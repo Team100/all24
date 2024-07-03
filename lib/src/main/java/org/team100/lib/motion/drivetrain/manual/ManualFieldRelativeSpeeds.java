@@ -38,17 +38,16 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
 
         // scale to max in both translation and rotation
-        FieldRelativeVelocity twistM_S = DriveUtil.scale(
-                clipped,
-                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        // and desaturate to feasibility
+        final FieldRelativeVelocity twistM_S = m_swerveKinodynamics.analyticDesaturation(
+                DriveUtil.scale(
+                        clipped,
+                        m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                        m_swerveKinodynamics.getMaxAngleSpeedRad_S()));
 
-        // desaturate to feasibility
-        twistM_S = m_swerveKinodynamics.analyticDesaturation(twistM_S);
-
-        t.logDouble(Level.TRACE, "twist x m_s", twistM_S.x());
-        t.logDouble(Level.TRACE, "twist y m_s", twistM_S.y());
-        t.logDouble(Level.TRACE, "twist theta rad_s", twistM_S.theta());
+        t.logDouble(Level.TRACE, "twist x m_s", () -> twistM_S.x());
+        t.logDouble(Level.TRACE, "twist y m_s", () -> twistM_S.y());
+        t.logDouble(Level.TRACE, "twist theta rad_s", () -> twistM_S.theta());
         return twistM_S;
     }
 

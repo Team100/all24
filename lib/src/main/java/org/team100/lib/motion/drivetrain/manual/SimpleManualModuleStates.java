@@ -37,8 +37,8 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.theta());
         double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.x();
-        t.logDouble(Level.TRACE, "speed m_s", speedM_S);
-        t.logDouble(Level.TRACE, "angle rad", angle.getRadians());
+        t.logDouble(Level.TRACE, "speed m_s", () -> speedM_S);
+        t.logDouble(Level.TRACE, "angle rad", () -> angle.getRadians());
         return new SwerveModuleState[] {
                 new SwerveModuleState(speedM_S, angle),
                 new SwerveModuleState(speedM_S, angle),

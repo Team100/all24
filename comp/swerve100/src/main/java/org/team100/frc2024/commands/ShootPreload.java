@@ -110,7 +110,7 @@ public class ShootPreload extends Command {
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
             t.logDouble(Level.DEBUG, "PIVOT DEFECIT",
-                    Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
+                    () -> Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
         }
 
         if (!m_sensor.getFeederSensor() && !m_sensor.getIntakeSensor()) {

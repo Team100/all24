@@ -32,8 +32,8 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T>, Generi
     }
 
     @Override
-    public void setDutyCycle(double output) {
-        output = MathUtil.clamp(output, -1, 1);
+    public void setDutyCycle(double dutyCycle) {
+        final double output = MathUtil.clamp(dutyCycle, -1, 1);
         t.logDouble(Level.TRACE, "duty_cycle", () -> output);
         setVelocity(output * m_freeSpeed, 0, 0);
     }
@@ -51,7 +51,7 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T>, Generi
         if (Double.isNaN(velocity))
             throw new IllegalArgumentException("velocity is NaN");
         m_velocity = velocity;
-        t.logDouble(Level.TRACE, "velocity", m_velocity);
+        t.logDouble(Level.TRACE, "velocity", () -> m_velocity);
     }
 
     public double getVelocity() {

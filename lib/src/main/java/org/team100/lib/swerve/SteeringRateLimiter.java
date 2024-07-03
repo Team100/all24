@@ -56,7 +56,8 @@ public class SteeringRateLimiter implements Glassy {
                     kMaxIterations);
             min_s = Math.min(min_s, s);
         }
-        t.logDouble(Level.DEBUG, "s", min_s);
+        double s = min_s;
+        t.logDouble(Level.DEBUG, "s", () -> s);
         return min_s;
     }
 

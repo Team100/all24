@@ -37,7 +37,7 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.logDouble(Level.TRACE, "duty cycle", output);
+        t.logDouble(Level.TRACE, "duty cycle", () -> output);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
         double motorRad_S = outputRad_S * m_gearRatio;
         double motorDutyCycle = motorRad_S * velocityFFDutyCycle_Rad_S;
         m_motor.set(motorDutyCycle);
-        t.logDouble(Level.TRACE, "duty cycle", motorDutyCycle);
+        t.logDouble(Level.TRACE, "duty cycle", () -> motorDutyCycle);
     }
 
     @Override

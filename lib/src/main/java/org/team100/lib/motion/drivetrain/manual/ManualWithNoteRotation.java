@@ -136,7 +136,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target.get());
-        t.logDouble(Level.TRACE, "apparent motion", targetMotion);
+        t.logDouble(Level.TRACE, "apparent motion", ()->targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 

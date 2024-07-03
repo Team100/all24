@@ -52,7 +52,7 @@ public class Tire {
     public Vector2d actual(Vector2d cornerM_s, Vector2d wheelM_s, double dtS) {
         t.log(Level.WARN, "corner M_s", cornerM_s);
         t.log(Level.WARN, "wheel M_s", wheelM_s);
-        t.logDouble(Level.INFO, "dtS", dtS); // usually about 0.02
+        t.logDouble(Level.INFO, "dtS", () -> dtS); // usually about 0.02
 
         Vector2d desiredAccelM_s_s = desiredAccelM_s_s(cornerM_s, wheelM_s, dtS);
         t.log(Level.INFO, "desired accel M_s_s", desiredAccelM_s_s);

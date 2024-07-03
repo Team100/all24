@@ -46,7 +46,7 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.logDouble(Level.TRACE, "Duty Cycle", output);
+        t.logDouble(Level.TRACE, "Duty Cycle", ()->output);
     }
 
     /**

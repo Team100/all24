@@ -61,7 +61,7 @@ public class ShootSmart extends Command {
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
             double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
-            t.logDouble(Level.DEBUG, "pivot error (rad)", errorRad);
+            t.logDouble(Level.DEBUG, "pivot error (rad)", ()->errorRad);
         }
 
         // no matter the note position, set the shooter angle and speed

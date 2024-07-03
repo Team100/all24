@@ -115,19 +115,20 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double headingRate = m_heading.getHeadingRateNWU();
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get());
-        Rotation2d bearing = bearing(currentTranslation, target);
-        // Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state);
-
-        t.log(Level.DEBUG, "bearing", bearing);
 
         // take the short path
-        double measurement = currentRotation.getRadians();
-        bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, bearing.getRadians()));
+        final double measurement = currentRotation.getRadians();
+        final Rotation2d bearing = new Rotation2d(
+                Math100.getMinDistance(
+                        measurement,
+                        bearing(currentTranslation, target).getRadians()));
+
+        // Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state);
 
         checkBearing(bearing, currentRotation);
 
-        t.logDouble(Level.TRACE, "Bearing Check", ()->bearing.minus(currentRotation).getDegrees());
+        t.log(Level.DEBUG, "bearing", bearing);
+        t.logDouble(Level.TRACE, "Bearing Check", () -> bearing.minus(currentRotation).getDegrees());
 
         // make sure the setpoint uses the modulus close to the measurement.
         if (first) {
@@ -143,7 +144,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);
-        t.logDouble(Level.TRACE, "apparent motion", ()->targetMotion);
+        t.logDouble(Level.TRACE, "apparent motion", () -> targetMotion);
         State100 goal = new State100(bearing.getRadians(), targetMotion);
         if (Math.abs(goal.x() - prevGoal.x()) < 0.05 || Math.abs(2 * Math.PI - goal.x() - prevGoal.x()) < 0.05) {
             goal = new State100(prevGoal.x(), goal.v(), goal.a());
@@ -162,29 +163,21 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        double thetaFF = m_thetaSetpoint.v();
+        final double thetaFF = m_thetaSetpoint.v();
+        final double thetaFB = getThetaFB(measurement);
+        final double omegaFB = getOmegaFB(headingRate);
 
-        double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-
-        if (Math.abs(thetaFB) < 0.5) {
-            thetaFB = 0;
-        }
-
-        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-
-        if (Math.abs(omegaFB) < 0.1) {
-            omegaFB = 0;
-        }
         t.log(Level.TRACE, "target", target);
         t.log(Level.TRACE, "theta/setpoint", m_thetaSetpoint);
-        t.logDouble(Level.TRACE, "theta/measurement", ()->measurement);
+        t.logDouble(Level.TRACE, "theta/measurement", () -> measurement);
         t.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
-        t.logDouble(Level.TRACE, "theta/fb", thetaFB);
-        t.logDouble(Level.TRACE, "omega/measurement", ()->headingRate);
+        t.logDouble(Level.TRACE, "theta/fb", () -> thetaFB);
+        t.logDouble(Level.TRACE, "omega/measurement", () -> headingRate);
         t.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
-        t.logDouble(Level.TRACE, "omega/fb", ()->omegaFB);
-        t.logDouble(Level.TRACE, "target motion", targetMotion);
+        t.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
+        t.logDouble(Level.TRACE, "target motion", () -> targetMotion);
         t.log(Level.TRACE, "goal", goal);
+        
         prevGoal = goal;
         double omega = MathUtil.clamp(
                 thetaFF,
@@ -217,6 +210,23 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         m_prevPose = state.pose();
         return twistWithLockM_S;
+    }
+
+    private double getOmegaFB(double headingRate) {
+        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
+        if (Math.abs(omegaFB) < 0.1) {
+            omegaFB = 0;
+        }
+        return omegaFB;
+    }
+
+    private double getThetaFB(final double measurement) {
+        double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
+
+        if (Math.abs(thetaFB) < 0.5) {
+            thetaFB = 0;
+        }
+        return thetaFB;
     }
 
     /**
