@@ -33,6 +33,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArrayTopic;
@@ -42,12 +43,14 @@ import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.IntegerTopic;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.networktables.StringArrayPublisher;
 import edu.wpi.first.networktables.StringArrayTopic;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Simple logging wrapper.
@@ -124,9 +127,22 @@ public class Telemetry {
 
     public class Logger {
         private final String m_root;
+        private final BooleanSubscriber m_sub;
 
         private Logger(String root) {
             m_root = root;
+            // System.out.println("root: " + root);
+            BooleanTopic t = inst.getBooleanTopic(root + "/enable");
+            t.publish().set(false);
+            t.getEntry(false);
+            t.setRetained(true);
+            // t.publish().set(false);
+            m_sub = t.subscribe(false);
+            // SmartDashboard.putBoolean(root + "/enable", false);
+        }
+
+        private boolean enabled() {
+            return m_sub.get();
         }
 
         public void logBoolean(Level level, String leaf, boolean val) {
@@ -162,6 +178,8 @@ public class Telemetry {
         public void logDouble(Level level, String leaf, DoubleSupplier vals) {
             Sample s = m_chronos.sample(kName);
             try {
+                if (!enabled())
+                    return;
                 if (!m_level.admit(level))
                     return;
                 double val = vals.getAsDouble();
@@ -271,18 +289,18 @@ public class Telemetry {
         }
 
         public void log(Level level, String leaf, Translation2d val) {
-            logDouble(level, append(leaf, "x"), ()->val.getX());
-            logDouble(level, append(leaf, "y"),()-> val.getY());
+            logDouble(level, append(leaf, "x"), () -> val.getX());
+            logDouble(level, append(leaf, "y"), () -> val.getY());
         }
 
         public void log(Level level, String leaf, Vector2d val) {
-            logDouble(level, append(leaf, "x"),()-> val.getX());
-            logDouble(level, append(leaf, "y"), ()->val.getY());
+            logDouble(level, append(leaf, "x"), () -> val.getX());
+            logDouble(level, append(leaf, "y"), () -> val.getY());
 
         }
 
         public void log(Level level, String leaf, Rotation2d val) {
-            logDouble(level, append(leaf, "rad"),()-> val.getRadians());
+            logDouble(level, append(leaf, "rad"), () -> val.getRadians());
         }
 
         public void log(Level level, String leaf, TrajectorySamplePoint val) {
@@ -291,9 +309,9 @@ public class Telemetry {
 
         public void log(Level level, String leaf, TimedPose val) {
             log(level, append(leaf, "posestate"), val.state());
-            logDouble(level, append(leaf, "time"), ()->val.getTimeS());
-            logDouble(level, append(leaf, "velocity"), ()->val.velocityM_S());
-            logDouble(level, append(leaf, "accel"), ()->val.acceleration());
+            logDouble(level, append(leaf, "time"), () -> val.getTimeS());
+            logDouble(level, append(leaf, "velocity"), () -> val.velocityM_S());
+            logDouble(level, append(leaf, "accel"), () -> val.acceleration());
         }
 
         public void log(Level level, String leaf, PoseWithCurvature val) {
@@ -345,20 +363,20 @@ public class Telemetry {
         }
 
         public void log(Level level, String leaf, SwerveModulePosition val) {
-            logDouble(level, append(leaf, "distance"),()-> val.distanceMeters);
+            logDouble(level, append(leaf, "distance"), () -> val.distanceMeters);
             log(level, append(leaf, "angle"), val.angle);
         }
 
         public void log(Level level, String leaf, ArmAngles angles) {
-            logDouble(level, append(leaf, "th1"), ()->angles.th1);
-            logDouble(level, append(leaf, "th2"),()-> angles.th2);
+            logDouble(level, append(leaf, "th1"), () -> angles.th1);
+            logDouble(level, append(leaf, "th2"), () -> angles.th2);
         }
 
         public void log(Level level, String leaf, State state) {
             log(level, append(leaf, "pose"), state.poseMeters);
-            logDouble(level, append(leaf, "curvature"), ()->state.curvatureRadPerMeter);
-            logDouble(level, append(leaf, "velocity"), ()->state.velocityMetersPerSecond);
-            logDouble(level, append(leaf, "accel"), ()->state.accelerationMetersPerSecondSq);
+            logDouble(level, append(leaf, "curvature"), () -> state.curvatureRadPerMeter);
+            logDouble(level, append(leaf, "velocity"), () -> state.velocityMetersPerSecond);
+            logDouble(level, append(leaf, "accel"), () -> state.accelerationMetersPerSecondSq);
         }
 
         private <T extends Publisher> T pub(String key, Function<String, Publisher> fn, Class<T> pubClass) {
