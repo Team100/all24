@@ -20,14 +20,14 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * The input dy is ignored.
  */
 public class SimpleManualModuleStates implements ModuleStateDriver {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
     public SimpleManualModuleStates(String name, Logger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
     }
 
     /**
@@ -38,8 +38,8 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.theta());
         double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.x();
-        t.logDouble(Level.TRACE, "speed m_s", () -> speedM_S);
-        t.logDouble(Level.TRACE, "angle rad", () -> angle.getRadians());
+        m_logger.logDouble(Level.TRACE, "speed m_s", () -> speedM_S);
+        m_logger.logDouble(Level.TRACE, "angle rad", () -> angle.getRadians());
         return new SwerveModuleState[] {
                 new SwerveModuleState(speedM_S, angle),
                 new SwerveModuleState(speedM_S, angle),

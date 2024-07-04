@@ -21,13 +21,13 @@ import edu.wpi.first.math.MathUtil;
 public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
     private static final int ticksPerRevolution = 1666;
 
-    private final Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final WPI_TalonSRX m_motor;
 
     public TalonSRXTurningEncoder(String name, Logger parent, CANTurningMotor motor) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_motor = motor.getMotor();
     }
 
@@ -57,7 +57,7 @@ public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
         // should be fast, no need to cache
         double rawPosition = m_motor.getSelectedSensorPosition();
         double positionRad = MathUtil.angleModulus(rawPosition / ticksPerRevolution * 2 * Math.PI);
-        t.logDouble(Level.DEBUG, "position (rad)", ()->positionRad);
+        m_logger.logDouble(Level.DEBUG, "position (rad)", ()->positionRad);
         return positionRad;
     }
 
@@ -67,7 +67,7 @@ public class TalonSRXTurningEncoder implements Encoder100<Angle100> {
         double rawRate = m_motor.getSelectedSensorVelocity();
         // times ten because rate is per 100ms
         double rateRad_S = 2.0 * Math.PI * 10.0 * rawRate / ticksPerRevolution;
-        t.logDouble(Level.DEBUG, "velocity (rad_s)",()-> rateRad_S);
+        m_logger.logDouble(Level.DEBUG, "velocity (rad_s)",()-> rateRad_S);
         return rateRad_S;
     }
 

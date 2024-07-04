@@ -7,6 +7,7 @@ import org.team100.frc2024.selftest.AmpSelfTest;
 import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.Veering;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
@@ -34,7 +35,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
  * RobotContainer internals.
  */
 @ExcludeFromJacocoGeneratedReport
-public class SelfTestRunner extends Command {
+public class SelfTestRunner extends Command implements Glassy {
     public static class SelfTestEnableException extends RuntimeException {
     }
 
@@ -67,6 +68,7 @@ public class SelfTestRunner extends Command {
         // addCase(new BatterySelfTest(m_container.m_monitor, m_listener));
 
         SwerveDriveSubsystem drivetrain = m_container.m_drive;
+        Logger logger = Telemetry.get().rootLogger(this);
 
         if (kTestDrivetrain) {
             // "treatment" is in situ.
@@ -77,8 +79,7 @@ public class SelfTestRunner extends Command {
             // treatment is a specific manual input, supplied by the test case.
             DriveManuallySelfTest driveManuallyTest = new DriveManuallySelfTest(drivetrain, m_listener);
 
-            DriveManually driveManually = new DriveManually(driveManuallyTest::treatment, drivetrain);
-            Logger logger = Telemetry.get().rootLogger("foo");
+            DriveManually driveManually = new DriveManually(logger, driveManuallyTest::treatment, drivetrain);
 
             driveManually.register("MODULE_STATE", false,
                     new SimpleManualModuleStates("foo", logger, SwerveKinodynamicsFactory.forTest()));
@@ -91,15 +92,19 @@ public class SelfTestRunner extends Command {
 
         if (kTestOscillate) {
             // these take a long time
-            addCase(new OscillateSelfTest(drivetrain, m_listener, false, false, 12), new Oscillate(drivetrain));
-            addCase(new OscillateSelfTest(drivetrain, m_listener, false, true, 12), new Oscillate(drivetrain));
-            addCase(new OscillateSelfTest(drivetrain, m_listener, true, false, 12), new Oscillate(drivetrain));
-            addCase(new OscillateSelfTest(drivetrain, m_listener, true, true, 12), new Oscillate(drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, false, false, 12),
+                    new Oscillate(logger, drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, false, true, 12),
+                    new Oscillate(logger, drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, true, false, 12),
+                    new Oscillate(logger, drivetrain));
+            addCase(new OscillateSelfTest(drivetrain, m_listener, true, true, 12),
+                    new Oscillate(logger, drivetrain));
         }
 
         if (kTestVeering) {
             // ALERT! This test goes FAAAAAST! ALERT!
-            addCase(new VeeringSelfTest(m_listener), new Veering(drivetrain));
+            addCase(new VeeringSelfTest(m_listener), new Veering(logger, drivetrain));
         }
 
         if (kTestMechanisms) {
@@ -124,7 +129,7 @@ public class SelfTestRunner extends Command {
             // profiles
             // and relatively slow speed. This moves back and forth in x, using
             // module direct mode.
-            Oscillate oscillate = new Oscillate(drivetrain);
+            Oscillate oscillate = new Oscillate(logger, drivetrain);
             // end up where you started
             double expectedDuration = oscillate.getPeriod() * 4;
             addCase(new OscillateSelfTest(drivetrain, m_listener, true, false, expectedDuration), oscillate);
@@ -195,5 +200,10 @@ public class SelfTestRunner extends Command {
         } catch (InterruptedException e) {
             //
         }
+    }
+
+    @Override
+    public String getGlassName() {
+        return "SelfTestRunner";
     }
 }

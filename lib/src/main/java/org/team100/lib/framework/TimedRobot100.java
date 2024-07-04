@@ -14,6 +14,7 @@ import java.util.PriorityQueue;
 import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 /**
  * Copy of {@link edu.wpi.first.wpilibj.TimedRobot} in an effort to improve
@@ -73,8 +74,8 @@ public class TimedRobot100 extends IterativeRobotBase {
     public static final double kDefaultPeriod = 0.02;
     private static final String kName = "TimedRobot100";
 
-    private final Telemetry.Logger t = Telemetry.get().rootLogger(kName);
-    private final Chronos chronos = Chronos.get();
+    private final Logger m_logger;
+    private final Chronos chronos;
 
     // The C pointer to the notifier object. We don't use it directly, it is
     // just passed to the JNI bindings.
@@ -96,6 +97,8 @@ public class TimedRobot100 extends IterativeRobotBase {
      */
     protected TimedRobot100(double period) {
         super(period);
+        m_logger = Telemetry.get().rootLogger(this.getClass());
+        chronos = Chronos.get();
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");
         NotifierJNI.setNotifierName(m_notifier, "TimedRobot");
@@ -141,7 +144,7 @@ public class TimedRobot100 extends IterativeRobotBase {
             double endWaitingS = Timer.getFPGATimestamp();
             double slackS = endWaitingS - startWaitingS;
             // this is the main loop slack, don't let it go to zero!
-            t.logDouble(Level.INFO, "slack time (s)", () -> slackS);
+            m_logger.logDouble(Level.INFO, "slack time (s)", () -> slackS);
 
             log(callback.func::run, callback.name);
 
@@ -162,9 +165,9 @@ public class TimedRobot100 extends IterativeRobotBase {
             for (Map.Entry<String, Double> durations : chronos.durations().entrySet()) {
                 Double duration = durations.getValue();
                 String name = durations.getKey();
-                t.logDouble(Level.INFO, "duration (s)/" + name, () -> duration);
+                m_logger.logDouble(Level.INFO, "duration (s)/" + name, () -> duration);
                 double fraction = duration / elapsed;
-                t.logDouble(Level.INFO, "fraction (pct)/" + name, () -> 100.0 * fraction);
+                m_logger.logDouble(Level.INFO, "fraction (pct)/" + name, () -> 100.0 * fraction);
             }
             chronos.reset();
         }
@@ -175,7 +178,7 @@ public class TimedRobot100 extends IterativeRobotBase {
         r.run();
         double endWaitingS = Timer.getFPGATimestamp();
         double durationS = endWaitingS - startWaitingS;
-        t.logDouble(Level.INFO, "duration (s)/" + name, () -> durationS);
+        m_logger.logDouble(Level.INFO, "duration (s)/" + name, () -> durationS);
     }
 
     /** Ends the main loop in startCompetition(). */

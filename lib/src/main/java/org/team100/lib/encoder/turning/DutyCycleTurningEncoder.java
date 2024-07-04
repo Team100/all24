@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.Timer;
  * have no common parent, so there's some duplication here.
  */
 public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final DutyCycleEncoder m_encoder;
     private final String m_name;
 
@@ -36,7 +36,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
             double gearRatio,
             EncoderDrive drive) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         switch (drive) {
@@ -48,7 +48,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
                 break;
         }
 
-        t.log(Level.DEBUG,  "channel", m_encoder.getSourceChannel());
+        m_logger.log(Level.DEBUG,  "channel", m_encoder.getSourceChannel());
     }
 
     @Override
@@ -86,10 +86,10 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
 
     private double getPositionRad() {
         double positionRad = m_encoder.getDistance();
-        t.logDouble(Level.DEBUG,  "position (rad) ROBOT USES THIS (CCW POSITIVE)",()-> positionRad);
-        t.logDouble(Level.DEBUG,  "position (turns) USE FOR OFFSETS",()-> m_encoder.get());
-        t.logDouble(Level.DEBUG,  "position (absolute)", ()->m_encoder.getAbsolutePosition());
-        t.logDouble(Level.DEBUG,  "Wrapped position rads (absolute)", ()->MathUtil.angleModulus(positionRad));
+        m_logger.logDouble(Level.DEBUG,  "position (rad) ROBOT USES THIS (CCW POSITIVE)",()-> positionRad);
+        m_logger.logDouble(Level.DEBUG,  "position (turns) USE FOR OFFSETS",()-> m_encoder.get());
+        m_logger.logDouble(Level.DEBUG,  "position (absolute)", ()->m_encoder.getAbsolutePosition());
+        m_logger.logDouble(Level.DEBUG,  "Wrapped position rads (absolute)", ()->MathUtil.angleModulus(positionRad));
         return positionRad;
     }
 
@@ -109,7 +109,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         prevTime = time;
 
         double rateRad_S = dx / dt;
-        t.logDouble(Level.DEBUG,  "rate (rad_s)",()-> rateRad_S);
+        m_logger.logDouble(Level.DEBUG,  "rate (rad_s)",()-> rateRad_S);
         return rateRad_S;
     }
 }

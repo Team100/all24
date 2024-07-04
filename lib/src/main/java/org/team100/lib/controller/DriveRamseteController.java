@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -33,12 +34,12 @@ public class DriveRamseteController implements DriveMotionController {
     private static final double kZeta = 0.7; // Damping coefficient, [0, 1].
     private static final double kLooperDt = 0.02;
 
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
 
-    public DriveRamseteController() {
+    public DriveRamseteController(Logger parent) {
         m_name = Names.name(this);
-        t = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
     }
 
     private TrajectoryTimeIterator m_iter;
@@ -59,7 +60,7 @@ public class DriveRamseteController implements DriveMotionController {
         if (m_iter == null)
             return null;
 
-        t.log(Level.TRACE, "current state", measurement);
+        m_logger.log(Level.TRACE, "current state", measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -69,7 +70,7 @@ public class DriveRamseteController implements DriveMotionController {
             return new ChassisSpeeds();
         }
         TimedPose setpoint = optionalSetpoint.get();
-        t.log(Level.TRACE, "setpoint", setpoint);
+        m_logger.log(Level.TRACE, "setpoint", setpoint);
 
         // Convert from current velocity into course.
         Optional<Rotation2d> maybe_field_to_course = Optional.empty();
@@ -107,7 +108,7 @@ public class DriveRamseteController implements DriveMotionController {
         Rotation2d course_to_goal = field_to_course.unaryMinus().rotateBy(maybe_field_to_goal.get());
 
         Twist2d mErrorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, setpoint);
-        t.log(Level.TRACE, "error", mErrorTwist);
+        m_logger.log(Level.TRACE, "error", mErrorTwist);
 
         // Rotate error to be aligned to current course.
         // Error is in robot (heading) frame. Need to rotate it to be in course frame.
@@ -163,7 +164,7 @@ public class DriveRamseteController implements DriveMotionController {
             return Optional.empty();
         }
 
-        t.log(Level.TRACE, "sample point", sample_point.get());
+        m_logger.log(Level.TRACE, "sample point", sample_point.get());
         return Optional.of(sample_point.get().state());
     }
 

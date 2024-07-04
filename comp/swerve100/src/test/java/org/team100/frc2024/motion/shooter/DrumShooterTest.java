@@ -12,7 +12,7 @@ class DrumShooterTest implements Timeless2024 {
 
     @Test
     void testAngle() {
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().rootLogger(this.getClass());
         DrumShooter s = new DrumShooter(logger, 0, 0, 0, 0, 0);
         for (int i = 0; i < 50; ++i) {
             s.setAngle(1.0);
@@ -23,7 +23,7 @@ class DrumShooterTest implements Timeless2024 {
 
     @Test
     void testRollers() {
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().rootLogger(this.getClass());
         DrumShooter s = new DrumShooter(logger, 0, 0, 0, 0, 0);
         // 0.5 sec to spin up
         for (int i = 0; i <= 25; ++i) {

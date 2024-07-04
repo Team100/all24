@@ -9,6 +9,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.Trajectory100;
@@ -52,10 +53,12 @@ public class DriveToWaypoint3 extends Command100 {
      *                     trajectory between them.
      */
     public DriveToWaypoint3(
+            Logger parent,
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             StraightLineTrajectory trajectories,
             HolonomicDriveController3 controller) {
+        super(parent);
         m_goal = goal;
         m_swerve = drivetrain;
         m_trajectories = trajectories;
@@ -88,8 +91,8 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            t.logDouble(Level.TRACE, "Desired X",()-> desiredState.state().getPose().getX());
-            t.logDouble(Level.TRACE, "Desired Y",()-> desiredState.state().getPose().getY());
+            m_logger.logDouble(Level.TRACE, "Desired X", () -> desiredState.state().getPose().getX());
+            m_logger.logDouble(Level.TRACE, "Desired Y", () -> desiredState.state().getPose().getY());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -108,8 +111,8 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            t.logDouble(Level.TRACE, "Desired X",()-> desiredState.state().getPose().getX());
-            t.logDouble(Level.TRACE, "Desired Y", ()->desiredState.state().getPose().getY());
+            m_logger.logDouble(Level.TRACE, "Desired X", () -> desiredState.state().getPose().getX());
+            m_logger.logDouble(Level.TRACE, "Desired Y", () -> desiredState.state().getPose().getY());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -117,12 +120,12 @@ public class DriveToWaypoint3 extends Command100 {
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
 
-        t.logBoolean(Level.TRACE, "Aligned", m_steeringAligned);
+        m_logger.logBoolean(Level.TRACE, "Aligned", m_steeringAligned);
 
-        t.logDouble(Level.TRACE, "Pose X",()-> m_swerve.getState().pose().getX());
-        t.logDouble(Level.TRACE, "Pose Y",()-> m_swerve.getState().pose().getY());
-        t.logDouble(Level.TRACE, "Desired Rot",()-> m_goal.getRotation().getRadians());
-        t.logDouble(Level.TRACE, "Pose Rot",()-> m_swerve.getState().pose().getRotation().getRadians());
+        m_logger.logDouble(Level.TRACE, "Pose X", () -> m_swerve.getState().pose().getX());
+        m_logger.logDouble(Level.TRACE, "Pose Y", () -> m_swerve.getState().pose().getY());
+        m_logger.logDouble(Level.TRACE, "Desired Rot", () -> m_goal.getRotation().getRadians());
+        m_logger.logDouble(Level.TRACE, "Pose Rot", () -> m_swerve.getState().pose().getRotation().getRadians());
     }
 
     @Override

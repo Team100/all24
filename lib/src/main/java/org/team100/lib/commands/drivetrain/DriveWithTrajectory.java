@@ -8,6 +8,7 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
@@ -34,10 +35,12 @@ public class DriveWithTrajectory extends Command100 {
     private final Trajectory100 trajectory;
 
     public DriveWithTrajectory(
+            Logger parent,
             SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             SwerveKinodynamics limits,
             String fileName) {
+        super(parent);
         m_swerve = drivetrain;
         m_controller = controller;
 
@@ -75,7 +78,7 @@ public class DriveWithTrajectory extends Command100 {
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
-        t.log(Level.DEBUG, "chassis speeds", output);
+        m_logger.log(Level.DEBUG, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }

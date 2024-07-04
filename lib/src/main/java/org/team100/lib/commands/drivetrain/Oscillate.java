@@ -7,6 +7,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;
@@ -47,10 +48,11 @@ public class Oscillate extends Command100 {
 
     private SwerveState m_initial;
 
-    public Oscillate(SwerveDriveSubsystem swerve) {
+    public Oscillate(Logger parent, SwerveDriveSubsystem swerve) {
+        super(parent);
         m_swerve = swerve;
         m_period = 4 * kMaxSpeed / kAccel;
-        t.logDouble(Level.DEBUG, "period",()-> m_period);
+        m_logger.logDouble(Level.DEBUG, "period", () -> m_period);
         m_square = new SquareWave(kAccel, m_period);
         m_triangle = new TriangleWave(kMaxSpeed, m_period);
         m_parabola = new ParabolicWave(kMaxSpeed * m_period / 4, m_period);
@@ -104,20 +106,20 @@ public class Oscillate extends Command100 {
 
         }
 
-        t.logDouble(Level.DEBUG, "time",()-> time);
-        t.logDouble(Level.DEBUG, "setpoint/accel", ()->accelM_S_S);
-        t.logDouble(Level.DEBUG, "setpoint/speed", ()->speedM_S);
-        t.logDouble(Level.DEBUG, "setpoint/position", ()->positionM);
+        m_logger.logDouble(Level.DEBUG, "time", () -> time);
+        m_logger.logDouble(Level.DEBUG, "setpoint/accel", () -> accelM_S_S);
+        m_logger.logDouble(Level.DEBUG, "setpoint/speed", () -> speedM_S);
+        m_logger.logDouble(Level.DEBUG, "setpoint/position", () -> positionM);
 
         SwerveState swerveState = m_swerve.getState();
         if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
-            t.logDouble(Level.DEBUG, "measurement/speed", ()->swerveState.theta().v());
-            t.logDouble(Level.DEBUG, "measurement/position",
-            ()->  swerveState.theta().x() - m_initial.theta().x());
+            m_logger.logDouble(Level.DEBUG, "measurement/speed", () -> swerveState.theta().v());
+            m_logger.logDouble(Level.DEBUG, "measurement/position",
+                    () -> swerveState.theta().x() - m_initial.theta().x());
         } else {
-            t.logDouble(Level.DEBUG, "measurement/speed", ()->swerveState.x().v());
-            t.logDouble(Level.DEBUG, "measurement/position",
-            ()->  swerveState.x().x() - m_initial.x().x());
+            m_logger.logDouble(Level.DEBUG, "measurement/speed", () -> swerveState.x().v());
+            m_logger.logDouble(Level.DEBUG, "measurement/position",
+                    () -> swerveState.x().x() - m_initial.x().x());
         }
     }
 

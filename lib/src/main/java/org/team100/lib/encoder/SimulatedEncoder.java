@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
  * use SimHooks.stepTimingAsync() in your tests.
  */
 public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final SimulatedMotor<T> m_motor;
     private final double m_reduction;
@@ -44,7 +44,7 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
             double lowerLimit,
             double upperLimit) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_reduction = reduction;
         m_lowerLimit = lowerLimit;
@@ -60,14 +60,14 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
         m_position += m_rate * dt;
         m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
         m_time = now;
-        t.logDouble(Level.TRACE,  "position",()-> m_position);
+        m_logger.logDouble(Level.TRACE,  "position",()-> m_position);
         return OptionalDouble.of(m_position);
     }
 
     @Override
     public OptionalDouble getRate() {
         double m_rate = m_motor.getVelocity() / m_reduction;
-        t.logDouble(Level.TRACE,  "rate",()-> m_rate);
+        m_logger.logDouble(Level.TRACE,  "rate",()-> m_rate);
         return OptionalDouble.of(m_rate);
     }
 

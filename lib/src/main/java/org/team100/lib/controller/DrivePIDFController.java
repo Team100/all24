@@ -6,6 +6,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -23,7 +24,7 @@ public class DrivePIDFController implements DriveMotionController {
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
 
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final boolean m_feedforwardOnly;
     private final String m_name;
     private final double m_kPCart;
@@ -34,6 +35,7 @@ public class DrivePIDFController implements DriveMotionController {
 
     /** Use the factory. */
     DrivePIDFController(
+            Logger parent,
             boolean feedforwardOnly,
             double kPCart,
             double kPTheta) {
@@ -41,7 +43,7 @@ public class DrivePIDFController implements DriveMotionController {
         m_kPCart = kPCart;
         m_kPTheta = kPTheta;
         m_name = Names.name(this);
-        t = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
     }
 
     @Override
@@ -59,7 +61,7 @@ public class DrivePIDFController implements DriveMotionController {
         if (m_iter == null)
             return new ChassisSpeeds();
 
-        t.log(Level.DEBUG, "measurement", measurement);
+        m_logger.log(Level.DEBUG, "measurement", measurement);
 
         Optional<TimedPose> optionalSetpoint = getSetpoint(timeS);
         if (!optionalSetpoint.isPresent()) {
@@ -67,7 +69,7 @@ public class DrivePIDFController implements DriveMotionController {
         }
         TimedPose setpoint = optionalSetpoint.get();
         SmartDashboard.putNumber("setpointX", setpoint.state().getPose().getX());
-        t.log(Level.DEBUG, "setpoint", setpoint);
+        m_logger.log(Level.DEBUG, "setpoint", setpoint);
 
         ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, setpoint);
         if (m_feedforwardOnly)
@@ -107,11 +109,11 @@ public class DrivePIDFController implements DriveMotionController {
 
         Optional<TrajectorySamplePoint> sample_point = m_iter.advance(mDt);
         if (!sample_point.isPresent()) {
-            t.logBoolean(Level.TRACE, "IS MT", true);
+            m_logger.logBoolean(Level.TRACE, "IS MT", true);
 
             return Optional.empty();
         }
-        t.log(Level.TRACE, "sample point", sample_point.get());
+        m_logger.log(Level.TRACE, "sample point", sample_point.get());
         return Optional.of(sample_point.get().state());
     }
 

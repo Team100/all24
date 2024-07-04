@@ -18,7 +18,7 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
      * Very much not calibrated. Say 100 rev/s max so 0.01?
      */
     private static final double velocityFFDutyCycle_Rev_S = 0.01;
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final MotorController m_motor;
     private final String m_name;
     private final double m_gearRatio;
@@ -33,7 +33,7 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
         m_motor = motorController;
         m_motor.setInverted(true);
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;
     }
@@ -41,7 +41,7 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.logDouble(Level.TRACE, "duty cycle", ()->output);
+        m_logger.logDouble(Level.TRACE, "duty cycle", () -> output);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
         double motorRev_S = wheelRev_S * m_gearRatio;
         double motorDutyCycle = motorRev_S * velocityFFDutyCycle_Rev_S;
         m_motor.set(motorDutyCycle);
-        t.logDouble(Level.TRACE, "duty cycle",()-> motorDutyCycle);
+        m_logger.logDouble(Level.TRACE, "duty cycle", () -> motorDutyCycle);
     }
 
     @Override

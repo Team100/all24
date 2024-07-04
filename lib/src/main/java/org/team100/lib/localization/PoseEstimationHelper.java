@@ -6,6 +6,7 @@ import java.util.List;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -21,7 +22,7 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public class PoseEstimationHelper {
     private static final String kName = PoseEstimationHelper.class.getSimpleName();
-    private static final Telemetry.Logger t = Telemetry.get().rootLogger(kName);
+    private static final Logger kLogger = Telemetry.get().rootLogger(PoseEstimationHelper.class);
 
     /**
      * Converts camera rotation to an object to a robot relative translation,
@@ -117,14 +118,14 @@ public class PoseEstimationHelper {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            t.log(Level.DEBUG, "rotation_source", "CAMERA");
+            kLogger.log(Level.DEBUG, "rotation_source", "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        t.log(Level.DEBUG, "rotation_source", "GYRO");
+        kLogger.log(Level.DEBUG, "rotation_source", "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -201,14 +202,14 @@ public class PoseEstimationHelper {
 
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
-        t.log(Level.DEBUG, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
-        t.log(Level.DEBUG, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
+        kLogger.log(Level.DEBUG, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
+        kLogger.log(Level.DEBUG, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
-        t.log(Level.DEBUG, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
+        kLogger.log(Level.DEBUG, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -218,7 +219,7 @@ public class PoseEstimationHelper {
                 tagInCameraCoords,
                 tagInFieldCoords);
 
-        t.log(Level.DEBUG, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
+        kLogger.log(Level.DEBUG, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
                 cameraInFieldCoords,

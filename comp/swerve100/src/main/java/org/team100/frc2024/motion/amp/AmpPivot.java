@@ -30,9 +30,9 @@ public class AmpPivot extends SubsystemBase implements Glassy {
     private final Logger m_logger;
     private final GravityServo ampAngleServo;
 
-    public AmpPivot() {
+    public AmpPivot(Logger parent) {
         m_name = Names.name(this);
-        m_logger = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
         SysParam m_params = SysParam.neoPositionServoSystem(
                 55,
                 60,

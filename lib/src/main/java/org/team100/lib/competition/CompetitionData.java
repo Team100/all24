@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation.MatchType;
 
 public class CompetitionData {
 
-    public static Telemetry.Logger t = Telemetry.get().rootLogger("CompetitionData");
+    public static Telemetry.Logger logger = Telemetry.get().rootLogger(CompetitionData.class);
 
     public static void startupData() {
 
@@ -38,7 +38,7 @@ public class CompetitionData {
     }
 
     public static void logMatchTime() {
-        t.logDouble(Level.DEBUG, "Match Time Remaining",()-> DriverStation.getMatchTime());
+        logger.logDouble(Level.DEBUG, "Match Time Remaining",()-> DriverStation.getMatchTime());
 
     }
 

@@ -17,7 +17,7 @@ import edu.wpi.first.math.MathUtil;
  * A Neo goes about 6000 rpm, or 100 rev/s, or about 600 rad/s.
  */
 public class SimulatedMotor<T extends Measure100> implements Motor100<T>, GenericTorqueModel {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final double m_freeSpeed;
     private double m_velocity = 0;
@@ -28,14 +28,14 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T>, Generi
      */
     public SimulatedMotor(String name, Logger parent, double freeSpeed) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_freeSpeed = freeSpeed;
     }
 
     @Override
     public void setDutyCycle(double dutyCycle) {
         final double output = MathUtil.clamp(dutyCycle, -1, 1);
-        t.logDouble(Level.TRACE, "duty_cycle", () -> output);
+        m_logger.logDouble(Level.TRACE, "duty_cycle", () -> output);
         setVelocity(output * m_freeSpeed, 0, 0);
     }
 
@@ -52,7 +52,7 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T>, Generi
         if (Double.isNaN(velocity))
             throw new IllegalArgumentException("velocity is NaN");
         m_velocity = velocity;
-        t.logDouble(Level.TRACE, "velocity", () -> m_velocity);
+        m_logger.logDouble(Level.TRACE, "velocity", () -> m_velocity);
     }
 
     public double getVelocity() {

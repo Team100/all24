@@ -17,7 +17,7 @@ import org.team100.lib.util.Names;
  * per turn.
  */
 public class NeoTurningEncoder implements SettableEncoder<Angle100> {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final NeoTurningMotor m_motor;
     private final double m_gearRatio;
@@ -32,7 +32,7 @@ public class NeoTurningEncoder implements SettableEncoder<Angle100> {
             NeoTurningMotor motor,
             double gearRatio) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_gearRatio = gearRatio;
         reset();
@@ -72,8 +72,8 @@ public class NeoTurningEncoder implements SettableEncoder<Angle100> {
         // should be fast, no need to cache it.
         double motorPositionRev = m_motor.getPositionRot();
         double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
-        t.logDouble(Level.DEBUG,  "motor position (rev)",()-> motorPositionRev);
-        t.logDouble(Level.DEBUG,  "output position (rad)",()-> positionRad);
+        m_logger.logDouble(Level.DEBUG,  "motor position (rev)",()-> motorPositionRev);
+        m_logger.logDouble(Level.DEBUG,  "output position (rad)",()-> positionRad);
         return positionRad;
     }
 
@@ -81,8 +81,8 @@ public class NeoTurningEncoder implements SettableEncoder<Angle100> {
         // should be fast, no need to cache it.
         double motorVelocityRev_S = m_motor.getRateRPM() / 60;
         double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
-        t.logDouble(Level.DEBUG,  "motor velocity (rev_s)", ()->motorVelocityRev_S);
-        t.logDouble(Level.DEBUG,  "output velocity (rad_s)", ()->outputVelocityRad_S);
+        m_logger.logDouble(Level.DEBUG,  "motor velocity (rev_s)", ()->motorVelocityRev_S);
+        m_logger.logDouble(Level.DEBUG,  "output velocity (rad_s)", ()->outputVelocityRad_S);
         return outputVelocityRad_S;
     }
 }

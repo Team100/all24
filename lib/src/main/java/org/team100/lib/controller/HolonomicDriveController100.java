@@ -6,6 +6,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -16,18 +17,19 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Drivetrain control with three independent PID controllers.
  */
 public class HolonomicDriveController100 implements Glassy {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final String m_name;
 
-    public HolonomicDriveController100() {
-        this(cartesian(), cartesian(), theta(), omega());
+    public HolonomicDriveController100(Logger parent) {
+        this(parent, cartesian(), cartesian(), theta(), omega());
     }
 
     public HolonomicDriveController100(
+            Logger parent,
             PIDController xController,
             PIDController yController,
             PIDController thetaController,
@@ -37,7 +39,7 @@ public class HolonomicDriveController100 implements Glassy {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_name = Names.name(this);
-        t = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
     }
 
     public static HolonomicDriveController100 withTolerance(
@@ -83,20 +85,20 @@ public class HolonomicDriveController100 implements Glassy {
         double thetaFB = m_thetaController.calculate(currentPose.theta().x(), desiredState.theta().x());
         double omegaFB = m_omegaController.calculate(currentPose.theta().v(), desiredState.theta().v());
         double omega = thetaFF + thetaFB + omegaFB;
-        t.logDouble(Level.TRACE, "u_FF/x",()-> xFF);
-        t.logDouble(Level.TRACE, "u_FF/y",()-> yFF);
-        t.logDouble(Level.TRACE, "u_FF/theta",()-> thetaFF);
-        t.logDouble(Level.TRACE, "u_FB/x",()-> xFB);
-        t.logDouble(Level.TRACE, "u_FB/y",()-> yFB);
-        t.logDouble(Level.TRACE, "u_FB/theta",()-> thetaFB);
-        t.log(Level.TRACE, "measurement", currentPose);
+        m_logger.logDouble(Level.TRACE, "u_FF/x", () -> xFF);
+        m_logger.logDouble(Level.TRACE, "u_FF/y", () -> yFF);
+        m_logger.logDouble(Level.TRACE, "u_FF/theta", () -> thetaFF);
+        m_logger.logDouble(Level.TRACE, "u_FB/x", () -> xFB);
+        m_logger.logDouble(Level.TRACE, "u_FB/y", () -> yFB);
+        m_logger.logDouble(Level.TRACE, "u_FB/theta", () -> thetaFB);
+        m_logger.log(Level.TRACE, "measurement", currentPose);
 
-        t.logDouble(Level.DEBUG, "setpoint/x",()-> m_xController.getSetpoint());
-        t.logDouble(Level.DEBUG, "setpoint/y",()-> m_yController.getSetpoint());
-        t.logDouble(Level.TRACE, "setpoint/theta", ()->m_thetaController.getSetpoint());
-        t.logDouble(Level.TRACE, "error/x",()-> m_xController.getPositionError());
-        t.logDouble(Level.TRACE, "error/y",()-> m_yController.getPositionError());
-        t.logDouble(Level.TRACE, "error/theta", ()->m_thetaController.getPositionError());
+        m_logger.logDouble(Level.DEBUG, "setpoint/x", () -> m_xController.getSetpoint());
+        m_logger.logDouble(Level.DEBUG, "setpoint/y", () -> m_yController.getSetpoint());
+        m_logger.logDouble(Level.TRACE, "setpoint/theta", () -> m_thetaController.getSetpoint());
+        m_logger.logDouble(Level.TRACE, "error/x", () -> m_xController.getPositionError());
+        m_logger.logDouble(Level.TRACE, "error/y", () -> m_yController.getPositionError());
+        m_logger.logDouble(Level.TRACE, "error/theta", () -> m_thetaController.getPositionError());
 
         return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, omega);
     }

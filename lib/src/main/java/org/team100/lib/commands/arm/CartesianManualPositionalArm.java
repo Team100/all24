@@ -8,6 +8,7 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -30,10 +31,12 @@ public class CartesianManualPositionalArm extends Command100 {
     private final PIDController m_upperController;
 
     public CartesianManualPositionalArm(
+            Logger parent,
             ArmSubsystem arm,
             ArmKinematics kinematics,
             DoubleSupplier x,
             DoubleSupplier y) {
+        super(parent);
         m_arm = arm;
         m_kinematics = kinematics;
         m_x = x;
@@ -75,14 +78,14 @@ public class CartesianManualPositionalArm extends Command100 {
 
         m_arm.set(u1, u2);
 
-        t.log(Level.TRACE, "input", input);
-        t.log(Level.TRACE, "setpoint", setpoint);
-        t.log(Level.TRACE, "measurement", measurement.get());
-        t.log(Level.TRACE, "cartesian_measurement", cartesian_measurement);
-        t.logDouble(Level.TRACE, "output/u1", ()->u1);
-        t.logDouble(Level.TRACE, "output/u2",()-> u2);
-        t.logDouble(Level.TRACE, "error/e1", m_lowerController::getPositionError);
-        t.logDouble(Level.TRACE, "error/e2", m_upperController::getPositionError);
+        m_logger.log(Level.TRACE, "input", input);
+        m_logger.log(Level.TRACE, "setpoint", setpoint);
+        m_logger.log(Level.TRACE, "measurement", measurement.get());
+        m_logger.log(Level.TRACE, "cartesian_measurement", cartesian_measurement);
+        m_logger.logDouble(Level.TRACE, "output/u1", () -> u1);
+        m_logger.logDouble(Level.TRACE, "output/u2", () -> u2);
+        m_logger.logDouble(Level.TRACE, "error/e1", m_lowerController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "error/e2", m_upperController::getPositionError);
     }
 
     @Override

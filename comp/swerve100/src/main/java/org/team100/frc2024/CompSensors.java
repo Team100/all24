@@ -1,18 +1,19 @@
 package org.team100.frc2024;
 
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 
-public class CompSensors implements SensorInterface {
-    private final Telemetry.Logger t;
+public class CompSensors implements SensorInterface, Glassy {
+    private final Logger m_logger;
     private final DigitalInput intakeSensor;
     private final DigitalInput feederSensor;
     private final DigitalInput ampSensor;
 
-    public CompSensors(int port1, int port2, int port3) {
-        t = Telemetry.get().rootLogger("CompSensors");
+    public CompSensors(Logger parent, int port1, int port2, int port3) {
+        m_logger = parent.child(this);
         intakeSensor = new DigitalInput(port1);
         feederSensor = new DigitalInput(port2);
         ampSensor = new DigitalInput(port3);
@@ -21,21 +22,26 @@ public class CompSensors implements SensorInterface {
     @Override
     public boolean getIntakeSensor() {
         boolean sensorState = intakeSensor.get();
-        t.logBoolean(Level.DEBUG,  "intake", sensorState);
+        m_logger.logBoolean(Level.DEBUG, "intake", sensorState);
         return sensorState;
     }
 
     @Override
     public boolean getAmpSensor() {
         boolean sensorState = ampSensor.get();
-        t.logBoolean(Level.DEBUG,  "amp", sensorState);
+        m_logger.logBoolean(Level.DEBUG, "amp", sensorState);
         return sensorState;
     }
 
     @Override
     public boolean getFeederSensor() {
         boolean sensorState = feederSensor.get();
-        t.logBoolean(Level.DEBUG,  "feeder", sensorState);
+        m_logger.logBoolean(Level.DEBUG, "feeder", sensorState);
         return sensorState;
+    }
+
+    @Override
+    public String getGlassName() {
+        return "CompSensors";
     }
 }

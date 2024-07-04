@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
  * Duty cycle encoder such as the AMS 5048.
  */
 public class DutyCycleEncoder100 implements Encoder100<Distance100> {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     public final DutyCycleEncoder m_encoder;
 
@@ -40,7 +40,7 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
             boolean reversed) {
         m_reversed = reversed;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
         m_encoder.setDistancePerRotation(2 * Math.PI);
@@ -97,9 +97,9 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     //////////////////////////////////////////////
 
     private double getPositionRad() {
-        t.logDouble(Level.DEBUG, "position (rad)",()-> m_encoder.getDistance());
-        t.logDouble(Level.DEBUG, "position (turns)",()-> m_encoder.get());
-        t.logDouble(Level.DEBUG, "position (absolute)",()-> m_encoder.getAbsolutePosition());
+        m_logger.logDouble(Level.DEBUG, "position (rad)",()-> m_encoder.getDistance());
+        m_logger.logDouble(Level.DEBUG, "position (turns)",()-> m_encoder.get());
+        m_logger.logDouble(Level.DEBUG, "position (absolute)",()-> m_encoder.getAbsolutePosition());
         // should be fast, no cache needed.
         return m_encoder.getDistance();
     }

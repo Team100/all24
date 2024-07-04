@@ -4,7 +4,6 @@ import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
@@ -20,14 +19,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * corresponding ChassisSpeeds components (and scaled).
  */
 public class ManualChassisSpeeds implements ChassisSpeedDriver {
-    private final Logger t;
+    private final Logger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
     public ManualChassisSpeeds(String name, Logger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
     }
 
     /**
@@ -46,7 +45,7 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver {
 
         // desaturate to feasibility
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
-        t.log(Level.TRACE, "speeds", speeds);
+        m_logger.log(Level.TRACE, "speeds", speeds);
         return speeds;
     }
 

@@ -13,6 +13,7 @@ import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Chronos.Sample;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
@@ -73,7 +74,7 @@ public class VisionDataProvider24 implements Glassy {
     // private static final double kVisionChangeToleranceMeters = 1;
     private static final String kName = "VisionDataProvider24";
 
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
 
     private final PoseEstimator100 m_poseEstimator;
     private final FireControl m_fireControl;
@@ -96,6 +97,7 @@ public class VisionDataProvider24 implements Glassy {
      * @throws IOException
      */
     public VisionDataProvider24(
+            Logger parent,
             AprilTagFieldLayoutWithCorrectOrientation layout,
             PoseEstimator100 poseEstimator,
             FireControl fireControl) throws IOException {
@@ -105,7 +107,7 @@ public class VisionDataProvider24 implements Glassy {
         m_poseEstimator = poseEstimator;
         m_fireControl = fireControl;
         m_name = Names.name(this);
-        t = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
     }
 
     /** Start listening for updates. */
@@ -243,7 +245,7 @@ public class VisionDataProvider24 implements Glassy {
                     (blip.getId() == 5 && alliance == Alliance.Red)) {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
-                t.log(Level.DEBUG, cameraSerialNumber + "/Firing Solution", translation2d);
+                m_logger.log(Level.DEBUG, cameraSerialNumber + "/Firing Solution", translation2d);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
@@ -272,7 +274,8 @@ public class VisionDataProvider24 implements Glassy {
 
                 // this is just for logging
                 Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
-                t.logDouble(Level.DEBUG, cameraSerialNumber + "/Blip Tag Rotation", ()->tagRotation.getAngle());
+                m_logger.logDouble(Level.DEBUG, cameraSerialNumber + "/Blip Tag Rotation",
+                        () -> tagRotation.getAngle());
 
                 Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
                 if (!tagInFieldCoordsOptional.isPresent())
@@ -287,7 +290,7 @@ public class VisionDataProvider24 implements Glassy {
                         0, 0, gyroRotation.getRadians());
 
                 Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
-                t.log(Level.DEBUG, cameraSerialNumber + "/Blip Tag In Field Cords",
+                m_logger.log(Level.DEBUG, cameraSerialNumber + "/Blip Tag In Field Cords",
                         tagInFieldCoords.toPose2d());
 
                 Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
@@ -301,7 +304,7 @@ public class VisionDataProvider24 implements Glassy {
 
                 Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
 
-                t.log(Level.DEBUG, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
+                m_logger.log(Level.DEBUG, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
@@ -372,7 +375,7 @@ public class VisionDataProvider24 implements Glassy {
                 Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
                 Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
 
-                t.log(Level.DEBUG, cameraSerialNumber + "/Triangulate Pose", currentRobotinFieldCoords);
+                m_logger.log(Level.DEBUG, cameraSerialNumber + "/Triangulate Pose", currentRobotinFieldCoords);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;

@@ -121,23 +121,8 @@ public class RobotContainer implements Glassy {
         final TelemetryLevelPoller poller = new TelemetryLevelPoller(async);
         poller.setDefault(Level.TRACE);
 
-        // TODO: remove all this, it's joel figuring out how to do choosers and logging.
-        // slash here makes a tree
-        var foo = new NamedChooser<String>("asdf/foochooser") {
-
-        };
-        foo.addOption("bar", "bar");
-        // any value is fine, i.e. slashes have no effect
-        foo.setDefaultOption("blarg/baz", "baz");
-        foo.onChange((val) -> System.out.println(val));
-        SmartDashboard.putData(foo);
-
-        Logger l = Telemetry.get().rootLogger("mylogger");
-        // slashes are ok everywhere
-        l.logDouble(Level.ERROR, "qwerty/uiop", () -> 1.0);
-
         m_name = Names.name(this);
-        Logger logger = Telemetry.get().rootLogger(m_name);
+        final Logger logger = Telemetry.get().rootLogger(this);
 
         final DriverControl driverControl = new DriverControlProxy(async);
         final OperatorControl operatorControl = new OperatorControlProxy(async);
@@ -146,7 +131,7 @@ public class RobotContainer implements Glassy {
         final SensorInterface m_sensors;
         switch (Identity.instance) {
             case COMP_BOT:
-                m_sensors = new CompSensors(2, 1, 4);
+                m_sensors = new CompSensors(logger, 2, 1, 4);
                 break;
             default:
                 // always returns false
@@ -161,6 +146,7 @@ public class RobotContainer implements Glassy {
                 async);
         SwerveModuleVisualization.make(m_modules, async);
         final HeadingInterface m_heading = HeadingFactory.get(
+                logger,
                 swerveKinodynamics,
                 m_modules,
                 asyncFactory);
@@ -182,8 +168,11 @@ public class RobotContainer implements Glassy {
         FireControl fireControl = new FireControl() {
         };
 
+        final Logger driveLogger = Telemetry.get().namedRootLogger("DRIVE");
+
         final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
+                driveLogger,
                 m_layout,
                 poseEstimator,
                 fireControl);
@@ -192,20 +181,23 @@ public class RobotContainer implements Glassy {
         NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
         notePositionDetector.enable();
 
-        SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
+        SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
 
         m_drive = new SwerveDriveSubsystem(
+                driveLogger,
                 m_heading,
                 poseEstimator,
                 swerveLocal,
                 driverControl::speed);
         cameraUpdater = new CameraUpdater(() -> poseEstimator.getEstimatedPosition().pose(), m_layout);
 
-        final FeederSubsystem m_feeder = new FeederSubsystem(m_sensors);
+        final Logger shooterLogger = Telemetry.get().namedRootLogger("SHOOTER");
+        final FeederSubsystem m_feeder = new FeederSubsystem(shooterLogger, m_sensors);
 
-        final Intake m_intake = new Intake(m_sensors);
+        final Logger intakeLogger = Telemetry.get().namedRootLogger("INTAKE");
+        final Intake m_intake = new Intake(intakeLogger, m_sensors);
 
-        m_shooter = new DrumShooter(logger, 3, 13, 27, 58, 100);
+        m_shooter = new DrumShooter(shooterLogger, 3, 13, 27, 58, 100);
 
         ///////////////////////////
         //
@@ -220,10 +212,12 @@ public class RobotContainer implements Glassy {
                 m_shooter,
                 visionDataProvider);
 
-        m_ampFeeder = new AmpFeeder();
-        m_ampPivot = new AmpPivot();
+        final Logger ampLogger = Telemetry.get().namedRootLogger("AMP");
+        m_ampFeeder = new AmpFeeder(ampLogger);
+        m_ampPivot = new AmpPivot(ampLogger);
 
-        final ClimberSubsystem m_climber = new ClimberSubsystem(60, 61);
+        final Logger climberLogger = Telemetry.get().namedRootLogger("CLIMBER");
+        final ClimberSubsystem m_climber = new ClimberSubsystem(climberLogger, 60, 61);
 
         ////////////////////////////
         //
@@ -238,19 +232,20 @@ public class RobotContainer implements Glassy {
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
         FullStateDriveController fullStateController = new FullStateDriveController();
-        HolonomicDriveController100 dthetaController = new HolonomicDriveController100();
+        HolonomicDriveController100 dthetaController = new HolonomicDriveController100(driveLogger);
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         whileTrue(driverControl::driveWithFancyTrajec,
-                new FancyTrajectory(m_drive, constraints));
+                new FancyTrajectory(driveLogger, m_drive, constraints));
 
         // 254 PID follower
-        DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF();
+        DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF(driveLogger);
 
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(
+                        driveLogger,
                         m_intake,
                         notePositionDetector::getClosestTranslation2d,
                         m_drive,
@@ -259,6 +254,7 @@ public class RobotContainer implements Glassy {
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(
+                        driveLogger,
                         m_drive,
                         swerveKinodynamics,
                         m_ampPivot,
@@ -277,7 +273,7 @@ public class RobotContainer implements Glassy {
         whileTrue(operatorControl::feed, new Feed(m_intake, m_feeder));
 
         // hold the amp up while holding the button
-        whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(m_ampPivot, 1.8));
+        whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(ampLogger, m_ampPivot, 1.8));
 
         whileTrue(operatorControl::feedToAmp, new FeedToAmp(m_intake, m_shooter, m_ampFeeder, m_feeder));
 
@@ -298,7 +294,7 @@ public class RobotContainer implements Glassy {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0.1, 0, 0); // .5
 
-        DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
+        DriveManually driveManually = new DriveManually(driveLogger, driverControl::velocity, m_drive);
 
         driveManually.register("MODULE_STATE", false,
                 new SimpleManualModuleStates(m_name, logger, swerveKinodynamics));
@@ -373,7 +369,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("SHOOTER_LOCK", false,
                 new ManualWithShooterLock(
                         m_name,
-                        logger,
+                        driveLogger,
                         swerveKinodynamics,
                         m_heading,
                         thetaController,
@@ -383,7 +379,7 @@ public class RobotContainer implements Glassy {
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 m_name,
-                logger,
+                driveLogger,
                 swerveKinodynamics,
                 m_heading,
                 thetaController,
@@ -391,13 +387,14 @@ public class RobotContainer implements Glassy {
 
         ManualWithAmpLock ampLock = new ManualWithAmpLock(
                 m_name,
-                logger,
+                driveLogger,
                 swerveKinodynamics,
                 m_heading,
                 thetaController,
                 omega2Controller);
 
         AutoMaker m_AutoMaker = new AutoMaker(
+                driveLogger,
                 m_drive,
                 drivePID,
                 0,
@@ -414,7 +411,7 @@ public class RobotContainer implements Glassy {
                 new AmpLockCommand(ampLock, driverControl::velocity, m_drive));
 
         whileTrue(driverControl::shooterLock,
-                new ShootSmartWithRotation(m_drive, m_shooter, m_feeder, m_intake, shooterLock,
+                new ShootSmartWithRotation(driveLogger, m_drive, m_shooter, m_feeder, m_intake, shooterLock,
                         driverControl::velocity));
 
         //////////////////
@@ -432,7 +429,7 @@ public class RobotContainer implements Glassy {
                 operatorControl::getRightAxis,
                 operatorControl::pov));
         m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
-        m_ampPivot.setDefaultCommand(new AmpSet(m_ampPivot, 0));
+        m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
 
         ////////////////////
         //

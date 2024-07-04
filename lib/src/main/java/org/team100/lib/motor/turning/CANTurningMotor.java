@@ -83,7 +83,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
      */
     private static final double saturationVoltage = 11;
 
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final WPI_TalonSRX m_motor;
     private final String m_name;
 
@@ -126,8 +126,8 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
         m_motor.setSensorPhase(true);
 
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
-        t.log(Level.TRACE, "Device ID", m_motor.getDeviceID());
+        m_logger = parent.child(this);
+        m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceID());
     }
 
     public WPI_TalonSRX getMotor() {
@@ -137,7 +137,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.logDouble(Level.TRACE, "Output", () -> output);
+        m_logger.logDouble(Level.TRACE, "Output", () -> output);
         log();
     }
 
@@ -172,9 +172,9 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     }
 
     public void log() {
-        t.logDouble(Level.TRACE, "Encoder Value",
+        m_logger.logDouble(Level.TRACE, "Encoder Value",
                 () -> m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        t.logDouble(Level.TRACE, "Velocity Value",
+        m_logger.logDouble(Level.TRACE, "Velocity Value",
                 () -> m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 

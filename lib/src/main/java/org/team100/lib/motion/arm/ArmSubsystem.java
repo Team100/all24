@@ -25,7 +25,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
 
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
@@ -54,7 +54,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
             Encoder100<Angle100> upperEncoder,
             Async async) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
@@ -79,7 +79,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         ArmAngles position = new ArmAngles(
                 MathUtil.angleModulus(m_lowerMeasurementFilter.calculate(lowerPosition.getAsDouble())),
                 MathUtil.angleModulus(m_upperMeasurementFilter.calculate(upperPosition.getAsDouble())));
-        t.log(Level.TRACE,  "position", position);
+        m_logger.log(Level.TRACE,  "position", position);
         return Optional.of(position);
     }
 
@@ -92,7 +92,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         double th2 = position.get().th2 - m_previousPosition.th2;
         m_previousPosition = position.get();
         ArmAngles velocity = new ArmAngles(th1 * 50, th2 * 50);
-        t.log(Level.TRACE,  "velocity", velocity);
+        m_logger.log(Level.TRACE,  "velocity", velocity);
         return Optional.of(velocity);
     }
 

@@ -5,7 +5,6 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
@@ -19,14 +18,14 @@ import edu.wpi.first.math.geometry.Pose2d;
  * The input is a twist, so the output is just scaled.
  */
 public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final String m_name;
 
     public ManualFieldRelativeSpeeds(String name, Logger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
     }
 
     /**
@@ -46,9 +45,9 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
                         m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                         m_swerveKinodynamics.getMaxAngleSpeedRad_S()));
 
-        t.logDouble(Level.TRACE, "twist x m_s", () -> twistM_S.x());
-        t.logDouble(Level.TRACE, "twist y m_s", () -> twistM_S.y());
-        t.logDouble(Level.TRACE, "twist theta rad_s", () -> twistM_S.theta());
+        m_logger.logDouble(Level.TRACE, "twist x m_s", () -> twistM_S.x());
+        m_logger.logDouble(Level.TRACE, "twist y m_s", () -> twistM_S.y());
+        m_logger.logDouble(Level.TRACE, "twist theta rad_s", () -> twistM_S.theta());
         return twistM_S;
     }
 

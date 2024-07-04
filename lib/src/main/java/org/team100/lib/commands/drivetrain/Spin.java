@@ -6,6 +6,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,7 +31,8 @@ public class Spin extends Command100 {
     double m_speedRad_S;
     double m_angleRad;
 
-    public Spin(SwerveDriveSubsystem swerve, HolonomicDriveController3 controller) {
+    public Spin(Logger parent, SwerveDriveSubsystem swerve, HolonomicDriveController3 controller) {
+        super(parent);
         m_swerve = swerve;
         m_controller = controller;
         addRequirements(m_swerve);

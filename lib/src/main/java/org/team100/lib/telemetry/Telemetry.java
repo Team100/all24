@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.arm.ArmAngles;
@@ -121,12 +122,24 @@ public class Telemetry {
         return instance;
     }
 
-    public Logger logger(String root, Logger parent) {
-        return new Logger(root, parent);
+    // public Logger logger(String root, Logger parent) {
+    //     return new Logger(root, parent);
+    // }
+
+    public Logger rootLogger(Glassy obj) {
+        return new RootLogger(obj.getGlassName());
     }
 
-    public Logger rootLogger(String root) {
-        return new RootLogger(root);
+    public Logger rootLogger(Class<?> clazz) {
+        return new RootLogger(clazz.getSimpleName());
+    }
+
+    public Logger fieldLogger() {
+        return new RootLogger("field");
+    }
+
+    public Logger namedRootLogger(String str) {
+        return new RootLogger(str);
     }
 
     public class RootLogger extends Logger {
@@ -164,7 +177,15 @@ public class Telemetry {
         }
 
         public Logger child(String stem) {
-            return new Logger(m_root + stem, this);
+            return new Logger(m_root + "/" + stem, this);
+        }
+
+        public Logger child(Glassy obj) {
+            return child(obj.getGlassName());
+        }
+
+        public Logger child(Class<?> clazz) {
+            return child(clazz.getSimpleName());
         }
 
         boolean enabled() {

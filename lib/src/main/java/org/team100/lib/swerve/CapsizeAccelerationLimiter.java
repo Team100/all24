@@ -11,13 +11,13 @@ import org.team100.lib.util.Names;
  * Enforces a fixed limit on delta v.
  */
 public class CapsizeAccelerationLimiter implements Glassy {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final SwerveKinodynamics m_limits;
     private final String m_name;
 
     public CapsizeAccelerationLimiter(String name, Logger parent, SwerveKinodynamics limits) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_limits = limits;
     }
 
@@ -28,7 +28,7 @@ public class CapsizeAccelerationLimiter implements Glassy {
             min_s = kDtSec * m_limits.getMaxCapsizeAccelM_S2() / dv;
         }
         double s = min_s;
-        t.logDouble(Level.DEBUG, "s", () -> s);
+        m_logger.logDouble(Level.DEBUG, "s", () -> s);
         return s;
     }
 

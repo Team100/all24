@@ -12,6 +12,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -41,9 +42,11 @@ public class TrajectoryListCommand extends Command100 {
     private boolean done;
 
     public TrajectoryListCommand(
+            Logger parent,
             SwerveDriveSubsystem swerve,
             HolonomicFieldRelativeController controller,
             Function<Pose2d, List<Trajectory100>> trajectories) {
+        super(parent);
         m_swerve = swerve;
         m_controller = controller;
         m_trajectories = trajectories;
@@ -90,7 +93,7 @@ public class TrajectoryListCommand extends Command100 {
 
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            t.log(Level.TRACE, "reference", reference);
+            m_logger.log(Level.TRACE, "reference", reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
@@ -106,7 +109,7 @@ public class TrajectoryListCommand extends Command100 {
 
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            t.log(Level.TRACE, "reference", reference);
+            m_logger.log(Level.TRACE, "reference", reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }

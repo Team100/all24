@@ -12,6 +12,7 @@ import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
@@ -45,20 +46,22 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
             new SwerveModuleState(0, new Rotation2d(-3 * Math.PI / 4))
     };
 
-    private final Telemetry.Logger t;
-
+    private final Logger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final SwerveModuleCollection m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
     private final String m_name;
     private SwerveSetpoint prevSetpoint;
 
-    public SwerveLocal(SwerveKinodynamics swerveKinodynamics, SwerveModuleCollection modules) {
+    public SwerveLocal(
+            Logger parent,
+            SwerveKinodynamics swerveKinodynamics,
+            SwerveModuleCollection modules) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
         m_name = Names.name(this);
-        t = Telemetry.get().rootLogger(m_name);
-        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_name, t, m_swerveKinodynamics);
+        m_logger = parent.child(this);
+        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_name, m_logger, m_swerveKinodynamics);
         prevSetpoint = new SwerveSetpoint();
     }
 
@@ -79,7 +82,7 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
      *                      calculate
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
-        t.log(Level.DEBUG, "desired chassis speed", speeds);
+        m_logger.log(Level.DEBUG, "desired chassis speed", speeds);
         if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
             setChassisSpeedsWithSetpointGenerator(speeds, kDtSec);
         } else {
@@ -222,9 +225,9 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
                 kDtSec);
         // ideally delta would be zero because our input would be feasible.
         ChassisSpeeds delta = setpoint.getChassisSpeeds().minus(speeds);
-        t.log(Level.DEBUG, "setpoint delta", delta);
-        t.log(Level.TRACE, "prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
-        t.log(Level.DEBUG, "setpoint chassis speed", setpoint.getChassisSpeeds());
+        m_logger.log(Level.DEBUG, "setpoint delta", delta);
+        m_logger.log(Level.TRACE, "prevSetpoint chassis speed", prevSetpoint.getChassisSpeeds());
+        m_logger.log(Level.DEBUG, "setpoint chassis speed", setpoint.getChassisSpeeds());
         setModuleStates(setpoint.getModuleStates());
         prevSetpoint = setpoint;
     }

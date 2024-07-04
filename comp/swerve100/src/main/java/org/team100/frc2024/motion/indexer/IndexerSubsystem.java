@@ -10,7 +10,6 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Names;
@@ -45,9 +44,9 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
     DigitalInput beamBreak1;
     // DigitalInput beamBreak2;
 
-    public IndexerSubsystem(int driveID) {
+    public IndexerSubsystem(Logger parent, int driveID) {
         m_name = Names.name(this);
-        m_logger = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
         m_velocityConstants = new PIDConstants(0.0001, 0, 0);
         m_lowLevelFeedforwardConstants = Feedforward100.makeNeo();
 

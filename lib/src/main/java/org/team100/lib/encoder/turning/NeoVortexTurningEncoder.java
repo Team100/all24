@@ -17,7 +17,7 @@ import org.team100.lib.util.Names;
  * per turn.
  */
 public class NeoVortexTurningEncoder implements SettableEncoder<Angle100> {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final NeoVortexTurningMotor m_motor;
     private final double m_gearRatio;
@@ -32,7 +32,7 @@ public class NeoVortexTurningEncoder implements SettableEncoder<Angle100> {
             NeoVortexTurningMotor motor,
             double gearRatio) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_gearRatio = gearRatio;
         reset();
@@ -71,14 +71,14 @@ public class NeoVortexTurningEncoder implements SettableEncoder<Angle100> {
     private double getPositionRad() {
         // should be fast, no need to cache
         double positionRad = m_motor.getPositionRot() * 2 * Math.PI / m_gearRatio;
-        t.logDouble(Level.DEBUG,  "position (rad)", ()->positionRad);
+        m_logger.logDouble(Level.DEBUG,  "position (rad)", ()->positionRad);
         return positionRad;
     }
 
     private double getRateRad_S() {
         // should be fast, no need to cache
         double rateRad_S = m_motor.getRateRPM() * 2 * Math.PI / (60 * m_gearRatio);
-        t.logDouble(Level.DEBUG,  "velocity (rad_s)", ()->rateRad_S);
+        m_logger.logDouble(Level.DEBUG,  "velocity (rad_s)", ()->rateRad_S);
         return rateRad_S;
     }
 }

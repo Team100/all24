@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.util.function.BooleanConsumer;
@@ -19,7 +20,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * Sets the annunciator if bounds are exceeded.
  */
 public class Monitor implements Glassy {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final BooleanConsumer m_annunciator;
     private final BooleanSupplier m_test;
@@ -30,9 +31,9 @@ public class Monitor implements Glassy {
      * @param annunciator some sort of alert.
      * @param test        activates the annunciator, to make sure it's working.
      */
-    public Monitor(BooleanConsumer annunciator, BooleanSupplier test) {
+    public Monitor(Logger parent, BooleanConsumer annunciator, BooleanSupplier test) {
         m_name = Names.name(this);
-        t = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
         m_annunciator = annunciator;
         m_test = test;
         m_pdp = new PowerDistribution(1, ModuleType.kRev);
@@ -42,7 +43,7 @@ public class Monitor implements Glassy {
         m_shouldAlert = false;
         // this should test different things for different identities.
         if (Identity.instance == Identity.COMP_BOT || Identity.instance == Identity.BETA_BOT) {
-            t.logDouble(Level.INFO, "battery_voltage", () -> getBatteryVoltage());
+            m_logger.logDouble(Level.INFO, "battery_voltage", () -> getBatteryVoltage());
             // TODO: fix the pdp observer
             // t.log(Level.INFO, m_name, "bus_voltage", getBusVoltage());
             // t.log(Level.INFO, m_name, "total_current", getTotalCurrent());
@@ -54,7 +55,7 @@ public class Monitor implements Glassy {
 
         if (m_test.getAsBoolean())
             m_shouldAlert = true;
-        t.logBoolean(Level.INFO, "master_warning", m_shouldAlert);
+        m_logger.logBoolean(Level.INFO, "master_warning", m_shouldAlert);
         m_annunciator.accept(m_shouldAlert);
     }
 

@@ -17,7 +17,7 @@ import org.team100.lib.util.Names;
  * per turn.
  */
 public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final NeoVortexDriveMotor m_motor;
     private final double m_distancePerTurn;
@@ -31,10 +31,8 @@ public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
             Logger parent,
             NeoVortexDriveMotor motor,
             double distancePerTurn) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;
     }
@@ -74,7 +72,7 @@ public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
         // raw position is in rotations
         // this is fast, doesn't need to be cached
         double positionM = m_motor.getPositionRot() * m_distancePerTurn;
-        t.logDouble(Level.DEBUG, "position (m)", ()->positionM);
+        m_logger.logDouble(Level.DEBUG, "position (m)", ()->positionM);
         return positionM;
     }
 
@@ -82,7 +80,7 @@ public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
         // raw velocity is in RPM
         // this is fast, doesn't need to be cached
         double velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
-        t.logDouble(Level.DEBUG, "velocity (m_s)",()-> velocityM_S);
+        m_logger.logDouble(Level.DEBUG, "velocity (m_s)",()-> velocityM_S);
         return velocityM_S;
     }
 

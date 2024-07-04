@@ -24,7 +24,7 @@ import com.revrobotics.CANSparkMax;
 public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     /** Very much not calibrated. */
     private static final double kV = 0.1;
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final CANSparkMax m_motor;
     private final String m_name;
 
@@ -35,19 +35,19 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
      */
     public JointMotor(String name, Logger parent, int canId, int currentLimit) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, IdleMode.kBrake, MotorPhase.FORWARD, 10);
         Rev100.currentConfig(m_motor, currentLimit);
 
-        t.log(Level.TRACE, "Device ID", m_motor.getDeviceId());
+        m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceId());
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.logDouble(Level.TRACE, "Duty Cycle", ()->output);
+        m_logger.logDouble(Level.TRACE, "Duty Cycle", () -> output);
     }
 
     /**
@@ -56,10 +56,10 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     @Override
     public void setVelocity(double velocity, double accel, double torqueNm) {
         m_motor.set(kV * velocity);
-        t.logDouble(Level.TRACE, "Velocity", ()->velocity);
-        t.logDouble(Level.TRACE, "Accel",()-> accel);
-        t.logDouble(Level.TRACE, "Desired torque Nm",()->torqueNm);
-        t.logDouble(Level.TRACE, "Actual torque Nm",()-> getTorque());
+        m_logger.logDouble(Level.TRACE, "Velocity", () -> velocity);
+        m_logger.logDouble(Level.TRACE, "Accel", () -> accel);
+        m_logger.logDouble(Level.TRACE, "Desired torque Nm", () -> torqueNm);
+        m_logger.logDouble(Level.TRACE, "Actual torque Nm", () -> getTorque());
     }
 
     @Override

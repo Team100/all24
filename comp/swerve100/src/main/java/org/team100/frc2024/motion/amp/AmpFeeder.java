@@ -22,9 +22,9 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
     private final Logger m_logger;
     private final DutyCycleMotor100 ampDrive;
 
-    public AmpFeeder() {
+    public AmpFeeder(Logger parent) {
         m_name = Names.name(this);
-        m_logger = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
         switch (Identity.instance) {
             case COMP_BOT:
                 ampDrive = new NeoProxy(m_name, m_logger, 33, IdleMode.kBrake, 40);

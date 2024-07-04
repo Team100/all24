@@ -19,7 +19,7 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
      * Say 600 rad/s max so 0.0016?
      */
     private static final double velocityFFDutyCycle_Rad_S = 0.0016;
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final MotorController m_motor;
     private final String m_name;
     private final double m_gearRatio;
@@ -32,14 +32,14 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
         m_motor = motorController;
         m_motor.setInverted(true);
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_gearRatio = kDriveReduction;
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.logDouble(Level.TRACE, "duty cycle", () -> output);
+        m_logger.logDouble(Level.TRACE, "duty cycle", () -> output);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
         double motorRad_S = outputRad_S * m_gearRatio;
         double motorDutyCycle = motorRad_S * velocityFFDutyCycle_Rad_S;
         m_motor.set(motorDutyCycle);
-        t.logDouble(Level.TRACE, "duty cycle", () -> motorDutyCycle);
+        m_logger.logDouble(Level.TRACE, "duty cycle", () -> motorDutyCycle);
     }
 
     @Override

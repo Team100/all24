@@ -47,8 +47,8 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
      * translation
      */
     private static final double kRotationSpeed = 0.5;
-    private final Telemetry.Logger t;
-    private final Telemetry.Logger fieldLogger;
+    private final Logger m_logger;
+    private final Logger fieldLogger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     private final Supplier<Optional<Translation2d>> m_target;
@@ -77,8 +77,8 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
-        fieldLogger = Telemetry.get().rootLogger("field");
+        m_logger = parent.child(this);
+        fieldLogger = Telemetry.get().fieldLogger();
         m_trigger = trigger;
         m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -139,7 +139,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target.get());
-        t.logDouble(Level.DEBUG, "apparent motion",()-> targetMotion);
+        m_logger.logDouble(Level.DEBUG, "apparent motion",()-> targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -150,15 +150,15 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        t.log(Level.DEBUG, "theta/setpoint", m_thetaSetpoint);
-        t.logDouble(Level.DEBUG, "theta/measurement", ()->measurement);
-        t.logDouble(Level.DEBUG, "theta/error", ()->m_thetaController.getPositionError());
-        t.logDouble(Level.DEBUG, "theta/fb", ()->thetaFB);
+        m_logger.log(Level.DEBUG, "theta/setpoint", m_thetaSetpoint);
+        m_logger.logDouble(Level.DEBUG, "theta/measurement", ()->measurement);
+        m_logger.logDouble(Level.DEBUG, "theta/error", ()->m_thetaController.getPositionError());
+        m_logger.logDouble(Level.DEBUG, "theta/fb", ()->thetaFB);
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        t.log(Level.DEBUG, "omega/reference", m_thetaSetpoint);
-        t.logDouble(Level.DEBUG, "omega/measurement", ()->headingRate);
-        t.logDouble(Level.DEBUG, "omega/error",()-> m_omegaController.getPositionError());
-        t.logDouble(Level.DEBUG, "omega/fb", ()->omegaFB);
+        m_logger.log(Level.DEBUG, "omega/reference", m_thetaSetpoint);
+        m_logger.logDouble(Level.DEBUG, "omega/measurement", ()->headingRate);
+        m_logger.logDouble(Level.DEBUG, "omega/error",()-> m_omegaController.getPositionError());
+        m_logger.logDouble(Level.DEBUG, "omega/fb", ()->omegaFB);
 
         omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,

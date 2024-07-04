@@ -3,6 +3,7 @@ package org.team100.lib.util;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 /**
  * Tire/carpet interaction model.
@@ -18,24 +19,24 @@ public class Tire {
     private static final double kDefaultSaturationM_s_s = 10.0;
     private static final double kDefaultSlipAtSaturation0_1 = 0.1;
 
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
 
     private final double m_saturationM_s_s;
     private final double m_slipAtSaturation0_1;
 
     /** for testing */
-    Tire(double saturationM_s_s, double slip0_1) {
+    Tire(Logger parent, double saturationM_s_s, double slip0_1) {
         m_saturationM_s_s = saturationM_s_s;
         m_slipAtSaturation0_1 = slip0_1;
-        t = Telemetry.get().rootLogger("tire");
+        m_logger = parent.child(this.getClass());
     }
 
-    public static Tire noslip() {
-        return new Tire(Double.MAX_VALUE, 0.0);
+    public static Tire noslip(Logger parent) {
+        return new Tire(parent, Double.MAX_VALUE, 0.0);
     }
 
-    public static Tire defaultTire() {
-        return new Tire(kDefaultSaturationM_s_s, kDefaultSlipAtSaturation0_1);
+    public static Tire defaultTire(Logger parent) {
+        return new Tire(parent, kDefaultSaturationM_s_s, kDefaultSlipAtSaturation0_1);
     }
 
     /**
@@ -50,21 +51,21 @@ public class Tire {
      * @param dtS       length of the current period
      */
     public Vector2d actual(Vector2d cornerM_s, Vector2d wheelM_s, double dtS) {
-        t.log(Level.WARN, "corner M_s", cornerM_s);
-        t.log(Level.WARN, "wheel M_s", wheelM_s);
-        t.logDouble(Level.INFO, "dtS", () -> dtS); // usually about 0.02
+        m_logger.log(Level.WARN, "corner M_s", cornerM_s);
+        m_logger.log(Level.WARN, "wheel M_s", wheelM_s);
+        m_logger.logDouble(Level.INFO, "dtS", () -> dtS); // usually about 0.02
 
         Vector2d desiredAccelM_s_s = desiredAccelM_s_s(cornerM_s, wheelM_s, dtS);
-        t.log(Level.INFO, "desired accel M_s_s", desiredAccelM_s_s);
+        m_logger.log(Level.INFO, "desired accel M_s_s", desiredAccelM_s_s);
         double fraction = fraction(desiredAccelM_s_s);
         double scale = scale(fraction);
         Vector2d scaledAccelM_s_s = scaledAccelM_s_s(desiredAccelM_s_s, scale);
         Vector2d limitedAccelM_s_s = limit(scaledAccelM_s_s);
-        t.log(Level.INFO, "limited accel M_s_s", limitedAccelM_s_s);
+        m_logger.log(Level.INFO, "limited accel M_s_s", limitedAccelM_s_s);
 
         // Vector2d actual = apply(cornerM_s, desiredAccelM_s_s, dtS);
         Vector2d actual = apply(cornerM_s, limitedAccelM_s_s, dtS);
-        t.log(Level.WARN, "actual M_s", actual);
+        m_logger.log(Level.WARN, "actual M_s", actual);
         return actual;
     }
 
@@ -114,11 +115,11 @@ public class Tire {
         double normM_s_s = scaledAccelM_s_s.norm();
         double saturationM_s_s = m_saturationM_s_s;
         if (normM_s_s <= saturationM_s_s) {
-            t.log(Level.DEBUG, "limit M_s_s", scaledAccelM_s_s);
+            m_logger.log(Level.DEBUG, "limit M_s_s", scaledAccelM_s_s);
             return scaledAccelM_s_s;
         }
         Vector2d limitedM_s_s = scaledAccelM_s_s.times(saturationM_s_s / normM_s_s);
-        t.log(Level.DEBUG, "limit M_s_s", limitedM_s_s);
+        m_logger.log(Level.DEBUG, "limit M_s_s", limitedM_s_s);
         return limitedM_s_s;
     }
 }

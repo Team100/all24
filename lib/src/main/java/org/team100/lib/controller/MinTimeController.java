@@ -92,7 +92,7 @@ import edu.wpi.first.math.MathUtil;
  * TODO: allow different acceleration and deceleration.
  */
 public class MinTimeController implements Glassy {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
 
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
@@ -157,7 +157,7 @@ public class MinTimeController implements Glassy {
         m_finish = finish;
         m_k = k;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
     }
 
     private State100 modulus(double x, double v, double a) {
@@ -197,13 +197,13 @@ public class MinTimeController implements Glassy {
 
         // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
-            t.log(Level.TRACE, "mode", "within tolerance");
+            m_logger.log(Level.TRACE, "mode", "within tolerance");
             return modulus(goal);
         }
 
         // NEAR THE GOAL: USE FULL STATE to avoid oscillation
         if (goal.near(initial, m_finish)) {
-            t.log(Level.TRACE, "mode", "full state");
+            m_logger.log(Level.TRACE, "mode", "full state");
             double xError = goal.x() - initial.x();
             double vError = goal.v() - initial.v();
             double u_FBx = xError * m_k[0];
@@ -233,7 +233,7 @@ public class MinTimeController implements Glassy {
             return modulus(initial);
         }
 
-        t.log(Level.TRACE, "mode", "min time");
+        m_logger.log(Level.TRACE, "mode", "min time");
 
         // ON THE INITIAL PATH
 

@@ -10,7 +10,7 @@ import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final String m_name;
     private final Talon6TurningMotor m_motor;
     private final double m_gearRatio;
@@ -21,7 +21,7 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
             Talon6TurningMotor m_motor,
             double m_gearRatio) {
         this.m_name = name;
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         this.m_motor = m_motor;
         this.m_gearRatio = m_gearRatio;
     }
@@ -31,8 +31,8 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
     public OptionalDouble getPosition() {
         double motorPositionRev = m_motor.getPositionRev();
         double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
-        t.logDouble(Level.TRACE,  "motor position (rev)", ()->motorPositionRev);
-        t.logDouble(Level.DEBUG,  "output position (rad)",()-> positionRad);
+        m_logger.logDouble(Level.TRACE,  "motor position (rev)", ()->motorPositionRev);
+        m_logger.logDouble(Level.DEBUG,  "output position (rad)",()-> positionRad);
         return OptionalDouble.of(positionRad);
     }
 
@@ -41,8 +41,8 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
     public OptionalDouble getRate() {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
         double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
-        t.logDouble(Level.TRACE,  "motor velocity (rev_s)",()-> motorVelocityRev_S);
-        t.logDouble(Level.DEBUG,  "output velocity (rad_s)",()->outputVelocityRad_S);
+        m_logger.logDouble(Level.TRACE,  "motor velocity (rev_s)",()-> motorVelocityRev_S);
+        m_logger.logDouble(Level.DEBUG,  "output velocity (rad_s)",()->outputVelocityRad_S);
         return OptionalDouble.of(outputVelocityRad_S);
     }
 

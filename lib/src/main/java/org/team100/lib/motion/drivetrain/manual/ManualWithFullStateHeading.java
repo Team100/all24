@@ -31,7 +31,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Rotation uses simple full-state feedback and that's all..
  */
 public class ManualWithFullStateHeading implements FieldRelativeDriver {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     /** Absolute input supplier, null if free */
@@ -66,7 +66,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         m_heading = heading;
         m_desiredRotation = desiredRotation;
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_K = k;
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
@@ -124,7 +124,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
-            t.log(Level.TRACE, "mode", "free");
+            m_logger.log(Level.TRACE, "mode", "free");
             // desaturate to feasibility
             return m_swerveKinodynamics.analyticDesaturation(twistM_S);
         }
@@ -161,17 +161,17 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
 
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
-        t.log(Level.TRACE, "mode", "snap");
-        t.logDouble(Level.TRACE, "goal/theta", () -> m_goal.getRadians());
-        t.log(Level.TRACE, "setpoint/theta", m_thetaSetpoint);
-        t.logDouble(Level.TRACE, "measurement/theta", () -> headingMeasurement);
-        t.logDouble(Level.TRACE, "measurement/omega", () -> headingRate);
-        t.logDouble(Level.TRACE, "error/theta", () -> thetaError);
-        t.logDouble(Level.TRACE, "error/omega", () -> omegaError);
-        t.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);
-        t.logDouble(Level.TRACE, "thetaFB", () -> thetaFB);
-        t.logDouble(Level.TRACE, "omegaFB", () -> omegaFB);
-        t.logDouble(Level.TRACE, "output/omega", () -> omega);
+        m_logger.log(Level.TRACE, "mode", "snap");
+        m_logger.logDouble(Level.TRACE, "goal/theta", () -> m_goal.getRadians());
+        m_logger.log(Level.TRACE, "setpoint/theta", m_thetaSetpoint);
+        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> headingMeasurement);
+        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> headingRate);
+        m_logger.logDouble(Level.TRACE, "error/theta", () -> thetaError);
+        m_logger.logDouble(Level.TRACE, "error/omega", () -> omegaError);
+        m_logger.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);
+        m_logger.logDouble(Level.TRACE, "thetaFB", () -> thetaFB);
+        m_logger.logDouble(Level.TRACE, "omegaFB", () -> omegaFB);
+        m_logger.logDouble(Level.TRACE, "output/omega", () -> omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

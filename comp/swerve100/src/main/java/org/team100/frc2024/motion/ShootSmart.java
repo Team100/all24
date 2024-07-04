@@ -7,17 +7,18 @@ import org.team100.frc2024.SensorInterface;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class ShootSmart extends Command {
-    private final Telemetry.Logger t;
+public class ShootSmart extends Command implements Glassy {
+    private final Logger m_logger;
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -28,13 +29,14 @@ public class ShootSmart extends Command {
     private boolean atVelocity;
 
     public ShootSmart(
+            Logger parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
-        t = Telemetry.get().rootLogger("ShootSmart");
+        m_logger = parent.child(this);
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;
@@ -61,7 +63,7 @@ public class ShootSmart extends Command {
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
             double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
-            t.logDouble(Level.DEBUG, "pivot error (rad)", ()->errorRad);
+            m_logger.logDouble(Level.DEBUG, "pivot error (rad)", () -> errorRad);
         }
 
         // no matter the note position, set the shooter angle and speed
@@ -98,5 +100,10 @@ public class ShootSmart extends Command {
         m_shooter.stop();
         m_intake.stop();
         m_feeder.stop();
+    }
+
+    @Override
+    public String getGlassName() {
+        return "ShootSmart";
     }
 }

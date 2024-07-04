@@ -5,8 +5,8 @@ import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,14 +20,15 @@ public class DriverXboxControl implements DriverControl {
     private static final double kExpo = 0.65;
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
-    private final Telemetry.Logger t ;
+    private final Logger m_logger;
     private final XboxController m_controller;
     private final String m_name;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
-    public DriverXboxControl() {
+
+    public DriverXboxControl(Logger parent) {
         m_controller = new XboxController(0);
         m_name = Names.name(this);
-        t = Telemetry.get().rootLogger(m_name);
+        m_logger = parent.child(this);
     }
 
     @Override
@@ -78,9 +79,9 @@ public class DriverXboxControl implements DriverControl {
         }
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
         Speed speed = speed();
-        t.logDouble(Level.TRACE,  "Xbox/right y",()-> m_controller.getRightY());
-        t.logDouble(Level.TRACE,  "Xbox/right x",()-> m_controller.getRightX());
-        t.logDouble(Level.TRACE,  "Xbox/left x",()-> m_controller.getLeftX());
+        m_logger.logDouble(Level.TRACE, "Xbox/right y", () -> m_controller.getRightY());
+        m_logger.logDouble(Level.TRACE, "Xbox/right x", () -> m_controller.getRightX());
+        m_logger.logDouble(Level.TRACE, "Xbox/left x", () -> m_controller.getLeftX());
         switch (speed) {
             case SLOW:
                 return new Velocity(kSlow * dx, kSlow * dy, kSlow * dtheta);
@@ -107,7 +108,7 @@ public class DriverXboxControl implements DriverControl {
         // @joel 3/15/24 removed this entirely
         // return m_controller.getRightStickButton();
         return false;
-    } 
+    }
 
     @Override
     public boolean ampLock() {
@@ -125,7 +126,7 @@ public class DriverXboxControl implements DriverControl {
         return previousRotation;
     }
 
-    public boolean choreo(){
+    public boolean choreo() {
         return m_controller.getRawButton(2);
     }
 
@@ -140,17 +141,17 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public boolean test(){
+    public boolean test() {
         return false;
     }
 
     @Override
-    public int pov(){
+    public int pov() {
         return m_controller.getPOV();
     }
 
     @Override
-    public boolean shooterLock(){
+    public boolean shooterLock() {
         return m_controller.getBButton();
-    }    
+    }
 }

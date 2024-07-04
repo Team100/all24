@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
  * Positional control via onboard control of motor velocity.
  */
 public class OnboardPositionServo<T extends Measure100> implements PositionServo<T> {
-    private final Telemetry.Logger t;
+    private final Logger m_logger;
     private final VelocityMotor100<T> m_motor;
     private final Encoder100<T> m_encoder;
     private final double m_maxVel;
@@ -46,7 +46,7 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
             Profile100 profile,
             T instance) {
         m_name = Names.append(name, this);
-        t = Telemetry.get().logger(m_name, parent);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;
         m_maxVel = maxVel;
@@ -104,19 +104,19 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
 
         // pass the feedforward through unmodified
         m_motor.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
-        t.logDouble(Level.DEBUG, "Desired velocity setpoint", () -> u_TOTAL);
+        m_logger.logDouble(Level.DEBUG, "Desired velocity setpoint", () -> u_TOTAL);
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        t.logDouble(Level.TRACE, "u_FB", () -> u_FB);
-        t.logDouble(Level.TRACE, "u_FF", () -> u_FF);
-        t.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
-        t.log(Level.DEBUG, "Goal", m_goal);
-        t.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        t.log(Level.DEBUG, "Setpoint", m_setpoint);
-        t.logDouble(Level.TRACE, "Controller Position Error", () -> m_controller.getPositionError());
-        t.logDouble(Level.TRACE, "Controller Velocity Error", () -> m_controller.getVelocityError());
-        t.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
+        m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
+        m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
+        m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
+        m_logger.log(Level.DEBUG, "Goal", m_goal);
+        m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
+        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
+        m_logger.logDouble(Level.TRACE, "Controller Position Error", () -> m_controller.getPositionError());
+        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", () -> m_controller.getVelocityError());
+        m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
     }
 
     /**
@@ -139,9 +139,9 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     @Override
     public boolean atSetpoint() {
         boolean atSetpoint = m_controller.atSetpoint();
-        t.logDouble(Level.DEBUG, "Position Tolerance", () -> m_controller.getPositionTolerance());
-        t.logDouble(Level.DEBUG, "Velocity Tolerance", () -> m_controller.getVelocityTolerance());
-        t.logBoolean(Level.DEBUG, "At Setpoint", atSetpoint);
+        m_logger.logDouble(Level.DEBUG, "Position Tolerance", () -> m_controller.getPositionTolerance());
+        m_logger.logDouble(Level.DEBUG, "Velocity Tolerance", () -> m_controller.getVelocityTolerance());
+        m_logger.logBoolean(Level.DEBUG, "At Setpoint", atSetpoint);
         return atSetpoint;
     }
 

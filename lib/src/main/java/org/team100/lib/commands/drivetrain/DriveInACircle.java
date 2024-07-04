@@ -11,6 +11,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -53,9 +54,11 @@ public class DriveInACircle extends Command100 {
      * 
      */
     public DriveInACircle(
+            Logger parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
             double turnRatio) {
+        super(parent);
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
         m_controller = controller;
@@ -96,10 +99,10 @@ public class DriveInACircle extends Command100 {
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
-        t.log(Level.TRACE,  "center", m_center);
-        t.logDouble(Level.TRACE,  "angle", ()->m_angleRad);
-        t.log(Level.TRACE,  "reference", reference);
-        t.log(Level.TRACE,  "target", fieldRelativeTarget);
+        m_logger.log(Level.TRACE, "center", m_center);
+        m_logger.logDouble(Level.TRACE, "angle", () -> m_angleRad);
+        m_logger.log(Level.TRACE, "reference", reference);
+        m_logger.log(Level.TRACE, "target", fieldRelativeTarget);
     }
 
     static Translation2d getCenter(Pose2d currentPose, double radiusM) {
