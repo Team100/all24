@@ -48,7 +48,6 @@ import org.team100.lib.visualization.SwerveModuleVisualization;
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -102,9 +101,7 @@ public class RobotContainerParkingLot implements Glassy {
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
-                Timer.getFPGATimestamp(),
-                VecBuilder.fill(0.1, 0.1, 0.1),
-                VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); // 0.1 0.1
+                Timer.getFPGATimestamp());
         SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
         m_drive = new SwerveDriveSubsystem(
                 driveLogger,
