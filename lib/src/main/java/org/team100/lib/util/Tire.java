@@ -1,8 +1,8 @@
 package org.team100.lib.util;
 
 import org.team100.lib.geometry.Vector2d;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 
 /**
  * Tire/carpet interaction model.

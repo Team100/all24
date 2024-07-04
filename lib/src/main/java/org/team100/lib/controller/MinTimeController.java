@@ -3,8 +3,8 @@ package org.team100.lib.controller;
 import java.util.function.DoubleUnaryOperator;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;

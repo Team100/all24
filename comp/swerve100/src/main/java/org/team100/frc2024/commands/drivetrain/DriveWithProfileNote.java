@@ -14,9 +14,9 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,7 +37,7 @@ public class DriveWithProfileNote extends Command100 {
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
-    private final Telemetry.Logger fieldLogger;
+    private final Logger fieldLogger;
     private Optional<Translation2d> previousGoal;
     private State100 xSetpoint;
     private State100 ySetpoint;
@@ -143,5 +143,6 @@ public class DriveWithProfileNote extends Command100 {
 
     @Override
     public void end100(boolean interrupted) {
+        //
     }
 }

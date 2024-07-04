@@ -13,8 +13,8 @@ import java.io.Writer;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 

@@ -1,8 +1,8 @@
 package org.team100.frc2024;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 

@@ -16,7 +16,7 @@ import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 

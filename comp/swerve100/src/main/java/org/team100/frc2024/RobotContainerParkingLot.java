@@ -37,9 +37,9 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Annunciator;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
@@ -91,8 +91,7 @@ public class RobotContainerParkingLot implements Glassy {
                 logger,
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
-                swerveKinodynamics,
-                async);
+                swerveKinodynamics);
         SwerveModuleVisualization.make(m_modules, async);
         m_heading = HeadingFactory.get(
                 logger,

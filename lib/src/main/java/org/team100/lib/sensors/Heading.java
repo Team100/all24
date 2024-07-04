@@ -1,7 +1,7 @@
 package org.team100.lib.sensors;
 
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 

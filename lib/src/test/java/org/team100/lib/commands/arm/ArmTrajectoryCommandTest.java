@@ -12,8 +12,8 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,11 +22,11 @@ import edu.wpi.first.math.trajectory.Trajectory;
 
 class ArmTrajectoryCommandTest implements Timeless {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
+    private static final Async async = new MockAsync();
 
     @Test
     void testSimple() {
-        Async async = new MockAsync();
-        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d();
@@ -48,8 +48,6 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testSimple2() {
-        Async async = new MockAsync();
-        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
@@ -80,8 +78,6 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testPosRefernce() {
-        Async async = new MockAsync();
-        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
@@ -99,8 +95,6 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testVelRefernce() {
-        Async async = new MockAsync();
-        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);

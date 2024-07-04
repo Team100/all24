@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -43,7 +43,7 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 class PanTiltOffsetTest {
     private static final double kDelta = 0.01;
-    Logger m_logger = Telemetry.get().testLogger();
+    private static final Logger m_logger = new TestLogger();
 
     public PanTiltOffsetTest() throws IOException {
         // load the JNI

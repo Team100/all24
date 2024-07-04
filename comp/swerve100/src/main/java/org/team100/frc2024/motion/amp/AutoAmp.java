@@ -1,7 +1,7 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 
 public class AutoAmp extends Command100 {
     public AutoAmp(Logger parent) {
@@ -10,7 +10,7 @@ public class AutoAmp extends Command100 {
 
     @Override
     public void execute100(double dt) {
-
+        //
     }
 
 }

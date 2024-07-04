@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 
@@ -24,7 +24,7 @@ class TrajectoryTimeSamplerTest {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
-    Logger logger = Telemetry.get().testLogger();
+    private static final Logger logger = new TestLogger();
 
     @Test
     void testSample() {

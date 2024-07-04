@@ -1,7 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 

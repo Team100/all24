@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;

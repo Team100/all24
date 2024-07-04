@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 import org.team100.lib.telemetry.Chronos;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 
 /**
  * Copy of {@link edu.wpi.first.wpilibj.TimedRobot} in an effort to improve

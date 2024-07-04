@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 
 /**
  * Logs stuff about the JVM. Inspired by Advantage Kit's

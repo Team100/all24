@@ -1,7 +1,7 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 
 /**
  * Set the amp pivot angle goal.

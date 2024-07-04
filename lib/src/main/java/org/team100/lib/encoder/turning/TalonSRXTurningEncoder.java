@@ -4,8 +4,8 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.turning.CANTurningMotor;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;

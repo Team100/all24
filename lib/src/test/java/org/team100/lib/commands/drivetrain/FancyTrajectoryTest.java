@@ -9,15 +9,16 @@ import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 
 class FancyTrajectoryTest extends Fixtured {
+    private static final Logger logger = new TestLogger();
+
     @Test
     void testSimple() {
-        Logger logger = Telemetry.get().testLogger();
         SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest(logger);
         SwerveDriveSubsystem drive = fixture.drive;
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();

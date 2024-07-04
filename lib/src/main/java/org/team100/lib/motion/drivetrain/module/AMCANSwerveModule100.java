@@ -14,7 +14,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 

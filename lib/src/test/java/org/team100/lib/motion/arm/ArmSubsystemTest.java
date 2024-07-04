@@ -5,18 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.MockAsync;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.testing.Timeless;
 
 class ArmSubsystemTest implements Timeless {
     private static final double kDelta = 0.001;
+    private static final Async async = new MockAsync();
+    private static final Logger logger = new TestLogger();
 
     // test simple direct motion
     @Test
     void testSimple() {
-        Async async = new MockAsync();
-        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
 
         assertEquals(0, armSubSystem.getPosition().get().th1, kDelta);

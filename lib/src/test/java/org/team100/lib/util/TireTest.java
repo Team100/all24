@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Vector2d;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 
 class TireTest {
     private static final double kDelta = 0.001;
-    Logger logger = Telemetry.get().testLogger();
+    private static final Logger logger = new TestLogger();
 
     @Test
     void testDesiredAccel() {

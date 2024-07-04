@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
@@ -18,7 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  */
 class SwerveKinodynamicsTest {
     private static final double kDelta = 0.001;
-    Logger logger = Telemetry.get().testLogger();
+    private static final Logger logger = new TestLogger();
 
     @Test
     void testComputedValues() {
