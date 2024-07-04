@@ -16,7 +16,7 @@ class Distance100VelocityServoTest {
         String name = "test";
         MockVelocityMotor100<Distance100> driveMotor = new MockVelocityMotor100<>();
         MockEncoder100<Distance100> driveEncoder = new MockEncoder100<>();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
 
         OutboardVelocityServo<Distance100> servo = new OutboardVelocityServo<>(
                 name,

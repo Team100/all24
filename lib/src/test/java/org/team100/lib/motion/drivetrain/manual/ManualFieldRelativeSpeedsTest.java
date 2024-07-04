@@ -13,11 +13,12 @@ import org.team100.lib.telemetry.Telemetry.Logger;
 
 class ManualFieldRelativeSpeedsTest {
     private static final double kDelta = 0.001;
+    Logger logger = Telemetry.get().testLogger();
 
     @Test
     void testTwistZero() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        Logger logger = Telemetry.get().testLogger();
         ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds("foo", logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
         SwerveState s = new SwerveState();
@@ -29,8 +30,8 @@ class ManualFieldRelativeSpeedsTest {
 
     @Test
     void testTwistNonzero() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        Logger logger = Telemetry.get().testLogger();
         ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds("foo", logger, limits);
         // these inputs are clipped and desaturated
         DriverControl.Velocity input = new DriverControl.Velocity(1, 2, 3);

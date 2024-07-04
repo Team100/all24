@@ -14,7 +14,7 @@ class MotorController100Test {
     @Test
     void testTurning() {
         MockMotorController mc = new MockMotorController();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         TurningMotorController100 m = new TurningMotorController100("foo", logger, mc, 2);
         m.setVelocity(0, 0, 0);
         assertEquals(0, mc.speed, kDelta);
@@ -25,7 +25,7 @@ class MotorController100Test {
     @Test
     void testSimple() {
         MockMotorController mc = new MockMotorController();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         DriveMotorController100 m = new DriveMotorController100("foo", logger, mc, 2, 0.1);
         m.setVelocity(0, 0, 0);
         assertEquals(0, mc.speed, kDelta);

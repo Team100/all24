@@ -150,6 +150,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
+            Logger parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -162,7 +163,7 @@ public class SwerveKinodynamics implements Glassy {
             double frontoffset,
             double vcg,
             Tire tire) {
-        m_logger = Telemetry.get().rootLogger(Names.name(this));
+        m_logger = parent.child(this);
         if (fronttrack < 0.1 || backtrack < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -419,6 +420,7 @@ public class SwerveKinodynamics implements Glassy {
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         return new SwerveDrivePoseEstimator100(
+                m_logger,
                 this,
                 gyroAngle,
                 modulePositions,

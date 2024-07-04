@@ -43,6 +43,7 @@ public class HolonomicDriveController100 implements Glassy {
     }
 
     public static HolonomicDriveController100 withTolerance(
+            Logger parent,
             double cartesianPosition,
             double cartesianVelocity,
             double rotationPosition,
@@ -56,7 +57,7 @@ public class HolonomicDriveController100 implements Glassy {
         PIDController omega = omega();
         // I don't think we really care about acceleration
         omega.setTolerance(rotationVelocity, 100000000);
-        return new HolonomicDriveController100(x, y, theta, omega);
+        return new HolonomicDriveController100(parent, x, y, theta, omega);
     }
 
     public boolean atReference() {

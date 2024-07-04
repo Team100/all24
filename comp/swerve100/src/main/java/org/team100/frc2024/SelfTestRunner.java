@@ -82,7 +82,7 @@ public class SelfTestRunner extends Command implements Glassy {
             DriveManually driveManually = new DriveManually(logger, driveManuallyTest::treatment, drivetrain);
 
             driveManually.register("MODULE_STATE", false,
-                    new SimpleManualModuleStates("foo", logger, SwerveKinodynamicsFactory.forTest()));
+                    new SimpleManualModuleStates("foo", logger, SwerveKinodynamicsFactory.forTest(logger)));
             driveManually.overrideMode(() -> "MODULE_STATE");
             addCase(driveManuallyTest, driveManually);
 

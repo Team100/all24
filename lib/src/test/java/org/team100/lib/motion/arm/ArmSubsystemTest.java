@@ -16,7 +16,7 @@ class ArmSubsystemTest implements Timeless {
     @Test
     void testSimple() {
         Async async = new MockAsync();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
 
         assertEquals(0, armSubSystem.getPosition().get().th1, kDelta);

@@ -5,9 +5,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.NeoProxy;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.telemetry.Telemetry.RootLogger;
 import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase.IdleMode;

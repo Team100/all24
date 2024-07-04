@@ -26,11 +26,12 @@ class ArmTrajectoryCommandTest implements Timeless {
     @Test
     void testSimple() {
         Async async = new MockAsync();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d();
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
+                logger,
                 armSubSystem,
                 armKinematicsM,
                 goal);
@@ -48,11 +49,12 @@ class ArmTrajectoryCommandTest implements Timeless {
     @Test
     void testSimple2() {
         Async async = new MockAsync();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
+                logger,
                 armSubSystem,
                 armKinematicsM,
                 goal);
@@ -79,11 +81,12 @@ class ArmTrajectoryCommandTest implements Timeless {
     @Test
     void testPosRefernce() {
         Async async = new MockAsync();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
+                logger,
                 armSubSystem,
                 armKinematicsM,
                 goal);
@@ -97,11 +100,12 @@ class ArmTrajectoryCommandTest implements Timeless {
     @Test
     void testVelRefernce() {
         Async async = new MockAsync();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
+                logger,
                 armSubSystem,
                 armKinematicsM,
                 goal);

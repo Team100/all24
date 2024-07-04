@@ -296,7 +296,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             final double t00 = t0;
             m_logger.logDouble(Level.DEBUG, "t0", () -> t00);
             earlierPose = earlierEntry.getValue().m_state;
-            Vector2d[] corners = SlipperyTireUtil.cornerDeltas(
+            Vector2d[] corners = m_tireUtil.cornerDeltas(
                     m_kinodynamics.getKinematics(),
                     earlierPose.pose(),
                     previousPose.pose());

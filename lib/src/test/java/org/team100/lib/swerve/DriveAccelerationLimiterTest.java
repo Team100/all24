@@ -9,13 +9,12 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Logger;
 
 class DriveAccelerationLimiterTest {
-
     private static final double kDelta = 0.001;
+    Logger logger = Telemetry.get().testLogger();
 
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
         DriveAccelerationLimiter c = new DriveAccelerationLimiter("foo", logger, l);
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
@@ -32,8 +31,7 @@ class DriveAccelerationLimiterTest {
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
         DriveAccelerationLimiter c = new DriveAccelerationLimiter("foo", logger, l);
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };

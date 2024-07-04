@@ -123,8 +123,12 @@ public class Telemetry {
     }
 
     // public Logger logger(String root, Logger parent) {
-    //     return new Logger(root, parent);
+    // return new Logger(root, parent);
     // }
+
+    public Logger testLogger() {
+        return new TestLogger();
+    }
 
     public Logger rootLogger(Glassy obj) {
         return new RootLogger(obj.getGlassName());
@@ -140,6 +144,18 @@ public class Telemetry {
 
     public Logger namedRootLogger(String str) {
         return new RootLogger(str);
+    }
+
+    /** Doesn't do anything, always disabled. */
+    public class TestLogger extends Logger {
+        public TestLogger() {
+            super("test");
+        }
+
+        @Override
+        boolean enabled() {
+            return false;
+        }
     }
 
     public class RootLogger extends Logger {

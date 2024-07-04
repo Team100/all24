@@ -30,7 +30,7 @@ class GravityServoTest implements Timeless2024 {
         double period = 0.02;
         double[] softLimits = new double[] { 0, 45 };
         // motor speed is rad/s
-        Logger logger = Telemetry.get().rootLogger(this.getClass());
+        Logger logger = Telemetry.get().testLogger();
         SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>("test", logger, 600);
         SimulatedEncoder<Distance100> simEncoder = new SimulatedEncoder<>(
                 "test", logger,

@@ -27,12 +27,11 @@ class DriveManuallyTest extends Fixtured implements Timeless {
     void testSimple() {
         Supplier<DriverControl.Velocity> twistSupplier = () -> desiredTwist;
         SwerveDriveSubsystem robotDrive = fixture.drive;
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        Logger logger = Telemetry.get().testLogger();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
 
-        DriveManually command = new DriveManually(twistSupplier, robotDrive);
+        DriveManually command = new DriveManually(logger, twistSupplier, robotDrive);
         DriveManually.shutDownForTest();
-
-        Logger logger = Telemetry.get().rootLogger("foo");
 
         command.register("MODULE_STATE", false,
                 new SimpleManualModuleStates("foo", logger, swerveKinodynamics));

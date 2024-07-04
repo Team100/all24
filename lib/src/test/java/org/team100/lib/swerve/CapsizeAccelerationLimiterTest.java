@@ -10,12 +10,12 @@ import org.team100.lib.telemetry.Telemetry.Logger;
 
 class CapsizeAccelerationLimiterTest {
     private static final double kDelta = 0.001;
+    Logger logger = Telemetry.get().testLogger();
 
     /** zero delta v => no constraint */
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-         Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
         CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter("foo", logger, l);
         double s = c.enforceCentripetalLimit(0, 0, 0.02);
         assertEquals(1, s, kDelta);
@@ -26,8 +26,7 @@ class CapsizeAccelerationLimiterTest {
      */
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
         CapsizeAccelerationLimiter c = new CapsizeAccelerationLimiter("foo", logger, l);
         double s = c.enforceCentripetalLimit(-1, 1, 0.02);
         assertEquals(0.115, s, kDelta);

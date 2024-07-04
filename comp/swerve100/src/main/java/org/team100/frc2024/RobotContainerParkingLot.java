@@ -83,9 +83,9 @@ public class RobotContainerParkingLot implements Glassy {
 
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
         final Async async = asyncFactory.get();
-        driverControl = new DriverControlProxy(async);
+        driverControl = new DriverControlProxy(driveLogger, async);
         operatorControl = new OperatorControlProxy(async);
-        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
 
         m_modules = SwerveModuleCollection.get(
                 logger,

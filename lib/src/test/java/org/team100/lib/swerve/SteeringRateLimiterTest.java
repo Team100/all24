@@ -13,11 +13,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 class SteeringRateLimiterTest {
     private static final double kDelta = 0.001;
+    Logger logger = Telemetry.get().testLogger();
 
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
         SteeringRateLimiter c = new SteeringRateLimiter("foo", logger, l);
 
         double[] prev_vx = new double[] { 0 };
@@ -43,8 +43,7 @@ class SteeringRateLimiterTest {
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2(logger);
         SteeringRateLimiter c = new SteeringRateLimiter("foo", logger, l);
 
         double[] prev_vx = new double[] { 0 };

@@ -32,7 +32,7 @@ class AnglePositionServoTest {
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         double maxVel = 1;
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         OnboardPositionServo<Angle100> servo = new OnboardPositionServo<>(
                 name,
                 logger,
@@ -59,7 +59,7 @@ class AnglePositionServoTest {
         CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
                 externalEncoder, 1.0, builtInEncoder);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
 
         OutboardPositionServo<Angle100> servo = new OutboardPositionServo<>(
                 name,

@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -29,8 +31,8 @@ class DrivePursuitControllerTest {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
-
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
+    private static final Logger logger = Telemetry.get().testLogger();
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(logger);
 
     @Test
     void testPursuit() {
@@ -66,7 +68,7 @@ class DrivePursuitControllerTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
-        DrivePursuitController controller = new DrivePursuitController(kSmoothKinematicLimits);
+        DrivePursuitController controller = new DrivePursuitController(logger, kSmoothKinematicLimits);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
@@ -135,7 +137,7 @@ class DrivePursuitControllerTest {
 
     @Test
     void testPreviewDt() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get(logger);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -185,7 +187,7 @@ class DrivePursuitControllerTest {
 
     @Test
     void testNearPreviewDt() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get(logger);
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));

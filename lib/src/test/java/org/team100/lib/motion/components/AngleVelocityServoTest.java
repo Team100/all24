@@ -15,7 +15,7 @@ class AngleVelocityServoTest {
         String name = "test";
         MockVelocityMotor100<Angle100> motor = new MockVelocityMotor100<>();
         MockEncoder100<Angle100> encoder = new MockEncoder100<>();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         OutboardVelocityServo<Angle100> servo = new OutboardVelocityServo<>(
                 name,
                 logger,

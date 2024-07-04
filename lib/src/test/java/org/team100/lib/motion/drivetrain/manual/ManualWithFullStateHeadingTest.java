@@ -28,6 +28,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 class ManualWithFullStateHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
+    Logger logger = Telemetry.get().testLogger();
 
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
 
@@ -35,9 +36,8 @@ class ManualWithFullStateHeadingTest {
     void testModeSwitching() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
                 logger,
@@ -68,9 +68,8 @@ class ManualWithFullStateHeadingTest {
     void testNotSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
                 logger,
@@ -107,9 +106,8 @@ class ManualWithFullStateHeadingTest {
     void testSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
                 logger,
@@ -184,9 +182,8 @@ class ManualWithFullStateHeadingTest {
     void testSnapHeld() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
                 logger,
@@ -251,11 +248,9 @@ class ManualWithFullStateHeadingTest {
     void testStickyHeading() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        Logger logger = Telemetry.get().rootLogger("foo");
-
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
                 logger,
@@ -311,10 +306,9 @@ class ManualWithFullStateHeadingTest {
     void testStickyHeading2() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 "foo",
                 logger,
@@ -371,7 +365,7 @@ class ManualWithFullStateHeadingTest {
      */
     @Test
     void testProfile() {
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         // trapezoid adapts to max actual speed
         double kRotationSpeed = 0.5;
         assertEquals(1.414, swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed, kDelta);

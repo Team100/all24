@@ -123,10 +123,15 @@ public class RobotContainer implements Glassy {
 
         m_name = Names.name(this);
         final Logger logger = Telemetry.get().rootLogger(this);
+        final Logger driveLogger = Telemetry.get().namedRootLogger("DRIVE");
+        final Logger shooterLogger = Telemetry.get().namedRootLogger("SHOOTER");
+        final Logger intakeLogger = Telemetry.get().namedRootLogger("INTAKE");
+        final Logger ampLogger = Telemetry.get().namedRootLogger("AMP");
+        final Logger climberLogger = Telemetry.get().namedRootLogger("CLIMBER");
 
-        final DriverControl driverControl = new DriverControlProxy(async);
+        final DriverControl driverControl = new DriverControlProxy(driveLogger, async);
         final OperatorControl operatorControl = new OperatorControlProxy(async);
-        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
 
         final SensorInterface m_sensors;
         switch (Identity.instance) {
@@ -168,8 +173,6 @@ public class RobotContainer implements Glassy {
         FireControl fireControl = new FireControl() {
         };
 
-        final Logger driveLogger = Telemetry.get().namedRootLogger("DRIVE");
-
         final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 driveLogger,
@@ -191,10 +194,8 @@ public class RobotContainer implements Glassy {
                 driverControl::speed);
         cameraUpdater = new CameraUpdater(() -> poseEstimator.getEstimatedPosition().pose(), m_layout);
 
-        final Logger shooterLogger = Telemetry.get().namedRootLogger("SHOOTER");
         final FeederSubsystem m_feeder = new FeederSubsystem(shooterLogger, m_sensors);
 
-        final Logger intakeLogger = Telemetry.get().namedRootLogger("INTAKE");
         final Intake m_intake = new Intake(intakeLogger, m_sensors);
 
         m_shooter = new DrumShooter(shooterLogger, 3, 13, 27, 58, 100);
@@ -212,11 +213,9 @@ public class RobotContainer implements Glassy {
                 m_shooter,
                 visionDataProvider);
 
-        final Logger ampLogger = Telemetry.get().namedRootLogger("AMP");
         m_ampFeeder = new AmpFeeder(ampLogger);
         m_ampPivot = new AmpPivot(ampLogger);
 
-        final Logger climberLogger = Telemetry.get().namedRootLogger("CLIMBER");
         final ClimberSubsystem m_climber = new ClimberSubsystem(climberLogger, 60, 61);
 
         ////////////////////////////

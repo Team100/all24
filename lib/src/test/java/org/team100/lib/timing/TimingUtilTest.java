@@ -17,6 +17,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 import org.team100.lib.trajectory.Trajectory100;
 
@@ -26,8 +28,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
 public class TimingUtilTest {
-
     public static final double kTestEpsilon = 1e-12;
+    Logger logger = Telemetry.get().testLogger();
 
     public static final List<Pose2dWithMotion> kWaypoints = Arrays.asList(
             new Pose2dWithMotion(new Pose2d(new Translation2d(0.0, 0.0), GeometryUtil.kRotationZero)),
@@ -172,7 +174,7 @@ public class TimingUtilTest {
     void testCentripetalConstraint() {
         Path100 traj = new Path100(kWaypoints);
         PathDistanceSampler sampler = new PathDistanceSampler(traj);
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get(logger);
 
         // Triangle profile.
         Trajectory100 timed_traj = buildAndCheckTrajectory(sampler,

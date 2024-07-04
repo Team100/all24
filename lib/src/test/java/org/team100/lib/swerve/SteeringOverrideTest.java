@@ -14,11 +14,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SteeringOverrideTest {
     private static final double kDelta = 0.001;
+    Logger logger = Telemetry.get().testLogger();
 
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
         SteeringOverride c = new SteeringOverride("foo", logger, l);
 
         SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
@@ -40,8 +40,7 @@ class SteeringOverrideTest {
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2();
-        Logger logger = Telemetry.get().rootLogger("foo");
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2(logger);
         SteeringOverride c = new SteeringOverride("foo", logger, l);
 
         SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {

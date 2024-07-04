@@ -12,6 +12,8 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -22,7 +24,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 
 class StraightLineTrajectoryTest {
     private static final double kDelta = 0.001;
-    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+    Logger logger = Telemetry.get().testLogger();
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     TrajectoryMaker maker = new TrajectoryMaker(constraints);
 

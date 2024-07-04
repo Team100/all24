@@ -42,7 +42,7 @@ class PositionProfileTest implements Timeless {
     @Test
     void testTrapezoid() {
         Profile100 profile = new ProfileWPI(1, 1);
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         servo = new OnboardPositionServo<>(
                 name,
                 logger,
@@ -60,7 +60,7 @@ class PositionProfileTest implements Timeless {
     @Test
     void testProfile() {
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         servo = new OnboardPositionServo<>(
                 name,
                 logger,

@@ -40,6 +40,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     }
 
     public static HolonomicDriveController3 withTolerance(
+            Logger parent,
             double cartesianPosition,
             double cartesianVelocity,
             double rotationPosition,
@@ -50,7 +51,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         y.setTolerance(cartesianPosition, cartesianVelocity);
         PIDController theta = theta();
         theta.setTolerance(rotationPosition, rotationVelocity);
-        return new HolonomicDriveController3(x, y, theta);
+        return new HolonomicDriveController3(parent, x, y, theta);
     }
 
     @Override

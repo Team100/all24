@@ -29,6 +29,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 class ManualWithProfiledHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
+    Logger logger = Telemetry.get().testLogger();
 
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
 
@@ -36,13 +37,12 @@ class ManualWithProfiledHeadingTest {
     void testModeSwitching() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 logger,
@@ -74,13 +74,12 @@ class ManualWithProfiledHeadingTest {
     void testNotSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 logger,
@@ -118,14 +117,13 @@ class ManualWithProfiledHeadingTest {
     void testSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         // probably P is too high here.
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 logger,
@@ -197,13 +195,12 @@ class ManualWithProfiledHeadingTest {
     void testSnapHeld() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 logger,
@@ -267,14 +264,13 @@ class ManualWithProfiledHeadingTest {
     void testStickyHeading() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
         PIDController thetaController = new PIDController(0, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0);
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 logger,
@@ -331,7 +327,7 @@ class ManualWithProfiledHeadingTest {
     void testStickyHeading2() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         assertEquals(8.485, swerveKinodynamics.getMaxAngleAccelRad_S2(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
@@ -339,7 +335,6 @@ class ManualWithProfiledHeadingTest {
         PIDController thetaController = new PIDController(3.5, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
-        Logger logger = Telemetry.get().rootLogger("foo");
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 "foo",
                 logger,
@@ -402,7 +397,7 @@ class ManualWithProfiledHeadingTest {
      */
     @Test
     void testProfile() {
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         // trapezoid adapts to max actual speed
         double kRotationSpeed = 0.5;
         assertEquals(1.414, swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed, kDelta);

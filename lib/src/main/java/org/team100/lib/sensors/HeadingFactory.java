@@ -28,7 +28,7 @@ public class HeadingFactory {
                     // this seems only to be a problem in some test or
                     // simulation scenarios.
                     // System.loadLibrary("vmxHaljni");
-                    Gyro100 ahrsclass = new GyroFactory(Identity.instance, asyncFactory).get();
+                    Gyro100 ahrsclass = new GyroFactory(Identity.instance, asyncFactory).get(parent);
                     return new Heading(parent, ahrsclass);
                 } catch (UnsatisfiedLinkError e) {
                     // fall back to simulated heading for testing.

@@ -32,7 +32,7 @@ class AnglePositionServoProfileTest {
         controller2.enableContinuousInput(-Math.PI, Math.PI);
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        Logger logger = Telemetry.get().rootLogger("foo");
+        Logger logger = Telemetry.get().testLogger();
         servo = new OnboardPositionServo<>(
                 name,
                 logger,

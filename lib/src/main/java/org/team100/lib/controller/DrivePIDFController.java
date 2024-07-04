@@ -29,6 +29,7 @@ public class DrivePIDFController implements DriveMotionController {
     private final String m_name;
     private final double m_kPCart;
     private final double m_kPTheta;
+    private final DriveMotionControllerUtil m_util;
 
     private TrajectoryTimeIterator m_iter;
     private double m_prevTimeS;
@@ -44,6 +45,7 @@ public class DrivePIDFController implements DriveMotionController {
         m_kPTheta = kPTheta;
         m_name = Names.name(this);
         m_logger = parent.child(this);
+        m_util = new DriveMotionControllerUtil(m_logger);
     }
 
     @Override
@@ -71,13 +73,13 @@ public class DrivePIDFController implements DriveMotionController {
         SmartDashboard.putNumber("setpointX", setpoint.state().getPose().getX());
         m_logger.log(Level.DEBUG, "setpoint", setpoint);
 
-        ChassisSpeeds u_FF = DriveMotionControllerUtil.feedforward(measurement, setpoint);
+        ChassisSpeeds u_FF = m_util.feedforward(measurement, setpoint);
         if (m_feedforwardOnly)
             return u_FF;
 
         ChassisSpeeds u_FB;
         if (Experiments.instance.enabled(Experiment.FullStateTrajectoryFollower)) {
-            u_FB = DriveMotionControllerUtil.fullFeedback(
+            u_FB = m_util.fullFeedback(
                     measurement,
                     setpoint,
                     m_kPCart,
@@ -86,7 +88,7 @@ public class DrivePIDFController implements DriveMotionController {
                     kPCartV,
                     kPThetaV);
         } else {
-            u_FB = DriveMotionControllerUtil.feedback(
+            u_FB = m_util.feedback(
                     measurement,
                     setpoint,
                     m_kPCart,
