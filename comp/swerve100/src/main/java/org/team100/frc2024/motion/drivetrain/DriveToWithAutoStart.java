@@ -5,8 +5,8 @@ import java.util.List;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -29,8 +29,7 @@ public class DriveToWithAutoStart extends Command100 {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 5;
-    
-    private final Telemetry t = Telemetry.get();
+
     private final SwerveDriveSubsystem m_swerve;
     private final Pose2d m_goalWaypoint;
     private final Rotation2d m_goalHeading;
@@ -38,11 +37,13 @@ public class DriveToWithAutoStart extends Command100 {
     private final List<TimingConstraint> m_constraints;
 
     public DriveToWithAutoStart(
+            Logger parent,
             SwerveDriveSubsystem swerve,
             Pose2d goalWaypoint,
             Rotation2d goalHeading,
             DriveMotionController controller,
             List<TimingConstraint> constraints) {
+        super(parent);
         m_swerve = swerve;
         m_goalWaypoint = goalWaypoint;
         m_goalHeading = goalHeading;
@@ -94,7 +95,7 @@ public class DriveToWithAutoStart extends Command100 {
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
+        m_logger.log(Level.DEBUG, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeedsNormally(output, dt);
     }

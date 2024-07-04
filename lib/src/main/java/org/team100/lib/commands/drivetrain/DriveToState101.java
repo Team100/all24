@@ -6,8 +6,8 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -30,8 +30,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class DriveToState101 extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
-    
-    private final Telemetry t = Telemetry.get();
+
     private final Pose2d m_goal;
     private final FieldRelativeVelocity m_endVelocity;
     private final SwerveDriveSubsystem m_swerve;
@@ -39,11 +38,13 @@ public class DriveToState101 extends Command100 {
     private final List<TimingConstraint> m_constraints;
 
     public DriveToState101(
+            Logger parent,
             Pose2d goal,
             FieldRelativeVelocity endVelocity,
             SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             List<TimingConstraint> constraints) {
+        super(parent);
         m_goal = goal;
         m_endVelocity = endVelocity;
         m_swerve = drivetrain;
@@ -93,7 +94,7 @@ public class DriveToState101 extends Command100 {
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
+        m_logger.log(Level.DEBUG, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }

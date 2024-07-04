@@ -12,8 +12,8 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class ShootSmartWithRotation extends Command100 {
-    private final Telemetry t = Telemetry.get();
     private final DrumShooter m_shooter;
     private final SwerveDriveSubsystem m_drive;
     private final ManualWithShooterLock m_driver;
@@ -30,12 +29,14 @@ public class ShootSmartWithRotation extends Command100 {
     private final Supplier<DriverControl.Velocity> m_twistSupplier;
 
     public ShootSmartWithRotation(
+            Logger parent,
             SwerveDriveSubsystem drive,
             DrumShooter shooter,
             FeederSubsystem feeder,
             Intake intake,
             ManualWithShooterLock driver,
             Supplier<DriverControl.Velocity> twistSupplier) {
+        super(parent);
         m_shooter = shooter;
         m_drive = drive;
         m_intake = intake;
@@ -62,9 +63,9 @@ public class ShootSmartWithRotation extends Command100 {
         Translation2d speakerLocation = ShooterUtil.getSpeakerTranslation(alliance.get());
         Translation2d difference = robotLocation.minus(speakerLocation);
         double angle = MathUtil.angleModulus(Math.atan2(difference.getY(), difference.getX()) - Math.PI);
-        t.log(Level.DEBUG, m_name, "angle", angle);
+        m_logger.logDouble(Level.DEBUG, "angle", () -> angle);
         double angleModulus = MathUtil.angleModulus(m_drive.getState().pose().getRotation().getRadians());
-        t.log(Level.DEBUG, m_name, "realangle", angleModulus);
+        m_logger.logDouble(Level.DEBUG, "realangle", () -> angleModulus);
         double angleError = angle - angleModulus;
         double distance = robotLocation.getDistance(speakerLocation);
         m_shooter.setAngle(ShooterUtil.getAngleRad(distance));

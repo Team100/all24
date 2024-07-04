@@ -10,8 +10,8 @@ import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -28,7 +28,6 @@ import edu.wpi.first.math.geometry.Pose2d;
  * essentially like ignoring cross-track error.
  */
 public class PermissiveTrajectoryListCommand extends Command100 {
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final List<Function<Pose2d, Trajectory100>> m_trajectories;
@@ -39,9 +38,11 @@ public class PermissiveTrajectoryListCommand extends Command100 {
     private boolean m_aligned;
 
     public PermissiveTrajectoryListCommand(
+            Logger parent,
             SwerveDriveSubsystem swerve,
             HolonomicFieldRelativeController controller,
             List<Function<Pose2d, Trajectory100>> trajectories) {
+        super(parent);
         m_swerve = swerve;
         m_controller = controller;
         m_trajectories = trajectories;
@@ -87,7 +88,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
 
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            t.log(Level.TRACE, m_name, "reference", reference);
+            m_logger.log(Level.TRACE, "reference", reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
@@ -103,7 +104,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
 
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            t.log(Level.TRACE, m_name, "reference", reference);
+            m_logger.log(Level.TRACE, "reference", reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }

@@ -2,9 +2,8 @@ package org.team100.lib.swerve;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -17,13 +16,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class SteeringRateLimiter implements Glassy {
     private static final int kMaxIterations = 10;
-    
-    private final Telemetry t = Telemetry.get();
-    private final SwerveKinodynamics m_limits;
-    private final String m_name;
 
-    public SteeringRateLimiter(String parent, SwerveKinodynamics limits) {
-        m_name = Names.append(parent, this);
+    private final Logger m_logger;
+    private final SwerveKinodynamics m_limits;
+
+    public SteeringRateLimiter(Logger parent, SwerveKinodynamics limits) {
+        m_logger = parent.child(this);
         m_limits = limits;
     }
 
@@ -55,7 +53,8 @@ public class SteeringRateLimiter implements Glassy {
                     kMaxIterations);
             min_s = Math.min(min_s, s);
         }
-        t.log(Level.DEBUG, m_name, "s", min_s);
+        double s = min_s;
+        m_logger.logDouble(Level.DEBUG, "s", () -> s);
         return min_s;
     }
 

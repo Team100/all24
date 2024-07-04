@@ -3,10 +3,9 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.motor.SimulatedMotor;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
@@ -18,8 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
  * use SimHooks.stepTimingAsync() in your tests.
  */
 public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final SimulatedMotor<T> m_motor;
     private final double m_reduction;
     private final double m_lowerLimit;
@@ -29,21 +27,18 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
     private double m_time = Timer.getFPGATimestamp();
 
     /**
-     * @param name       may not start with a slash
      * @param motor
      * @param reduction  ratio between motor and encoder
      * @param lowerLimit in m or rad
      * @param upperLimit in m or rad
      */
     public SimulatedEncoder(
-            String name,
+            Logger parent,
             SimulatedMotor<T> motor,
             double reduction,
             double lowerLimit,
             double upperLimit) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_reduction = reduction;
         m_lowerLimit = lowerLimit;
@@ -59,14 +54,14 @@ public class SimulatedEncoder<T extends Measure100> implements Encoder100<T> {
         m_position += m_rate * dt;
         m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
         m_time = now;
-        t.log(Level.TRACE, m_name, "position", m_position);
+        m_logger.logDouble(Level.TRACE,  "position",()-> m_position);
         return OptionalDouble.of(m_position);
     }
 
     @Override
     public OptionalDouble getRate() {
         double m_rate = m_motor.getVelocity() / m_reduction;
-        t.log(Level.TRACE, m_name, "rate", m_rate);
+        m_logger.logDouble(Level.TRACE,  "rate",()-> m_rate);
         return OptionalDouble.of(m_rate);
     }
 

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -20,8 +20,12 @@ import edu.wpi.first.math.geometry.Translation3d;
  * Static methods used to interpret camera input.
  */
 public class PoseEstimationHelper {
-    private static final String kName = PoseEstimationHelper.class.getSimpleName();
-    private static final Telemetry t = Telemetry.get();
+
+    private final Logger m_logger;
+
+    public PoseEstimationHelper(Logger parent) {
+        m_logger = parent.child(this.getClass());
+    }
 
     /**
      * Converts camera rotation to an object to a robot relative translation,
@@ -107,7 +111,7 @@ public class PoseEstimationHelper {
      * First calculates the distance to the tag. If it's closer than the threshold,
      * use the camera-derived tag rotation. If it's far, use the gyro.
      */
-    public static Pose3d getRobotPoseInFieldCoords(
+    public Pose3d getRobotPoseInFieldCoords(
             Transform3d cameraInRobotCoords,
             Pose3d tagInFieldCoords,
             Blip24 blip,
@@ -117,14 +121,14 @@ public class PoseEstimationHelper {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            t.log(Level.DEBUG, kName, "rotation_source", "CAMERA");
+            m_logger.log(Level.DEBUG, "rotation_source", "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        t.log(Level.DEBUG, kName, "rotation_source", "GYRO");
+        m_logger.log(Level.DEBUG, "rotation_source", "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -189,7 +193,7 @@ public class PoseEstimationHelper {
      *                                           use the real gyro than the getPose
      *                                           method.
      */
-    public static Pose3d getRobotPoseInFieldCoords(
+    public Pose3d getRobotPoseInFieldCoords(
             Transform3d cameraInRobotCoords,
             Pose3d tagInFieldCoords,
             Blip24 blip,
@@ -201,14 +205,14 @@ public class PoseEstimationHelper {
 
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
-        t.log(Level.DEBUG, kName, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
-        t.log(Level.DEBUG, kName, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
+        m_logger.log(Level.DEBUG, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
+        m_logger.log(Level.DEBUG, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
-        t.log(Level.DEBUG, kName, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
+        m_logger.log(Level.DEBUG, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -218,7 +222,7 @@ public class PoseEstimationHelper {
                 tagInCameraCoords,
                 tagInFieldCoords);
 
-        t.log(Level.DEBUG, kName, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
+        m_logger.log(Level.DEBUG, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
                 cameraInFieldCoords,
@@ -322,8 +326,5 @@ public class PoseEstimationHelper {
         Translation3d t = PoseEstimationHelper.blipToTranslation(blip);
         return cameraInRobotCoordinates.plus(
                 new Transform3d(t, GeometryUtil.kRotation3Zero));
-    }
-
-    private PoseEstimationHelper() {
     }
 }

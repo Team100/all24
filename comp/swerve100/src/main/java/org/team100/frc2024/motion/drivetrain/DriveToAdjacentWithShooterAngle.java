@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -34,7 +34,6 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
 
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final Translation2d m_goalTranslation;
     private final DriveMotionController m_controller;
@@ -42,11 +41,13 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     private final double kShooterScale;
 
     public DriveToAdjacentWithShooterAngle(
+            Logger parent,
             SwerveDriveSubsystem swerve,
             Translation2d goalTranslation,
             DriveMotionController controller,
             List<TimingConstraint> constraints,
             double shooterScale) {
+        super(parent);
         m_swerve = swerve;
         m_goalTranslation = goalTranslation;
         m_controller = controller;
@@ -95,7 +96,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
+        m_logger.log(Level.DEBUG, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.geometry.Vector2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,6 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SlipperyTireUtilTest {
     private static final double kDelta = 0.001;
+    Logger logger = Telemetry.get().testLogger();
 
     // radius is sqrt(2)/2
     SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
@@ -91,8 +94,11 @@ class SlipperyTireUtilTest {
         check(0, 0, vecs[2]);
         check(0, 0, vecs[3]);
 
+        Tire t = new Tire(logger, 10.0, 0.1);
+        SlipperyTireUtil u = new SlipperyTireUtil(logger, t);
+
         // using the util
-        Vector2d[] corners = SlipperyTireUtil.cornerDeltas(kinematics, pose0, pose1);
+        Vector2d[] corners = u.cornerDeltas(kinematics, pose0, pose1);
         check(0, 0, corners[0]);
         check(0, 0, corners[1]);
         check(0, 0, corners[2]);
@@ -166,8 +172,11 @@ class SlipperyTireUtilTest {
         check(0.02, 0, vecs[2]);
         check(0.02, 0, vecs[3]);
 
+        Tire t = new Tire(logger, 10.0, 0.1);
+        SlipperyTireUtil u = new SlipperyTireUtil(logger, t);
+
         // using the util
-        Vector2d[] corners = SlipperyTireUtil.cornerDeltas(kinematics, pose0, pose1);
+        Vector2d[] corners = u.cornerDeltas(kinematics, pose0, pose1);
         check(0.02, 0, corners[0]);
         check(0.02, 0, corners[1]);
         check(0.02, 0, corners[2]);
@@ -242,8 +251,11 @@ class SlipperyTireUtilTest {
         check(-0.01, -0.01, vecs[2]);
         check(0.01, -0.01, vecs[3]);
 
+        Tire t = new Tire(logger, 10.0, 0.1);
+        SlipperyTireUtil u = new SlipperyTireUtil(logger, t);
+
         // using the util
-        Vector2d[] corners = SlipperyTireUtil.cornerDeltas(kinematics, pose0, pose1);
+        Vector2d[] corners = u.cornerDeltas(kinematics, pose0, pose1);
         check(-0.01, 0.01, corners[0]);
         check(0.01, 0.01, corners[1]);
         check(-0.01, -0.01, corners[2]);
@@ -256,8 +268,10 @@ class SlipperyTireUtilTest {
         Pose2d pose0 = new Pose2d();
         Pose2d pose1 = new Pose2d();
         final double dtSeconds = 0.02;
+        Tire t = new Tire(logger, 10.0, 0.1);
+        SlipperyTireUtil u = new SlipperyTireUtil(logger, t);
         // corners are not moving
-        Vector2d[] corners = SlipperyTireUtil.cornerDeltas(kinematics, pose0, pose1);
+        Vector2d[] corners = u.cornerDeltas(kinematics, pose0, pose1);
         // but now there's some odometry showing 1 m/s (!)
         SwerveModulePosition[] deltas = new SwerveModulePosition[] {
                 new SwerveModulePosition(0.02, new Rotation2d()),
@@ -265,8 +279,6 @@ class SlipperyTireUtilTest {
                 new SwerveModulePosition(0.02, new Rotation2d()),
                 new SwerveModulePosition(0.02, new Rotation2d())
         };
-        Tire t = new Tire(10.0, 0.1);
-        SlipperyTireUtil u = new SlipperyTireUtil(t);
         SwerveModulePosition[] adjusted = u.adjust(corners, dtSeconds, deltas, dtSeconds);
         // we wanted to go 1 m/s but this is 50m/s/s of accel
         // which is way beyond the 10 m/s/s limit.
@@ -283,7 +295,9 @@ class SlipperyTireUtilTest {
         Pose2d pose0 = new Pose2d();
         Pose2d pose1 = new Pose2d(new Translation2d(0.02, 0), new Rotation2d());
         final double dtSeconds = 0.02;
-        Vector2d[] corners = SlipperyTireUtil.cornerDeltas(kinematics, pose0, pose1);
+        Tire t = new Tire(logger, 10.0, 0.1);
+        SlipperyTireUtil u = new SlipperyTireUtil(logger, t);
+        Vector2d[] corners = u.cornerDeltas(kinematics, pose0, pose1);
         // now lock the wheels
         SwerveModulePosition[] deltas = new SwerveModulePosition[] {
                 new SwerveModulePosition(0, new Rotation2d()),
@@ -291,9 +305,6 @@ class SlipperyTireUtilTest {
                 new SwerveModulePosition(0, new Rotation2d()),
                 new SwerveModulePosition(0, new Rotation2d())
         };
-
-        Tire t = new Tire(10.0, 0.1);
-        SlipperyTireUtil u = new SlipperyTireUtil(t);
         SwerveModulePosition[] adjusted = u.adjust(corners, dtSeconds, deltas, dtSeconds);
         // as above we are trying for 50 m/s/s but we get 10.
         // so slide along, instead of 0.02 go 0.016

@@ -19,6 +19,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,6 +28,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 class ManualWithFullStateHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
+    Logger logger = Telemetry.get().testLogger();
 
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
 
@@ -33,15 +36,14 @@ class ManualWithFullStateHeadingTest {
     void testModeSwitching() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
 
@@ -65,15 +67,14 @@ class ManualWithFullStateHeadingTest {
     void testNotSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         Pose2d currentPose = GeometryUtil.kPoseZero;
 
@@ -103,15 +104,14 @@ class ManualWithFullStateHeadingTest {
     void testSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         // facing +x
         Pose2d currentPose = GeometryUtil.kPoseZero;
@@ -179,15 +179,14 @@ class ManualWithFullStateHeadingTest {
     void testSnapHeld() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         // currently facing +x
         Pose2d currentPose = GeometryUtil.kPoseZero;
@@ -245,16 +244,15 @@ class ManualWithFullStateHeadingTest {
     void testStickyHeading() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         // driver rotates a bit
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
@@ -303,16 +301,15 @@ class ManualWithFullStateHeadingTest {
     void testStickyHeading2() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier,
-                new double[]{1.0, 1.0});
+                new double[] { 1.0, 1.0 });
 
         // driver rotates a bit
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
@@ -362,7 +359,7 @@ class ManualWithFullStateHeadingTest {
      */
     @Test
     void testProfile() {
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         // trapezoid adapts to max actual speed
         double kRotationSpeed = 0.5;
         assertEquals(1.414, swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed, kDelta);

@@ -3,9 +3,8 @@ package org.team100.frc2024.motion;
 import org.team100.frc2024.SensorInterface;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,13 +13,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Feeder feeds the shooter.
  */
 public class FeederSubsystem extends SubsystemBase implements Glassy {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     // this uses PWMSparkMax instead of PWM to get MotorSafety.
     private final PWMSparkMax feedRoller;
     private final SensorInterface m_sensors;
-    public FeederSubsystem(SensorInterface sensors) {
-        m_name = Names.name(this);
+
+    public FeederSubsystem(Logger parent, SensorInterface sensors) {
+        m_logger = parent.child(this);
         switch (Identity.instance) {
             case COMP_BOT:
                 feedRoller = new PWMSparkMax(3);
@@ -60,7 +59,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, m_name, "speed", feedRoller.get());
+        m_logger.logDouble(Level.DEBUG, "speed", feedRoller::get);
     }
 
     @Override

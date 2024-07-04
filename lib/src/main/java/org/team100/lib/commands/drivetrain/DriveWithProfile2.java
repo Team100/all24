@@ -10,6 +10,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -40,10 +41,12 @@ public class DriveWithProfile2 extends Command100 {
     private State100 m_thetaGoalRaw;
 
     public DriveWithProfile2(
+            Logger parent,
             Supplier<Pose2d> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
+        super(parent);
         m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;
         m_controller = controller;

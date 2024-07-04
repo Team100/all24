@@ -17,6 +17,8 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +36,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 
 class SwerveDrivePoseEstimator100Test {
     private static final double kDelta = 0.001;
+    private static final Logger logger = Telemetry.get().testLogger();
     private final SwerveModulePosition p0 = new SwerveModulePosition(0, GeometryUtil.kRotationZero);
     private final SwerveModulePosition[] positionZero = new SwerveModulePosition[] { p0, p0, p0, p0 };
     private final SwerveModulePosition p01 = new SwerveModulePosition(0.1, GeometryUtil.kRotationZero);
@@ -56,7 +59,7 @@ class SwerveDrivePoseEstimator100Test {
     void outOfOrder() {
         // out of order odometry?
         // no tire slip
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 GeometryUtil.kRotationZero,
                 positionZero,
@@ -125,7 +128,7 @@ class SwerveDrivePoseEstimator100Test {
     void outOfOrderWithSliding() {
         // out of order odometry?
         // use a reasonable max accel.
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTestWithSlip();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTestWithSlip(logger);
         Experiments.instance.testOverride(Experiment.SlipperyTires, true);
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 GeometryUtil.kRotationZero,
@@ -196,7 +199,7 @@ class SwerveDrivePoseEstimator100Test {
     void minorWeirdness() {
         // weirdness with out-of-order vision updates
         // no wheel slip
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 GeometryUtil.kRotationZero,
                 positionZero,
@@ -265,7 +268,7 @@ class SwerveDrivePoseEstimator100Test {
     void test0105() {
         // this is the current (post-comp 2024) base case.
         // within a few frames, the estimate converges on the vision input.
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 GeometryUtil.kRotationZero,
                 positionZero,
@@ -290,7 +293,7 @@ class SwerveDrivePoseEstimator100Test {
     @Test
     void test0110() {
         // double vision stdev (r) -> slower convergence
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 GeometryUtil.kRotationZero,
                 positionZero,
@@ -316,7 +319,7 @@ class SwerveDrivePoseEstimator100Test {
     void test00505() {
         // half odo stdev (q) -> slower convergence
         // the K is q/(q+qr) so it's q compared to r that matters.
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 GeometryUtil.kRotationZero,
                 positionZero,
@@ -344,7 +347,7 @@ class SwerveDrivePoseEstimator100Test {
         // actual odometry error is very low
         // measured camera error is something under 10 cm
         // these yield much slower convergence, maybe too slow? try and see.
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 GeometryUtil.kRotationZero,
                 positionZero,
@@ -375,7 +378,7 @@ class SwerveDrivePoseEstimator100Test {
     @Test
     void testAccuracyFacingTrajectory() {
         // no wheel slip
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
 
         var fl = new SwerveModulePosition();
         var fr = new SwerveModulePosition();
@@ -383,6 +386,7 @@ class SwerveDrivePoseEstimator100Test {
         var br = new SwerveModulePosition();
 
         var estimator = new SwerveDrivePoseEstimator100(
+                logger,
                 kinodynamics,
                 new Rotation2d(),
                 new SwerveModulePosition[] { fl, fr, bl, br },
@@ -421,7 +425,7 @@ class SwerveDrivePoseEstimator100Test {
     @Test
     void testBadInitialPose() {
         // no wheel slip
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
 
         var fl = new SwerveModulePosition();
         var fr = new SwerveModulePosition();
@@ -431,6 +435,7 @@ class SwerveDrivePoseEstimator100Test {
         // estimator initial pose is at (-1,-1) rotated 60 degrees to the right.
 
         var estimator = new SwerveDrivePoseEstimator100(
+                logger,
                 kinodynamics,
                 new Rotation2d(),
                 new SwerveModulePosition[] { fl, fr, bl, br },
@@ -598,7 +603,7 @@ class SwerveDrivePoseEstimator100Test {
         // measurements, the
         // estimated pose would converge to that measurement.
 
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
 
         var fl = new SwerveModulePosition();
         var fr = new SwerveModulePosition();
@@ -606,6 +611,7 @@ class SwerveDrivePoseEstimator100Test {
         var br = new SwerveModulePosition();
 
         var estimator = new SwerveDrivePoseEstimator100(
+                logger,
                 kinodynamics,
                 new Rotation2d(),
                 new SwerveModulePosition[] { fl, fr, bl, br },
@@ -648,8 +654,9 @@ class SwerveDrivePoseEstimator100Test {
 
     @Test
     void testDiscardsOldVisionMeasurements() {
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest();
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
         var estimator = new SwerveDrivePoseEstimator100(
+                logger,
                 kinodynamics,
                 new Rotation2d(),
                 new SwerveModulePosition[] {

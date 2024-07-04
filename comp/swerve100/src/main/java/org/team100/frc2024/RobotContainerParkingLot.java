@@ -20,6 +20,7 @@ import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -37,6 +38,8 @@ import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.Monitor;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
@@ -55,7 +58,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * This is stuff cut out of RobotContainer, so that the compiler will still see
  * it, but so that it's not in the prod robot execution path at all.
  */
-public class RobotContainerParkingLot {
+public class RobotContainerParkingLot implements Glassy {
     // for background on drive current limits:
     // https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/talonfx/improving-performance-with-current-limits.html
     // https://www.chiefdelphi.com/t/the-brushless-era-needs-sensible-default-current-limits/461056/51
@@ -75,18 +78,24 @@ public class RobotContainerParkingLot {
      * rot.
      */
     RobotContainerParkingLot(TimedRobot100 robot) {
+        final Logger logger = Telemetry.get().rootLogger(this);
+        final Logger driveLogger = Telemetry.get().namedRootLogger("DRIVE");
+
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
         final Async async = asyncFactory.get();
-        driverControl = new DriverControlProxy(async);
+        driverControl = new DriverControlProxy(driveLogger, async);
         operatorControl = new OperatorControlProxy(async);
-        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
+
         m_modules = SwerveModuleCollection.get(
+                logger,
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics,
                 async);
         SwerveModuleVisualization.make(m_modules, async);
         m_heading = HeadingFactory.get(
+                logger,
                 swerveKinodynamics,
                 m_modules,
                 asyncFactory);
@@ -97,8 +106,9 @@ public class RobotContainerParkingLot {
                 Timer.getFPGATimestamp(),
                 VecBuilder.fill(0.1, 0.1, 0.1),
                 VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE)); // 0.1 0.1
-        SwerveLocal swerveLocal = new SwerveLocal(swerveKinodynamics, m_modules);
+        SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
         m_drive = new SwerveDriveSubsystem(
+                driveLogger,
                 m_heading,
                 poseEstimator,
                 swerveLocal,
@@ -115,11 +125,11 @@ public class RobotContainerParkingLot {
         // m_beep = new Beep();
         BooleanSupplier test = () -> driverControl.annunicatorTest() ||
                 m_beep.getOutput();
-        m_monitor = new Monitor(new Annunciator(6, async), test);
+        m_monitor = new Monitor(logger, new Annunciator(6, async), test);
         // The monitor runs less frequently than the control loop.
         robot.addPeriodic(m_monitor::periodic, 0.2, "monitor");
 
-        HolonomicDriveController3 controller = new HolonomicDriveController3();
+        HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
 
         ///////////////////////
 
@@ -127,7 +137,7 @@ public class RobotContainerParkingLot {
         // this should be a field.
         final DriveInALittleSquare m_driveInALittleSquare;
 
-        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
+        m_driveInALittleSquare = new DriveInALittleSquare(logger, m_drive);
         whileTrue(driverControl::never, m_driveInALittleSquare);
 
         ///////////////////////
@@ -137,9 +147,9 @@ public class RobotContainerParkingLot {
 
         ///////////////////////
 
-        whileTrue(driverControl::never, new DriveInACircle(m_drive, controller, -1));
-        whileTrue(driverControl::never, new Spin(m_drive, controller));
-        whileTrue(driverControl::never, new Oscillate(m_drive));
+        whileTrue(driverControl::never, new DriveInACircle(logger, m_drive, controller, -1));
+        whileTrue(driverControl::never, new Spin(logger, m_drive, controller));
+        whileTrue(driverControl::never, new Oscillate(logger, m_drive));
 
         ////////////////////////
 
@@ -148,9 +158,10 @@ public class RobotContainerParkingLot {
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         // 254 PID follower
-        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF();
+        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF(logger);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
+                        logger,
                         goal,
                         m_drive,
                         drivePID,
@@ -161,10 +172,11 @@ public class RobotContainerParkingLot {
 
         // 254 FF follower
 
-        DriveMotionController driveFF = DriveMotionControllerFactory.ffOnly();
+        DriveMotionController driveFF = DriveMotionControllerFactory.ffOnly(logger);
 
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
+                        logger,
                         goal,
                         m_drive,
                         driveFF,
@@ -174,10 +186,11 @@ public class RobotContainerParkingLot {
         ///////////////////////
 
         // 254 Pursuit follower
-        DriveMotionController drivePP = DriveMotionControllerFactory.purePursuit(swerveKinodynamics);
+        DriveMotionController drivePP = DriveMotionControllerFactory.purePursuit(logger, swerveKinodynamics);
 
         whileTrue(driverControl::test,
                 new DriveToWaypoint100(
+                        logger,
                         goal,
                         m_drive,
                         drivePP,
@@ -186,6 +199,7 @@ public class RobotContainerParkingLot {
 
         whileTrue(driverControl::test,
                 new DriveToState101(
+                        logger,
                         goal,
                         new FieldRelativeVelocity(2, 0, 0),
                         m_drive,
@@ -196,9 +210,10 @@ public class RobotContainerParkingLot {
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
-        DriveMotionController driveRam = DriveMotionControllerFactory.ramsete();
+        DriveMotionController driveRam = DriveMotionControllerFactory.ramsete(logger);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
+                        logger,
                         goal,
                         m_drive,
                         driveRam,
@@ -213,34 +228,39 @@ public class RobotContainerParkingLot {
 
         // make a one-meter line
         whileTrue(driverControl::never,
-                new TrajectoryListCommand(m_drive, controller,
+                new TrajectoryListCommand(logger, m_drive, controller,
                         x -> List.of(maker.line(x))));
 
         // make a one-meter square
         whileTrue(driverControl::never,
-                new TrajectoryListCommand(m_drive, controller,
+                new TrajectoryListCommand(logger, m_drive, controller,
                         maker::square));
 
-        whileTrue(driverControl::test, new TrajectoryListCommand(m_drive, controller,
+        whileTrue(driverControl::test, new TrajectoryListCommand(logger, m_drive, controller,
                 null));
 
         // one-meter square with reset at the corners
         whileTrue(driverControl::never,
-                new PermissiveTrajectoryListCommand(m_drive, controller,
+                new PermissiveTrajectoryListCommand(logger, m_drive, controller,
                         maker.permissiveSquare()));
 
         // one-meter square with position and velocity feedback control
         whileTrue(driverControl::never,
-                new FullStateTrajectoryListCommand(m_drive,
+                new FullStateTrajectoryListCommand(logger, m_drive,
                         maker::square));
 
         // this should be a field.
-        final DrawSquare m_drawCircle = new DrawSquare(m_drive, controller);
+        final DrawSquare m_drawCircle = new DrawSquare(logger, m_drive, controller);
         whileTrue(driverControl::circle, m_drawCircle);
     }
 
     private void whileTrue(BooleanSupplier condition, Command command) {
         new Trigger(condition).whileTrue(command);
+    }
+
+    @Override
+    public String getGlassName() {
+        return "RobotContainer";
     }
 
 }

@@ -5,10 +5,9 @@ import java.util.function.DoubleSupplier;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.model.TorqueModel;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -21,8 +20,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
  */
 public abstract class Talon6Motor<T extends Measure100>
         implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
-    protected final Telemetry t = Telemetry.get();
-    protected final String m_name;
+    protected final Logger m_logger;
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
 
@@ -42,14 +40,14 @@ public abstract class Talon6Motor<T extends Measure100>
     private final PositionVoltage m_PositionVoltage = new PositionVoltage(0);
 
     protected Talon6Motor(
-            String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             double supplyLimit,
             double statorLimit,
             PIDConstants lowLevelVelocityConstants,
             Feedforward100 ff) {
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
         m_motor = new TalonFX(canId);
         m_ff = ff;
 
@@ -71,14 +69,14 @@ public abstract class Talon6Motor<T extends Measure100>
         m_stator = () -> m_motor.getStatorCurrent().refresh().getValueAsDouble();
         m_temp = () -> m_motor.getDeviceTemp().refresh().getValueAsDouble();
         m_torque = () -> m_motor.getTorqueCurrent().refresh().getValueAsDouble();
-        t.log(Level.TRACE, m_name, "Device ID", m_motor.getDeviceID());
+        m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceID());
     }
 
     @Override
     public void setDutyCycle(double output) {
         Phoenix100.warn(() -> m_motor.setControl(m_dutyCycleOut
                 .withOutput(output)));
-        t.log(Level.TRACE, m_name, "desired duty cycle [-1,1]", output);
+        m_logger.logDouble(Level.TRACE, "desired duty cycle [-1,1]", () -> output);
         log();
     }
 
@@ -105,12 +103,12 @@ public abstract class Talon6Motor<T extends Measure100>
                         .withVelocity(motorRev_S)
                         .withFeedForward(kFFVolts)));
 
-        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
-        t.log(Level.TRACE, m_name, "desired accel (rev_s2)", motorRev_S2);
-        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "accel feedforward (v)", accelFFVolts);
-        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
+        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
+        m_logger.logDouble(Level.TRACE, "desired accel (rev_s2)", () -> motorRev_S2);
+        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
+        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
+        m_logger.logDouble(Level.TRACE, "accel feedforward (v)", () -> accelFFVolts);
+        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
         log();
     }
 
@@ -140,11 +138,11 @@ public abstract class Talon6Motor<T extends Measure100>
                         .withPosition(motorRev)
                         .withFeedForward(kFFVolts)));
 
-        t.log(Level.TRACE, m_name, "desired position (rev)", motorRev);
-        t.log(Level.TRACE, m_name, "desired speed (rev_s)", motorRev_S);
-        t.log(Level.TRACE, m_name, "friction feedforward (v)", frictionFFVolts);
-        t.log(Level.TRACE, m_name, "velocity feedforward (v)", velocityFFVolts);
-        t.log(Level.TRACE, m_name, "torque feedforward (v)", torqueFFVolts);
+        m_logger.logDouble(Level.TRACE, "desired position (rev)", () -> motorRev);
+        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
+        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
+        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
+        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
         log();
     }
 
@@ -169,7 +167,7 @@ public abstract class Talon6Motor<T extends Measure100>
      * Set integrated sensor position in rotations.
      */
     public void setEncoderPosition(double motorPositionRev) {
-        Phoenix100.warn(()->m_motor.setPosition(motorPositionRev));
+        Phoenix100.warn(() -> m_motor.setPosition(motorPositionRev));
     }
 
     public double getVelocityRev_S() {
@@ -182,13 +180,13 @@ public abstract class Talon6Motor<T extends Measure100>
 
     protected void log() {
         // suppliers here are never touched in the non-logging case.
-        t.log(Level.TRACE, m_name, "velocity (rev_s)", m_velocity);
-        t.log(Level.TRACE, m_name, "output [-1,1]", m_dutyCycle);
-        t.log(Level.TRACE, m_name, "error (rev_s)", m_error);
-        t.log(Level.TRACE, m_name, "supply current (A)", m_supply);
-        t.log(Level.TRACE, m_name, "stator current (A)", m_stator);
-        t.log(Level.TRACE, m_name, "torque (Nm)", getMotorTorque());
-        t.log(Level.DEBUG, m_name, "temperature (C)", m_temp);
+        m_logger.logDouble(Level.TRACE, "velocity (rev_s)", m_velocity);
+        m_logger.logDouble(Level.TRACE, "output [-1,1]", m_dutyCycle);
+        m_logger.logDouble(Level.TRACE, "error (rev_s)", m_error);
+        m_logger.logDouble(Level.TRACE, "supply current (A)", m_supply);
+        m_logger.logDouble(Level.TRACE, "stator current (A)", m_stator);
+        m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
+        m_logger.logDouble(Level.DEBUG, "temperature (C)", m_temp);
     }
 
     private double getMotorTorque() {

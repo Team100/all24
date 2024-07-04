@@ -6,8 +6,8 @@ import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 /**
  * The built-in encoder in Neo motors.
@@ -16,22 +16,15 @@ import org.team100.lib.util.Names;
  * per turn.
  */
 public class NeoDriveEncoder implements SettableEncoder<Distance100> {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Telemetry.Logger m_logger;
     private final NeoDriveMotor m_motor;
     private final double m_distancePerTurn;
 
-    /**
-     * @param name            do not use a leading slash.
-     * @param distancePerTurn in meters
-     */
     public NeoDriveEncoder(
-            String name,
+            Logger parent,
             NeoDriveMotor motor,
             double distancePerTurn) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;
     }
@@ -72,8 +65,8 @@ public class NeoDriveEncoder implements SettableEncoder<Distance100> {
         // this is fast so we don't need to cache it
         double motorPositionRev = m_motor.getPositionRot();
         double positionM = motorPositionRev * m_distancePerTurn;
-        t.log(Level.TRACE, m_name, "motor position (rev)", motorPositionRev);
-        t.log(Level.DEBUG, m_name, "position (m)", positionM);
+        m_logger.logDouble(Level.TRACE, "motor position (rev)", ()->motorPositionRev);
+        m_logger.logDouble(Level.DEBUG, "position (m)",()-> positionM);
         return positionM;
     }
 
@@ -81,7 +74,7 @@ public class NeoDriveEncoder implements SettableEncoder<Distance100> {
         // raw velocity is in RPM
         // this is fast so we don't need to cache it
         double velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
-        t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
+        m_logger.logDouble(Level.DEBUG, "velocity (m_s)", ()->velocityM_S);
         return velocityM_S;
     }
 }

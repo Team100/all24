@@ -13,11 +13,10 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -32,14 +31,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     private static final double kDtSec = 0.02;
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
     private final MinTimeController m_controller;
-    private final String m_name;
     private final LinearFilter m_outputFilter;
 
     // package private for testing
@@ -57,20 +55,20 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      * @param omegaController
      */
     public ManualWithMinTimeHeading(
-            String parent,
+            Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Rotation2d> desiredRotation) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_desiredRotation = desiredRotation;
-        m_name = Names.append(parent, this);
+        m_logger = parent.child(this);
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
 
         // these parameters are total guesses
         m_controller = new MinTimeController(
-                m_name,
+                parent,
                 MathUtil::angleModulus,
                 15, // maxV
                 12, // switchingA
@@ -135,7 +133,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
-            t.log(Level.TRACE, m_name, "mode", "free");
+            m_logger.log(Level.TRACE, "mode", "free");
             // desaturate to feasibility
             return m_swerveKinodynamics.analyticDesaturation(twistM_S);
         }
@@ -167,6 +165,33 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_thetaSetpoint = m_controller.calculate(kDtSec, state.theta(), goalState);
 
         // the snap overrides the user input for omega.
+        final double thetaFF = getThetaFF();
+
+        final double omega = MathUtil.clamp(
+                thetaFF,
+                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
+
+        m_logger.log(Level.TRACE, "mode", "snap");
+        m_logger.logDouble(Level.TRACE, "goal/theta", () -> m_goal.getRadians());
+        m_logger.log(Level.TRACE, "setpoint/theta", m_thetaSetpoint);
+        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> headingMeasurement);
+        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> headingRate);
+        m_logger.logDouble(Level.TRACE, "error/theta", () -> m_thetaSetpoint.x() - headingMeasurement);
+        m_logger.logDouble(Level.TRACE, "error/omega", () -> m_thetaSetpoint.v() - headingRate);
+        m_logger.logDouble(Level.TRACE, "goal_error/theta", () -> m_thetaSetpoint.x() - goalState.x());
+        m_logger.logDouble(Level.TRACE, "goal_error/omega", () -> m_thetaSetpoint.v() - goalState.v());
+        m_logger.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);
+        m_logger.logDouble(Level.TRACE, "output/omega", () -> omega);
+
+        // desaturate the end result to feasibility by preferring the rotation over
+        // translation
+        twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
+        return twistWithSnapM_S;
+    }
+
+    private double getThetaFF() {
         double thetaFF = m_thetaSetpoint.v();
 
         if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
@@ -176,28 +201,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         if (Math.abs(thetaFF) < 0.05) {
             thetaFF = 0;
         }
-        double omega = MathUtil.clamp(
-                thetaFF,
-                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
-
-        t.log(Level.TRACE, m_name, "mode", "snap");
-        t.log(Level.TRACE, m_name, "goal/theta", m_goal.getRadians());
-        t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaSetpoint);
-        t.log(Level.TRACE, m_name, "measurement/theta", headingMeasurement);
-        t.log(Level.TRACE, m_name, "measurement/omega", headingRate);
-        t.log(Level.TRACE, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
-        t.log(Level.TRACE, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
-        t.log(Level.TRACE, m_name, "goal_error/theta", m_thetaSetpoint.x() - goalState.x());
-        t.log(Level.TRACE, m_name, "goal_error/omega", m_thetaSetpoint.v() - goalState.v());
-        t.log(Level.TRACE, m_name, "thetaFF", thetaFF);
-        t.log(Level.TRACE, m_name, "output/omega", omega);
-
-        // desaturate the end result to feasibility by preferring the rotation over
-        // translation
-        twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
-        return twistWithSnapM_S;
+        return thetaFF;
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,7 +27,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * Creates a profile to the translation of a note and follows it
  */
 public class DriveWithProfileNote extends Command100 {
-    private final Telemetry t = Telemetry.get();
 
     private final Intake m_intake;
 
@@ -37,6 +37,7 @@ public class DriveWithProfileNote extends Command100 {
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
+    private final Telemetry.Logger fieldLogger;
     private Optional<Translation2d> previousGoal;
     private State100 xSetpoint;
     private State100 ySetpoint;
@@ -44,11 +45,14 @@ public class DriveWithProfileNote extends Command100 {
     private int count;
 
     public DriveWithProfileNote(
+            Logger parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             FullStateDriveController controller,
             SwerveKinodynamics limits) {
+        super(parent);
+        fieldLogger = Telemetry.get().fieldLogger();
         previousGoal = null;
         count = 0;
         m_intake = intake;
@@ -87,7 +91,7 @@ public class DriveWithProfileNote extends Command100 {
         if (optGoal.isEmpty()) {
             if (previousGoal == null) {
                 m_swerve.setChassisSpeeds(new ChassisSpeeds(), dt);
-                t.log(Level.DEBUG, m_name, "Note detected", false);
+                m_logger.logBoolean(Level.DEBUG, "Note detected", false);
                 return;
             }
             optGoal = previousGoal;
@@ -100,7 +104,7 @@ public class DriveWithProfileNote extends Command100 {
         }
         Translation2d goal = optGoal.get();
 
-        t.log(Level.DEBUG, m_name, "Note detected", true);
+        m_logger.logBoolean(Level.DEBUG, "Note detected", true);
         Rotation2d rotationGoal;
         if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
             rotationGoal = new Rotation2d(
@@ -129,7 +133,7 @@ public class DriveWithProfileNote extends Command100 {
         SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
         FieldRelativeVelocity twistGoal = m_controller.calculate(m_swerve.getState(), goalState);
 
-        t.log(Level.DEBUG, "field", "target", new double[] {
+        fieldLogger.log(Level.DEBUG, "target", new double[] {
                 goal.getX(),
                 goal.getY(),
                 0 });

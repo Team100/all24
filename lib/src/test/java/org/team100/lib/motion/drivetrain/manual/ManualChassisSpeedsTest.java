@@ -7,16 +7,20 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class ManualChassisSpeedsTest {
     private static final double kDelta = 0.001;
+    Logger logger = Telemetry.get().testLogger();
 
     @Test
     void testChassisSpeedsZero() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", limits);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        Logger logger = Telemetry.get().testLogger();
+        ManualChassisSpeeds manual = new ManualChassisSpeeds(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
         ChassisSpeeds speeds = manual.apply(new SwerveState(), input);
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
@@ -26,10 +30,11 @@ class ManualChassisSpeedsTest {
 
     @Test
     void testChassisSpeedsNonzero() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(1, limits.getMaxDriveVelocityM_S(), kDelta);
         assertEquals(2.828, limits.getMaxAngleSpeedRad_S(), kDelta);
-        ManualChassisSpeeds manual = new ManualChassisSpeeds("foo", limits);
+        Logger logger = Telemetry.get().testLogger();
+        ManualChassisSpeeds manual = new ManualChassisSpeeds(logger, limits);
         // clipping to the unit circle, then desaturating.
         DriverControl.Velocity input = new DriverControl.Velocity(1, 2, 3);
         ChassisSpeeds speeds = manual.apply(new SwerveState(), input);

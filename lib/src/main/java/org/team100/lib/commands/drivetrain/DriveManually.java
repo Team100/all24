@@ -10,6 +10,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.NamedChooser;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -47,7 +48,11 @@ public class DriveManually extends Command100 {
 
     String currentManualMode = null;
 
-    public DriveManually(Supplier<DriverControl.Velocity> twistSupplier, SwerveDriveSubsystem robotDrive) {
+    public DriveManually(
+            Logger parent,
+            Supplier<DriverControl.Velocity> twistSupplier,
+            SwerveDriveSubsystem robotDrive) {
+        super(parent);
         m_mode = m_manualModeChooser::getSelected;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
@@ -135,7 +140,7 @@ public class DriveManually extends Command100 {
                 name,
                 new Driver() {
                     public void apply(SwerveState s, DriverControl.Velocity t, double dt) {
-                        m_drive.setChassisSpeeds(d.apply(s,t), dt);
+                        m_drive.setChassisSpeeds(d.apply(s, t), dt);
                     }
 
                     public void reset(Pose2d p) {

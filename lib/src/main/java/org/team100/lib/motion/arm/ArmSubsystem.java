@@ -7,10 +7,9 @@ import org.team100.lib.async.Async;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.Motor100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.util.Names;
 import org.team100.lib.visualization.ArmVisualization;
 
 import edu.wpi.first.math.MathUtil;
@@ -24,8 +23,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
 
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
     private final Motor100<Angle100> m_lowerArmMotor;
@@ -37,23 +35,19 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
 
     // use the factory to instantiate
     /**
-     * 
-     * @param name
      * @param lowerMotor
      * @param lowerEncoder Lower arm angle (radians), 0 up, positive forward.
      * @param upperMotor
      * @param upperEncoder Upper arm angle (radians), 0 up, positive forward.
      */
     ArmSubsystem(
-            String name,
+            Logger parent,
             Motor100<Angle100> lowerMotor,
             Encoder100<Angle100> lowerEncoder,
             Motor100<Angle100> upperMotor,
             Encoder100<Angle100> upperEncoder,
             Async async) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
@@ -78,7 +72,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         ArmAngles position = new ArmAngles(
                 MathUtil.angleModulus(m_lowerMeasurementFilter.calculate(lowerPosition.getAsDouble())),
                 MathUtil.angleModulus(m_upperMeasurementFilter.calculate(upperPosition.getAsDouble())));
-        t.log(Level.TRACE, m_name, "position", position);
+        m_logger.log(Level.TRACE,  "position", position);
         return Optional.of(position);
     }
 
@@ -91,7 +85,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         double th2 = position.get().th2 - m_previousPosition.th2;
         m_previousPosition = position.get();
         ArmAngles velocity = new ArmAngles(th1 * 50, th2 * 50);
-        t.log(Level.TRACE, m_name, "velocity", velocity);
+        m_logger.log(Level.TRACE,  "velocity", velocity);
         return Optional.of(velocity);
     }
 

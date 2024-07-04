@@ -8,8 +8,8 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
@@ -30,17 +30,18 @@ public class DriveWithWaypoints extends Command100 {
     private static final double start_vel = 0;
     private static final double end_vel = 0;
 
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> constraints;
     private final Supplier<List<Pose2d>> m_goal;
 
     public DriveWithWaypoints(
+            Logger parent,
             SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             SwerveKinodynamics limits,
             Supplier<List<Pose2d>> goal) {
+        super(parent);
         m_swerve = drivetrain;
         m_controller = controller;
         constraints = new TimingConstraintFactory(limits).allGood();
@@ -81,7 +82,7 @@ public class DriveWithWaypoints extends Command100 {
         Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
+        m_logger.log(Level.DEBUG, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }

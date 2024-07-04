@@ -4,10 +4,9 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.drive.NeoVortexDriveMotor;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 /**
  * The built-in encoder in Neo motors.
@@ -16,22 +15,18 @@ import org.team100.lib.util.Names;
  * per turn.
  */
 public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final NeoVortexDriveMotor m_motor;
     private final double m_distancePerTurn;
 
     /**
-     * @param name            do not use a leading slash.
      * @param distancePerTurn in meters
      */
     public NeoVortexDriveEncoder(
-            String name,
+            Logger parent,
             NeoVortexDriveMotor motor,
             double distancePerTurn) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;
     }
@@ -71,7 +66,7 @@ public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
         // raw position is in rotations
         // this is fast, doesn't need to be cached
         double positionM = m_motor.getPositionRot() * m_distancePerTurn;
-        t.log(Level.DEBUG, m_name, "position (m)", positionM);
+        m_logger.logDouble(Level.DEBUG, "position (m)", ()->positionM);
         return positionM;
     }
 
@@ -79,7 +74,7 @@ public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
         // raw velocity is in RPM
         // this is fast, doesn't need to be cached
         double velocityM_S = m_motor.getRateRPM() * m_distancePerTurn / 60;
-        t.log(Level.DEBUG, m_name, "velocity (m_s)", velocityM_S);
+        m_logger.logDouble(Level.DEBUG, "velocity (m_s)",()-> velocityM_S);
         return velocityM_S;
     }
 

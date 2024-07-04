@@ -3,8 +3,8 @@ package org.team100.lib.commands.drivetrain;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.SquareWave;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -18,12 +18,12 @@ public class Veering extends Command100 {
     private static final double kPeriod = 10;
     /** omega command in rad/s */
     private static final double kOmega = Math.PI;
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_swerve;
     private final SquareWave m_square;
     private final Timer m_timer;
 
-    public Veering(SwerveDriveSubsystem swerve) {
+    public Veering(Logger parent, SwerveDriveSubsystem swerve) {
+        super(parent);
         m_swerve = swerve;
         m_square = new SquareWave(kAmplitude, kPeriod);
         m_timer = new Timer();
@@ -41,7 +41,7 @@ public class Veering extends Command100 {
         double dx = m_square.applyAsDouble(time);
         FieldRelativeVelocity input = new FieldRelativeVelocity(dx, 0, kOmega);
         m_swerve.driveInFieldCoords(input, dt);
-        t.log(Level.TRACE, m_name, "input", input);
+        m_logger.log(Level.TRACE, "input", input);
     }
 
     @Override

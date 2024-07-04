@@ -9,6 +9,8 @@ import org.team100.lib.motor.MockPositionMotor100;
 import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -22,7 +24,6 @@ class AnglePositionServoTest {
         // long period to make the output bigger
         double period = 1;
 
-        String name = "test";
         MockVelocityMotor100<Angle100> turningMotor = new MockVelocityMotor100<>();
         MockEncoder100<Angle100> turningEncoder = new MockEncoder100<>();
 
@@ -30,8 +31,9 @@ class AnglePositionServoTest {
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         double maxVel = 1;
+        Logger logger = Telemetry.get().testLogger();
         OnboardPositionServo<Angle100> servo = new OnboardPositionServo<>(
-                name,
+                logger,
                 turningMotor,
                 turningEncoder,
                 maxVel,
@@ -48,16 +50,16 @@ class AnglePositionServoTest {
 
     @Test
     void testOutboard() {
-        String name = "test";
         MockPositionMotor100<Angle100> motor = new MockPositionMotor100<>();
         MockEncoder100<Angle100> externalEncoder = new MockEncoder100<>();
         MockEncoder100<Angle100> builtInEncoder = new MockEncoder100<>();
         CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
                 externalEncoder, 1.0, builtInEncoder);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        Logger logger = Telemetry.get().testLogger();
 
         OutboardPositionServo<Angle100> servo = new OutboardPositionServo<>(
-                name,
+                logger,
                 motor,
                 combinedEncoder,
                 profile,

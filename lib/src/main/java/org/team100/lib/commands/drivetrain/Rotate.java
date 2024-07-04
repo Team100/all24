@@ -9,8 +9,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -29,7 +29,6 @@ public class Rotate extends Command100 {
     // don't try to rotate at max speed
     private static final double kSpeed = 0.5;
 
-    private final Telemetry t = Telemetry.get();
     private final SwerveDriveSubsystem m_robotDrive;
     private final HeadingInterface m_heading;
     private final SwerveKinodynamics m_swerveKinodynamics;
@@ -44,10 +43,12 @@ public class Rotate extends Command100 {
     private boolean m_steeringAligned;
 
     public Rotate(
+            Logger parent,
             SwerveDriveSubsystem drivetrain,
             HeadingInterface heading,
             SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
+        super(parent);
         m_robotDrive = drivetrain;
         // since we specify a different tolerance, use a new controller.
 
@@ -61,7 +62,7 @@ public class Rotate extends Command100 {
         // real effect.
         tc.setP(3.5);
 
-        m_controller = new HolonomicDriveController3(xc, yc, tc);
+        m_controller = new HolonomicDriveController3(parent, xc, yc, tc);
         m_heading = heading;
         m_swerveKinodynamics = swerveKinodynamics;
         m_goalState = new State100(targetAngleRadians, 0);
@@ -124,12 +125,12 @@ public class Rotate extends Command100 {
         double headingRate = m_heading.getHeadingRateNWU();
 
         // log what we did
-        t.log(Level.TRACE, m_name, "errorX", refTheta.x() - headingMeasurement);
-        t.log(Level.TRACE, m_name, "errorV", refTheta.v() - headingRate);
-        t.log(Level.TRACE, m_name, "measurementX", headingMeasurement);
-        t.log(Level.TRACE, m_name, "measurementV", headingRate);
-        t.log(Level.TRACE, m_name, "refX", refTheta.x());
-        t.log(Level.TRACE, m_name, "refV", refTheta.v());
+        m_logger.logDouble(Level.TRACE, "errorX", () -> refTheta.x() - headingMeasurement);
+        m_logger.logDouble(Level.TRACE, "errorV", () -> refTheta.v() - headingRate);
+        m_logger.logDouble(Level.TRACE, "measurementX", () -> headingMeasurement);
+        m_logger.logDouble(Level.TRACE, "measurementV", () -> headingRate);
+        m_logger.logDouble(Level.TRACE, "refX", () -> refTheta.x());
+        m_logger.logDouble(Level.TRACE, "refV", () -> refTheta.v());
     }
 
     @Override

@@ -7,14 +7,15 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.arm.ArmTrajectories;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -30,8 +31,6 @@ public class ArmTrajectoryCommand extends Command100 {
     private static final TrajectoryConfig kConf = new TrajectoryConfig(1, 1);
     private static final double kA = 0.2;
     private static final double kRotsPerSecToVoltsPerSec = 4;
-
-    private final Telemetry t = Telemetry.get();
 
     private final ArmSubsystem m_armSubsystem;
     private final ArmKinematics m_armKinematicsM;
@@ -50,9 +49,11 @@ public class ArmTrajectoryCommand extends Command100 {
     private Trajectory m_trajectory;
 
     public ArmTrajectoryCommand(
+            Logger parent,
             ArmSubsystem armSubSystem,
             ArmKinematics armKinematicsM,
             Translation2d goal) {
+        super(parent);
         m_armSubsystem = armSubSystem;
         m_armKinematicsM = armKinematicsM;
         m_goal = goal;
@@ -119,14 +120,14 @@ public class ArmTrajectoryCommand extends Command100 {
 
         m_armSubsystem.set(u1, u2);
 
-        t.log(Level.TRACE, m_name, "Lower FF ", ff1);
-        t.log(Level.TRACE, m_name, "Lower Controller Output: ", u1_pos);
-        t.log(Level.TRACE, m_name, "Upper FF ", ff2);
-        t.log(Level.TRACE, m_name, "Upper Controller Output: ", u2_pos);
-        t.log(Level.TRACE, m_name, "Lower Ref: ", r.th1);
-        t.log(Level.TRACE, m_name, "Upper Ref: ", r.th2);
-        t.log(Level.TRACE, m_name, "Output Upper: ", u1);
-        t.log(Level.TRACE, m_name, "Output Lower: ", u2);
+        m_logger.logDouble(Level.TRACE, "Lower FF ", () -> ff1);
+        m_logger.logDouble(Level.TRACE, "Lower Controller Output: ", () -> u1_pos);
+        m_logger.logDouble(Level.TRACE, "Upper FF ", () -> ff2);
+        m_logger.logDouble(Level.TRACE, "Upper Controller Output: ", () -> u2_pos);
+        m_logger.logDouble(Level.TRACE, "Lower Ref: ", () -> r.th1);
+        m_logger.logDouble(Level.TRACE, "Upper Ref: ", () -> r.th2);
+        m_logger.logDouble(Level.TRACE, "Output Upper: ", () -> u1);
+        m_logger.logDouble(Level.TRACE, "Output Lower: ", () -> u2);
     }
 
     private State getDesiredState() {

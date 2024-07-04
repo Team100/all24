@@ -9,17 +9,15 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase implements Glassy {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final SensorInterface m_sensors;
 
     // this uses PWMSparkMax instead of PWM to get MotorSafety.
@@ -30,8 +28,8 @@ public class Intake extends SubsystemBase implements Glassy {
     private int count = 0;
     private int currentCount = 0;
 
-    public Intake(SensorInterface sensors) {
-        m_name = Names.name(this);
+    public Intake(Logger parent, SensorInterface sensors) {
+        m_logger = parent.child(this);
         m_sensors = sensors;
 
         SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(9, 0.05, 15, 10, -10);
@@ -41,7 +39,7 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_intake = new PWMSparkMax(1);
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedNeoVelocityServo(
-                        m_name + "/Super Roller",
+                        m_logger.child("Super Roller"),
                         5,
                         MotorPhase.FORWARD,
                         20,
@@ -54,7 +52,7 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_intake = new PWMSparkMax(1);
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name + "/Super Roller",
+                        m_logger.child("Super Roller"),
                         rollerParameter);
         }
     }
@@ -116,9 +114,9 @@ public class Intake extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, m_name, "lower", m_intake.get());
-        t.log(Level.DEBUG, m_name, "upper", superRollers.getVelocity());
-        t.log(Level.DEBUG, m_name, "centering", m_centering.get());
+        m_logger.logDouble(Level.DEBUG, "lower", m_intake::get);
+        m_logger.log(Level.DEBUG, "upper", superRollers.getVelocity());
+        m_logger.logDouble(Level.DEBUG, "centering", m_centering::get);
     }
 
     @Override

@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,6 +26,8 @@ import edu.wpi.first.wpilibj.Timer;
 
 class VisionDataProviderTest implements Timeless {
     private static final double kDelta = 0.01;
+    Logger logger = Telemetry.get().testLogger();
+
     FireControl f = new FireControl() {
     };
 
@@ -47,7 +51,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
 
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         // in red layout blip 7 is on the other side of the field
 
@@ -99,7 +103,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
 
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         // camera sees the tag straight ahead in the center of the frame,
         // but rotated pi/4 to the left. this is ignored anyway.
@@ -154,6 +158,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase1() throws IOException {
+
         // the case from 2/14
         // robot 45 degrees to the right (negative), so 135 degrees
         // x = 2.2m, y = - 1.3 m from the center speaker tag
@@ -175,7 +180,7 @@ class VisionDataProviderTest implements Timeless {
                 return Optional.of(new Rotation2d(3 * Math.PI / 4));
             }
         };
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 2.4),
@@ -195,6 +200,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase2() throws IOException {
+
         // 1m in front of tag 4
         // field is 16.54 m long, 8.21 m wide
         // tag 4 is at 16.579, 5.547, 1.451 in blue so
@@ -219,7 +225,7 @@ class VisionDataProviderTest implements Timeless {
                 return Optional.of(new Rotation2d(Math.PI));
             }
         };
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1),
@@ -262,7 +268,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
 
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1),
@@ -280,6 +286,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase2WithTriangulation() throws IOException {
+
         // 1m in front of tag 4
         // field is 16.54 m long, 8.21 m wide
         // tag 4 is at 16.579, 5.547, 1.451 in blue so
@@ -305,7 +312,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
 
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag3 = new Blip24(3, new Transform3d(
                 new Translation3d(0.561, 0, 1),
@@ -326,6 +333,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase2tilt() throws IOException {
+
         // 1m in front of tag 4, tilted up 45
         // field is 16.54 m long, 8.21 m wide
         // tag 4 is at 16.579, 5.547, 1.451 in blue so
@@ -351,7 +359,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
 
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -369,6 +377,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase3() throws IOException {
+
         // 1m in front of tag 4, 1m to the right
         // field is 16.54 m long, 8.21 m wide
         // tag 4 is at 16.579, 5.547, 1.451 in blue so
@@ -394,7 +403,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
 
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(-1, 0, 1),
@@ -412,6 +421,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase4() throws IOException {
+
         // 1m in front of tag 4, 1m to the right, rotated to the left
         // field is 16.54 m long, 8.21 m wide
         // tag 4 is at 16.579, 5.547, 1.451 in blue so
@@ -437,7 +447,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
 
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -455,6 +465,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase5() throws IOException {
+
         // 1m in front of tag 4, 1m to the left, rotated to the right
         // field is 16.54 m long, 8.21 m wide
         // tag 4 is at 16.579, 5.547, 1.451 in blue so
@@ -479,7 +490,7 @@ class VisionDataProviderTest implements Timeless {
                 return Optional.of(new Rotation2d(3 * Math.PI / 4));
             }
         };
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -497,6 +508,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase6() throws IOException {
+
         // 1m in front of tag 4, 1m to the left, rotated to the right
         // looking up at a 45 degree angle
         // field is 16.54 m long, 8.21 m wide
@@ -522,7 +534,7 @@ class VisionDataProviderTest implements Timeless {
                 return Optional.of(new Rotation2d(3 * Math.PI / 4));
             }
         };
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 2),
@@ -540,6 +552,7 @@ class VisionDataProviderTest implements Timeless {
 
     @Test
     void testCase7() throws IOException {
+
         // 1m in front of tag 4, 1m to the left, rotated to the right
         // looking up at a 30 degree angle
         // field is 16.54 m long, 8.21 m wide
@@ -565,7 +578,7 @@ class VisionDataProviderTest implements Timeless {
                 return Optional.of(new Rotation2d(3 * Math.PI / 4));
             }
         };
-        VisionDataProvider24 vdp = new VisionDataProvider24(layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
 
         // 30 degrees, long side is sqrt2, so hypotenuse is sqrt2/sqrt3/2
         Blip24 tag4 = new Blip24(4, new Transform3d(

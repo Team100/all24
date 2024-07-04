@@ -3,9 +3,8 @@ package org.team100.lib.controller;
 import org.team100.lib.config.Identity;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,27 +15,28 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Drivetrain control with three independent PID controllers.
  */
 public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
-    private final String m_name;
 
-    public HolonomicDriveController3() {
-        this(cartesian(), cartesian(), theta());
+    public HolonomicDriveController3(Logger parent) {
+        this(parent, cartesian(), cartesian(), theta());
     }
 
     public HolonomicDriveController3(
+            Logger parent,
             PIDController xController,
             PIDController yController,
             PIDController thetaController) {
         m_xController = xController;
         m_yController = yController;
         m_thetaController = thetaController;
-        m_name = Names.name(this);
+        m_logger = parent.child(this);
     }
 
     public static HolonomicDriveController3 withTolerance(
+            Logger parent,
             double cartesianPosition,
             double cartesianVelocity,
             double rotationPosition,
@@ -47,7 +47,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         y.setTolerance(cartesianPosition, cartesianVelocity);
         PIDController theta = theta();
         theta.setTolerance(rotationPosition, rotationVelocity);
-        return new HolonomicDriveController3(x, y, theta);
+        return new HolonomicDriveController3(parent, x, y, theta);
     }
 
     @Override
@@ -79,20 +79,20 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         double yFB = m_yController.calculate(currentPose.getY(), desiredState.y().x());
         double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
 
-        t.log(Level.TRACE, m_name, "u_FF/x", xFF);
-        t.log(Level.TRACE, m_name, "u_FF/y", yFF);
-        t.log(Level.TRACE, m_name, "u_FF/theta", thetaFF);
-        t.log(Level.TRACE, m_name, "u_FB/x", xFB);
-        t.log(Level.TRACE, m_name, "u_FB/y", yFB);
-        t.log(Level.TRACE, m_name, "u_FB/theta", thetaFB);
-        t.log(Level.TRACE, m_name, "measurement", currentPose);
+        m_logger.logDouble(Level.TRACE, "u_FF/x", () -> xFF);
+        m_logger.logDouble(Level.TRACE, "u_FF/y", () -> yFF);
+        m_logger.logDouble(Level.TRACE, "u_FF/theta", () -> thetaFF);
+        m_logger.logDouble(Level.TRACE, "u_FB/x", () -> xFB);
+        m_logger.logDouble(Level.TRACE, "u_FB/y", () -> yFB);
+        m_logger.logDouble(Level.TRACE, "u_FB/theta", () -> thetaFB);
+        m_logger.log(Level.TRACE, "measurement", currentPose);
 
-        t.log(Level.TRACE, m_name, "setpoint/x", m_xController.getSetpoint());
-        t.log(Level.TRACE, m_name, "setpoint/y", m_yController.getSetpoint());
-        t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaController.getSetpoint());
-        t.log(Level.TRACE, m_name, "error/x", m_xController.getPositionError());
-        t.log(Level.TRACE, m_name, "error/y", m_yController.getPositionError());
-        t.log(Level.TRACE, m_name, "error/theta", m_thetaController.getPositionError());
+        m_logger.logDouble(Level.TRACE, "setpoint/x", m_xController::getSetpoint);
+        m_logger.logDouble(Level.TRACE, "setpoint/y", m_yController::getSetpoint);
+        m_logger.logDouble(Level.TRACE, "setpoint/theta", m_thetaController::getSetpoint);
+        m_logger.logDouble(Level.TRACE, "error/x", m_xController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "error/y", m_yController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "error/theta", m_thetaController::getPositionError);
 
         return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, thetaFF + thetaFB);
     }

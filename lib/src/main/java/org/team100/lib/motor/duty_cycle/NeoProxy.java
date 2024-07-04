@@ -4,9 +4,8 @@ import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
 import org.team100.lib.motor.model.NeoTorqueModel;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -19,17 +18,16 @@ import com.revrobotics.CANSparkMax;
  * This makes the code that uses it easier to test.
  */
 public class NeoProxy implements DutyCycleMotor100, NeoTorqueModel {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
 
     private final CANSparkMax m_motor;
 
     public NeoProxy(
-            String name,
+            Logger parent,
             int canId,
             IdleMode idleMode,
             int currentLimit) {
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
         m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, idleMode, MotorPhase.FORWARD, 20);
@@ -38,8 +36,8 @@ public class NeoProxy implements DutyCycleMotor100, NeoTorqueModel {
 
     private void set(double speed) {
         m_motor.set(speed);
-        t.log(Level.TRACE, m_name, "DUTY", m_motor.getAppliedOutput());
-        t.log(Level.TRACE, m_name, "AMPS", m_motor.getOutputCurrent());
+        m_logger.logDouble(Level.TRACE, "DUTY", m_motor::getAppliedOutput);
+        m_logger.logDouble(Level.TRACE, "AMPS", m_motor::getOutputCurrent);
     }
 
     @Override

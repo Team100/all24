@@ -9,6 +9,8 @@ import org.team100.lib.commands.drivetrain.DriveInALittleSquare.DriveState;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.util.Util;
 
@@ -22,7 +24,8 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
     @Test
     void testSteering() {
         SwerveDriveSubsystem swerve = fixture.drive;
-        DriveInALittleSquare command = new DriveInALittleSquare(swerve);
+        Logger logger = Telemetry.get().testLogger();
+        DriveInALittleSquare command = new DriveInALittleSquare(logger, swerve);
         DriveInALittleSquare.shutDownForTest();
         command.initialize();
         // the first time we call execute, drive doesn't yet know it's at the goal
@@ -63,7 +66,8 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
 
     @Test
     void testLowLevel() {
-        DriveInALittleSquare command = new DriveInALittleSquare(fixture.drive);
+        Logger logger = Telemetry.get().testLogger();
+        DriveInALittleSquare command = new DriveInALittleSquare(logger, fixture.drive);
         DriveInALittleSquare.shutDownForTest();
         command.initialize();
 

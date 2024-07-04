@@ -12,8 +12,8 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.ExpiringMemoizingSupplier;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -27,15 +27,16 @@ import edu.wpi.first.wpilibj.Timer;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends Subsystem100 {
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
+    private final Logger fieldLogger;
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
-    private final String m_name;
     private final ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
+            Logger parent,
             HeadingInterface heading,
             SwerveDrivePoseEstimator100 poseEstimator,
             SwerveLocal swerveLocal,
@@ -44,11 +45,12 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_speed = speed;
-        m_name = Names.name(this);
+        m_logger = parent.child(this);
+        fieldLogger = Telemetry.get().fieldLogger();
         // state update at 100 hz.
         m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
         stop();
-        t.log(Level.INFO, "field", ".type", "Field2d");
+        fieldLogger.log(Level.INFO, ".type", "Field2d");
     }
 
     ////////////////
@@ -66,13 +68,13 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
     public void driveInFieldCoords(FieldRelativeVelocity v, double kDtSec) {
-        t.log(Level.TRACE, m_name, "drive input", v);
+        m_logger.log(Level.TRACE, "drive input", v);
         DriverControl.Speed speed = m_speed.get();
-        t.log(Level.TRACE, m_name, "control_speed", speed);
+        m_logger.log(Level.TRACE, "control_speed", speed);
 
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        t.log(Level.TRACE, m_name, "skill level", driverSkillLevel);
+        m_logger.log(Level.TRACE, "skill level", driverSkillLevel);
         v = GeometryUtil.scale(v, driverSkillLevel.scale());
 
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -112,7 +114,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        t.log(Level.TRACE, m_name, "skill level", driverSkillLevel);
+        m_logger.log(Level.TRACE, "skill level", driverSkillLevel);
         speeds = speeds.times(driverSkillLevel.scale());
         m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
@@ -193,25 +195,25 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     @Override
     public void periodic100(double dt) {
-        t.log(Level.DEBUG, m_name, "pose", m_stateSupplier.get());
-        t.log(Level.TRACE, m_name, "Tur Deg", m_stateSupplier.get().pose().getRotation().getDegrees());
-        t.log(Level.DEBUG, m_name, "pose array",
+        m_logger.log(Level.DEBUG, "pose", m_stateSupplier.get());
+        m_logger.logDouble(Level.TRACE, "Tur Deg", () -> m_stateSupplier.get().pose().getRotation().getDegrees());
+        m_logger.log(Level.DEBUG, "pose array",
                 new double[] {
                         m_stateSupplier.get().pose().getX(),
                         m_stateSupplier.get().pose().getY(),
                         m_stateSupplier.get().pose().getRotation().getRadians()
                 });
-        t.log(Level.DEBUG, m_name, "state", m_stateSupplier.get());
+        m_logger.log(Level.DEBUG, "state", m_stateSupplier.get());
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
-        t.log(Level.INFO, "field", "robot", new double[] {
+        fieldLogger.log(Level.INFO, "robot", new double[] {
                 m_stateSupplier.get().pose().getX(),
                 m_stateSupplier.get().pose().getY(),
                 m_stateSupplier.get().pose().getRotation().getDegrees()
         });
-        t.log(Level.DEBUG, m_name, "heading rate rad_s", m_heading.getHeadingRateNWU());
+        m_logger.logDouble(Level.DEBUG, "heading rate rad_s", m_heading::getHeadingRateNWU);
     }
 
     @Override

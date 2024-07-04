@@ -16,6 +16,8 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -29,9 +31,10 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
+    Logger logger = Telemetry.get().testLogger();
 
     // default for testing is no wheel slip
-    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
 
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     TrajectoryMaker maker = new TrajectoryMaker(constraints);
@@ -44,8 +47,9 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     @Test
     void testSimple() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-        HolonomicDriveController3 control = new HolonomicDriveController3();
+        HolonomicDriveController3 control = new HolonomicDriveController3(logger);
         TrajectoryListCommand c = new TrajectoryListCommand(
+                logger,
                 fixture.drive,
                 control,
                 x -> List.of(maker.line(x)));
@@ -72,8 +76,9 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
      */
     @Test
     void testLowLevel() {
-        HolonomicDriveController3 controller = new HolonomicDriveController3();
+        HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
         TrajectoryListCommand command = new TrajectoryListCommand(
+                logger,
                 fixture.drive,
                 controller,
                 x -> maker.square(x));

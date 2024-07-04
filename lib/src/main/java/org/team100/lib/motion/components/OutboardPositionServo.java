@@ -6,10 +6,9 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.motor.PositionMotor100;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -25,8 +24,7 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
     private static final double kDtSec = 0.02;
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final PositionMotor100<T> m_motor;
     private final CombinedEncoder<T> m_encoder;
     private final Profile100 m_profile;
@@ -36,12 +34,12 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
     private State100 m_setpoint = new State100(0, 0);
 
     public OutboardPositionServo(
-            String name,
+            Logger parent,
             PositionMotor100<T> motor,
             CombinedEncoder<T> encoder,
             Profile100 profile,
             T instance) {
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;
         m_profile = profile;
@@ -77,10 +75,10 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
 
         m_motor.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 
-        t.log(Level.TRACE, m_name, "goal", goal);
-        t.log(Level.DEBUG, m_name, "Measurement", measurement);
-        t.log(Level.DEBUG, m_name, "Setpoint", m_setpoint);
-        t.log(Level.TRACE, m_name, "Feedforward Torque", feedForwardTorqueNm);
+        m_logger.logDouble(Level.TRACE,  "goal", ()->goal);
+        m_logger.logDouble(Level.DEBUG,  "Measurement",()-> measurement);
+        m_logger.log(Level.DEBUG,  "Setpoint", m_setpoint);
+        m_logger.logDouble(Level.TRACE,  "Feedforward Torque", ()->feedForwardTorqueNm);
     }
 
     @Override

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Logger;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -14,8 +16,9 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testZero() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
+        Logger logger = Telemetry.get().testLogger();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
         SwerveModuleState[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
@@ -31,8 +34,9 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testAngle() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
+        Logger logger = Telemetry.get().testLogger();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0.5);
         SwerveModuleState[] ms = s.apply(input);
         assertEquals(Math.PI / 2, ms[0].angle.getRadians(), kDelta);
@@ -48,8 +52,9 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testDrive() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
-        SimpleManualModuleStates s = new SimpleManualModuleStates("foo", limits);
+        Logger logger = Telemetry.get().testLogger();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0.5, 0, 0);
         SwerveModuleState[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
