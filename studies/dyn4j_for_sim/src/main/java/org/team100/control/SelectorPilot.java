@@ -27,7 +27,7 @@ public class SelectorPilot implements Pilot {
 
     @Override
     public FieldRelativeVelocity driveVelocity() {
-        return select(Pilot::driveVelocity);
+        return select((Pilot::driveVelocity));
     }
 
     @Override
