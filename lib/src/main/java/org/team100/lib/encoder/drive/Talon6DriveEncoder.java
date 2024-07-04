@@ -4,8 +4,8 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.drive.Talon6DriveMotor;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 
 public class Talon6DriveEncoder implements SettableEncoder<Distance100> {

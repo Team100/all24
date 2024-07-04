@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 
 /**
  * Rotate in place at the specified speed.

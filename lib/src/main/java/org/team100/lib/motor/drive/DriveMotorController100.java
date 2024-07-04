@@ -2,8 +2,8 @@ package org.team100.lib.motor.drive;
 
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;

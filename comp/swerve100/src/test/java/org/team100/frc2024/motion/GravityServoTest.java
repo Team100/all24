@@ -3,19 +3,20 @@ package org.team100.frc2024.motion;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.frc2024.TestLogger24;
 import org.team100.frc2024.Timeless2024;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
 class GravityServoTest implements Timeless2024 {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger24();
 
     @Test
     void testSetPosition() {
@@ -30,7 +31,6 @@ class GravityServoTest implements Timeless2024 {
         double period = 0.02;
         double[] softLimits = new double[] { 0, 45 };
         // motor speed is rad/s
-        Logger logger = Telemetry.get().testLogger();
         SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>(logger, 600);
         SimulatedEncoder<Distance100> simEncoder = new SimulatedEncoder<>(
                 logger,

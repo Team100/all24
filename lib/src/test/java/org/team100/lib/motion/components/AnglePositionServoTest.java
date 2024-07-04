@@ -9,14 +9,15 @@ import org.team100.lib.motor.MockPositionMotor100;
 import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 
 class AnglePositionServoTest {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
     /** A minimal exercise. */
     @Test
@@ -31,7 +32,6 @@ class AnglePositionServoTest {
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         double maxVel = 1;
-        Logger logger = Telemetry.get().testLogger();
         OnboardPositionServo<Angle100> servo = new OnboardPositionServo<>(
                 logger,
                 turningMotor,
@@ -56,7 +56,6 @@ class AnglePositionServoTest {
         CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
                 externalEncoder, 1.0, builtInEncoder);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        Logger logger = Telemetry.get().testLogger();
 
         OutboardPositionServo<Angle100> servo = new OutboardPositionServo<>(
                 logger,

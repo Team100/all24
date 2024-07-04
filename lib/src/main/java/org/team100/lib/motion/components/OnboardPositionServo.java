@@ -6,8 +6,8 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
 
 import edu.wpi.first.math.MathUtil;

@@ -11,8 +11,8 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.VortexEncoder;
 import org.team100.lib.motor.duty_cycle.VortexProxy;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;

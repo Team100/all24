@@ -4,9 +4,8 @@ import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,7 +14,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveMotionControllerUtil implements Glassy {
-    private final Telemetry.Logger m_logger;
+    private final Logger m_logger;
 
     public DriveMotionControllerUtil(Logger parent) {
         m_logger = parent.child(this);

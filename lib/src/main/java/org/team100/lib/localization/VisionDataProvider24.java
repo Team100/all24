@@ -11,8 +11,8 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Chronos.Sample;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;

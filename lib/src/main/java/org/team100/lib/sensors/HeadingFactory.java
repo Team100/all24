@@ -4,7 +4,7 @@ import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.config.Identity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.util.Util;
 
 /**

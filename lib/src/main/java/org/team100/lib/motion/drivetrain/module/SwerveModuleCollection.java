@@ -1,6 +1,5 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
@@ -9,7 +8,7 @@ import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -46,8 +45,7 @@ public class SwerveModuleCollection {
             Logger parent,
             double currentLimit,
             double statorLimit,
-            SwerveKinodynamics kinodynamics,
-            Async async) {
+            SwerveKinodynamics kinodynamics) {
         switch (Identity.instance) {
             case COMP_BOT:
                 Util.println("************** WCP MODULES w/Duty-Cycle Encoders **************");

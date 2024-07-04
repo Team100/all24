@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.geometry.Vector2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SlipperyTireUtilTest {
     private static final double kDelta = 0.001;
-    Logger logger = Telemetry.get().testLogger();
+    private static final Logger logger = new TestLogger();
 
     // radius is sqrt(2)/2
     SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(

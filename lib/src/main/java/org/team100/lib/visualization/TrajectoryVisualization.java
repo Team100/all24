@@ -2,6 +2,7 @@ package org.team100.lib.visualization;
 
 import java.util.List;
 
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.Trajectory100;
@@ -15,7 +16,7 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 
 public class TrajectoryVisualization {
     private static final String kTrajectory = "trajectory";
-    private static final Telemetry.Logger fieldLogger = Telemetry.get().fieldLogger();
+    private static final Logger fieldLogger = Telemetry.get().fieldLogger();
 
     private TrajectoryVisualization() {
         //

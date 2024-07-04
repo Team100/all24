@@ -9,7 +9,7 @@ import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.arm.JointMotor;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 /**

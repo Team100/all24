@@ -3,8 +3,8 @@ package org.team100.lib.motor;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.model.TorqueModel;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
 
 import com.revrobotics.CANSparkBase;

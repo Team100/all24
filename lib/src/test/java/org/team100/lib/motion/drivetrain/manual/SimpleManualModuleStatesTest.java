@@ -6,17 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SimpleManualModuleStatesTest {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
     @Test
     void testZero() {
-        Logger logger = Telemetry.get().testLogger();
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
@@ -34,7 +34,6 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testAngle() {
-        Logger logger = Telemetry.get().testLogger();
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0.5);
@@ -52,7 +51,6 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testDrive() {
-        Logger logger = Telemetry.get().testLogger();
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0.5, 0, 0);

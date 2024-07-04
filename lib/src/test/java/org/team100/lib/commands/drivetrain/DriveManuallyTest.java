@@ -13,13 +13,15 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class DriveManuallyTest extends Fixtured implements Timeless {
+    private static final Logger logger = new TestLogger();
+
     String desiredMode = null;
     DriverControl.Velocity desiredTwist = new DriverControl.Velocity(1, 0, 0);
 
@@ -27,7 +29,6 @@ class DriveManuallyTest extends Fixtured implements Timeless {
     void testSimple() {
         Supplier<DriverControl.Velocity> twistSupplier = () -> desiredTwist;
         SwerveDriveSubsystem robotDrive = fixture.drive;
-        Logger logger = Telemetry.get().testLogger();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
 
         DriveManually command = new DriveManually(logger, twistSupplier, robotDrive);

@@ -1,7 +1,7 @@
 package org.team100.lib.controller;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.Logger;
 
 /**
  * Known-good controller settings.

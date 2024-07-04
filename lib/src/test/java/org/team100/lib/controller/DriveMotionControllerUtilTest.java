@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveMotionControllerUtilTest {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
     @Test
     void testFeedForwardAhead() {
@@ -40,7 +41,6 @@ class DriveMotionControllerUtilTest {
         // constant speed
         double acceleration = 0;
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         // feedforward should be straight ahead, no rotation.
         ChassisSpeeds speeds = util.feedforward(currentState, setpoint);
@@ -72,7 +72,6 @@ class DriveMotionControllerUtilTest {
         // constant speed
         double acceleration = 0;
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         // feedforward should be -y, robot relative, no rotation.
         ChassisSpeeds speeds = util.feedforward(currentState, setpoint);
@@ -104,7 +103,6 @@ class DriveMotionControllerUtilTest {
         // constant speed
         double acceleration = 0;
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         // feedforward should be ahead and rotating.
         ChassisSpeeds speeds = util.feedforward(currentState, setpoint);
@@ -202,7 +200,6 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
@@ -238,7 +235,6 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
@@ -274,7 +270,6 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
@@ -311,7 +306,6 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
@@ -346,7 +340,6 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
@@ -382,7 +375,6 @@ class DriveMotionControllerUtilTest {
 
         // on the setpoint: since we're facing 180, v is -x.
         ChassisSpeeds currentVelocity = new ChassisSpeeds(-1, 0, 0);
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds error = util.getVelocityError(currentState,
                 setpoint, currentVelocity);
@@ -418,7 +410,6 @@ class DriveMotionControllerUtilTest {
 
         // totally the wrong direction
         ChassisSpeeds currentVelocity = new ChassisSpeeds(0, 1, 0);
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds error = util.getVelocityError(currentState,
                 setpoint, currentVelocity);
@@ -457,7 +448,6 @@ class DriveMotionControllerUtilTest {
         double kPThetaV = 1.0;
         // motion is on setpoint
         ChassisSpeeds currentVelocity = new ChassisSpeeds(1, 0, 0);
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds speeds = util.fullFeedback(
                 currentState, setpoint,
@@ -499,7 +489,6 @@ class DriveMotionControllerUtilTest {
         double kPThetaV = 1.0;
         // motion is in the right direction but too slow
         ChassisSpeeds robotRelativeCurrentVelocity = new ChassisSpeeds(0, -0.5, 0);
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         ChassisSpeeds speeds = util.fullFeedback(
                 currentPose, setpoint,
@@ -541,7 +530,6 @@ class DriveMotionControllerUtilTest {
         double kPTheta = 1.0;
         double kPCartV = 1.0;
         double kPThetaV = 1.0;
-        Logger logger = Telemetry.get().testLogger();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         // motion is in the right direction but too slow
         ChassisSpeeds robotRelativeCurrentVelocity = new ChassisSpeeds(0, -0.5, 0);

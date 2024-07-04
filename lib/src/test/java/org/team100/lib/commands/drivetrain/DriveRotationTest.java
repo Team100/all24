@@ -6,17 +6,17 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixtured;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 
 class DriveRotationTest extends Fixtured {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
     private final double desiredRotation = 1;
 
     @Test
     void testSimple() {
         Supplier<Double> rot = () -> desiredRotation;
-        Logger logger = Telemetry.get().testLogger();
         DriveRotation command = new DriveRotation(logger, fixture.drive, rot);
         DriveRotation.shutDownForTest();
         command.initialize();
