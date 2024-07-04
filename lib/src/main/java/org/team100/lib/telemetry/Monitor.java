@@ -6,7 +6,6 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -21,7 +20,6 @@ import edu.wpi.first.wpilibj.RobotController;
  */
 public class Monitor implements Glassy {
     private final Logger m_logger;
-    private final String m_name;
     private final BooleanConsumer m_annunciator;
     private final BooleanSupplier m_test;
     private final PowerDistribution m_pdp;
@@ -32,7 +30,6 @@ public class Monitor implements Glassy {
      * @param test        activates the annunciator, to make sure it's working.
      */
     public Monitor(Logger parent, BooleanConsumer annunciator, BooleanSupplier test) {
-        m_name = Names.name(this);
         m_logger = parent.child(this);
         m_annunciator = annunciator;
         m_test = test;
@@ -43,7 +40,7 @@ public class Monitor implements Glassy {
         m_shouldAlert = false;
         // this should test different things for different identities.
         if (Identity.instance == Identity.COMP_BOT || Identity.instance == Identity.BETA_BOT) {
-            m_logger.logDouble(Level.INFO, "battery_voltage", () -> getBatteryVoltage());
+            m_logger.logDouble(Level.INFO, "battery_voltage", this::getBatteryVoltage);
             // TODO: fix the pdp observer
             // t.log(Level.INFO, m_name, "bus_voltage", getBusVoltage());
             // t.log(Level.INFO, m_name, "total_current", getTotalCurrent());

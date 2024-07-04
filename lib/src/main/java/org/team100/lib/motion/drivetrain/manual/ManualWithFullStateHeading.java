@@ -12,12 +12,10 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -37,7 +35,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
-    private final String m_name;
     // feedback gains
     private final double[] m_K;
     private final LinearFilter m_outputFilter;
@@ -56,7 +53,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      * @param k                  full state gains
      */
     public ManualWithFullStateHeading(
-            String name,
             Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
@@ -65,7 +61,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_desiredRotation = desiredRotation;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_K = k;
         m_latch = new HeadingLatch();

@@ -16,7 +16,7 @@ class DriveRotationTest extends Fixtured {
     @Test
     void testSimple() {
         Supplier<Double> rot = () -> desiredRotation;
-        Logger logger = Telemetry.get().rootLogger(this.getClass());
+        Logger logger = Telemetry.get().testLogger();
         DriveRotation command = new DriveRotation(logger, fixture.drive, rot);
         DriveRotation.shutDownForTest();
         command.initialize();

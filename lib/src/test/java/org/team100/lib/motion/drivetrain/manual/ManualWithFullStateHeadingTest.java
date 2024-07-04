@@ -39,7 +39,6 @@ class ManualWithFullStateHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -71,7 +70,6 @@ class ManualWithFullStateHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -109,7 +107,6 @@ class ManualWithFullStateHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -185,7 +182,6 @@ class ManualWithFullStateHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -252,7 +248,6 @@ class ManualWithFullStateHeadingTest {
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -310,7 +305,6 @@ class ManualWithFullStateHeadingTest {
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,

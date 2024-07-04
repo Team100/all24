@@ -15,7 +15,7 @@ class DriveAccelerationLimiterTest {
     @Test
     void testUnconstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
-        DriveAccelerationLimiter c = new DriveAccelerationLimiter("foo", logger, l);
+        DriveAccelerationLimiter c = new DriveAccelerationLimiter(logger, l);
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
         double[] desired_vx = new double[] { 0 };
@@ -32,7 +32,7 @@ class DriveAccelerationLimiterTest {
     @Test
     void testConstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
-        DriveAccelerationLimiter c = new DriveAccelerationLimiter("foo", logger, l);
+        DriveAccelerationLimiter c = new DriveAccelerationLimiter(logger, l);
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
         double[] desired_vx = new double[] { 1 };

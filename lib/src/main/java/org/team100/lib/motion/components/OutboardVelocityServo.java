@@ -4,11 +4,9 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.VelocityMotor100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -19,15 +17,13 @@ public class OutboardVelocityServo<T extends Measure100> implements VelocityServ
     private final Logger m_logger;
     private final VelocityMotor100<T> m_motor;
     private final Encoder100<T> m_encoder;
-    private final String m_name;
 
     // for calculating acceleration
     private double previousSetpoint = 0;
     private double prevTime;
     private double m_setpoint;
 
-    public OutboardVelocityServo(String name, Logger parent, VelocityMotor100<T> motor, Encoder100<T> encoder) {
-        m_name = Names.append(name, this);
+    public OutboardVelocityServo(Logger parent, VelocityMotor100<T> motor, Encoder100<T> encoder) {
         m_logger = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;

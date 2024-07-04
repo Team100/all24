@@ -6,11 +6,9 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -26,7 +24,6 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     private final double m_maxVel;
     private final PIDController m_controller;
     private final double m_period;
-    private final String m_name;
     private final Profile100 m_profile;
     private final T m_instance;
 
@@ -37,7 +34,6 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     private double m_prevTime;
 
     public OnboardPositionServo(
-            String name,
             Logger parent,
             VelocityMotor100<T> motor,
             Encoder100<T> encoder,
@@ -45,7 +41,6 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
             PIDController controller,
             Profile100 profile,
             T instance) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;
@@ -114,8 +109,8 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
         m_logger.log(Level.DEBUG, "Goal", m_goal);
         m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
         m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
-        m_logger.logDouble(Level.TRACE, "Controller Position Error", () -> m_controller.getPositionError());
-        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", () -> m_controller.getVelocityError());
+        m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
+        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
         m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
     }
 
@@ -139,8 +134,8 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     @Override
     public boolean atSetpoint() {
         boolean atSetpoint = m_controller.atSetpoint();
-        m_logger.logDouble(Level.DEBUG, "Position Tolerance", () -> m_controller.getPositionTolerance());
-        m_logger.logDouble(Level.DEBUG, "Velocity Tolerance", () -> m_controller.getVelocityTolerance());
+        m_logger.logDouble(Level.DEBUG, "Position Tolerance", m_controller::getPositionTolerance);
+        m_logger.logDouble(Level.DEBUG, "Velocity Tolerance", m_controller::getVelocityTolerance);
         m_logger.logBoolean(Level.DEBUG, "At Setpoint", atSetpoint);
         return atSetpoint;
     }

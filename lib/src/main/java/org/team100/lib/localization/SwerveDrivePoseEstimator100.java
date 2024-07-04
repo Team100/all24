@@ -14,11 +14,9 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.SlipperyTireUtil;
 
 import edu.wpi.first.math.Matrix;
@@ -45,7 +43,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private static final double velocityDtS = 0.02;
 
     private final Logger m_logger;
-    private final String m_name;
     private final int m_numModules;
     private final SwerveKinodynamics m_kinodynamics;
     private final Matrix<N3, N1> m_q;
@@ -86,7 +83,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             double timestampSeconds,
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
-        m_name = Names.name(this);
         m_logger = parent.child(this);
         m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
@@ -315,7 +311,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         Pose2d newPose = new Pose2d(previousPose.pose().exp(twist).getTranslation(), angle);
 
-        m_logger.logDouble(Level.TRACE, "posex", () -> newPose.getX());
+        m_logger.logDouble(Level.TRACE, "posex", newPose::getX);
 
         FieldRelativeDelta deltaTransform = FieldRelativeDelta.delta(
                 previousPose.pose(), newPose).div(t1);

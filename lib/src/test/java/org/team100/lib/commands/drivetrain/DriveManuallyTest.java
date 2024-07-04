@@ -34,13 +34,13 @@ class DriveManuallyTest extends Fixtured implements Timeless {
         DriveManually.shutDownForTest();
 
         command.register("MODULE_STATE", false,
-                new SimpleManualModuleStates("foo", logger, swerveKinodynamics));
+                new SimpleManualModuleStates(logger, swerveKinodynamics));
 
         command.register("ROBOT_RELATIVE_CHASSIS_SPEED", false,
-                new ManualChassisSpeeds("foo", logger, swerveKinodynamics));
+                new ManualChassisSpeeds(logger, swerveKinodynamics));
 
         command.register("FIELD_RELATIVE_TWIST", false,
-                new ManualFieldRelativeSpeeds("foo", logger, swerveKinodynamics));
+                new ManualFieldRelativeSpeeds(logger, swerveKinodynamics));
 
         command.overrideMode(() -> desiredMode);
 

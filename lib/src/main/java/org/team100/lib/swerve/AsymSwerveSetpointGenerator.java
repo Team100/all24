@@ -7,7 +7,6 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -40,15 +39,13 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     private final SteeringRateLimiter m_steeringRateLimiter;
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
     private final BatterySagLimiter m_BatterySagLimiter;
-    private final String m_name;
 
-    public AsymSwerveSetpointGenerator(String name, Logger parent, SwerveKinodynamics limits) {
+    public AsymSwerveSetpointGenerator(Logger parent, SwerveKinodynamics limits) {
         m_limits = limits;
-        m_name = Names.append(name, this);
-        m_centripetalLimiter = new CapsizeAccelerationLimiter(m_name, parent, limits);
-        m_SteeringOverride = new SteeringOverride(m_name, parent, limits);
-        m_steeringRateLimiter = new SteeringRateLimiter(m_name, parent, limits);
-        m_DriveAccelerationLimiter = new DriveAccelerationLimiter(m_name, parent, limits);
+        m_centripetalLimiter = new CapsizeAccelerationLimiter(parent, limits);
+        m_SteeringOverride = new SteeringOverride(parent, limits);
+        m_steeringRateLimiter = new SteeringRateLimiter(parent, limits);
+        m_DriveAccelerationLimiter = new DriveAccelerationLimiter(parent, limits);
         m_BatterySagLimiter = new BatterySagLimiter();
     }
 

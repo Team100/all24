@@ -17,7 +17,6 @@ public abstract class CANSparkDriveMotor extends CANSparkMotor<Distance100> {
     private final double m_wheelDiameterM;
 
     CANSparkDriveMotor(
-            String name,
             Logger parent,
             CANSparkBase motor,
             MotorPhase motorPhase,
@@ -26,7 +25,7 @@ public abstract class CANSparkDriveMotor extends CANSparkMotor<Distance100> {
             double wheelDiameterM,
             Feedforward100 ff,
             PIDConstants pid) {
-        super(name, parent, motor, motorPhase, currentLimit, ff, pid);
+        super(parent, motor, motorPhase, currentLimit, ff, pid);
         m_gearRatio = gearRatio;
         m_wheelDiameterM = wheelDiameterM;
     }

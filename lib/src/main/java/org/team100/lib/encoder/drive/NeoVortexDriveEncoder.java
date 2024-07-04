@@ -4,11 +4,9 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.drive.NeoVortexDriveMotor;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 /**
  * The built-in encoder in Neo motors.
@@ -18,20 +16,16 @@ import org.team100.lib.util.Names;
  */
 public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
     private final Logger m_logger;
-    private final String m_name;
     private final NeoVortexDriveMotor m_motor;
     private final double m_distancePerTurn;
 
     /**
-     * @param name            do not use a leading slash.
      * @param distancePerTurn in meters
      */
     public NeoVortexDriveEncoder(
-            String name,
             Logger parent,
             NeoVortexDriveMotor motor,
             double distancePerTurn) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;

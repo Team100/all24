@@ -19,7 +19,7 @@ class ManualFieldRelativeSpeedsTest {
     void testTwistZero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         Logger logger = Telemetry.get().testLogger();
-        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds("foo", logger, limits);
+        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
         SwerveState s = new SwerveState();
         FieldRelativeVelocity twist = manual.apply(s, input);
@@ -32,7 +32,7 @@ class ManualFieldRelativeSpeedsTest {
     void testTwistNonzero() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         Logger logger = Telemetry.get().testLogger();
-        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds("foo", logger, limits);
+        ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(logger, limits);
         // these inputs are clipped and desaturated
         DriverControl.Velocity input = new DriverControl.Velocity(1, 2, 3);
         SwerveState s = new SwerveState();

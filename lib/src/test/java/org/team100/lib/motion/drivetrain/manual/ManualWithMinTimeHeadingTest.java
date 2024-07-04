@@ -39,7 +39,6 @@ class ManualWithMinTimeHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -70,7 +69,6 @@ class ManualWithMinTimeHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -107,7 +105,6 @@ class ManualWithMinTimeHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -178,7 +175,6 @@ class ManualWithMinTimeHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -242,7 +238,6 @@ class ManualWithMinTimeHeadingTest {
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -299,7 +294,6 @@ class ManualWithMinTimeHeadingTest {
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,

@@ -4,10 +4,8 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,7 +20,6 @@ public class HolonomicDriveController100 implements Glassy {
     private final PIDController m_yController;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
-    private final String m_name;
 
     public HolonomicDriveController100(Logger parent) {
         this(parent, cartesian(), cartesian(), theta(), omega());
@@ -38,7 +35,6 @@ public class HolonomicDriveController100 implements Glassy {
         m_yController = yController;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_name = Names.name(this);
         m_logger = parent.child(this);
     }
 
@@ -94,12 +90,12 @@ public class HolonomicDriveController100 implements Glassy {
         m_logger.logDouble(Level.TRACE, "u_FB/theta", () -> thetaFB);
         m_logger.log(Level.TRACE, "measurement", currentPose);
 
-        m_logger.logDouble(Level.DEBUG, "setpoint/x", () -> m_xController.getSetpoint());
-        m_logger.logDouble(Level.DEBUG, "setpoint/y", () -> m_yController.getSetpoint());
-        m_logger.logDouble(Level.TRACE, "setpoint/theta", () -> m_thetaController.getSetpoint());
-        m_logger.logDouble(Level.TRACE, "error/x", () -> m_xController.getPositionError());
-        m_logger.logDouble(Level.TRACE, "error/y", () -> m_yController.getPositionError());
-        m_logger.logDouble(Level.TRACE, "error/theta", () -> m_thetaController.getPositionError());
+        m_logger.logDouble(Level.DEBUG, "setpoint/x", m_xController::getSetpoint);
+        m_logger.logDouble(Level.DEBUG, "setpoint/y", m_yController::getSetpoint);
+        m_logger.logDouble(Level.TRACE, "setpoint/theta", m_thetaController::getSetpoint);
+        m_logger.logDouble(Level.TRACE, "error/x", m_xController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "error/y", m_yController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "error/theta", m_thetaController::getPositionError);
 
         return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, omega);
     }

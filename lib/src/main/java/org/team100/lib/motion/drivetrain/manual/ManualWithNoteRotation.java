@@ -19,7 +19,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -54,7 +53,6 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private final Supplier<Optional<Translation2d>> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
-    private final String m_name;
     private final TrapezoidProfile100 m_profile;
     State100 m_thetaSetpoint;
     Translation2d m_ball;
@@ -63,7 +61,6 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     Pose2d m_prevPose;
 
     public ManualWithNoteRotation(
-            String name,
             Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
@@ -76,7 +73,6 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         fieldLogger = Telemetry.get().fieldLogger();
         m_trigger = trigger;
@@ -148,12 +144,12 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
         m_logger.log(Level.TRACE, "theta/setpoint", m_thetaSetpoint);
         m_logger.logDouble(Level.TRACE, "theta/measurement", () -> measurement);
-        m_logger.logDouble(Level.TRACE, "theta/error", () -> m_thetaController.getPositionError());
+        m_logger.logDouble(Level.TRACE, "theta/error",  m_thetaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "theta/fb", () -> thetaFB);
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
         m_logger.log(Level.TRACE, "omega/reference", m_thetaSetpoint);
         m_logger.logDouble(Level.TRACE, "omega/measurement", () -> headingRate);
-        m_logger.logDouble(Level.TRACE, "omega/error", () -> m_omegaController.getPositionError());
+        m_logger.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
 
         double omega = MathUtil.clamp(

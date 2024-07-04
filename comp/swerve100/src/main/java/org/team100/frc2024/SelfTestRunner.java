@@ -68,7 +68,7 @@ public class SelfTestRunner extends Command implements Glassy {
         // addCase(new BatterySelfTest(m_container.m_monitor, m_listener));
 
         SwerveDriveSubsystem drivetrain = m_container.m_drive;
-        Logger logger = Telemetry.get().rootLogger(this);
+        Logger logger = Telemetry.get().namedRootLogger("SELF TEST");
 
         if (kTestDrivetrain) {
             // "treatment" is in situ.
@@ -82,7 +82,7 @@ public class SelfTestRunner extends Command implements Glassy {
             DriveManually driveManually = new DriveManually(logger, driveManuallyTest::treatment, drivetrain);
 
             driveManually.register("MODULE_STATE", false,
-                    new SimpleManualModuleStates("foo", logger, SwerveKinodynamicsFactory.forTest(logger)));
+                    new SimpleManualModuleStates(logger, SwerveKinodynamicsFactory.forTest(logger)));
             driveManually.overrideMode(() -> "MODULE_STATE");
             addCase(driveManuallyTest, driveManually);
 

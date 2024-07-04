@@ -3,11 +3,9 @@ package org.team100.lib.encoder.turning;
 import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.AnalogInput;
@@ -18,7 +16,6 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class AnalogTurningEncoder implements Encoder100<Angle100> {
     private final Logger m_logger;
-    private final String m_name;
     private final AnalogInput m_input;
     private final AnalogEncoder m_encoder;
 
@@ -26,7 +23,6 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
     private Double prevTime = null;
 
     /**
-     * @param name        may not start with a slash
      * @param channel     roboRIO analog input channel
      * @param inputOffset unit = turns, i.e. [0,1] subtracted from the raw
      *                    measurement
@@ -34,13 +30,11 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
      * @param drive       polarity
      */
     public AnalogTurningEncoder(
-            String name,
             Logger parent,
             int channel,
             double inputOffset,
             double gearRatio,
             EncoderDrive drive) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_input = new AnalogInput(channel);
         m_encoder = new AnalogEncoder(m_input);
@@ -95,10 +89,10 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
     private double getPositionRad() {
         // this should be fast, need not be cached.
         double positionRad = m_encoder.getDistance();
-        m_logger.logDouble(Level.DEBUG, "position (rad)",()-> positionRad);
-        m_logger.logDouble(Level.DEBUG, "position (turns)",()-> m_encoder.get());
-        m_logger.logDouble(Level.DEBUG, "position (absolute)", ()->m_encoder.getAbsolutePosition());
-        m_logger.logDouble(Level.DEBUG, "position (volts)",()-> m_input.getVoltage());
+        m_logger.logDouble(Level.DEBUG, "position (rad)", () -> positionRad);
+        m_logger.logDouble(Level.DEBUG, "position (turns)", m_encoder::get);
+        m_logger.logDouble(Level.DEBUG, "position (absolute)", m_encoder::getAbsolutePosition);
+        m_logger.logDouble(Level.DEBUG, "position (volts)", m_input::getVoltage);
         return positionRad;
     }
 
@@ -122,7 +116,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         prevTime = time;
 
         double rateRad_S = dx / dt;
-        m_logger.logDouble(Level.DEBUG, "rate (rad)s)",()-> rateRad_S);
+        m_logger.logDouble(Level.DEBUG, "rate (rad)s)", () -> rateRad_S);
         return rateRad_S;
     }
 }

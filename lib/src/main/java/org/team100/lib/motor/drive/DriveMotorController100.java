@@ -2,11 +2,9 @@ package org.team100.lib.motor.drive;
 
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 
@@ -20,19 +18,16 @@ public class DriveMotorController100 implements Motor100<Distance100>, GenericTo
     private static final double velocityFFDutyCycle_Rev_S = 0.01;
     private final Logger m_logger;
     private final MotorController m_motor;
-    private final String m_name;
     private final double m_gearRatio;
     private final double m_wheelDiameter;
 
     public DriveMotorController100(
-            String name,
             Logger parent,
             MotorController motorController,
             double kDriveReduction,
             double wheelDiameter) {
         m_motor = motorController;
         m_motor.setInverted(true);
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_wheelDiameter = wheelDiameter;
         m_gearRatio = kDriveReduction;

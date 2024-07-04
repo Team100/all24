@@ -13,12 +13,10 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -42,7 +40,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private final HeadingLatch m_latch;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
-    private final String m_name;
     private final LinearFilter m_outputFilter;
 
     // package private for testing
@@ -60,7 +57,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * @param omegaController
      */
     public ManualWithProfiledHeading(
-            String name,
             Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
@@ -72,7 +68,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);

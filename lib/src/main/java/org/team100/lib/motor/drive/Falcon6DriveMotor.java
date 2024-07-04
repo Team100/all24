@@ -10,7 +10,6 @@ import org.team100.lib.telemetry.Telemetry.Logger;
 public class Falcon6DriveMotor extends Talon6DriveMotor implements FalconTorqueModel {
 
     public Falcon6DriveMotor(
-            String name,
             Logger parent,
             int canId,
             MotorPhase motorPhase,
@@ -20,7 +19,7 @@ public class Falcon6DriveMotor extends Talon6DriveMotor implements FalconTorqueM
             double wheelDiameter,
             PIDConstants pid,
             Feedforward100 ff) {
-        super(name, parent, canId, motorPhase, supplyLimit,
+        super(parent, canId, motorPhase, supplyLimit,
                 statorLimit, kDriveReduction, wheelDiameter,
                 pid, ff);
     }

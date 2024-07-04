@@ -13,7 +13,6 @@ import com.revrobotics.CANSparkMax;
 public class NeoDriveMotor extends CANSparkDriveMotor implements NeoTorqueModel {
 
     public NeoDriveMotor(
-            String name,
             Logger parent,
             int canId,
             MotorPhase motorPhase,
@@ -22,7 +21,7 @@ public class NeoDriveMotor extends CANSparkDriveMotor implements NeoTorqueModel 
             double wheelDiameter,
             Feedforward100 ff,
             PIDConstants pid) {
-        super(name, parent, new CANSparkMax(canId, MotorType.kBrushless),
+        super(parent, new CANSparkMax(canId, MotorType.kBrushless),
                 motorPhase, currentLimit, gearRatio, wheelDiameter,
                 ff, pid);
     }

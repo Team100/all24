@@ -10,11 +10,9 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Chronos;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Chronos.Sample;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;
@@ -79,8 +77,8 @@ public class VisionDataProvider24 implements Glassy {
     private final PoseEstimator100 m_poseEstimator;
     private final FireControl m_fireControl;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
-    private final String m_name;
-    private final Chronos m_chronos = Chronos.get();
+    private final Chronos m_chronos;
+    private final PoseEstimationHelper m_helper;
 
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
@@ -103,11 +101,12 @@ public class VisionDataProvider24 implements Glassy {
             FireControl fireControl) throws IOException {
         // load the JNI (used by PoseEstimationHelper)
         CameraServerCvJNI.forceLoad();
+        m_logger = parent.child(this);
         m_layout = layout;
+        m_chronos = Chronos.get();
+        m_helper = new PoseEstimationHelper(m_logger);
         m_poseEstimator = poseEstimator;
         m_fireControl = fireControl;
-        m_name = Names.name(this);
-        m_logger = parent.child(this);
     }
 
     /** Start listening for updates. */
@@ -273,9 +272,8 @@ public class VisionDataProvider24 implements Glassy {
             for (Blip24 blip : blips) {
 
                 // this is just for logging
-                Rotation3d tagRotation = PoseEstimationHelper.blipToRotation(blip);
                 m_logger.logDouble(Level.DEBUG, cameraSerialNumber + "/Blip Tag Rotation",
-                        () -> tagRotation.getAngle());
+                        () -> PoseEstimationHelper.blipToRotation(blip).getAngle());
 
                 Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
                 if (!tagInFieldCoordsOptional.isPresent())
@@ -293,7 +291,7 @@ public class VisionDataProvider24 implements Glassy {
                 m_logger.log(Level.DEBUG, cameraSerialNumber + "/Blip Tag In Field Cords",
                         tagInFieldCoords.toPose2d());
 
-                Pose3d robotPoseInFieldCoords = PoseEstimationHelper.getRobotPoseInFieldCoords(
+                Pose3d robotPoseInFieldCoords = m_helper.getRobotPoseInFieldCoords(
                         cameraInRobotCoordinates,
                         tagInFieldCoords,
                         blip,

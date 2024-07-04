@@ -18,7 +18,7 @@ class SteeringRateLimiterTest {
     @Test
     void testUnconstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
-        SteeringRateLimiter c = new SteeringRateLimiter("foo", logger, l);
+        SteeringRateLimiter c = new SteeringRateLimiter(logger, l);
 
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
@@ -44,7 +44,7 @@ class SteeringRateLimiterTest {
     @Test
     void testConstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2(logger);
-        SteeringRateLimiter c = new SteeringRateLimiter("foo", logger, l);
+        SteeringRateLimiter c = new SteeringRateLimiter(logger, l);
 
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };

@@ -6,11 +6,9 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.motor.PositionMotor100;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -27,7 +25,6 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
     private final Logger m_logger;
-    private final String m_name;
     private final PositionMotor100<T> m_motor;
     private final CombinedEncoder<T> m_encoder;
     private final Profile100 m_profile;
@@ -37,13 +34,11 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
     private State100 m_setpoint = new State100(0, 0);
 
     public OutboardPositionServo(
-            String name,
             Logger parent,
             PositionMotor100<T> motor,
             CombinedEncoder<T> encoder,
             Profile100 profile,
             T instance) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;

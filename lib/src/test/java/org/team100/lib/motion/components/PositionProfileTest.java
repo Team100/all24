@@ -20,7 +20,6 @@ class PositionProfileTest implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
 
-    private final String name;
     private final MockVelocityMotor100<Distance100> motor;
     private final MockEncoder100<Distance100> encoder;
     private final double period;
@@ -28,7 +27,6 @@ class PositionProfileTest implements Timeless {
     private OnboardPositionServo<Distance100> servo;
 
     public PositionProfileTest() {
-        name = "test";
         motor = new MockVelocityMotor100<>();
         encoder = new MockEncoder100<>();
         period = 0.1;
@@ -44,7 +42,6 @@ class PositionProfileTest implements Timeless {
         Profile100 profile = new ProfileWPI(1, 1);
         Logger logger = Telemetry.get().testLogger();
         servo = new OnboardPositionServo<>(
-                name,
                 logger,
                 motor,
                 encoder,
@@ -62,7 +59,6 @@ class PositionProfileTest implements Timeless {
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         Logger logger = Telemetry.get().testLogger();
         servo = new OnboardPositionServo<>(
-                name,
                 logger,
                 motor,
                 encoder,

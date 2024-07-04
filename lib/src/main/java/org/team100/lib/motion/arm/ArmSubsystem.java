@@ -7,11 +7,9 @@ import org.team100.lib.async.Async;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.Motor100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.util.Names;
 import org.team100.lib.visualization.ArmVisualization;
 
 import edu.wpi.first.math.MathUtil;
@@ -26,7 +24,6 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterPeriodS = 0.02;
 
     private final Logger m_logger;
-    private final String m_name;
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
     private final Motor100<Angle100> m_lowerArmMotor;
@@ -38,22 +35,18 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
 
     // use the factory to instantiate
     /**
-     * 
-     * @param name
      * @param lowerMotor
      * @param lowerEncoder Lower arm angle (radians), 0 up, positive forward.
      * @param upperMotor
      * @param upperEncoder Upper arm angle (radians), 0 up, positive forward.
      */
     ArmSubsystem(
-            String name,
             Logger parent,
             Motor100<Angle100> lowerMotor,
             Encoder100<Angle100> lowerEncoder,
             Motor100<Angle100> upperMotor,
             Encoder100<Angle100> upperEncoder,
             Async async) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);

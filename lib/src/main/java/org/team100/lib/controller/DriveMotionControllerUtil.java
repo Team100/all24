@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveMotionControllerUtil implements Glassy {
-    private final String kName = DriveMotionControllerUtil.class.getSimpleName();
     private final Telemetry.Logger m_logger;
 
     public DriveMotionControllerUtil(Logger parent) {

@@ -9,13 +9,12 @@ import org.team100.lib.telemetry.Telemetry.Logger;
 public class Kraken6TurningMotor extends Talon6TurningMotor implements KrakenTorqueModel {
 
     protected Kraken6TurningMotor(
-            String name,
             Logger parent,
             int canId,
             MotorPhase motorPhase,
             double kGearRatio,
             PIDConstants pid,
             Feedforward100 ff) {
-        super(name, parent, canId, motorPhase, kGearRatio, pid, ff);
+        super(parent, canId, motorPhase, kGearRatio, pid, ff);
     }
 }

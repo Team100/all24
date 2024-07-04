@@ -6,10 +6,8 @@ import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Tire;
 
 import edu.wpi.first.math.Matrix;

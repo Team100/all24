@@ -72,9 +72,8 @@ public class TimedRobot100 extends IterativeRobotBase {
 
     /** Default loop period. */
     public static final double kDefaultPeriod = 0.02;
-    private static final String kName = "TimedRobot100";
 
-    private final Logger m_logger;
+    protected final Logger m_logger;
     private final Chronos chronos;
 
     // The C pointer to the notifier object. We don't use it directly, it is
@@ -97,7 +96,7 @@ public class TimedRobot100 extends IterativeRobotBase {
      */
     protected TimedRobot100(double period) {
         super(period);
-        m_logger = Telemetry.get().rootLogger(this.getClass());
+        m_logger = Telemetry.get().namedRootLogger("ROBOT");
         chronos = Chronos.get();
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");

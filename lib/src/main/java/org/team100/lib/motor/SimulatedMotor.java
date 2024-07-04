@@ -1,11 +1,9 @@
 package org.team100.lib.motor;
 
 import org.team100.lib.motor.model.GenericTorqueModel;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -18,16 +16,10 @@ import edu.wpi.first.math.MathUtil;
  */
 public class SimulatedMotor<T extends Measure100> implements Motor100<T>, GenericTorqueModel {
     private final Logger m_logger;
-    private final String m_name;
     private final double m_freeSpeed;
     private double m_velocity = 0;
 
-    /**
-     * @param name may not start with slash
-     * @param kV   velocity units at full output
-     */
-    public SimulatedMotor(String name, Logger parent, double freeSpeed) {
-        m_name = Names.append(name, this);
+    public SimulatedMotor(Logger parent, double freeSpeed) {
         m_logger = parent.child(this);
         m_freeSpeed = freeSpeed;
     }

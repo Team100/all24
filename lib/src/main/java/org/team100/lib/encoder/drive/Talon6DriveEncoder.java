@@ -4,24 +4,19 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.drive.Talon6DriveMotor;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 public class Talon6DriveEncoder implements SettableEncoder<Distance100> {
     private final Logger m_logger;
-    private final String m_name;
     private final Talon6DriveMotor m_motor;
     private final double m_distancePerTurn;
 
     public Talon6DriveEncoder(
-            String name,
             Logger parent,
             Talon6DriveMotor motor,
             double distancePerTurn) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_motor = motor;
         m_distancePerTurn = distancePerTurn;

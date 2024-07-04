@@ -4,10 +4,8 @@ import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
 import org.team100.lib.motor.model.NeoVortexTorqueModel;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
@@ -21,17 +19,14 @@ import com.revrobotics.RelativeEncoder;
  */
 public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
     private final Logger m_logger;
-    private final String m_name;
     private final CANSparkFlex m_motor;
     private final RelativeEncoder m_encoder;
 
     public VortexProxy(
-            String name,
             Logger parent,
             int canId,
             MotorPhase phase,
             int currentLimit) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_motor = new CANSparkFlex(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
@@ -42,8 +37,8 @@ public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
 
     private void set(double speed) {
         m_motor.set(speed);
-        m_logger.logDouble(Level.DEBUG, "current (A)", () -> m_motor.getOutputCurrent());
-        m_logger.logDouble(Level.DEBUG, "duty cycle", () -> m_motor.getAppliedOutput());
+        m_logger.logDouble(Level.DEBUG, "current (A)", m_motor::getOutputCurrent);
+        m_logger.logDouble(Level.DEBUG, "duty cycle", m_motor::getAppliedOutput);
     }
 
     @Override

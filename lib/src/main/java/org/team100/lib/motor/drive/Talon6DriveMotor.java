@@ -23,7 +23,6 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
     private final double m_distancePerTurn;
 
     protected Talon6DriveMotor(
-            String name,
             Logger parent,
             int canId,
             MotorPhase motorPhase,
@@ -33,7 +32,7 @@ public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
             double wheelDiameter,
             PIDConstants pid,
             Feedforward100 ff) {
-        super(name, parent, canId, motorPhase, supplyLimit, statorLimit, pid, ff);
+        super(parent, canId, motorPhase, supplyLimit, statorLimit, pid, ff);
         m_gearRatio = gearRatio;
         m_wheelDiameterM = wheelDiameter;
         m_distancePerTurn = wheelDiameter * Math.PI / gearRatio;

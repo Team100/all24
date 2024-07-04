@@ -7,7 +7,6 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
@@ -17,7 +16,6 @@ import edu.wpi.first.math.controller.PIDController;
 public class GravityServo {
     private final Logger m_logger;
     private final DutyCycleMotor100 m_motor;
-    private final String m_name;
     private final SysParam m_params;
     private final PIDController m_controller;
     private final Profile100 m_profile;
@@ -30,7 +28,6 @@ public class GravityServo {
 
     public GravityServo(
             DutyCycleMotor100 motor,
-            String name,
             Logger parent,
             SysParam params,
             PIDController controller,
@@ -39,7 +36,6 @@ public class GravityServo {
             Encoder100<Distance100> encoder,
             double[] softLimits) {
         m_motor = motor;
-        m_name = name;
         m_logger = parent.child(this.getClass());
         m_params = params;
         m_controller = controller;
@@ -182,8 +178,8 @@ public class GravityServo {
         m_logger.log(Level.DEBUG, "Goal", m_goal);
         m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
         m_logger.logDouble(Level.DEBUG, "Setpoint Velocity", () -> m_setpoint.v());
-        m_logger.logDouble(Level.DEBUG, "Controller Position Error", () -> m_controller.getPositionError());
-        m_logger.logDouble(Level.DEBUG, "Controller Velocity Error", () -> m_controller.getVelocityError());
+        m_logger.logDouble(Level.DEBUG, "Controller Position Error", m_controller::getPositionError);
+        m_logger.logDouble(Level.DEBUG, "Controller Velocity Error", m_controller::getVelocityError);
         m_logger.logDouble(Level.DEBUG, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
         m_logger.logDouble(Level.DEBUG, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
         m_logger.logDouble(Level.DEBUG, "ENCODEr", () -> measurement);

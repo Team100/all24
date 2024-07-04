@@ -3,11 +3,9 @@ package org.team100.lib.motor;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.model.TorqueModel;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -19,14 +17,12 @@ import com.revrobotics.SparkPIDController.ArbFFUnits;
 public abstract class CANSparkMotor<T extends Measure100>
         implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
     protected final Logger m_logger;
-    private final String m_name;
     protected final Feedforward100 m_ff;
     protected final CANSparkBase m_motor;
     protected final RelativeEncoder m_encoder;
     protected final SparkPIDController m_pidController;
 
     protected CANSparkMotor(
-            String name,
             Logger parent,
             CANSparkBase motor,
             MotorPhase motorPhase,
@@ -34,7 +30,6 @@ public abstract class CANSparkMotor<T extends Measure100>
             Feedforward100 ff,
             PIDConstants pid) {
         m_motor = motor;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_ff = ff;
         Rev100.baseConfig(m_motor);
@@ -159,13 +154,13 @@ public abstract class CANSparkMotor<T extends Measure100>
     }
 
     protected void log() {
-        m_logger.logDouble(Level.TRACE, "position (rev)", () -> m_encoder.getPosition());
+        m_logger.logDouble(Level.TRACE, "position (rev)", m_encoder::getPosition);
         m_logger.logDouble(Level.TRACE, "velocity (rev_s)", () -> m_encoder.getVelocity() / 60);
-        m_logger.logDouble(Level.TRACE, "velocity (RPM)", () -> m_encoder.getVelocity());
-        m_logger.logDouble(Level.TRACE, "current (A)", () -> m_motor.getOutputCurrent());
-        m_logger.logDouble(Level.TRACE, "duty cycle", () -> m_motor.getAppliedOutput());
-        m_logger.logDouble(Level.TRACE, "torque (Nm)", () -> getMotorTorque());
-        m_logger.logDouble(Level.TRACE, "temperature (C)", () -> m_motor.getMotorTemperature());
+        m_logger.logDouble(Level.TRACE, "velocity (RPM)", m_encoder::getVelocity);
+        m_logger.logDouble(Level.TRACE, "current (A)", m_motor::getOutputCurrent);
+        m_logger.logDouble(Level.TRACE, "duty cycle",  m_motor::getAppliedOutput);
+        m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
+        m_logger.logDouble(Level.TRACE, "temperature (C)",  m_motor::getMotorTemperature);
     }
 
     private void setP(double p) {

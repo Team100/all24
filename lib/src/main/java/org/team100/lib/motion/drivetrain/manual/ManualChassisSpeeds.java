@@ -7,7 +7,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -21,11 +20,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 public class ManualChassisSpeeds implements ChassisSpeedDriver {
     private final Logger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final String m_name;
 
-    public ManualChassisSpeeds(String name, Logger parent, SwerveKinodynamics swerveKinodynamics) {
+    public ManualChassisSpeeds(Logger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
     }
 

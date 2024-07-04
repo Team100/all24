@@ -12,7 +12,7 @@ class ClimberSubsystemTest implements Timeless2024 {
 
     @Test
     void testSimple() {
-        Logger logger = Telemetry.get().rootLogger(this.getClass());
+        Logger logger = Telemetry.get().testLogger();
         ClimberSubsystem c = new ClimberSubsystem(logger, 0, 0);
         assertEquals(0, c.getLeftPosition().getAsDouble(), kDelta);
         // run it for 0.25 sec at full output

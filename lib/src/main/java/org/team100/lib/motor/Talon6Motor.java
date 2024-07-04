@@ -5,11 +5,9 @@ import java.util.function.DoubleSupplier;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.model.TorqueModel;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -23,7 +21,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 public abstract class Talon6Motor<T extends Measure100>
         implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
     protected final Logger m_logger;
-    protected final String m_name;
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
 
@@ -43,7 +40,6 @@ public abstract class Talon6Motor<T extends Measure100>
     private final PositionVoltage m_PositionVoltage = new PositionVoltage(0);
 
     protected Talon6Motor(
-            String name,
             Logger parent,
             int canId,
             MotorPhase motorPhase,
@@ -51,7 +47,6 @@ public abstract class Talon6Motor<T extends Measure100>
             double statorLimit,
             PIDConstants lowLevelVelocityConstants,
             Feedforward100 ff) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_motor = new TalonFX(canId);
         m_ff = ff;
@@ -190,7 +185,7 @@ public abstract class Talon6Motor<T extends Measure100>
         m_logger.logDouble(Level.TRACE, "error (rev_s)", m_error);
         m_logger.logDouble(Level.TRACE, "supply current (A)", m_supply);
         m_logger.logDouble(Level.TRACE, "stator current (A)", m_stator);
-        m_logger.logDouble(Level.TRACE, "torque (Nm)", () -> getMotorTorque());
+        m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
         m_logger.logDouble(Level.DEBUG, "temperature (C)", m_temp);
     }
 

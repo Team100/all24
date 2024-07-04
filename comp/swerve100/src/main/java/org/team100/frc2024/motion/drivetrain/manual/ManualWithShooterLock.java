@@ -19,7 +19,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -54,7 +53,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private final HeadingInterface m_heading;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
-    private final String m_name;
     private final TrapezoidProfile100 m_profile;
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
@@ -66,7 +64,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private boolean first;
 
     public ManualWithShooterLock(
-            String name,
             Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
@@ -77,7 +74,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         isAligned = false;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         fieldLogger = Telemetry.get().fieldLogger();
         m_trigger = () -> false;

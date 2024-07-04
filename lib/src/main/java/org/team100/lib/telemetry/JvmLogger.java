@@ -11,7 +11,6 @@ import java.util.Map;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 
 /**
  * Logs stuff about the JVM. Inspired by Advantage Kit's
@@ -19,12 +18,10 @@ import org.team100.lib.util.Names;
  */
 public class JvmLogger implements Glassy {
     private final Logger m_logger;
-    private final String m_name;
     private final Map<String, Long> times;
     private final Map<String, Long> counts;
 
     public JvmLogger(Logger parent) {
-        m_name = Names.name(this);
         m_logger = parent.child(this);
         times = new HashMap<>();
         counts = new HashMap<>();

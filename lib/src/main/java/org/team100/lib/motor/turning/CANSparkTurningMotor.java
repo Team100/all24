@@ -16,7 +16,6 @@ public abstract class CANSparkTurningMotor extends CANSparkMotor<Angle100> {
     private final double m_gearRatio;
 
     CANSparkTurningMotor(
-            String name,
             Logger parent,
             CANSparkBase motor,
             MotorPhase motorPhase,
@@ -24,7 +23,7 @@ public abstract class CANSparkTurningMotor extends CANSparkMotor<Angle100> {
             double gearRatio,
             Feedforward100 ff,
             PIDConstants pid) {
-        super(name, parent, motor, motorPhase, currentLimit, ff, pid);
+        super(parent, motor, motorPhase, currentLimit, ff, pid);
         m_gearRatio = gearRatio;
     }
 

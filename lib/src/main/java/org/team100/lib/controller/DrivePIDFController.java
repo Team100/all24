@@ -4,13 +4,11 @@ import java.util.Optional;
 
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -26,7 +24,6 @@ public class DrivePIDFController implements DriveMotionController {
 
     private final Logger m_logger;
     private final boolean m_feedforwardOnly;
-    private final String m_name;
     private final double m_kPCart;
     private final double m_kPTheta;
     private final DriveMotionControllerUtil m_util;
@@ -43,7 +40,6 @@ public class DrivePIDFController implements DriveMotionController {
         m_feedforwardOnly = feedforwardOnly;
         m_kPCart = kPCart;
         m_kPTheta = kPTheta;
-        m_name = Names.name(this);
         m_logger = parent.child(this);
         m_util = new DriveMotionControllerUtil(m_logger);
     }

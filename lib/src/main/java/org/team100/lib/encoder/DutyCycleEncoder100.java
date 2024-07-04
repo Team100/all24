@@ -2,11 +2,9 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -17,7 +15,6 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     private final Logger m_logger;
-    private final String m_name;
     public final DutyCycleEncoder m_encoder;
 
     private Double prevAngle = null;
@@ -26,20 +23,17 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     private boolean m_reversed;
 
     /**
-     * @param name        may not start with a slash
      * @param channel     roboRIO analog input channel
      * @param inputOffset unit = turns, i.e. [0,1] subtracted from the raw
      *                    measurement
      * @param reversed    polarity
      */
     public DutyCycleEncoder100(
-            String name,
             Logger parent,
             int channel,
             double inputOffset,
             boolean reversed) {
         m_reversed = reversed;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
@@ -97,9 +91,9 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     //////////////////////////////////////////////
 
     private double getPositionRad() {
-        m_logger.logDouble(Level.DEBUG, "position (rad)",()-> m_encoder.getDistance());
-        m_logger.logDouble(Level.DEBUG, "position (turns)",()-> m_encoder.get());
-        m_logger.logDouble(Level.DEBUG, "position (absolute)",()-> m_encoder.getAbsolutePosition());
+        m_logger.logDouble(Level.DEBUG, "position (rad)", m_encoder::getDistance);
+        m_logger.logDouble(Level.DEBUG, "position (turns)", m_encoder::get);
+        m_logger.logDouble(Level.DEBUG, "position (absolute)", m_encoder::getAbsolutePosition);
         // should be fast, no cache needed.
         return m_encoder.getDistance();
     }

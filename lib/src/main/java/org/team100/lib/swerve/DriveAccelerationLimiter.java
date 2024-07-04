@@ -5,7 +5,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 /**
  * Enforces drive motor torque constraints.
@@ -15,11 +14,9 @@ public class DriveAccelerationLimiter implements Glassy {
 
     private final Logger m_logger;
     private final SwerveKinodynamics m_limits;
-    private final String m_name;
 
-    public DriveAccelerationLimiter(String name, Logger parent, SwerveKinodynamics limits) {
+    public DriveAccelerationLimiter(Logger parent, SwerveKinodynamics limits) {
         m_limits = limits;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
     }
 

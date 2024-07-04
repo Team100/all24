@@ -36,26 +36,26 @@ public class ArmFactory {
         final double kLowerEncoderOffset = 0.861614;
         final double kUpperEncoderOffset = 0.266396;
 
-        Motor100<Angle100> lowerMotor = new JointMotor(kLower, parent.child(kLower), 4, 8);
+        Motor100<Angle100> lowerMotor = new JointMotor(parent.child(kLower), 4, 8);
         // NOTE: the encoder inversion used to be in the subsystem,
         // but now it is here.
         Encoder100<Angle100> lowerEncoder = new AnalogTurningEncoder(
-                kLower, parent.child(kLower),
+                parent.child(kLower),
                 1, // analog input 1
                 kLowerEncoderOffset,
                 1, // encoder is 1:1 with the arm joint
                 EncoderDrive.INVERSE);
 
-        Motor100<Angle100> upperMotor = new JointMotor(kUpper, parent.child(kUpper), 30, 1);
+        Motor100<Angle100> upperMotor = new JointMotor(parent.child(kUpper), 30, 1);
         Encoder100<Angle100> upperEncoder = new AnalogTurningEncoder(
-                kUpper, parent.child(kUpper),
+                parent.child(kUpper),
                 0, // analog input 0
                 kUpperEncoderOffset,
                 1, // encoder is 1:1 with the arm joint
                 EncoderDrive.DIRECT);
 
         return new ArmSubsystem(
-                kArm, parent.child(kArm),
+                parent.child(kArm),
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
@@ -68,15 +68,14 @@ public class ArmFactory {
         // note very high reduction ratio
         // motor speed is rad/s
 
-        SimulatedMotor<Angle100> lowerMotor = new SimulatedMotor<>(kLower, parent.child(kLower), 600);
+        SimulatedMotor<Angle100> lowerMotor = new SimulatedMotor<>(parent.child(kLower), 600);
         SimulatedEncoder<Angle100> lowerEncoder = new SimulatedEncoder<>(
-                kLower, parent.child(kLower), lowerMotor, 200, -1, 1);
+                parent.child(kLower), lowerMotor, 200, -1, 1);
 
-        SimulatedMotor<Angle100> upperMotor = new SimulatedMotor<>(kUpper, parent.child(kUpper), 600);
+        SimulatedMotor<Angle100> upperMotor = new SimulatedMotor<>(parent.child(kUpper), 600);
         SimulatedEncoder<Angle100> upperEncoder = new SimulatedEncoder<>(
-                kUpper, parent.child(kUpper), upperMotor, 200, 0.1, 2.5);
+                parent.child(kUpper), upperMotor, 200, 0.1, 2.5);
         return new ArmSubsystem(
-                kArm,
                 parent.child(kArm),
                 lowerMotor,
                 lowerEncoder,

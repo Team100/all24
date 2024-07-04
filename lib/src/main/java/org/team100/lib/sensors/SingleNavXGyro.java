@@ -4,7 +4,6 @@ import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -27,13 +26,11 @@ public class SingleNavXGyro implements Gyro100 {
     private static final int kSPIBitRateHz = 500000;
     private final Logger m_logger;
     private final AHRS m_gyro1;
-    private final String m_name;
 
     /**
      * NOTE: the async is just for logging, maybe don't use a whole thread for it.
      */
     public SingleNavXGyro(Logger parent, Async async) {
-        m_name = Names.name(this);
         m_logger = parent.child(this);
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
@@ -133,7 +130,7 @@ public class SingleNavXGyro implements Gyro100 {
         } else {
             m_logger.logBoolean(Level.ERROR, "Connected", false);
         }
-        m_logger.logDouble(Level.TRACE, "Angle (deg)", () -> m_gyro1.getAngle());
+        m_logger.logDouble(Level.TRACE, "Angle (deg)", m_gyro1::getAngle);
         m_logger.log(Level.TRACE, "Fused (deg)", m_gyro1.getFusedHeading());
         m_logger.log(Level.TRACE, "Yaw (deg)", m_gyro1.getYaw());
         m_logger.logDouble(Level.TRACE, "Angle Mod 360 (deg)", () -> m_gyro1.getAngle() % 360);

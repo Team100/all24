@@ -44,7 +44,6 @@ class ManualWithProfiledHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -81,7 +80,6 @@ class ManualWithProfiledHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -125,7 +123,6 @@ class ManualWithProfiledHeadingTest {
         // probably P is too high here.
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -202,7 +199,6 @@ class ManualWithProfiledHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -272,7 +268,6 @@ class ManualWithProfiledHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0, 0, 0);
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,
@@ -336,7 +331,6 @@ class ManualWithProfiledHeadingTest {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(3.5, 0, 0);
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
-                "foo",
                 logger,
                 swerveKinodynamics,
                 heading,

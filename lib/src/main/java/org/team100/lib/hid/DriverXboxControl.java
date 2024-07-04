@@ -7,7 +7,6 @@ import static org.team100.lib.hid.ControlUtil.expo;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
@@ -22,12 +21,10 @@ public class DriverXboxControl implements DriverControl {
     private static final double kSlow = 0.15;
     private final Logger m_logger;
     private final XboxController m_controller;
-    private final String m_name;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public DriverXboxControl(Logger parent) {
         m_controller = new XboxController(0);
-        m_name = Names.name(this);
         m_logger = parent.child(this);
     }
 
@@ -79,9 +76,9 @@ public class DriverXboxControl implements DriverControl {
         }
         double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
         Speed speed = speed();
-        m_logger.logDouble(Level.TRACE, "Xbox/right y", () -> m_controller.getRightY());
-        m_logger.logDouble(Level.TRACE, "Xbox/right x", () -> m_controller.getRightX());
-        m_logger.logDouble(Level.TRACE, "Xbox/left x", () -> m_controller.getLeftX());
+        m_logger.logDouble(Level.TRACE, "Xbox/right y", m_controller::getRightY);
+        m_logger.logDouble(Level.TRACE, "Xbox/right x", m_controller::getRightX);
+        m_logger.logDouble(Level.TRACE, "Xbox/left x", m_controller::getLeftX);
         switch (speed) {
             case SLOW:
                 return new Velocity(kSlow * dx, kSlow * dy, kSlow * dtheta);

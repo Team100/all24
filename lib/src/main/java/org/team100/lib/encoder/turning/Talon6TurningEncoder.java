@@ -4,23 +4,19 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.turning.Talon6TurningMotor;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
     private final Logger m_logger;
-    private final String m_name;
     private final Talon6TurningMotor m_motor;
     private final double m_gearRatio;
 
     public Talon6TurningEncoder(
-            String name,
             Logger parent,
             Talon6TurningMotor m_motor,
             double m_gearRatio) {
-        this.m_name = name;
         m_logger = parent.child(this);
         this.m_motor = m_motor;
         this.m_gearRatio = m_gearRatio;

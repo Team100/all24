@@ -14,7 +14,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.util.ExpiringMemoizingSupplier;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -34,7 +33,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
     private final Supplier<DriverControl.Speed> m_speed;
-    private final String m_name;
     private final ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
@@ -47,7 +45,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_speed = speed;
-        m_name = Names.name(this);
         m_logger = parent.child(this);
         fieldLogger = Telemetry.get().fieldLogger();
         // state update at 100 hz.
@@ -216,7 +213,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 m_stateSupplier.get().pose().getY(),
                 m_stateSupplier.get().pose().getRotation().getDegrees()
         });
-        m_logger.logDouble(Level.DEBUG, "heading rate rad_s", () -> m_heading.getHeadingRateNWU());
+        m_logger.logDouble(Level.DEBUG, "heading rate rad_s", m_heading::getHeadingRateNWU);
     }
 
     @Override

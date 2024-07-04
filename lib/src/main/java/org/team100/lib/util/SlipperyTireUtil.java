@@ -119,8 +119,8 @@ public class SlipperyTireUtil {
             SwerveDriveKinematics100 kinematics,
             Pose2d pose0,
             Pose2d pose1) {
-        m_logger.logDouble(Level.TRACE, "pose0x", () -> pose0.getX());
-        m_logger.logDouble(Level.TRACE, "pose1x", () -> pose1.getX());
+        m_logger.logDouble(Level.TRACE, "pose0x", pose0::getX);
+        m_logger.logDouble(Level.TRACE, "pose1x", pose1::getX);
         Twist2d twist = pose0.log(pose1);
         m_logger.logDouble(Level.TRACE, "twistdx", () -> twist.dx);
         SwerveModulePosition[] p = kinematics.toSwerveModulePosition(twist);

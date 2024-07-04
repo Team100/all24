@@ -2,11 +2,9 @@ package org.team100.lib.motor.turning;
 
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.util.Names;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -85,9 +83,8 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
 
     private final Logger m_logger;
     private final WPI_TalonSRX m_motor;
-    private final String m_name;
 
-    public CANTurningMotor(String name, Logger parent, int channel) {
+    public CANTurningMotor(Logger parent, int channel) {
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
         m_motor.setNeutralMode(NeutralMode.Brake);
@@ -125,7 +122,6 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
 
         m_motor.setSensorPhase(true);
 
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceID());
     }

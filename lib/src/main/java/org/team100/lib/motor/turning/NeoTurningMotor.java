@@ -14,7 +14,6 @@ import com.revrobotics.CANSparkMax;
  */
 public class NeoTurningMotor extends CANSparkTurningMotor implements NeoTorqueModel {
     public NeoTurningMotor(
-            String name,
             Logger parent,
             int canId,
             MotorPhase motorPhase,
@@ -22,7 +21,7 @@ public class NeoTurningMotor extends CANSparkTurningMotor implements NeoTorqueMo
             double gearRatio,
             Feedforward100 ff,
             PIDConstants pid) {
-        super(name, parent, new CANSparkMax(canId, MotorType.kBrushless),
+        super(parent, new CANSparkMax(canId, MotorType.kBrushless),
                 motorPhase, currentLimit, gearRatio, ff, pid);
     }
 }

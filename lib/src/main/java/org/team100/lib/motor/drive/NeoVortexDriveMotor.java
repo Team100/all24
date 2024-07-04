@@ -13,7 +13,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 public class NeoVortexDriveMotor extends CANSparkDriveMotor implements NeoVortexTorqueModel {
 
     public NeoVortexDriveMotor(
-            String name,
             Logger parent,
             int canId,
             MotorPhase motorPhase,
@@ -22,7 +21,7 @@ public class NeoVortexDriveMotor extends CANSparkDriveMotor implements NeoVortex
             double wheelDiameter,
             Feedforward100 ff,
             PIDConstants pid) {
-        super(name, parent, new CANSparkFlex(canId, MotorType.kBrushless),
+        super(parent, new CANSparkFlex(canId, MotorType.kBrushless),
                 motorPhase, currentLimit, gearRatio, wheelDiameter,
                 ff, pid);
     }

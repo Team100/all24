@@ -3,14 +3,12 @@ package org.team100.lib.controller;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -35,10 +33,8 @@ public class DriveRamseteController implements DriveMotionController {
     private static final double kLooperDt = 0.02;
 
     private final Logger m_logger;
-    private final String m_name;
 
     public DriveRamseteController(Logger parent) {
-        m_name = Names.name(this);
         m_logger = parent.child(this);
     }
 

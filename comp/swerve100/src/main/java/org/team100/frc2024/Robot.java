@@ -9,10 +9,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.telemetry.JvmLogger;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -27,15 +24,8 @@ public class Robot extends TimedRobot100 implements Glassy {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
-    private final Logger m_logger;
-    private final String m_name;
     private RobotContainer m_robotContainer;
     private JvmLogger m_jvmLogger;
-
-    public Robot() {
-        m_name = Names.name(this);
-        m_logger = Telemetry.get().rootLogger(this);
-    }
 
     @Override
     public void robotInit() {

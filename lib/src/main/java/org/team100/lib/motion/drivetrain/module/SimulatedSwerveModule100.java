@@ -21,40 +21,34 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
             Logger parent,
             SwerveKinodynamics kinodynamics) {
         VelocityServo<Distance100> driveServo = simulatedDriveServo(
-                name + "/Drive",
-                parent.child("/Drive"));
+                parent.child("Drive"));
         PositionServo<Angle100> turningServo = simulatedTurningServo(
-                name + "/Turning",
-                parent.child("/Turning"),
+                parent.child("Turning"),
                 kinodynamics);
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100> simulatedDriveServo(String name, Logger parent) {
+    private static VelocityServo<Distance100> simulatedDriveServo(Logger parent) {
         // simulated drive motor free speed is 5 m/s
-        SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(name, parent, 5);
+        SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(parent, 5);
         SimulatedEncoder<Distance100> driveEncoder = new SimulatedEncoder<>(
-                name,
                 parent,
                 driveMotor,
                 1,
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
         return new OutboardVelocityServo<>(
-                name,
                 parent,
                 driveMotor,
                 driveEncoder);
     }
 
     private static PositionServo<Angle100> simulatedTurningServo(
-            String name,
             Logger parent,
             SwerveKinodynamics kinodynamics) {
         // simulated turning motor free speed is 20 rad/s
-        SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(name, parent, 20);
+        SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(parent, 20);
         SimulatedEncoder<Angle100> turningEncoder = new SimulatedEncoder<>(
-                name,
                 parent,
                 turningMotor,
                 1,
@@ -70,7 +64,6 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         turningPositionController.setTolerance(0.05, 0.05);
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
-                name,
                 parent,
                 turningMotor,
                 turningEncoder,

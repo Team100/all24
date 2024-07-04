@@ -19,7 +19,7 @@ class SteeringOverrideTest {
     @Test
     void testUnconstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
-        SteeringOverride c = new SteeringOverride("foo", logger, l);
+        SteeringOverride c = new SteeringOverride(logger, l);
 
         SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(0, GeometryUtil.kRotationZero)
@@ -41,7 +41,7 @@ class SteeringOverrideTest {
     @Test
     void testConstrained() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2(logger);
-        SteeringOverride c = new SteeringOverride("foo", logger, l);
+        SteeringOverride c = new SteeringOverride(logger, l);
 
         SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
                 new SwerveModuleState(1, GeometryUtil.kRotation90)

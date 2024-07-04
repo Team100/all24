@@ -24,7 +24,6 @@ class AnglePositionServoTest {
         // long period to make the output bigger
         double period = 1;
 
-        String name = "test";
         MockVelocityMotor100<Angle100> turningMotor = new MockVelocityMotor100<>();
         MockEncoder100<Angle100> turningEncoder = new MockEncoder100<>();
 
@@ -34,7 +33,6 @@ class AnglePositionServoTest {
         double maxVel = 1;
         Logger logger = Telemetry.get().testLogger();
         OnboardPositionServo<Angle100> servo = new OnboardPositionServo<>(
-                name,
                 logger,
                 turningMotor,
                 turningEncoder,
@@ -52,7 +50,6 @@ class AnglePositionServoTest {
 
     @Test
     void testOutboard() {
-        String name = "test";
         MockPositionMotor100<Angle100> motor = new MockPositionMotor100<>();
         MockEncoder100<Angle100> externalEncoder = new MockEncoder100<>();
         MockEncoder100<Angle100> builtInEncoder = new MockEncoder100<>();
@@ -62,7 +59,6 @@ class AnglePositionServoTest {
         Logger logger = Telemetry.get().testLogger();
 
         OutboardPositionServo<Angle100> servo = new OutboardPositionServo<>(
-                name,
                 logger,
                 motor,
                 combinedEncoder,

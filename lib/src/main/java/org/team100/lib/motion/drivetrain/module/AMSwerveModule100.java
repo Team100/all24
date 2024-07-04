@@ -47,8 +47,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
             Feedforward100 ff) {
 
         VelocityServo<Distance100> driveServo = driveServo(
-                name + "/Drive",
-                parent.child("/Drive"),
+                parent.child("Drive"),
                 currentLimit,
                 statorLimit,
                 driveMotorCanId,
@@ -56,8 +55,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 ff);
 
         PositionServo<Angle100> turningServo = turningServo(
-                name + "/Turning",
-                parent.child("/Turning"),
+                parent.child("Turning"),
                 turningMotorChannel,
                 turningEncoderChannel,
                 turningOffset,
@@ -67,7 +65,6 @@ public class AMSwerveModule100 extends SwerveModule100 {
     }
 
     private static VelocityServo<Distance100> driveServo(
-            String name,
             Logger parent,
             double currentLimit,
             double statorLimit,
@@ -76,7 +73,6 @@ public class AMSwerveModule100 extends SwerveModule100 {
             Feedforward100 ff) {
         double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
         Falcon6DriveMotor driveMotor = new Falcon6DriveMotor(
-                name,
                 parent,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
@@ -87,31 +83,26 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 pidConstants,
                 ff);
         Talon6DriveEncoder driveEncoder = new Talon6DriveEncoder(
-                name,
                 parent,
                 driveMotor,
                 distancePerTurn);
         return new OutboardVelocityServo<>(
-                name,
                 parent,
                 driveMotor,
                 driveEncoder);
     }
 
     private static PositionServo<Angle100> turningServo(
-            String name,
             Logger parent,
             int turningMotorChannel,
             int turningEncoderChannel,
             double turningOffset,
             SwerveKinodynamics kinodynamics) {
         TurningMotorController100 turningMotor = new TurningMotorController100(
-                name,
                 parent,
                 new VictorSP(turningMotorChannel),
                 turningMotorChannel);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
-                name,
                 parent,
                 turningEncoderChannel,
                 turningOffset,
@@ -127,7 +118,6 @@ public class AMSwerveModule100 extends SwerveModule100 {
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
         PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
-                name,
                 parent,
                 turningMotor,
                 turningEncoder,

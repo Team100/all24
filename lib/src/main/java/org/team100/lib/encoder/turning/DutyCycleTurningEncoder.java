@@ -3,11 +3,9 @@ package org.team100.lib.encoder.turning;
 import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -23,19 +21,16 @@ import edu.wpi.first.wpilibj.Timer;
 public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     private final Logger m_logger;
     private final DutyCycleEncoder m_encoder;
-    private final String m_name;
 
     private Double prevAngle = null;
     private Double prevTime = null;
 
     public DutyCycleTurningEncoder(
-            String name,
             Logger parent,
             int channel,
             double inputOffset,
             double gearRatio,
             EncoderDrive drive) {
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
         m_encoder = new DutyCycleEncoder(channel);
         m_encoder.setPositionOffset(inputOffset);
@@ -48,7 +43,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
                 break;
         }
 
-        m_logger.log(Level.DEBUG,  "channel", m_encoder.getSourceChannel());
+        m_logger.log(Level.DEBUG, "channel", m_encoder.getSourceChannel());
     }
 
     @Override
@@ -86,10 +81,10 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
 
     private double getPositionRad() {
         double positionRad = m_encoder.getDistance();
-        m_logger.logDouble(Level.DEBUG,  "position (rad) ROBOT USES THIS (CCW POSITIVE)",()-> positionRad);
-        m_logger.logDouble(Level.DEBUG,  "position (turns) USE FOR OFFSETS",()-> m_encoder.get());
-        m_logger.logDouble(Level.DEBUG,  "position (absolute)", ()->m_encoder.getAbsolutePosition());
-        m_logger.logDouble(Level.DEBUG,  "Wrapped position rads (absolute)", ()->MathUtil.angleModulus(positionRad));
+        m_logger.logDouble(Level.DEBUG, "position (rad) ROBOT USES THIS (CCW POSITIVE)", () -> positionRad);
+        m_logger.logDouble(Level.DEBUG, "position (turns) USE FOR OFFSETS", m_encoder::get);
+        m_logger.logDouble(Level.DEBUG, "position (absolute)", m_encoder::getAbsolutePosition);
+        m_logger.logDouble(Level.DEBUG, "Wrapped position rads (absolute)", () -> MathUtil.angleModulus(positionRad));
         return positionRad;
     }
 
@@ -109,7 +104,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         prevTime = time;
 
         double rateRad_S = dx / dt;
-        m_logger.logDouble(Level.DEBUG,  "rate (rad_s)",()-> rateRad_S);
+        m_logger.logDouble(Level.DEBUG, "rate (rad_s)", () -> rateRad_S);
         return rateRad_S;
     }
 }

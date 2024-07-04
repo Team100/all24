@@ -14,7 +14,6 @@ import org.team100.lib.motor.duty_cycle.NeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -25,12 +24,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * The pivot is independent from the feeder, so it's a separate subsystem.
  */
 public class AmpPivot extends SubsystemBase implements Glassy {
-    private final String m_name;
     private final Logger m_logger;
     private final GravityServo ampAngleServo;
 
     public AmpPivot(Logger parent) {
-        m_name = Names.name(this);
         m_logger = parent.child(this);
         SysParam m_params = SysParam.neoPositionServoSystem(
                 55,
@@ -43,23 +40,21 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         switch (Identity.instance) {
             case COMP_BOT:
                 ampAngleServo = new GravityServo(
-                        new NeoProxy(m_name, m_logger, 2, IdleMode.kCoast, 30),
-                        m_name,
+                        new NeoProxy(m_logger, 2, IdleMode.kCoast, 30),
                         m_logger,
                         m_params,
                         new PIDController(0.8, 0, 0),
                         profile,
                         period,
-                        new DutyCycleEncoder100("ANALOG ENCODER PIVOT", m_logger, 3, 0.645439, true),
+                        new DutyCycleEncoder100(m_logger, 3, 0.645439, true),
                         new double[] { 0, 0 });
                 break;
             default:
                 // For testing and simulation
                 // motor speed is rad/s
                 SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>(
-                        m_name, m_logger, 600);
+                        m_logger, 600);
                 SimulatedEncoder<Distance100> simEncoder = new SimulatedEncoder<>(
-                        m_name,
                         m_logger,
                         simMotor,
                         75, // guess the gear ratio?
@@ -67,7 +62,6 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                         Double.MAX_VALUE);
                 ampAngleServo = new GravityServo(
                         simMotor,
-                        m_name,
                         m_logger,
                         m_params,
                         new PIDController(0.7, 0, 0),

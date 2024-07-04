@@ -3,10 +3,8 @@ package org.team100.lib.controller;
 import java.util.function.DoubleUnaryOperator;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -120,7 +118,6 @@ public class MinTimeController implements Glassy {
     private final double m_maxVelocity;
     private final double m_switchingAcceleration;
     private final double m_tolerance;
-    private final String m_name;
 
     /**
      * @param modulus        for angle wrapping
@@ -138,7 +135,6 @@ public class MinTimeController implements Glassy {
      * @param k              full-state gains
      */
     public MinTimeController(
-            String name,
             Logger parent,
             DoubleUnaryOperator modulus,
             double maxVel,
@@ -156,7 +152,6 @@ public class MinTimeController implements Glassy {
         m_tolerance = tolerance;
         m_finish = finish;
         m_k = k;
-        m_name = Names.append(name, this);
         m_logger = parent.child(this);
     }
 

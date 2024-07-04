@@ -29,7 +29,6 @@ class MinTimeControllerTest {
         // (equal to the delay) and oscillation around the goal.
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 x -> x,
                 1, // maxV
@@ -72,7 +71,6 @@ class MinTimeControllerTest {
         // is to use the previous setpoint, not the measurement, as the initial state.
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 x -> x,
                 1, // maxV
@@ -111,7 +109,6 @@ class MinTimeControllerTest {
         // System.out.println("testAngleWrapping");
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 MathUtil::angleModulus,
                 1, // maxV
@@ -167,7 +164,6 @@ class MinTimeControllerTest {
         // System.out.println("testMovingAngleWrapping");
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 MathUtil::angleModulus,
                 1, // maxV
@@ -217,7 +213,6 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 x -> x,
                 1, // maxV
@@ -262,7 +257,6 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 x -> x,
                 0.6, // maxV
@@ -309,7 +303,6 @@ class MinTimeControllerTest {
         // max accel = 0.8 rad/s^2
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 x -> x,
                 1, // maxV
@@ -354,7 +347,6 @@ class MinTimeControllerTest {
         // System.out.println("testUnderdrive");
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 x -> x,
                 1, // maxV
@@ -400,7 +392,6 @@ class MinTimeControllerTest {
         // System.out.println("testOverdrive");
         Logger logger = Telemetry.get().testLogger();
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 x -> x,
                 1, // maxV
@@ -462,7 +453,6 @@ class MinTimeControllerTest {
         Logger logger = Telemetry.get().testLogger();
 
         final MinTimeController profile = new MinTimeController(
-                "test",
                 logger,
                 x -> x,
                 1, // maxV

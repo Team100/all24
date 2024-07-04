@@ -2,7 +2,6 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.Telemetry.Logger;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -14,25 +13,23 @@ public class Heading implements HeadingInterface {
     private final Logger m_logger;
 
     private final Gyro100 m_gyro;
-    private final String m_name;
 
     public Heading(Logger parent, Gyro100 gyro) {
         m_gyro = gyro;
-        m_name = Names.name(this);
         m_logger = parent.child(this);
     }
 
     @Override
     public Rotation2d getHeadingNWU() {
         Rotation2d currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * m_gyro.getYawNEDDeg());
-        m_logger.logDouble(Level.TRACE, "Heading NWU (rad)", ()->currentHeadingNWU.getRadians());
+        m_logger.logDouble(Level.TRACE, "Heading NWU (rad)", currentHeadingNWU::getRadians);
         return currentHeadingNWU;
     }
 
     @Override
     public double getHeadingRateNWU() {
         double currentHeadingRateNWU = Math.toRadians(m_gyro.getYawRateNEDDeg_s());
-        m_logger.logDouble(Level.TRACE, "Heading Rate NWU (rad_s)", ()->currentHeadingRateNWU);
+        m_logger.logDouble(Level.TRACE, "Heading Rate NWU (rad_s)", () -> currentHeadingRateNWU);
         return currentHeadingRateNWU;
     }
 

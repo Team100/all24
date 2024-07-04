@@ -18,14 +18,13 @@ public abstract class Talon6TurningMotor extends Talon6Motor<Angle100> {
     private final double m_gearRatio;
 
     protected Talon6TurningMotor(
-            String name,
             Logger parent,
             int canId,
             MotorPhase motorPhase,
             double gearRatio,
             PIDConstants pid,
             Feedforward100 ff) {
-        super(name, parent, canId, motorPhase, kSupplyLimit, kStatorLimit, pid, ff);
+        super(parent, canId, motorPhase, kSupplyLimit, kStatorLimit, pid, ff);
         m_gearRatio = gearRatio;
     }
 
