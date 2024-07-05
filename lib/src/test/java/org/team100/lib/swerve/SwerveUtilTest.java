@@ -7,11 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 
 class SwerveUtilTest {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
-        @Test
+    @Test
     void testFindDriveMaxS0() {
         double x_0 = 0;
         double y_0 = 0;
@@ -149,7 +152,7 @@ class SwerveUtilTest {
 
     @Test
     void testGetMaxVelStep() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.lowAccelHighDecel();
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.lowAccelHighDecel(logger);
         // decelerating
         assertEquals(0.2, SwerveUtil.getMaxVelStep(l, 1, 0, 0, 1, 0.02), kDelta);
         // acccelerating
@@ -158,7 +161,7 @@ class SwerveUtilTest {
 
     @Test
     void testGetMaxVelStepConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(0.02, SwerveUtil.getMaxVelStep(l, 0, 0, 1, 0, 0.02), kDelta);
     }
 

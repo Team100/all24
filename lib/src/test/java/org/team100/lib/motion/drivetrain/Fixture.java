@@ -11,6 +11,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.visualization.SwerveModuleVisualization;
 
 import edu.wpi.first.math.VecBuilder;
@@ -28,11 +30,13 @@ public class Fixture {
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
     public HolonomicDriveController3 controller;
+    public Logger logger;
 
     public Fixture() {
-        swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        logger = new TestLogger();
+        swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Async async = new MockAsync();
-        collection = SwerveModuleCollection.get(10, 20, swerveKinodynamics, async);
+        collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
         SwerveModuleVisualization.make(collection, async);
         heading = new SimulatedHeading(swerveKinodynamics, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
@@ -43,15 +47,16 @@ public class Fixture {
                 VecBuilder.fill(0.5, 0.5, 0.5),
                 VecBuilder.fill(0.1, 0.1, 0.4));
 
-        swerveLocal = new SwerveLocal(swerveKinodynamics, collection);
+        swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
 
         drive = new SwerveDriveSubsystem(
+                logger,
                 heading,
                 poseEstimator,
                 swerveLocal,
                 () -> DriverControl.Speed.NORMAL);
 
-        controller = new HolonomicDriveController3();
+        controller = new HolonomicDriveController3(logger);
     }
 
     public void close() {

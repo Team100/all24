@@ -2,10 +2,9 @@ package org.team100.lib.swerve;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 /**
  * Enforces drive motor torque constraints.
@@ -13,13 +12,12 @@ import org.team100.lib.util.Names;
 public class DriveAccelerationLimiter implements Glassy {
     private static final int kMaxIterations = 10;
 
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
     private final SwerveKinodynamics m_limits;
-    private final String m_name;
 
-    public DriveAccelerationLimiter(String parent, SwerveKinodynamics limits) {
+    public DriveAccelerationLimiter(Logger parent, SwerveKinodynamics limits) {
         m_limits = limits;
-        m_name = Names.append(parent, this);
+        m_logger = parent.child(this);
     }
 
     public double enforceWheelAccelLimit(
@@ -37,7 +35,7 @@ public class DriveAccelerationLimiter implements Glassy {
                     desired_vx[i],
                     desired_vy[i],
                     kDtSec);
-            t.log(Level.DEBUG, m_name, "max_vel_step", max_vel_step);
+            m_logger.logDouble(Level.DEBUG, "max_vel_step", () -> max_vel_step);
 
             // reduces the size of the search space if min_s is already constrained (by
             // earlier modules)
@@ -56,7 +54,8 @@ public class DriveAccelerationLimiter implements Glassy {
                 break;
             }
         }
-        t.log(Level.DEBUG, m_name, "s", min_s);
+        final double s = min_s;
+        m_logger.logDouble(Level.DEBUG, "s", () -> s);
         return min_s;
     }
 

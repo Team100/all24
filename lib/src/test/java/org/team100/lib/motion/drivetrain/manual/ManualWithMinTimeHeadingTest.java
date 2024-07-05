@@ -19,6 +19,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,6 +28,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 class ManualWithMinTimeHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
+    private static final Logger logger = new TestLogger();
 
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
 
@@ -33,11 +36,10 @@ class ManualWithMinTimeHeadingTest {
     void testModeSwitching() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -64,11 +66,10 @@ class ManualWithMinTimeHeadingTest {
     void testNotSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -101,11 +102,10 @@ class ManualWithMinTimeHeadingTest {
     void testSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -172,11 +172,10 @@ class ManualWithMinTimeHeadingTest {
     void testSnapHeld() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
         HeadingInterface heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -235,12 +234,11 @@ class ManualWithMinTimeHeadingTest {
     void testStickyHeading() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -292,12 +290,11 @@ class ManualWithMinTimeHeadingTest {
     void testStickyHeading2() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
         MockHeading heading = new MockHeading();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
-                "foo",
+                logger,
                 swerveKinodynamics,
                 heading,
                 rotationSupplier);
@@ -338,7 +335,7 @@ class ManualWithMinTimeHeadingTest {
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // velocity carries forward
         assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
-        //  ?
+        // ?
         assertEquals(0.058, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         assertEquals(2.796, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // ?
@@ -350,7 +347,7 @@ class ManualWithMinTimeHeadingTest {
      */
     @Test
     void testProfile() {
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         // trapezoid adapts to max actual speed
         double kRotationSpeed = 0.5;
         assertEquals(1.414, swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed, kDelta);

@@ -16,6 +16,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.swerve.SwerveSetpoint;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryGenerator100;
@@ -30,7 +32,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveMotionPlannerTest {
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
+    private static final Logger logger = new TestLogger();
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(logger);
 
     @Test
     void testTrajectory() {
@@ -65,7 +68,7 @@ class DriveMotionPlannerTest {
                 start_vel,
                 end_vel);
 
-        DriveMotionController controller = new DrivePIDFController(false, 2.4, 2.4);
+        DriveMotionController controller = new DrivePIDFController(logger, false, 2.4, 2.4);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(timed_trajectory));
         controller.setTrajectory(traj_iterator);
@@ -92,7 +95,7 @@ class DriveMotionPlannerTest {
 
     @Test
     void testAllTrajectories() {
-        DrivePIDFController controller = new DrivePIDFController(false, 2.4, 2.4);
+        DrivePIDFController controller = new DrivePIDFController(logger, false, 2.4, 2.4);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100();
         List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();
 

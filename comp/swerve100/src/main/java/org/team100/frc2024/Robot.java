@@ -9,9 +9,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.telemetry.JvmLogger;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -26,8 +24,6 @@ public class Robot extends TimedRobot100 implements Glassy {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
-    private final Telemetry t = Telemetry.get();
-    private final String m_name = Names.name(this);
     private RobotContainer m_robotContainer;
     private JvmLogger m_jvmLogger;
 
@@ -39,7 +35,7 @@ public class Robot extends TimedRobot100 implements Glassy {
         RobotController.setBrownoutVoltage(5.5);
         banner();
 
-        m_jvmLogger = new JvmLogger();
+        m_jvmLogger = new JvmLogger(m_logger);
 
         // By default, LiveWindow turns off the CommandScheduler in test mode,
         // but we don't want that.
@@ -58,7 +54,7 @@ public class Robot extends TimedRobot100 implements Glassy {
 
         DataLogManager.start();
 
-        // This reduces the allocated heap size, not just the used heap size, which 
+        // This reduces the allocated heap size, not just the used heap size, which
         // means more-frequent and smaller subsequent GC's.
         System.gc();
     }
@@ -67,19 +63,19 @@ public class Robot extends TimedRobot100 implements Glassy {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
-        // t.log(Level.DEBUG, m_name, "Voltage", m_pdh.getVoltage());
-        // t.log(Level.DEBUG, m_name, "Total Current", m_pdh.getTotalCurrent());
+        // t.log(Level.DEBUG, "Voltage", m_pdh.getVoltage());
+        // t.log(Level.DEBUG, "Total Current", m_pdh.getTotalCurrent());
 
         // for(int channel = 0; channel < 20; channel++){
-        // t.log(Level.DEBUG, m_name, "Channel " + String.valueOf(channel),
+        // t.log(Level.DEBUG, "Channel " + String.valueOf(channel),
         // m_pdh.getCurrent(channel));
 
         // }
 
-        t.log(Level.DEBUG, m_name, "DriverStation MatchTime", DriverStation.getMatchTime());
-        t.log(Level.DEBUG, m_name, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
-        t.log(Level.DEBUG, m_name, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
-        t.log(Level.DEBUG, m_name, "DriverStation FMSAttached", DriverStation.isFMSAttached());
+        m_logger.logDouble(Level.DEBUG, "DriverStation MatchTime", DriverStation::getMatchTime);
+        m_logger.logBoolean(Level.DEBUG, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
+        m_logger.logBoolean(Level.DEBUG, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
+        m_logger.logBoolean(Level.DEBUG, "DriverStation FMSAttached", DriverStation.isFMSAttached());
 
         m_jvmLogger.logGarbageCollectors();
         m_jvmLogger.logMemoryPools();
@@ -93,12 +89,12 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void disabledPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "disabled");
+        m_logger.log(Level.DEBUG, "mode", "disabled");
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
-        t.log(Level.DEBUG, m_name, "key list size", keyListSize);
+        m_logger.logDouble(Level.DEBUG, "key list size",()-> keyListSize);
 
         // this forces the static initializer to run, so that the widget appears.
-        t.log(Level.INFO, m_name, "active auton routine", AutonChooser.routine().name());
+        m_logger.log(Level.INFO, "active auton routine", AutonChooser.routine().name());
     }
 
     @Override
@@ -146,24 +142,24 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void autonomousPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "autonomous");
+        m_logger.log(Level.DEBUG, "mode", "autonomous");
     }
 
     @Override
     public void simulationPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "simulation");
+        m_logger.log(Level.DEBUG, "mode", "simulation");
     }
 
     @Override
     public void teleopPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "teleop");
-        t.log(Level.DEBUG, "Robot", "voltage", RobotController.getBatteryVoltage());
+        m_logger.log(Level.DEBUG, "mode", "teleop");
+        m_logger.logDouble(Level.DEBUG, "voltage", RobotController::getBatteryVoltage);
 
     }
 
     @Override
     public void testPeriodic() {
-        t.log(Level.DEBUG, m_name, "mode", "test");
+        m_logger.log(Level.DEBUG, "mode", "test");
     }
 
     private void banner() {

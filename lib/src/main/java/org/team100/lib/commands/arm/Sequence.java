@@ -2,6 +2,7 @@ package org.team100.lib.commands.arm;
 
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
+import org.team100.lib.telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -13,12 +14,12 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
  */
 public class Sequence extends SequentialCommandGroup {
 
-    public Sequence(ArmSubsystem armSubsystem, ArmKinematics armKinematicsM) {
+    public Sequence(Logger parent, ArmSubsystem armSubsystem, ArmKinematics armKinematicsM) {
 
-        addCommands(new ArmTrajectoryCommand(armSubsystem, armKinematicsM, new Translation2d(.6, .6)),
-                new ArmTrajectoryCommand(armSubsystem, armKinematicsM, new Translation2d(1, .6)),
-                new ArmTrajectoryCommand(armSubsystem, armKinematicsM, new Translation2d(1, 1)),
-                new ArmTrajectoryCommand(armSubsystem, armKinematicsM, new Translation2d(.6, 1)),
-                new ArmTrajectoryCommand(armSubsystem, armKinematicsM, new Translation2d(.6, .6)));
+        addCommands(new ArmTrajectoryCommand(parent, armSubsystem, armKinematicsM, new Translation2d(.6, .6)),
+                new ArmTrajectoryCommand(parent, armSubsystem, armKinematicsM, new Translation2d(1, .6)),
+                new ArmTrajectoryCommand(parent, armSubsystem, armKinematicsM, new Translation2d(1, 1)),
+                new ArmTrajectoryCommand(parent, armSubsystem, armKinematicsM, new Translation2d(.6, 1)),
+                new ArmTrajectoryCommand(parent, armSubsystem, armKinematicsM, new Translation2d(.6, .6)));
     }
 }

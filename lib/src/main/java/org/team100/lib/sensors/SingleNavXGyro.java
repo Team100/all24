@@ -2,9 +2,8 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -18,15 +17,21 @@ import edu.wpi.first.wpilibj.Timer;
  * Single NavX over USB, using high update rate.
  */
 public class SingleNavXGyro implements Gyro100 {
-    private static final byte kUpdateRateHz = (byte) 200;
-    private static final int kSPIBitRateHz = 500000;
-    private final Telemetry t = Telemetry.get();
-    private final AHRS m_gyro1;
-    private final String m_name;
+    // 200 hz seems to make edu.wpi.first.hal.SPIJNI.spiReadB do a lot of work (7.5%
+    // self time according to VisualVM)
+    // private static final byte kUpdateRateHz = (byte) 200;
+    // 60 is the default
+    private static final byte kUpdateRateHz = (byte) 60;
 
-    /** NOTE: the async is just for logging, maybe don't use a whole thread for it. */
-    public SingleNavXGyro(Async async) {
-        m_name = Names.name(this);
+    private static final int kSPIBitRateHz = 500000;
+    private final Logger m_logger;
+    private final AHRS m_gyro1;
+
+    /**
+     * NOTE: the async is just for logging, maybe don't use a whole thread for it.
+     */
+    public SingleNavXGyro(Logger parent, Async async) {
+        m_logger = parent.child(this);
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
         // much CPU?
@@ -61,7 +66,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getYawNEDDeg() {
         float yawDeg = m_gyro1.getYaw();
-        t.log(Level.TRACE, m_name, "Yaw NED (deg)", yawDeg);
+        m_logger.log(Level.TRACE, "Yaw NED (deg)", yawDeg);
         return yawDeg;
     }
 
@@ -71,7 +76,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getPitchDeg() {
         float pitchDeg = m_gyro1.getPitch();
-        t.log(Level.TRACE, m_name, "Pitch (deg)", pitchDeg);
+        m_logger.log(Level.TRACE, "Pitch (deg)", pitchDeg);
         return pitchDeg;
     }
 
@@ -81,7 +86,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getRollDeg() {
         float rollDeg = m_gyro1.getRoll();
-        t.log(Level.TRACE, m_name, "Roll (deg)", rollDeg);
+        m_logger.log(Level.TRACE, "Roll (deg)", rollDeg);
         return rollDeg;
     }
 
@@ -95,6 +100,12 @@ public class SingleNavXGyro implements Gyro100 {
      */
     @Override
     public float getYawRateNEDDeg_s() {
+        final double rateDeg_S = getRateDeg_S();
+        m_logger.logDouble(Level.TRACE, "Rate NED (deg_s)", () -> rateDeg_S);
+        return (float) rateDeg_S;
+    }
+
+    private double getRateDeg_S() {
         // 2/27/24 the NavX getRate() method has been broken since at least 2018
         //
         // https://github.com/kauailabs/navxmxp/issues/69
@@ -110,21 +121,19 @@ public class SingleNavXGyro implements Gyro100 {
         if (Math.abs(rateDeg_S) < 2.9) {
             rateDeg_S = 0;
         }
-
-        t.log(Level.TRACE, m_name, "Rate NED (deg_s)", rateDeg_S);
-        return (float) rateDeg_S;
+        return rateDeg_S;
     }
 
     private void logStuff() {
         if (m_gyro1.isConnected()) {
-            t.log(Level.TRACE, m_name, "Connected", true);
+            m_logger.logBoolean(Level.TRACE, "Connected", true);
         } else {
-            t.log(Level.ERROR, m_name, "Connected", false);
+            m_logger.logBoolean(Level.ERROR, "Connected", false);
         }
-        t.log(Level.TRACE, m_name, "Angle (deg)", m_gyro1.getAngle());
-        t.log(Level.TRACE, m_name, "Fused (deg)", m_gyro1.getFusedHeading());
-        t.log(Level.TRACE, m_name, "Yaw (deg)", m_gyro1.getYaw());
-        t.log(Level.TRACE, m_name, "Angle Mod 360 (deg)", m_gyro1.getAngle() % 360);
-        t.log(Level.TRACE, m_name, "Compass Heading (deg)", m_gyro1.getCompassHeading());
+        m_logger.logDouble(Level.TRACE, "Angle (deg)", m_gyro1::getAngle);
+        m_logger.log(Level.TRACE, "Fused (deg)", m_gyro1.getFusedHeading());
+        m_logger.log(Level.TRACE, "Yaw (deg)", m_gyro1.getYaw());
+        m_logger.logDouble(Level.TRACE, "Angle Mod 360 (deg)", () -> m_gyro1.getAngle() % 360);
+        m_logger.log(Level.TRACE, "Compass Heading (deg)", m_gyro1.getCompassHeading());
     }
 }

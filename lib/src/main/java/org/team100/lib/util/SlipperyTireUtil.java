@@ -2,7 +2,7 @@ package org.team100.lib.util;
 
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
@@ -23,12 +23,13 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 public class SlipperyTireUtil {
     /** Clip corner speeds to this. */
     private static final double kMaxSpeedM_s = 5.0;
-    private static final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
 
     private final Tire m_tire;
 
-    public SlipperyTireUtil(Tire tire) {
+    public SlipperyTireUtil(Logger parent, Tire tire) {
         m_tire = tire;
+        m_logger = parent.child(this.getClass());
     }
 
     /**
@@ -52,7 +53,7 @@ public class SlipperyTireUtil {
         SwerveModulePosition[] result = new SwerveModulePosition[deltas.length];
         for (int i = 0; i < deltas.length; i++) {
             SwerveModulePosition delta = deltas[i];
-            t.log(Level.WARN, "tireutil", "deltas", delta);
+            m_logger.log(Level.WARN, "deltas", delta);
 
             // this is robot-relative
             Vector2d wheelSpeedM_s = new Vector2d(
@@ -60,15 +61,15 @@ public class SlipperyTireUtil {
                     delta.distanceMeters * delta.angle.getSin() / dtS);
 
             // corners are robot-relative
-            t.log(Level.WARN, "tireutil", "corner", corners[i]);
+            m_logger.log(Level.WARN, "corner", corners[i]);
             Vector2d cornerSpeedM_s = corners[i].times(1 / cornerDtS);
             // cap the allowed corner speed.
             if (cornerSpeedM_s.norm() > kMaxSpeedM_s) {
                 cornerSpeedM_s = cornerSpeedM_s.times(kMaxSpeedM_s / cornerSpeedM_s.norm());
             }
             Vector2d actualSpeedM_s = m_tire.actual(cornerSpeedM_s, wheelSpeedM_s, dtS);
-            t.log(Level.WARN, "tireutil", "cornerSpeed", cornerSpeedM_s);
-            t.log(Level.WARN, "tireutil", "actualSpeed", actualSpeedM_s);
+            m_logger.log(Level.WARN, "cornerSpeed", cornerSpeedM_s);
+            m_logger.log(Level.WARN, "actualSpeed", actualSpeedM_s);
 
             // this throws away the "optimization" of the input. :(
             // TODO: fix that
@@ -77,8 +78,8 @@ public class SlipperyTireUtil {
                     Math.hypot(actualSpeedM_s.getX(), actualSpeedM_s.getY()) * dtS,
                     new Rotation2d(actualSpeedM_s.getX(), actualSpeedM_s.getY()));
 
-            t.log(Level.WARN, "tireutil", "result", result[i]);
-            t.log(Level.WARN, "tireutil", "dts", dtS);
+            m_logger.log(Level.WARN, "result", result[i]);
+            m_logger.logDouble(Level.WARN, "dts", () -> dtS);
         }
         return result;
     }
@@ -114,14 +115,14 @@ public class SlipperyTireUtil {
      * 
      * Note this can produce unrealistically large deltas, reacting to noise.
      */
-    public static Vector2d[] cornerDeltas(
+    public Vector2d[] cornerDeltas(
             SwerveDriveKinematics100 kinematics,
             Pose2d pose0,
             Pose2d pose1) {
-        t.log(Level.TRACE, "tireutil", "pose0x", pose0.getX());
-        t.log(Level.TRACE, "tireutil", "pose1x", pose1.getX());
+        m_logger.logDouble(Level.TRACE, "pose0x", pose0::getX);
+        m_logger.logDouble(Level.TRACE, "pose1x", pose1::getX);
         Twist2d twist = pose0.log(pose1);
-        t.log(Level.TRACE, "tireutil", "twistdx", twist.dx);
+        m_logger.logDouble(Level.TRACE, "twistdx", () -> twist.dx);
         SwerveModulePosition[] p = kinematics.toSwerveModulePosition(twist);
         return kinematics.pos2vec(p);
     }

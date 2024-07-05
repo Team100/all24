@@ -6,9 +6,8 @@ import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Tire;
 
 import edu.wpi.first.math.Matrix;
@@ -35,7 +34,7 @@ import edu.wpi.first.math.numbers.N3;
  * lower it here.
  */
 public class SwerveKinodynamics implements Glassy {
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
 
     // geometry
     private final double m_fronttrack;
@@ -79,6 +78,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
+            Logger parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -90,6 +90,7 @@ public class SwerveKinodynamics implements Glassy {
             double frontoffset,
             double vcg,
             Tire tire) {
+        m_logger = parent.child(this);
         if (track < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -115,17 +116,17 @@ public class SwerveKinodynamics implements Glassy {
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
         setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
 
-        t.register(Level.TRACE, Names.name(this), "max velocity m_s", m_MaxDriveVelocityM_S,
+        m_logger.register(Level.TRACE, "max velocity m_s", m_MaxDriveVelocityM_S,
                 this::setMaxDriveVelocityM_S);
-        t.register(Level.TRACE, Names.name(this), "stall accel m_s2", m_StallAccelerationM_S2,
+        m_logger.register(Level.TRACE, "stall accel m_s2", m_StallAccelerationM_S2,
                 this::setStallAccelerationM_S2);
-        t.register(Level.TRACE, Names.name(this), "max accel m_s2", m_MaxDriveAccelerationM_S2,
+        m_logger.register(Level.TRACE, "max accel m_s2", m_MaxDriveAccelerationM_S2,
                 this::setMaxDriveAccelerationM_S2);
-        t.register(Level.TRACE, Names.name(this), "max decel m_s2", m_MaxDriveDecelerationM_S2,
+        m_logger.register(Level.TRACE, "max decel m_s2", m_MaxDriveDecelerationM_S2,
                 this::setMaxDriveDecelerationM_S2);
-        t.register(Level.TRACE, Names.name(this), "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
+        m_logger.register(Level.TRACE, "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
                 this::setMaxSteeringVelocityRad_S);
-        t.register(Level.TRACE, Names.name(this), "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
+        m_logger.register(Level.TRACE, "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
                 this::setMaxSteeringAccelerationRad_S2);
     }
 
@@ -146,6 +147,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
+            Logger parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -158,6 +160,7 @@ public class SwerveKinodynamics implements Glassy {
             double frontoffset,
             double vcg,
             Tire tire) {
+        m_logger = parent.child(this);
         if (fronttrack < 0.1 || backtrack < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -183,17 +186,17 @@ public class SwerveKinodynamics implements Glassy {
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
         setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
 
-        t.register(Level.TRACE, Names.name(this), "max velocity m_s", m_MaxDriveVelocityM_S,
+        m_logger.register(Level.TRACE, "max velocity m_s", m_MaxDriveVelocityM_S,
                 this::setMaxDriveVelocityM_S);
-        t.register(Level.TRACE, Names.name(this), "stall accel m_s2", m_StallAccelerationM_S2,
+        m_logger.register(Level.TRACE, "stall accel m_s2", m_StallAccelerationM_S2,
                 this::setStallAccelerationM_S2);
-        t.register(Level.TRACE, Names.name(this), "max accel m_s2", m_MaxDriveAccelerationM_S2,
+        m_logger.register(Level.TRACE, "max accel m_s2", m_MaxDriveAccelerationM_S2,
                 this::setMaxDriveAccelerationM_S2);
-        t.register(Level.TRACE, Names.name(this), "max decel m_s2", m_MaxDriveDecelerationM_S2,
+        m_logger.register(Level.TRACE, "max decel m_s2", m_MaxDriveDecelerationM_S2,
                 this::setMaxDriveDecelerationM_S2);
-        t.register(Level.TRACE, Names.name(this), "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
+        m_logger.register(Level.TRACE, "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
                 this::setMaxSteeringVelocityRad_S);
-        t.register(Level.TRACE, Names.name(this), "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
+        m_logger.register(Level.TRACE, "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
                 this::setMaxSteeringAccelerationRad_S2);
     }
 
@@ -523,6 +526,7 @@ public class SwerveKinodynamics implements Glassy {
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         return new SwerveDrivePoseEstimator100(
+                m_logger,
                 this,
                 gyroAngle,
                 modulePositions,

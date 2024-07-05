@@ -7,14 +7,16 @@ import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 
 class AnglePositionServoProfileTest {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
-    private final String name;
     private final MockVelocityMotor100<Angle100> motor;
     private final MockEncoder100<Angle100> encoder;
     private final double period;
@@ -22,7 +24,6 @@ class AnglePositionServoProfileTest {
     private final OnboardPositionServo<Angle100> servo;
 
     public AnglePositionServoProfileTest() {
-        name = "test";
         motor = new MockVelocityMotor100<>();
         encoder = new MockEncoder100<>();
         period = 0.1;
@@ -31,7 +32,7 @@ class AnglePositionServoProfileTest {
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new OnboardPositionServo<>(
-                name,
+                logger,
                 motor,
                 encoder,
                 1,

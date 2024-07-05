@@ -8,6 +8,8 @@ import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.ProfileWPI;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Util;
@@ -17,8 +19,8 @@ import edu.wpi.first.math.controller.PIDController;
 class PositionProfileTest implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
-    private final String name;
     private final MockVelocityMotor100<Distance100> motor;
     private final MockEncoder100<Distance100> encoder;
     private final double period;
@@ -26,7 +28,6 @@ class PositionProfileTest implements Timeless {
     private OnboardPositionServo<Distance100> servo;
 
     public PositionProfileTest() {
-        name = "test";
         motor = new MockVelocityMotor100<>();
         encoder = new MockEncoder100<>();
         period = 0.1;
@@ -41,7 +42,7 @@ class PositionProfileTest implements Timeless {
     void testTrapezoid() {
         Profile100 profile = new ProfileWPI(1, 1);
         servo = new OnboardPositionServo<>(
-                name,
+                logger,
                 motor,
                 encoder,
                 1,
@@ -57,7 +58,7 @@ class PositionProfileTest implements Timeless {
     void testProfile() {
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new OnboardPositionServo<>(
-                name,
+                logger,
                 motor,
                 encoder,
                 1,

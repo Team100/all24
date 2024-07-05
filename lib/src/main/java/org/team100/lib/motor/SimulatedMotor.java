@@ -1,10 +1,9 @@
 package org.team100.lib.motor;
 
 import org.team100.lib.motor.model.GenericTorqueModel;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Measure100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -16,26 +15,19 @@ import edu.wpi.first.math.MathUtil;
  * A Neo goes about 6000 rpm, or 100 rev/s, or about 600 rad/s.
  */
 public class SimulatedMotor<T extends Measure100> implements Motor100<T>, GenericTorqueModel {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final double m_freeSpeed;
     private double m_velocity = 0;
 
-    /**
-     * @param name may not start with slash
-     * @param kV   velocity units at full output
-     */
-    public SimulatedMotor(String name, double freeSpeed) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
-        m_name = Names.append(name, this);
+    public SimulatedMotor(Logger parent, double freeSpeed) {
+        m_logger = parent.child(this);
         m_freeSpeed = freeSpeed;
     }
 
     @Override
-    public void setDutyCycle(double output) {
-        output = MathUtil.clamp(output, -1, 1);
-        t.log(Level.TRACE, m_name, "duty_cycle", output);
+    public void setDutyCycle(double dutyCycle) {
+        final double output = MathUtil.clamp(dutyCycle, -1, 1);
+        m_logger.logDouble(Level.TRACE, "duty_cycle", () -> output);
         setVelocity(output * m_freeSpeed, 0, 0);
     }
 
@@ -52,7 +44,7 @@ public class SimulatedMotor<T extends Measure100> implements Motor100<T>, Generi
         if (Double.isNaN(velocity))
             throw new IllegalArgumentException("velocity is NaN");
         m_velocity = velocity;
-        t.log(Level.TRACE, m_name, "velocity", m_velocity);
+        m_logger.logDouble(Level.TRACE, "velocity", () -> m_velocity);
     }
 
     public double getVelocity() {

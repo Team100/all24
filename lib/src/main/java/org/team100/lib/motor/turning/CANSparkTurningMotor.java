@@ -4,6 +4,7 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Angle100;
 
 import com.revrobotics.CANSparkBase;
@@ -15,14 +16,14 @@ public abstract class CANSparkTurningMotor extends CANSparkMotor<Angle100> {
     private final double m_gearRatio;
 
     CANSparkTurningMotor(
-            String name,
+            Logger parent,
             CANSparkBase motor,
             MotorPhase motorPhase,
             int currentLimit,
             double gearRatio,
             Feedforward100 ff,
             PIDConstants pid) {
-        super(name, motor, motorPhase, currentLimit, ff, pid);
+        super(parent, motor, motorPhase, currentLimit, ff, pid);
         m_gearRatio = gearRatio;
     }
 

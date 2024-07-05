@@ -24,8 +24,8 @@ public class Chronos {
      * </pre>
      */
     public class Sample {
-        String m_name;
-        double m_startS;
+        private final String m_name;
+        private final double m_startS;
 
         public Sample(String name) {
             m_name = name;

@@ -14,11 +14,11 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -47,12 +47,12 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
      * translation
      */
     private static final double kRotationSpeed = 0.5;
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
+    private final Logger fieldLogger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
-    private final String m_name;
     private final TrapezoidProfile100 m_profile;
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
@@ -63,7 +63,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private boolean isAligned;
     
     public ManualWithShooterLock(
-            String parent,
+            Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             PIDController thetaController,
@@ -73,7 +73,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         isAligned = false;
-        m_name = Names.append(parent, this);
+        m_logger = parent.child(this);
+        fieldLogger = Telemetry.get().fieldLogger();
         m_trigger = () -> false;
         m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),
@@ -110,19 +111,20 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double headingRate = m_heading.getHeadingRateNWU();
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get());
-        Rotation2d bearing = bearing(currentTranslation, target);
-        // Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state);
-
-        t.log(Level.DEBUG, m_name, "bearing", bearing);
 
         // take the short path
-        double measurement = currentRotation.getRadians();
-        bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, bearing.getRadians()));
+        final double measurement = currentRotation.getRadians();
+        final Rotation2d bearing = new Rotation2d(
+                Math100.getMinDistance(
+                        measurement,
+                        bearing(currentTranslation, target).getRadians()));
+
+        // Rotation2d bearingCorrected = aimWhileMoving(bearing, 20, state);
 
         checkBearing(bearing, currentRotation);
 
-        t.log(Level.TRACE, m_name, "Bearing Check", bearing.minus(currentRotation).getDegrees());
+        m_logger.log(Level.DEBUG, "bearing", bearing);
+        m_logger.logDouble(Level.TRACE, "Bearing Check", () -> bearing.minus(currentRotation).getDegrees());
 
             // make sure the setpoint uses the modulus close to the measurement.
             m_thetaSetpoint = new State100(
@@ -132,7 +134,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);
-        t.log(Level.TRACE, m_name, "apparent motion", targetMotion);
+        m_logger.logDouble(Level.TRACE, "apparent motion", () -> targetMotion);
         State100 goal = new State100(bearing.getRadians(), targetMotion);
         if (Math.abs(goal.x() - prevGoal.x()) < 0.05 || Math.abs(2 * Math.PI - goal.x() - prevGoal.x()) < 0.05) {
             goal = new State100(prevGoal.x(), goal.v(), goal.a());
@@ -151,29 +153,21 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        double thetaFF = m_thetaSetpoint.v();
+        final double thetaFF = m_thetaSetpoint.v();
+        final double thetaFB = getThetaFB(measurement);
+        final double omegaFB = getOmegaFB(headingRate);
 
-        double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-
-        if (Math.abs(thetaFB) < 0.5) {
-            thetaFB = 0;
-        }
-
-        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-
-        if (Math.abs(omegaFB) < 0.1) {
-            omegaFB = 0;
-        }
-        t.log(Level.TRACE, m_name, "target", target);
-        t.log(Level.TRACE, m_name, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.TRACE, m_name, "theta/measurement", measurement);
-        t.log(Level.TRACE, m_name, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.TRACE, m_name, "theta/fb", thetaFB);
-        t.log(Level.TRACE, m_name, "omega/measurement", headingRate);
-        t.log(Level.TRACE, m_name, "omega/error", m_omegaController.getPositionError());
-        t.log(Level.TRACE, m_name, "omega/fb", omegaFB);
-        t.log(Level.TRACE, m_name, "target motion", targetMotion);
-        t.log(Level.TRACE, m_name, "goal", goal);
+        m_logger.log(Level.TRACE, "target", target);
+        m_logger.log(Level.TRACE, "theta/setpoint", m_thetaSetpoint);
+        m_logger.logDouble(Level.TRACE, "theta/measurement", () -> measurement);
+        m_logger.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "theta/fb", () -> thetaFB);
+        m_logger.logDouble(Level.TRACE, "omega/measurement", () -> headingRate);
+        m_logger.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
+        m_logger.logDouble(Level.TRACE, "target motion", () -> targetMotion);
+        m_logger.log(Level.TRACE, "goal", goal);
+        
         prevGoal = goal;
         double omega = MathUtil.clamp(
                 thetaFF+ omegaFB + thetaFB,
@@ -183,7 +177,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // desaturate to feasibility by preferring the rotational velocity.
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
         // this name needs to be exactly "/field/target" for glass.
-        t.log(Level.TRACE, "field", "target", new double[] {
+        fieldLogger.log(Level.TRACE, "target", new double[] {
                 target.getX(),
                 target.getY(),
                 0 });
@@ -198,7 +192,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            t.log(Level.TRACE, "field", "ball", new double[] {
+            fieldLogger.log(Level.TRACE, "ball", new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });
@@ -206,6 +200,23 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         m_prevPose = state.pose();
         return twistWithLockM_S;
+    }
+
+    private double getOmegaFB(double headingRate) {
+        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
+        if (Math.abs(omegaFB) < 0.1) {
+            omegaFB = 0;
+        }
+        return omegaFB;
+    }
+
+    private double getThetaFB(final double measurement) {
+        double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
+
+        if (Math.abs(thetaFB) < 0.5) {
+            thetaFB = 0;
+        }
+        return thetaFB;
     }
 
     /**

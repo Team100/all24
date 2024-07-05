@@ -4,10 +4,9 @@ import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -18,14 +17,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * The twist components, x, y, and theta, are mapped directly to the
  * corresponding ChassisSpeeds components (and scaled).
  */
-public class ManualChassisSpeeds implements ChassisSpeedDriver{
-    private final Telemetry t = Telemetry.get();
+public class ManualChassisSpeeds implements ChassisSpeedDriver {
+    private final Logger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final String m_name;
 
-    public ManualChassisSpeeds(String parent, SwerveKinodynamics swerveKinodynamics) {
+    public ManualChassisSpeeds(Logger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_name = Names.append(parent, this);
+        m_logger = parent.child(this);
     }
 
     /**
@@ -44,7 +42,7 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver{
 
         // desaturate to feasibility
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
-        t.log(Level.TRACE, m_name, "speeds", speeds);
+        m_logger.log(Level.TRACE, "speeds", speeds);
         return speeds;
     }
 

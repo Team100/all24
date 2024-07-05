@@ -4,6 +4,7 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.model.NeoVortexTorqueModel;
+import org.team100.lib.telemetry.Logger;
 
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -12,7 +13,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 public class NeoVortexDriveMotor extends CANSparkDriveMotor implements NeoVortexTorqueModel {
 
     public NeoVortexDriveMotor(
-            String name,
+            Logger parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -20,7 +21,7 @@ public class NeoVortexDriveMotor extends CANSparkDriveMotor implements NeoVortex
             double wheelDiameter,
             Feedforward100 ff,
             PIDConstants pid) {
-        super(name, new CANSparkFlex(canId, MotorType.kBrushless),
+        super(parent, new CANSparkFlex(canId, MotorType.kBrushless),
                 motorPhase, currentLimit, gearRatio, wheelDiameter,
                 ff, pid);
     }

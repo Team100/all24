@@ -11,35 +11,33 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.VortexEncoder;
 import org.team100.lib.motor.duty_cycle.VortexProxy;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final int kCurrentLimit = 40;
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final DutyCycleMotor100 v1;
     private final Encoder100<Distance100> e1;
     private final DutyCycleMotor100 v2;
     private final Encoder100<Distance100> e2;
 
-    public ClimberSubsystem(int leftClimberID, int rightClimberID) {
-        m_name = Names.name(this);
+    public ClimberSubsystem(Logger parent, int leftClimberID, int rightClimberID) {
+        m_logger = parent.child(this);
         switch (Identity.instance) {
             case COMP_BOT:
                 VortexProxy vp1 = new VortexProxy(
-                        m_name + "/left",
+                        m_logger.child("left"),
                         leftClimberID,
                         MotorPhase.FORWARD,
                         kCurrentLimit);
                 e1 = new VortexEncoder(vp1);
                 v1 = vp1;
                 VortexProxy vp2 = new VortexProxy(
-                        m_name + "/right",
+                        m_logger.child("right"),
                         rightClimberID,
                         MotorPhase.REVERSE,
                         kCurrentLimit);
@@ -48,11 +46,15 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 break;
             default:
                 // for testing and simulation
-                SimulatedMotor<Distance100> vs1 = new SimulatedMotor<>(m_name + "left", 1);
-                e1 = new SimulatedEncoder<>(m_name + "left", vs1, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
+                SimulatedMotor<Distance100> vs1 = new SimulatedMotor<>(
+                        m_logger.child("left"), 1);
+                e1 = new SimulatedEncoder<>(m_logger.child("left"),
+                        vs1, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
                 v1 = vs1;
-                SimulatedMotor<Distance100> vs2 = new SimulatedMotor<>(m_name + "right", 1);
-                e2 = new SimulatedEncoder<>(m_name + "right", vs2, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
+                SimulatedMotor<Distance100> vs2 = new SimulatedMotor<>(
+                        m_logger.child("right"), 1);
+                e2 = new SimulatedEncoder<>(m_logger.child("right"), vs2, 1, -Double.MAX_VALUE,
+                        Double.MAX_VALUE);
                 v2 = vs2;
         }
     }
@@ -71,12 +73,12 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v1.setDutyCycle(0);
             return;
         }
-        Telemetry.get().log(Level.DEBUG, m_name, "LEFT VALUE", value);
+        m_logger.logDouble(Level.DEBUG, "LEFT VALUE", () -> value);
     }
 
     public void setRightWithSoftLimits(double value) {
         OptionalDouble e2Position = e2.getPosition();
-         if (e2Position.isEmpty()) {
+        if (e2Position.isEmpty()) {
             v2.setDutyCycle(0);
             return;
         }
@@ -88,7 +90,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v2.setDutyCycle(0);
             return;
         }
-        Telemetry.get().log(Level.DEBUG, m_name, "RIGHT VALUE", value);
+        m_logger.logDouble(Level.DEBUG, "RIGHT VALUE", () -> value);
     }
 
     public void zeroClimbers() {
@@ -114,10 +116,10 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        t.log(Level.DEBUG, m_name, "CLIMBER 1 ENCODER", e1.getPosition());
-        t.log(Level.DEBUG, m_name, "CLIMBER 2 ENCODER", e2.getPosition());
-        t.log(Level.DEBUG, m_name, "RPM 1", e1.getRate());
-        t.log(Level.DEBUG, m_name, "RPM 2", e2.getRate());
+        m_logger.log(Level.DEBUG, "CLIMBER 1 ENCODER", e1.getPosition());
+        m_logger.log(Level.DEBUG, "CLIMBER 2 ENCODER", e2.getPosition());
+        m_logger.log(Level.DEBUG, "RPM 1", e1.getRate());
+        m_logger.log(Level.DEBUG, "RPM 2", e2.getRate());
     }
 
     @Override

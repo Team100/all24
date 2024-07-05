@@ -2,10 +2,9 @@ package org.team100.lib.motor.turning;
 
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 
@@ -18,27 +17,24 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
      * Say 600 rad/s max so 0.0016?
      */
     private static final double velocityFFDutyCycle_Rad_S = 0.0016;
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
     private final MotorController m_motor;
-    private final String m_name;
     private final double m_gearRatio;
 
     public TurningMotorController100(
-            String name,
+            Logger parent,
             MotorController motorController,
             double kDriveReduction) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
         m_motor = motorController;
         m_motor.setInverted(true);
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
         m_gearRatio = kDriveReduction;
     }
 
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        t.log(Level.TRACE, m_name, "duty cycle", output);
+        m_logger.logDouble(Level.TRACE, "duty cycle", () -> output);
     }
 
     @Override
@@ -54,7 +50,7 @@ public class TurningMotorController100 implements Motor100<Angle100>, GenericTor
         double motorRad_S = outputRad_S * m_gearRatio;
         double motorDutyCycle = motorRad_S * velocityFFDutyCycle_Rad_S;
         m_motor.set(motorDutyCycle);
-        t.log(Level.TRACE, m_name, "duty cycle", motorDutyCycle);
+        m_logger.logDouble(Level.TRACE, "duty cycle", () -> motorDutyCycle);
     }
 
     @Override

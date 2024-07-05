@@ -7,7 +7,7 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
@@ -30,15 +30,17 @@ public class FancyTrajectory extends Command100 {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
 
-    private final Telemetry t = Telemetry.get();
-
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
 
-    public FancyTrajectory(SwerveDriveSubsystem robotDrive, List<TimingConstraint> constraints) {
+    public FancyTrajectory(
+            Logger parent,
+            SwerveDriveSubsystem robotDrive,
+            List<TimingConstraint> constraints) {
+        super(parent);
         m_robotDrive = robotDrive;
-        m_controller = DriveMotionControllerFactory.fancyPIDF();
+        m_controller = DriveMotionControllerFactory.fancyPIDF(parent);
         m_constraints = constraints;
         addRequirements(m_robotDrive);
     }
@@ -75,7 +77,7 @@ public class FancyTrajectory extends Command100 {
         Pose2d currentPose = m_robotDrive.getState().pose();
         ChassisSpeeds currentSpeed = m_robotDrive.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
-        t.log(Level.TRACE, m_name, "chassis speeds", output);
+        m_logger.log(Level.TRACE, "chassis speeds", output);
         m_robotDrive.setChassisSpeeds(output, dt);
     }
 

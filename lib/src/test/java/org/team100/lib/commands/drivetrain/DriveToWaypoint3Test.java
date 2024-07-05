@@ -18,6 +18,8 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -32,8 +34,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class DriveToWaypoint3Test extends Fixtured {
     private static final double kDelta = 0.001;
-
-    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+    private static final Logger logger = new TestLogger();
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     TrajectoryMaker tmaker = new TrajectoryMaker(constraints);
 
@@ -48,9 +50,10 @@ class DriveToWaypoint3Test extends Fixtured {
             }
         };
 
-        HolonomicDriveController3 controller = new HolonomicDriveController3();
+        HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
 
         DriveToWaypoint3 command = new DriveToWaypoint3(
+                logger,
                 goal,
                 drivetrain,
                 trajectories,
@@ -80,9 +83,9 @@ class DriveToWaypoint3Test extends Fixtured {
         assertEquals(0.612, goal.getY(), kDelta);
         assertEquals(-1.047, goal.getRotation().getRadians(), kDelta);
 
-        HolonomicDriveController3 m_controller = new HolonomicDriveController3();
+        HolonomicDriveController3 m_controller = new HolonomicDriveController3(logger);
 
-        DriveToWaypoint3 command = new DriveToWaypoint3(goal, drivetrain, maker, m_controller);
+        DriveToWaypoint3 command = new DriveToWaypoint3(logger, goal, drivetrain, maker, m_controller);
         DriveToWaypoint3.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);

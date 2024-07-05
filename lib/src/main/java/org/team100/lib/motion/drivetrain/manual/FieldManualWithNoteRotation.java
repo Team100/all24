@@ -15,11 +15,11 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -46,13 +46,13 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
      * translation
      */
     private static final double kRotationSpeed = 0.5;
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
+    private final Logger fieldLogger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     private final Supplier<Optional<Translation2d>> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
-    private final String m_name;
     private final TrapezoidProfile100 m_profile;
     State100 m_thetaSetpoint;
     Translation2d m_ball;
@@ -61,7 +61,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     Pose2d m_prevPose;
 
     public FieldManualWithNoteRotation(
-            String parent,
+            Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Optional<Translation2d>> target,
@@ -73,7 +73,8 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_name = Names.append(parent, this);
+        m_logger = parent.child(this);
+        fieldLogger = Telemetry.get().fieldLogger();
         m_trigger = trigger;
         m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
@@ -134,7 +135,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target.get());
-        t.log(Level.DEBUG, m_name, "apparent motion", targetMotion);
+        m_logger.logDouble(Level.DEBUG, "apparent motion", () -> targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -145,15 +146,15 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        t.log(Level.DEBUG, m_name, "theta/setpoint", m_thetaSetpoint);
-        t.log(Level.DEBUG, m_name, "theta/measurement", measurement);
-        t.log(Level.DEBUG, m_name, "theta/error", m_thetaController.getPositionError());
-        t.log(Level.DEBUG, m_name, "theta/fb", thetaFB);
+        m_logger.log(Level.DEBUG, "theta/setpoint", m_thetaSetpoint);
+        m_logger.logDouble(Level.DEBUG, "theta/measurement", () -> measurement);
+        m_logger.logDouble(Level.DEBUG, "theta/error", m_thetaController::getPositionError);
+        m_logger.logDouble(Level.DEBUG, "theta/fb", () -> thetaFB);
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        t.log(Level.DEBUG, m_name, "omega/reference", m_thetaSetpoint);
-        t.log(Level.DEBUG, m_name, "omega/measurement", headingRate);
-        t.log(Level.DEBUG, m_name, "omega/error", m_omegaController.getPositionError());
-        t.log(Level.DEBUG, m_name, "omega/fb", omegaFB);
+        m_logger.log(Level.DEBUG, "omega/reference", m_thetaSetpoint);
+        m_logger.logDouble(Level.DEBUG, "omega/measurement", () -> headingRate);
+        m_logger.logDouble(Level.DEBUG, "omega/error", m_omegaController::getPositionError);
+        m_logger.logDouble(Level.DEBUG, "omega/fb", () -> omegaFB);
 
         omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -161,7 +162,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // this name needs to be exactly "/field/target" for glass.
-        t.log(Level.DEBUG, "field", "target", new double[] {
+        fieldLogger.log(Level.DEBUG, "target", new double[] {
                 target.get().getX(),
                 target.get().getY(),
                 0 });
@@ -176,7 +177,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            t.log(Level.DEBUG, "field", "ball", new double[] {
+            fieldLogger.log(Level.DEBUG, "ball", new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

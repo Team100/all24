@@ -4,6 +4,7 @@ import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.config.Identity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.util.Util;
 
 /**
@@ -12,6 +13,7 @@ import org.team100.lib.util.Util;
 public class HeadingFactory {
 
     public static HeadingInterface get(
+            Logger parent,
             SwerveKinodynamics kinodynamics,
             SwerveModuleCollection collection,
             AsyncFactory asyncFactory) {
@@ -26,8 +28,8 @@ public class HeadingFactory {
                     // this seems only to be a problem in some test or
                     // simulation scenarios.
                     // System.loadLibrary("vmxHaljni");
-                    Gyro100 ahrsclass = new GyroFactory(Identity.instance, asyncFactory).get();
-                    return new Heading(ahrsclass);
+                    Gyro100 ahrsclass = new GyroFactory(Identity.instance, asyncFactory).get(parent);
+                    return new Heading(parent, ahrsclass);
                 } catch (UnsatisfiedLinkError e) {
                     // fall back to simulated heading for testing.
                     Util.warn("No NavX Library!");

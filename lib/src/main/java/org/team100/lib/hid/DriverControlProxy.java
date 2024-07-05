@@ -1,6 +1,7 @@
 package org.team100.lib.hid;
 
 import org.team100.lib.async.Async;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,12 +21,14 @@ public class DriverControlProxy implements DriverControl {
 
     private String m_name;
     private DriverControl m_driverControl;
+    private final Logger m_logger;
 
     /**
      * The async is just to scan for control updates, maybe don't use a whole thread
      * for it.
      */
-    public DriverControlProxy(Async async) {
+    public DriverControlProxy(Logger parent, Async async) {
+        m_logger = parent.child(this.getClass());
         refresh();
         async.addPeriodic(this::refresh, kFreq, "DriverControlProxy");
     }
@@ -36,7 +39,7 @@ public class DriverControlProxy implements DriverControl {
         if (name.equals(m_name))
             return;
         m_name = name;
-        m_driverControl = getDriverControl(name);
+        m_driverControl = getDriverControl(m_logger, name);
 
         Util.printf("*** CONTROL UPDATE\n");
         Util.printf("*** Driver HID: %s Control: %s\n",
@@ -44,12 +47,12 @@ public class DriverControlProxy implements DriverControl {
                 m_driverControl.getClass().getSimpleName());
     }
 
-    private static DriverControl getDriverControl(String name) {
+    private static DriverControl getDriverControl(Logger parent, String name) {
         if (name.contains("F310")) {
-            return new DriverXboxControl();
+            return new DriverXboxControl(parent);
         }
         if (name.contains("Xbox")) {
-            return new DriverXboxControl();
+            return new DriverXboxControl(parent);
         }
         if (name.startsWith("VKBsim")) {
             return new VKBJoystick();

@@ -8,6 +8,8 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,13 +21,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  */
 class SwerveDriveDynamicsConstraintTest {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
+
     // the free speed of a module, which is also the free speed
     // of the robot going in a straight line without rotating.
     private static final double maxV = 4;
 
     @Test
     void testVelocity() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(l);
 
         // motionless
@@ -51,7 +55,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testAccel() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(l);
         // this is constant
         MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);
@@ -61,7 +65,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testDesaturation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
 
         // this is for comparison to the above case.
 
@@ -94,7 +98,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testDesaturation2() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
 
         // 0.62 m/s is pretty close to the maximum speed
         // possible at 5 rad/s; this is about 8 rad/m.

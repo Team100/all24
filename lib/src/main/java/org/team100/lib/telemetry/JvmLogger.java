@@ -10,20 +10,18 @@ import java.util.Map;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 
 /**
  * Logs stuff about the JVM. Inspired by Advantage Kit's
  * LoggedRobot.GcStatsCollector().
  */
 public class JvmLogger implements Glassy {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final Map<String, Long> times;
     private final Map<String, Long> counts;
 
-    public JvmLogger() {
-        m_name = Names.name(this);
+    public JvmLogger(Logger parent) {
+        m_logger = parent.child(this);
         times = new HashMap<>();
         counts = new HashMap<>();
     }
@@ -42,13 +40,13 @@ public class JvmLogger implements Glassy {
             long thisCount = collectionCount - counts.get(pool);
             times.put(pool, collectionTime);
             counts.put(pool, collectionCount);
-            t.log(Level.TRACE, m_name, "GCTimeMS/" + pool, thisTime);
-            t.log(Level.TRACE, m_name, "GCCounts/" + pool, thisCount);
+            m_logger.log(Level.TRACE, "GCTimeMS/" + pool, thisTime);
+            m_logger.log(Level.TRACE, "GCCounts/" + pool, thisCount);
             accumTime += thisTime;
             accumCount += thisCount;
         }
-        t.log(Level.TRACE, m_name, "GCTimeMS/total", accumTime);
-        t.log(Level.TRACE, m_name, "GCCounts/total", accumCount);
+        m_logger.log(Level.TRACE, "GCTimeMS/total", accumTime);
+        m_logger.log(Level.TRACE, "GCCounts/total", accumCount);
     }
 
     public void logMemoryPools() {
@@ -56,15 +54,15 @@ public class JvmLogger implements Glassy {
         for (MemoryPoolMXBean bean : ManagementFactory.getMemoryPoolMXBeans()) {
             MemoryUsage usage = bean.getUsage();
             accumUsage += usage.getUsed();
-            t.log(Level.INFO, m_name, "MemoryPool/" + bean.getName(), usage.getUsed());
+            m_logger.log(Level.INFO, "MemoryPool/" + bean.getName(), usage.getUsed());
         }
-        t.log(Level.INFO, m_name, "MemoryPool/total", accumUsage);
+        m_logger.log(Level.INFO, "MemoryPool/total", accumUsage);
     }
 
     public void logMemoryUsage() {
         MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
-        t.log(Level.INFO, m_name, "MemoryUsage/heap", bean.getHeapMemoryUsage().getUsed());
-        t.log(Level.INFO, m_name, "MemoryUsage/non-heap", bean.getNonHeapMemoryUsage().getUsed());
+        m_logger.log(Level.INFO, "MemoryUsage/heap", bean.getHeapMemoryUsage().getUsed());
+        m_logger.log(Level.INFO, "MemoryUsage/non-heap", bean.getNonHeapMemoryUsage().getUsed());
     }
 
     @Override

@@ -5,7 +5,7 @@ import java.util.List;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
@@ -30,8 +30,7 @@ public class DriveToWaypoint100 extends Command100 {
     // trajectory supplier.
     private static final double kMaxVelM_S = 2;
     private static final double kMaxAccelM_S_S = 2;
-     
-    private final Telemetry t = Telemetry.get();
+
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
@@ -43,11 +42,13 @@ public class DriveToWaypoint100 extends Command100 {
     private Trajectory100 m_trajectory = new Trajectory100();
 
     public DriveToWaypoint100(
+            Logger parent,
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             List<TimingConstraint> constraints,
             double timeBuffer) {
+        super(parent);
         m_goal = goal;
         m_swerve = drivetrain;
         m_controller = controller;
@@ -102,7 +103,7 @@ public class DriveToWaypoint100 extends Command100 {
         if (output == null)
             return;
 
-        t.log(Level.DEBUG, m_name, "chassis speeds", output);
+        m_logger.log(Level.DEBUG, "chassis speeds", output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeedsNormally(output, dt);
     }

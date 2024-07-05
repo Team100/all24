@@ -13,7 +13,7 @@ import java.io.Writer;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
@@ -32,14 +32,15 @@ public abstract class Command100 extends Command implements Glassy {
     private static final ScheduledExecutorService m_scheduler = Executors.newSingleThreadScheduledExecutor(
             new MaxPriorityThreads());
 
-    private final Telemetry t = Telemetry.get();
+    protected final Logger m_logger;
     protected final String m_name;
 
     private double prevTime;
     private Future<?> m_task;
 
-    protected Command100() {
+    protected Command100(Logger parent) {
         m_name = Names.append(Command100.class.getSimpleName(), this);
+        m_logger = parent.child(this);
     }
 
     public void initialize100() {
@@ -55,7 +56,7 @@ public abstract class Command100 extends Command implements Glassy {
 
     @Override
     public final void initialize() {
-        t.log(Level.DEBUG, m_name, "command state", "initialize");
+        m_logger.log(Level.DEBUG, "command state", "initialize");
         prevTime = Timer.getFPGATimestamp();
         initialize100();
         if (Experiments.instance.enabled(Experiment.UseCommandExecutor)) {
@@ -73,10 +74,10 @@ public abstract class Command100 extends Command implements Glassy {
         if (Experiments.instance.enabled(Experiment.UseCommandExecutor)) {
             return;
         }
-        t.log(Level.DEBUG, m_name, "command state", "execute");
+        m_logger.log(Level.DEBUG, "command state", "execute");
         double now = Timer.getFPGATimestamp();
         double dt = now - prevTime;
-        t.log(Level.DEBUG, m_name, "dt", dt);
+        m_logger.logDouble(Level.DEBUG, "dt", ()->dt);
         prevTime = now;
         execute100(dt);
     }
@@ -127,10 +128,10 @@ public abstract class Command100 extends Command implements Glassy {
         @Override
         public void run() {
             try {
-                t.log(Level.DEBUG, m_name, "command state", "execute");
+                m_logger.log(Level.DEBUG, "command state", "execute");
                 double now = Timer.getFPGATimestamp();
                 double dt = now - prevTime;
-                t.log(Level.DEBUG, m_name, "dt", dt);
+                m_logger.logDouble(Level.DEBUG, "dt",()-> dt);
                 prevTime = now;
                 execute100(dt);
             } catch (Throwable e) {

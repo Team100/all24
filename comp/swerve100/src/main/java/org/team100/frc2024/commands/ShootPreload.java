@@ -8,8 +8,9 @@ import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -17,8 +18,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class ShootPreload extends Command {
-    private final Telemetry t = Telemetry.get();
+public class ShootPreload extends Command implements Glassy {
+    private final Logger logger;
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -32,6 +33,7 @@ public class ShootPreload extends Command {
     private boolean finished = false;
 
     public ShootPreload(
+            Logger parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
@@ -39,6 +41,7 @@ public class ShootPreload extends Command {
             SwerveDriveSubsystem drive,
             double pivotOverride,
             boolean isPreload) {
+        logger = parent.child(this);
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;
@@ -51,12 +54,14 @@ public class ShootPreload extends Command {
     }
 
     public ShootPreload(
+            Logger parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
+        logger = parent.child(this);
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;
@@ -75,7 +80,7 @@ public class ShootPreload extends Command {
         if (!alliance.isPresent())
             return;
 
-        t.log(Level.DEBUG, "ShootSmart", "command state", "initialize");
+        logger.log(Level.DEBUG, "command state", "initialize");
 
         double distance = m_drive.getState().pose().getTranslation()
                 .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
@@ -89,8 +94,8 @@ public class ShootPreload extends Command {
 
     @Override
     public void execute() {
-        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
-        t.log(Level.DEBUG, "ShootSmart", "END", 0);
+        logger.log(Level.DEBUG, "command state", "end");
+        logger.log(Level.DEBUG, "END", 0);
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
@@ -107,8 +112,8 @@ public class ShootPreload extends Command {
         m_shooter.setAngle(pivotSetpoint);
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
-            t.log(Level.DEBUG, "ShootSmart", "PIVOT DEFECIT",
-                    Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
+            logger.logDouble(Level.DEBUG, "PIVOT DEFECIT",
+                    () -> Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
         }
 
         if (!m_sensor.getFeederSensor() && !m_sensor.getIntakeSensor()) {
@@ -136,9 +141,9 @@ public class ShootPreload extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
-        t.log(Level.DEBUG, "ShootSmart", "command state", "end");
-        t.log(Level.DEBUG, "ShootSmart", "END", 1);
+        logger.log(Level.DEBUG, "command state", "end");
+        logger.log(Level.DEBUG, "command state", "end");
+        logger.log(Level.DEBUG, "END", 1);
         atVelocity = false;
         finished = false;
         m_timer.stop();
@@ -150,5 +155,10 @@ public class ShootPreload extends Command {
     @Override
     public boolean isFinished() {
         return finished;
+    }
+
+    @Override
+    public String getGlassName() {
+        return "ShootPreload";
     }
 }

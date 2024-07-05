@@ -4,10 +4,9 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.util.Names;
 
 /**
  * The built-in encoder in Neo motors.
@@ -16,22 +15,15 @@ import org.team100.lib.util.Names;
  * per turn.
  */
 public class NeoVortexTurningEncoder implements SettableEncoder<Angle100> {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final NeoVortexTurningMotor m_motor;
     private final double m_gearRatio;
 
-    /**
-     * @param name            do not use a leading slash.
-     * @param distancePerTurn in meters
-     */
     public NeoVortexTurningEncoder(
-            String name,
+            Logger parent,
             NeoVortexTurningMotor motor,
             double gearRatio) {
-        if (name.startsWith("/"))
-            throw new IllegalArgumentException();
-        m_name = Names.append(name, this);
+        m_logger = parent.child(this);
         m_motor = motor;
         m_gearRatio = gearRatio;
         reset();
@@ -70,14 +62,14 @@ public class NeoVortexTurningEncoder implements SettableEncoder<Angle100> {
     private double getPositionRad() {
         // should be fast, no need to cache
         double positionRad = m_motor.getPositionRot() * 2 * Math.PI / m_gearRatio;
-        t.log(Level.DEBUG, m_name, "position (rad)", positionRad);
+        m_logger.logDouble(Level.DEBUG,  "position (rad)", ()->positionRad);
         return positionRad;
     }
 
     private double getRateRad_S() {
         // should be fast, no need to cache
         double rateRad_S = m_motor.getRateRPM() * 2 * Math.PI / (60 * m_gearRatio);
-        t.log(Level.DEBUG, m_name, "velocity (rad_s)", rateRad_S);
+        m_logger.logDouble(Level.DEBUG,  "velocity (rad_s)", ()->rateRad_S);
         return rateRad_S;
     }
 }

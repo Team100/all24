@@ -9,6 +9,8 @@ import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.Fixtured;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 
@@ -17,13 +19,15 @@ import org.team100.lib.timing.TimingConstraintFactory;
  */
 class DriveToWaypoint100Test extends Fixtured {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
     @Test
     void testWithPID() {
-        DriveMotionController controller = DriveMotionControllerFactory.testPIDF();
+        DriveMotionController controller = DriveMotionControllerFactory.testPIDF(logger);
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
         // the trajectory here should be a no-op.
         DriveToWaypoint100 command = new DriveToWaypoint100(
+                logger,
                 GeometryUtil.kPoseZero,
                 fixture.drive,
                 controller,
@@ -38,10 +42,11 @@ class DriveToWaypoint100Test extends Fixtured {
 
     @Test
     void testWithPursuit() {
-        DriveMotionController controller = DriveMotionControllerFactory.purePursuit(fixture.swerveKinodynamics);
+        DriveMotionController controller = DriveMotionControllerFactory.purePursuit(logger, fixture.swerveKinodynamics);
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
         // the trajectory here should be a no-op.
         DriveToWaypoint100 command = new DriveToWaypoint100(
+                logger,
                 GeometryUtil.kPoseZero,
                 fixture.drive,
                 controller,
@@ -57,10 +62,11 @@ class DriveToWaypoint100Test extends Fixtured {
 
     @Test
     void testWithRamsete() {
-        DriveMotionController controller = DriveMotionControllerFactory.ramsete();
+        DriveMotionController controller = DriveMotionControllerFactory.ramsete(logger);
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
         // the trajectory here should be a no-op.
         DriveToWaypoint100 command = new DriveToWaypoint100(
+                logger,
                 GeometryUtil.kPoseZero,
                 fixture.drive,
                 controller,
@@ -75,10 +81,11 @@ class DriveToWaypoint100Test extends Fixtured {
 
     @Test
     void testWithFF() {
-        DriveMotionController controller = DriveMotionControllerFactory.testFFOnly();
+        DriveMotionController controller = DriveMotionControllerFactory.testFFOnly(logger);
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
         // the trajectory here should be a no-op.
         DriveToWaypoint100 command = new DriveToWaypoint100(
+                logger,
                 GeometryUtil.kPoseZero,
                 fixture.drive,
                 controller,

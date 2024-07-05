@@ -4,12 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.interpolation.Interpolatable;
 
 class TimeInterpolatableBuffer100Test {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
     static class Item implements Interpolatable<Item> {
         public final double value;
@@ -26,7 +29,7 @@ class TimeInterpolatableBuffer100Test {
 
     @Test
     void testSimple() {
-        TimeInterpolatableBuffer100<Item> b = new TimeInterpolatableBuffer100<>(10, 0, new Item(0));
+        TimeInterpolatableBuffer100<Item> b = new TimeInterpolatableBuffer100<>(logger, 10, 0, new Item(0));
         {
             Item i = b.get(0);
             assertNotNull(i);

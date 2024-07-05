@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.interpolation.Interpolatable;
@@ -19,7 +19,7 @@ import edu.wpi.first.math.interpolation.Interpolatable;
  * The buffer is never empty, so get() always returns *something*.
  */
 public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
-    private final Telemetry t = Telemetry.get();
+    private final Logger m_logger;
     private final double m_historyS;
     private final NavigableMap<Double, T> m_pastSnapshots = new ConcurrentSkipListMap<>();
 
@@ -32,7 +32,8 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
      */
     private final ReadWriteLock m_lock = new ReentrantReadWriteLock();
 
-    public TimeInterpolatableBuffer100(double historyS, double timeS, T initialValue) {
+    public TimeInterpolatableBuffer100(Logger parent, double historyS, double timeS, T initialValue) {
+        m_logger = parent.child(this.getClass());
         m_historyS = historyS;
         // no lock needed in constructor
         m_pastSnapshots.put(timeS, initialValue);
@@ -95,11 +96,11 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
         }
         // Return the opposite bound if the other is null
         if (topBound == null) {
-            t.log(Level.TRACE, "buffer", "bottom", bottomBound.getValue().toString());
+            m_logger.log(Level.TRACE, "bottom", bottomBound.getValue().toString());
             return bottomBound.getValue();
         }
         if (bottomBound == null) {
-            t.log(Level.TRACE, "buffer", "top", topBound.getValue().toString());
+            m_logger.log(Level.TRACE, "top", topBound.getValue().toString());
             return topBound.getValue();
         }
 
@@ -108,8 +109,8 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
         // (the difference between the current time and bottom bound) and (the
         // difference between top and bottom bounds).
 
-        t.log(Level.TRACE, "buffer", "bottom", bottomBound.getValue().toString());
-        t.log(Level.TRACE, "buffer", "top", topBound.getValue().toString());
+        m_logger.log(Level.TRACE, "bottom", bottomBound.getValue().toString());
+        m_logger.log(Level.TRACE, "top", topBound.getValue().toString());
         double timeSinceBottom = timeSeconds - bottomBound.getKey();
         double timeSpan = topBound.getKey() - bottomBound.getKey();
         double timeFraction = timeSinceBottom / timeSpan;

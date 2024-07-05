@@ -7,16 +7,19 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
 class SteeringOverrideTest {
     private static final double kDelta = 0.001;
+    private static final Logger logger = new TestLogger();
 
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
-        SteeringOverride c = new SteeringOverride("foo", l);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
+        SteeringOverride c = new SteeringOverride(logger, l);
 
         SwerveModuleState100[] desiredModuleStates = new SwerveModuleState100[] {
                 new SwerveModuleState100(0, GeometryUtil.kRotationZero)
@@ -37,8 +40,8 @@ class SteeringOverrideTest {
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2();
-        SteeringOverride c = new SteeringOverride("foo", l);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2(logger);
+        SteeringOverride c = new SteeringOverride(logger, l);
 
         SwerveModuleState100[] desiredModuleStates = new SwerveModuleState100[] {
                 new SwerveModuleState100(1, GeometryUtil.kRotation90)

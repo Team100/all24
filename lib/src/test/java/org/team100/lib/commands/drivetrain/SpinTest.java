@@ -6,16 +6,18 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
+import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 
 class SpinTest extends Fixtured implements Timeless {
     private static final double kDelta = 0.01;
+    private static final Logger logger = new TestLogger();
 
     @Test
     void testSimple() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-
-        Spin command = new Spin(fixture.drive, fixture.controller);
+        Spin command = new Spin(logger, fixture.drive, fixture.controller);
         Spin.shutDownForTest();
         command.initialize();
         stepTime(0.02);

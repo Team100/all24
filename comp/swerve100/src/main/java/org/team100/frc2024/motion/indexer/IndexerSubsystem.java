@@ -10,8 +10,8 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Distance100;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,7 +34,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
      * Surface velocity of whatever is turning in the indexer.
      */
     private static final double kIndexerVelocityM_S = 5;
-    private final String m_name;
+    private final Logger m_logger;
     private final LimitedVelocityServo<Distance100> m_servo;
     private final PIDConstants m_velocityConstants;
     private final Feedforward100 m_lowLevelFeedforwardConstants;
@@ -42,8 +42,8 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
     DigitalInput beamBreak1;
     // DigitalInput beamBreak2;
 
-    public IndexerSubsystem(int driveID) {
-        m_name = Names.name(this);
+    public IndexerSubsystem(Logger parent, int driveID) {
+        m_logger = parent.child(this);
         m_velocityConstants = new PIDConstants(0.0001, 0, 0);
         m_lowLevelFeedforwardConstants = Feedforward100.makeNeo();
 
@@ -61,7 +61,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
 
 
                 m_servo = ServoFactory.limitedNeoVelocityServo(
-                        m_name,
+                        m_logger,
                         driveID,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
@@ -72,7 +72,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
             case BLANK:
             default:
                 m_servo = ServoFactory.limitedSimulatedVelocityServo(
-                        m_name,
+                        m_logger,
                         params);
         }
     }

@@ -5,7 +5,6 @@ import java.util.function.BooleanSupplier;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -19,8 +18,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * Sets the annunciator if bounds are exceeded.
  */
 public class Monitor implements Glassy {
-    private final Telemetry t = Telemetry.get();
-    private final String m_name;
+    private final Logger m_logger;
     private final BooleanConsumer m_annunciator;
     private final BooleanSupplier m_test;
     private final PowerDistribution m_pdp;
@@ -30,8 +28,8 @@ public class Monitor implements Glassy {
      * @param annunciator some sort of alert.
      * @param test        activates the annunciator, to make sure it's working.
      */
-    public Monitor(BooleanConsumer annunciator, BooleanSupplier test) {
-        m_name = Names.name(this);
+    public Monitor(Logger parent, BooleanConsumer annunciator, BooleanSupplier test) {
+        m_logger = parent.child(this);
         m_annunciator = annunciator;
         m_test = test;
         m_pdp = new PowerDistribution(1, ModuleType.kRev);
@@ -41,19 +39,19 @@ public class Monitor implements Glassy {
         m_shouldAlert = false;
         // this should test different things for different identities.
         if (Identity.instance == Identity.COMP_BOT || Identity.instance == Identity.BETA_BOT) {
-            t.log(Level.INFO, m_name, "battery_voltage", getBatteryVoltage());
+            m_logger.logDouble(Level.INFO, "battery_voltage", this::getBatteryVoltage);
             // TODO: fix the pdp observer
-            // t.log(Level.INFO,  m_name, "bus_voltage", getBusVoltage());
-            // t.log(Level.INFO,  m_name, "total_current", getTotalCurrent());
+            // t.log(Level.INFO, m_name, "bus_voltage", getBusVoltage());
+            // t.log(Level.INFO, m_name, "total_current", getTotalCurrent());
             // for (int i = 0; i < 16; ++i) {
-            // t.log(Level.INFO,  m_name, String.format("channel_current_%02d", i),
+            // t.log(Level.INFO, m_name, String.format("channel_current_%02d", i),
             // getChannelCurrent(i));
             // }
         }
 
         if (m_test.getAsBoolean())
             m_shouldAlert = true;
-        t.log(Level.INFO, m_name, "master_warning", m_shouldAlert);
+        m_logger.logBoolean(Level.INFO, "master_warning", m_shouldAlert);
         m_annunciator.accept(m_shouldAlert);
     }
 
@@ -94,5 +92,4 @@ public class Monitor implements Glassy {
         return "Monitor";
     }
 
-    
 }
