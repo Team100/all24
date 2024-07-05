@@ -9,6 +9,7 @@ import org.team100.lib.telemetry.Logger;
 import org.team100.lib.timing.ConstantConstraint;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -32,25 +33,26 @@ public class DrawSquare extends SequentialCommandGroup {
     public DrawSquare(
             Logger parent,
             SwerveDriveSubsystem drivetrain,
-            HolonomicDriveController3 controller) {
+            HolonomicDriveController3 controller,
+            TrajectoryVisualization viz) {
         TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(maxVelocityM_S, maxAccelM_S_S)));
         StraightLineTrajectory maker = new StraightLineTrajectory(tmaker);
         addCommands(
                 new DriveToWaypoint3(parent, new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
-                        controller),
+                        controller, viz),
                 new DriveToWaypoint3(parent, new Pose2d(-0.5, 0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
-                        controller),
+                        controller, viz),
                 new DriveToWaypoint3(parent, new Pose2d(0.5, 0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
-                        controller),
+                        controller, viz),
                 new DriveToWaypoint3(parent, new Pose2d(0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
-                        controller),
+                        controller, viz),
                 new DriveToWaypoint3(parent, new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
-                        controller)
+                        controller, viz)
 
         );
     }

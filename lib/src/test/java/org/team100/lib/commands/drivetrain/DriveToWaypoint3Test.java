@@ -26,6 +26,7 @@ import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryMaker;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -35,6 +36,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 class DriveToWaypoint3Test extends Fixtured {
     private static final double kDelta = 0.001;
     private static final Logger logger = new TestLogger();
+    private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
+
     SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     TrajectoryMaker tmaker = new TrajectoryMaker(constraints);
@@ -57,7 +60,8 @@ class DriveToWaypoint3Test extends Fixtured {
                 goal,
                 drivetrain,
                 trajectories,
-                controller);
+                controller,
+                viz);
         DriveToWaypoint3.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
@@ -85,7 +89,8 @@ class DriveToWaypoint3Test extends Fixtured {
 
         HolonomicDriveController3 m_controller = new HolonomicDriveController3(logger);
 
-        DriveToWaypoint3 command = new DriveToWaypoint3(logger, goal, drivetrain, maker, m_controller);
+        DriveToWaypoint3 command = new DriveToWaypoint3(
+                logger, goal, drivetrain, maker, m_controller, viz);
         DriveToWaypoint3.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);

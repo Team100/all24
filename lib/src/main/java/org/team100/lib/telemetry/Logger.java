@@ -79,7 +79,7 @@ public interface Logger {
     default void logDoubleObjArray(Level level, String leaf, Supplier<Double[]> val) {
     }
 
-    default void loglong(Level level, String leaf, LongSupplier val) {
+    default void logLong(Level level, String leaf, LongSupplier val) {
     }
 
     default void logString(Level level, String leaf, Supplier<String> val) {

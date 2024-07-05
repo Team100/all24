@@ -81,15 +81,11 @@ public class Telemetry {
         return instance;
     }
 
-    public Logger rootLogger(Glassy obj) {
-        return new RootLogger(this, obj.getGlassName());
+    public FieldLogger fieldLogger(boolean defaultEnabled) {
+        return new FieldLogger(this, defaultEnabled);
     }
 
-    public Logger fieldLogger() {
-        return new RootLogger(this, "field");
-    }
-
-    public Logger namedRootLogger(String str) {
-        return new RootLogger(this, str);
+    public RootLogger namedRootLogger(String str, boolean defaultEnabled) {
+        return new RootLogger(this, str, defaultEnabled);
     }
 }

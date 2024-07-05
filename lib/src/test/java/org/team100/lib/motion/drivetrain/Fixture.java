@@ -29,9 +29,11 @@ public class Fixture {
     public SwerveDriveSubsystem drive;
     public HolonomicDriveController3 controller;
     public Logger logger;
+    public Logger fieldLogger;
 
     public Fixture() {
         logger = new TestLogger();
+        fieldLogger = new TestLogger();
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Async async = new MockAsync();
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
@@ -46,6 +48,7 @@ public class Fixture {
         swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
 
         drive = new SwerveDriveSubsystem(
+                fieldLogger,
                 logger,
                 heading,
                 poseEstimator,

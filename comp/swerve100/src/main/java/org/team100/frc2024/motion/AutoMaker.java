@@ -24,6 +24,7 @@ import org.team100.lib.telemetry.Logger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -51,6 +52,7 @@ public class AutoMaker implements Glassy {
     private final NotePosition24ArrayListener m_notePosition24ArrayListener;
     private final double kShooterScale;
     private final Logger m_logger;
+    private final TrajectoryVisualization m_viz;
 
     public enum FieldPoint {
         NOTE1, NOTE2, NOTE3, NOTE4, NOTE5, NOTE6, NOTE7, NOTE8, CLOSEWINGSHOT, FARWINGSHOT, STAGESHOT,
@@ -69,7 +71,8 @@ public class AutoMaker implements Glassy {
             Intake intake,
             SensorInterface sensor,
             NotePosition24ArrayListener notePosition24ArrayListener,
-            List<TimingConstraint> constraints) {
+            List<TimingConstraint> constraints,
+            TrajectoryVisualization viz) {
         m_notePosition24ArrayListener = notePosition24ArrayListener;
         m_swerve = swerve;
         m_controller = controller;
@@ -80,6 +83,7 @@ public class AutoMaker implements Glassy {
         m_intake = intake;
         m_sensors = sensor;
         m_logger = parent.child(this);
+        m_viz = viz;
     }
 
     private Translation2d getTranslation(Alliance m_alliance, FieldPoint point) {
@@ -299,7 +303,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller);
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 test(
@@ -339,7 +343,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 maxVel,
                 maxAcc);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.goodPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.goodPIDF(m_logger),
+                m_viz);
     }
 
     public DriveToWithAutoStart startToNote(Alliance alliance, FieldPoint note) {
@@ -347,7 +352,7 @@ public class AutoMaker implements Glassy {
         Rotation2d endRotation = new Rotation2d(Math.PI / 2);
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endRotation);
         return new DriveToWithAutoStart(m_logger, m_swerve, endWaypoint, endPose.getRotation(), m_controller,
-                m_constraints);
+                m_constraints, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory1() {
@@ -365,7 +370,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller);
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory6() {
@@ -383,7 +388,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller);
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory2() {
@@ -401,7 +406,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller);
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory3() {
@@ -419,7 +424,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller);
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory4() {
@@ -437,7 +442,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller);
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 driveToStageBase(Alliance alliance, FieldPoint start, FieldPoint end) {
@@ -467,7 +472,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 2,
                 2); // kNote
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.stageBase(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.stageBase(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 throughStage(Alliance alliance, FieldPoint start, FieldPoint end) {
@@ -501,7 +507,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 4,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.complementPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 aroundStage(Alliance alliance, FieldPoint start, FieldPoint end) {
@@ -532,7 +539,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 2,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.complementPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 aroundStage(Alliance alliance, FieldPoint start, FieldPoint end, Rotation2d heading) {
@@ -563,7 +571,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 2,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.complementPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 aroundStage(Alliance alliance, FieldPoint start, FieldPoint end, double begHeading) {
@@ -594,7 +603,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 2,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.complementPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint start, FieldPoint end, int maxAcc,
@@ -620,7 +630,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 maxVel,
                 maxAcc);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.straightPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.straightPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint start, FieldPoint end, int maxAcc,
@@ -644,7 +655,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 maxVel,
                 maxAcc);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.straightPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.straightPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint start, FieldPoint end,
@@ -669,7 +681,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 maxVel,
                 maxAcc);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.complementPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.complementPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 driveStraight(Pose2d start, Pose2d end, Alliance alliance) {
@@ -703,7 +716,7 @@ public class AutoMaker implements Glassy {
                 m_logger,
                 m_swerve,
                 trajectory,
-                DriveMotionControllerFactory.straightPIDF(m_logger));
+                DriveMotionControllerFactory.straightPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 driveStraightWithWaypoints(
@@ -734,7 +747,8 @@ public class AutoMaker implements Glassy {
                 0.0,
                 4,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, DriveMotionControllerFactory.newNewPIDF(m_logger));
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+                DriveMotionControllerFactory.newNewPIDF(m_logger), m_viz);
     }
 
     public TrajectoryCommand100 stageManeuver(Alliance alliance, FieldPoint start, FieldPoint between, FieldPoint end) {
@@ -769,7 +783,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller);
+        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 throughCentralStageOpening(Alliance alliance, FieldPoint start, FieldPoint end) {
@@ -789,7 +803,8 @@ public class AutoMaker implements Glassy {
     }
 
     public DriveToWaypoint100 driveToStraight(Alliance alliance, FieldPoint point) {
-        return new DriveToWaypoint100(m_logger, getPose(alliance, point), m_swerve, m_controller, m_constraints, 1);
+        return new DriveToWaypoint100(m_logger, getPose(alliance, point), m_swerve, m_controller, m_constraints, 1,
+                m_viz);
     }
 
     public SequentialCommandGroup eightNoteAuto(Alliance alliance) {

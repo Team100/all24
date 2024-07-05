@@ -37,13 +37,16 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Annunciator;
+import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Monitor;
+import org.team100.lib.telemetry.RootLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.visualization.SwerveModuleVisualization;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
@@ -77,8 +80,11 @@ public class RobotContainerParkingLot implements Glassy {
      * rot.
      */
     RobotContainerParkingLot(TimedRobot100 robot) {
-        final Logger logger = Telemetry.get().rootLogger(this);
-        final Logger driveLogger = Telemetry.get().namedRootLogger("DRIVE");
+        Telemetry telemetry = Telemetry.get();
+        final FieldLogger fieldLogger = telemetry.fieldLogger(true);
+        final RootLogger monitorLogger = telemetry.namedRootLogger("MONITOR", false);
+        final RootLogger driveLogger = telemetry.namedRootLogger("DRIVE", false);
+        final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
 
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
         final Async async = asyncFactory.get();
@@ -87,13 +93,13 @@ public class RobotContainerParkingLot implements Glassy {
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
 
         m_modules = SwerveModuleCollection.get(
-                logger,
+                driveLogger,
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
         SwerveModuleVisualization.make(m_modules, async);
         m_heading = HeadingFactory.get(
-                logger,
+                driveLogger,
                 swerveKinodynamics,
                 m_modules,
                 asyncFactory);
@@ -104,6 +110,7 @@ public class RobotContainerParkingLot implements Glassy {
                 Timer.getFPGATimestamp());
         SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
         m_drive = new SwerveDriveSubsystem(
+                fieldLogger,
                 driveLogger,
                 m_heading,
                 poseEstimator,
@@ -121,11 +128,11 @@ public class RobotContainerParkingLot implements Glassy {
         // m_beep = new Beep();
         BooleanSupplier test = () -> driverControl.annunicatorTest() ||
                 m_beep.getOutput();
-        m_monitor = new Monitor(logger, new Annunciator(6, async), test);
+        m_monitor = new Monitor(monitorLogger, new Annunciator(6, async), test);
         // The monitor runs less frequently than the control loop.
         robot.addPeriodic(m_monitor::periodic, 0.2, "monitor");
 
-        HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
+        HolonomicDriveController3 controller = new HolonomicDriveController3(driveLogger);
 
         ///////////////////////
 
@@ -133,19 +140,19 @@ public class RobotContainerParkingLot implements Glassy {
         // this should be a field.
         final DriveInALittleSquare m_driveInALittleSquare;
 
-        m_driveInALittleSquare = new DriveInALittleSquare(logger, m_drive);
+        m_driveInALittleSquare = new DriveInALittleSquare(driveLogger, m_drive);
         whileTrue(driverControl::never, m_driveInALittleSquare);
 
         ///////////////////////
         // trying the new ChoreoLib
         ChoreoTrajectory choreoTrajectory = Choreo.getTrajectory("test");
-        whileTrue(driverControl::never, CommandMaker.choreo(choreoTrajectory, m_drive));
+        whileTrue(driverControl::never, CommandMaker.choreo(choreoTrajectory, m_drive, viz));
 
         ///////////////////////
 
-        whileTrue(driverControl::never, new DriveInACircle(logger, m_drive, controller, -1));
-        whileTrue(driverControl::never, new Spin(logger, m_drive, controller));
-        whileTrue(driverControl::never, new Oscillate(logger, m_drive));
+        whileTrue(driverControl::never, new DriveInACircle(driveLogger, m_drive, controller, -1, viz));
+        whileTrue(driverControl::never, new Spin(driveLogger, m_drive, controller));
+        whileTrue(driverControl::never, new Oscillate(driveLogger, m_drive));
 
         ////////////////////////
 
@@ -154,67 +161,72 @@ public class RobotContainerParkingLot implements Glassy {
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         // 254 PID follower
-        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF(logger);
+        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF(driveLogger);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
-                        logger,
+                        driveLogger,
                         goal,
                         m_drive,
                         drivePID,
                         constraints,
-                        1));
+                        1,
+                        viz));
 
         ////////////////////////
 
         // 254 FF follower
 
-        DriveMotionController driveFF = DriveMotionControllerFactory.ffOnly(logger);
+        DriveMotionController driveFF = DriveMotionControllerFactory.ffOnly(driveLogger);
 
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
-                        logger,
+                        driveLogger,
                         goal,
                         m_drive,
                         driveFF,
                         constraints,
-                        1));
+                        1,
+                        viz));
 
         ///////////////////////
 
         // 254 Pursuit follower
-        DriveMotionController drivePP = DriveMotionControllerFactory.purePursuit(logger, swerveKinodynamics);
+        DriveMotionController drivePP = DriveMotionControllerFactory.purePursuit(driveLogger, swerveKinodynamics);
 
         whileTrue(driverControl::test,
                 new DriveToWaypoint100(
-                        logger,
+                        driveLogger,
                         goal,
                         m_drive,
                         drivePP,
                         constraints,
-                        1));
+                        1,
+                        viz));
 
         whileTrue(driverControl::test,
                 new DriveToState101(
-                        logger,
+                        driveLogger,
                         goal,
                         new FieldRelativeVelocity(2, 0, 0),
                         m_drive,
                         drivePP,
-                        constraints));
+                        constraints,
+                        viz));
 
         ///////////////////////
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
-        DriveMotionController driveRam = DriveMotionControllerFactory.ramsete(logger);
+        DriveMotionController driveRam = DriveMotionControllerFactory.ramsete(driveLogger);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
-                        logger,
+                        driveLogger,
                         goal,
                         m_drive,
                         driveRam,
                         constraints,
-                        1));
+                        1,
+                        viz));
 
         //////////////////////
 
@@ -224,29 +236,29 @@ public class RobotContainerParkingLot implements Glassy {
 
         // make a one-meter line
         whileTrue(driverControl::never,
-                new TrajectoryListCommand(logger, m_drive, controller,
-                        x -> List.of(maker.line(x))));
+                new TrajectoryListCommand(driveLogger, m_drive, controller,
+                        x -> List.of(maker.line(x)), viz));
 
         // make a one-meter square
         whileTrue(driverControl::never,
-                new TrajectoryListCommand(logger, m_drive, controller,
-                        maker::square));
+                new TrajectoryListCommand(driveLogger, m_drive, controller,
+                        maker::square, viz));
 
-        whileTrue(driverControl::test, new TrajectoryListCommand(logger, m_drive, controller,
-                null));
+        whileTrue(driverControl::test, new TrajectoryListCommand(driveLogger, m_drive, controller,
+                null, viz));
 
         // one-meter square with reset at the corners
         whileTrue(driverControl::never,
-                new PermissiveTrajectoryListCommand(logger, m_drive, controller,
-                        maker.permissiveSquare()));
+                new PermissiveTrajectoryListCommand(driveLogger, m_drive, controller,
+                        maker.permissiveSquare(), viz));
 
         // one-meter square with position and velocity feedback control
         whileTrue(driverControl::never,
-                new FullStateTrajectoryListCommand(logger, m_drive,
-                        maker::square));
+                new FullStateTrajectoryListCommand(driveLogger, m_drive,
+                        maker::square, viz));
 
         // this should be a field.
-        final DrawSquare m_drawCircle = new DrawSquare(logger, m_drive, controller);
+        final DrawSquare m_drawCircle = new DrawSquare(driveLogger, m_drive, controller, viz);
         whileTrue(driverControl::circle, m_drawCircle);
     }
 

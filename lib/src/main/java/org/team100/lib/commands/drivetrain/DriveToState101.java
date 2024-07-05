@@ -36,6 +36,7 @@ public class DriveToState101 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
+    private final TrajectoryVisualization m_viz;
 
     public DriveToState101(
             Logger parent,
@@ -43,13 +44,15 @@ public class DriveToState101 extends Command100 {
             FieldRelativeVelocity endVelocity,
             SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
-            List<TimingConstraint> constraints) {
+            List<TimingConstraint> constraints,
+            TrajectoryVisualization viz) {
         super(parent);
         m_goal = goal;
         m_endVelocity = endVelocity;
         m_swerve = drivetrain;
         m_controller = controller;
         m_constraints = constraints;
+        m_viz = viz;
         addRequirements(m_swerve);
     }
 
@@ -81,7 +84,7 @@ public class DriveToState101 extends Command100 {
             return;
         }
 
-        TrajectoryVisualization.setViz(trajectory);
+        m_viz.setViz(trajectory);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
         m_controller.setTrajectory(iter);
@@ -106,7 +109,7 @@ public class DriveToState101 extends Command100 {
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 
     private Pose2d getStartWaypoint(Pose2d startPose, FieldRelativeVelocity startVelocity) {

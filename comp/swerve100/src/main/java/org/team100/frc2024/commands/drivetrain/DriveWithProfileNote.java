@@ -14,8 +14,8 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
 
@@ -33,9 +33,8 @@ import edu.wpi.first.math.geometry.Translation2d;
  * TODO: force the theta axis to finish first, so that the approach is correct.
  */
 public class DriveWithProfileNote extends Command100 {
-
+    private final FieldLogger m_fieldLogger;
     private final Intake m_intake;
-
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final FullStateDriveController m_controller;
@@ -43,7 +42,7 @@ public class DriveWithProfileNote extends Command100 {
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
-    private final Logger fieldLogger;
+
     private Translation2d m_previousGoal;
     private State100 m_xSetpoint;
     private State100 m_ySetpoint;
@@ -51,6 +50,7 @@ public class DriveWithProfileNote extends Command100 {
     private int m_count;
 
     public DriveWithProfileNote(
+            FieldLogger fieldLogger,
             Logger parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
@@ -58,9 +58,7 @@ public class DriveWithProfileNote extends Command100 {
             FullStateDriveController controller,
             SwerveKinodynamics limits) {
         super(parent);
-        fieldLogger = Telemetry.get().fieldLogger();
-        m_previousGoal = null;
-        m_count = 0;
+        m_fieldLogger = fieldLogger;
         m_intake = intake;
         m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;
@@ -79,6 +77,10 @@ public class DriveWithProfileNote extends Command100 {
                 m_limits.getMaxAngleSpeedRad_S(),
                 m_limits.getMaxAngleAccelRad_S2() / 4,
                 0.01);
+
+        m_previousGoal = null;
+        m_count = 0;
+
         addRequirements(m_swerve, m_intake);
     }
 
@@ -147,7 +149,7 @@ public class DriveWithProfileNote extends Command100 {
 
         m_swerve.driveInFieldCoords(output, dt);
 
-        fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
+        m_fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
                 goal.getX(),
                 goal.getY(),
                 0 });
