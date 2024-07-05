@@ -4,6 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.config.SysParam;
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.profile.Profile100;
@@ -13,7 +14,7 @@ import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
-public class GravityServo {
+public class GravityServo implements Glassy {
     private final Logger m_logger;
     private final DutyCycleMotor100 m_motor;
     private final SysParam m_params;
@@ -36,7 +37,7 @@ public class GravityServo {
             Encoder100<Distance100> encoder,
             double[] softLimits) {
         m_motor = motor;
-        m_logger = parent.child(this.getClass());
+        m_logger = parent.child(this);
         m_params = params;
         m_controller = controller;
         m_controller.setTolerance(0.02);
@@ -191,5 +192,10 @@ public class GravityServo {
 
     public void stop() {
         m_motor.setDutyCycle(0);
+    }
+
+    @Override
+    public String getGlassName() {
+        return "GravityServo";
     }
 }

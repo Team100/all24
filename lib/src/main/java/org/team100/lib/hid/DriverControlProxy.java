@@ -28,7 +28,7 @@ public class DriverControlProxy implements DriverControl {
      * for it.
      */
     public DriverControlProxy(Logger parent, Async async) {
-        m_logger = parent.child(this.getClass());
+        m_logger = parent.child(this);
         refresh();
         async.addPeriodic(this::refresh, kFreq, "DriverControlProxy");
     }

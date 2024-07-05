@@ -52,9 +52,7 @@ public class Telemetry {
      */
     static final boolean kAlsoPrint = false;
     private static final Telemetry instance = new Telemetry();
-    static final String kName = "Telemetry";
 
-    final Chronos m_chronos = Chronos.get();
     final NetworkTableInstance inst;
     final Map<String, Publisher> pubs;
     Level m_level;

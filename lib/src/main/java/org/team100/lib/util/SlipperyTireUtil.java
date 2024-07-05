@@ -1,5 +1,6 @@
 package org.team100.lib.util;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.telemetry.Logger;
@@ -20,7 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
  * 
  * This class helps produce those corner velocities.
  */
-public class SlipperyTireUtil {
+public class SlipperyTireUtil implements Glassy {
     /** Clip corner speeds to this. */
     private static final double kMaxSpeedM_s = 5.0;
     private final Logger m_logger;
@@ -29,7 +30,7 @@ public class SlipperyTireUtil {
 
     public SlipperyTireUtil(Logger parent, Tire tire) {
         m_tire = tire;
-        m_logger = parent.child(this.getClass());
+        m_logger = parent.child(this);
     }
 
     /**
@@ -132,5 +133,10 @@ public class SlipperyTireUtil {
         m_logger.logDouble(Level.TRACE, "twistdx", () -> twist.dx);
         SwerveModulePosition[] p = kinematics.toSwerveModulePosition(twist);
         return kinematics.pos2vec(p);
+    }
+
+    @Override
+    public String getGlassName() {
+        return "SlipperyTireUtil";
     }
 }

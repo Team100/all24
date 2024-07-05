@@ -2,7 +2,6 @@ package org.team100.lib.telemetry;
 
 import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
@@ -36,29 +35,29 @@ import edu.wpi.first.util.function.FloatSupplier;
  * 
  * All the methods have different names because Java erases the type parameter
  * of the suppliers.
+ * 
+ * It's an interface with defaults so that the test mock is simple.
  */
 public interface Logger {
 
-    /** Adds a slash between the root and the stem */
+    /**
+     * Use this to create a child logger that describes the purpose of the
+     * subordinate thing, e.g. the "left" thing or the "right" thing.
+     * 
+     * Each child level is separated by slashes, to make a tree in glass.
+     */
     Logger child(String stem);
 
+    /**
+     * Use this to create a child logger that describes the type of the subordinate
+     * thing, using the stable glass name (i.e. interface names, not implementation
+     * names, where possible).
+     */
     default Logger child(Glassy obj) {
         return child(obj.getGlassName());
     }
 
-    default Logger child(Class<?> clazz) {
-        return child(clazz.getSimpleName());
-    }
-
     default void logBoolean(Level level, String leaf, BooleanSupplier val) {
-    }
-
-    /**
-     * This is for tuning through glass.
-     * Remember that the values don't survive restarts, so
-     * you should write them down.
-     */
-    default void register(Level level, String leaf, double initial, DoubleConsumer consumer) {
     }
 
     default void logDouble(Level level, String leaf, DoubleSupplier vals) {

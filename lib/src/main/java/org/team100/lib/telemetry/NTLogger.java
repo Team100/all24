@@ -1,11 +1,9 @@
 package org.team100.lib.telemetry;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
@@ -43,7 +41,6 @@ import edu.wpi.first.networktables.FloatPublisher;
 import edu.wpi.first.networktables.FloatTopic;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.IntegerTopic;
-import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.networktables.StringArrayPublisher;
 import edu.wpi.first.networktables.StringArrayTopic;
@@ -55,14 +52,16 @@ public class NTLogger implements Logger {
     private final Telemetry m_telemetry;
     private final String m_root;
     private final BooleanSupplier m_enabled;
+    private final Chronos m_chronos;
+
 
     NTLogger(Telemetry telemetry, String root, BooleanSupplier enabled) {
         m_telemetry = telemetry;
         m_root = root;
         m_enabled = enabled;
+        m_chronos = Chronos.get();
     }
 
-    /** Adds a slash between the root and the stem */
     @Override
     public Logger child(String stem) {
         return new NTLogger(m_telemetry, m_root + "/" + stem, m_enabled);
@@ -95,28 +94,9 @@ public class NTLogger implements Logger {
         }, BooleanPublisher.class).set(val);
     }
 
-    /**
-     * This is for tuning through glass.
-     * Remember that the values don't survive restarts, so
-     * you should write them down.
-     * TODO: get rid of this, we never use it.
-     */
-    @Override
-    public void register(Level level, String leaf, double initial, DoubleConsumer consumer) {
-        if (!allow(level))
-            return;
-        String k = append(m_root, leaf);
-        DoubleTopic t = m_telemetry.inst.getDoubleTopic(k);
-        t.publish().set(initial);
-        t.setRetained(true);
-        m_telemetry.inst.addListener(t, EnumSet.of(NetworkTableEvent.Kind.kValueAll),
-                e -> consumer.accept(e.valueData.value.getDouble()));
-    }
-
-    // using a supplier here is faster in the non-logging case.
     @Override
     public void logDouble(Level level, String leaf, DoubleSupplier vals) {
-        Sample s = m_telemetry.m_chronos.sample(Telemetry.kName);
+        Sample s = m_chronos.sample("logDouble");
         try {
             if (!allow(level))
                 return;

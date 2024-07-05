@@ -3,6 +3,7 @@ package org.team100.lib.localization;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -19,12 +20,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 /**
  * Static methods used to interpret camera input.
  */
-public class PoseEstimationHelper {
+public class PoseEstimationHelper implements Glassy {
 
     private final Logger m_logger;
 
     public PoseEstimationHelper(Logger parent) {
-        m_logger = parent.child(this.getClass());
+        m_logger = parent.child(this);
     }
 
     /**
@@ -330,5 +331,10 @@ public class PoseEstimationHelper {
         Translation3d t = PoseEstimationHelper.blipToTranslation(blip);
         return cameraInRobotCoordinates.plus(
                 new Transform3d(t, GeometryUtil.kRotation3Zero));
+    }
+
+    @Override
+    public String getGlassName() {
+        return "PoseEstimationHelper";
     }
 }
