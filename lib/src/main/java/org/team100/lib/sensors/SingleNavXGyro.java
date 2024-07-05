@@ -128,7 +128,7 @@ public class SingleNavXGyro implements Gyro100 {
         if (m_gyro1.isConnected()) {
             m_logger.logBoolean(Level.TRACE, "Connected", () -> true);
         } else {
-            m_logger.logBoolean(Level.ERROR, "Connected", () -> false);
+            m_logger.logBoolean(Level.COMP, "Connected", () -> false);
         }
         m_logger.logDouble(Level.TRACE, "Angle (deg)", m_gyro1::getAngle);
         m_logger.logFloat(Level.TRACE, "Fused (deg)", m_gyro1::getFusedHeading);

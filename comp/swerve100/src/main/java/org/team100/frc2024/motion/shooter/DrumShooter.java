@@ -255,9 +255,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.DEBUG, "left velocity", leftRoller::getVelocity);
-        m_logger.logOptionalDouble(Level.DEBUG, "right velocity", rightRoller::getVelocity);
-        m_logger.logOptionalDouble(Level.DEBUG, "pivot angle", pivotServo::getPosition);
+        m_logger.logOptionalDouble(Level.TRACE, "left velocity", leftRoller::getVelocity);
+        m_logger.logOptionalDouble(Level.TRACE, "right velocity", rightRoller::getVelocity);
+        m_logger.logOptionalDouble(Level.TRACE, "pivot angle", pivotServo::getPosition);
     }
 
     @Override

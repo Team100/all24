@@ -37,8 +37,8 @@ public class VortexProxy implements DutyCycleMotor100, NeoVortexTorqueModel {
 
     private void set(double speed) {
         m_motor.set(speed);
-        m_logger.logDouble(Level.DEBUG, "current (A)", m_motor::getOutputCurrent);
-        m_logger.logDouble(Level.DEBUG, "duty cycle", m_motor::getAppliedOutput);
+        m_logger.logDouble(Level.TRACE, "current (A)", m_motor::getOutputCurrent);
+        m_logger.logDouble(Level.TRACE, "duty cycle", m_motor::getAppliedOutput);
     }
 
     @Override

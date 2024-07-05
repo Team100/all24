@@ -82,7 +82,7 @@ public class DriveWithWaypoints extends Command100 {
         Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
-        m_logger.logChassisSpeeds(Level.DEBUG, "chassis speeds", () -> output);
+        m_logger.logChassisSpeeds(Level.TRACE, "chassis speeds", () -> output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }

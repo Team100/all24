@@ -186,7 +186,7 @@ public abstract class Talon6Motor<T extends Measure100>
         m_logger.logDouble(Level.TRACE, "supply current (A)", m_supply);
         m_logger.logDouble(Level.TRACE, "stator current (A)", m_stator);
         m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
-        m_logger.logDouble(Level.DEBUG, "temperature (C)", m_temp);
+        m_logger.logDouble(Level.TRACE, "temperature (C)", m_temp);
     }
 
     private double getMotorTorque() {

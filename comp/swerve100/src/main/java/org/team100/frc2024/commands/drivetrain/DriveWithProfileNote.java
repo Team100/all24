@@ -95,7 +95,7 @@ public class DriveWithProfileNote extends Command100 {
      */
     private Optional<Translation2d> getGoal() {
         Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
-        m_logger.logBoolean(Level.DEBUG, "Note detected", optGoal::isPresent);
+        m_logger.logBoolean(Level.TRACE, "Note detected", optGoal::isPresent);
 
         if (optGoal.isPresent()) {
             // Supplier is ok, use this goal and reset the history mechanism.
@@ -147,7 +147,7 @@ public class DriveWithProfileNote extends Command100 {
 
         m_swerve.driveInFieldCoords(output, dt);
 
-        fieldLogger.logDoubleArray(Level.DEBUG, "target", () -> new double[] {
+        fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
                 goal.getX(),
                 goal.getY(),
                 0 });

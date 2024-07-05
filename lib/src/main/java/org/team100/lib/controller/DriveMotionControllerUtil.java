@@ -45,7 +45,7 @@ public class DriveMotionControllerUtil implements Glassy {
         Optional<Rotation2d> motion_direction = direction(currentPose, setpoint);
 
         ChassisSpeeds u_FF = ff(setpoint, velocity_m, motion_direction);
-        m_logger.logChassisSpeeds(Level.DEBUG, "u_FF", () -> u_FF);
+        m_logger.logChassisSpeeds(Level.TRACE, "u_FF", () -> u_FF);
         return u_FF;
     }
 
@@ -67,12 +67,12 @@ public class DriveMotionControllerUtil implements Glassy {
             double kPCart,
             double kPTheta) {
         final Twist2d positionError = getErrorTwist(currentPose, setpoint);
-        m_logger.logTwist2d(Level.DEBUG, "errorTwist", () -> positionError);
+        m_logger.logTwist2d(Level.TRACE, "errorTwist", () -> positionError);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPCart * positionError.dx,
                 kPCart * positionError.dy,
                 kPTheta * positionError.dtheta);
-        m_logger.logChassisSpeeds(Level.DEBUG, "u_FB", () -> u_FB);
+        m_logger.logChassisSpeeds(Level.TRACE, "u_FB", () -> u_FB);
         return u_FB;
     }
 

@@ -59,7 +59,7 @@ public class DrivePIDFController implements DriveMotionController {
         if (m_iter == null)
             return new ChassisSpeeds();
 
-        m_logger.logPose2d(Level.DEBUG, "measurement", () -> measurement);
+        m_logger.logPose2d(Level.TRACE, "measurement", () -> measurement);
 
         Optional<TimedPose> optionalSetpoint = getSetpoint(timeS);
         if (!optionalSetpoint.isPresent()) {
@@ -67,7 +67,7 @@ public class DrivePIDFController implements DriveMotionController {
         }
         TimedPose setpoint = optionalSetpoint.get();
         SmartDashboard.putNumber("setpointX", setpoint.state().getPose().getX());
-        m_logger.logTimedPose(Level.DEBUG, "setpoint", () -> setpoint);
+        m_logger.logTimedPose(Level.TRACE, "setpoint", () -> setpoint);
 
         ChassisSpeeds u_FF = m_util.feedforward(measurement, setpoint);
         if (m_feedforwardOnly)

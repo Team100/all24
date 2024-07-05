@@ -50,10 +50,6 @@ public interface Logger {
         return child(clazz.getSimpleName());
     }
 
-    default boolean enabled() {
-        return false;
-    }
-
     default void logBoolean(Level level, String leaf, BooleanSupplier val) {
     }
 

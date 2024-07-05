@@ -66,16 +66,21 @@ public class NTLogger implements Logger {
         return new NTLogger(m_telemetry, m_root + "/" + stem, m_enabled);
     }
 
-    @Override
-    public boolean enabled() {
+    private boolean enabled() {
         return m_enabled.getAsBoolean();
+    }
+
+    private boolean allow(Level level) {
+        if (m_telemetry.m_level == Level.COMP && level == Level.COMP) {
+            // comp mode allows COMP level regardless of enablement.
+            return true;
+        }
+        return enabled() && m_telemetry.m_level.admit(level);
     }
 
     @Override
     public void logBoolean(Level level, String leaf, BooleanSupplier vals) {
-        if (!enabled())
-            return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         String key = append(m_root, leaf);
         boolean val = vals.getAsBoolean();
@@ -95,9 +100,7 @@ public class NTLogger implements Logger {
      */
     @Override
     public void register(Level level, String leaf, double initial, DoubleConsumer consumer) {
-        if (!enabled())
-            return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         String k = append(m_root, leaf);
         DoubleTopic t = m_telemetry.inst.getDoubleTopic(k);
@@ -112,9 +115,7 @@ public class NTLogger implements Logger {
     public void logDouble(Level level, String leaf, DoubleSupplier vals) {
         Sample s = m_telemetry.m_chronos.sample(Telemetry.kName);
         try {
-            if (!enabled())
-                return;
-            if (!m_telemetry.m_level.admit(level))
+            if (!allow(level))
                 return;
             String key = append(m_root, leaf);
             double val = vals.getAsDouble();
@@ -132,9 +133,7 @@ public class NTLogger implements Logger {
 
     @Override
     public void logOptionalDouble(Level level, String leaf, Supplier<OptionalDouble> vals) {
-        if (!enabled())
-            return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         OptionalDouble val = vals.get();
         if (val.isPresent()) {
@@ -144,11 +143,7 @@ public class NTLogger implements Logger {
 
     @Override
     public void logFloat(Level level, String leaf, FloatSupplier vals) {
-        if (!enabled())
-            return;
-        // if(val == null)
-        // return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         String key = append(m_root, leaf);
         float val = vals.getAsFloat();
@@ -163,9 +158,7 @@ public class NTLogger implements Logger {
 
     @Override
     public void logDoubleArray(Level level, String leaf, Supplier<double[]> vals) {
-        if (!enabled())
-            return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         String key = append(m_root, leaf);
         double[] val = vals.get();
@@ -180,9 +173,7 @@ public class NTLogger implements Logger {
 
     @Override
     public void logDoubleObjArray(Level level, String leaf, Supplier<Double[]> vals) {
-        if (!enabled())
-            return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         Double[] val = vals.get();
         logDoubleArray(level, leaf, () -> Stream.of(val).mapToDouble(Double::doubleValue).toArray());
@@ -190,9 +181,7 @@ public class NTLogger implements Logger {
 
     @Override
     public void loglong(Level level, String leaf, LongSupplier vals) {
-        if (!enabled())
-            return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         String key = append(m_root, leaf);
         long val = vals.getAsLong();
@@ -207,9 +196,7 @@ public class NTLogger implements Logger {
 
     @Override
     public void logString(Level level, String leaf, Supplier<String> vals) {
-        if (!enabled())
-            return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         String key = append(m_root, leaf);
         String val = vals.get();
@@ -225,9 +212,7 @@ public class NTLogger implements Logger {
     /** val is a supplier to avoid doing any work if we're not going to log it. */
     @Override
     public void logStringArray(Level level, String leaf, Supplier<String[]> vals) {
-        if (!enabled())
-            return;
-        if (!m_telemetry.m_level.admit(level))
+        if (!allow(level))
             return;
         String key = append(m_root, leaf);
         String[] val = vals.get();

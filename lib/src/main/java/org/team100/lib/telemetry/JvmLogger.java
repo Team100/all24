@@ -56,16 +56,16 @@ public class JvmLogger implements Glassy {
         for (MemoryPoolMXBean bean : ManagementFactory.getMemoryPoolMXBeans()) {
             MemoryUsage usage = bean.getUsage();
             accumUsage += usage.getUsed();
-            m_logger.loglong(Level.INFO, "MemoryPool/" + bean.getName(), usage::getUsed);
+            m_logger.loglong(Level.COMP, "MemoryPool/" + bean.getName(), usage::getUsed);
         }
         long finalAccumUsage = accumUsage;
-        m_logger.loglong(Level.INFO, "MemoryPool/total", () -> finalAccumUsage);
+        m_logger.loglong(Level.COMP, "MemoryPool/total", () -> finalAccumUsage);
     }
 
     public void logMemoryUsage() {
         MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
-        m_logger.loglong(Level.INFO, "MemoryUsage/heap", () -> bean.getHeapMemoryUsage().getUsed());
-        m_logger.loglong(Level.INFO, "MemoryUsage/non-heap", () -> bean.getNonHeapMemoryUsage().getUsed());
+        m_logger.loglong(Level.COMP, "MemoryUsage/heap", () -> bean.getHeapMemoryUsage().getUsed());
+        m_logger.loglong(Level.COMP, "MemoryUsage/non-heap", () -> bean.getNonHeapMemoryUsage().getUsed());
     }
 
     @Override

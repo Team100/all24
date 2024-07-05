@@ -53,7 +53,7 @@ public class SlipperyTireUtil {
         SwerveModulePosition[] result = new SwerveModulePosition[deltas.length];
         for (int i = 0; i < deltas.length; i++) {
             SwerveModulePosition delta = deltas[i];
-            m_logger.logSwerveModulePosition(Level.WARN, "deltas" + i, () -> delta);
+            m_logger.logSwerveModulePosition(Level.TRACE, "deltas" + i, () -> delta);
 
             // this is robot-relative
             Vector2d wheelSpeedM_s = new Vector2d(
@@ -62,11 +62,11 @@ public class SlipperyTireUtil {
 
             // corners are robot-relative
             final Vector2d corner = corners[i];
-            m_logger.logVector2d(Level.WARN, "corner" + i, () -> corner);
+            m_logger.logVector2d(Level.TRACE, "corner" + i, () -> corner);
             Vector2d cornerSpeedM_s = getCornerSpeedM_s(corners[i], cornerDtS);
             Vector2d actualSpeedM_s = m_tire.actual(cornerSpeedM_s, wheelSpeedM_s, dtS);
-            m_logger.logVector2d(Level.WARN, "cornerSpeed" + i, () -> cornerSpeedM_s);
-            m_logger.logVector2d(Level.WARN, "actualSpeed" + i, () -> actualSpeedM_s);
+            m_logger.logVector2d(Level.TRACE, "cornerSpeed" + i, () -> cornerSpeedM_s);
+            m_logger.logVector2d(Level.TRACE, "actualSpeed" + i, () -> actualSpeedM_s);
 
             // this throws away the "optimization" of the input. :(
             // TODO: fix that
@@ -76,9 +76,9 @@ public class SlipperyTireUtil {
                     new Rotation2d(actualSpeedM_s.getX(), actualSpeedM_s.getY()));
 
             final SwerveModulePosition resulti = result[i];
-            m_logger.logSwerveModulePosition(Level.WARN, "result" + i, () -> resulti);
+            m_logger.logSwerveModulePosition(Level.TRACE, "result" + i, () -> resulti);
         }
-        m_logger.logDouble(Level.WARN, "dts", () -> dtS);
+        m_logger.logDouble(Level.TRACE, "dts", () -> dtS);
         return result;
     }
 

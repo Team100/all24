@@ -158,7 +158,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // this name needs to be exactly "/field/target" for glass.
-        fieldLogger.logDoubleArray(Level.DEBUG, "target", () -> new double[] {
+        fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
                 target.get().getX(),
                 target.get().getY(),
                 0 });

@@ -63,7 +63,7 @@ public class ShootSmart extends Command implements Glassy {
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
             double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
-            m_logger.logDouble(Level.DEBUG, "pivot error (rad)", () -> errorRad);
+            m_logger.logDouble(Level.TRACE, "pivot error (rad)", () -> errorRad);
         }
 
         // no matter the note position, set the shooter angle and speed

@@ -39,7 +39,7 @@ public class Monitor implements Glassy {
         m_shouldAlert = false;
         // this should test different things for different identities.
         if (Identity.instance == Identity.COMP_BOT || Identity.instance == Identity.BETA_BOT) {
-            m_logger.logDouble(Level.INFO, "battery_voltage", this::getBatteryVoltage);
+            m_logger.logDouble(Level.COMP, "battery_voltage", this::getBatteryVoltage);
             // TODO: fix the pdp observer
             // t.log(Level.INFO, m_name, "bus_voltage", getBusVoltage());
             // t.log(Level.INFO, m_name, "total_current", getTotalCurrent());
@@ -51,7 +51,7 @@ public class Monitor implements Glassy {
 
         if (m_test.getAsBoolean())
             m_shouldAlert = true;
-        m_logger.logBoolean(Level.INFO, "master_warning", () -> m_shouldAlert);
+        m_logger.logBoolean(Level.COMP, "master_warning", () -> m_shouldAlert);
         m_annunciator.accept(m_shouldAlert);
     }
 

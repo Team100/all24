@@ -134,7 +134,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         checkBearing(bearing, currentRotation);
 
-        m_logger.logRotation2d(Level.DEBUG, "bearing", () -> bearing);
+        m_logger.logRotation2d(Level.TRACE, "bearing", () -> bearing);
         m_logger.logDouble(Level.TRACE, "Bearing Check", () -> bearing.minus(currentRotation).getDegrees());
 
         // make sure the setpoint uses the modulus close to the measurement.

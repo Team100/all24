@@ -98,7 +98,7 @@ public class DrivePursuitController implements DriveMotionController {
             return null;
         }
 
-        m_logger.logPose2d(Level.DEBUG, "current state", () -> measurement);
+        m_logger.logPose2d(Level.TRACE, "current state", () -> measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }

@@ -243,7 +243,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
 
         double t1 = currentTimeS - lowerEntry.getKey();
-        m_logger.logDouble(Level.DEBUG, "t1", () -> t1);
+        m_logger.logDouble(Level.TRACE, "t1", () -> t1);
         InterpolationRecord value = lowerEntry.getValue();
         SwerveState previousPose = value.m_state;
 
@@ -259,17 +259,17 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
             t0 = lowerEntry.getKey() - earlierEntry.getKey();
             final double t00 = t0;
-            m_logger.logDouble(Level.DEBUG, "t0", () -> t00);
+            m_logger.logDouble(Level.TRACE, "t0", () -> t00);
             earlierPose = earlierEntry.getValue().m_state;
             Vector2d[] corners = m_tireUtil.cornerDeltas(
                     m_kinodynamics.getKinematics(),
                     earlierPose.pose(),
                     previousPose.pose());
             final SwerveModulePosition[] delta0 = modulePositionDelta;
-            m_logger.logSwerveModulePosition(Level.DEBUG, "delta0", () -> delta0[0]);
+            m_logger.logSwerveModulePosition(Level.TRACE, "delta0", () -> delta0[0]);
             modulePositionDelta = m_tireUtil.adjust(corners, t0, modulePositionDelta, t1);
             final SwerveModulePosition[] delta1 = modulePositionDelta;
-            m_logger.logSwerveModulePosition(Level.DEBUG, "delta1", () -> delta1[0]);
+            m_logger.logSwerveModulePosition(Level.TRACE, "delta1", () -> delta1[0]);
         }
 
         Twist2d twist = m_kinodynamics.getKinematics().toTwist2d(modulePositionDelta);

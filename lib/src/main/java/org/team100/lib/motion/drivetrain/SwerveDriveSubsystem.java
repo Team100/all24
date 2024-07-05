@@ -50,7 +50,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         // state update at 100 hz.
         m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
         stop();
-        fieldLogger.logString(Level.INFO, ".type", () -> "Field2d");
+        fieldLogger.logString(Level.COMP, ".type", () -> "Field2d");
     }
 
     ////////////////
@@ -195,9 +195,9 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     @Override
     public void periodic100(double dt) {
-        m_logger.logSwerveState(Level.DEBUG, "state", m_stateSupplier::get);
+        m_logger.logSwerveState(Level.COMP, "state", m_stateSupplier::get);
         m_logger.logDouble(Level.TRACE, "Tur Deg", () -> m_stateSupplier.get().pose().getRotation().getDegrees());
-        m_logger.logDoubleArray(Level.DEBUG, "pose array",
+        m_logger.logDoubleArray(Level.COMP, "pose array",
                 () -> new double[] {
                         m_stateSupplier.get().pose().getX(),
                         m_stateSupplier.get().pose().getY(),
@@ -207,12 +207,12 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
-        fieldLogger.logDoubleArray(Level.INFO, "robot", () -> new double[] {
+        fieldLogger.logDoubleArray(Level.COMP, "robot", () -> new double[] {
                 m_stateSupplier.get().pose().getX(),
                 m_stateSupplier.get().pose().getY(),
                 m_stateSupplier.get().pose().getRotation().getDegrees()
         });
-        m_logger.logDouble(Level.DEBUG, "heading rate rad_s", m_heading::getHeadingRateNWU);
+        m_logger.logDouble(Level.TRACE, "heading rate rad_s", m_heading::getHeadingRateNWU);
     }
 
     @Override

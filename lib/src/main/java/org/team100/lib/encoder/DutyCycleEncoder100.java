@@ -91,9 +91,9 @@ public class DutyCycleEncoder100 implements Encoder100<Distance100> {
     //////////////////////////////////////////////
 
     private double getPositionRad() {
-        m_logger.logDouble(Level.DEBUG, "position (rad)", m_encoder::getDistance);
-        m_logger.logDouble(Level.DEBUG, "position (turns)", m_encoder::get);
-        m_logger.logDouble(Level.DEBUG, "position (absolute)", m_encoder::getAbsolutePosition);
+        m_logger.logDouble(Level.TRACE, "position (rad)", m_encoder::getDistance);
+        m_logger.logDouble(Level.TRACE, "position (turns)", m_encoder::get);
+        m_logger.logDouble(Level.TRACE, "position (absolute)", m_encoder::getAbsolutePosition);
         // should be fast, no cache needed.
         return m_encoder.getDistance();
     }
