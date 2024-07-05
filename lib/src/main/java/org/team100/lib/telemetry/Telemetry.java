@@ -3,8 +3,6 @@ package org.team100.lib.telemetry;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.team100.lib.dashboard.Glassy;
-
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.wpilibj.DataLogManager;

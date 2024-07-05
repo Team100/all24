@@ -10,9 +10,7 @@ import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
-import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ExpiringMemoizingSupplier;
 

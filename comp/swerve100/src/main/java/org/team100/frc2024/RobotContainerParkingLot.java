@@ -38,7 +38,6 @@ import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.RootLogger;
 import org.team100.lib.telemetry.Telemetry;
