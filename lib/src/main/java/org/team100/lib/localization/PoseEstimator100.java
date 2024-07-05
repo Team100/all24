@@ -2,11 +2,8 @@ package org.team100.lib.localization;
 
 import java.util.Optional;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 
 public interface PoseEstimator100 {
     /**
@@ -19,34 +16,27 @@ public interface PoseEstimator100 {
      * @param visionRobotPoseMeters pose as measured by the camera.
      * @param timestampSeconds      The timestamp of the vision measurement in
      *                              seconds, same epoch as updateWithTime().
-     */
-    void addVisionMeasurement(
-            Pose2d visionRobotPoseMeters,
-            double timestampSeconds);
-
-    /**
-     * Sets the pose estimator's trust of global measurements. This might be used to
-     * change trust in vision measurements after the autonomous period, or to change
-     * trust as distance to a vision target increases.
      *
-     * @param stateStdDevs             standard deviations of the state. Increase
-     *                                 these numbers to trust the state less, i.e.
-     *                                 allow it to change faster on update.
-     * @param visionMeasurementStdDevs Standard deviations of the vision
-     *                                 measurements. Increase these numbers to trust
-     *                                 global measurements from vision less. This
-     *                                 matrix is in the form [x, y, theta]ᵀ, with
-     *                                 units in meters and radians.
+     * 
+     * @param stateSigma            standard deviations of the state. Increase
+     *                              these numbers to trust the state less, i.e.
+     *                              allow it to change faster on update.
+     * @param visionSigma           Standard deviations of the vision
+     *                              measurements. Increase these numbers to trust
+     *                              global measurements from vision less. This
+     *                              matrix is in the form [x, y, theta]ᵀ, with
+     *                              units in meters and radians.
      */
-    default void setStdDevs(
-            Matrix<N3, N1> stateStdDevs,
-            Matrix<N3, N1> visionMeasurementStdDevs) {
-    }
+
+    void addVisionMeasurement(
+            Pose2d measurement,
+            double timestampS,
+            double[] stateSigma,
+            double[] visionSigma);
 
     /**
      * This is for vision calculations, so that we use the high-accuracy gyro
      * measurement for the correct time in the past.
      */
-    Optional<Rotation2d> getSampledRotation(
-            double timestampSeconds);
+    Optional<Rotation2d> getSampledRotation(double timestampS);
 }

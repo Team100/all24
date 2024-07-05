@@ -69,7 +69,7 @@ public abstract class Talon6Motor<T extends Measure100>
         m_stator = () -> m_motor.getStatorCurrent().refresh().getValueAsDouble();
         m_temp = () -> m_motor.getDeviceTemp().refresh().getValueAsDouble();
         m_torque = () -> m_motor.getTorqueCurrent().refresh().getValueAsDouble();
-        m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceID());
+        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceID);
     }
 
     @Override
@@ -186,7 +186,7 @@ public abstract class Talon6Motor<T extends Measure100>
         m_logger.logDouble(Level.TRACE, "supply current (A)", m_supply);
         m_logger.logDouble(Level.TRACE, "stator current (A)", m_stator);
         m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
-        m_logger.logDouble(Level.DEBUG, "temperature (C)", m_temp);
+        m_logger.logDouble(Level.TRACE, "temperature (C)", m_temp);
     }
 
     private double getMotorTorque() {

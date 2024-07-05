@@ -6,6 +6,8 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.hid.DriverControl;
@@ -22,6 +24,7 @@ import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -38,6 +41,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * 
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
+ * 
+ * TODO: replace the two PID controllers with simpler multiplication; see
+ * ManualWithFullStateHeading for an example.
+ * 
+ * TODO: do more investigation into jitter,
  */
 public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
@@ -54,12 +62,13 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
+    // TODO: this filters the omega output since it can be noisy
+    private final LinearFilter m_outputFilter;
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
     private BooleanSupplier m_trigger;
     private Pose2d m_prevPose;
-    private State100 prevGoal;
     private boolean isAligned;
     private boolean first;
 
@@ -81,6 +90,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed / 4,
                 0.01);
+        m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
     }
 
     @Override
@@ -88,7 +98,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
         first = true;
-        prevGoal = new State100();
         m_prevPose = currentPose;
         m_thetaController.reset();
         m_omegaController.reset();
@@ -125,7 +134,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         checkBearing(bearing, currentRotation);
 
-        m_logger.log(Level.DEBUG, "bearing", bearing);
+        m_logger.logRotation2d(Level.TRACE, "bearing", () -> bearing);
         m_logger.logDouble(Level.TRACE, "Bearing Check", () -> bearing.minus(currentRotation).getDegrees());
 
         // make sure the setpoint uses the modulus close to the measurement.
@@ -143,16 +152,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);
         m_logger.logDouble(Level.TRACE, "apparent motion", () -> targetMotion);
+
         State100 goal = new State100(bearing.getRadians(), targetMotion);
-        if (Math.abs(goal.x() - prevGoal.x()) < 0.05 || Math.abs(2 * Math.PI - goal.x() - prevGoal.x()) < 0.05) {
-            goal = new State100(prevGoal.x(), goal.v(), goal.a());
-        }
-        if (Math.abs(goal.v() - prevGoal.v()) < 0.05) {
-            goal = new State100(goal.x(), 0, goal.a());
-        }
-        if (Math.abs(goal.a()) < 0.05) {
-            goal = new State100(goal.x(), goal.v(), 0);
-        }
         m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
 
         // this is user input scaled to m/s and rad/s
@@ -165,8 +166,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         final double thetaFB = getThetaFB(measurement);
         final double omegaFB = getOmegaFB(headingRate);
 
-        m_logger.log(Level.TRACE, "target", target);
-        m_logger.log(Level.TRACE, "theta/setpoint", m_thetaSetpoint);
+        m_logger.logTranslation2d(Level.TRACE, "target", () -> target);
+        m_logger.logState100(Level.TRACE, "theta/setpoint", () -> m_thetaSetpoint);
         m_logger.logDouble(Level.TRACE, "theta/measurement", () -> measurement);
         m_logger.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "theta/fb", () -> thetaFB);
@@ -174,9 +175,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_logger.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
         m_logger.logDouble(Level.TRACE, "target motion", () -> targetMotion);
-        m_logger.log(Level.TRACE, "goal", goal);
-        
-        prevGoal = goal;
+        m_logger.logState100(Level.TRACE, "goal", () -> goal);
+
         double omega = MathUtil.clamp(
                 thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
@@ -185,7 +185,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // desaturate to feasibility by preferring the rotational velocity.
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
         // this name needs to be exactly "/field/target" for glass.
-        fieldLogger.log(Level.TRACE, "target", new double[] {
+        fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
                 target.getX(),
                 target.getY(),
                 0 });
@@ -200,7 +200,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            fieldLogger.log(Level.TRACE, "ball", new double[] {
+            fieldLogger.logDoubleArray(Level.TRACE, "ball", () -> new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });
@@ -212,6 +212,12 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
     private double getOmegaFB(double headingRate) {
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
+
+        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+            // output filtering to prevent oscillation due to delay
+            omegaFB = m_outputFilter.calculate(omegaFB);
+        }
+
         if (Math.abs(omegaFB) < 0.1) {
             omegaFB = 0;
         }
@@ -220,7 +226,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
     private double getThetaFB(final double measurement) {
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-
         if (Math.abs(thetaFB) < 0.5) {
             thetaFB = 0;
         }

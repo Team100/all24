@@ -119,7 +119,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
-            m_logger.log(Level.TRACE, "mode", "free");
+            m_logger.logString(Level.TRACE, "mode", () -> "free");
             // desaturate to feasibility
             return m_swerveKinodynamics.analyticDesaturation(twistM_S);
         }
@@ -156,9 +156,9 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
 
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
-        m_logger.log(Level.TRACE, "mode", "snap");
-        m_logger.logDouble(Level.TRACE, "goal/theta", () -> m_goal.getRadians());
-        m_logger.log(Level.TRACE, "setpoint/theta", m_thetaSetpoint);
+        m_logger.logString(Level.TRACE, "mode", () -> "snap");
+        m_logger.logDouble(Level.TRACE, "goal/theta", m_goal::getRadians);
+        m_logger.logState100(Level.TRACE, "setpoint/theta", () -> m_thetaSetpoint);
         m_logger.logDouble(Level.TRACE, "measurement/theta", () -> headingMeasurement);
         m_logger.logDouble(Level.TRACE, "measurement/omega", () -> headingRate);
         m_logger.logDouble(Level.TRACE, "error/theta", () -> thetaError);

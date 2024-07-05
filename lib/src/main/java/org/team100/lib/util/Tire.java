@@ -50,21 +50,21 @@ public class Tire {
      * @param dtS       length of the current period
      */
     public Vector2d actual(Vector2d cornerM_s, Vector2d wheelM_s, double dtS) {
-        m_logger.log(Level.WARN, "corner M_s", cornerM_s);
-        m_logger.log(Level.WARN, "wheel M_s", wheelM_s);
-        m_logger.logDouble(Level.INFO, "dtS", () -> dtS); // usually about 0.02
+        m_logger.logVector2d(Level.TRACE, "corner M_s", () -> cornerM_s);
+        m_logger.logVector2d(Level.TRACE, "wheel M_s", () -> wheelM_s);
+        m_logger.logDouble(Level.COMP, "dtS", () -> dtS); // usually about 0.02
 
         Vector2d desiredAccelM_s_s = desiredAccelM_s_s(cornerM_s, wheelM_s, dtS);
-        m_logger.log(Level.INFO, "desired accel M_s_s", desiredAccelM_s_s);
+        m_logger.logVector2d(Level.COMP, "desired accel M_s_s", () -> desiredAccelM_s_s);
         double fraction = fraction(desiredAccelM_s_s);
         double scale = scale(fraction);
         Vector2d scaledAccelM_s_s = scaledAccelM_s_s(desiredAccelM_s_s, scale);
         Vector2d limitedAccelM_s_s = limit(scaledAccelM_s_s);
-        m_logger.log(Level.INFO, "limited accel M_s_s", limitedAccelM_s_s);
+        m_logger.logVector2d(Level.COMP, "limited accel M_s_s", () -> limitedAccelM_s_s);
 
         // Vector2d actual = apply(cornerM_s, desiredAccelM_s_s, dtS);
         Vector2d actual = apply(cornerM_s, limitedAccelM_s_s, dtS);
-        m_logger.log(Level.WARN, "actual M_s", actual);
+        m_logger.logVector2d(Level.TRACE, "actual M_s", () -> actual);
         return actual;
     }
 
@@ -114,11 +114,11 @@ public class Tire {
         double normM_s_s = scaledAccelM_s_s.norm();
         double saturationM_s_s = m_saturationM_s_s;
         if (normM_s_s <= saturationM_s_s) {
-            m_logger.log(Level.DEBUG, "limit M_s_s", scaledAccelM_s_s);
+            m_logger.logVector2d(Level.TRACE, "limit M_s_s", () -> scaledAccelM_s_s);
             return scaledAccelM_s_s;
         }
         Vector2d limitedM_s_s = scaledAccelM_s_s.times(saturationM_s_s / normM_s_s);
-        m_logger.log(Level.DEBUG, "limit M_s_s", limitedM_s_s);
+        m_logger.logVector2d(Level.TRACE, "limit M_s_s", () -> limitedM_s_s);
         return limitedM_s_s;
     }
 }

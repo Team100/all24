@@ -40,13 +40,15 @@ public class JvmLogger implements Glassy {
             long thisCount = collectionCount - counts.get(pool);
             times.put(pool, collectionTime);
             counts.put(pool, collectionCount);
-            m_logger.log(Level.TRACE, "GCTimeMS/" + pool, thisTime);
-            m_logger.log(Level.TRACE, "GCCounts/" + pool, thisCount);
+            m_logger.loglong(Level.TRACE, "GCTimeMS/" + pool, () -> thisTime);
+            m_logger.loglong(Level.TRACE, "GCCounts/" + pool, () -> thisCount);
             accumTime += thisTime;
             accumCount += thisCount;
         }
-        m_logger.log(Level.TRACE, "GCTimeMS/total", accumTime);
-        m_logger.log(Level.TRACE, "GCCounts/total", accumCount);
+        long finalAccumTime = accumTime;
+        long finalAccumCount = accumCount;
+        m_logger.loglong(Level.TRACE, "GCTimeMS/total", () -> finalAccumTime);
+        m_logger.loglong(Level.TRACE, "GCCounts/total", () -> finalAccumCount);
     }
 
     public void logMemoryPools() {
@@ -54,15 +56,16 @@ public class JvmLogger implements Glassy {
         for (MemoryPoolMXBean bean : ManagementFactory.getMemoryPoolMXBeans()) {
             MemoryUsage usage = bean.getUsage();
             accumUsage += usage.getUsed();
-            m_logger.log(Level.INFO, "MemoryPool/" + bean.getName(), usage.getUsed());
+            m_logger.loglong(Level.COMP, "MemoryPool/" + bean.getName(), usage::getUsed);
         }
-        m_logger.log(Level.INFO, "MemoryPool/total", accumUsage);
+        long finalAccumUsage = accumUsage;
+        m_logger.loglong(Level.COMP, "MemoryPool/total", () -> finalAccumUsage);
     }
 
     public void logMemoryUsage() {
         MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
-        m_logger.log(Level.INFO, "MemoryUsage/heap", bean.getHeapMemoryUsage().getUsed());
-        m_logger.log(Level.INFO, "MemoryUsage/non-heap", bean.getNonHeapMemoryUsage().getUsed());
+        m_logger.loglong(Level.COMP, "MemoryUsage/heap", () -> bean.getHeapMemoryUsage().getUsed());
+        m_logger.loglong(Level.COMP, "MemoryUsage/non-heap", () -> bean.getNonHeapMemoryUsage().getUsed());
     }
 
     @Override

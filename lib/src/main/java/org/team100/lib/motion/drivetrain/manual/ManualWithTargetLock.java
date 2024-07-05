@@ -136,12 +136,13 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        m_logger.log(Level.TRACE, "theta/setpoint", m_thetaSetpoint);
+        m_logger.logState100(Level.TRACE, "theta/setpoint", () -> m_thetaSetpoint);
         m_logger.logDouble(Level.TRACE, "theta/measurement", () -> measurement);
         m_logger.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "theta/fb", () -> thetaFB);
+
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        m_logger.log(Level.TRACE, "omega/reference", m_thetaSetpoint);
+        m_logger.logState100(Level.TRACE, "omega/reference", () -> m_thetaSetpoint);
         m_logger.logDouble(Level.TRACE, "omega/measurement", () -> headingRate);
         m_logger.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
@@ -156,7 +157,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
 
         // this name needs to be exactly "/field/target" for glass.
-        fieldLogger.log(Level.TRACE, "target", new double[] {
+        fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
                 target.getX(),
                 target.getY(),
                 0 });
@@ -171,7 +172,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            fieldLogger.log(Level.TRACE, "ball", new double[] {
+            fieldLogger.logDoubleArray(Level.TRACE, "ball", () -> new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

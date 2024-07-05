@@ -38,7 +38,7 @@ public abstract class CANSparkMotor<T extends Measure100>
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         Rev100.pidConfig(m_pidController, pid);
-        m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceId());
+        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceId);
         m_logger.register(Level.TRACE, "P", pid.getP(), this::setP);
         m_logger.register(Level.TRACE, "I", pid.getI(), this::setI);
         m_logger.register(Level.TRACE, "D", pid.getD(), this::setD);
@@ -158,9 +158,9 @@ public abstract class CANSparkMotor<T extends Measure100>
         m_logger.logDouble(Level.TRACE, "velocity (rev_s)", () -> m_encoder.getVelocity() / 60);
         m_logger.logDouble(Level.TRACE, "velocity (RPM)", m_encoder::getVelocity);
         m_logger.logDouble(Level.TRACE, "current (A)", m_motor::getOutputCurrent);
-        m_logger.logDouble(Level.TRACE, "duty cycle",  m_motor::getAppliedOutput);
+        m_logger.logDouble(Level.TRACE, "duty cycle", m_motor::getAppliedOutput);
         m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
-        m_logger.logDouble(Level.TRACE, "temperature (C)",  m_motor::getMotorTemperature);
+        m_logger.logDouble(Level.TRACE, "temperature (C)", m_motor::getMotorTemperature);
     }
 
     private void setP(double p) {

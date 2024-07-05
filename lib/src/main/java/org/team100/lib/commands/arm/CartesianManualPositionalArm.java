@@ -78,10 +78,10 @@ public class CartesianManualPositionalArm extends Command100 {
 
         m_arm.set(u1, u2);
 
-        m_logger.log(Level.TRACE, "input", input);
-        m_logger.log(Level.TRACE, "setpoint", setpoint);
-        m_logger.log(Level.TRACE, "measurement", measurement.get());
-        m_logger.log(Level.TRACE, "cartesian_measurement", cartesian_measurement);
+        m_logger.logTranslation2d(Level.TRACE, "input", () -> input);
+        m_logger.logArmAngles(Level.TRACE, "setpoint", () -> setpoint);
+        m_logger.logArmAngles(Level.TRACE, "measurement", measurement::get);
+        m_logger.logTranslation2d(Level.TRACE, "cartesian_measurement", () -> cartesian_measurement);
         m_logger.logDouble(Level.TRACE, "output/u1", () -> u1);
         m_logger.logDouble(Level.TRACE, "output/u2", () -> u2);
         m_logger.logDouble(Level.TRACE, "error/e1", m_lowerController::getPositionError);

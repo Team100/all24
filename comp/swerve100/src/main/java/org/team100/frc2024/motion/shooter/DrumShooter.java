@@ -84,7 +84,6 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         double period = 0.02;
         double[] softLimits = new double[] { 0, 45 };
 
-
         Logger leftLogger = parent.child("Left");
         Logger rightLogger = parent.child("Right");
         switch (Identity.instance) {
@@ -256,9 +255,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.log(Level.DEBUG, "left velocity", leftRoller.getVelocity());
-        m_logger.log(Level.DEBUG, "right velocity", rightRoller.getVelocity());
-        m_logger.log(Level.DEBUG, "pivot angle", pivotServo.getPosition());
+        m_logger.logOptionalDouble(Level.TRACE, "left velocity", leftRoller::getVelocity);
+        m_logger.logOptionalDouble(Level.TRACE, "right velocity", rightRoller::getVelocity);
+        m_logger.logOptionalDouble(Level.TRACE, "pivot angle", pivotServo::getPosition);
     }
 
     @Override

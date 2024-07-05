@@ -123,7 +123,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
         m_motor.setSensorPhase(true);
 
         m_logger = parent.child(this);
-        m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceID());
+        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceID);
     }
 
     public WPI_TalonSRX getMotor() {

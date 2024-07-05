@@ -66,8 +66,8 @@ import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualWithFullStateHeading;
 import org.team100.lib.motion.drivetrain.manual.ManualWithMinTimeHeading;
-import org.team100.lib.motion.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
+import org.team100.lib.motion.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -75,13 +75,12 @@ import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.TelemetryLevelPoller;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.telemetry.TelemetryLevelPoller;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.visualization.SwerveModuleVisualization;
 
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -150,19 +149,12 @@ public class RobotContainer implements Glassy {
                 m_modules,
                 asyncFactory);
 
-        // these are the old numbers, just used as defaults. see VisionDataProvider24
-        // for updated stddevs.
-        double stateStdDev = 0.1;
-        double visionStdDev = 0.5;
-
         // ignores the rotation derived from vision.
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
-                Timer.getFPGATimestamp(),
-                VecBuilder.fill(stateStdDev, stateStdDev, 0.1),
-                VecBuilder.fill(visionStdDev, visionStdDev, Double.MAX_VALUE)); // 0.1 0.1
+                Timer.getFPGATimestamp());
 
         FireControl fireControl = new FireControl() {
         };

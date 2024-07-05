@@ -16,16 +16,12 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.cscore.CameraServerCvJNI;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
@@ -71,6 +67,21 @@ public class VisionDataProvider24 implements Glassy {
     private static final double kVisionChangeToleranceMeters = 0.1;
     // private static final double kVisionChangeToleranceMeters = 1;
     private static final String kName = "VisionDataProvider24";
+
+    /** this is the default value which, in hindsight, seems ridiculously high. */
+    private static final double[] defaultStateStdDevs = new double[] {
+            0.1,
+            0.1,
+            0.1 };
+    /**
+     * this value is intended to make the response to vision input more gradual, to
+     * avoid "jitter." it's a guess.
+     * TODO: try adjusting this
+     */
+    private static final double[] tightStateStdDevs = new double[] {
+            0.001,
+            0.001,
+            0.1 };
 
     private final Logger m_logger;
 
@@ -244,18 +255,12 @@ public class VisionDataProvider24 implements Glassy {
                     (blip.getId() == 5 && alliance == Alliance.Red)) {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
-                m_logger.log(Level.DEBUG, cameraSerialNumber + "/Firing Solution", translation2d);
+                m_logger.logTranslation2d(Level.TRACE, cameraSerialNumber + "/Firing Solution", () -> translation2d);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
 
-                double distance = translation2d.getNorm();
-                if (m_poseEstimator != null)
-                    m_poseEstimator.setStdDevs(
-                            stateStdDevs(),
-                            visionMeasurementStdDevs(distance));
                 m_fireControl.accept(translation2d);
-
             }
         }
     }
@@ -272,7 +277,7 @@ public class VisionDataProvider24 implements Glassy {
             for (Blip24 blip : blips) {
 
                 // this is just for logging
-                m_logger.logDouble(Level.DEBUG, cameraSerialNumber + "/Blip Tag Rotation",
+                m_logger.logDouble(Level.TRACE, cameraSerialNumber + "/Blip Tag Rotation",
                         () -> PoseEstimationHelper.blipToRotation(blip).getAngle());
 
                 Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
@@ -288,8 +293,8 @@ public class VisionDataProvider24 implements Glassy {
                         0, 0, gyroRotation.getRadians());
 
                 Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
-                m_logger.log(Level.DEBUG, cameraSerialNumber + "/Blip Tag In Field Cords",
-                        tagInFieldCoords.toPose2d());
+                m_logger.logPose2d(Level.TRACE, cameraSerialNumber + "/Blip Tag In Field Cords",
+                        tagInFieldCoords::toPose2d);
 
                 Pose3d robotPoseInFieldCoords = m_helper.getRobotPoseInFieldCoords(
                         cameraInRobotCoordinates,
@@ -302,7 +307,7 @@ public class VisionDataProvider24 implements Glassy {
 
                 Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
 
-                m_logger.log(Level.DEBUG, cameraSerialNumber + "/Blip Pose", currentRobotinFieldCoords);
+                m_logger.logPose2d(Level.TRACE, cameraSerialNumber + "/Blip Pose", () -> currentRobotinFieldCoords);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
@@ -312,14 +317,12 @@ public class VisionDataProvider24 implements Glassy {
                     if (distanceM <= kVisionChangeToleranceMeters) {
                         // this hard limit excludes false positives, which were a bigger problem in 2023
                         // due to the coarse tag family used. in 2024 this might not be an issue.
-                        m_poseEstimator.setStdDevs(
-                                stateStdDevs(),
-                                visionMeasurementStdDevs(distanceM));
                         latestTimeUs = RobotController.getFPGATime();
                         m_poseEstimator.addVisionMeasurement(
                                 currentRobotinFieldCoords,
-                                frameTimeSec);
-
+                                frameTimeSec,
+                                stateStdDevs(),
+                                visionMeasurementStdDevs(distanceM));
                     }
                 }
                 lastRobotInFieldCoords = currentRobotinFieldCoords;
@@ -373,7 +376,8 @@ public class VisionDataProvider24 implements Glassy {
                 Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
                 Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
 
-                m_logger.log(Level.DEBUG, cameraSerialNumber + "/Triangulate Pose", currentRobotinFieldCoords);
+                m_logger.logPose2d(Level.TRACE, cameraSerialNumber + "/Triangulate Pose",
+                        () -> currentRobotinFieldCoords);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
@@ -383,11 +387,12 @@ public class VisionDataProvider24 implements Glassy {
                     if (distanceM <= kVisionChangeToleranceMeters) {
                         // this hard limit excludes false positives, which were a bigger problem in 2023
                         // due to the coarse tag family used. in 2024 this might not be an issue.
-                        m_poseEstimator.setStdDevs(
+                        latestTimeUs = RobotController.getFPGATime();
+                        m_poseEstimator.addVisionMeasurement(
+                                currentRobotinFieldCoords,
+                                frameTimeSec,
                                 stateStdDevs(),
                                 visionMeasurementStdDevs(distanceM));
-                        latestTimeUs = RobotController.getFPGATime();
-                        m_poseEstimator.addVisionMeasurement(currentRobotinFieldCoords, frameTimeSec);
                     }
                 }
                 lastRobotInFieldCoords = currentRobotinFieldCoords;
@@ -395,16 +400,26 @@ public class VisionDataProvider24 implements Glassy {
         }
     }
 
-    static Matrix<N3, N1> stateStdDevs() {
-        double stateStdDev = 0.1;
+    static double[] stateStdDevs() {
         if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
-            stateStdDev = 0.001; // guess: try adjusting this.
+            return tightStateStdDevs;
         }
-        return VecBuilder.fill(stateStdDev, stateStdDev, 0.1);
+        return defaultStateStdDevs;
     }
 
     /** This is an educated guess. */
-    static Matrix<N3, N1> visionMeasurementStdDevs(double distanceM) {
+    static double[] visionMeasurementStdDevs(double distanceM) {
+        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
+            /*
+             * actual stdev seem like between 0.03 at 1m or 0.15 at 5m so
+             * actual k might be 0.03. This needs to be accompanied by the
+             * much lower state stddev in RobotContainer.
+             */
+            return new double[] {
+                    0.03 * distanceM,
+                    0.03 * distanceM,
+                    Double.MAX_VALUE };
+        }
         /*
          * Standard deviation of pose estimate, as a fraction of target range.
          * This is a guess based on figure 5 in the Apriltag2 paper:
@@ -412,17 +427,10 @@ public class VisionDataProvider24 implements Glassy {
          * The error is much worse at very long range but I don't think that
          * matters for us.
          */
-        double kRelativeError = 0.1;
-        if (Experiments.instance.enabled(Experiment.AvoidVisionJitter)) {
-            /*
-             * actual stdev seem like between 0.03 at 1m or 0.15 at 5m so
-             * actual k might be 0.03, this needs to be accompanied by the
-             * much lower state stddev in RobotContainer.
-             */
-            kRelativeError = 0.03;
-        }
-        double stddev = kRelativeError * distanceM;
-        return VecBuilder.fill(stddev, stddev, Double.MAX_VALUE);
+        return new double[] {
+                0.1 * distanceM,
+                0.1 * distanceM,
+                Double.MAX_VALUE };
     }
 
     @Override

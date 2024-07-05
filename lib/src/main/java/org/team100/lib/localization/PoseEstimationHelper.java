@@ -121,14 +121,14 @@ public class PoseEstimationHelper {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            m_logger.log(Level.DEBUG, "rotation_source", "CAMERA");
+            m_logger.logString(Level.TRACE, "rotation_source", () -> "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        m_logger.log(Level.DEBUG, "rotation_source", "GYRO");
+        m_logger.logString(Level.TRACE, "rotation_source", () -> "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -205,14 +205,17 @@ public class PoseEstimationHelper {
 
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
-        m_logger.log(Level.DEBUG, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
-        m_logger.log(Level.DEBUG, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
+        m_logger.logRotation2d(Level.TRACE, "CAMERA ROT IN FIELD COORDS",
+                cameraRotationInFieldCoords::toRotation2d);
+        m_logger.logTranslation2d(Level.TRACE, "TAG TRANSLATION IN CAM COORDS",
+                tagTranslationInCameraCoords::toTranslation2d);
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
-        m_logger.log(Level.DEBUG, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
+        m_logger.logRotation2d(Level.TRACE, "TAG ROTATION IN CAM COORDS",
+                tagRotationInCameraCoords::toRotation2d);
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -222,7 +225,8 @@ public class PoseEstimationHelper {
                 tagInCameraCoords,
                 tagInFieldCoords);
 
-        m_logger.log(Level.DEBUG, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
+        m_logger.logTranslation2d(Level.TRACE, "CAM IN FIELD COORDS",
+                () -> cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
                 cameraInFieldCoords,

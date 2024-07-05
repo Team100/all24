@@ -40,7 +40,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 poseEstimate.add(p);
                 timeEstimate.add(t);
             }
@@ -92,7 +92,7 @@ class VisionDataProviderTest implements Timeless {
         final List<Double> timeEstimate = new ArrayList<Double>();
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 poseEstimate.add(p);
                 timeEstimate.add(t);
             }
@@ -171,7 +171,7 @@ class VisionDataProviderTest implements Timeless {
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 //
             }
 
@@ -215,7 +215,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(0.96, p.getX(), kDelta);
                 assertEquals(2.66, p.getY(), kDelta);
             }
@@ -257,7 +257,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(1.96, p.getX(), kDelta);
                 assertEquals(2.66, p.getY(), kDelta);
             }
@@ -301,7 +301,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(0.96, p.getX(), kDelta);
                 assertEquals(2.66, p.getY(), kDelta);
             }
@@ -348,7 +348,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(0.96, p.getX(), kDelta);
                 assertEquals(2.66, p.getY(), kDelta);
             }
@@ -392,7 +392,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(0.96, p.getX(), kDelta);
                 assertEquals(3.66, p.getY(), kDelta);
             }
@@ -436,7 +436,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(0.96, p.getX(), kDelta);
                 assertEquals(3.66, p.getY(), kDelta);
             }
@@ -480,7 +480,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(0.96, p.getX(), kDelta);
                 assertEquals(1.66, p.getY(), kDelta);
             }
@@ -524,7 +524,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(0.96, p.getX(), kDelta);
                 assertEquals(1.66, p.getY(), kDelta);
             }
@@ -568,7 +568,7 @@ class VisionDataProviderTest implements Timeless {
 
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t) {
+            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
                 assertEquals(0.96, p.getX(), kDelta);
                 assertEquals(1.66, p.getY(), kDelta);
             }

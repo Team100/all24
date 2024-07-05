@@ -63,19 +63,19 @@ public class Robot extends TimedRobot100 implements Glassy {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
-        // t.log(Level.DEBUG, "Voltage", m_pdh.getVoltage());
-        // t.log(Level.DEBUG, "Total Current", m_pdh.getTotalCurrent());
+        // t.log(Level.TRACE, "Voltage", m_pdh.getVoltage());
+        // t.log(Level.TRACE, "Total Current", m_pdh.getTotalCurrent());
 
         // for(int channel = 0; channel < 20; channel++){
-        // t.log(Level.DEBUG, "Channel " + String.valueOf(channel),
+        // t.log(Level.TRACE, "Channel " + String.valueOf(channel),
         // m_pdh.getCurrent(channel));
 
         // }
 
-        m_logger.logDouble(Level.DEBUG, "DriverStation MatchTime", DriverStation::getMatchTime);
-        m_logger.logBoolean(Level.DEBUG, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
-        m_logger.logBoolean(Level.DEBUG, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
-        m_logger.logBoolean(Level.DEBUG, "DriverStation FMSAttached", DriverStation.isFMSAttached());
+        m_logger.logDouble(Level.TRACE, "DriverStation MatchTime", DriverStation::getMatchTime);
+        m_logger.logBoolean(Level.TRACE, "DriverStation AutonomousEnabled", DriverStation::isAutonomousEnabled);
+        m_logger.logBoolean(Level.TRACE, "DriverStation TeleopEnabled", DriverStation::isTeleopEnabled);
+        m_logger.logBoolean(Level.TRACE, "DriverStation FMSAttached", DriverStation::isFMSAttached);
 
         m_jvmLogger.logGarbageCollectors();
         m_jvmLogger.logMemoryPools();
@@ -89,12 +89,12 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void disabledPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "disabled");
+        m_logger.logString(Level.TRACE, "mode", () -> "disabled");
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
-        m_logger.logDouble(Level.DEBUG, "key list size",()-> keyListSize);
+        m_logger.logDouble(Level.TRACE, "key list size", () -> keyListSize);
 
         // this forces the static initializer to run, so that the widget appears.
-        m_logger.log(Level.INFO, "active auton routine", AutonChooser.routine().name());
+        m_logger.logString(Level.COMP, "active auton routine", () -> AutonChooser.routine().name());
     }
 
     @Override
@@ -142,24 +142,24 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void autonomousPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "autonomous");
+        m_logger.logString(Level.TRACE, "mode", () -> "autonomous");
     }
 
     @Override
     public void simulationPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "simulation");
+        m_logger.logString(Level.TRACE, "mode", () -> "simulation");
     }
 
     @Override
     public void teleopPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "teleop");
-        m_logger.logDouble(Level.DEBUG, "voltage", RobotController::getBatteryVoltage);
+        m_logger.logString(Level.TRACE, "mode", () -> "teleop");
+        m_logger.logDouble(Level.TRACE, "voltage", RobotController::getBatteryVoltage);
 
     }
 
     @Override
     public void testPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "test");
+        m_logger.logString(Level.TRACE, "mode", () -> "test");
     }
 
     private void banner() {

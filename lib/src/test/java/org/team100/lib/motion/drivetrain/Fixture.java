@@ -11,11 +11,9 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
-import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.visualization.SwerveModuleVisualization;
-
-import edu.wpi.first.math.VecBuilder;
 
 /**
  * A real swerve subsystem populated with simulated motors and encoders,
@@ -43,9 +41,7 @@ public class Fixture {
                 heading.getHeadingNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,
-                0, // initial time is zero here for testing
-                VecBuilder.fill(0.5, 0.5, 0.5),
-                VecBuilder.fill(0.1, 0.1, 0.4));
+                0); // initial time is zero here for testing
 
         swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
 

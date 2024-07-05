@@ -4,12 +4,7 @@ import org.team100.lib.telemetry.Logger;
 
 public class TestLogger24 implements Logger {
     @Override
-    public boolean enabled() {
-        return false;
+    public Logger child(String stem) {
+        return this;
     }
-
-	@Override
-	public Logger child(String stem) {
-		return this;
-	}
 }

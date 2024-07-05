@@ -10,7 +10,6 @@ import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Tire;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -18,8 +17,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 
 /**
  * Kinematics and dynamics of the swerve drive.
@@ -414,18 +411,14 @@ public class SwerveKinodynamics implements Glassy {
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,
-            double timestampSeconds,
-            Matrix<N3, N1> stateStdDevs,
-            Matrix<N3, N1> visionMeasurementStdDevs) {
+            double timestampSeconds) {
         return new SwerveDrivePoseEstimator100(
                 m_logger,
                 this,
                 gyroAngle,
                 modulePositions,
                 initialPoseMeters,
-                timestampSeconds,
-                stateStdDevs,
-                visionMeasurementStdDevs);
+                timestampSeconds);
     }
 
     /**

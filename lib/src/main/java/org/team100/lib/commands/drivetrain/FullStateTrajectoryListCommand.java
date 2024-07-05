@@ -85,7 +85,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
             SwerveState measurement = m_swerve.getState();
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
-            m_logger.log(Level.TRACE, "reference", reference);
+            m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
         } else {
             // look one loop ahead by *previewing* the next point
             Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(dt);
@@ -101,7 +101,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
             SwerveState measurement = m_swerve.getState();
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
-            m_logger.log(Level.TRACE, "reference", reference);
+            m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
         }
 
     }

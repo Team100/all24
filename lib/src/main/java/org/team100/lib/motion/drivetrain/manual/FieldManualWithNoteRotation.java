@@ -135,7 +135,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target.get());
-        m_logger.logDouble(Level.DEBUG, "apparent motion", () -> targetMotion);
+        m_logger.logDouble(Level.TRACE, "apparent motion", () -> targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -146,15 +146,16 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        m_logger.log(Level.DEBUG, "theta/setpoint", m_thetaSetpoint);
-        m_logger.logDouble(Level.DEBUG, "theta/measurement", () -> measurement);
-        m_logger.logDouble(Level.DEBUG, "theta/error", m_thetaController::getPositionError);
-        m_logger.logDouble(Level.DEBUG, "theta/fb", () -> thetaFB);
+        m_logger.logState100(Level.TRACE, "theta/setpoint", () -> m_thetaSetpoint);
+        m_logger.logDouble(Level.TRACE, "theta/measurement", () -> measurement);
+        m_logger.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "theta/fb", () -> thetaFB);
+
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        m_logger.log(Level.DEBUG, "omega/reference", m_thetaSetpoint);
-        m_logger.logDouble(Level.DEBUG, "omega/measurement", () -> headingRate);
-        m_logger.logDouble(Level.DEBUG, "omega/error", m_omegaController::getPositionError);
-        m_logger.logDouble(Level.DEBUG, "omega/fb", () -> omegaFB);
+        m_logger.logState100(Level.TRACE, "omega/reference", () -> m_thetaSetpoint);
+        m_logger.logDouble(Level.TRACE, "omega/measurement", () -> headingRate);
+        m_logger.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
+        m_logger.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
 
         omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -162,7 +163,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // this name needs to be exactly "/field/target" for glass.
-        fieldLogger.log(Level.DEBUG, "target", new double[] {
+        fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
                 target.get().getX(),
                 target.get().getY(),
                 0 });
@@ -177,7 +178,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            fieldLogger.log(Level.DEBUG, "ball", new double[] {
+            fieldLogger.logDoubleArray(Level.TRACE, "ball", () -> new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

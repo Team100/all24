@@ -96,20 +96,20 @@ public class GravityServo {
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        m_logger.logDouble(Level.DEBUG, "u_FB", () -> u_FB);
-        m_logger.logDouble(Level.DEBUG, "u_FF", () -> u_FF);
-        m_logger.logDouble(Level.DEBUG, "static FF", () -> staticFF);
-        m_logger.logDouble(Level.DEBUG, "gravity T", () -> gravityTorque);
-        m_logger.logDouble(Level.DEBUG, "u_TOTAL", () -> u_TOTAL);
-        m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        m_logger.log(Level.DEBUG, "Goal", m_goal);
-        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
-        m_logger.logDouble(Level.DEBUG, "Setpoint Velocity", m_setpoint::v);
-        m_logger.logDouble(Level.DEBUG, "Controller Position Error", m_controller::getPositionError);
-        m_logger.logDouble(Level.DEBUG, "Controller Velocity Error", m_controller::getVelocityError);
-        m_logger.logDouble(Level.DEBUG, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
-        m_logger.logDouble(Level.DEBUG, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
-        m_logger.logDouble(Level.DEBUG, "ENCODEr", () -> measurement);
+        m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
+        m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
+        m_logger.logDouble(Level.TRACE, "static FF", () -> staticFF);
+        m_logger.logDouble(Level.TRACE, "gravity T", () -> gravityTorque);
+        m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
+        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
+        m_logger.logState100(Level.TRACE, "Goal", () -> m_goal);
+        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
+        m_logger.logDouble(Level.TRACE, "Setpoint Velocity", m_setpoint::v);
+        m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
+        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
+        m_logger.logDouble(Level.TRACE, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
+        m_logger.logDouble(Level.TRACE, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
+        m_logger.logDouble(Level.TRACE, "ENCODEr", () -> measurement);
     }
 
     private double getStaticFF(double measurement, double u_FB, double u_FF) {
@@ -170,19 +170,19 @@ public class GravityServo {
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        m_logger.logDouble(Level.DEBUG, "u_FB", () -> u_FB);
-        m_logger.logDouble(Level.DEBUG, "u_FF", () -> u_FF);
-        m_logger.logDouble(Level.DEBUG, "GRAVITY", () -> gravityTorque);
-        m_logger.logDouble(Level.DEBUG, "u_TOTAL", () -> u_TOTAL);
-        m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        m_logger.log(Level.DEBUG, "Goal", m_goal);
-        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
-        m_logger.logDouble(Level.DEBUG, "Setpoint Velocity", () -> m_setpoint.v());
-        m_logger.logDouble(Level.DEBUG, "Controller Position Error", m_controller::getPositionError);
-        m_logger.logDouble(Level.DEBUG, "Controller Velocity Error", m_controller::getVelocityError);
-        m_logger.logDouble(Level.DEBUG, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
-        m_logger.logDouble(Level.DEBUG, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
-        m_logger.logDouble(Level.DEBUG, "ENCODEr", () -> measurement);
+        m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
+        m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
+        m_logger.logDouble(Level.TRACE, "GRAVITY", () -> gravityTorque);
+        m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
+        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
+        m_logger.logState100(Level.TRACE, "Goal", () -> m_goal);
+        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
+        m_logger.logDouble(Level.TRACE, "Setpoint Velocity", () -> m_setpoint.v());
+        m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
+        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
+        m_logger.logDouble(Level.TRACE, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
+        m_logger.logDouble(Level.TRACE, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
+        m_logger.logDouble(Level.TRACE, "ENCODEr", () -> measurement);
     }
 
     public void set(double value) {

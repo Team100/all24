@@ -19,16 +19,11 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.SlipperyTireUtil;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 
 /**
  * Collapses WPI SwerveDrivePoseEstimator and PoseEstimator.
@@ -45,34 +40,20 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private final Logger m_logger;
     private final int m_numModules;
     private final SwerveKinodynamics m_kinodynamics;
-    private final Matrix<N3, N1> m_q;
-    private final Matrix<N3, N3> m_visionK;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
     private final SlipperyTireUtil m_tireUtil;
     /**
      * maintained in resetPosition().
      */
-    Rotation2d m_gyroOffset;
+    private Rotation2d m_gyroOffset;
 
     /**
-     *
-     * @param kinodynamics             A correctly-configured kinodynamics object
-     *                                 for
-     *                                 your drivetrain.
-     * @param gyroAngle                The current gyro angle.
-     * @param modulePositions          The current distance and rotation
-     *                                 measurements of the swerve modules.
-     * @param initialPoseMeters        The starting pose estimate.
-     * @param stateStdDevs             Standard deviations of the pose estimate (x
-     *                                 position in meters, y position
-     *                                 in meters, and heading in radians). Increase
-     *                                 these numbers to trust your state estimate
-     *                                 less.
-     * @param visionMeasurementStdDevs Standard deviations of the vision pose
-     *                                 measurement (x position
-     *                                 in meters, y position in meters, and heading
-     *                                 in radians). Increase these numbers to trust
-     *                                 the vision pose measurement less.
+     * @param kinodynamics      A correctly-configured kinodynamics object
+     *                          for your drivetrain.
+     * @param gyroAngle         The current gyro angle.
+     * @param modulePositions   The current distance and rotation
+     *                          measurements of the swerve modules.
+     * @param initialPoseMeters The starting pose estimate.
      */
     public SwerveDrivePoseEstimator100(
             Logger parent,
@@ -80,15 +61,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,
-            double timestampSeconds,
-            Matrix<N3, N1> stateStdDevs,
-            Matrix<N3, N1> visionMeasurementStdDevs) {
+            double timestampSeconds) {
         m_logger = parent.child(this);
         m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
         m_tireUtil = new SlipperyTireUtil(m_logger, m_kinodynamics.getTire());
-        m_q = new Matrix<>(Nat.N3(), Nat.N1());
-        m_visionK = new Matrix<>(Nat.N3(), Nat.N3());
         m_poseBuffer = new TimeInterpolatableBuffer100<>(
                 m_logger,
                 kBufferDuration,
@@ -102,31 +79,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         gyroAngle,
                         new SwerveDriveWheelPositions(modulePositions)));
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
-        setStdDevs(stateStdDevs, visionMeasurementStdDevs);
-    }
-
-    @Override
-    public void setStdDevs(
-            Matrix<N3, N1> stateStdDevs,
-            Matrix<N3, N1> visionMeasurementStdDevs) {
-        for (int i = 0; i < 3; ++i) {
-            m_q.set(i, 0, stateStdDevs.get(i, 0) * stateStdDevs.get(i, 0));
-        }
-        double[] r = new double[3];
-        for (int i = 0; i < 3; ++i) {
-            r[i] = visionMeasurementStdDevs.get(i, 0) * visionMeasurementStdDevs.get(i, 0);
-        }
-
-        // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
-        // and C = I. See wpimath/algorithms.md.
-        for (int row = 0; row < 3; ++row) {
-            if (m_q.get(row, 0) == 0.0) {
-                m_visionK.set(row, row, 0.0);
-            } else {
-                m_visionK.set(
-                        row, row, m_q.get(row, 0) / (m_q.get(row, 0) + Math.sqrt(m_q.get(row, 0) * r[row])));
-            }
-        }
     }
 
     /**
@@ -143,59 +95,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
         InterpolationRecord sample = m_poseBuffer.get(timestampSeconds);
         return Optional.of(sample.m_state.pose().getRotation());
-    }
-
-    @Override
-    public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
-        // Step 0: If this measurement is old enough to be outside the pose buffer's
-        // timespan, skip.
-
-        if (m_poseBuffer.lastKey() - kBufferDuration > timestampSeconds) {
-            return;
-        }
-
-        // Step 1: Get the pose odometry measured at the moment the vision measurement
-        // was made.
-        InterpolationRecord sample = m_poseBuffer.get(timestampSeconds);
-
-        // Step 2: Measure the twist between the odometry pose and the vision pose.
-        Twist2d twist = sample.m_state.pose().log(visionRobotPoseMeters);
-
-        // Step 3: We should not trust the twist entirely, so instead we scale this
-        // twist by a Kalman gain matrix representing how much we trust vision
-        // measurements compared to our current pose.
-        Matrix<N3, N1> k_times_twist = m_visionK.times(VecBuilder.fill(twist.dx, twist.dy, twist.dtheta));
-
-        // Step 4: Convert back to Twist2d.
-        Twist2d scaledTwist = new Twist2d(k_times_twist.get(0, 0), k_times_twist.get(1, 0), k_times_twist.get(2, 0));
-
-        Pose2d newPose = sample.m_state.pose().exp(scaledTwist);
-
-        // Step 5: Adjust the gyro offset so that the adjusted pose is consistent with
-        // the unadjusted gyro angle
-        // this should have no effect if you disregard vision angle input
-
-        m_gyroOffset = newPose.getRotation().minus(sample.m_gyroAngle);
-        m_logger.log(Level.TRACE, "GYRO OFFSET", m_gyroOffset);
-
-        // Step 6: Record the current pose to allow multiple measurements from the same
-        // timestamp
-        m_poseBuffer.put(
-                timestampSeconds,
-                new InterpolationRecord(
-                        m_kinodynamics.getKinematics(),
-                        new SwerveState(newPose, sample.m_state.velocity(), sample.m_state.acceleration()),
-                        sample.m_gyroAngle,
-                        sample.m_wheelPositions));
-        // Step 7: Replay odometry inputs between sample time and latest recorded sample
-        // to update the pose buffer and correct odometry.
-        // note exclusive tailmap, don't need to reprocess the entry we just put there.
-        for (Map.Entry<Double, InterpolationRecord> entry : m_poseBuffer.tailMap(timestampSeconds, false).entrySet()) {
-            double entryTimestampS = entry.getKey();
-            Rotation2d entryGyroAngle = entry.getValue().m_gyroAngle;
-            SwerveDriveWheelPositions wheelPositions = entry.getValue().m_wheelPositions;
-            update(entryTimestampS, entryGyroAngle, wheelPositions);
-        }
     }
 
     public void resetPosition(
@@ -220,26 +119,96 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         gyroAngle,
                         modulePositions.copy()));
 
-        m_logger.log(Level.TRACE, "GYRO OFFSET", m_gyroOffset);
+        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
     }
 
     void resetOdometry(
             Rotation2d gyroAngle,
             Pose2d pose) {
         m_gyroOffset = pose.getRotation().minus(gyroAngle);
-        m_logger.log(Level.TRACE, "GYRO OFFSET", m_gyroOffset);
+        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
+    }
+
+    @Override
+    public void addVisionMeasurement(
+            Pose2d measurement,
+            double timestampS,
+            double[] stateSigma,
+            double[] visionSigma) {
+
+        // discount the vision update by this factor.
+        final double[] k = new double[] {
+                mix(Math.pow(stateSigma[0], 2), Math.pow(visionSigma[0], 2)),
+                mix(Math.pow(stateSigma[1], 2), Math.pow(visionSigma[1], 2)),
+                mix(Math.pow(stateSigma[2], 2), Math.pow(visionSigma[2], 2)) };
+
+        // Step 0: If this measurement is old enough to be outside the pose buffer's
+        // timespan, skip.
+
+        if (m_poseBuffer.lastKey() - kBufferDuration > timestampS) {
+            return;
+        }
+
+        // Step 1: Get the pose odometry measured at the moment the vision measurement
+        // was made.
+        InterpolationRecord sample = m_poseBuffer.get(timestampS);
+
+        // Step 2: Measure the twist between the odometry pose and the vision pose.
+        Twist2d twist = sample.m_state.pose().log(measurement);
+
+        // Step 3: We should not trust the twist entirely, so instead we scale this
+        // twist by a Kalman gain matrix representing how much we trust vision
+        // measurements compared to our current pose.
+        // Matrix<N3, N1> k_times_twist = m_visionK.times(VecBuilder.fill(twist.dx,
+        // twist.dy, twist.dtheta));
+
+        // Step 4: Convert back to Twist2d.
+        Twist2d scaledTwist = new Twist2d(
+                k[0] * twist.dx,
+                k[1] * twist.dy,
+                k[2] * twist.dtheta);
+        // Twist2d scaledTwist = new Twist2d(k_times_twist.get(0, 0),
+        // k_times_twist.get(1, 0), k_times_twist.get(2, 0));
+
+        Pose2d newPose = sample.m_state.pose().exp(scaledTwist);
+
+        // Step 5: Adjust the gyro offset so that the adjusted pose is consistent with
+        // the unadjusted gyro angle
+        // this should have no effect if you disregard vision angle input
+
+        m_gyroOffset = newPose.getRotation().minus(sample.m_gyroAngle);
+        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
+
+        // Step 6: Record the current pose to allow multiple measurements from the same
+        // timestamp
+        m_poseBuffer.put(
+                timestampS,
+                new InterpolationRecord(
+                        m_kinodynamics.getKinematics(),
+                        new SwerveState(newPose, sample.m_state.velocity(), sample.m_state.acceleration()),
+                        sample.m_gyroAngle,
+                        sample.m_wheelPositions));
+        // Step 7: Replay odometry inputs between sample time and latest recorded sample
+        // to update the pose buffer and correct odometry.
+        // note exclusive tailmap, don't need to reprocess the entry we just put there.
+        for (Map.Entry<Double, InterpolationRecord> entry : m_poseBuffer.tailMap(timestampS, false).entrySet()) {
+            double entryTimestampS = entry.getKey();
+            Rotation2d entryGyroAngle = entry.getValue().m_gyroAngle;
+            SwerveDriveWheelPositions wheelPositions = entry.getValue().m_wheelPositions;
+            update(entryTimestampS, entryGyroAngle, wheelPositions);
+        }
+
     }
 
     /**
-     * Allow vision and stdev changes in one fn.
+     * Given q and r stddev's, what mixture should that yield?
+     * This is the "closed form Kalman gain for continuous Kalman filter with A = 0
+     * and C = I. See wpimath/algorithms.md." ... but really it's just a mixer.
      */
-    public void addVisionMeasurement(
-            Pose2d visionRobotPoseMeters,
-            double timestampSeconds,
-            Matrix<N3, N1> stateStdDevs,
-            Matrix<N3, N1> visionMeasurementStdDevs) {
-        setStdDevs(stateStdDevs, visionMeasurementStdDevs);
-        addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
+    private double mix(final double q, final double r) {
+        if (q == 0.0)
+            return 0.0;
+        return q / (q + Math.sqrt(q * r));
     }
 
     /**
@@ -274,7 +243,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
 
         double t1 = currentTimeS - lowerEntry.getKey();
-        m_logger.logDouble(Level.DEBUG, "t1", () -> t1);
+        m_logger.logDouble(Level.TRACE, "t1", () -> t1);
         InterpolationRecord value = lowerEntry.getValue();
         SwerveState previousPose = value.m_state;
 
@@ -290,15 +259,17 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
             t0 = lowerEntry.getKey() - earlierEntry.getKey();
             final double t00 = t0;
-            m_logger.logDouble(Level.DEBUG, "t0", () -> t00);
+            m_logger.logDouble(Level.TRACE, "t0", () -> t00);
             earlierPose = earlierEntry.getValue().m_state;
             Vector2d[] corners = m_tireUtil.cornerDeltas(
                     m_kinodynamics.getKinematics(),
                     earlierPose.pose(),
                     previousPose.pose());
-            m_logger.log(Level.DEBUG, "delta0", modulePositionDelta[0]);
+            final SwerveModulePosition[] delta0 = modulePositionDelta;
+            m_logger.logSwerveModulePosition(Level.TRACE, "delta0", () -> delta0[0]);
             modulePositionDelta = m_tireUtil.adjust(corners, t0, modulePositionDelta, t1);
-            m_logger.log(Level.DEBUG, "delta1", modulePositionDelta[0]);
+            final SwerveModulePosition[] delta1 = modulePositionDelta;
+            m_logger.logSwerveModulePosition(Level.TRACE, "delta1", () -> delta1[0]);
         }
 
         Twist2d twist = m_kinodynamics.getKinematics().toTwist2d(modulePositionDelta);

@@ -83,7 +83,7 @@ public class NotePicker {
     /**
      * @param notes      the field relative pose of detected notes
      * @param swervePose the pose of the swerve drivetrain
-     * @return The field relative translation of the closest note
+     * @return The field relative translation of the closest note, or empty if none nearby
      */
     public static Optional<Translation2d> closestNote(Optional<List<Translation2d>> notes, Pose2d swervePose) {
         if (!notes.isPresent()) {

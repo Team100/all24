@@ -22,18 +22,21 @@ import edu.wpi.first.wpilibj.DataLogManager;
  */
 public class Telemetry {
     public enum Level {
-        /** Log nothing for maximum speed */
-        SILENT(1),
-        /** Serious problems */
-        ERROR(2),
-        /** Not-serious problems */
-        WARN(3),
-        /** useful for normal operations */
-        INFO(4),
-        /** primarily useful during development */
-        DEBUG(5),
-        /** slow, shows absolutely everything */
-        TRACE(6);
+        /**
+         * Minimal, curated set of measurements for competition matches. Comp mode
+         * overrides root logger enablement.
+         */
+        COMP(1),
+        /**
+         * Keep this set small enough to avoid overrunning. This should only contain
+         * things you're actively working on.
+         */
+        DEBUG(2),
+        /**
+         * Slow, shows absolutely everything. Overruns. Don't expect normal robot
+         * behavior in this mode.
+         */
+        TRACE(3);
 
         private int priority;
 
