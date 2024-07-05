@@ -22,7 +22,10 @@ public class CommandMaker {
      * 
      * see https://github.com/SleipnirGroup/Choreo/wiki/ChoreoLib-Java-Usage
      */
-    public static Command choreo(ChoreoTrajectory trajectory, SwerveDriveSubsystem drivetrain) {
+    public static Command choreo(
+        ChoreoTrajectory trajectory, 
+        SwerveDriveSubsystem drivetrain,
+        TrajectoryVisualization viz) {
         return new WrapperCommand(
                 Choreo.choreoSwerveCommand(
                         trajectory,
@@ -37,13 +40,13 @@ public class CommandMaker {
             @Override
             public void initialize() {
                 super.initialize();
-                TrajectoryVisualization.setViz(trajectory);
+                viz.setViz(trajectory);
             }
 
             @Override
             public void end(boolean interrupted) {
                 super.end(interrupted);
-                TrajectoryVisualization.clear();
+                viz.clear();
             }
         };
     }

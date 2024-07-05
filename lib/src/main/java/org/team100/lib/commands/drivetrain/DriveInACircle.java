@@ -36,6 +36,7 @@ public class DriveInACircle extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final double m_turnRatio;
     private final HolonomicDriveController3 m_controller;
+    private final TrajectoryVisualization m_viz;
 
     private Translation2d m_center;
     private double m_initialRotation;
@@ -57,11 +58,13 @@ public class DriveInACircle extends Command100 {
             Logger parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
-            double turnRatio) {
+            double turnRatio,
+            TrajectoryVisualization viz) {
         super(parent);
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
         m_controller = controller;
+        m_viz = viz;
 
         addRequirements(m_swerve);
     }
@@ -152,12 +155,12 @@ public class DriveInACircle extends Command100 {
                     0.0);
             poses.add(s.pose());
         }
-        TrajectoryVisualization.setViz(poses);
+        m_viz.setViz(poses);
     }
 
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 }

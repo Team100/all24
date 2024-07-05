@@ -12,12 +12,14 @@ import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Angle100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
 
 class AnglePositionServoTest {
     private static final double kDelta = 0.001;
     private static final Logger logger = new TestLogger();
+    private static final boolean kActuallyPrint = false;
 
     /** A minimal exercise. */
     @Test
@@ -74,7 +76,8 @@ class AnglePositionServoTest {
         for (int i = 0; i < 100; ++i) {
             // run it for awhile
             servo.setPosition(1, 0);
-            System.out.println(motor.position);
+            if (kActuallyPrint)
+                Util.printf("%5.3f\n", motor.position);
         }
         assertEquals(1, motor.position, kDelta);
     }

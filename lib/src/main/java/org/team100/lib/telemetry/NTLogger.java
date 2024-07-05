@@ -39,6 +39,8 @@ import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.DoubleTopic;
+import edu.wpi.first.networktables.FloatPublisher;
+import edu.wpi.first.networktables.FloatTopic;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.IntegerTopic;
 import edu.wpi.first.networktables.NetworkTableEvent;
@@ -87,9 +89,9 @@ public class NTLogger implements Logger {
         print(key, val);
         pub(key, k -> {
             BooleanTopic t = m_telemetry.inst.getBooleanTopic(k);
-            t.publish();
+            BooleanPublisher p = t.publish();
             t.setRetained(true);
-            return t.publish();
+            return p;
         }, BooleanPublisher.class).set(val);
     }
 
@@ -97,6 +99,7 @@ public class NTLogger implements Logger {
      * This is for tuning through glass.
      * Remember that the values don't survive restarts, so
      * you should write them down.
+     * TODO: get rid of this, we never use it.
      */
     @Override
     public void register(Level level, String leaf, double initial, DoubleConsumer consumer) {
@@ -122,9 +125,9 @@ public class NTLogger implements Logger {
             print(key, val);
             pub(key, k -> {
                 DoubleTopic t = m_telemetry.inst.getDoubleTopic(k);
-                t.publish();
+                DoublePublisher p = t.publish();
                 t.setRetained(true);
-                return t.publish();
+                return p;
             }, DoublePublisher.class).set(val);
         } finally {
             s.end();
@@ -149,11 +152,11 @@ public class NTLogger implements Logger {
         float val = vals.getAsFloat();
         print(key, val);
         pub(key, k -> {
-            DoubleTopic t = m_telemetry.inst.getDoubleTopic(k);
-            t.publish();
+            FloatTopic t = m_telemetry.inst.getFloatTopic(k);
+            FloatPublisher p = t.publish();
             t.setRetained(true);
-            return t.publish();
-        }, DoublePublisher.class).set(val);
+            return p;
+        }, FloatPublisher.class).set(val);
     }
 
     @Override
@@ -165,9 +168,9 @@ public class NTLogger implements Logger {
         print(key, val);
         pub(key, k -> {
             DoubleArrayTopic t = m_telemetry.inst.getDoubleArrayTopic(k);
-            t.publish();
+            DoubleArrayPublisher p = t.publish();
             t.setRetained(true);
-            return t.publish();
+            return p;
         }, DoubleArrayPublisher.class).set(val);
     }
 
@@ -180,7 +183,7 @@ public class NTLogger implements Logger {
     }
 
     @Override
-    public void loglong(Level level, String leaf, LongSupplier vals) {
+    public void logLong(Level level, String leaf, LongSupplier vals) {
         if (!allow(level))
             return;
         String key = append(m_root, leaf);
@@ -188,9 +191,9 @@ public class NTLogger implements Logger {
         print(key, val);
         pub(key, k -> {
             IntegerTopic t = m_telemetry.inst.getIntegerTopic(k);
-            t.publish();
+            IntegerPublisher p = t.publish();
             t.setRetained(true);
-            return t.publish();
+            return p;
         }, IntegerPublisher.class).set(val);
     }
 
@@ -203,9 +206,9 @@ public class NTLogger implements Logger {
         print(key, val);
         pub(key, k -> {
             StringTopic t = m_telemetry.inst.getStringTopic(k);
-            t.publish();
+            StringPublisher p = t.publish();
             t.setRetained(true);
-            return t.publish();
+            return p;
         }, StringPublisher.class).set(val);
     }
 
@@ -219,9 +222,9 @@ public class NTLogger implements Logger {
         print(key, val);
         pub(key, k -> {
             StringArrayTopic t = m_telemetry.inst.getStringArrayTopic(k);
-            t.publish();
+            StringArrayPublisher p = t.publish();
             t.setRetained(true);
-            return t.publish();
+            return p;
         }, StringArrayPublisher.class).set(val);
     }
 

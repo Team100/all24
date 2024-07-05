@@ -96,7 +96,7 @@ public class TimedRobot100 extends IterativeRobotBase {
      */
     protected TimedRobot100(double period) {
         super(period);
-        m_logger = Telemetry.get().namedRootLogger("ROBOT");
+        m_logger = Telemetry.get().namedRootLogger("ROBOT", false);
         chronos = Chronos.get();
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");

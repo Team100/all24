@@ -12,6 +12,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -44,30 +45,33 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
      * translation
      */
     private static final double kRotationSpeed = 0.5;
+
+    private final FieldLogger m_fieldLogger;
     private final Logger m_logger;
-    private final Logger fieldLogger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
-    State100 m_thetaSetpoint;
-    Translation2d m_ball;
-    Translation2d m_ballV;
-    Pose2d m_prevPose;
+
+    private State100 m_thetaSetpoint;
+    private Translation2d m_ball;
+    private Translation2d m_ballV;
+    private Pose2d m_prevPose;
 
     public ManualWithAmpLock(
+            FieldLogger fieldLogger,
             Logger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             PIDController thetaController,
             PIDController omegaController) {
+        m_fieldLogger = fieldLogger;
+        m_logger = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_logger = parent.child(this);
-        fieldLogger = Telemetry.get().fieldLogger();
         m_profile = new TrapezoidProfile100(
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed,
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed,
@@ -154,7 +158,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
 
         // this name needs to be exactly "/field/target" for glass.
-        fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
+        m_fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
                 target.getX(),
                 target.getY(),
                 0 });
@@ -162,7 +166,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            fieldLogger.logDoubleArray(Level.TRACE, "ball", () -> new double[] {
+            m_fieldLogger.logDoubleArray(Level.TRACE, "ball", () -> new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

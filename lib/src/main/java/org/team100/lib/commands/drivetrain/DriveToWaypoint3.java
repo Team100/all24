@@ -37,6 +37,7 @@ public class DriveToWaypoint3 extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final StraightLineTrajectory m_trajectories;
     private final HolonomicDriveController3 m_controller;
+    private final TrajectoryVisualization m_viz;
 
     private Trajectory100 m_trajectory;
     private TrajectoryTimeIterator m_iter;
@@ -57,12 +58,14 @@ public class DriveToWaypoint3 extends Command100 {
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             StraightLineTrajectory trajectories,
-            HolonomicDriveController3 controller) {
+            HolonomicDriveController3 controller,
+            TrajectoryVisualization viz) {
         super(parent);
         m_goal = goal;
         m_swerve = drivetrain;
         m_trajectories = trajectories;
         m_controller = controller;
+        m_viz = viz;
         addRequirements(m_swerve);
     }
 
@@ -72,7 +75,7 @@ public class DriveToWaypoint3 extends Command100 {
         m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
         m_iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(m_trajectory));
-        TrajectoryVisualization.setViz(m_trajectory);
+        m_viz.setViz(m_trajectory);
         m_steeringAligned = false;
     }
 
@@ -138,6 +141,6 @@ public class DriveToWaypoint3 extends Command100 {
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 }

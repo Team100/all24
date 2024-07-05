@@ -10,6 +10,7 @@ import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
+import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -27,8 +28,8 @@ import edu.wpi.first.wpilibj.Timer;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends Subsystem100 {
+    private final Logger m_fieldLogger;
     private final Logger m_logger;
-    private final Logger fieldLogger;
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
@@ -36,21 +37,21 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
+            Logger fieldLogger,
             Logger parent,
             HeadingInterface heading,
             SwerveDrivePoseEstimator100 poseEstimator,
             SwerveLocal swerveLocal,
             Supplier<DriverControl.Speed> speed) {
+        m_fieldLogger = fieldLogger;
+        m_logger = parent.child(this);
         m_heading = heading;
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_speed = speed;
-        m_logger = parent.child(this);
-        fieldLogger = Telemetry.get().fieldLogger();
         // state update at 100 hz.
         m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
         stop();
-        fieldLogger.logString(Level.COMP, ".type", () -> "Field2d");
     }
 
     ////////////////
@@ -207,7 +208,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
-        fieldLogger.logDoubleArray(Level.COMP, "robot", () -> new double[] {
+        m_fieldLogger.logDoubleArray(Level.COMP, "robot", () -> new double[] {
                 m_stateSupplier.get().pose().getX(),
                 m_stateSupplier.get().pose().getY(),
                 m_stateSupplier.get().pose().getRotation().getDegrees()

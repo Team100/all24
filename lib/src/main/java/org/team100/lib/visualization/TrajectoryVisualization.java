@@ -3,7 +3,6 @@ package org.team100.lib.visualization;
 import java.util.List;
 
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPoint;
@@ -16,14 +15,15 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 
 public class TrajectoryVisualization {
     private static final String kTrajectory = "trajectory";
-    private static final Logger fieldLogger = Telemetry.get().fieldLogger();
 
-    private TrajectoryVisualization() {
-        //
+    private final Logger m_fieldLogger;
+
+    public TrajectoryVisualization(Logger fieldLogger) {
+        m_fieldLogger = fieldLogger;
     }
 
-    public static void setViz(Trajectory100 m_trajectory) {
-        fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromTrajectory100(m_trajectory));
+    public void setViz(Trajectory100 m_trajectory) {
+        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromTrajectory100(m_trajectory));
     }
 
     private static double[] fromTrajectory100(Trajectory100 m_trajectory) {
@@ -39,8 +39,8 @@ public class TrajectoryVisualization {
         return arr;
     }
 
-    public static void setViz(Trajectory m_trajectory) {
-        fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromWPITrajectory(m_trajectory));
+    public void setViz(Trajectory m_trajectory) {
+        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromWPITrajectory(m_trajectory));
     }
 
     private static double[] fromWPITrajectory(Trajectory m_trajectory) {
@@ -56,8 +56,8 @@ public class TrajectoryVisualization {
         return arr;
     }
 
-    public static void setViz(List<Pose2d> poses) {
-        fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromPoses(poses));
+    public void setViz(List<Pose2d> poses) {
+        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromPoses(poses));
     }
 
     private static double[] fromPoses(List<Pose2d> poses) {
@@ -72,12 +72,12 @@ public class TrajectoryVisualization {
         return arr;
     }
 
-    public static void setViz(ChoreoTrajectory trajectory) {
+    public void setViz(ChoreoTrajectory trajectory) {
         setViz(List.of(trajectory.getPoses()));
     }
 
-    public static void clear() {
-        fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> new double[0]);
+    public void clear() {
+        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> new double[0]);
     }
 
 }

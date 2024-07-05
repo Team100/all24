@@ -29,6 +29,8 @@ public class FullStateTrajectoryListCommand extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final FullStateDriveController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;
+    private final TrajectoryVisualization m_viz;
+
     private Iterator<Trajectory100> m_trajectoryIter;
     private TrajectoryTimeIterator m_iter;
     private boolean done;
@@ -37,11 +39,13 @@ public class FullStateTrajectoryListCommand extends Command100 {
     public FullStateTrajectoryListCommand(
             Logger parent,
             SwerveDriveSubsystem swerve,
-            Function<Pose2d, List<Trajectory100>> trajectories) {
+            Function<Pose2d, List<Trajectory100>> trajectories,
+            TrajectoryVisualization viz) {
         super(parent);
         m_swerve = swerve;
         m_controller = new FullStateDriveController();
         m_trajectories = trajectories;
+        m_viz = viz;
         addRequirements(m_swerve);
     }
 
@@ -62,7 +66,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
                 Trajectory100 m_currentTrajectory = m_trajectoryIter.next();
                 m_iter = new TrajectoryTimeIterator(
                         new TrajectoryTimeSampler(m_currentTrajectory));
-                TrajectoryVisualization.setViz(m_currentTrajectory);
+                m_viz.setViz(m_currentTrajectory);
                 m_aligned = false;
             } else {
                 done = true;
@@ -114,6 +118,6 @@ public class FullStateTrajectoryListCommand extends Command100 {
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 }

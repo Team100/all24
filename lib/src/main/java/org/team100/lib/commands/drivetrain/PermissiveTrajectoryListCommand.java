@@ -31,6 +31,8 @@ public class PermissiveTrajectoryListCommand extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final List<Function<Pose2d, Trajectory100>> m_trajectories;
+    private final TrajectoryVisualization m_viz;
+
     private Iterator<Function<Pose2d, Trajectory100>> m_trajectoryIter;
     private Trajectory100 m_currentTrajectory;
     private TrajectoryTimeIterator m_iter;
@@ -41,11 +43,13 @@ public class PermissiveTrajectoryListCommand extends Command100 {
             Logger parent,
             SwerveDriveSubsystem swerve,
             HolonomicFieldRelativeController controller,
-            List<Function<Pose2d, Trajectory100>> trajectories) {
+            List<Function<Pose2d, Trajectory100>> trajectories,
+            TrajectoryVisualization viz) {
         super(parent);
         m_swerve = swerve;
         m_controller = controller;
         m_trajectories = trajectories;
+        m_viz = viz;
         addRequirements(m_swerve);
     }
 
@@ -66,7 +70,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
                 m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getState().pose());
                 m_iter = new TrajectoryTimeIterator(
                         new TrajectoryTimeSampler(m_currentTrajectory));
-                TrajectoryVisualization.setViz(m_currentTrajectory);
+                m_viz.setViz(m_currentTrajectory);
                 m_aligned = false;
             } else {
                 done = true;
@@ -118,7 +122,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 
 }

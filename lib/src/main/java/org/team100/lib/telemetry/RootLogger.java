@@ -1,5 +1,6 @@
 package org.team100.lib.telemetry;
 
+import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.networktables.BooleanTopic;
 
@@ -9,16 +10,19 @@ import edu.wpi.first.networktables.BooleanTopic;
  */
 public class RootLogger extends NTLogger {
 
-    RootLogger(Telemetry telemetry, String root) {
-        super(telemetry, root, getT(telemetry, root));
+    RootLogger(Telemetry telemetry, String root, boolean defaultEnabled) {
+        super(telemetry, root, getT(telemetry, root, defaultEnabled));
     }
 
-    private static BooleanSubscriber getT(Telemetry telemetry, String root) {
+    private static BooleanSubscriber getT(
+            Telemetry telemetry,
+            String root,
+            boolean defaultEnabled) {
         BooleanTopic t = telemetry.inst.getBooleanTopic(root + "/enable");
-        t.publish().set(false);
-        t.getEntry(false);
+        BooleanPublisher p = t.publish();
         t.setRetained(true);
-        return t.subscribe(false);
+        p.set(defaultEnabled);
+        return t.subscribe(defaultEnabled);
     }
 
 }

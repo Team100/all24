@@ -73,6 +73,7 @@ import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -80,6 +81,7 @@ import org.team100.lib.telemetry.TelemetryLevelPoller;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.visualization.SwerveModuleVisualization;
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -116,13 +118,16 @@ public class RobotContainer implements Glassy {
         final TelemetryLevelPoller poller = new TelemetryLevelPoller(async);
         poller.setDefault(Level.TRACE);
 
-        final Logger sensorLogger = Telemetry.get().namedRootLogger("SENSOR");
-        final Logger driveLogger = Telemetry.get().namedRootLogger("DRIVE");
-        final Logger shooterLogger = Telemetry.get().namedRootLogger("SHOOTER");
-        final Logger intakeLogger = Telemetry.get().namedRootLogger("INTAKE");
-        final Logger ampLogger = Telemetry.get().namedRootLogger("AMP");
-        final Logger climberLogger = Telemetry.get().namedRootLogger("CLIMBER");
+        final Telemetry telemetry = Telemetry.get();
+        final FieldLogger fieldLogger = telemetry.fieldLogger(true);
+        final Logger sensorLogger = telemetry.namedRootLogger("SENSOR", false);
+        final Logger driveLogger = telemetry.namedRootLogger("DRIVE", false);
+        final Logger shooterLogger = telemetry.namedRootLogger("SHOOTER", false);
+        final Logger intakeLogger = telemetry.namedRootLogger("INTAKE", false);
+        final Logger ampLogger = telemetry.namedRootLogger("AMP", false);
+        final Logger climberLogger = telemetry.namedRootLogger("CLIMBER", false);
 
+        final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(driveLogger, async);
         final OperatorControl operatorControl = new OperatorControlProxy(async);
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
@@ -173,6 +178,7 @@ public class RobotContainer implements Glassy {
         SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
 
         m_drive = new SwerveDriveSubsystem(
+                fieldLogger,
                 driveLogger,
                 m_heading,
                 poseEstimator,
@@ -230,6 +236,7 @@ public class RobotContainer implements Glassy {
         // Drive With Profile
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(
+                        fieldLogger,
                         driveLogger,
                         m_intake,
                         notePositionDetector::getClosestTranslation2d,
@@ -289,6 +296,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("ROBOT_RELATIVE_FACING_NOTE", false,
                 new ManualWithNoteRotation(
+                        fieldLogger,
                         driveLogger,
                         swerveKinodynamics,
                         m_heading,
@@ -327,6 +335,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(
+                        fieldLogger,
                         driveLogger,
                         swerveKinodynamics,
                         m_heading,
@@ -337,6 +346,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(
+                        fieldLogger,
                         driveLogger,
                         swerveKinodynamics,
                         m_heading,
@@ -347,6 +357,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("SHOOTER_LOCK", false,
                 new ManualWithShooterLock(
+                        fieldLogger,
                         driveLogger,
                         swerveKinodynamics,
                         m_heading,
@@ -356,6 +367,7 @@ public class RobotContainer implements Glassy {
         PIDController omega2Controller = new PIDController(0.5, 0, 0); // .5
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
+                fieldLogger,
                 driveLogger,
                 swerveKinodynamics,
                 m_heading,
@@ -363,6 +375,7 @@ public class RobotContainer implements Glassy {
                 omega2Controller);
 
         ManualWithAmpLock ampLock = new ManualWithAmpLock(
+                fieldLogger,
                 driveLogger,
                 swerveKinodynamics,
                 m_heading,
@@ -379,7 +392,8 @@ public class RobotContainer implements Glassy {
                 m_intake,
                 m_sensors,
                 notePositionDetector,
-                constraints);
+                constraints,
+                viz);
 
         whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
 
