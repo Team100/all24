@@ -204,6 +204,11 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         prevSetpoint = new SwerveSetpoint(speeds, states);
     }
 
+    /** Updates visualization. */
+    void periodic() {
+        m_modules.periodic();
+    }
+
     @Override
     public String getGlassName() {
         return "SwerveLocal";

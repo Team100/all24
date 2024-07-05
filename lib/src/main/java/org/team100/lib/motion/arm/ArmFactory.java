@@ -1,6 +1,5 @@
 package org.team100.lib.motion.arm;
 
-import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
 import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.SimulatedEncoder;
@@ -20,19 +19,19 @@ public class ArmFactory {
     private static final String kLower = "arm/lower";
     private static final String kUpper = "arm/upper";
 
-    public static ArmSubsystem get(Logger parent, Async async) {
+    public static ArmSubsystem get(Logger parent) {
         switch (Identity.instance) {
             case TEST_BOARD_6B:
-                return real(parent, async);
+                return real(parent);
             case BLANK:
                 // for testing
-                return simulated(parent, async);
+                return simulated(parent);
             default:
-                return simulated(parent, async);
+                return simulated(parent);
         }
     }
 
-    private static ArmSubsystem real(Logger parent, Async async) {
+    private static ArmSubsystem real(Logger parent) {
         final double kLowerEncoderOffset = 0.861614;
         final double kUpperEncoderOffset = 0.266396;
 
@@ -59,11 +58,10 @@ public class ArmFactory {
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
-                upperEncoder,
-                async);
+                upperEncoder);
     }
 
-    private static ArmSubsystem simulated(Logger parent, Async async) {
+    private static ArmSubsystem simulated(Logger parent) {
         // for testing
         // note very high reduction ratio
         // motor speed is rad/s
@@ -80,8 +78,7 @@ public class ArmFactory {
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
-                upperEncoder,
-                async);
+                upperEncoder);
     }
 
     private ArmFactory() {

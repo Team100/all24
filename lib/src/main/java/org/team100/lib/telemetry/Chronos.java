@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * Keeps track of how long things take.
  * The general idea is to reset all the timers periodically, to let them
- * accumulate time, and then to spit out the fraction of time spent in each one.
+ * accumulate time, and then to spit out the time spent in each one.
  */
 public class Chronos {
     /**

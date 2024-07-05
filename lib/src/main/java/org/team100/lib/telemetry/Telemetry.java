@@ -75,6 +75,10 @@ public class Telemetry {
         m_level = level;
     }
 
+    public Level getLevel() {
+        return m_level;
+    }
+
     public static Telemetry get() {
         return instance;
     }

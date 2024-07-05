@@ -1,7 +1,5 @@
 package org.team100.lib.motion.drivetrain;
 
-import org.team100.lib.async.Async;
-import org.team100.lib.async.MockAsync;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -13,7 +11,6 @@ import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.visualization.SwerveModuleVisualization;
 
 /**
  * A real swerve subsystem populated with simulated motors and encoders,
@@ -35,9 +32,7 @@ public class Fixture {
         logger = new TestLogger();
         fieldLogger = new TestLogger();
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
-        Async async = new MockAsync();
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
-        SwerveModuleVisualization.make(collection, async);
         heading = new SimulatedHeading(swerveKinodynamics, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
                 heading.getHeadingNWU(),

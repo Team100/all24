@@ -20,10 +20,11 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
             String name,
             Logger parent,
             SwerveKinodynamics kinodynamics) {
+        Logger moduleLogger = parent.child(name);
         VelocityServo<Distance100> driveServo = simulatedDriveServo(
-                parent.child("Drive"));
+                moduleLogger.child("Drive"));
         PositionServo<Angle100> turningServo = simulatedTurningServo(
-                parent.child("Turning"),
+                moduleLogger.child("Turning"),
                 kinodynamics);
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }

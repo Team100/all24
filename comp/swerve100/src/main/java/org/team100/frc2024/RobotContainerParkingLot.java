@@ -44,7 +44,6 @@ import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
-import org.team100.lib.visualization.SwerveModuleVisualization;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import com.choreo.lib.Choreo;
@@ -96,7 +95,6 @@ public class RobotContainerParkingLot implements Glassy {
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
-        SwerveModuleVisualization.make(m_modules, async);
         m_heading = HeadingFactory.get(
                 driveLogger,
                 swerveKinodynamics,
@@ -127,7 +125,7 @@ public class RobotContainerParkingLot implements Glassy {
         // m_beep = new Beep();
         BooleanSupplier test = () -> driverControl.annunicatorTest() ||
                 m_beep.getOutput();
-        m_monitor = new Monitor(monitorLogger, new Annunciator(6, async), test);
+        m_monitor = new Monitor(monitorLogger, new Annunciator(6), test);
         // The monitor runs less frequently than the control loop.
         robot.addPeriodic(m_monitor::periodic, 0.2, "monitor");
 

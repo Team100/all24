@@ -63,13 +63,15 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
             MotorPhase motorPhase) {
+        Logger moduleLogger = parent.child(name);
+
         PIDConstants drivePidConstants = new PIDConstants(.2); // .2
         PIDConstants turningPidConstants = new PIDConstants(.32); // 5
         Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
         Feedforward100 driveFF = Feedforward100.makeWCPSwerveDriveFalcon6();
 
         VelocityServo<Distance100> driveServo = driveServo(
-                parent.child("Drive"),
+                moduleLogger.child("Drive"),
                 supplyLimitAmps,
                 statorLimitAmps,
                 driveMotorCanId,
@@ -78,7 +80,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 driveFF);
 
         PositionServo<Angle100> turningServo = turningServo(
-                parent.child("Turning"),
+                moduleLogger.child("Turning"),
                 encoderClass,
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -123,7 +125,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 encoder);
     }
 
-
     private static PositionServo<Angle100> turningServo(
             Logger parent,
             Class<? extends Encoder100<Angle100>> encoderClass,
@@ -159,8 +160,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, -Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
 
-            Profile100 profile = kinodynamics.getSteeringProfile();
-            
+        Profile100 profile = kinodynamics.getSteeringProfile();
+
         PositionServo<Angle100> turningServo = getTurningServo(
                 parent,
                 kinodynamics,

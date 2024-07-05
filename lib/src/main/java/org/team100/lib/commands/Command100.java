@@ -15,7 +15,6 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -33,13 +32,11 @@ public abstract class Command100 extends Command implements Glassy {
             new MaxPriorityThreads());
 
     protected final Logger m_logger;
-    protected final String m_name;
 
     private double prevTime;
     private Future<?> m_task;
 
     protected Command100(Logger parent) {
-        m_name = Names.append(Command100.class.getSimpleName(), this);
         m_logger = parent.child(this);
     }
 

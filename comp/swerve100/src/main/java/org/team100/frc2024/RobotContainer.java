@@ -80,7 +80,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelPoller;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
-import org.team100.lib.visualization.SwerveModuleVisualization;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -147,7 +146,6 @@ public class RobotContainer implements Glassy {
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
-        SwerveModuleVisualization.make(m_modules, async);
         final HeadingInterface m_heading = HeadingFactory.get(
                 driveLogger,
                 swerveKinodynamics,

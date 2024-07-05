@@ -1,7 +1,8 @@
 package org.team100.lib.visualization;
 
 import org.team100.lib.telemetry.Annunciator;
-import org.team100.lib.async.Async;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -20,16 +21,7 @@ public class AnnunciatorVisualization {
     private final Mechanism2d m_mechanism;
     private final MechanismLigament2d m_ligament;
 
-    /**
-     * Since this is just a visualization, maybe don't burn a whole async thread for
-     * it.
-     */
-    public static void make(Annunciator annunciator, Async async) {
-        AnnunciatorVisualization v = new AnnunciatorVisualization(annunciator);
-        async.addPeriodic(v::viz, 0.1, "AnnunciatorVisualization");
-    }
-
-    private AnnunciatorVisualization(Annunciator annunciator) {
+    public AnnunciatorVisualization(Annunciator annunciator) {
         m_annunciator = annunciator;
         m_mechanism = new Mechanism2d(100, 100);
         MechanismRoot2d root = m_mechanism.getRoot("root", 0, 50);
@@ -38,11 +30,13 @@ public class AnnunciatorVisualization {
         SmartDashboard.putData("annunciator", m_mechanism);
     }
 
-    private void viz() {
-        if (m_annunciator.get()) {
-            m_ligament.setColor(kOn);
-        } else {
-            m_ligament.setColor(kOff);
+    public void viz() {
+        if (Telemetry.get().getLevel().admit(Level.TRACE)) {
+            if (m_annunciator.get()) {
+                m_ligament.setColor(kOn);
+            } else {
+                m_ligament.setColor(kOff);
+            }
         }
     }
 }

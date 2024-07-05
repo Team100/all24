@@ -1,8 +1,10 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.experiments;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
+
+import org.team100.lib.telemetry.NamedChooser;
 
 public class ExperimentChooser extends NamedChooser<BooleanSupplier> {
     private static final Map<String, ExperimentChooser> choosers = new ConcurrentHashMap<>();
