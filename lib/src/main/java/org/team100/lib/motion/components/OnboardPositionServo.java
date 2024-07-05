@@ -106,9 +106,9 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
         m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
         m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
         m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
-        m_logger.log(Level.DEBUG, "Goal", m_goal);
+        m_logger.logState100(Level.DEBUG, "Goal", () -> m_goal);
         m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
+        m_logger.logState100(Level.DEBUG, "Setpoint", () -> m_setpoint);
         m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
         m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
         m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
@@ -136,7 +136,7 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
         boolean atSetpoint = m_controller.atSetpoint();
         m_logger.logDouble(Level.DEBUG, "Position Tolerance", m_controller::getPositionTolerance);
         m_logger.logDouble(Level.DEBUG, "Velocity Tolerance", m_controller::getVelocityTolerance);
-        m_logger.logBoolean(Level.DEBUG, "At Setpoint", atSetpoint);
+        m_logger.logBoolean(Level.DEBUG, "At Setpoint", () -> atSetpoint);
         return atSetpoint;
     }
 

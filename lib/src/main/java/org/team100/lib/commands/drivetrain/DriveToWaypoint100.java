@@ -103,7 +103,7 @@ public class DriveToWaypoint100 extends Command100 {
         if (output == null)
             return;
 
-        m_logger.log(Level.DEBUG, "chassis speeds", output);
+        m_logger.logChassisSpeeds(Level.DEBUG, "chassis speeds", () -> output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeedsNormally(output, dt);
     }

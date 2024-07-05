@@ -43,7 +43,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
                 break;
         }
 
-        m_logger.log(Level.DEBUG, "channel", m_encoder.getSourceChannel());
+        m_logger.logInt(Level.DEBUG, "channel", m_encoder::getSourceChannel);
     }
 
     @Override

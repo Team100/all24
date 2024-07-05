@@ -99,10 +99,10 @@ public class DriveInACircle extends Command100 {
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
-        m_logger.log(Level.TRACE, "center", m_center);
+        m_logger.logTranslation2d(Level.TRACE, "center", () -> m_center);
         m_logger.logDouble(Level.TRACE, "angle", () -> m_angleRad);
-        m_logger.log(Level.TRACE, "reference", reference);
-        m_logger.log(Level.TRACE, "target", fieldRelativeTarget);
+        m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
+        m_logger.logFieldRelativeVelocity(Level.TRACE, "target", () -> fieldRelativeTarget);
     }
 
     static Translation2d getCenter(Pose2d currentPose, double radiusM) {

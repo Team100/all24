@@ -73,9 +73,9 @@ public class Robot extends TimedRobot100 implements Glassy {
         // }
 
         m_logger.logDouble(Level.DEBUG, "DriverStation MatchTime", DriverStation::getMatchTime);
-        m_logger.logBoolean(Level.DEBUG, "DriverStation AutonomousEnabled", DriverStation.isAutonomousEnabled());
-        m_logger.logBoolean(Level.DEBUG, "DriverStation TeleopEnabled", DriverStation.isTeleopEnabled());
-        m_logger.logBoolean(Level.DEBUG, "DriverStation FMSAttached", DriverStation.isFMSAttached());
+        m_logger.logBoolean(Level.DEBUG, "DriverStation AutonomousEnabled", DriverStation::isAutonomousEnabled);
+        m_logger.logBoolean(Level.DEBUG, "DriverStation TeleopEnabled", DriverStation::isTeleopEnabled);
+        m_logger.logBoolean(Level.DEBUG, "DriverStation FMSAttached", DriverStation::isFMSAttached);
 
         m_jvmLogger.logGarbageCollectors();
         m_jvmLogger.logMemoryPools();
@@ -89,12 +89,12 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void disabledPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "disabled");
+        m_logger.logString(Level.DEBUG, "mode", () -> "disabled");
         double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
-        m_logger.logDouble(Level.DEBUG, "key list size",()-> keyListSize);
+        m_logger.logDouble(Level.DEBUG, "key list size", () -> keyListSize);
 
         // this forces the static initializer to run, so that the widget appears.
-        m_logger.log(Level.INFO, "active auton routine", AutonChooser.routine().name());
+        m_logger.logString(Level.INFO, "active auton routine", () -> AutonChooser.routine().name());
     }
 
     @Override
@@ -142,24 +142,24 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void autonomousPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "autonomous");
+        m_logger.logString(Level.DEBUG, "mode", () -> "autonomous");
     }
 
     @Override
     public void simulationPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "simulation");
+        m_logger.logString(Level.DEBUG, "mode", () -> "simulation");
     }
 
     @Override
     public void teleopPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "teleop");
+        m_logger.logString(Level.DEBUG, "mode", () -> "teleop");
         m_logger.logDouble(Level.DEBUG, "voltage", RobotController::getBatteryVoltage);
 
     }
 
     @Override
     public void testPeriodic() {
-        m_logger.log(Level.DEBUG, "mode", "test");
+        m_logger.logString(Level.DEBUG, "mode", () -> "test");
     }
 
     private void banner() {

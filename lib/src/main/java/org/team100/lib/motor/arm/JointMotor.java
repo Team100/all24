@@ -32,7 +32,7 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
         Rev100.motorConfig(m_motor, IdleMode.kBrake, MotorPhase.FORWARD, 10);
         Rev100.currentConfig(m_motor, currentLimit);
 
-        m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceId());
+        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceId);
     }
 
     @Override

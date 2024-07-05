@@ -120,7 +120,7 @@ public class DriveToWaypoint3 extends Command100 {
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
 
-        m_logger.logBoolean(Level.TRACE, "Aligned", m_steeringAligned);
+        m_logger.logBoolean(Level.TRACE, "Aligned", () -> m_steeringAligned);
 
         m_logger.logDouble(Level.TRACE, "Pose X", () -> m_swerve.getState().pose().getX());
         m_logger.logDouble(Level.TRACE, "Pose Y", () -> m_swerve.getState().pose().getY());

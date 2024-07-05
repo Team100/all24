@@ -47,7 +47,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
                 m_encoder.setDistancePerRotation(2.0 * Math.PI / (-1.0 * gearRatio));
                 break;
         }
-        m_logger.log(Level.DEBUG, "channel", m_encoder.getChannel());
+        m_logger.logInt(Level.DEBUG, "channel", m_encoder::getChannel);
     }
 
     @Override

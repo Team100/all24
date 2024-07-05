@@ -116,10 +116,10 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.log(Level.DEBUG, "CLIMBER 1 ENCODER", e1.getPosition());
-        m_logger.log(Level.DEBUG, "CLIMBER 2 ENCODER", e2.getPosition());
-        m_logger.log(Level.DEBUG, "RPM 1", e1.getRate());
-        m_logger.log(Level.DEBUG, "RPM 2", e2.getRate());
+        m_logger.logOptionalDouble(Level.DEBUG, "CLIMBER 1 ENCODER", e1::getPosition);
+        m_logger.logOptionalDouble(Level.DEBUG, "CLIMBER 2 ENCODER", e2::getPosition);
+        m_logger.logOptionalDouble(Level.DEBUG, "RPM 1", e1::getRate);
+        m_logger.logOptionalDouble(Level.DEBUG, "RPM 2", e2::getRate);
     }
 
     @Override

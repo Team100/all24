@@ -50,7 +50,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         // state update at 100 hz.
         m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
         stop();
-        fieldLogger.log(Level.INFO, ".type", "Field2d");
+        fieldLogger.logString(Level.INFO, ".type", () -> "Field2d");
     }
 
     ////////////////
@@ -67,15 +67,15 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * @param v      Field coordinate velocities in meters and radians per second.
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
-    public void driveInFieldCoords(FieldRelativeVelocity v, double kDtSec) {
-        m_logger.log(Level.TRACE, "drive input", v);
+    public void driveInFieldCoords(FieldRelativeVelocity vIn, double kDtSec) {
+        m_logger.logFieldRelativeVelocity(Level.TRACE, "drive input", () -> vIn);
         DriverControl.Speed speed = m_speed.get();
-        m_logger.log(Level.TRACE, "control_speed", speed);
+        m_logger.logEnum(Level.TRACE, "control_speed", () -> speed);
 
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        m_logger.log(Level.TRACE, "skill level", driverSkillLevel);
-        v = GeometryUtil.scale(v, driverSkillLevel.scale());
+        m_logger.logEnum(Level.TRACE, "skill level", () -> driverSkillLevel);
+        FieldRelativeVelocity v = GeometryUtil.scale(vIn, driverSkillLevel.scale());
 
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 v.x(),
@@ -114,7 +114,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        m_logger.log(Level.TRACE, "skill level", driverSkillLevel);
+        m_logger.logEnum(Level.TRACE, "skill level", () -> driverSkillLevel);
         speeds = speeds.times(driverSkillLevel.scale());
         m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
     }
@@ -195,20 +195,19 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     @Override
     public void periodic100(double dt) {
-        m_logger.log(Level.DEBUG, "pose", m_stateSupplier.get());
+        m_logger.logSwerveState(Level.DEBUG, "state", m_stateSupplier::get);
         m_logger.logDouble(Level.TRACE, "Tur Deg", () -> m_stateSupplier.get().pose().getRotation().getDegrees());
-        m_logger.log(Level.DEBUG, "pose array",
-                new double[] {
+        m_logger.logDoubleArray(Level.DEBUG, "pose array",
+                () -> new double[] {
                         m_stateSupplier.get().pose().getX(),
                         m_stateSupplier.get().pose().getY(),
                         m_stateSupplier.get().pose().getRotation().getRadians()
                 });
-        m_logger.log(Level.DEBUG, "state", m_stateSupplier.get());
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
-        fieldLogger.log(Level.INFO, "robot", new double[] {
+        fieldLogger.logDoubleArray(Level.INFO, "robot", () -> new double[] {
                 m_stateSupplier.get().pose().getX(),
                 m_stateSupplier.get().pose().getY(),
                 m_stateSupplier.get().pose().getRotation().getDegrees()

@@ -146,12 +146,13 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        m_logger.log(Level.DEBUG, "theta/setpoint", m_thetaSetpoint);
+        m_logger.logState100(Level.DEBUG, "theta/setpoint", () -> m_thetaSetpoint);
         m_logger.logDouble(Level.DEBUG, "theta/measurement", () -> measurement);
         m_logger.logDouble(Level.DEBUG, "theta/error", m_thetaController::getPositionError);
         m_logger.logDouble(Level.DEBUG, "theta/fb", () -> thetaFB);
+
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        m_logger.log(Level.DEBUG, "omega/reference", m_thetaSetpoint);
+        m_logger.logState100(Level.DEBUG, "omega/reference", () -> m_thetaSetpoint);
         m_logger.logDouble(Level.DEBUG, "omega/measurement", () -> headingRate);
         m_logger.logDouble(Level.DEBUG, "omega/error", m_omegaController::getPositionError);
         m_logger.logDouble(Level.DEBUG, "omega/fb", () -> omegaFB);
@@ -162,7 +163,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // this name needs to be exactly "/field/target" for glass.
-        fieldLogger.log(Level.DEBUG, "target", new double[] {
+        fieldLogger.logDoubleArray(Level.DEBUG, "target", () -> new double[] {
                 target.get().getX(),
                 target.get().getY(),
                 0 });
@@ -177,7 +178,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            fieldLogger.log(Level.DEBUG, "ball", new double[] {
+            fieldLogger.logDoubleArray(Level.DEBUG, "ball", () -> new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

@@ -75,10 +75,10 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
 
         m_motor.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 
-        m_logger.logDouble(Level.TRACE,  "goal", ()->goal);
-        m_logger.logDouble(Level.DEBUG,  "Measurement",()-> measurement);
-        m_logger.log(Level.DEBUG,  "Setpoint", m_setpoint);
-        m_logger.logDouble(Level.TRACE,  "Feedforward Torque", ()->feedForwardTorqueNm);
+        m_logger.logDouble(Level.TRACE, "goal", () -> goal);
+        m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
+        m_logger.logState100(Level.DEBUG, "Setpoint", () -> m_setpoint);
+        m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
     }
 
     @Override

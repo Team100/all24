@@ -102,8 +102,8 @@ public class GravityServo {
         m_logger.logDouble(Level.DEBUG, "gravity T", () -> gravityTorque);
         m_logger.logDouble(Level.DEBUG, "u_TOTAL", () -> u_TOTAL);
         m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        m_logger.log(Level.DEBUG, "Goal", m_goal);
-        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
+        m_logger.logState100(Level.DEBUG, "Goal", () -> m_goal);
+        m_logger.logState100(Level.DEBUG, "Setpoint", () -> m_setpoint);
         m_logger.logDouble(Level.DEBUG, "Setpoint Velocity", m_setpoint::v);
         m_logger.logDouble(Level.DEBUG, "Controller Position Error", m_controller::getPositionError);
         m_logger.logDouble(Level.DEBUG, "Controller Velocity Error", m_controller::getVelocityError);
@@ -175,8 +175,8 @@ public class GravityServo {
         m_logger.logDouble(Level.DEBUG, "GRAVITY", () -> gravityTorque);
         m_logger.logDouble(Level.DEBUG, "u_TOTAL", () -> u_TOTAL);
         m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        m_logger.log(Level.DEBUG, "Goal", m_goal);
-        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
+        m_logger.logState100(Level.DEBUG, "Goal", () -> m_goal);
+        m_logger.logState100(Level.DEBUG, "Setpoint", () -> m_setpoint);
         m_logger.logDouble(Level.DEBUG, "Setpoint Velocity", () -> m_setpoint.v());
         m_logger.logDouble(Level.DEBUG, "Controller Position Error", m_controller::getPositionError);
         m_logger.logDouble(Level.DEBUG, "Controller Velocity Error", m_controller::getVelocityError);

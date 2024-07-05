@@ -23,6 +23,10 @@ public class TrajectoryVisualization {
     }
 
     public static void setViz(Trajectory100 m_trajectory) {
+        fieldLogger.logDoubleArray(Level.DEBUG, kTrajectory, () -> fromTrajectory100(m_trajectory));
+    }
+
+    private static double[] fromTrajectory100(Trajectory100 m_trajectory) {
         double[] arr = new double[m_trajectory.length() * 3];
         int ndx = 0;
         for (TrajectoryPoint p : m_trajectory.getPoints()) {
@@ -32,10 +36,14 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        fieldLogger.log(Level.DEBUG, kTrajectory, arr);
+        return arr;
     }
 
     public static void setViz(Trajectory m_trajectory) {
+        fieldLogger.logDoubleArray(Level.DEBUG, kTrajectory, () -> fromWPITrajectory(m_trajectory));
+    }
+
+    private static double[] fromWPITrajectory(Trajectory m_trajectory) {
         double[] arr = new double[m_trajectory.getStates().size() * 3];
         int ndx = 0;
         for (State p : m_trajectory.getStates()) {
@@ -45,10 +53,14 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        fieldLogger.log(Level.DEBUG, kTrajectory, arr);
+        return arr;
     }
 
     public static void setViz(List<Pose2d> poses) {
+        fieldLogger.logDoubleArray(Level.DEBUG, kTrajectory, () -> fromPoses(poses));
+    }
+
+    private static double[] fromPoses(List<Pose2d> poses) {
         double[] arr = new double[poses.size() * 3];
         int ndx = 0;
         for (Pose2d pose : poses) {
@@ -57,7 +69,7 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        fieldLogger.log(Level.DEBUG, kTrajectory, arr);
+        return arr;
     }
 
     public static void setViz(ChoreoTrajectory trajectory) {
@@ -65,7 +77,7 @@ public class TrajectoryVisualization {
     }
 
     public static void clear() {
-        fieldLogger.log(Level.DEBUG, kTrajectory, new double[0]);
+        fieldLogger.logDoubleArray(Level.DEBUG, kTrajectory, () -> new double[0]);
     }
 
 }

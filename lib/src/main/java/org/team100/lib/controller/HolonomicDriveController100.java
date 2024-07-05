@@ -88,7 +88,7 @@ public class HolonomicDriveController100 implements Glassy {
         m_logger.logDouble(Level.TRACE, "u_FB/x", () -> xFB);
         m_logger.logDouble(Level.TRACE, "u_FB/y", () -> yFB);
         m_logger.logDouble(Level.TRACE, "u_FB/theta", () -> thetaFB);
-        m_logger.log(Level.TRACE, "measurement", currentPose);
+        m_logger.logSwerveState(Level.TRACE, "measurement", () -> currentPose);
 
         m_logger.logDouble(Level.DEBUG, "setpoint/x", m_xController::getSetpoint);
         m_logger.logDouble(Level.DEBUG, "setpoint/y", m_yController::getSetpoint);

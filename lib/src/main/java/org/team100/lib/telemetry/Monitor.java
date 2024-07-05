@@ -51,7 +51,7 @@ public class Monitor implements Glassy {
 
         if (m_test.getAsBoolean())
             m_shouldAlert = true;
-        m_logger.logBoolean(Level.INFO, "master_warning", m_shouldAlert);
+        m_logger.logBoolean(Level.INFO, "master_warning", () -> m_shouldAlert);
         m_annunciator.accept(m_shouldAlert);
     }
 

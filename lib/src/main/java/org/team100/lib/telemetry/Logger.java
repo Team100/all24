@@ -1,8 +1,11 @@
 package org.team100.lib.telemetry;
 
 import java.util.OptionalDouble;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.controller.State100;
@@ -25,7 +28,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.util.function.FloatSupplier;
 
+/**
+ * The logger interface uses suppliers to make the fast case (logging less)
+ * fast.
+ * 
+ * All the methods have different names because Java erases the type parameter
+ * of the suppliers.
+ */
 public interface Logger {
 
     /** Adds a slash between the root and the stem */
@@ -43,7 +54,7 @@ public interface Logger {
         return false;
     }
 
-    default void logBoolean(Level level, String leaf, boolean val) {
+    default void logBoolean(Level level, String leaf, BooleanSupplier val) {
     }
 
     /**
@@ -54,84 +65,86 @@ public interface Logger {
     default void register(Level level, String leaf, double initial, DoubleConsumer consumer) {
     }
 
-    // using a supplier here is faster in the non-logging case.
     default void logDouble(Level level, String leaf, DoubleSupplier vals) {
     }
 
-    default void log(Level level, String leaf, OptionalDouble val) {
+    default void logInt(Level level, String leaf, IntSupplier vals) {
     }
 
-    default void log(Level level, String leaf, float val) {
+    default void logOptionalDouble(Level level, String leaf, Supplier<OptionalDouble> val) {
     }
 
-    default void log(Level level, String leaf, double[] val) {
+    default void logFloat(Level level, String leaf, FloatSupplier val) {
     }
 
-    default void log(Level level, String leaf, Double[] val) {
+    default void logDoubleArray(Level level, String leaf, Supplier<double[]> val) {
     }
 
-    default void log(Level level, String leaf, long val) {
+    default void logDoubleObjArray(Level level, String leaf, Supplier<Double[]> val) {
     }
 
-    default void log(Level level, String leaf, String val) {
+    default void loglong(Level level, String leaf, LongSupplier val) {
+    }
+
+    default void logString(Level level, String leaf, Supplier<String> val) {
     }
 
     /** val is a supplier to avoid doing any work if we're not going to log it. */
-    default void log(Level level, String leaf, Supplier<String[]> val) {
+    default void logStringArray(Level level, String leaf, Supplier<String[]> val) {
     }
 
-    default void log(Level level, String leaf, Enum<?> val) {
+    default void logEnum(Level level, String leaf, Supplier<Enum<?>> val) {
     }
 
-    default void log(Level level, String leaf, Pose2d val) {
+    default void logPose2d(Level level, String leaf, Supplier<Pose2d> val) {
     }
 
-    default void log(Level level, String leaf, Translation2d val) {
+    default void logTranslation2d(Level level, String leaf, Supplier<Translation2d> val) {
     }
 
-    default void log(Level level, String leaf, Vector2d val) {
+    default void logVector2d(Level level, String leaf, Supplier<Vector2d> val) {
     }
 
-    default void log(Level level, String leaf, Rotation2d val) {
+    default void logRotation2d(Level level, String leaf, Supplier<Rotation2d> val) {
     }
 
-    default void log(Level level, String leaf, TrajectorySamplePoint val) {
+    default void logTrajectorySamplePoint(Level level, String leaf, Supplier<TrajectorySamplePoint> val) {
     }
 
-    default void log(Level level, String leaf, TimedPose val) {
+    default void logTimedPose(Level level, String leaf, Supplier<TimedPose> val) {
     }
 
-    default void log(Level level, String leaf, PoseWithCurvature val) {
+    default void logPoseWithCurvature(Level level, String leaf, Supplier<PoseWithCurvature> val) {
     }
 
-    default void log(Level level, String leaf, Pose2dWithMotion val) {
+    default void logPose2dWithMotion(Level level, String leaf, Supplier<Pose2dWithMotion> val) {
     }
 
-    default void log(Level level, String leaf, Twist2d val) {
+    default void logTwist2d(Level level, String leaf, Supplier<Twist2d> val) {
     }
 
-    default void log(Level level, String leaf, ChassisSpeeds val) {
+    default void logChassisSpeeds(Level level, String leaf, Supplier<ChassisSpeeds> val) {
     }
 
-    default void log(Level level, String leaf, FieldRelativeVelocity val) {
+    default void logFieldRelativeVelocity(Level level, String leaf, Supplier<FieldRelativeVelocity> val) {
     }
 
-    default void log(Level level, String leaf, FieldRelativeAcceleration val) {
+    default void logFieldRelativeAcceleration(Level level, String leaf, Supplier<FieldRelativeAcceleration> val) {
     }
 
-    default void log(Level level, String leaf, State100 state) {
+    default void logState100(Level level, String leaf, Supplier<State100> state) {
     }
 
-    default void log(Level level, String leaf, SwerveState state) {
+    default void logSwerveState(Level level, String leaf, Supplier<SwerveState> state) {
     }
 
-    default void log(Level level, String leaf, SwerveModulePosition val) {
+    default void logSwerveModulePosition(Level level, String leaf, Supplier<SwerveModulePosition> val) {
     }
 
-    default void log(Level level, String leaf, ArmAngles angles) {
+    default void logArmAngles(Level level, String leaf, Supplier<ArmAngles> angles) {
     }
 
-    default void log(Level level, String leaf, State state) {
+    default void logState(Level level, String leaf, Supplier<State> state) {
     }
 
 }

@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -46,6 +47,7 @@ import edu.wpi.first.networktables.StringArrayPublisher;
 import edu.wpi.first.networktables.StringArrayTopic;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
+import edu.wpi.first.util.function.FloatSupplier;
 
 public class NTLogger implements Logger {
     private final Telemetry m_telemetry;
@@ -70,10 +72,13 @@ public class NTLogger implements Logger {
     }
 
     @Override
-    public void logBoolean(Level level, String leaf, boolean val) {
+    public void logBoolean(Level level, String leaf, BooleanSupplier vals) {
+        if (!enabled())
+            return;
         if (!m_telemetry.m_level.admit(level))
             return;
         String key = append(m_root, leaf);
+        boolean val = vals.getAsBoolean();
         print(key, val);
         pub(key, k -> {
             BooleanTopic t = m_telemetry.inst.getBooleanTopic(k);
@@ -90,6 +95,8 @@ public class NTLogger implements Logger {
      */
     @Override
     public void register(Level level, String leaf, double initial, DoubleConsumer consumer) {
+        if (!enabled())
+            return;
         if (!m_telemetry.m_level.admit(level))
             return;
         String k = append(m_root, leaf);
@@ -109,8 +116,8 @@ public class NTLogger implements Logger {
                 return;
             if (!m_telemetry.m_level.admit(level))
                 return;
-            double val = vals.getAsDouble();
             String key = append(m_root, leaf);
+            double val = vals.getAsDouble();
             print(key, val);
             pub(key, k -> {
                 DoubleTopic t = m_telemetry.inst.getDoubleTopic(k);
@@ -124,22 +131,27 @@ public class NTLogger implements Logger {
     }
 
     @Override
-    public void log(Level level, String leaf, OptionalDouble val) {
+    public void logOptionalDouble(Level level, String leaf, Supplier<OptionalDouble> vals) {
+        if (!enabled())
+            return;
         if (!m_telemetry.m_level.admit(level))
             return;
-        if (val.isEmpty()) {
-            return;
+        OptionalDouble val = vals.get();
+        if (val.isPresent()) {
+            logDouble(level, leaf, val::getAsDouble);
         }
-        logDouble(level, leaf, val::getAsDouble);
     }
 
     @Override
-    public void log(Level level, String leaf, float val) {
+    public void logFloat(Level level, String leaf, FloatSupplier vals) {
+        if (!enabled())
+            return;
         // if(val == null)
         // return;
         if (!m_telemetry.m_level.admit(level))
             return;
         String key = append(m_root, leaf);
+        float val = vals.getAsFloat();
         print(key, val);
         pub(key, k -> {
             DoubleTopic t = m_telemetry.inst.getDoubleTopic(k);
@@ -150,10 +162,13 @@ public class NTLogger implements Logger {
     }
 
     @Override
-    public void log(Level level, String leaf, double[] val) {
+    public void logDoubleArray(Level level, String leaf, Supplier<double[]> vals) {
+        if (!enabled())
+            return;
         if (!m_telemetry.m_level.admit(level))
             return;
         String key = append(m_root, leaf);
+        double[] val = vals.get();
         print(key, val);
         pub(key, k -> {
             DoubleArrayTopic t = m_telemetry.inst.getDoubleArrayTopic(k);
@@ -164,17 +179,23 @@ public class NTLogger implements Logger {
     }
 
     @Override
-    public void log(Level level, String leaf, Double[] val) {
+    public void logDoubleObjArray(Level level, String leaf, Supplier<Double[]> vals) {
+        if (!enabled())
+            return;
         if (!m_telemetry.m_level.admit(level))
             return;
-        log(level, leaf, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
+        Double[] val = vals.get();
+        logDoubleArray(level, leaf, () -> Stream.of(val).mapToDouble(Double::doubleValue).toArray());
     }
 
     @Override
-    public void log(Level level, String leaf, long val) {
+    public void loglong(Level level, String leaf, LongSupplier vals) {
+        if (!enabled())
+            return;
         if (!m_telemetry.m_level.admit(level))
             return;
         String key = append(m_root, leaf);
+        long val = vals.getAsLong();
         print(key, val);
         pub(key, k -> {
             IntegerTopic t = m_telemetry.inst.getIntegerTopic(k);
@@ -185,10 +206,13 @@ public class NTLogger implements Logger {
     }
 
     @Override
-    public void log(Level level, String leaf, String val) {
+    public void logString(Level level, String leaf, Supplier<String> vals) {
+        if (!enabled())
+            return;
         if (!m_telemetry.m_level.admit(level))
             return;
         String key = append(m_root, leaf);
+        String val = vals.get();
         print(key, val);
         pub(key, k -> {
             StringTopic t = m_telemetry.inst.getStringTopic(k);
@@ -200,135 +224,138 @@ public class NTLogger implements Logger {
 
     /** val is a supplier to avoid doing any work if we're not going to log it. */
     @Override
-    public void log(Level level, String leaf, Supplier<String[]> val) {
+    public void logStringArray(Level level, String leaf, Supplier<String[]> vals) {
+        if (!enabled())
+            return;
         if (!m_telemetry.m_level.admit(level))
             return;
         String key = append(m_root, leaf);
+        String[] val = vals.get();
         print(key, val);
         pub(key, k -> {
             StringArrayTopic t = m_telemetry.inst.getStringArrayTopic(k);
             t.publish();
             t.setRetained(true);
             return t.publish();
-        }, StringArrayPublisher.class).set(val.get());
+        }, StringArrayPublisher.class).set(val);
     }
 
     @Override
-    public void log(Level level, String leaf, Enum<?> val) {
-        log(level, leaf, val.name());
+    public void logEnum(Level level, String leaf, Supplier<Enum<?>> val) {
+        logString(level, leaf, () -> val.get().name());
     }
 
     @Override
-    public void log(Level level, String leaf, Pose2d val) {
-        log(level, append(leaf, "translation"), val.getTranslation());
-        log(level, append(leaf, "rotation"), val.getRotation());
+    public void logPose2d(Level level, String leaf, Supplier<Pose2d> val) {
+        logTranslation2d(level, append(leaf, "translation"), () -> val.get().getTranslation());
+        logRotation2d(level, append(leaf, "rotation"), () -> val.get().getRotation());
     }
 
     @Override
-    public void log(Level level, String leaf, Translation2d val) {
-        logDouble(level, append(leaf, "x"), val::getX);
-        logDouble(level, append(leaf, "y"), val::getY);
+    public void logTranslation2d(Level level, String leaf, Supplier<Translation2d> val) {
+        logDouble(level, append(leaf, "x"), () -> val.get().getX());
+        logDouble(level, append(leaf, "y"), () -> val.get().getY());
     }
 
     @Override
-    public void log(Level level, String leaf, Vector2d val) {
-        logDouble(level, append(leaf, "x"), val::getX);
-        logDouble(level, append(leaf, "y"), val::getY);
+    public void logVector2d(Level level, String leaf, Supplier<Vector2d> val) {
+        logDouble(level, append(leaf, "x"), () -> val.get().getX());
+        logDouble(level, append(leaf, "y"), () -> val.get().getY());
 
     }
 
     @Override
-    public void log(Level level, String leaf, Rotation2d val) {
-        logDouble(level, append(leaf, "rad"), val::getRadians);
+    public void logRotation2d(Level level, String leaf, Supplier<Rotation2d> val) {
+        logDouble(level, append(leaf, "rad"), () -> val.get().getRadians());
     }
 
     @Override
-    public void log(Level level, String leaf, TrajectorySamplePoint val) {
-        log(level, append(leaf, "state"), val.state());
+    public void logTrajectorySamplePoint(Level level, String leaf, Supplier<TrajectorySamplePoint> val) {
+        logTimedPose(level, append(leaf, "state"), () -> val.get().state());
     }
 
     @Override
-    public void log(Level level, String leaf, TimedPose val) {
-        log(level, append(leaf, "posestate"), val.state());
-        logDouble(level, append(leaf, "time"), val::getTimeS);
-        logDouble(level, append(leaf, "velocity"), val::velocityM_S);
-        logDouble(level, append(leaf, "accel"), val::acceleration);
+    public void logTimedPose(Level level, String leaf, Supplier<TimedPose> val) {
+        logPose2dWithMotion(level, append(leaf, "posestate"), () -> val.get().state());
+        logDouble(level, append(leaf, "time"), () -> val.get().getTimeS());
+        logDouble(level, append(leaf, "velocity"), () -> val.get().velocityM_S());
+        logDouble(level, append(leaf, "accel"), () -> val.get().acceleration());
     }
 
     @Override
-    public void log(Level level, String leaf, PoseWithCurvature val) {
-        log(level, append(leaf, "pose"), val.poseMeters);
+    public void logPoseWithCurvature(Level level, String leaf, Supplier<PoseWithCurvature> val) {
+        logPose2d(level, append(leaf, "pose"), () -> val.get().poseMeters);
     }
 
     @Override
-    public void log(Level level, String leaf, Pose2dWithMotion val) {
-        log(level, append(leaf, "pose"), val.getPose());
-        Optional<Rotation2d> course = val.getCourse();
+    public void logPose2dWithMotion(Level level, String leaf, Supplier<Pose2dWithMotion> val) {
+        logPose2d(level, append(leaf, "pose"), () -> val.get().getPose());
+        Optional<Rotation2d> course = val.get().getCourse();
         if (course.isPresent()) {
-            log(level, append(leaf, "course"), course.get());
+            logRotation2d(level, append(leaf, "course"), course::get);
         }
     }
 
     @Override
-    public void log(Level level, String leaf, Twist2d val) {
-        logDouble(level, append(leaf, "dx"), () -> val.dx);
-        logDouble(level, append(leaf, "dy"), () -> val.dy);
-        logDouble(level, append(leaf, "dtheta"), () -> val.dtheta);
+    public void logTwist2d(Level level, String leaf, Supplier<Twist2d> val) {
+        logDouble(level, append(leaf, "dx"), () -> val.get().dx);
+        logDouble(level, append(leaf, "dy"), () -> val.get().dy);
+        logDouble(level, append(leaf, "dtheta"), () -> val.get().dtheta);
     }
 
     @Override
-    public void log(Level level, String leaf, ChassisSpeeds val) {
-        logDouble(level, append(leaf, "vx m_s"), () -> val.vxMetersPerSecond);
-        logDouble(level, append(leaf, "vy m_s"), () -> val.vyMetersPerSecond);
-        logDouble(level, append(leaf, "omega rad_s"), () -> val.omegaRadiansPerSecond);
+    public void logChassisSpeeds(Level level, String leaf, Supplier<ChassisSpeeds> val) {
+        logDouble(level, append(leaf, "vx m_s"), () -> val.get().vxMetersPerSecond);
+        logDouble(level, append(leaf, "vy m_s"), () -> val.get().vyMetersPerSecond);
+        logDouble(level, append(leaf, "omega rad_s"), () -> val.get().omegaRadiansPerSecond);
     }
 
     @Override
-    public void log(Level level, String leaf, FieldRelativeVelocity val) {
-        logDouble(level, append(leaf, "x m_s"), val::x);
-        logDouble(level, append(leaf, "y m_s"), val::y);
-        logDouble(level, append(leaf, "theta rad_s"), val::theta);
+    public void logFieldRelativeVelocity(Level level, String leaf, Supplier<FieldRelativeVelocity> val) {
+        logDouble(level, append(leaf, "x m_s"), () -> val.get().x());
+        logDouble(level, append(leaf, "y m_s"), () -> val.get().y());
+        logDouble(level, append(leaf, "theta rad_s"), () -> val.get().theta());
     }
 
     @Override
-    public void log(Level level, String leaf, FieldRelativeAcceleration val) {
-        logDouble(level, append(leaf, "x m_s_s"), val::x);
-        logDouble(level, append(leaf, "y m_s_s"), val::y);
-        logDouble(level, append(leaf, "theta rad_s_s"), val::theta);
+    public void logFieldRelativeAcceleration(Level level, String leaf, Supplier<FieldRelativeAcceleration> val) {
+        logDouble(level, append(leaf, "x m_s_s"), () -> val.get().x());
+        logDouble(level, append(leaf, "y m_s_s"), () -> val.get().y());
+        logDouble(level, append(leaf, "theta rad_s_s"), () -> val.get().theta());
     }
 
     @Override
-    public void log(Level level, String leaf, State100 state) {
-        logDouble(level, append(leaf, "x"), state::x);
-        logDouble(level, append(leaf, "v"), state::v);
-        logDouble(level, append(leaf, "a"), state::a);
+    public void logState100(Level level, String leaf, Supplier<State100> state) {
+        logDouble(level, append(leaf, "x"), () -> state.get().x());
+        logDouble(level, append(leaf, "v"), () -> state.get().v());
+        logDouble(level, append(leaf, "a"), () -> state.get().a());
     }
 
     @Override
-    public void log(Level level, String leaf, SwerveState state) {
-        log(level, append(leaf, "x"), state.x());
-        log(level, append(leaf, "y"), state.y());
-        log(level, append(leaf, "theta"), state.theta());
+    public void logSwerveState(Level level, String leaf, Supplier<SwerveState> state) {
+        logState100(level, append(leaf, "x"), () -> state.get().x());
+        logState100(level, append(leaf, "y"), () -> state.get().y());
+        logState100(level, append(leaf, "theta"), () -> state.get().theta());
     }
 
     @Override
-    public void log(Level level, String leaf, SwerveModulePosition val) {
-        logDouble(level, append(leaf, "distance"), () -> val.distanceMeters);
-        log(level, append(leaf, "angle"), val.angle);
+    public void logSwerveModulePosition(Level level, String leaf, Supplier<SwerveModulePosition> val) {
+        logDouble(level, append(leaf, "distance"), () -> val.get().distanceMeters);
+        logRotation2d(level, append(leaf, "angle"), () -> val.get().angle);
     }
 
     @Override
-    public void log(Level level, String leaf, ArmAngles angles) {
-        logDouble(level, append(leaf, "th1"), () -> angles.th1);
-        logDouble(level, append(leaf, "th2"), () -> angles.th2);
+    public void logArmAngles(Level level, String leaf, Supplier<ArmAngles> angles) {
+        logDouble(level, append(leaf, "th1"), () -> angles.get().th1);
+        logDouble(level, append(leaf, "th2"), () -> angles.get().th2);
     }
 
     @Override
-    public void log(Level level, String leaf, State state) {
-        log(level, append(leaf, "pose"), state.poseMeters);
-        logDouble(level, append(leaf, "curvature"), () -> state.curvatureRadPerMeter);
-        logDouble(level, append(leaf, "velocity"), () -> state.velocityMetersPerSecond);
-        logDouble(level, append(leaf, "accel"), () -> state.accelerationMetersPerSecondSq);
+    public void logState(Level level, String leaf, Supplier<State> state) {
+        logPose2d(level, append(leaf, "pose"), () -> state.get().poseMeters);
+        logDouble(level, append(leaf, "curvature"), () -> state.get().curvatureRadPerMeter);
+        logDouble(level, append(leaf, "velocity"), () -> state.get().velocityMetersPerSecond);
+        logDouble(level, append(leaf, "accel"), () -> state.get().accelerationMetersPerSecondSq);
     }
 
     private <T extends Publisher> T pub(String key, Function<String, Publisher> fn, Class<T> pubClass) {
@@ -393,9 +420,9 @@ public class NTLogger implements Logger {
         Util.printf("%s: %s\n", key, val);
     }
 
-    private void print(String key, Supplier<String[]> val) {
+    private void print(String key, String[] val) {
         if (!Telemetry.kAlsoPrint)
             return;
-        Util.printf("%s: %s\n", key, Arrays.toString(val.get()));
+        Util.printf("%s: %s\n", key, Arrays.toString(val));
     }
 }

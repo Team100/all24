@@ -119,14 +119,14 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         gyroAngle,
                         modulePositions.copy()));
 
-        m_logger.log(Level.TRACE, "GYRO OFFSET", m_gyroOffset);
+        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
     }
 
     void resetOdometry(
             Rotation2d gyroAngle,
             Pose2d pose) {
         m_gyroOffset = pose.getRotation().minus(gyroAngle);
-        m_logger.log(Level.TRACE, "GYRO OFFSET", m_gyroOffset);
+        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
     }
 
     @Override
@@ -177,7 +177,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         // this should have no effect if you disregard vision angle input
 
         m_gyroOffset = newPose.getRotation().minus(sample.m_gyroAngle);
-        m_logger.log(Level.TRACE, "GYRO OFFSET", m_gyroOffset);
+        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
 
         // Step 6: Record the current pose to allow multiple measurements from the same
         // timestamp
@@ -265,9 +265,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                     m_kinodynamics.getKinematics(),
                     earlierPose.pose(),
                     previousPose.pose());
-            m_logger.log(Level.DEBUG, "delta0", modulePositionDelta[0]);
+            final SwerveModulePosition[] delta0 = modulePositionDelta;
+            m_logger.logSwerveModulePosition(Level.DEBUG, "delta0", () -> delta0[0]);
             modulePositionDelta = m_tireUtil.adjust(corners, t0, modulePositionDelta, t1);
-            m_logger.log(Level.DEBUG, "delta1", modulePositionDelta[0]);
+            final SwerveModulePosition[] delta1 = modulePositionDelta;
+            m_logger.logSwerveModulePosition(Level.DEBUG, "delta1", () -> delta1[0]);
         }
 
         Twist2d twist = m_kinodynamics.getKinematics().toTwist2d(modulePositionDelta);
