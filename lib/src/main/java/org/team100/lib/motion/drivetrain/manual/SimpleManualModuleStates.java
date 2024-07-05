@@ -5,7 +5,6 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,8 +34,8 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.theta());
         double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.x();
-        t.log(Level.TRACE, m_name, "speed m_s", speedM_S);
-        t.log(Level.TRACE, m_name, "angle rad", angle.getRadians());
+        m_logger.logDouble(Level.TRACE, "speed m_s", ()->speedM_S);
+        m_logger.logDouble(Level.TRACE, "angle rad", ()->angle.getRadians());
         return new SwerveModuleState100[] {
                 new SwerveModuleState100(speedM_S, angle),
                 new SwerveModuleState100(speedM_S, angle),
