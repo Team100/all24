@@ -45,9 +45,9 @@ public class AMSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-
+        Logger moduleLogger = parent.child(name);
         VelocityServo<Distance100> driveServo = driveServo(
-                parent.child("Drive"),
+                moduleLogger.child("Drive"),
                 currentLimit,
                 statorLimit,
                 driveMotorCanId,
@@ -55,7 +55,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 ff);
 
         PositionServo<Angle100> turningServo = turningServo(
-                parent.child("Turning"),
+                moduleLogger.child("Turning"),
                 turningMotorChannel,
                 turningEncoderChannel,
                 turningOffset,

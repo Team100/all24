@@ -39,10 +39,6 @@ public abstract class CANSparkMotor<T extends Measure100>
         m_pidController = m_motor.getPIDController();
         Rev100.pidConfig(m_pidController, pid);
         m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceId);
-        m_logger.register(Level.TRACE, "P", pid.getP(), this::setP);
-        m_logger.register(Level.TRACE, "I", pid.getI(), this::setI);
-        m_logger.register(Level.TRACE, "D", pid.getD(), this::setD);
-        m_logger.register(Level.TRACE, "IZone", pid.getIZone(), this::setIZone);
     }
 
     @Override
@@ -162,21 +158,4 @@ public abstract class CANSparkMotor<T extends Measure100>
         m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
         m_logger.logDouble(Level.TRACE, "temperature (C)", m_motor::getMotorTemperature);
     }
-
-    private void setP(double p) {
-        Rev100.warn(() -> m_pidController.setP(p));
-    }
-
-    private void setI(double i) {
-        Rev100.warn(() -> m_pidController.setI(i));
-    }
-
-    private void setD(double d) {
-        Rev100.warn(() -> m_pidController.setD(d));
-    }
-
-    private void setIZone(double iz) {
-        Rev100.warn(() -> m_pidController.setIZone(iz));
-    }
-
 }

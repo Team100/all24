@@ -7,7 +7,6 @@ import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Tire;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -113,19 +112,6 @@ public class SwerveKinodynamics implements Glassy {
         setMaxDriveDecelerationM_S2(maxDriveDeceleration);
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
         setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
-
-        m_logger.register(Level.TRACE, "max velocity m_s", m_MaxDriveVelocityM_S,
-                this::setMaxDriveVelocityM_S);
-        m_logger.register(Level.TRACE, "stall accel m_s2", m_StallAccelerationM_S2,
-                this::setStallAccelerationM_S2);
-        m_logger.register(Level.TRACE, "max accel m_s2", m_MaxDriveAccelerationM_S2,
-                this::setMaxDriveAccelerationM_S2);
-        m_logger.register(Level.TRACE, "max decel m_s2", m_MaxDriveDecelerationM_S2,
-                this::setMaxDriveDecelerationM_S2);
-        m_logger.register(Level.TRACE, "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
-                this::setMaxSteeringVelocityRad_S);
-        m_logger.register(Level.TRACE, "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
-                this::setMaxSteeringAccelerationRad_S2);
     }
 
     /**
@@ -183,19 +169,6 @@ public class SwerveKinodynamics implements Glassy {
         setMaxDriveDecelerationM_S2(maxDriveDeceleration);
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
         setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
-
-        m_logger.register(Level.TRACE, "max velocity m_s", m_MaxDriveVelocityM_S,
-                this::setMaxDriveVelocityM_S);
-        m_logger.register(Level.TRACE, "stall accel m_s2", m_StallAccelerationM_S2,
-                this::setStallAccelerationM_S2);
-        m_logger.register(Level.TRACE, "max accel m_s2", m_MaxDriveAccelerationM_S2,
-                this::setMaxDriveAccelerationM_S2);
-        m_logger.register(Level.TRACE, "max decel m_s2", m_MaxDriveDecelerationM_S2,
-                this::setMaxDriveDecelerationM_S2);
-        m_logger.register(Level.TRACE, "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
-                this::setMaxSteeringVelocityRad_S);
-        m_logger.register(Level.TRACE, "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
-                this::setMaxSteeringAccelerationRad_S2);
     }
 
     private void setMaxDriveVelocityM_S(double maxDriveVelocityM_S) {

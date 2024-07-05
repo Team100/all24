@@ -2,9 +2,10 @@ package org.team100.lib.visualization;
 
 import java.util.Optional;
 
-import org.team100.lib.async.Async;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmSubsystem;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -25,12 +26,7 @@ public class ArmVisualization {
     private final MechanismLigament2d m_boomLigament;
     private final MechanismLigament2d m_stickLigament;
 
-    public static void make(ArmSubsystem armSubsystem, Async async) {
-        ArmVisualization v = new ArmVisualization(armSubsystem);
-        async.addPeriodic(v::viz, 0.1, "ArmVisualization" + armSubsystem.getName());
-    }
-
-    private ArmVisualization(ArmSubsystem armSubsystem) {
+    public ArmVisualization(ArmSubsystem armSubsystem) {
         m_armSubsystem = armSubsystem;
 
         Optional<ArmAngles> angles = m_armSubsystem.getPosition();
@@ -54,12 +50,14 @@ public class ArmVisualization {
         SmartDashboard.putData("SideView", m_mechanism);
     }
 
-    private void viz() {
-        Optional<ArmAngles> angles = m_armSubsystem.getPosition();
-        if (angles.isEmpty())
-            return;
-        m_boomLigament.setAngle(boomAngleDeg(angles.get()));
-        m_stickLigament.setAngle(stickAngleDeg(angles.get()));
+    public void viz() {
+        if (Telemetry.get().getLevel().admit(Level.TRACE)) {
+            Optional<ArmAngles> angles = m_armSubsystem.getPosition();
+            if (angles.isEmpty())
+                return;
+            m_boomLigament.setAngle(boomAngleDeg(angles.get()));
+            m_stickLigament.setAngle(stickAngleDeg(angles.get()));
+        }
     }
 
     // zero is straight up
@@ -71,5 +69,4 @@ public class ArmVisualization {
     private double stickAngleDeg(ArmAngles angles) {
         return Units.radiansToDegrees(angles.th2 - angles.th1);
     }
-
 }

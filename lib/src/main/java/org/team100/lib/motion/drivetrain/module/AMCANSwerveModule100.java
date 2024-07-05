@@ -45,10 +45,11 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
+        Logger moduleLogger = parent.child(name);
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         Feedforward100 ff = Feedforward100.makeAMSwerveDriveFalcon6();
         VelocityServo<Distance100> driveServo = driveServo(
-                parent.child("Drive"),
+                moduleLogger.child("Drive"),
                 currentLimit,
                 statorLimit,
                 driveMotorCanId,
@@ -56,7 +57,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 ff);
 
         PositionServo<Angle100> turningServo = turningServo(
-                parent.child("Turning"),
+                moduleLogger.child("Turning"),
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -64,7 +65,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 kinodynamics);
 
         return new AMCANSwerveModule100(name, driveServo, turningServo);
-
     }
 
     private static VelocityServo<Distance100> driveServo(

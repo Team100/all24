@@ -5,15 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.async.Async;
-import org.team100.lib.async.MockAsync;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,11 +21,10 @@ import edu.wpi.first.math.trajectory.Trajectory;
 class ArmTrajectoryCommandTest implements Timeless {
     private static final double kDelta = 0.001;
     private static final Logger logger = new TestLogger();
-    private static final Async async = new MockAsync();
 
     @Test
     void testSimple() {
-        ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
+        ArmSubsystem armSubSystem = ArmFactory.get(logger);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d();
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -48,7 +45,7 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testSimple2() {
-        ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
+        ArmSubsystem armSubSystem = ArmFactory.get(logger);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -78,7 +75,7 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testPosRefernce() {
-        ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
+        ArmSubsystem armSubSystem = ArmFactory.get(logger);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(
@@ -95,7 +92,7 @@ class ArmTrajectoryCommandTest implements Timeless {
 
     @Test
     void testVelRefernce() {
-        ArmSubsystem armSubSystem = ArmFactory.get(logger, async);
+        ArmSubsystem armSubSystem = ArmFactory.get(logger);
         ArmKinematics armKinematicsM = new ArmKinematics(1, 1);
         Translation2d goal = new Translation2d(1, 1);
         ArmTrajectoryCommand command = new ArmTrajectoryCommand(

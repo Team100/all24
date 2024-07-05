@@ -1,5 +1,6 @@
 package org.team100.lib.util;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -13,7 +14,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * Here's a link to the documentation
  * https://docs.google.com/document/d/1a-yI4T2AifRgIW3QJcWiV6-kvuVHfvHLoRkeGFjYLiI/edit
  */
-public class Tire {
+public class Tire implements Glassy {
     // TODO: measure for different wheel/floors; Colson on tile will be much lower.
     private static final double kDefaultSaturationM_s_s = 10.0;
     private static final double kDefaultSlipAtSaturation0_1 = 0.1;
@@ -27,7 +28,7 @@ public class Tire {
     Tire(Logger parent, double saturationM_s_s, double slip0_1) {
         m_saturationM_s_s = saturationM_s_s;
         m_slipAtSaturation0_1 = slip0_1;
-        m_logger = parent.child(this.getClass());
+        m_logger = parent.child(this);
     }
 
     public static Tire noslip(Logger parent) {
@@ -120,5 +121,10 @@ public class Tire {
         Vector2d limitedM_s_s = scaledAccelM_s_s.times(saturationM_s_s / normM_s_s);
         m_logger.logVector2d(Level.TRACE, "limit M_s_s", () -> limitedM_s_s);
         return limitedM_s_s;
+    }
+
+    @Override
+    public String getGlassName() {
+        return "Tire";
     }
 }

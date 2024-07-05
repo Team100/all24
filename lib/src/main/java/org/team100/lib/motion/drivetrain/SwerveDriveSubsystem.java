@@ -212,6 +212,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 m_stateSupplier.get().pose().getRotation().getDegrees()
         });
         m_logger.logDouble(Level.TRACE, "heading rate rad_s", m_heading::getHeadingRateNWU);
+        m_swerveLocal.periodic();
     }
 
     @Override
