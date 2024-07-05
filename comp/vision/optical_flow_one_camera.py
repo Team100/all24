@@ -79,8 +79,8 @@ class MouseVision:
             k2 = 0.04
         # TODO get these real distortion values
         elif model == "imx296":
-            fx = 660
-            fy = 660
+            fx = 1680
+            fy = 1680
             cx = 728
             cy = 544
             k1 = 0

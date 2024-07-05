@@ -234,30 +234,8 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         if (Math.abs(thetaFB) < 0.1) {
             thetaFB = 0;
         }
-        double omega = MathUtil.clamp(
-                thetaFF + thetaFB + omegaFB,
-                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
-
-        t.log(Level.TRACE, m_name, "mode", "snap");
-        t.log(Level.TRACE, m_name, "goal/theta", m_goal.getRadians());
-        t.log(Level.TRACE, m_name, "setpoint/theta", m_thetaSetpoint);
-        t.log(Level.TRACE, m_name, "thetaFB", thetaFB);
-        t.log(Level.TRACE, m_name, "omegaFB", omegaFB);
-        t.log(Level.TRACE, m_name, "measurement/theta", headingMeasurement);
-        t.log(Level.TRACE, m_name, "measurement/omega", headingRate);
-        t.log(Level.TRACE, m_name, "error/theta", m_thetaSetpoint.x() - headingMeasurement);
-        t.log(Level.TRACE, m_name, "error/omega", m_thetaSetpoint.v() - headingRate);
-        t.log(Level.TRACE, m_name, "thetaFF", thetaFF);
-        t.log(Level.TRACE, m_name, "thetaFB", thetaFB);
-        t.log(Level.TRACE, m_name, "omegaFB", omegaFB);
-        t.log(Level.TRACE, m_name, "output/omega", omega);
-
-        // desaturate the end result to feasibility by preferring the rotation over
-        // translation
-        twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
-        return twistWithSnapM_S;
+        
+        return thetaFB;
     }
 
     @Override

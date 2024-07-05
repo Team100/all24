@@ -235,7 +235,7 @@ public class RobotContainer implements Glassy {
                 new FancyTrajectory(driveLogger, m_drive, constraints));
 
         // 254 PID follower
-        HolonomicDriveController3 controller = new HolonomicDriveController3();
+        HolonomicDriveController3 controller = new HolonomicDriveController3(driveLogger);
         DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF(driveLogger);
 
         whileTrue(driverControl::driveToNote,
@@ -246,7 +246,7 @@ public class RobotContainer implements Glassy {
                         m_drive,
                         dthetaController,
                         swerveKinodynamics));
-        whileTrue(driverControl::actualCircle, new DriveInACircle(m_drive, controller, -1));
+        whileTrue(driverControl::actualCircle, new DriveInACircle(driveLogger, m_drive, controller, -1));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(

@@ -87,7 +87,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         double[] desired_vx = computeVx(desiredModuleStates);
         double[] desired_vy = computeVy(desiredModuleStates);
         Rotation2d[] desired_heading = computeHeading(desiredModuleStates);
-        double[] desired_heading_velocity = computeHeading_2(desiredModuleStates);
+        double[] desired_heading_velocity = computeHeadingVelocity(desiredModuleStates);
 
         boolean shouldStopAndReverse = shouldStopAndReverse(prev_heading, desired_heading);
         if (shouldStopAndReverse
@@ -210,13 +210,10 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     /**
      * Which way each module is actually going, taking speed polarity into account.
      */
-    private double[] computeHeading_2(SwerveModuleState100[] states) {
+    private double[] computeHeadingVelocity(SwerveModuleState100[] states) {
         double[] heading = new double[states.length];
         for (int i = 0; i < states.length; ++i) {
             heading[i] = states[i].angle_2;
-            if (states[i].accelMetersPerSecond_2 < 0.0) {
-                heading[i] = heading[i]*-1;
-            }
         }
         return heading;
     }

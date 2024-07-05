@@ -75,10 +75,10 @@ class CameraData:
         elif model == "imx296":
             print("GS Camera")
             # full frame, 2x2, to set the detector mode to widest angle possible
-            fullwidth = 1456  # slightly larger than the detector, to match stride
+            fullwidth = 1408  # slightly larger than the detector, to match stride
             fullheight = 1088
             # medium detection resolution, compromise speed vs range
-            self.width = 1456 
+            self.width = 1408 
             self.height = 1088
         else:
             print("UNKNOWN CAMERA: " + model)
@@ -191,32 +191,32 @@ class TagFinder:
         self.at_detector.addFamily("tag36h11")
 
     def analyze(self, request, camera):
-        potentialTags = self.estimatedTagPose.get()
-        potentialArray = []
-        z = []
-        for Blip24s in potentialTags:
-            translation = Blip24s.pose.translation()
-            if translation.Z() < 0:
-                continue
-            rvec = np.zeros((3, 1), np.float32)
-            tvec = np.zeros((3, 1), np.float32)
-            object_points = np.array(
-                [translation.X(), translation.Y(), translation.Z()], np.float32
-            )
-            (point2D, _) = cv2.projectPoints(
-                object_points, rvec, tvec, camera.mtx, camera.dist
-            )
-            if (
-                point2D[0][0][0] > 0
-                and point2D[0][0][0] < 1456
-                and point2D[0][0][1] > 0
-                and point2D[0][0][1] < 1088
-            ):
+        # potentialTags = self.estimatedTagPose.get()
+        # potentialArray = []
+        # z = []
+        # for Blip24s in potentialTags:
+        #     translation = Blip24s.pose.translation()
+        #     if translation.Z() < 0:
+        #         continue
+        #     rvec = np.zeros((3, 1), np.float32)
+        #     tvec = np.zeros((3, 1), np.float32)
+        #     object_points = np.array(
+        #         [translation.X(), translation.Y(), translation.Z()], np.float32
+        #     )
+        #     (point2D, _) = cv2.projectPoints(
+        #         object_points, rvec, tvec, camera.mtx, camera.dist
+        #     )
+        #     if (
+        #         point2D[0][0][0] > 0
+        #         and point2D[0][0][0] < 1456
+        #         and point2D[0][0][1] > 0
+        #         and point2D[0][0][1] < 1088
+        #     ):
                 # print(Blip24s.id)
                 # print(object_points)
                 # print(point2D[0][0])
-                z.append(translation.Z())
-                potentialArray.append(point2D[0][0])
+                # z.append(translation.Z())
+                # potentialArray.append(point2D[0][0])
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
 
@@ -231,22 +231,22 @@ class TagFinder:
         # this also makes a view, very fast (150 ns)
         # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
         # for now use the full frame
-        if len(potentialArray) == 1:
-            offset = 100 / z[0]
-            if (
-                potentialArray[0][1] - offset > 0
-                and potentialArray[0][0] - offset > 0
-                and potentialArray[0][0] + offset < camera.width
-                and potentialArray[0][1] + offset < camera.height
-            ):
-                img = img[
-                    int(potentialArray[0][1] - offset) : int(
-                        potentialArray[0][1] + offset
-                    ),
-                    int(potentialArray[0][0] - offset) : int(
-                        potentialArray[0][0] + offset
-                    ),
-                ]
+        # if len(potentialArray) == 1:
+        #     offset = 100 / z[0]
+        #     if (
+        #         potentialArray[0][1] - offset > 0
+        #         and potentialArray[0][0] - offset > 0
+        #         and potentialArray[0][0] + offset < camera.width
+        #         and potentialArray[0][1] + offset < camera.height
+        #     ):
+        #         img = img[
+        #             int(potentialArray[0][1] - offset) : int(
+        #                 potentialArray[0][1] + offset
+        #             ),
+        #             int(potentialArray[0][0] - offset) : int(
+        #                 potentialArray[0][0] + offset
+        #             ),
+        #         ]
 
         img = cv2.undistort(img, camera.mtx, camera.dist)
 
