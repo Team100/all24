@@ -15,11 +15,11 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
 
     public Talon6TurningEncoder(
             Logger parent,
-            Talon6TurningMotor m_motor,
-            double m_gearRatio) {
+            Talon6TurningMotor motor,
+            double gearRatio) {
         m_logger = parent.child(this);
-        this.m_motor = m_motor;
-        this.m_gearRatio = m_gearRatio;
+        m_motor = motor;
+        m_gearRatio = gearRatio;
     }
 
     /** Position in radians */

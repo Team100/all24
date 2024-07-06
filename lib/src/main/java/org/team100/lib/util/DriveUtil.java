@@ -6,7 +6,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -117,15 +116,15 @@ public class DriveUtil {
      * angles are assumed to be close to each other.
      */
     public static SwerveModulePosition[] modulePositionDelta(
-            SwerveDriveWheelPositions start,
-            SwerveDriveWheelPositions end) {
-        if (start.positions.length != end.positions.length) {
+            SwerveModulePosition[] start,
+            SwerveModulePosition[] end) {
+        if (start.length != end.length) {
             throw new IllegalArgumentException("Inconsistent number of modules!");
         }
-        SwerveModulePosition[] newPositions = new SwerveModulePosition[start.positions.length];
-        for (int i = 0; i < start.positions.length; i++) {
-            SwerveModulePosition startModule = start.positions[i];
-            SwerveModulePosition endModule = end.positions[i];
+        SwerveModulePosition[] newPositions = new SwerveModulePosition[start.length];
+        for (int i = 0; i < start.length; i++) {
+            SwerveModulePosition startModule = start[i];
+            SwerveModulePosition endModule = end[i];
             newPositions[i] = new SwerveModulePosition(
                     endModule.distanceMeters - startModule.distanceMeters,
                     // this change breaks the odometry test on line 66, the 90 degree turn case.

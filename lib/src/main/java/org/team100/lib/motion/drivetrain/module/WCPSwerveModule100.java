@@ -2,21 +2,22 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.encoder.AS5048RotaryPositionSensor;
 import org.team100.lib.encoder.CombinedEncoder;
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
+import org.team100.lib.encoder.turning.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.encoder.turning.Talon6TurningEncoder;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motion.components.OnboardPositionServo;
+import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.LinearVelocityServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.OutboardPositionServo;
-import org.team100.lib.motion.components.OutboardVelocityServo;
-import org.team100.lib.motion.components.PositionServo;
-import org.team100.lib.motion.components.SelectablePositionServo;
-import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.motion.components.SelectableAngularPositionServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.Kraken6DriveMotor;
@@ -24,11 +25,17 @@ import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
+    /**
+     * WCP calls this "rotation ratio" here, we use the "flipped belt" which is the
+     * fastest steering ratio.
+     * https://docs.wcproducts.com/wcp-swervex/misc/other-configurations/ratio-options
+     */
+    private static final double kSteeringRatio = 10.29;
+
     /**
      * Flipped belt ratios.
      * 
@@ -56,7 +63,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double statorLimitAmps,
             int driveMotorCanId,
             DriveRatio ratio,
-            Class<? extends Encoder100<Angle100>> encoderClass,
+            Class<? extends RotaryPositionSensor> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
@@ -70,7 +77,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
         Feedforward100 driveFF = Feedforward100.makeWCPSwerveDriveFalcon6();
 
-        VelocityServo<Distance100> driveServo = driveServo(
+        LinearVelocityServo driveServo = driveServo(
                 moduleLogger.child("Drive"),
                 supplyLimitAmps,
                 statorLimitAmps,
@@ -79,13 +86,13 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 drivePidConstants,
                 driveFF);
 
-        PositionServo<Angle100> turningServo = turningServo(
+        AngularPositionServo turningServo = turningServo(
                 moduleLogger.child("Turning"),
                 encoderClass,
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
-                10.29,
+                kSteeringRatio,
                 kinodynamics,
                 drive,
                 motorPhase,
@@ -95,7 +102,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100> driveServo(
+    private static LinearVelocityServo driveServo(
             Logger parent,
             double supplyLimit,
             double statorLimit,
@@ -119,15 +126,15 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 parent,
                 driveMotor,
                 distancePerTurn);
-        return new OutboardVelocityServo<>(
+        return new OutboardLinearVelocityServo(
                 parent,
                 driveMotor,
                 encoder);
     }
 
-    private static PositionServo<Angle100> turningServo(
+    private static AngularPositionServo turningServo(
             Logger parent,
-            Class<? extends Encoder100<Angle100>> encoderClass,
+            Class<? extends RotaryPositionSensor> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,
@@ -137,7 +144,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             MotorPhase motorPhase,
             PIDConstants lowLevelPID,
             Feedforward100 ff) {
-        final double turningGearRatio = 1.0;
         Falcon6TurningMotor turningMotor = new Falcon6TurningMotor(
                 parent,
                 turningMotorCanId,
@@ -145,12 +151,11 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 gearRatio,
                 lowLevelPID,
                 ff);
-        Encoder100<Angle100> turningEncoder = turningEncoder(
+        RotaryPositionSensor turningEncoder = turningEncoder(
                 encoderClass,
                 parent,
                 turningEncoderChannel,
                 turningOffset,
-                turningGearRatio,
                 drive);
         PIDController turningPositionController = new PIDController(
                 10, // kP
@@ -162,23 +167,23 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         Profile100 profile = kinodynamics.getSteeringProfile();
 
-        PositionServo<Angle100> turningServo = getTurningServo(
+        AngularPositionServo turningServo = getTurningServo(
                 parent,
                 kinodynamics,
                 turningMotor,
                 turningEncoder,
-                turningGearRatio,
+                gearRatio,
                 turningPositionController,
                 profile);
         turningServo.reset();
         return turningServo;
     }
 
-    private static PositionServo<Angle100> getTurningServo(
+    private static AngularPositionServo getTurningServo(
             Logger parent,
             SwerveKinodynamics kinodynamics,
             Falcon6TurningMotor turningMotor,
-            Encoder100<Angle100> turningEncoder,
+            RotaryPositionSensor turningEncoder,
             double turningGearRatio,
             PIDController turningPositionController,
             Profile100 profile) {
@@ -193,47 +198,42 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoder,
                 primaryAuthority,
                 builtInEncoder);
-        PositionServo<Angle100> outboard = new OutboardPositionServo<>(
+        AngularPositionServo outboard = new OutboardPositionServo(
                 parent,
                 turningMotor,
                 combinedEncoder,
-                profile,
-                Angle100.instance);
-        PositionServo<Angle100> onboard = new OnboardPositionServo<>(
+                profile);
+        OnboardAngularPositionServo onboard = new OnboardAngularPositionServo(
                 parent,
                 turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
-                profile,
-                Angle100.instance);
-        return new SelectablePositionServo<>(
+                profile);
+        return new SelectableAngularPositionServo(
                 outboard,
                 onboard,
                 () -> Experiments.instance.enabled(Experiment.OutboardSteering));
     }
 
-    private static Encoder100<Angle100> turningEncoder(
-            Class<?> encoderClass,
+    private static RotaryPositionSensor turningEncoder(
+            Class<? extends RotaryPositionSensor> encoderClass,
             Logger parent,
             int channel,
             double inputOffset,
-            double gearRatio,
             EncoderDrive drive) {
         if (encoderClass == AnalogTurningEncoder.class) {
             return new AnalogTurningEncoder(
                     parent,
                     channel,
                     inputOffset,
-                    gearRatio,
                     drive);
         }
-        if (encoderClass == DutyCycleTurningEncoder.class) {
-            return new DutyCycleTurningEncoder(
+        if (encoderClass == DutyCycleRotaryPositionSensor.class) {
+            return new AS5048RotaryPositionSensor(
                     parent,
                     channel,
                     inputOffset,
-                    gearRatio,
                     drive);
         }
         throw new IllegalArgumentException("unknown encoder class: " + encoderClass.getName());
@@ -242,8 +242,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private WCPSwerveModule100(
             String name,
-            VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
+            LinearVelocityServo driveServo,
+            AngularPositionServo turningServo) {
         super(name, driveServo, turningServo);
         //
     }

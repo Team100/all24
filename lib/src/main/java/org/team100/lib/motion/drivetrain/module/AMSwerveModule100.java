@@ -5,18 +5,16 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.motion.components.OnboardPositionServo;
-import org.team100.lib.motion.components.OutboardVelocityServo;
-import org.team100.lib.motion.components.PositionServo;
-import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.LinearVelocityServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.TurningMotorController100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
@@ -29,8 +27,6 @@ public class AMSwerveModule100 extends SwerveModule100 {
     private static final double kWheelDiameterM = 0.09628;
     // see andymark.com/products/swerve-and-steer
     private static final double kDriveReduction = 6.67;
-    // andymark ma3 encoder is 1:1
-    private static final double turningGearRatio = 1.0;
 
     /** @param name like "front left" or whatever */
     public static AMSwerveModule100 get(
@@ -46,7 +42,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
             PIDConstants pidConstants,
             Feedforward100 ff) {
         Logger moduleLogger = parent.child(name);
-        VelocityServo<Distance100> driveServo = driveServo(
+        LinearVelocityServo driveServo = driveServo(
                 moduleLogger.child("Drive"),
                 currentLimit,
                 statorLimit,
@@ -54,7 +50,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 pidConstants,
                 ff);
 
-        PositionServo<Angle100> turningServo = turningServo(
+        AngularPositionServo turningServo = turningServo(
                 moduleLogger.child("Turning"),
                 turningMotorChannel,
                 turningEncoderChannel,
@@ -64,7 +60,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
         return new AMSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100> driveServo(
+    private static LinearVelocityServo driveServo(
             Logger parent,
             double currentLimit,
             double statorLimit,
@@ -86,13 +82,13 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 parent,
                 driveMotor,
                 distancePerTurn);
-        return new OutboardVelocityServo<>(
+        return new OutboardLinearVelocityServo(
                 parent,
                 driveMotor,
                 driveEncoder);
     }
 
-    private static PositionServo<Angle100> turningServo(
+    private static AngularPositionServo turningServo(
             Logger parent,
             int turningMotorChannel,
             int turningEncoderChannel,
@@ -106,7 +102,6 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 parent,
                 turningEncoderChannel,
                 turningOffset,
-                turningGearRatio,
                 EncoderDrive.DIRECT);
 
         PIDController turningPositionController = new PIDController(
@@ -117,22 +112,21 @@ public class AMSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
+        OnboardAngularPositionServo turningServo = new OnboardAngularPositionServo(
                 parent,
                 turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
-                profile,
-                Angle100.instance);
+                profile);
         turningServo.reset();
         return turningServo;
     }
 
     private AMSwerveModule100(
             String name,
-            VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
+            LinearVelocityServo driveServo,
+            AngularPositionServo turningServo) {
         super(name, driveServo, turningServo);
         //
     }

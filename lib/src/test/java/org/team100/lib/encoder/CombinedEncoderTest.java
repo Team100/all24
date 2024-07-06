@@ -3,7 +3,6 @@ package org.team100.lib.encoder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.encoder.turning.MockEncoder100;
 import org.team100.lib.units.Angle100;
 
 class CombinedEncoderTest {
@@ -11,7 +10,7 @@ class CombinedEncoderTest {
 
     @Test
     void testSimple1() {
-        MockEncoder100<Angle100> e1 = new MockEncoder100<>();
+        MockRotaryPositionSensor e1 = new MockRotaryPositionSensor();
         MockEncoder100<Angle100> e2 = new MockEncoder100<>();
         CombinedEncoder<Angle100> c = new CombinedEncoder<>(e1, 1.0, e2);
         e1.angle = 1; // this is the authority
@@ -24,7 +23,7 @@ class CombinedEncoderTest {
 
     @Test
     void testHalfPrimary() {
-        MockEncoder100<Angle100> e1 = new MockEncoder100<>();
+        MockRotaryPositionSensor e1 = new MockRotaryPositionSensor();
         MockEncoder100<Angle100> e2 = new MockEncoder100<>();
         CombinedEncoder<Angle100> c = new CombinedEncoder<>(e1, 0.5, e2);
         e1.angle = 1; // this is the authority
@@ -37,7 +36,7 @@ class CombinedEncoderTest {
 
     @Test
     void testIgnorePrimary() {
-        MockEncoder100<Angle100> e1 = new MockEncoder100<>();
+        MockRotaryPositionSensor e1 = new MockRotaryPositionSensor();
         MockEncoder100<Angle100> e2 = new MockEncoder100<>();
         CombinedEncoder<Angle100> c = new CombinedEncoder<>(e1, 0.0, e2);
         e1.angle = 1; // this is the authority

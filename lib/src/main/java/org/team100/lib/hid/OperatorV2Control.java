@@ -28,7 +28,7 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public boolean rampAndPivot() {
-        return m_controller.getLeftBumper();
+        return m_controller.getLeftBumperButton();
     }
 
     @Override
@@ -69,12 +69,12 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public boolean pivotToAmpPosition() {
-        return m_controller.getLeftBumper();
+        return m_controller.getLeftBumperButton();
     }
 
     @Override
     public boolean pivotToDownPosition() {
-        return m_controller.getRightBumper();
+        return m_controller.getRightBumperButton();
     }
 
     @Override

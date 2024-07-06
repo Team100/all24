@@ -15,7 +15,6 @@ import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
-import edu.wpi.first.cscore.CameraServerCvJNI;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -109,9 +108,7 @@ public class VisionDataProvider24 implements Glassy {
             Logger parent,
             AprilTagFieldLayoutWithCorrectOrientation layout,
             PoseEstimator100 poseEstimator,
-            FireControl fireControl) throws IOException {
-        // load the JNI (used by PoseEstimationHelper)
-        CameraServerCvJNI.forceLoad();
+            FireControl fireControl) {
         m_logger = parent.child(this);
         m_layout = layout;
         m_chronos = Chronos.get();

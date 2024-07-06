@@ -2,25 +2,33 @@ package org.team100.lib.encoder.turning;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
+import org.team100.lib.util.Util;
 
-import edu.wpi.first.wpilibj.AnalogEncoder;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.
+ * 
+ * The 2025 changes to AnalogEncoder changed the way the zeros are calculated,
+ * so I imported the old methods here for now.
+ * 
+ * TODO: the gear ratio is always 1, so streamline this a bit.
  */
-public class AnalogTurningEncoder implements Encoder100<Angle100> {
+public class AnalogTurningEncoder implements RotaryPositionSensor {
+    private static final double kTwoPi = 2.0 * Math.PI;
     private final Logger m_logger;
     private final AnalogInput m_input;
-    private final AnalogEncoder m_encoder;
+    private final double m_positionOffset;
+    private final EncoderDrive m_drive;
 
-    private Double prevAngle = null;
-    private Double prevTime = null;
+    private Double m_prevAngleRad = null;
+    private Double m_prevTimeS = null;
 
     /**
      * @param channel     roboRIO analog input channel
@@ -33,26 +41,23 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
             Logger parent,
             int channel,
             double inputOffset,
-            double gearRatio,
             EncoderDrive drive) {
         m_logger = parent.child(this);
         m_input = new AnalogInput(channel);
-        m_encoder = new AnalogEncoder(m_input);
-        m_encoder.setPositionOffset(inputOffset);
-        switch (drive) {
-            case DIRECT:
-                m_encoder.setDistancePerRotation(2.0 * Math.PI / gearRatio);
-                break;
-            case INVERSE:
-                m_encoder.setDistancePerRotation(2.0 * Math.PI / (-1.0 * gearRatio));
-                break;
-        }
-        m_logger.logInt(Level.TRACE, "channel", m_encoder::getChannel);
+        m_positionOffset = Util.inRange(inputOffset, 0.0, 1.0);
+        m_drive = drive;
     }
 
     @Override
-    public OptionalDouble getPosition() {
-        return OptionalDouble.of(getPositionRad());
+    public OptionalDouble getPositionRad() {
+        // this should be fast, need not be cached.
+        double positionRad = getRad();
+        m_logger.logInt(Level.TRACE, "channel", m_input::getChannel);
+        m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
+        m_logger.logDouble(Level.TRACE, "position (turns-offset)", this::get);
+        m_logger.logDouble(Level.TRACE, "position (turns)", this::getAbsolutePosition);
+        m_logger.logDouble(Level.TRACE, "position (volts)", m_input::getVoltage);
+        return OptionalDouble.of(positionRad);
     }
 
     /**
@@ -67,8 +72,24 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
      * Use a Kalman filter if you can, to reduce the lag.
      */
     @Override
-    public OptionalDouble getRate() {
-        return OptionalDouble.of(getRateRad_S());
+    public OptionalDouble getRateRad_S() {
+        double angleRad = getRad();
+        double timeS = Timer.getFPGATimestamp();
+        if (m_prevAngleRad == null) {
+            m_prevAngleRad = angleRad;
+            m_prevTimeS = timeS;
+            return OptionalDouble.of(0);
+        }
+        double dxRad = MathUtil.angleModulus(angleRad - m_prevAngleRad);
+        double dtS = timeS - m_prevTimeS;
+
+        m_prevAngleRad = angleRad;
+        m_prevTimeS = timeS;
+
+        double rateRad_S = dxRad / dtS;
+        m_logger.logDouble(Level.TRACE, "rate (rad)s)", () -> rateRad_S);
+        return OptionalDouble.of(rateRad_S);
+
     }
 
     @Override
@@ -81,42 +102,34 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
 
     public void close() {
         m_input.close();
-        m_encoder.close();
     }
 
     //////////////////////////////////////////////
 
-    private double getPositionRad() {
-        // this should be fast, need not be cached.
-        double positionRad = m_encoder.getDistance();
-        m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
-        m_logger.logDouble(Level.TRACE, "position (turns)", m_encoder::get);
-        m_logger.logDouble(Level.TRACE, "position (absolute)", m_encoder::getAbsolutePosition);
-        m_logger.logDouble(Level.TRACE, "position (volts)", m_input::getVoltage);
-        return positionRad;
+    /** Turns [0, 1] */
+    private double getAbsolutePosition() {
+        return m_input.getVoltage() / RobotController.getVoltage5V();
     }
 
     /**
-     * This is *just* the discrete difference looking back one time period, so it
-     * will be very noisy.
+     * Turns minus offset, could be outside [0, 1]
      */
-    private double getRateRad_S() {
+    private double get() {
+        double posTurns = getAbsolutePosition();
+        return posTurns - m_positionOffset;
+    }
 
-        double angle = getPositionRad();
-        double time = Timer.getFPGATimestamp();
-        if (prevAngle == null) {
-            prevAngle = angle;
-            prevTime = time;
-            return 0;
+    /** Radians, [-pi, pi] */
+    private double getRad() {
+        double posTurnsMinusOffset = get();
+        switch (m_drive) {
+            case DIRECT:
+                return MathUtil.angleModulus(posTurnsMinusOffset * kTwoPi);
+            case INVERSE:
+                return MathUtil.angleModulus(-1.0 * posTurnsMinusOffset * kTwoPi);
+            default:
+                throw new IllegalArgumentException();
         }
-        double dx = angle - prevAngle;
-        double dt = time - prevTime;
 
-        prevAngle = angle;
-        prevTime = time;
-
-        double rateRad_S = dx / dt;
-        m_logger.logDouble(Level.TRACE, "rate (rad)s)", () -> rateRad_S);
-        return rateRad_S;
     }
 }

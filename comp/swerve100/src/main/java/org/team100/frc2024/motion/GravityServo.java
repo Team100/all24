@@ -5,15 +5,18 @@ import java.util.OptionalDouble;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
+/**
+ * Implements cosine feedforward for gravity compensation, using a duty cycle
+ * motor.
+ */
 public class GravityServo implements Glassy {
     private final Logger m_logger;
     private final DutyCycleMotor100 m_motor;
@@ -21,7 +24,7 @@ public class GravityServo implements Glassy {
     private final PIDController m_controller;
     private final Profile100 m_profile;
     private final double m_period;
-    private final Encoder100<Distance100> m_encoder;
+    private final RotaryPositionSensor m_encoder;
     private final double[] m_softLimits;
 
     private State100 m_goal = new State100(0, 0);
@@ -34,7 +37,7 @@ public class GravityServo implements Glassy {
             PIDController controller,
             Profile100 profile,
             double period,
-            Encoder100<Distance100> encoder,
+            RotaryPositionSensor encoder,
             double[] softLimits) {
         m_motor = motor;
         m_logger = parent.child(this);
@@ -50,26 +53,26 @@ public class GravityServo implements Glassy {
     /** Zeros controller errors, sets setpoint to current position. */
     public void reset() {
         m_controller.reset();
-        if (getPosition().isEmpty()) {
+        if (getPositionRad().isEmpty()) {
             return;
         }
-        m_setpoint = new State100(getPosition().getAsDouble(), 0);
+        m_setpoint = new State100(getPositionRad().getAsDouble(), 0);
     }
 
-    public OptionalDouble getPosition() {
-        return m_encoder.getPosition();
+    public OptionalDouble getPositionRad() {
+        return m_encoder.getPositionRad();
     }
 
     public void rezero() {
         m_encoder.reset();
     }
 
-    public OptionalDouble getRawPosition() {
-        return m_encoder.getPosition();
+    public OptionalDouble getRawPositionRad() {
+        return m_encoder.getPositionRad();
     }
 
     public void setPosition(double goal) {
-        OptionalDouble encoderPosition = m_encoder.getPosition();
+        OptionalDouble encoderPosition = m_encoder.getPositionRad();
         if (encoderPosition.isEmpty()) {
             return;
         }
@@ -123,7 +126,7 @@ public class GravityServo implements Glassy {
     }
 
     public void setWithSoftLimits(double value) {
-        OptionalDouble encoderPosition = m_encoder.getPosition();
+        OptionalDouble encoderPosition = m_encoder.getPositionRad();
         if (encoderPosition.isEmpty()) {
             m_motor.setDutyCycle(0);
             return;
@@ -142,7 +145,7 @@ public class GravityServo implements Glassy {
     }
 
     public void setPositionWithSteadyState(double goal) {
-        OptionalDouble encoderPosition = m_encoder.getPosition();
+        OptionalDouble encoderPosition = m_encoder.getPositionRad();
         if (encoderPosition.isEmpty()) {
             m_motor.setDutyCycle(0);
             return;

@@ -11,7 +11,6 @@ import org.team100.lib.telemetry.TestLogger;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
-import edu.wpi.first.cscore.CameraServerCvJNI;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -22,11 +21,6 @@ import edu.wpi.first.wpilibj.Filesystem;
 class PoseEstimationHelperTest {
     private static final double kDelta = 0.01;
     private static final Logger m_logger = new TestLogger();
-
-    public PoseEstimationHelperTest() throws IOException {
-        // load the JNI
-        CameraServerCvJNI.forceLoad();
-    }
 
     @Test
     void testGetRobotPoseInFieldCoords2() {

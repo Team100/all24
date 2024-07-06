@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.team100.frc2024.TestLogger24;
 import org.team100.frc2024.Timeless2024;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Distance100;
+import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -31,13 +31,11 @@ class GravityServoTest implements Timeless2024 {
         double period = 0.02;
         double[] softLimits = new double[] { 0, 45 };
         // motor speed is rad/s
-        SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>(logger, 600);
-        SimulatedEncoder<Distance100> simEncoder = new SimulatedEncoder<>(
+        SimulatedMotor<Angle100> simMotor = new SimulatedMotor<>(logger, 600);
+        SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                 logger,
                 simMotor,
-                165, // see above
-                -Double.MAX_VALUE,
-                Double.MAX_VALUE);
+                165); // see above
 
         GravityServo g = new GravityServo(
                 simMotor,
@@ -49,7 +47,7 @@ class GravityServoTest implements Timeless2024 {
                 simEncoder,
                 softLimits);
         // start at zero
-        assertEquals(0, g.getPosition().getAsDouble(), kDelta);
+        assertEquals(0, g.getPositionRad().getAsDouble(), kDelta);
         // one second
         for (int i = 0; i < 50; ++i) {
             g.setPosition(1);
@@ -57,7 +55,7 @@ class GravityServoTest implements Timeless2024 {
         }
         // this overshoots a little, i think maybe because of the slight lag in
         // measurement.
-        assertEquals(1, g.getPosition().getAsDouble(), kDelta);
+        assertEquals(1, g.getPositionRad().getAsDouble(), kDelta);
     }
 
 }

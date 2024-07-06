@@ -4,10 +4,8 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.PositionServo;
-import org.team100.lib.motion.components.VelocityServo;
-import org.team100.lib.units.Angle100;
-import org.team100.lib.units.Distance100;
+import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.util.Util;
 import org.team100.lib.visualization.SwerveModuleVisualization;
 
@@ -22,14 +20,14 @@ public class SwerveModule100 implements Glassy {
     protected static final double dt = 0.02;
 
     private final String m_name;
-    private final VelocityServo<Distance100> m_driveServo;
-    private final PositionServo<Angle100> m_turningServo;
+    private final LinearVelocityServo m_driveServo;
+    private final AngularPositionServo m_turningServo;
     private final SwerveModuleVisualization m_viz;
 
     public SwerveModule100(
             String name,
-            VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
+            LinearVelocityServo driveServo,
+            AngularPositionServo turningServo) {
         m_name = name;
         m_driveServo = driveServo;
         m_turningServo = turningServo;

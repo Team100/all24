@@ -4,7 +4,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
+import org.team100.lib.encoder.turning.DutyCycleRotaryPositionSensor;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
@@ -55,7 +55,7 @@ public class SwerveModuleCollection {
                                 currentLimit,
                                 statorLimit,
                                 4,
-                                DriveRatio.FAST, DutyCycleTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 54,
                                 9,
                                 0.058735,
@@ -65,7 +65,7 @@ public class SwerveModuleCollection {
                                 currentLimit,
                                 statorLimit,
                                 22,
-                                DriveRatio.FAST, DutyCycleTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 52,
                                 8,
                                 0.773486,
@@ -75,7 +75,7 @@ public class SwerveModuleCollection {
                                 currentLimit,
                                 statorLimit,
                                 56,
-                                DriveRatio.FAST, DutyCycleTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 51,
                                 5,
                                 0.334580,
@@ -85,7 +85,7 @@ public class SwerveModuleCollection {
                                 currentLimit,
                                 statorLimit,
                                 11,
-                                DriveRatio.FAST, DutyCycleTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 21,
                                 7,
                                 0.714328,

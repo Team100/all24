@@ -123,7 +123,6 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
         m_motor.setSensorPhase(true);
 
         m_logger = parent.child(this);
-        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceID);
     }
 
     public WPI_TalonSRX getMotor() {
@@ -168,6 +167,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     }
 
     public void log() {
+        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceID);
         m_logger.logDouble(Level.TRACE, "Encoder Value",
                 () -> m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
         m_logger.logDouble(Level.TRACE, "Velocity Value",

@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 
 import org.team100.lib.commands.Subsystem100;
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -26,8 +26,8 @@ public class ArmSubsystem extends Subsystem100 {
     private final LinearFilter m_upperMeasurementFilter;
     private final Motor100<Angle100> m_lowerArmMotor;
     private final Motor100<Angle100> m_upperArmMotor;
-    private final Encoder100<Angle100> m_lowerArmEncoder;
-    private final Encoder100<Angle100> m_upperArmEncoder;
+    private final RotaryPositionSensor m_lowerArmEncoder;
+    private final RotaryPositionSensor m_upperArmEncoder;
     private final ArmVisualization m_viz;
 
     private ArmAngles m_previousPosition;
@@ -42,9 +42,9 @@ public class ArmSubsystem extends Subsystem100 {
     ArmSubsystem(
             Logger parent,
             Motor100<Angle100> lowerMotor,
-            Encoder100<Angle100> lowerEncoder,
+            RotaryPositionSensor lowerEncoder,
             Motor100<Angle100> upperMotor,
-            Encoder100<Angle100> upperEncoder) {
+            RotaryPositionSensor upperEncoder) {
         m_logger = parent.child(this);
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
@@ -63,8 +63,8 @@ public class ArmSubsystem extends Subsystem100 {
 
     /** Arm angles (radians), 0 up, positive forward. */
     public Optional<ArmAngles> getPosition() {
-        OptionalDouble lowerPosition = m_lowerArmEncoder.getPosition();
-        OptionalDouble upperPosition = m_upperArmEncoder.getPosition();
+        OptionalDouble lowerPosition = m_lowerArmEncoder.getPositionRad();
+        OptionalDouble upperPosition = m_upperArmEncoder.getPositionRad();
         if (lowerPosition.isEmpty() || upperPosition.isEmpty())
             return Optional.empty();
         ArmAngles position = new ArmAngles(

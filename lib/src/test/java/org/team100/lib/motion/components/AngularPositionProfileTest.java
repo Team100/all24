@@ -3,33 +3,34 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.encoder.MockEncoder100;
+import org.team100.lib.encoder.MockRotaryPositionSensor;
 import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.ProfileWPI;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.testing.Timeless;
-import org.team100.lib.units.Distance100;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
 
-class PositionProfileTest implements Timeless {
+class AngularPositionProfileTest implements Timeless {
+
     boolean dump = false;
     private static final double kDelta = 0.001;
     private static final Logger logger = new TestLogger();
 
-    private final MockVelocityMotor100<Distance100> motor;
-    private final MockEncoder100<Distance100> encoder;
+    private final MockVelocityMotor100<Angle100> motor;
+    private final MockRotaryPositionSensor encoder;
     private final double period;
     private final PIDController controller2;
-    private OnboardPositionServo<Distance100> servo;
+    private OnboardAngularPositionServo servo;
 
-    public PositionProfileTest() {
+    public AngularPositionProfileTest() {
         motor = new MockVelocityMotor100<>();
-        encoder = new MockEncoder100<>();
+        encoder = new MockRotaryPositionSensor();
         period = 0.1;
         controller2 = new PIDController(5, 0, 0, period);
     }
@@ -41,14 +42,13 @@ class PositionProfileTest implements Timeless {
     @Test
     void testTrapezoid() {
         Profile100 profile = new ProfileWPI(1, 1);
-        servo = new OnboardPositionServo<>(
+        servo = new OnboardAngularPositionServo(
                 logger,
                 motor,
                 encoder,
                 1,
                 controller2,
-                profile,
-                Distance100.instance);
+                profile);
         servo.reset();
 
         verifyTrapezoid();
@@ -57,14 +57,13 @@ class PositionProfileTest implements Timeless {
     @Test
     void testProfile() {
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        servo = new OnboardPositionServo<>(
+        servo = new OnboardAngularPositionServo(
                 logger,
                 motor,
                 encoder,
                 1,
                 controller2,
-                profile,
-                Distance100.instance);
+                profile);
         servo.reset();
         verifyTrapezoid();
     }
