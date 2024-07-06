@@ -17,7 +17,6 @@ import org.team100.lib.util.ExpiringMemoizingSupplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -149,7 +148,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     public void resetTranslation(Translation2d translation) {
         m_poseEstimator.resetPosition(
                 m_heading.getHeadingNWU(),
-                new SwerveDriveWheelPositions(m_swerveLocal.positions()),
+                m_swerveLocal.positions(),
                 new Pose2d(translation, m_heading.getHeadingNWU()),
                 Timer.getFPGATimestamp());
         m_stateSupplier.reset();
@@ -158,7 +157,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     public void resetPose(Pose2d robotPose) {
         m_poseEstimator.resetPosition(
                 m_heading.getHeadingNWU(),
-                new SwerveDriveWheelPositions(m_swerveLocal.positions()),
+                m_swerveLocal.positions(),
                 robotPose,
                 Timer.getFPGATimestamp());
         m_stateSupplier.reset();
@@ -231,6 +230,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         return m_poseEstimator.update(
                 Timer.getFPGATimestamp(),
                 m_heading.getHeadingNWU(),
-                new SwerveDriveWheelPositions(m_swerveLocal.positions()));
+                m_swerveLocal.positions());
     }
 }

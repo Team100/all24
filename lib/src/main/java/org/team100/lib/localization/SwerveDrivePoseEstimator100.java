@@ -22,7 +22,6 @@ import org.team100.lib.util.SlipperyTireUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /**
@@ -77,7 +76,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                                 new FieldRelativeVelocity(0, 0, 0),
                                 new FieldRelativeAcceleration(0, 0, 0)),
                         gyroAngle,
-                        new SwerveDriveWheelPositions(modulePositions)));
+                        modulePositions));
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
     }
 
@@ -99,7 +98,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
     public void resetPosition(
             Rotation2d gyroAngle,
-            SwerveDriveWheelPositions modulePositions,
+            SwerveModulePosition[] modulePositions,
             Pose2d pose,
             double timestampSeconds) {
 
@@ -117,7 +116,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                                 new FieldRelativeVelocity(0, 0, 0),
                                 new FieldRelativeAcceleration(0, 0, 0)),
                         gyroAngle,
-                        modulePositions.copy()));
+                        modulePositions));
 
         m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
     }
@@ -194,7 +193,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         for (Map.Entry<Double, InterpolationRecord> entry : m_poseBuffer.tailMap(timestampS, false).entrySet()) {
             double entryTimestampS = entry.getKey();
             Rotation2d entryGyroAngle = entry.getValue().m_gyroAngle;
-            SwerveDriveWheelPositions wheelPositions = entry.getValue().m_wheelPositions;
+            SwerveModulePosition[] wheelPositions = entry.getValue().m_wheelPositions;
             update(entryTimestampS, entryGyroAngle, wheelPositions);
         }
 
@@ -227,7 +226,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     public SwerveState update(
             double currentTimeS,
             Rotation2d gyroAngle,
-            SwerveDriveWheelPositions wheelPositions) {
+            SwerveModulePosition[] wheelPositions) {
         checkLength(wheelPositions);
 
         List<Entry<Double, InterpolationRecord>> consistentPair = m_poseBuffer.consistentPair(
@@ -304,7 +303,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         m_poseBuffer.put(
                 currentTimeS,
-                new InterpolationRecord(m_kinodynamics.getKinematics(), swerveState, gyroAngle, wheelPositions.copy()));
+                new InterpolationRecord(m_kinodynamics.getKinematics(), swerveState, gyroAngle, wheelPositions));
 
         return swerveState;
     }
@@ -316,8 +315,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
     ///////////////////////////////////////
 
-    private void checkLength(SwerveDriveWheelPositions modulePositions) {
-        int ct = modulePositions.positions.length;
+    private void checkLength(SwerveModulePosition[] modulePositions) {
+        int ct = modulePositions.length;
         if (ct != m_numModules) {
             throw new IllegalArgumentException("Wrong module count: " + ct);
         }

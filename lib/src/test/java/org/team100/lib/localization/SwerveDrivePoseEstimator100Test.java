@@ -25,7 +25,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
@@ -74,7 +73,7 @@ class SwerveDrivePoseEstimator100Test {
         // if we try to update zero, there's nothing to compare it to,
         // so we should just ignore this update.
         verify(0, poseEstimator.update(0.0, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         // now vision says we're one meter away, so pose goes towards that
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.01, stateStdDevs, visionMeasurementStdDevs);
@@ -89,7 +88,7 @@ class SwerveDrivePoseEstimator100Test {
         // but it's not, it's applied relative to the vision update, so there's no
         // change.
         verify(0.167, poseEstimator.update(0.02, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         // wheels have moved 0.1m in +x, at t=0.04.
         // the "odometry opinion" should be 0.1 since the last odometry estimate was
@@ -97,7 +96,7 @@ class SwerveDrivePoseEstimator100Test {
         // was based on vision. so the actual odometry stddev is like *zero*.
 
         verify(0.267, poseEstimator.update(0.04, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
         // here's the delayed update from above, which moves the estimate to 0.305 and
         // then the odometry is applied on top of that, yielding 0.405.
@@ -107,7 +106,7 @@ class SwerveDrivePoseEstimator100Test {
 
         // wheels are in the same position as the previous iteration,
         verify(0.405, poseEstimator.update(0.06, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
         // a little earlier than the previous estimate does nothing.
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.014, stateStdDevs, visionMeasurementStdDevs);
@@ -119,7 +118,7 @@ class SwerveDrivePoseEstimator100Test {
 
         // wheels not moving -> no change,
         verify(0.521, poseEstimator.update(0.08, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
     }
 
@@ -144,7 +143,7 @@ class SwerveDrivePoseEstimator100Test {
         // if we try to update zero, there's nothing to compare it to,
         // so we should just ignore this update.
         verify(0, poseEstimator.update(0.0, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         // now vision says we're one meter away, so pose goes towards that
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.01, stateStdDevs, visionMeasurementStdDevs);
@@ -159,13 +158,13 @@ class SwerveDrivePoseEstimator100Test {
         // but it's not, it's applied relative to the vision update, so there's no
         // change.
         verify(0.167, poseEstimator.update(0.02, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         // wheels have moved 0.1m in +x, at t=0.04.
         // but the velocity estimate says we're sliding, so it's a bit more than 0.1
         // note the sliding rate is limited here.
         verify(0.267, poseEstimator.update(0.04, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
         // here's the delayed update from above, which replays the history
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.015, stateStdDevs, visionMeasurementStdDevs);
@@ -175,7 +174,7 @@ class SwerveDrivePoseEstimator100Test {
         // wheels are in the same position as the previous iteration,
         // but we've moved since then so we must be sliding.
         verify(0.501, poseEstimator.update(0.06, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
         // a little earlier than the previous estimate does nothing.
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.014, stateStdDevs, visionMeasurementStdDevs);
@@ -188,10 +187,10 @@ class SwerveDrivePoseEstimator100Test {
         // wheels not moving -> no change,
         // except we are still sliding.
         verify(0.711, poseEstimator.update(0.08, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
         verify(0.932, poseEstimator.update(1, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
     }
 
     @Test
@@ -214,7 +213,7 @@ class SwerveDrivePoseEstimator100Test {
         // if we try to update zero, there's nothing to compare it to,
         // so we should just ignore this update.
         verify(0, poseEstimator.update(0.0, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         // now vision says we're one meter away, so pose goes towards that
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.01, stateStdDevs, visionMeasurementStdDevs);
@@ -229,7 +228,7 @@ class SwerveDrivePoseEstimator100Test {
         // but it's not, it's applied relative to the vision update, so there's no
         // change.
         verify(0.167, poseEstimator.update(0.02, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         // wheels have moved 0.1m in +x, at t=0.04.
         // the "odometry opinion" should be 0.1 since the last odometry estimate was
@@ -237,7 +236,7 @@ class SwerveDrivePoseEstimator100Test {
         // was based on vision. so the actual odometry stddev is like *zero*.
 
         verify(0.267, poseEstimator.update(0.04, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
         // here's the delayed update from above, which moves the estimate to 0.305 and
         // then the odometry is applied on top of that, yielding 0.405.
@@ -247,7 +246,7 @@ class SwerveDrivePoseEstimator100Test {
 
         // wheels are in the same position as the previous iteration
         verify(0.405, poseEstimator.update(0.06, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
         // a little earlier than the previous estimate does nothing.
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.014, stateStdDevs, visionMeasurementStdDevs);
@@ -259,7 +258,7 @@ class SwerveDrivePoseEstimator100Test {
 
         // wheels not moving -> no change
         verify(0.521, poseEstimator.update(0.08, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(position01)));
+                position01));
 
     }
 
@@ -278,7 +277,7 @@ class SwerveDrivePoseEstimator100Test {
 
         verify(0, poseEstimator.getEstimatedPosition());
         verify(0, poseEstimator.update(0, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.02, stateStdDevs, visionMeasurementStdDevs);
         verify(0.167, poseEstimator.getEstimatedPosition());
@@ -304,7 +303,7 @@ class SwerveDrivePoseEstimator100Test {
 
         verify(0, poseEstimator.getEstimatedPosition());
         verify(0, poseEstimator.update(0, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.02, stateStdDevs, visionMeasurementStdDevs);
         verify(0.091, poseEstimator.getEstimatedPosition());
@@ -331,7 +330,7 @@ class SwerveDrivePoseEstimator100Test {
 
         verify(0, poseEstimator.getEstimatedPosition());
         verify(0, poseEstimator.update(0, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.02, stateStdDevs, visionMeasurementStdDevs);
         verify(0.091, poseEstimator.getEstimatedPosition());
@@ -359,7 +358,7 @@ class SwerveDrivePoseEstimator100Test {
                 0); // zero initial time
         verify(0, poseEstimator.getEstimatedPosition());
         verify(0, poseEstimator.update(0, GeometryUtil.kRotationZero,
-                new SwerveDriveWheelPositions(positionZero)));
+                positionZero));
 
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.02, stateStdDevs, visionMeasurementStdDevs);
         verify(0.010, poseEstimator.getEstimatedPosition());
@@ -521,7 +520,7 @@ class SwerveDrivePoseEstimator100Test {
 
         estimator.resetPosition(
                 new Rotation2d(),
-                new SwerveDriveWheelPositions(positions),
+                positions,
                 startingPose,
                 0); // zero initial time
 
@@ -573,7 +572,7 @@ class SwerveDrivePoseEstimator100Test {
                             .getRotation()
                             .plus(new Rotation2d(rand.nextGaussian() * 0.05))
                             .minus(trajectory.getInitialPose().getRotation()),
-                    new SwerveDriveWheelPositions(positions));
+                    positions);
 
             double error = groundTruthState.poseMeters.getTranslation().getDistance(xHat.pose().getTranslation());
             if (error > maxError) {
@@ -630,8 +629,8 @@ class SwerveDrivePoseEstimator100Test {
                 0); // zero initial time
 
         estimator.update(0,
-                new Rotation2d(), new SwerveDriveWheelPositions(
-                        new SwerveModulePosition[] { fl, fr, bl, br }));
+                new Rotation2d(),
+                        new SwerveModulePosition[] { fl, fr, bl, br });
 
         var visionMeasurements = new Pose2d[] {
                 new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
@@ -684,13 +683,12 @@ class SwerveDrivePoseEstimator100Test {
             estimator.update(
                     time,
                     new Rotation2d(),
-                    new SwerveDriveWheelPositions(
                             new SwerveModulePosition[] {
                                     new SwerveModulePosition(),
                                     new SwerveModulePosition(),
                                     new SwerveModulePosition(),
                                     new SwerveModulePosition()
-                            }));
+                            });
         }
 
         var odometryPose = estimator.getEstimatedPosition();

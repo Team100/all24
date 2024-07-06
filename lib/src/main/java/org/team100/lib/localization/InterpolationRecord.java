@@ -9,7 +9,7 @@ import org.team100.lib.util.DriveUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /**
  * Represents an odometry record. The record contains the inputs provided as
@@ -28,7 +28,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     final Rotation2d m_gyroAngle;
 
     // The current encoder readings.
-    final SwerveDriveWheelPositions m_wheelPositions;
+    final SwerveModulePosition[] m_wheelPositions;
 
     /**
      * Constructs an Interpolation Record with the specified parameters.
@@ -42,7 +42,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
             SwerveDriveKinematics100 kinematics,
             SwerveState state,
             Rotation2d gyro,
-            SwerveDriveWheelPositions wheelPositions) {
+            SwerveModulePosition[] wheelPositions) {
         m_kinematics = kinematics;
         m_state = state;
         m_gyroAngle = gyro;
@@ -72,7 +72,10 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
             return endValue;
         }
         // Find the new wheel distances.
-        SwerveDriveWheelPositions wheelLerp = m_wheelPositions.interpolate(endValue.m_wheelPositions, t);
+        SwerveModulePosition[] wheelLerp = new SwerveModulePosition[m_wheelPositions.length];
+        for (int i = 0; i < m_wheelPositions.length; ++i) {
+            wheelLerp[i] = m_wheelPositions[i].interpolate(endValue.m_wheelPositions[i], t);
+        }
 
         // Find the new gyro angle.
         Rotation2d gyroLerp = m_gyroAngle.interpolate(endValue.m_gyroAngle, t);
