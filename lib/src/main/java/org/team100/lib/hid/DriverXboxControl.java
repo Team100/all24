@@ -91,7 +91,7 @@ public class DriverXboxControl implements DriverControl {
 
     @Override
     public Speed speed() {
-        if (m_controller.getLeftBumper())
+        if (m_controller.getLeftBumperButton())
             return Speed.SLOW;
         if (m_controller.getLeftTriggerAxis() > .9)
             return Speed.MEDIUM;

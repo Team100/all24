@@ -108,7 +108,7 @@ public class VisionDataProvider24 implements Glassy {
             Logger parent,
             AprilTagFieldLayoutWithCorrectOrientation layout,
             PoseEstimator100 poseEstimator,
-            FireControl fireControl) throws IOException {
+            FireControl fireControl) {
         m_logger = parent.child(this);
         m_layout = layout;
         m_chronos = Chronos.get();

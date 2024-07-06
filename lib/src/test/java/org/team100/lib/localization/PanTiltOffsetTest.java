@@ -2,8 +2,6 @@ package org.team100.lib.localization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
