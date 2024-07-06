@@ -65,7 +65,6 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
                 throw new IllegalArgumentException();
         }
         m_frequencyThreshold = 1000;
-        m_logger.logInt(Level.TRACE, "channel", m_dutyCycle::getSourceChannel);
     }
 
     @Override
@@ -140,6 +139,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
 
     private double getPositionRad() {
         double positionRad = getDistance();
+        m_logger.logInt(Level.TRACE, "channel", m_dutyCycle::getSourceChannel);
         m_logger.logDouble(Level.TRACE, "position (rad) ROBOT USES THIS (CCW POSITIVE)", () -> positionRad);
         m_logger.logDouble(Level.TRACE, "position (turns-offset) USE FOR OFFSETS", this::get);
         m_logger.logDouble(Level.TRACE, "position (absolute)", this::getAbsolutePosition);

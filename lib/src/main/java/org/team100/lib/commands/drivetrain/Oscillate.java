@@ -52,7 +52,6 @@ public class Oscillate extends Command100 {
         super(parent);
         m_swerve = swerve;
         m_period = 4 * kMaxSpeed / kAccel;
-        m_logger.logDouble(Level.TRACE, "period", () -> m_period);
         m_square = new SquareWave(kAccel, m_period);
         m_triangle = new TriangleWave(kMaxSpeed, m_period);
         m_parabola = new ParabolicWave(kMaxSpeed * m_period / 4, m_period);
@@ -106,6 +105,7 @@ public class Oscillate extends Command100 {
 
         }
 
+        m_logger.logDouble(Level.TRACE, "period", () -> m_period);
         m_logger.logDouble(Level.TRACE, "time", () -> time);
         m_logger.logDouble(Level.TRACE, "setpoint/accel", () -> accelM_S_S);
         m_logger.logDouble(Level.TRACE, "setpoint/speed", () -> speedM_S);

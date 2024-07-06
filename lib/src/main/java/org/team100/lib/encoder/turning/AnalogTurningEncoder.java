@@ -55,7 +55,6 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
             default:
                 throw new IllegalArgumentException();
         }
-        m_logger.logInt(Level.TRACE, "channel", m_input::getChannel);
     }
 
     @Override
@@ -96,6 +95,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
     private double getPositionRad() {
         // this should be fast, need not be cached.
         double positionRad = getDistance();
+        m_logger.logInt(Level.TRACE, "channel", m_input::getChannel);
         m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
         m_logger.logDouble(Level.TRACE, "position (turns-offset)", this::get);
         m_logger.logDouble(Level.TRACE, "position (turns)", this::getAbsolutePosition);

@@ -38,7 +38,6 @@ public abstract class CANSparkMotor<T extends Measure100>
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         Rev100.pidConfig(m_pidController, pid);
-        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceId);
     }
 
     @Override
@@ -150,6 +149,7 @@ public abstract class CANSparkMotor<T extends Measure100>
     }
 
     protected void log() {
+        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceId);
         m_logger.logDouble(Level.TRACE, "position (rev)", m_encoder::getPosition);
         m_logger.logDouble(Level.TRACE, "velocity (rev_s)", () -> m_encoder.getVelocity() / 60);
         m_logger.logDouble(Level.TRACE, "velocity (RPM)", m_encoder::getVelocity);
