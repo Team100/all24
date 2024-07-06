@@ -6,16 +6,15 @@ import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
-import org.team100.lib.motion.components.OutboardVelocityServo;
-import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.TurningMotorController100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
@@ -43,7 +42,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
             PIDConstants pidConstants,
             Feedforward100 ff) {
         Logger moduleLogger = parent.child(name);
-        VelocityServo<Distance100> driveServo = driveServo(
+        LinearVelocityServo driveServo = driveServo(
                 moduleLogger.child("Drive"),
                 currentLimit,
                 statorLimit,
@@ -61,7 +60,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
         return new AMSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100> driveServo(
+    private static LinearVelocityServo driveServo(
             Logger parent,
             double currentLimit,
             double statorLimit,
@@ -83,7 +82,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 parent,
                 driveMotor,
                 distancePerTurn);
-        return new OutboardVelocityServo<>(
+        return new OutboardLinearVelocityServo(
                 parent,
                 driveMotor,
                 driveEncoder);
@@ -126,7 +125,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
 
     private AMSwerveModule100(
             String name,
-            VelocityServo<Distance100> driveServo,
+            LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
         super(name, driveServo, turningServo);
         //

@@ -12,9 +12,9 @@ import org.team100.lib.encoder.AS5048RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.motion.components.OutboardVelocityServo;
+import org.team100.lib.motion.components.LinearVelocityServo;
+import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
-import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
@@ -23,7 +23,6 @@ import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.units.Distance100;
 import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -57,8 +56,8 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     private final Logger m_logger;
 
-    private final VelocityServo<Distance100> leftRoller;
-    private final VelocityServo<Distance100> rightRoller;
+    private final LinearVelocityServo leftRoller;
+    private final LinearVelocityServo rightRoller;
     private final GravityServo pivotServo;
 
     public DrumShooter(
@@ -104,7 +103,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         Feedforward100.makeShooterFalcon6());
                 Talon6DriveEncoder leftEncoder = new Talon6DriveEncoder(
                         leftLogger, leftMotor, distancePerTurn);
-                leftRoller = new OutboardVelocityServo<>(leftLogger, leftMotor, leftEncoder);
+                leftRoller = new OutboardLinearVelocityServo(leftLogger, leftMotor, leftEncoder);
 
                 Falcon6DriveMotor rightMotor = new Falcon6DriveMotor(
                         rightLogger,
@@ -118,7 +117,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         Feedforward100.makeShooterFalcon6());
                 Talon6DriveEncoder rightEncoder = new Talon6DriveEncoder(
                         rightLogger, rightMotor, distancePerTurn);
-                rightRoller = new OutboardVelocityServo<>(rightLogger, rightMotor, rightEncoder);
+                rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMotor, rightEncoder);
 
                 pivotServo = new GravityServo(
                         new NeoProxy(parent, pivotID, IdleMode.kCoast, 40),

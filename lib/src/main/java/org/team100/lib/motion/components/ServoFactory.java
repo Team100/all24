@@ -39,7 +39,7 @@ public class ServoFactory {
      *                      faster than they can speed up.
      * @return
      */
-    public static LimitedVelocityServo<Distance100> limitedNeoVelocityServo(
+    public static LimitedLinearVelocityServo limitedNeoVelocityServo(
             Logger parent,
             int canId,
             MotorPhase motorPhase,
@@ -60,27 +60,27 @@ public class ServoFactory {
                 parent,
                 motor,
                 param.wheelDiameter() * Math.PI / param.gearRatio());
-        VelocityServo<Distance100> v = new OutboardVelocityServo<>(
+                LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
                 motor,
                 encoder);
-        return new LimitedVelocityServo<>(v,
+        return new LimitedLinearVelocityServo(v,
                 param.maxVelM_S(),
                 param.maxAccelM_S2(),
                 param.maxDecelM_S2());
     }
 
-    public static LimitedVelocityServo<Distance100> limitedSimulatedVelocityServo(
+    public static LimitedLinearVelocityServo limitedSimulatedVelocityServo(
             Logger parent,
             SysParam param) {
         // motor speed is rad/s
         SimulatedMotor<Distance100> motor = new SimulatedMotor<>(parent, 600);
         SimulatedEncoder<Distance100> encoder = new SimulatedEncoder<>(parent, motor, 1, -1, 1);
-        VelocityServo<Distance100> v = new OutboardVelocityServo<>(
+        LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
                 motor,
                 encoder);
-        return new LimitedVelocityServo<>(v,
+        return new LimitedLinearVelocityServo(v,
                 param.maxVelM_S(),
                 param.maxAccelM_S2(),
                 param.maxDecelM_S2());

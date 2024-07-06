@@ -13,11 +13,11 @@ import org.team100.lib.encoder.turning.Talon6TurningEncoder;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.OutboardPositionServo;
-import org.team100.lib.motion.components.OutboardVelocityServo;
 import org.team100.lib.motion.components.SelectableAngularPositionServo;
-import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.drive.Kraken6DriveMotor;
@@ -25,7 +25,6 @@ import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Angle100;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -78,7 +77,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
         Feedforward100 driveFF = Feedforward100.makeWCPSwerveDriveFalcon6();
 
-        VelocityServo<Distance100> driveServo = driveServo(
+        LinearVelocityServo driveServo = driveServo(
                 moduleLogger.child("Drive"),
                 supplyLimitAmps,
                 statorLimitAmps,
@@ -103,7 +102,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new WCPSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100> driveServo(
+    private static LinearVelocityServo driveServo(
             Logger parent,
             double supplyLimit,
             double statorLimit,
@@ -127,7 +126,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 parent,
                 driveMotor,
                 distancePerTurn);
-        return new OutboardVelocityServo<>(
+        return new OutboardLinearVelocityServo(
                 parent,
                 driveMotor,
                 encoder);
@@ -243,7 +242,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private WCPSwerveModule100(
             String name,
-            VelocityServo<Distance100> driveServo,
+            LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
         super(name, driveServo, turningServo);
         //

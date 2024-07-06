@@ -3,9 +3,9 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
-import org.team100.lib.motion.components.OutboardVelocityServo;
-import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.Profile100;
@@ -22,7 +22,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
             Logger parent,
             SwerveKinodynamics kinodynamics) {
         Logger moduleLogger = parent.child(name);
-        VelocityServo<Distance100> driveServo = simulatedDriveServo(
+        LinearVelocityServo driveServo = simulatedDriveServo(
                 moduleLogger.child("Drive"));
         AngularPositionServo turningServo = simulatedTurningServo(
                 moduleLogger.child("Turning"),
@@ -30,7 +30,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100> simulatedDriveServo(Logger parent) {
+    private static LinearVelocityServo simulatedDriveServo(Logger parent) {
         // simulated drive motor free speed is 5 m/s
         SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(parent, 5);
         SimulatedEncoder<Distance100> driveEncoder = new SimulatedEncoder<>(
@@ -39,7 +39,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 1,
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
-        return new OutboardVelocityServo<>(
+        return new OutboardLinearVelocityServo(
                 parent,
                 driveMotor,
                 driveEncoder);
@@ -76,7 +76,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     private SimulatedSwerveModule100(
             String name,
-            VelocityServo<Distance100> driveServo,
+            LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
         super(name, driveServo, turningServo);
         //
