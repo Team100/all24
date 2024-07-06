@@ -26,6 +26,15 @@ public class Util {
         System.out.println("WARNING: " + s);
     }
 
+    /** Throw if x is out of range. This is a more strict version of "clamp" :-) */
+    public static double inRange(double x, double minX, double maxX) {
+        if (x < minX)
+            throw new IllegalArgumentException(String.format("arg was %f which is below %f", x, minX));
+        if (x > maxX)
+            throw new IllegalArgumentException(String.format("arg was %f which is above %f", x, maxX));
+        return x;
+    }
+
     private Util() {
         //
     }

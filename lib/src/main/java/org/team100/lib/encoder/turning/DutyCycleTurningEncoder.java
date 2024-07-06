@@ -2,10 +2,9 @@ package org.team100.lib.encoder.turning;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -29,13 +28,15 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * TODO: remove gear ratio, it's always 1.
  */
-public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
+public class DutyCycleTurningEncoder implements RotaryPositionSensor {
     private final Logger m_logger;
     private final DigitalInput m_digitalInput;
     private final DutyCycle m_dutyCycle;
     private final int m_frequencyThreshold;
     private final double m_positionOffset;
+    private final EncoderDrive m_drive;
     private final double m_distancePerRotation;
+
     // TODO: use these to fix https://github.com/Team100/all24/issues/383
     // these are within [0,1]
     private double m_sensorMin = 0.0;
@@ -48,18 +49,19 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
             Logger parent,
             int channel,
             double inputOffset,
-            double gearRatio,
             EncoderDrive drive) {
         m_logger = parent.child(this);
         m_digitalInput = new DigitalInput(channel);
         m_dutyCycle = new DutyCycle(m_digitalInput);
         m_positionOffset = inputOffset;
+        m_drive = drive;
+
         switch (drive) {
             case DIRECT:
-                m_distancePerRotation = 2.0 * Math.PI / gearRatio;
+                m_distancePerRotation = 2.0 * Math.PI;
                 break;
             case INVERSE:
-                m_distancePerRotation = 2.0 * Math.PI / (-1.0 * gearRatio);
+                m_distancePerRotation = -2.0 * Math.PI;
                 break;
             default:
                 throw new IllegalArgumentException();
@@ -68,21 +70,21 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     }
 
     @Override
-    public OptionalDouble getPosition() {
+    public OptionalDouble getPositionRad() {
         if (!isConnected()) {
             Util.warn(String.format("encoder %d not connected", m_dutyCycle.getSourceChannel()));
             return OptionalDouble.empty();
         }
-        return OptionalDouble.of(getPositionRad());
+        return OptionalDouble.of(getRad());
     }
 
     @Override
-    public OptionalDouble getRate() {
+    public OptionalDouble getRateRad_S() {
         if (!isConnected()) {
             Util.warn(String.format("encoder %d not connected", m_dutyCycle.getSourceChannel()));
             return OptionalDouble.empty();
         }
-        return OptionalDouble.of(getRateRad_S());
+        return OptionalDouble.of(getRad_S());
     }
 
     @Override
@@ -137,7 +139,7 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
         return get() * m_distancePerRotation;
     }
 
-    private double getPositionRad() {
+    private double getRad() {
         double positionRad = getDistance();
         m_logger.logInt(Level.TRACE, "channel", m_dutyCycle::getSourceChannel);
         m_logger.logDouble(Level.TRACE, "position (rad) ROBOT USES THIS (CCW POSITIVE)", () -> positionRad);
@@ -148,8 +150,8 @@ public class DutyCycleTurningEncoder implements Encoder100<Angle100> {
     }
 
     /** this is just finite difference over one time step. noisy! */
-    private double getRateRad_S() {
-        double angle = getPositionRad();
+    private double getRad_S() {
+        double angle = getRad();
         double time = Timer.getFPGATimestamp();
         if (prevAngle == null) {
             prevAngle = angle;

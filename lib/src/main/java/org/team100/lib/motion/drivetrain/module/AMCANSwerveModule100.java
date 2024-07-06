@@ -5,9 +5,9 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.motion.components.OnboardPositionServo;
+import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo;
 import org.team100.lib.motion.components.OutboardVelocityServo;
-import org.team100.lib.motion.components.PositionServo;
 import org.team100.lib.motion.components.VelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorPhase;
@@ -15,7 +15,6 @@ import org.team100.lib.motor.drive.Falcon6DriveMotor;
 import org.team100.lib.motor.turning.CANTurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -31,8 +30,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     // the true value is 6.67 but the measured value is 90% of that,
     // maybe because the wheel measurement is wrong.
     private static final double kDriveReduction = 6.67 * 9 / 10;
-    // andymark ma3 encoder is 1:1
-    private static final double turningGearRatio = 1.0;
 
     public static AMCANSwerveModule100 get(
             String name,
@@ -56,7 +53,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 drivePidConstants,
                 ff);
 
-        PositionServo<Angle100> turningServo = turningServo(
+        AngularPositionServo turningServo = turningServo(
                 moduleLogger.child("Turning"),
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -95,7 +92,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 driveEncoder);
     }
 
-    private static PositionServo<Angle100> turningServo(
+    private static OnboardAngularPositionServo turningServo(
             Logger parent,
             int turningMotorCanId,
             int turningEncoderChannel,
@@ -107,7 +104,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 parent,
                 turningEncoderChannel,
                 turningOffset,
-                turningGearRatio, turningDrive);
+                turningDrive);
         PIDController turningPositionController = new PIDController(
                 5, // kP
                 0, // kI
@@ -116,14 +113,13 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
+        OnboardAngularPositionServo turningServo = new OnboardAngularPositionServo(
                 parent,
                 turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
-                profile,
-                Angle100.instance);
+                profile);
         turningServo.reset();
         return turningServo;
     }
@@ -131,7 +127,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     private AMCANSwerveModule100(
             String name,
             VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
+            AngularPositionServo turningServo) {
         super(name, driveServo, turningServo);
     }
 }

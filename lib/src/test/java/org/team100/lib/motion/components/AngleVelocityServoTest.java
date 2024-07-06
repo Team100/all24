@@ -3,7 +3,7 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.encoder.turning.MockEncoder100;
+import org.team100.lib.encoder.MockEncoder100;
 import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;

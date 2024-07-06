@@ -9,6 +9,8 @@ import org.team100.lib.units.Measure100;
  * Used for both angle and length.
  * 
  * @param <T> unit, angle or distance
+ * 
+ * TODO: maybe split this into angular and linear ones instead of generics
  */
 public interface Encoder100<T extends Measure100> extends Glassy {
 
