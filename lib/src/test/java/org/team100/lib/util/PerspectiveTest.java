@@ -12,6 +12,8 @@ import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
+import edu.wpi.first.cscore.OpenCvLoader;
+
 class PerspectiveTest {
 
     Mat calibrationSquareInWorldCoordinatesMeters() {
@@ -45,7 +47,7 @@ class PerspectiveTest {
 
     @Test
     void testPerspective() {
-
+        OpenCvLoader.forceStaticLoad();
         Mat src = calibrationSquareInCameraPixels();
         Mat dst = calibrationSquareInWorldCoordinatesMeters();
 
