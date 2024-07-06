@@ -36,7 +36,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
      * @param state          The pose observed given the current sensor inputs and
      *                       the previous pose.
      * @param gyro           The current gyro angle.
-     * @param wheelPositions The current encoder readings.
+     * @param wheelPositions The current encoder readings. Makes a copy.
      */
     InterpolationRecord(
             SwerveDriveKinematics100 kinematics,
@@ -46,7 +46,10 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
         m_kinematics = kinematics;
         m_state = state;
         m_gyroAngle = gyro;
-        m_wheelPositions = wheelPositions;
+        m_wheelPositions = new SwerveModulePosition[wheelPositions.length];
+        for (int i = 0; i < wheelPositions.length; ++i) {
+            m_wheelPositions[i] = wheelPositions[i].copy();
+        }
     }
 
     /**

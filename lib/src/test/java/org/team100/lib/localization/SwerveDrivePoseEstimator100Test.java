@@ -19,6 +19,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,6 +36,8 @@ import edu.wpi.first.wpilibj.DataLogManager;
 class SwerveDrivePoseEstimator100Test {
     private static final double kDelta = 0.001;
     private static final Logger logger = new TestLogger();
+    private static final boolean kPrint = false;
+
     private final SwerveModulePosition p0 = new SwerveModulePosition(0, GeometryUtil.kRotationZero);
     private final SwerveModulePosition[] positionZero = new SwerveModulePosition[] { p0, p0, p0, p0 };
     private final SwerveModulePosition p01 = new SwerveModulePosition(0.1, GeometryUtil.kRotationZero);
@@ -580,6 +583,15 @@ class SwerveDrivePoseEstimator100Test {
             }
             errorSum += error;
 
+            if (kPrint) {
+                Util.printf("t %5.3f refX %5.3f refY %5.3f xhatX %5.3f xhatY %5.3f\n",
+                        t,
+                        groundTruthState.poseMeters.getX(),
+                        groundTruthState.poseMeters.getY(),
+                        xHat.pose().getX(),
+                        xHat.pose().getY());
+            }
+
             t += dt;
 
         }
@@ -630,7 +642,7 @@ class SwerveDrivePoseEstimator100Test {
 
         estimator.update(0,
                 new Rotation2d(),
-                        new SwerveModulePosition[] { fl, fr, bl, br });
+                new SwerveModulePosition[] { fl, fr, bl, br });
 
         var visionMeasurements = new Pose2d[] {
                 new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
@@ -683,12 +695,12 @@ class SwerveDrivePoseEstimator100Test {
             estimator.update(
                     time,
                     new Rotation2d(),
-                            new SwerveModulePosition[] {
-                                    new SwerveModulePosition(),
-                                    new SwerveModulePosition(),
-                                    new SwerveModulePosition(),
-                                    new SwerveModulePosition()
-                            });
+                    new SwerveModulePosition[] {
+                            new SwerveModulePosition(),
+                            new SwerveModulePosition(),
+                            new SwerveModulePosition(),
+                            new SwerveModulePosition()
+                    });
         }
 
         var odometryPose = estimator.getEstimatedPosition();
