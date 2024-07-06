@@ -7,13 +7,14 @@ import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.encoder.DutyCycleEncoder100;
-import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.encoder.AS5048RotaryPositionSensor;
+import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.NeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Distance100;
+import org.team100.lib.units.Angle100;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -46,20 +47,18 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                         new PIDController(0.8, 0, 0),
                         profile,
                         period,
-                        new DutyCycleEncoder100(m_logger, 3, 0.645439, true),
+                        new AS5048RotaryPositionSensor(m_logger, 3, 0.645439, EncoderDrive.INVERSE),
                         new double[] { 0, 0 });
                 break;
             default:
                 // For testing and simulation
                 // motor speed is rad/s
-                SimulatedMotor<Distance100> simMotor = new SimulatedMotor<>(
+                SimulatedMotor<Angle100> simMotor = new SimulatedMotor<>(
                         m_logger, 600);
-                SimulatedEncoder<Distance100> simEncoder = new SimulatedEncoder<>(
+                SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         m_logger,
                         simMotor,
-                        75, // guess the gear ratio?
-                        -Double.MAX_VALUE,
-                        Double.MAX_VALUE);
+                        75); // guess the gear ratio?
                 ampAngleServo = new GravityServo(
                         simMotor,
                         m_logger,
@@ -90,7 +89,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
     }
 
     public OptionalDouble getPositionRad() {
-        return ampAngleServo.getPosition();
+        return ampAngleServo.getPositionRad();
     }
 
     public Optional<Boolean> inPosition() {

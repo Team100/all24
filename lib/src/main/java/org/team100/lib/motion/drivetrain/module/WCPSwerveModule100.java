@@ -2,11 +2,12 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.encoder.AS5048RotaryPositionSensor;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
+import org.team100.lib.encoder.turning.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.encoder.turning.Talon6TurningEncoder;
 import org.team100.lib.experiments.Experiment;
@@ -229,8 +230,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                     inputOffset,
                     drive);
         }
-        if (encoderClass == DutyCycleTurningEncoder.class) {
-            return new DutyCycleTurningEncoder(
+        if (encoderClass == DutyCycleRotaryPositionSensor.class) {
+            return new AS5048RotaryPositionSensor(
                     parent,
                     channel,
                     inputOffset,
