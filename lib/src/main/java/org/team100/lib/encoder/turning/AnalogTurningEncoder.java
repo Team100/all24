@@ -97,7 +97,7 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         // this should be fast, need not be cached.
         double positionRad = getDistance();
         m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
-        m_logger.logDouble(Level.TRACE, "position (turns+offset)", this::get);
+        m_logger.logDouble(Level.TRACE, "position (turns-offset)", this::get);
         m_logger.logDouble(Level.TRACE, "position (turns)", this::getAbsolutePosition);
         m_logger.logDouble(Level.TRACE, "position (volts)", m_input::getVoltage);
         return positionRad;
@@ -112,7 +112,10 @@ public class AnalogTurningEncoder implements Encoder100<Angle100> {
         return m_distancePerRotation;
     }
 
-    /** In turns but with offset, range is outside [0,1] */
+    /**
+     * Return turns minus offset, range is outside [0,1]
+     * TODO: modulus to [0,1]
+     */
     private double get() {
         double posTurns = getAbsolutePosition();
         return posTurns - m_positionOffset;
