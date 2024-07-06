@@ -13,13 +13,7 @@ import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
-import edu.wpi.first.cscore.CameraServerCvJNI;
-
 class PerspectiveTest {
-
-    public PerspectiveTest() throws IOException {
-        CameraServerCvJNI.forceLoad();
-    }
 
     Mat calibrationSquareInWorldCoordinatesMeters() {
         // dst is the floor relative to the robot (robot is zero, x ahead, y to the

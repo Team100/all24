@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
 
-import edu.wpi.first.cscore.CameraServerCvJNI;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -44,11 +43,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 class PanTiltOffsetTest {
     private static final double kDelta = 0.01;
     private static final Logger m_logger = new TestLogger();
-
-    public PanTiltOffsetTest() throws IOException {
-        // load the JNI
-        CameraServerCvJNI.forceLoad();
-    }
 
     /**
      * Correct for offset but the offset is zero.
