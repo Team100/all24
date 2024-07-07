@@ -2,6 +2,7 @@ package org.team100.lib.motor;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -14,7 +15,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
-public abstract class CANSparkMotor<T extends Measure100> implements DutyCycleMotor100, TorqueModel {
+public abstract class CANSparkMotor<T extends Measure100> implements Glassy, TorqueModel {
     protected final Logger m_logger;
     protected final Feedforward100 m_ff;
     protected final CANSparkBase m_motor;
@@ -39,14 +40,12 @@ public abstract class CANSparkMotor<T extends Measure100> implements DutyCycleMo
         Rev100.pidConfig(m_pidController, pid);
     }
 
-    @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
         m_logger.logDouble(Level.TRACE, "Output", () -> output);
         log();
     }
 
-    @Override
     public void stop() {
         m_motor.stopMotor();
     }
@@ -55,7 +54,6 @@ public abstract class CANSparkMotor<T extends Measure100> implements DutyCycleMo
         return m_motor.getOutputCurrent() * kTNm_amp();
     }
 
-    @Override
     public void close() {
         m_motor.close();
     }

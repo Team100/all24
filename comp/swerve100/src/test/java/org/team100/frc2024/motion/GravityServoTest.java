@@ -7,9 +7,10 @@ import org.team100.frc2024.TestLogger24;
 import org.team100.frc2024.Timeless2024;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
-import org.team100.lib.motor.SimulatedAngularMotor;
+import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
+import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -30,7 +31,7 @@ class GravityServoTest implements Timeless2024 {
         double period = 0.02;
         double[] softLimits = new double[] { 0, 45 };
         // motor speed is rad/s
-        SimulatedAngularMotor simMotor = new SimulatedAngularMotor(logger, 600);
+        SimulatedMotor<Angle100> simMotor = new SimulatedMotor<>(logger, 600);
         SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                 logger,
                 simMotor,

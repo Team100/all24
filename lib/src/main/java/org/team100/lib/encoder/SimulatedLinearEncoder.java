@@ -2,9 +2,10 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.motor.SimulatedLinearMotor;
+import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
@@ -17,7 +18,7 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class SimulatedLinearEncoder implements IncrementalLinearEncoder {
     private final Logger m_logger;
-    private final SimulatedLinearMotor m_motor;
+    private final SimulatedMotor<Distance100> m_motor;
     private final double m_reduction;
     private final double m_lowerLimit;
     private final double m_upperLimit;
@@ -33,7 +34,7 @@ public class SimulatedLinearEncoder implements IncrementalLinearEncoder {
      */
     public SimulatedLinearEncoder(
             Logger parent,
-            SimulatedLinearMotor motor,
+            SimulatedMotor<Distance100> motor,
             double reduction,
             double lowerLimit,
             double upperLimit) {

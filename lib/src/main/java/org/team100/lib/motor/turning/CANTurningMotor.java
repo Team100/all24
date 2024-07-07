@@ -1,7 +1,6 @@
 package org.team100.lib.motor.turning;
 
-import org.team100.lib.motor.DutyCycleMotor100;
-import org.team100.lib.motor.VelocityMotor100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -37,7 +36,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * Given the issues with feedback, this controller should rely mostly on
  * feedforward.
  */
-public class CANTurningMotor implements DutyCycleMotor100, VelocityMotor100<Angle100>, GenericTorqueModel {
+public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     /**
      * There is a planetary gearbox between the motor and the steering gear, and the
      * final is 48/40.
@@ -196,5 +195,10 @@ public class CANTurningMotor implements DutyCycleMotor100, VelocityMotor100<Angl
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
+    }
+
+    @Override
+    public void setPosition(double position, double velocity, double torque) {
+        //
     }
 }

@@ -10,10 +10,11 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.motor.SimulatedAngularMotor;
-import org.team100.lib.motor.duty_cycle.NeoProxy;
+import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.duty_cycle.AngularNeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
+import org.team100.lib.units.Angle100;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -40,7 +41,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         switch (Identity.instance) {
             case COMP_BOT:
                 ampAngleServo = new GravityServo(
-                        new NeoProxy(m_logger, 2, IdleMode.kCoast, 30),
+                        new AngularNeoProxy(m_logger, 2, IdleMode.kCoast, 30),
                         m_logger,
                         m_params,
                         new PIDController(0.8, 0, 0),
@@ -52,7 +53,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
             default:
                 // For testing and simulation
                 // motor speed is rad/s
-                SimulatedAngularMotor simMotor = new SimulatedAngularMotor(
+                SimulatedMotor<Angle100> simMotor = new SimulatedMotor<>(
                         m_logger, 600);
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         m_logger,

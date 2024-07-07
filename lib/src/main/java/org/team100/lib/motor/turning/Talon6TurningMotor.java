@@ -3,17 +3,15 @@ package org.team100.lib.motor.turning;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Talon6Motor;
-import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.telemetry.Logger;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.PositionMotor100;
 import org.team100.lib.units.Angle100;
 
 /**
  * Swerve steering motor using Talon FX and Phoenix 6.
  */
-public abstract class Talon6TurningMotor extends Talon6Motor<Angle100>
-        implements PositionMotor100<Angle100>, VelocityMotor100<Angle100> {
+public abstract class Talon6TurningMotor extends Talon6Motor<Angle100> implements Motor100<Angle100> {
 
     private static final double kSupplyLimit = 10;
     private static final double kStatorLimit = 20;

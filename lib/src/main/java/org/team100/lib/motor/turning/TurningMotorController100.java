@@ -1,7 +1,6 @@
 package org.team100.lib.motor.turning;
 
-import org.team100.lib.motor.DutyCycleMotor100;
-import org.team100.lib.motor.VelocityMotor100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -12,7 +11,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 /**
  * Calibrated angle motor wrapping any MotorController.
  */
-public class TurningMotorController100 implements DutyCycleMotor100, VelocityMotor100<Angle100>, GenericTorqueModel {
+public class TurningMotorController100 implements Motor100<Angle100> , GenericTorqueModel {
     /**
      * Very much not calibrated.
      * Say 600 rad/s max so 0.0016?
@@ -57,5 +56,10 @@ public class TurningMotorController100 implements DutyCycleMotor100, VelocityMot
     @Override
     public void close() {
         // m_motor.close();
+    }
+
+    @Override
+    public void setPosition(double position, double velocity, double torque) {
+        //
     }
 }

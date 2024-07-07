@@ -5,9 +5,10 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.commands.Subsystem100;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.motor.DutyCycleMotor100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.visualization.ArmVisualization;
 
 import edu.wpi.first.math.MathUtil;
@@ -23,8 +24,8 @@ public class ArmSubsystem extends Subsystem100 {
     private final Logger m_logger;
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
-    private final DutyCycleMotor100 m_lowerArmMotor;
-    private final DutyCycleMotor100 m_upperArmMotor;
+    private final Motor100<Angle100>  m_lowerArmMotor;
+    private final Motor100<Angle100>  m_upperArmMotor;
     private final RotaryPositionSensor m_lowerArmEncoder;
     private final RotaryPositionSensor m_upperArmEncoder;
     private final ArmVisualization m_viz;
@@ -40,9 +41,9 @@ public class ArmSubsystem extends Subsystem100 {
      */
     ArmSubsystem(
             Logger parent,
-            DutyCycleMotor100 lowerMotor,
+            Motor100<Angle100>  lowerMotor,
             RotaryPositionSensor lowerEncoder,
-            DutyCycleMotor100 upperMotor,
+            Motor100<Angle100>  upperMotor,
             RotaryPositionSensor upperEncoder) {
         m_logger = parent.child(this);
 

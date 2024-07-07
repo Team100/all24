@@ -3,7 +3,8 @@ package org.team100.lib.motor;
 import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
+import org.team100.lib.units.Measure100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -14,23 +15,36 @@ import edu.wpi.first.math.MathUtil;
  * 
  * A Neo goes about 6000 rpm, or 100 rev/s, or about 600 rad/s.
  */
-public class SimulatedLinearMotor
-        implements DutyCycleMotor100, VelocityMotor100<Distance100>, GenericTorqueModel {
+public class SimulatedMotor<T extends Measure100>
+        implements Motor100<T>, GenericTorqueModel {
 
     private final Logger m_logger;
     private final double m_freeSpeed;
     private double m_velocity = 0;
 
-    public SimulatedLinearMotor(Logger parent, double freeSpeed) {
+    public SimulatedMotor(Logger parent, double freeSpeed) {
         m_logger = parent.child(this);
         m_freeSpeed = freeSpeed;
     }
 
     @Override
     public void setDutyCycle(double dutyCycle) {
-        final double output = MathUtil.clamp(dutyCycle, -1, 1);
+        final double output = MathUtil.clamp(
+                Util.notNaN(dutyCycle), -1, 1);
         m_logger.logDouble(Level.TRACE, "duty_cycle", () -> output);
         setVelocity(output * m_freeSpeed, 0, 0);
+    }
+
+    @Override
+    public void setVelocity(double velocity, double accel, double torque) {
+        m_velocity = MathUtil.clamp(
+                Util.notNaN(velocity), -m_freeSpeed, m_freeSpeed);
+        m_logger.logDouble(Level.TRACE, "velocity", () -> m_velocity);
+    }
+
+    @Override
+    public void setPosition(double position, double velocity, double torque) {
+        //
     }
 
     @Override
@@ -38,24 +52,13 @@ public class SimulatedLinearMotor
         m_velocity = 0;
     }
 
-    /**
-     * Velocity only.
-     */
     @Override
-    public void setVelocity(double velocity, double accel, double torque) {
-        if (Double.isNaN(velocity))
-            throw new IllegalArgumentException("velocity is NaN");
-        m_velocity = velocity;
-        m_logger.logDouble(Level.TRACE, "velocity", () -> m_velocity);
+    public void close() {
+        //
     }
 
     public double getVelocity() {
         return m_velocity;
-    }
-
-    @Override
-    public void close() {
-        //
     }
 
 }

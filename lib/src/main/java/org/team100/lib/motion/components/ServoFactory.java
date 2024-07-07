@@ -10,12 +10,13 @@ import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.SimulatedAngularMotor;
-import org.team100.lib.motor.SimulatedLinearMotor;
+import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
+import org.team100.lib.units.Angle100;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -69,7 +70,7 @@ public class ServoFactory {
             Logger parent,
             SysParam param) {
         // motor speed is rad/s
-        SimulatedLinearMotor motor = new SimulatedLinearMotor(parent, 600);
+        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(parent, 600);
         SimulatedLinearEncoder encoder = new SimulatedLinearEncoder(parent, motor, 1, -1, 1);
         LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
@@ -121,7 +122,7 @@ public class ServoFactory {
             SysParam param,
             PIDController controller) {
         // motor speed is rad/s
-        SimulatedAngularMotor motor = new SimulatedAngularMotor(parent, 600);
+        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(parent, 600);
         RotaryPositionSensor sensor = new SimulatedRotaryPositionSensor(
                 parent,
                 motor,

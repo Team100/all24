@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
-import org.team100.lib.motor.PositionMotor100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -27,7 +27,7 @@ public class OutboardPositionServo implements AngularPositionServo {
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
     private final Logger m_logger;
-    private final PositionMotor100<Angle100> m_motor;
+    private final Motor100<Angle100> m_motor;
     private final CombinedEncoder m_encoder;
     private final Profile100 m_profile;
 
@@ -36,7 +36,7 @@ public class OutboardPositionServo implements AngularPositionServo {
 
     public OutboardPositionServo(
             Logger parent,
-            PositionMotor100<Angle100> motor,
+            Motor100<Angle100> motor,
             CombinedEncoder encoder,
             Profile100 profile) {
         m_logger = parent.child(this);

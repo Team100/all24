@@ -1,7 +1,6 @@
 package org.team100.lib.motor.drive;
 
-import org.team100.lib.motor.DutyCycleMotor100;
-import org.team100.lib.motor.VelocityMotor100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -12,7 +11,7 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 /**
  * Calibrated distance motor using any MotorController.
  */
-public class DriveMotorController100 implements DutyCycleMotor100, VelocityMotor100<Distance100>, GenericTorqueModel {
+public class DriveMotorController100 implements Motor100<Distance100>, GenericTorqueModel {
     /**
      * Very much not calibrated. Say 100 rev/s max so 0.01?
      */
@@ -60,5 +59,10 @@ public class DriveMotorController100 implements DutyCycleMotor100, VelocityMotor
     @Override
     public void close() {
         // m_motor.close();
+    }
+
+    @Override
+    public void setPosition(double position, double velocity, double torque) {
+        //
     }
 }

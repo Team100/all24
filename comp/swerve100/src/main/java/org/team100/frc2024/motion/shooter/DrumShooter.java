@@ -16,12 +16,13 @@ import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.SimulatedAngularMotor;
+import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.Falcon6DriveMotor;
-import org.team100.lib.motor.duty_cycle.NeoProxy;
+import org.team100.lib.motor.duty_cycle.AngularNeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Util;
 
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -119,7 +120,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMotor, rightEncoder);
 
                 pivotServo = new GravityServo(
-                        new NeoProxy(parent, pivotID, IdleMode.kCoast, 40),
+                        new AngularNeoProxy(parent, pivotID, IdleMode.kCoast, 40),
                         parent.child("Pivot"),
                         pivotParams,
                         pivotController,
@@ -138,7 +139,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         rightLogger,
                         shooterParams);
                 // motor speed is rad/s
-                SimulatedAngularMotor simMotor = new SimulatedAngularMotor(parent, 600);
+                SimulatedMotor<Angle100> simMotor = new SimulatedMotor<>(parent, 600);
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         parent,
                         simMotor,

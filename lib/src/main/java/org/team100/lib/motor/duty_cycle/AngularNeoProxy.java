@@ -3,43 +3,36 @@ package org.team100.lib.motor.duty_cycle;
 import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
-import org.team100.lib.motor.model.NeoVortexTorqueModel;
+import org.team100.lib.motor.model.NeoTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
+import org.team100.lib.units.Angle100;
 
 import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkMax;
 
-/**
- * Very simple wrapper around SparkFlex for testing.
- * 
- * TODO: remove this class, use NeoVortexDriveEncoder instead.
- */
-public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel {
+public class AngularNeoProxy implements Motor100<Angle100>, NeoTorqueModel {
     private final Logger m_logger;
-    private final CANSparkFlex m_motor;
-    private final RelativeEncoder m_encoder;
 
-    public VortexProxy(
+    private final CANSparkMax m_motor;
+
+    public AngularNeoProxy(
             Logger parent,
             int canId,
-            MotorPhase phase,
+            IdleMode idleMode,
             int currentLimit) {
         m_logger = parent.child(this);
-        m_motor = new CANSparkFlex(canId, MotorType.kBrushless);
+        m_motor = new CANSparkMax(canId, MotorType.kBrushless);
         Rev100.baseConfig(m_motor);
-        Rev100.motorConfig(m_motor, IdleMode.kBrake, phase, 20);
+        Rev100.motorConfig(m_motor, idleMode, MotorPhase.FORWARD, 20);
         Rev100.currentConfig(m_motor, currentLimit);
-        m_encoder = m_motor.getEncoder();
     }
 
     private void set(double speed) {
         m_motor.set(speed);
-        m_logger.logDouble(Level.TRACE, "current (A)", m_motor::getOutputCurrent);
-        m_logger.logDouble(Level.TRACE, "duty cycle", m_motor::getAppliedOutput);
+        m_logger.logDouble(Level.TRACE, "DUTY", m_motor::getAppliedOutput);
+        m_logger.logDouble(Level.TRACE, "AMPS", m_motor::getOutputCurrent);
     }
 
     @Override
@@ -55,18 +48,6 @@ public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel 
     @Override
     public void close() {
         m_motor.close();
-    }
-
-    double getVelocityRPM() {
-        return m_encoder.getVelocity();
-    }
-
-    double getPositionRot() {
-        return m_encoder.getPosition();
-    }
-
-    void resetPosition() {
-        m_encoder.setPosition(0);
     }
 
     @Override

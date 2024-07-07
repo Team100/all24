@@ -4,6 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -18,7 +19,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 /**
  * Superclass for TalonFX motors.
  */
-public abstract class Talon6Motor<T extends Measure100> implements DutyCycleMotor100, TorqueModel {
+public abstract class Talon6Motor<T extends Measure100> implements Glassy, TorqueModel {
     protected final Logger m_logger;
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
@@ -70,7 +71,6 @@ public abstract class Talon6Motor<T extends Measure100> implements DutyCycleMoto
         m_torque = () -> m_motor.getTorqueCurrent().refresh().getValueAsDouble();
     }
 
-    @Override
     public void setDutyCycle(double output) {
         Phoenix100.warn(() -> m_motor.setControl(m_dutyCycleOut
                 .withOutput(output)));
@@ -144,12 +144,10 @@ public abstract class Talon6Motor<T extends Measure100> implements DutyCycleMoto
         log();
     }
 
-    @Override
     public void stop() {
         m_motor.stopMotor();
     }
 
-    @Override
     public void close() {
         m_motor.close();
     }

@@ -7,10 +7,11 @@ import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motor.SimulatedAngularMotor;
-import org.team100.lib.motor.SimulatedLinearMotor;
+import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
+import org.team100.lib.units.Angle100;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -31,7 +32,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     private static LinearVelocityServo simulatedDriveServo(Logger parent) {
         // simulated drive motor free speed is 5 m/s
-        SimulatedLinearMotor driveMotor = new SimulatedLinearMotor(parent, 5);
+        SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(parent, 5);
         SimulatedLinearEncoder driveEncoder = new SimulatedLinearEncoder(
                 parent,
                 driveMotor,
@@ -48,7 +49,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
             Logger parent,
             SwerveKinodynamics kinodynamics) {
         // simulated turning motor free speed is 20 rad/s
-        SimulatedAngularMotor turningMotor = new SimulatedAngularMotor(parent, 20);
+        SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(parent, 20);
         SimulatedRotaryPositionSensor turningEncoder = new SimulatedRotaryPositionSensor(
                 parent,
                 turningMotor,

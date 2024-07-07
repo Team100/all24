@@ -6,22 +6,23 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.IncrementalLinearEncoder;
 import org.team100.lib.encoder.SimulatedLinearEncoder;
-import org.team100.lib.motor.DutyCycleMotor100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.SimulatedLinearMotor;
+import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.duty_cycle.VortexEncoder;
 import org.team100.lib.motor.duty_cycle.VortexProxy;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final int kCurrentLimit = 40;
     private final Logger m_logger;
-    private final DutyCycleMotor100 v1;
+    private final Motor100<Distance100> v1;
     private final IncrementalLinearEncoder e1;
-    private final DutyCycleMotor100 v2;
+    private final Motor100<Distance100> v2;
     private final IncrementalLinearEncoder e2;
 
     public ClimberSubsystem(Logger parent, int leftClimberID, int rightClimberID) {
@@ -45,11 +46,11 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 break;
             default:
                 // for testing and simulation
-                SimulatedLinearMotor vs1 = new SimulatedLinearMotor(m_logger.child("left"), 1);
+                SimulatedMotor<Distance100> vs1 = new SimulatedMotor<>(m_logger.child("left"), 1);
                 e1 = new SimulatedLinearEncoder(m_logger.child("left"),
                         vs1, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
                 v1 = vs1;
-                SimulatedLinearMotor vs2 = new SimulatedLinearMotor(m_logger.child("right"), 1);
+                SimulatedMotor<Distance100> vs2 = new SimulatedMotor<>(m_logger.child("right"), 1);
                 e2 = new SimulatedLinearEncoder(m_logger.child("right"), vs2, 1, -Double.MAX_VALUE,
                         Double.MAX_VALUE);
                 v2 = vs2;

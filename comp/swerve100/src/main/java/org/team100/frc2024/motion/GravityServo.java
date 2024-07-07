@@ -6,10 +6,11 @@ import org.team100.lib.config.SysParam;
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.motor.DutyCycleMotor100;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -19,7 +20,7 @@ import edu.wpi.first.math.controller.PIDController;
  */
 public class GravityServo implements Glassy {
     private final Logger m_logger;
-    private final DutyCycleMotor100 m_motor;
+    private final Motor100<Angle100> m_motor;
     private final SysParam m_params;
     private final PIDController m_controller;
     private final Profile100 m_profile;
@@ -31,7 +32,7 @@ public class GravityServo implements Glassy {
     private State100 m_setpoint = new State100(0, 0);
 
     public GravityServo(
-            DutyCycleMotor100 motor,
+            Motor100<Angle100>  motor,
             Logger parent,
             SysParam params,
             PIDController controller,

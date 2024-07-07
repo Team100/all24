@@ -3,9 +3,8 @@ package org.team100.lib.motor.drive;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.CANSparkMotor;
+import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.PositionMotor100;
-import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.units.Distance100;
 
@@ -15,7 +14,7 @@ import com.revrobotics.CANSparkBase;
  * Linear velocity motor using REV Neo or Neo Vortex.
  */
 public abstract class CANSparkDriveMotor extends CANSparkMotor<Distance100>
-        implements VelocityMotor100<Distance100>, PositionMotor100<Distance100> {
+        implements Motor100<Distance100> {
     private final double m_gearRatio;
     private final double m_wheelDiameterM;
 
