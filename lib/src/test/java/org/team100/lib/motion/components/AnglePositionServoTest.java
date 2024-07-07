@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.MockEncoder100;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
+import org.team100.lib.motor.MockAngularVelocityMotor100;
 import org.team100.lib.motor.MockPositionMotor100;
-import org.team100.lib.motor.MockVelocityMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.TestLogger;
@@ -28,7 +28,7 @@ class AnglePositionServoTest {
         // long period to make the output bigger
         double period = 1;
 
-        MockVelocityMotor100<Angle100> turningMotor = new MockVelocityMotor100<>();
+        MockAngularVelocityMotor100 turningMotor = new MockAngularVelocityMotor100();
         MockRotaryPositionSensor turningEncoder = new MockRotaryPositionSensor();
 
         PIDController turningController2 = new PIDController(1, 0, 0, period);

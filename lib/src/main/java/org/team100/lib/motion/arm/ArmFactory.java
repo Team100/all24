@@ -6,10 +6,9 @@ import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motor.DutyCycleMotor100;
-import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.SimulatedAngularMotor;
 import org.team100.lib.motor.arm.JointMotor;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
 
 /**
  * Produces real or simulated arm subsystems depending on identity.
@@ -64,13 +63,13 @@ public class ArmFactory {
         // note very high reduction ratio
         // motor speed is rad/s
 
-        SimulatedMotor<Angle100> lowerMotor = new SimulatedMotor<>(parent.child(kLower), 600);
+        SimulatedAngularMotor lowerMotor = new SimulatedAngularMotor(parent.child(kLower), 600);
         // limits used to be -1, 1, when we used winding encoders.
         // i don't think we ever actually *use* the limits for anything, though.
         SimulatedRotaryPositionSensor lowerEncoder = new SimulatedRotaryPositionSensor(
                 parent.child(kLower), lowerMotor, 200);
 
-        SimulatedMotor<Angle100> upperMotor = new SimulatedMotor<>(parent.child(kUpper), 600);
+        SimulatedAngularMotor upperMotor = new SimulatedAngularMotor(parent.child(kUpper), 600);
         // limits used to be 0.1, 2.5, when we used winding encoders.
         // i don't think we ever actually *use* the limits for anything, though.
         SimulatedRotaryPositionSensor upperEncoder = new SimulatedRotaryPositionSensor(

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.MockEncoder100;
-import org.team100.lib.motor.MockVelocityMotor100;
+import org.team100.lib.motor.MockLinearVelocityMotor100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.units.Distance100;
@@ -14,7 +14,7 @@ class LinearVelocityServoTest {
 
     @Test
     void testSimple() {
-        MockVelocityMotor100<Distance100> driveMotor = new MockVelocityMotor100<>();
+        MockLinearVelocityMotor100 driveMotor = new MockLinearVelocityMotor100();
         MockEncoder100<Distance100> driveEncoder = new MockEncoder100<>();
         OutboardLinearVelocityServo servo = new OutboardLinearVelocityServo(
                 logger,

@@ -5,19 +5,19 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.encoder.SimulatedLinearEncoder;
+import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.SimulatedAngularMotor;
+import org.team100.lib.motor.SimulatedLinearMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -57,7 +57,7 @@ public class ServoFactory {
                 parent,
                 motor,
                 param.wheelDiameter() * Math.PI / param.gearRatio());
-                LinearVelocityServo v = new OutboardLinearVelocityServo(
+        LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
                 motor,
                 encoder);
@@ -71,8 +71,8 @@ public class ServoFactory {
             Logger parent,
             SysParam param) {
         // motor speed is rad/s
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(parent, 600);
-        SimulatedEncoder<Distance100> encoder = new SimulatedEncoder<>(parent, motor, 1, -1, 1);
+        SimulatedLinearMotor motor = new SimulatedLinearMotor(parent, 600);
+        SimulatedLinearEncoder encoder = new SimulatedLinearEncoder(parent, motor, 1, -1, 1);
         LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
                 motor,
@@ -158,14 +158,14 @@ public class ServoFactory {
             SysParam param,
             PIDController controller) {
         // motor speed is rad/s
-        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(parent, 600);
-        SimulatedEncoder<Angle100> encoder = new SimulatedEncoder<>(
+        SimulatedAngularMotor motor = new SimulatedAngularMotor(parent, 600);
+        RotaryPositionSensor sensor = new SimulatedRotaryPositionSensor(
                 parent,
                 motor,
-                1,
-                0, // minimum hard stop
-                2); // maximum hard stop
-        RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(encoder);
+                1);
+        // the new sim doesn't have hard stops; should it?
+        // 0, // minimum hard stop
+        // 2); // maximum hard stop
         return new OnboardAngularPositionServo(
                 parent,
                 motor,

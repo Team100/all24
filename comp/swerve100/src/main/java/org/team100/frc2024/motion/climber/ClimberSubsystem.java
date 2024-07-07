@@ -5,10 +5,10 @@ import java.util.OptionalDouble;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.encoder.SimulatedLinearEncoder;
 import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.SimulatedLinearMotor;
 import org.team100.lib.motor.duty_cycle.VortexEncoder;
 import org.team100.lib.motor.duty_cycle.VortexProxy;
 import org.team100.lib.telemetry.Logger;
@@ -46,14 +46,12 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 break;
             default:
                 // for testing and simulation
-                SimulatedMotor<Distance100> vs1 = new SimulatedMotor<>(
-                        m_logger.child("left"), 1);
-                e1 = new SimulatedEncoder<>(m_logger.child("left"),
+                SimulatedLinearMotor vs1 = new SimulatedLinearMotor(m_logger.child("left"), 1);
+                e1 = new SimulatedLinearEncoder(m_logger.child("left"),
                         vs1, 1, -Double.MAX_VALUE, Double.MAX_VALUE);
                 v1 = vs1;
-                SimulatedMotor<Distance100> vs2 = new SimulatedMotor<>(
-                        m_logger.child("right"), 1);
-                e2 = new SimulatedEncoder<>(m_logger.child("right"), vs2, 1, -Double.MAX_VALUE,
+                SimulatedLinearMotor vs2 = new SimulatedLinearMotor(m_logger.child("right"), 1);
+                e2 = new SimulatedLinearEncoder(m_logger.child("right"), vs2, 1, -Double.MAX_VALUE,
                         Double.MAX_VALUE);
                 v2 = vs2;
         }

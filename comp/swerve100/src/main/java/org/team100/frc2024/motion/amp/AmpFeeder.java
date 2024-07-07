@@ -3,7 +3,7 @@ package org.team100.frc2024.motion.amp;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motor.DutyCycleMotor100;
-import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.SimulatedDutyCycleMotor;
 import org.team100.lib.motor.duty_cycle.NeoProxy;
 import org.team100.lib.telemetry.Logger;
 
@@ -27,7 +27,7 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
             default:
                 // For testing and simulation
                 // motor speed is rad/s
-                ampDrive = new SimulatedMotor<>(m_logger, 600);
+                ampDrive = new SimulatedDutyCycleMotor(m_logger, 600);
         }
     }
 
