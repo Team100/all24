@@ -3,6 +3,7 @@ package org.team100.lib.field;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +24,8 @@ public class PracticeField {
 
     // A one-foot circle in the center, like a traffic cone or a bucket.
     public static final Ellipse2d obstacle = new Ellipse2d(new Translation2d(4, 2), 0.3);
+
+    public static final List<Ellipse2d> obstacles = List.of(obstacle);
 
     // Goal on the 0-meter baseline, with a tag under it.
     // Follows the "into the page" convention, so there is 180 degree rotation here.
