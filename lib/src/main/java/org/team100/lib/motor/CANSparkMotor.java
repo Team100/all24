@@ -14,8 +14,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
-public abstract class CANSparkMotor<T extends Measure100>
-        implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
+public abstract class CANSparkMotor<T extends Measure100> implements DutyCycleMotor100, TorqueModel {
     protected final Logger m_logger;
     protected final Feedforward100 m_ff;
     protected final CANSparkBase m_motor;

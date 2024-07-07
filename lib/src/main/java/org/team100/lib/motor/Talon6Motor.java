@@ -18,8 +18,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 /**
  * Superclass for TalonFX motors.
  */
-public abstract class Talon6Motor<T extends Measure100>
-        implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
+public abstract class Talon6Motor<T extends Measure100> implements DutyCycleMotor100, TorqueModel {
     protected final Logger m_logger;
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;

@@ -5,7 +5,7 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.arm.JointMotor;
 import org.team100.lib.telemetry.Logger;
@@ -35,7 +35,7 @@ public class ArmFactory {
         final double kLowerEncoderOffset = 0.861614;
         final double kUpperEncoderOffset = 0.266396;
 
-        Motor100<Angle100> lowerMotor = new JointMotor(parent.child(kLower), 4, 8);
+        DutyCycleMotor100 lowerMotor = new JointMotor(parent.child(kLower), 4, 8);
         // NOTE: the encoder inversion used to be in the subsystem,
         // but now it is here.
         RotaryPositionSensor lowerEncoder = new AnalogTurningEncoder(
@@ -44,7 +44,7 @@ public class ArmFactory {
                 kLowerEncoderOffset,
                 EncoderDrive.INVERSE);
 
-        Motor100<Angle100> upperMotor = new JointMotor(parent.child(kUpper), 30, 1);
+        DutyCycleMotor100 upperMotor = new JointMotor(parent.child(kUpper), 30, 1);
         RotaryPositionSensor upperEncoder = new AnalogTurningEncoder(
                 parent.child(kUpper),
                 0, // analog input 0

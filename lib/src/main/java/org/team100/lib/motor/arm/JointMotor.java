@@ -1,8 +1,9 @@
 package org.team100.lib.motor.arm;
 
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
+import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.motor.model.NeoTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -19,7 +20,7 @@ import com.revrobotics.CANSparkMax;
  * 
  * Note the absence of gear ratio; this should be added before using this class.
  */
-public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
+public class JointMotor implements DutyCycleMotor100, VelocityMotor100<Angle100>, NeoTorqueModel {
     /** Very much not calibrated. */
     private static final double kV = 0.1;
     private final Logger m_logger;

@@ -3,7 +3,9 @@ package org.team100.lib.motor.drive;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.Talon6Motor;
+import org.team100.lib.motor.VelocityMotor100;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.PositionMotor100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.units.Distance100;
@@ -15,8 +17,8 @@ import org.team100.lib.units.Distance100;
  * 
  * Phoenix 6 uses a Kalman filter to eliminate velocity measurement lag.
  */
-public abstract class Talon6DriveMotor extends Talon6Motor<Distance100> {
-
+public abstract class Talon6DriveMotor extends Talon6Motor<Distance100>
+        implements PositionMotor100<Distance100>, VelocityMotor100<Distance100> {
     private final double m_gearRatio;
     private final double m_wheelDiameterM;
     // TODO: just use distance???

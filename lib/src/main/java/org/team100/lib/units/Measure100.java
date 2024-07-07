@@ -8,5 +8,4 @@ package org.team100.lib.units;
  * Don't mix them up.
  */
 public interface Measure100 {
-    double modulus(double x);
 }

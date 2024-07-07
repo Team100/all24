@@ -3,18 +3,15 @@ package org.team100.lib.motion.components;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.encoder.Encoder100;
 import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedEncoder;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
-import org.team100.lib.encoder.drive.NeoVortexDriveEncoder;
 import org.team100.lib.encoder.turning.NeoTurningEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
-import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -176,97 +173,6 @@ public class ServoFactory {
                 param.maxVelM_S(),
                 controller,
                 new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
-    }
-
-    /**
-     * Position control using velocity feedforward and proportional feedback.
-     * Velocity control using outboard SparkMax controller.
-     */
-    public static PositionServo<Distance100> neoDistanceServo(
-            Logger parent,
-            int canId,
-            MotorPhase motorPhase,
-            int currentLimit,
-            SysParam param,
-            PIDController controller,
-            Feedforward100 ff,
-            PIDConstants lowLevelVelocityConstants) {
-        NeoDriveMotor motor = new NeoDriveMotor(
-                parent,
-                canId,
-                motorPhase,
-                currentLimit,
-                param.gearRatio(),
-                param.wheelDiameter(),
-                ff,
-                lowLevelVelocityConstants);
-        Encoder100<Distance100> encoder = new NeoDriveEncoder(
-                parent,
-                motor,
-                param.wheelDiameter() * Math.PI / param.gearRatio());
-        return new OnboardPositionServo<>(
-                parent,
-                motor,
-                encoder,
-                param.maxVelM_S(),
-                controller,
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
-                Distance100.instance);
-    }
-
-    /**
-     * Position control using velocity feedforward and proportional feedback.
-     * Velocity control using outboard SparkMax controller.
-     * 
-     * @param ff in VOLTS VOLTS VOLTS
-     */
-    public static OnboardPositionServo<Distance100> neoVortexDistanceServo(
-            Logger parent,
-            int canId,
-            MotorPhase motorPhase,
-            int currentLimit,
-            SysParam param,
-            PIDController controller,
-            Feedforward100 ff,
-            PIDConstants lowLevelVelocityConstants) {
-        NeoVortexDriveMotor motor = new NeoVortexDriveMotor(
-                parent,
-                canId,
-                motorPhase,
-                currentLimit,
-                param.gearRatio(),
-                param.wheelDiameter(),
-                ff,
-                lowLevelVelocityConstants);
-        Encoder100<Distance100> encoder = new NeoVortexDriveEncoder(
-                parent,
-                motor,
-                param.wheelDiameter() * Math.PI / param.gearRatio());
-        return new OnboardPositionServo<>(
-                parent,
-                motor,
-                encoder,
-                param.maxVelM_S(),
-                controller,
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
-                Distance100.instance);
-    }
-
-    public static PositionServo<Distance100> simulatedDistanceServo(
-            Logger parent,
-            SysParam param,
-            PIDController controller) {
-        // motor speed is rad/s
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(parent, 600);
-        Encoder100<Distance100> encoder = new SimulatedEncoder<>(parent, motor, 1, -1, 1);
-        return new OnboardPositionServo<>(
-                parent,
-                motor,
-                encoder,
-                param.maxVelM_S(),
-                controller,
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
-                Distance100.instance);
     }
 
     private ServoFactory() {

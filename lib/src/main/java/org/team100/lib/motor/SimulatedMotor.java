@@ -14,7 +14,8 @@ import edu.wpi.first.math.MathUtil;
  * 
  * A Neo goes about 6000 rpm, or 100 rev/s, or about 600 rad/s.
  */
-public class SimulatedMotor<T extends Measure100> implements Motor100<T>, GenericTorqueModel {
+public class SimulatedMotor<T extends Measure100>
+        implements DutyCycleMotor100, VelocityMotor100<T>, GenericTorqueModel {
     private final Logger m_logger;
     private final double m_freeSpeed;
     private double m_velocity = 0;
