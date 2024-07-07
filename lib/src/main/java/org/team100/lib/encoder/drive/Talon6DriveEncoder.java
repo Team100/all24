@@ -2,13 +2,12 @@ package org.team100.lib.encoder.drive;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.IncrementalLinearEncoder;
 import org.team100.lib.motor.drive.Talon6DriveMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
-public class Talon6DriveEncoder implements Encoder100<Distance100> {
+public class Talon6DriveEncoder implements IncrementalLinearEncoder {
     private final Logger m_logger;
     private final Talon6DriveMotor m_motor;
     private final double m_distancePerTurn;

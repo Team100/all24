@@ -2,15 +2,14 @@ package org.team100.lib.motor.duty_cycle;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.units.Distance100;
+import org.team100.lib.encoder.IncrementalLinearEncoder;
 
 /**
  * Very simple encoder wrapper to make testing easier.
  * 
  * Uses native units.
  */
-public class VortexEncoder implements Encoder100<Distance100> {
+public class VortexEncoder implements IncrementalLinearEncoder {
     private final VortexProxy m_motor;
 
     public VortexEncoder(VortexProxy motor) {

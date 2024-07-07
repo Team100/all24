@@ -8,13 +8,11 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedLinearEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
-import org.team100.lib.encoder.turning.NeoTurningEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedAngularMotor;
 import org.team100.lib.motor.SimulatedLinearMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
-import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
@@ -81,41 +79,6 @@ public class ServoFactory {
                 param.maxVelM_S(),
                 param.maxAccelM_S2(),
                 param.maxDecelM_S2());
-    }
-
-    /**
-     * Position control using velocity feedforward and proportional feedback.
-     * Velocity control using outboard SparkMax controller.
-     */
-    public static OnboardAngularPositionServo neoAngleServo(
-            Logger parent,
-            int canId,
-            MotorPhase motorPhase,
-            int currentLimit,
-            SysParam param,
-            PIDConstants controller,
-            Feedforward100 ff,
-            PIDConstants lowLevelVelocityConstants) {
-        NeoTurningMotor motor = new NeoTurningMotor(
-                parent,
-                canId,
-                motorPhase,
-                currentLimit,
-                param.gearRatio(),
-                ff,
-                lowLevelVelocityConstants);
-        NeoTurningEncoder encoder = new NeoTurningEncoder(
-                parent,
-                motor,
-                param.gearRatio());
-        RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(encoder);
-        return new OnboardAngularPositionServo(
-                parent,
-                motor,
-                sensor,
-                param.maxVelM_S(),
-                new PIDController(controller.getP(), controller.getI(), controller.getD()),
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
     }
 
     /**

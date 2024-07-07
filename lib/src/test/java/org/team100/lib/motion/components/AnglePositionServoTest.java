@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.CombinedEncoder;
-import org.team100.lib.encoder.MockEncoder100;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
+import org.team100.lib.encoder.MockSettableAngularEncoder;
 import org.team100.lib.motor.MockAngularVelocityMotor100;
 import org.team100.lib.motor.MockPositionMotor100;
 import org.team100.lib.profile.Profile100;
@@ -54,8 +54,8 @@ class AnglePositionServoTest {
     void testOutboard() {
         MockPositionMotor100<Angle100> motor = new MockPositionMotor100<>();
         MockRotaryPositionSensor externalEncoder = new MockRotaryPositionSensor();
-        MockEncoder100<Angle100> builtInEncoder = new MockEncoder100<>();
-        CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
+        MockSettableAngularEncoder builtInEncoder = new MockSettableAngularEncoder();
+        CombinedEncoder combinedEncoder = new CombinedEncoder(
                 externalEncoder, 1.0, builtInEncoder);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 

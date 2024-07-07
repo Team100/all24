@@ -2,7 +2,6 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.units.Measure100;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Util;
 
@@ -16,10 +15,10 @@ import org.team100.lib.util.Util;
  * RoboRIO-attached absolute encoders are the primary, and the incremental
  * encoders are the secondary.
  */
-public class CombinedEncoder<T extends Measure100> implements Encoder100<T> {
+public class CombinedEncoder implements RotaryPositionSensor {
     private final RotaryPositionSensor m_primary;
     private final double m_authority;
-    private final SettableEncoder<T> m_secondary;
+    private final SettableAngularEncoder m_secondary;
 
     /**
      * 
@@ -31,14 +30,14 @@ public class CombinedEncoder<T extends Measure100> implements Encoder100<T> {
     public CombinedEncoder(
             RotaryPositionSensor primary,
             double authority,
-            SettableEncoder<T> secondary) {
+            SettableAngularEncoder secondary) {
         m_primary = primary;
         m_authority = Util.inRange(authority, 0.0, 1.0);
         m_secondary = secondary;
     }
 
     @Override
-    public OptionalDouble getPosition() {
+    public OptionalDouble getPositionRad() {
         // primary range is [-pi, pi]
         OptionalDouble optPrimaryPositionRad = m_primary.getPositionRad();
         if (optPrimaryPositionRad.isPresent()) {
@@ -58,7 +57,7 @@ public class CombinedEncoder<T extends Measure100> implements Encoder100<T> {
     }
 
     @Override
-    public OptionalDouble getRate() {
+    public OptionalDouble getRateRad_S() {
         OptionalDouble primaryRate = m_primary.getRateRad_S();
         if (primaryRate.isPresent()) {
             // Rate cannot be corrected so just return the primary value.

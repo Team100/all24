@@ -24,7 +24,6 @@ import org.team100.lib.motor.drive.Kraken6DriveMotor;
 import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -194,7 +193,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         // if we correct to exactly the primary reading, we effectively inject noise
         // into the secondary, so soften the response.
         final double primaryAuthority = 0.1;
-        CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
+        CombinedEncoder combinedEncoder = new CombinedEncoder(
                 turningEncoder,
                 primaryAuthority,
                 builtInEncoder);

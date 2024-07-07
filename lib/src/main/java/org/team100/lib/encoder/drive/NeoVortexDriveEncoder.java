@@ -2,11 +2,10 @@ package org.team100.lib.encoder.drive;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.SettableEncoder;
+import org.team100.lib.encoder.SettableLinearEncoder;
 import org.team100.lib.motor.drive.NeoVortexDriveMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
 /**
  * The built-in encoder in Neo motors.
@@ -14,7 +13,7 @@ import org.team100.lib.units.Distance100;
  * This encoder simply senses the 14 rotor magnets in 3 places, so it's 42 ticks
  * per turn.
  */
-public class NeoVortexDriveEncoder implements SettableEncoder<Distance100> {
+public class NeoVortexDriveEncoder implements SettableLinearEncoder {
     private final Logger m_logger;
     private final NeoVortexDriveMotor m_motor;
     private final double m_distancePerTurn;

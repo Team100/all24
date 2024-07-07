@@ -2,9 +2,7 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.units.Measure100;
-
-public class MockEncoder100<T extends Measure100> implements SettableEncoder<T> {
+public class MockSettableAngularEncoder implements SettableAngularEncoder {
     public double angle = 0;
     public double rate = 0;
 
@@ -32,4 +30,5 @@ public class MockEncoder100<T extends Measure100> implements SettableEncoder<T> 
     public void setPosition(double position) {
         this.angle = position;
     }
+
 }

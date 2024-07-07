@@ -2,11 +2,10 @@ package org.team100.lib.encoder.turning;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.SettableEncoder;
+import org.team100.lib.encoder.SettableAngularEncoder;
 import org.team100.lib.motor.turning.NeoTurningMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
 /**
  * The built-in encoder in Neo motors.
@@ -14,7 +13,7 @@ import org.team100.lib.units.Angle100;
  * This encoder simply senses the 14 rotor magnets in 3 places, so it's 42 ticks
  * per turn.
  */
-public class NeoTurningEncoder implements SettableEncoder<Angle100> {
+public class NeoTurningEncoder implements SettableAngularEncoder {
     private final Logger m_logger;
     private final NeoTurningMotor m_motor;
     private final double m_gearRatio;

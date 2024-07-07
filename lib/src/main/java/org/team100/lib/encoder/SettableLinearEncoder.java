@@ -1,15 +1,16 @@
 package org.team100.lib.encoder;
 
-import org.team100.lib.units.Measure100;
+import org.team100.lib.units.Distance100;
 
 /**
  * Some kinds of encoders make it easy to set the position offset, but some
  * don't, for example the WPI DutyCycleEncoder and AnalogEncoder classes allow
  * you to set the absolute offset but you can't adjust the turn counter.
  */
-public interface SettableEncoder<T extends Measure100> extends Encoder100<T> {
+public interface SettableLinearEncoder extends Encoder100<Distance100> {
     /**
-     * Position in meters or radians
+     * Position in meters
      */
     void setPosition(double position);
+
 }

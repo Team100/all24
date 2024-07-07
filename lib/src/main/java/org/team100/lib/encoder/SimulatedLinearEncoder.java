@@ -5,7 +5,6 @@ import java.util.OptionalDouble;
 import org.team100.lib.motor.SimulatedLinearMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
@@ -16,7 +15,7 @@ import edu.wpi.first.wpilibj.Timer;
  * Relies on Timer.getFPGATimestamp() to compute rate, which means you should
  * use SimHooks.stepTimingAsync() in your tests.
  */
-public class SimulatedLinearEncoder implements Encoder100<Distance100> {
+public class SimulatedLinearEncoder implements IncrementalLinearEncoder {
     private final Logger m_logger;
     private final SimulatedLinearMotor m_motor;
     private final double m_reduction;

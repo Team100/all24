@@ -2,13 +2,12 @@ package org.team100.lib.encoder.turning;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.SettableEncoder;
+import org.team100.lib.encoder.SettableAngularEncoder;
 import org.team100.lib.motor.turning.Talon6TurningMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
-public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
+public class Talon6TurningEncoder implements SettableAngularEncoder {
     private final Logger m_logger;
     private final Talon6TurningMotor m_motor;
     private final double m_gearRatio;
