@@ -9,13 +9,14 @@ import org.team100.lib.encoder.SimulatedLinearEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -117,22 +118,22 @@ public class ServoFactory {
                 new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
     }
 
-    public static OnboardAngularPositionServo simulatedAngleServo(
+    public static OnboardAngularPositionServo2 simulatedAngleServo(
             Logger parent,
             SysParam param,
             PIDController controller) {
         // motor speed is rad/s
-        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(parent, 600);
+        SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
+        RotaryMechanism mech = new RotaryMechanism(motor, 1);
         RotaryPositionSensor sensor = new SimulatedRotaryPositionSensor(
                 parent,
-                motor,
-                1);
+                mech);
         // the new sim doesn't have hard stops; should it?
         // 0, // minimum hard stop
         // 2); // maximum hard stop
-        return new OnboardAngularPositionServo(
+        return new OnboardAngularPositionServo2(
                 parent,
-                motor,
+                mech,
                 sensor,
                 param.maxVelM_S(),
                 controller,

@@ -8,7 +8,7 @@ import org.team100.lib.units.Measure100;
  * 
  * Implementations don't need to cover them all.
  * 
- * TODO: remove Measure100.
+ * TODO: get rid of this entirely, use BareMotor.
  */
 public interface Motor100<T extends Measure100> extends Glassy {
 

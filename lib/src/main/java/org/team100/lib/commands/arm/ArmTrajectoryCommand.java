@@ -28,9 +28,8 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class ArmTrajectoryCommand extends Command100 {
     private static final double kTolerance = 0.02;
-    private static final TrajectoryConfig kConf = new TrajectoryConfig(1, 1);
+    private static final TrajectoryConfig kConf = new TrajectoryConfig(0.1, 0.1);
     private static final double kA = 0.2;
-    private static final double kRotsPerSecToVoltsPerSec = 4;
 
     private final ArmSubsystem m_armSubsystem;
     private final ArmKinematics m_armKinematicsM;
@@ -107,9 +106,17 @@ public class ArmTrajectoryCommand extends Command100 {
         // velocity reference
         ArmAngles rdot = getThetaVelReference(desiredState, r);
 
+        // System.out.printf("%5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f\n",
+        //         measurement.get().th1, measurement.get().th2,
+        //         r.th1, r.th2,
+        //         velocityMeasurement.get().th1, velocityMeasurement.get().th2,
+        //         rdot.th1, rdot.th2);
+
         // feedforward
-        double ff2 = rdot.th2 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
-        double ff1 = rdot.th1 / (Math.PI * 2) * kRotsPerSecToVoltsPerSec;
+        // this is a guess.
+        final double kFudgeFactor = 3;
+        double ff2 = rdot.th2 * kFudgeFactor;
+        double ff1 = rdot.th1 * kFudgeFactor;
 
         // velocity feedback
         double u1_vel = m_lowerVelController.calculate(velocityMeasurement.get().th1, rdot.th1);

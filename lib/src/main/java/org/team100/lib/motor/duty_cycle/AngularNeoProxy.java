@@ -1,18 +1,17 @@
 package org.team100.lib.motor.duty_cycle;
 
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
 import org.team100.lib.motor.model.NeoTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
-public class AngularNeoProxy implements Motor100<Angle100>, NeoTorqueModel {
+public class AngularNeoProxy implements BareMotor, NeoTorqueModel {
     private final Logger m_logger;
 
     private final CANSparkMax m_motor;
@@ -58,5 +57,10 @@ public class AngularNeoProxy implements Motor100<Angle100>, NeoTorqueModel {
     @Override
     public void setPosition(double position, double velocity, double torque) {
         //
+    }
+
+    @Override
+    public double getVelocityRad_S() {
+        throw new UnsupportedOperationException();
     }
 }

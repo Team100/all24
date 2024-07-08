@@ -5,9 +5,10 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
-import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo2;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.MotorPhase;
@@ -21,8 +22,15 @@ import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 
 /**
  * Stock AndyMark module with Falcon drive and PWM 775 steering.
+ * 
+ * 
  */
 public class AMSwerveModule100 extends SwerveModule100 {
+    /**
+     * There is a planetary gearbox between the motor and the steering gear, and the
+     * final is 48/40.
+     */
+    private static final double kSteeringReduction = 71.0 * 40 / 48;
     // AndyMark Swerve & Steer has 4 inch wheel
     private static final double kWheelDiameterM = 0.09628;
     // see andymark.com/products/swerve-and-steer
@@ -96,8 +104,10 @@ public class AMSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics) {
         TurningMotorController100 turningMotor = new TurningMotorController100(
                 parent,
-                new VictorSP(turningMotorChannel),
-                turningMotorChannel);
+                new VictorSP(turningMotorChannel));
+        RotaryMechanism steeringGears = new RotaryMechanism(
+                turningMotor,
+                kSteeringReduction);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
                 parent,
                 turningEncoderChannel,
@@ -112,9 +122,9 @@ public class AMSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        OnboardAngularPositionServo turningServo = new OnboardAngularPositionServo(
+        OnboardAngularPositionServo2 turningServo = new OnboardAngularPositionServo2(
                 parent,
-                turningMotor,
+                steeringGears,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,

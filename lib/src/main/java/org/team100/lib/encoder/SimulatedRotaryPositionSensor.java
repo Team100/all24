@@ -2,39 +2,35 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 
 public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
     private final Logger m_logger;
-    private final SimulatedMotor<Angle100> m_motor;
-    private final double m_reduction;
+    private final RotaryMechanism m_motor;
 
     private double m_positionRad = 0;
     private double m_timeS = Timer.getFPGATimestamp();
 
     public SimulatedRotaryPositionSensor(
             Logger parent,
-            SimulatedMotor<Angle100> motor,
-            double reduction) {
+            RotaryMechanism motor) {
         m_logger = parent.child(this);
         m_motor = motor;
-        m_reduction = reduction;
         reset();
     }
 
     @Override
     public OptionalDouble getPositionRad() {
         double nowS = Timer.getFPGATimestamp();
-        double dt = nowS - m_timeS;
+        double dtS = nowS - m_timeS;
         // motor velocity is rad/s
-        double m_rate = m_motor.getVelocity() / m_reduction;
-        m_positionRad += m_rate * dt;
+        double velocityRad_S = m_motor.getVelocityRad_S();
+        m_positionRad += velocityRad_S * dtS;
         m_positionRad = MathUtil.angleModulus(m_positionRad);
         m_timeS = nowS;
         m_logger.logDouble(Level.TRACE, "position", () -> m_positionRad);
@@ -44,7 +40,7 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
     @Override
     public OptionalDouble getRateRad_S() {
         // motor velocity is rad/s
-        double m_rate = m_motor.getVelocity() / m_reduction;
+        double m_rate = m_motor.getVelocityRad_S();
         m_logger.logDouble(Level.TRACE, "rate", () -> m_rate);
         return OptionalDouble.of(m_rate);
     }

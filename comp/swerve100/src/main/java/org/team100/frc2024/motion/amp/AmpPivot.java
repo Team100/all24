@@ -10,11 +10,12 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.motor.duty_cycle.AngularNeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -40,39 +41,41 @@ public class AmpPivot extends SubsystemBase implements Glassy {
 
         switch (Identity.instance) {
             case COMP_BOT:
+                BareMotor motor = new AngularNeoProxy(m_logger, 2, IdleMode.kCoast, 30);
+                RotaryMechanism mech = new RotaryMechanism(motor, 55);
+                AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(
+                        m_logger, 3, 0.645439, EncoderDrive.INVERSE);
+                PIDController controller = new PIDController(0.8, 0, 0);
                 ampAngleServo = new GravityServo(
-                        new AngularNeoProxy(m_logger, 2, IdleMode.kCoast, 30),
+                        mech,
                         m_logger,
-                        m_params,
-                        new PIDController(0.8, 0, 0),
+                        controller,
                         profile,
                         period,
-                        new AS5048RotaryPositionSensor(m_logger, 3, 0.645439, EncoderDrive.INVERSE),
-                        new double[] { 0, 0 });
+                        encoder);
                 break;
             default:
                 // For testing and simulation
                 // motor speed is rad/s
-                SimulatedMotor<Angle100> simMotor = new SimulatedMotor<>(
+                SimulatedBareMotor simMotor = new SimulatedBareMotor(
                         m_logger, 600);
+                // guess the gear ratio?
+                RotaryMechanism simMech = new RotaryMechanism(simMotor, 75);
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
-                        m_logger,
-                        simMotor,
-                        75); // guess the gear ratio?
+                        m_logger, simMech);
+                PIDController controller2 = new PIDController(0.7, 0, 0);
                 ampAngleServo = new GravityServo(
-                        simMotor,
+                        simMech,
                         m_logger,
-                        m_params,
-                        new PIDController(0.7, 0, 0),
+                        controller2,
                         profile,
                         period,
-                        simEncoder,
-                        new double[] { 0, 0 });
+                        simEncoder);
         }
     }
 
     public void setAmpPosition(double value) {
-        ampAngleServo.setPositionWithSteadyState(value);
+        ampAngleServo.setPosition(value);
     }
 
     public void setDutyCycle(double value) {

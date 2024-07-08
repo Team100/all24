@@ -2,15 +2,16 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.SimulatedLinearEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
-import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo2;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -49,11 +50,11 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
             Logger parent,
             SwerveKinodynamics kinodynamics) {
         // simulated turning motor free speed is 20 rad/s
-        SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(parent, 20);
+        SimulatedBareMotor turningMotor = new SimulatedBareMotor(parent, 20);
+        RotaryMechanism turningMech = new RotaryMechanism(turningMotor, 1);
         SimulatedRotaryPositionSensor turningEncoder = new SimulatedRotaryPositionSensor(
                 parent,
-                turningMotor,
-                1);
+                turningMech);
         PIDController turningPositionController = new PIDController(
                 20, // kP
                 0, // kI
@@ -63,9 +64,9 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         // note low tolerance
         turningPositionController.setTolerance(0.05, 0.05);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        OnboardAngularPositionServo turningServo = new OnboardAngularPositionServo(
+        OnboardAngularPositionServo2 turningServo = new OnboardAngularPositionServo2(
                 parent,
-                turningMotor,
+                turningMech,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,

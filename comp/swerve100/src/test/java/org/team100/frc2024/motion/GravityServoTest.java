@@ -5,12 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.frc2024.TestLogger24;
 import org.team100.frc2024.Timeless2024;
-import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
-import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -20,32 +19,23 @@ class GravityServoTest implements Timeless2024 {
 
     @Test
     void testSetPosition() {
-
-        SysParam pivotParams = SysParam.neoPositionServoSystem(
-                165, // gear ratio
-                300, // max vel
-                300); // max accel
-
         PIDController pivotController = new PIDController(4.5, 0.0, 0.000);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         double period = 0.02;
-        double[] softLimits = new double[] { 0, 45 };
         // motor speed is rad/s
-        SimulatedMotor<Angle100> simMotor = new SimulatedMotor<>(logger, 600);
+        SimulatedBareMotor simMotor = new SimulatedBareMotor(logger, 600);
+        RotaryMechanism simMech = new RotaryMechanism(simMotor, 165);
         SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                 logger,
-                simMotor,
-                165); // see above
+                simMech);
 
         GravityServo g = new GravityServo(
-                simMotor,
+                simMech,
                 logger,
-                pivotParams,
                 pivotController,
                 profile,
                 period,
-                simEncoder,
-                softLimits);
+                simEncoder);
         // start at zero
         assertEquals(0, g.getPositionRad().getAsDouble(), kDelta);
         // one second

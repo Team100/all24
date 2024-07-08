@@ -4,11 +4,10 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -18,11 +17,15 @@ import edu.wpi.first.wpilibj.Timer;
  * Because the 2025 angular encoder classes do not wind up, this is a version of
  * the position servo that understands that; it's almost a copy of
  * OnboardPositionServo.
+ * 
+ * TODO: replace the original with this, when it's done
  */
-public class OnboardAngularPositionServo implements AngularPositionServo {
+public class OnboardAngularPositionServo2 implements AngularPositionServo {
 
     private final Logger m_logger;
-    private final Motor100<Angle100> m_motor;
+    /** Mechanism is measured in output shaft units, not motor units. */
+    private final RotaryMechanism m_motor;
+    /** Encoder measures the output 1:1. */
     private final RotaryPositionSensor m_encoder;
     private final double m_maxVel;
     private final PIDController m_controller;
@@ -35,9 +38,9 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     private double m_previousSetpoint = 0;
     private double m_prevTime;
 
-    public OnboardAngularPositionServo(
+    public OnboardAngularPositionServo2(
             Logger parent,
-            Motor100<Angle100> motor,
+            RotaryMechanism motor,
             RotaryPositionSensor encoder,
             double maxVel,
             PIDController controller,
@@ -79,6 +82,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         OptionalDouble positionRad = m_encoder.getPositionRad();
         if (positionRad.isEmpty())
             return;
+        // measurement is output shaft rad
         double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
 
         // use the modulus closest to the measurement.
@@ -95,6 +99,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         final double u_FF = m_setpoint.v();
         // note u_FF is rad/s, so a big number, u_FB should also be a big number.
 
+        // u_TOTAL is output shaft speed in rad/s
         final double u_TOTAL = MathUtil.clamp(u_FB + u_FF, -m_maxVel, m_maxVel);
 
         // pass the feedforward through unmodified
