@@ -18,16 +18,14 @@ import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.motor.drive.Falcon6DriveMotor;
-import org.team100.lib.motor.duty_cycle.AngularNeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
-
-import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -89,7 +87,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
             case COMP_BOT:
                 double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
 
-                Falcon6DriveMotor leftMotor = new Falcon6DriveMotor(
+                Falcon6Motor leftMotor = new Falcon6Motor(
                         leftLogger,
                         leftID,
                         MotorPhase.REVERSE,
@@ -105,7 +103,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         leftLogger, leftMotor, distancePerTurn);
                 leftRoller = new OutboardLinearVelocityServo(leftLogger, leftMech, leftEncoder);
 
-                Falcon6DriveMotor rightMotor = new Falcon6DriveMotor(
+                Falcon6Motor rightMotor = new Falcon6Motor(
                         rightLogger,
                         rightID,
                         MotorPhase.FORWARD,
@@ -121,7 +119,8 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         rightLogger, rightMotor, distancePerTurn);
                 rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMech, rightEncoder);
 
-                BareMotor pivotMotor = new AngularNeoProxy(parent, pivotID, IdleMode.kCoast, 40);
+                BareMotor pivotMotor = new NeoCANSparkMotor(parent, pivotID, MotorPhase.FORWARD, 40, Feedforward100.makeNeo(), new PIDConstants(0,0,0));
+
                 RotaryMechanism pivotMech = new RotaryMechanism(pivotMotor, kPivotReduction);
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(parent, 0, 0.508753,
                         EncoderDrive.DIRECT);

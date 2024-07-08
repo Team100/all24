@@ -42,7 +42,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     public void setVelocity(double setpoint) {
         m_setpoint = setpoint;
         m_motor.setVelocity(setpoint, accel(setpoint), 0);
-        m_logger.logDouble(Level.TRACE, "Desired setpoint", () -> setpoint);
+        m_logger.logDouble(Level.TRACE, "setpoint (m_s)", () -> setpoint);
     }
 
     /**

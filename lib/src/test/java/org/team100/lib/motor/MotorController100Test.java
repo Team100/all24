@@ -3,7 +3,6 @@ package org.team100.lib.motor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motor.turning.TurningMotorController100;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
 
@@ -14,7 +13,7 @@ class MotorController100Test {
     @Test
     void testTurning() {
         MockMotorController mc = new MockMotorController();
-        TurningMotorController100 m = new TurningMotorController100(logger, mc);
+        BareMotorController100 m = new BareMotorController100(logger, mc);
         m.setVelocity(0, 0, 0);
         assertEquals(0, mc.speed, kDelta);
         m.setVelocity(1, 0, 0);

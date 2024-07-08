@@ -3,7 +3,7 @@ package org.team100.lib.encoder.drive;
 import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.SettableLinearEncoder;
-import org.team100.lib.motor.drive.NeoVortexDriveMotor;
+import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -15,7 +15,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
  */
 public class NeoVortexDriveEncoder implements SettableLinearEncoder {
     private final Logger m_logger;
-    private final NeoVortexDriveMotor m_motor;
+    private final NeoVortexCANSparkMotor m_motor;
     private final double m_distancePerTurn;
 
     /**
@@ -23,7 +23,7 @@ public class NeoVortexDriveEncoder implements SettableLinearEncoder {
      */
     public NeoVortexDriveEncoder(
             Logger parent,
-            NeoVortexDriveMotor motor,
+            NeoVortexCANSparkMotor motor,
             double distancePerTurn) {
         m_logger = parent.child(this);
         m_motor = motor;

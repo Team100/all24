@@ -4,11 +4,10 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -22,7 +21,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class OnboardAngularPositionServo implements AngularPositionServo {
 
     private final Logger m_logger;
-    private final Motor100<Angle100> m_motor;
+    private final RotaryMechanism m_motor;
     private final RotaryPositionSensor m_encoder;
     private final double m_maxVel;
     private final PIDController m_controller;
@@ -37,7 +36,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     public OnboardAngularPositionServo(
             Logger parent,
-            Motor100<Angle100> motor,
+            RotaryMechanism motor,
             RotaryPositionSensor encoder,
             double maxVel,
             PIDController controller,

@@ -1,10 +1,8 @@
-package org.team100.lib.motor.turning;
+package org.team100.lib.motor;
 
-import org.team100.lib.motor.Motor100;
 import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -36,7 +34,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * Given the issues with feedback, this controller should rely mostly on
  * feedforward.
  */
-public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
+public class TalonSRXMotor implements BareMotor, GenericTorqueModel {
     /**
      * There is a planetary gearbox between the motor and the steering gear, and the
      * final is 48/40.
@@ -84,7 +82,7 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     private final Logger m_logger;
     private final WPI_TalonSRX m_motor;
 
-    public CANTurningMotor(Logger parent, int channel) {
+    public TalonSRXMotor(Logger parent, int channel) {
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
         m_motor.setNeutralMode(NeutralMode.Brake);
@@ -200,5 +198,11 @@ public class CANTurningMotor implements Motor100<Angle100>, GenericTorqueModel {
     @Override
     public void setPosition(double position, double velocity, double torque) {
         //
+    }
+
+    @Override
+    public double getVelocityRad_S() {
+        return m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10;
+
     }
 }

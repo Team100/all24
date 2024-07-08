@@ -4,7 +4,9 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 
 import org.team100.frc2024.motion.GravityServo;
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
@@ -12,12 +14,11 @@ import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.motor.duty_cycle.AngularNeoProxy;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-
-import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,7 +42,13 @@ public class AmpPivot extends SubsystemBase implements Glassy {
 
         switch (Identity.instance) {
             case COMP_BOT:
-                BareMotor motor = new AngularNeoProxy(m_logger, 2, IdleMode.kCoast, 30);
+                BareMotor motor = new NeoCANSparkMotor(
+                        m_logger,
+                        2,
+                        MotorPhase.FORWARD,
+                        30,
+                        Feedforward100.makeNeo(),
+                        new PIDConstants(0, 0, 0));
                 RotaryMechanism mech = new RotaryMechanism(motor, 55);
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(
                         m_logger, 3, 0.645439, EncoderDrive.INVERSE);

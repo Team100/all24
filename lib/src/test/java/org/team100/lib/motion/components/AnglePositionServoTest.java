@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
 import org.team100.lib.encoder.MockSettableAngularEncoder;
-import org.team100.lib.motor.MockMotor100;
+import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -27,7 +27,8 @@ class AnglePositionServoTest {
         // long period to make the output bigger
         double period = 1;
 
-        MockMotor100<Angle100> turningMotor = new MockMotor100<>();
+        MockBareMotor turningMotor = new MockBareMotor();
+        RotaryMechanism mech = new RotaryMechanism(turningMotor, 1);
         MockRotaryPositionSensor turningEncoder = new MockRotaryPositionSensor();
 
         PIDController turningController2 = new PIDController(1, 0, 0, period);
@@ -36,7 +37,7 @@ class AnglePositionServoTest {
         double maxVel = 1;
         OnboardAngularPositionServo servo = new OnboardAngularPositionServo(
                 logger,
-                turningMotor,
+                mech,
                 turningEncoder,
                 maxVel,
                 turningController2,
@@ -51,7 +52,8 @@ class AnglePositionServoTest {
 
     @Test
     void testOutboard() {
-        MockMotor100<Angle100> motor = new MockMotor100<>();
+        MockBareMotor motor = new MockBareMotor();
+        RotaryMechanism mech = new RotaryMechanism(motor, 1);
         MockRotaryPositionSensor externalEncoder = new MockRotaryPositionSensor();
         MockSettableAngularEncoder builtInEncoder = new MockSettableAngularEncoder();
         CombinedEncoder combinedEncoder = new CombinedEncoder(
@@ -60,7 +62,7 @@ class AnglePositionServoTest {
 
         OutboardPositionServo servo = new OutboardPositionServo(
                 logger,
-                motor,
+                mech,
                 combinedEncoder,
                 profile);
         servo.reset();

@@ -3,7 +3,7 @@ package org.team100.lib.encoder.turning;
 import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.SettableAngularEncoder;
-import org.team100.lib.motor.turning.NeoTurningMotor;
+import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -15,12 +15,12 @@ import org.team100.lib.telemetry.Telemetry.Level;
  */
 public class NeoTurningEncoder implements SettableAngularEncoder {
     private final Logger m_logger;
-    private final NeoTurningMotor m_motor;
+    private final NeoCANSparkMotor m_motor;
     private final double m_gearRatio;
 
     public NeoTurningEncoder(
             Logger parent,
-            NeoTurningMotor motor,
+            NeoCANSparkMotor motor,
             double gearRatio) {
         m_logger = parent.child(this);
         m_motor = motor;

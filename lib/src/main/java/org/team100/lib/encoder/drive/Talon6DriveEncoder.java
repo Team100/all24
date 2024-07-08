@@ -3,18 +3,18 @@ package org.team100.lib.encoder.drive;
 import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.IncrementalLinearEncoder;
-import org.team100.lib.motor.drive.Talon6DriveMotor;
+import org.team100.lib.motor.Talon6Motor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 public class Talon6DriveEncoder implements IncrementalLinearEncoder {
     private final Logger m_logger;
-    private final Talon6DriveMotor m_motor;
+    private final Talon6Motor m_motor;
     private final double m_distancePerTurn;
 
     public Talon6DriveEncoder(
             Logger parent,
-            Talon6DriveMotor motor,
+            Talon6Motor motor,
             double distancePerTurn) {
         m_logger = parent.child(this);
         m_motor = motor;

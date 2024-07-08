@@ -1,14 +1,17 @@
 package org.team100.lib.motion.arm;
 
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.motor.arm.JointMotor;
 import org.team100.lib.telemetry.Logger;
 
 /**
@@ -34,7 +37,13 @@ public class ArmFactory {
         final double kUpperEncoderOffset = 0.266396;
         final double kReduction = 600;
 
-        BareMotor lowerMotor = new JointMotor(parent.child(kLower), 4, 8);
+        BareMotor lowerMotor = new NeoCANSparkMotor(
+                parent.child(kLower),
+                4,
+                MotorPhase.FORWARD,
+                8,
+                Feedforward100.makeNeo(),
+                new PIDConstants(0, 0, 0));
         RotaryMechanism lowerMech = new RotaryMechanism(lowerMotor, kReduction);
 
         // NOTE: the encoder inversion used to be in the subsystem,
@@ -45,7 +54,13 @@ public class ArmFactory {
                 kLowerEncoderOffset,
                 EncoderDrive.INVERSE);
 
-        BareMotor upperMotor = new JointMotor(parent.child(kUpper), 30, 1);
+        BareMotor upperMotor = new NeoCANSparkMotor(
+                parent.child(kUpper),
+                30,
+                MotorPhase.FORWARD,
+                1,
+                Feedforward100.makeNeo(),
+                new PIDConstants(0, 0, 0));
         RotaryMechanism upperMech = new RotaryMechanism(upperMotor, kReduction);
         RotaryPositionSensor upperEncoder = new AnalogTurningEncoder(
                 parent.child(kUpper),

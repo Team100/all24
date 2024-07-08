@@ -13,6 +13,7 @@ import org.team100.lib.encoder.turning.Talon6TurningEncoder;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
@@ -20,15 +21,17 @@ import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.OutboardPositionServo;
 import org.team100.lib.motion.components.SelectableAngularPositionServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motor.Falcon6Motor;
+import org.team100.lib.motor.Kraken6Motor;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.drive.Kraken6DriveMotor;
-import org.team100.lib.motor.turning.Falcon6TurningMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
+    private static final double kSteeringSupplyLimit = 10;
+    private static final double kSteeringStatorLimit = 20;
     /**
      * WCP calls this "rotation ratio" here, we use the "flipped belt" which is the
      * fastest steering ratio.
@@ -112,7 +115,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             Feedforward100 ff) {
         double distancePerTurn = kWheelDiameterM * Math.PI / ratio.m_ratio;
 
-        Kraken6DriveMotor driveMotor = new Kraken6DriveMotor(
+        Kraken6Motor driveMotor = new Kraken6Motor(
                 parent,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
@@ -148,11 +151,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             MotorPhase motorPhase,
             PIDConstants lowLevelPID,
             Feedforward100 ff) {
-        Falcon6TurningMotor turningMotor = new Falcon6TurningMotor(
+        Falcon6Motor turningMotor = new Falcon6Motor(
                 parent,
                 turningMotorCanId,
                 motorPhase,
-                gearRatio,
+                kSteeringSupplyLimit,
+                kSteeringStatorLimit,
                 lowLevelPID,
                 ff);
         RotaryPositionSensor turningEncoder = turningEncoder(
@@ -186,7 +190,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static AngularPositionServo getTurningServo(
             Logger parent,
             SwerveKinodynamics kinodynamics,
-            Falcon6TurningMotor turningMotor,
+            Falcon6Motor turningMotor,
             RotaryPositionSensor turningEncoder,
             double turningGearRatio,
             PIDController turningPositionController,
@@ -202,14 +206,15 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoder,
                 primaryAuthority,
                 builtInEncoder);
+        RotaryMechanism mech = new RotaryMechanism(turningMotor, turningGearRatio);
         AngularPositionServo outboard = new OutboardPositionServo(
                 parent,
-                turningMotor,
+                mech,
                 combinedEncoder,
                 profile);
         OnboardAngularPositionServo onboard = new OnboardAngularPositionServo(
                 parent,
-                turningMotor,
+                mech,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,

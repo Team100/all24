@@ -2,16 +2,18 @@ package org.team100.frc2024.motion.climber;
 
 import java.util.OptionalDouble;
 
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.IncrementalLinearEncoder;
 import org.team100.lib.encoder.SimulatedLinearEncoder;
+import org.team100.lib.encoder.VortexEncoder;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.motor.duty_cycle.VortexEncoder;
-import org.team100.lib.motor.duty_cycle.VortexProxy;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -33,30 +35,34 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         m_logger = parent.child(this);
         switch (Identity.instance) {
             case COMP_BOT:
-                VortexProxy vp1 = new VortexProxy(
+                NeoVortexCANSparkMotor vp1 = new NeoVortexCANSparkMotor(
                         m_logger.child("left"),
                         leftClimberID,
                         MotorPhase.FORWARD,
-                        kCurrentLimit);
+                        kCurrentLimit,
+                        Feedforward100.makeNeoVortex(),
+                        new PIDConstants(0, 0, 0));
                 e1 = new VortexEncoder(vp1);
                 v1 = vp1;
-                VortexProxy vp2 = new VortexProxy(
+                NeoVortexCANSparkMotor vp2 = new NeoVortexCANSparkMotor(
                         m_logger.child("right"),
                         rightClimberID,
                         MotorPhase.REVERSE,
-                        kCurrentLimit);
+                        kCurrentLimit,
+                        Feedforward100.makeNeoVortex(),
+                        new PIDConstants(0, 0, 0));
                 e2 = new VortexEncoder(vp2);
                 v2 = vp2;
                 break;
             default:
                 // for testing and simulation
                 SimulatedBareMotor vs1 = new SimulatedBareMotor(m_logger.child("left"), 1);
-                LinearMechanism m1 = new LinearMechanism(vs1, kReduction, kSprocketDiameterM );
+                LinearMechanism m1 = new LinearMechanism(vs1, kReduction, kSprocketDiameterM);
                 e1 = new SimulatedLinearEncoder(m_logger.child("left"),
                         m1, -Double.MAX_VALUE, Double.MAX_VALUE);
                 v1 = vs1;
                 SimulatedBareMotor vs2 = new SimulatedBareMotor(m_logger.child("right"), 1);
-                LinearMechanism m2 = new LinearMechanism(vs2, kReduction, kSprocketDiameterM );
+                LinearMechanism m2 = new LinearMechanism(vs2, kReduction, kSprocketDiameterM);
                 e2 = new SimulatedLinearEncoder(m_logger.child("right"), m2, -Double.MAX_VALUE,
                         Double.MAX_VALUE);
                 v2 = vs2;

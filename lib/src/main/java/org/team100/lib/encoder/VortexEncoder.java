@@ -1,8 +1,8 @@
-package org.team100.lib.motor.duty_cycle;
+package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.IncrementalLinearEncoder;
+import org.team100.lib.motor.CANSparkMotor;
 
 /**
  * Very simple encoder wrapper to make testing easier.
@@ -10,9 +10,9 @@ import org.team100.lib.encoder.IncrementalLinearEncoder;
  * Uses native units.
  */
 public class VortexEncoder implements IncrementalLinearEncoder {
-    private final VortexProxy m_motor;
+    private final CANSparkMotor m_motor;
 
-    public VortexEncoder(VortexProxy motor) {
+    public VortexEncoder(CANSparkMotor motor) {
         m_motor = motor;
     }
 
@@ -36,13 +36,13 @@ public class VortexEncoder implements IncrementalLinearEncoder {
      */
     @Override
     public OptionalDouble getRate() {
-        double rateRPM = m_motor.getVelocityRPM();
+        double rateRPM = m_motor.getRateRPM();
         return OptionalDouble.of(rateRPM);
     }
 
     @Override
     public void reset() {
-        m_motor.resetPosition();
+        m_motor.resetEncoderPosition();
     }
 
     @Override

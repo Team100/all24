@@ -4,11 +4,9 @@ import java.util.function.DoubleSupplier;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Measure100;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -19,7 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 /**
  * Superclass for TalonFX motors.
  */
-public abstract class Talon6Motor<T extends Measure100> implements Glassy, TorqueModel {
+public abstract class Talon6Motor implements BareMotor, TorqueModel {
     protected final Logger m_logger;
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
@@ -71,11 +69,41 @@ public abstract class Talon6Motor<T extends Measure100> implements Glassy, Torqu
         m_torque = () -> m_motor.getTorqueCurrent().refresh().getValueAsDouble();
     }
 
+    @Override
     public void setDutyCycle(double output) {
         Phoenix100.warn(() -> m_motor.setControl(m_dutyCycleOut
                 .withOutput(output)));
         m_logger.logDouble(Level.TRACE, "desired duty cycle [-1,1]", () -> output);
         log();
+    }
+
+    @Override
+    public void setVelocity(double motorRad_S, double motorAccelRad_S2, double motorTorqueNm) {
+        double motorRev_S = motorRad_S / (2 * Math.PI);
+        double motorRev_S2 = motorAccelRad_S2 / (2 * Math.PI);
+        setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
+    }
+
+    @Override
+    public void setPosition(double motorPositionRad, double motorVelocityRad_S, double motorTorqueNm) {
+        double motorRev = motorPositionRad / (2 * Math.PI);
+        double motorRev_S = motorVelocityRad_S / (2 * Math.PI);
+        setMotorPosition(motorRev, motorRev_S, motorTorqueNm);
+    }
+
+    @Override
+    public double getVelocityRad_S() {
+        return getVelocityRev_S() * 2 * Math.PI;
+    }
+
+    @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
+    @Override
+    public void close() {
+        m_motor.close();
     }
 
     /**
@@ -142,14 +170,6 @@ public abstract class Talon6Motor<T extends Measure100> implements Glassy, Torqu
         m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
         m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
         log();
-    }
-
-    public void stop() {
-        m_motor.stopMotor();
-    }
-
-    public void close() {
-        m_motor.close();
     }
 
     /**

@@ -3,7 +3,7 @@ package org.team100.lib.encoder.drive;
 import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.IncrementalLinearEncoder;
-import org.team100.lib.motor.drive.NeoDriveMotor;
+import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -15,12 +15,12 @@ import org.team100.lib.telemetry.Telemetry.Level;
  */
 public class NeoDriveEncoder implements IncrementalLinearEncoder {
     private final Logger m_logger;
-    private final NeoDriveMotor m_motor;
+    private final NeoCANSparkMotor m_motor;
     private final double m_distancePerTurn;
 
     public NeoDriveEncoder(
             Logger parent,
-            NeoDriveMotor motor,
+            NeoCANSparkMotor motor,
             double distancePerTurn) {
         m_logger = parent.child(this);
         m_motor = motor;

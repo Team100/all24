@@ -13,9 +13,9 @@ import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeoCANSparkMotor;
+import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.motor.drive.NeoDriveMotor;
-import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
 
@@ -44,7 +44,7 @@ public class ServoFactory {
             SysParam param,
             Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
-        NeoDriveMotor motor = new NeoDriveMotor(
+        NeoCANSparkMotor motor = new NeoCANSparkMotor(
                 parent,
                 canId,
                 motorPhase,
@@ -103,22 +103,23 @@ public class ServoFactory {
             PIDController controller,
             Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
-        NeoVortexTurningMotor motor = new NeoVortexTurningMotor(
+        NeoVortexCANSparkMotor motor = new NeoVortexCANSparkMotor(
                 parent,
                 canId,
                 motorPhase,
                 currentLimit,
-                param.gearRatio(),
+                // param.gearRatio(),
                 ff,
                 lowLevelVelocityConstants);
         NeoVortexTurningEncoder encoder = new NeoVortexTurningEncoder(
                 parent,
                 motor,
                 param.gearRatio());
+        RotaryMechanism mech = new RotaryMechanism(motor, param.gearRatio());
         RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(encoder);
         return new OnboardAngularPositionServo(
                 parent,
-                motor,
+                mech,
                 sensor,
                 param.maxVelM_S(),
                 controller,

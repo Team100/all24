@@ -44,14 +44,14 @@ public class SimulatedLinearEncoder implements IncrementalLinearEncoder {
         m_position += m_rate * dt;
         m_position = MathUtil.clamp(m_position, m_lowerLimit, m_upperLimit);
         m_time = now;
-        m_logger.logDouble(Level.TRACE, "position", () -> m_position);
+        m_logger.logDouble(Level.TRACE, "position (m)", () -> m_position);
         return OptionalDouble.of(m_position);
     }
 
     @Override
     public OptionalDouble getRate() {
         double m_rate = m_motor.getVelocityM_S();
-        m_logger.logDouble(Level.TRACE, "rate", () -> m_rate);
+        m_logger.logDouble(Level.TRACE, "rate (m_s)", () -> m_rate);
         return OptionalDouble.of(m_rate);
     }
 

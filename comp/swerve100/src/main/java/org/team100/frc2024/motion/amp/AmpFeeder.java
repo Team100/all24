@@ -1,13 +1,14 @@
 package org.team100.frc2024.motion.amp;
 
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.motor.duty_cycle.NeoProxy;
 import org.team100.lib.telemetry.Logger;
-
-import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -22,7 +23,9 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
         m_logger = parent.child(this);
         switch (Identity.instance) {
             case COMP_BOT:
-                ampDrive = new NeoProxy(m_logger, 33, IdleMode.kBrake, 40);
+                Feedforward100 ff = Feedforward100.makeNeo();
+                PIDConstants pid = new PIDConstants(0, 0, 0);
+                ampDrive = new NeoCANSparkMotor(m_logger, 33, MotorPhase.FORWARD, 40, ff, pid);
                 break;
             default:
                 // For testing and simulation

@@ -1,16 +1,12 @@
-package org.team100.lib.motor.turning;
+package org.team100.lib.motor;
 
-import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 
-/**
- * Calibrated angle motor wrapping any MotorController.
- */
-public class TurningMotorController100 implements BareMotor, GenericTorqueModel {
+public class BareMotorController100 implements BareMotor, GenericTorqueModel {
     /**
      * Very much not calibrated.
      * Say 600 rad/s max so 0.0016?
@@ -19,7 +15,7 @@ public class TurningMotorController100 implements BareMotor, GenericTorqueModel 
     private final Logger m_logger;
     private final MotorController m_motor;
 
-    public TurningMotorController100(
+    public BareMotorController100(
             Logger parent,
             MotorController motorController) {
         m_motor = motorController;
