@@ -4,6 +4,8 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -55,8 +57,13 @@ public class SwerveModule100 implements Glassy {
     void setRawDesiredState(SwerveModuleState100 state) {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
-        m_driveServo.setVelocity(state.speedMetersPerSecond);
-        m_turningServo.setPosition(state.angle.getRadians(), 0);
+        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
+            m_driveServo.setVelocity(state.speedMetersPerSecond, state.accelMetersPerSecond_2);
+            m_turningServo.setPositionWithVelocity(state.angle.getRadians(), state.angle_2, 0);
+        } else {
+            m_driveServo.setVelocity(state.speedMetersPerSecond);
+            m_turningServo.setPosition(state.angle.getRadians(), 0);
+        }
     }
 
     /** For testing */

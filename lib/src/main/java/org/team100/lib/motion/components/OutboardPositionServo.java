@@ -55,6 +55,32 @@ public class OutboardPositionServo implements AngularPositionServo {
     }
 
     @Override
+    public void setPositionWithVelocity(double goal, double goalVelocity, double feedForwardTorqueNm) {
+        OptionalDouble position = m_encoder.getPosition();
+        if (position.isEmpty())
+            return;
+        double measurement = MathUtil.angleModulus(position.getAsDouble());
+
+        // use the modulus closest to the measurement.
+        // note zero velocity in the goal.
+        m_goal = new State100(MathUtil.angleModulus(goal - measurement) + measurement, goalVelocity);
+
+        m_setpoint = new State100(
+                MathUtil.angleModulus(m_setpoint.x() - measurement) + measurement,
+                m_setpoint.v());
+
+        // NOTE: fixed dt here
+        m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
+
+        m_motor.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
+
+        m_logger.logDouble(Level.TRACE, "goal", () -> goal);
+        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
+        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
+        m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
+    }
+
+    @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
         OptionalDouble position = m_encoder.getPosition();
         if (position.isEmpty())

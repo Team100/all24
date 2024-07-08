@@ -29,6 +29,15 @@ public class SelectableAngularPositionServo implements AngularPositionServo {
     }
 
     @Override
+    public void setPositionWithVelocity(double goal, double goalVelocity, double feedForwardTorqueNm) {
+        if (m_selector.getAsBoolean()) {
+            m_whenTrue.setPositionWithVelocity(goal, goalVelocity, feedForwardTorqueNm);
+        } else {
+            m_whenFalse.setPositionWithVelocity(goal, goalVelocity, feedForwardTorqueNm);
+        }
+    }
+
+    @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
         if (m_selector.getAsBoolean()) {
             m_whenTrue.setPosition(goal, feedForwardTorqueNm);

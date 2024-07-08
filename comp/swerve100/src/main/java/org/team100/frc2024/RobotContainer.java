@@ -121,12 +121,17 @@ public class RobotContainer implements Glassy {
 
         final Telemetry telemetry = Telemetry.get();
         final FieldLogger fieldLogger = telemetry.fieldLogger(true);
-        final Logger sensorLogger = telemetry.namedRootLogger("SENSOR", false);
-        final Logger driveLogger = telemetry.namedRootLogger("DRIVE", false);
-        final Logger shooterLogger = telemetry.namedRootLogger("SHOOTER", false);
-        final Logger intakeLogger = telemetry.namedRootLogger("INTAKE", false);
-        final Logger ampLogger = telemetry.namedRootLogger("AMP", false);
-        final Logger climberLogger = telemetry.namedRootLogger("CLIMBER", false);
+        
+        boolean defaultEnabled = false;
+        if (Identity.instance.equals(Identity.BLANK)) {
+            defaultEnabled = true;
+        }
+        final Logger sensorLogger = telemetry.namedRootLogger("SENSOR", defaultEnabled);
+        final Logger driveLogger = telemetry.namedRootLogger("DRIVE", defaultEnabled);
+        final Logger shooterLogger = telemetry.namedRootLogger("SHOOTER", defaultEnabled);
+        final Logger intakeLogger = telemetry.namedRootLogger("INTAKE", defaultEnabled);
+        final Logger ampLogger = telemetry.namedRootLogger("AMP", defaultEnabled);
+        final Logger climberLogger = telemetry.namedRootLogger("CLIMBER", defaultEnabled);
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(driveLogger, async);
