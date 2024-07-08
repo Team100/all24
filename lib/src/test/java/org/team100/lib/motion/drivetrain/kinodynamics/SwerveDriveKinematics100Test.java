@@ -400,10 +400,18 @@ class SwerveDriveKinematics100Test {
         SimpleMatrix velocities2 = new SimpleMatrix(3, 1);
         SimpleMatrix accelerations = new SimpleMatrix(3, 1);
         SimpleMatrix accelerations2 = new SimpleMatrix(3, 1);
+        SimpleMatrix velocities3 = new SimpleMatrix(3, 1);
+        SimpleMatrix velocities4 = new SimpleMatrix(3, 1);
+        SimpleMatrix accelerations3 = new SimpleMatrix(3, 1);
+        SimpleMatrix accelerations4 = new SimpleMatrix(3, 1);
         velocities.setColumn(0, 0, 0, 0, 1);
         accelerations.setColumn(0, 0, 0, 0, 0);
         velocities2.setColumn(0, 0, 2, 1, 1);
         accelerations2.setColumn(0, 0, 2, 2, 2);
+        velocities3.setColumn(0, 0, 2.3, 0, 1.1);
+        accelerations3.setColumn(0, 0, 1.32, 1.2, 2.2);
+        velocities4.setColumn(0, 0, 0, 0, 0);
+        accelerations4.setColumn(0, 0, 1, 1.1, 2);
         SwerveModuleState100[] prevStates = {new SwerveModuleState100(),new SwerveModuleState100(),new SwerveModuleState100(),new SwerveModuleState100()};
         SwerveModuleState100[] output2 = kinematics.statesFromVector(velocities);
         SwerveModuleState100[] output = kinematics.accelerationFromVector(velocities,
@@ -411,15 +419,29 @@ class SwerveDriveKinematics100Test {
         SwerveModuleState100[] output4 = kinematics.statesFromVector(velocities2);
         SwerveModuleState100[] output3 = kinematics.accelerationFromVector(velocities2,
                 accelerations2,prevStates, 0.02);
+        SwerveModuleState100[] output5 = kinematics.statesFromVector(velocities3);
+        SwerveModuleState100[] output6 = kinematics.accelerationFromVector(velocities3,
+                accelerations3,prevStates, 0.02);
+        SwerveModuleState100[] output7 = kinematics.statesFromVector(velocities4);
+        SwerveModuleState100[] output8 = kinematics.accelerationFromVector(velocities4,
+                accelerations4,prevStates, 0.02);
                 Util.println(output[0].toString());
         assertEquals(0, output[0].accelMetersPerSecond_2, 0.0001);
         for (int i = 0; i < output.length; i++) {
             assertEquals(output[i].angle, output2[i].angle);
             assertEquals(output[i].speedMetersPerSecond, output2[i].speedMetersPerSecond);
         }
-        for (int i = 0; i < output.length; i++) {
+        for (int i = 0; i < output3.length; i++) {
             assertEquals(output3[i].angle, output4[i].angle);
             assertEquals(output3[i].speedMetersPerSecond, output4[i].speedMetersPerSecond);
+        }
+        for (int i = 0; i < output5.length; i++) {
+            assertEquals(output5[i].angle, output6[i].angle);
+            assertEquals(output5[i].speedMetersPerSecond, output6[i].speedMetersPerSecond);
+        }
+        for (int i = 0; i < output7.length; i++) {
+            assertEquals(output7[i].angle, output8[i].angle);
+            assertEquals(output7[i].speedMetersPerSecond, output8[i].speedMetersPerSecond);
         }
     }
 

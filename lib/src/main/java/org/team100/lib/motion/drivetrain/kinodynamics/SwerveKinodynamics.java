@@ -7,18 +7,15 @@ import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Tire;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * Kinematics and dynamics of the swerve drive.
@@ -115,19 +112,6 @@ public class SwerveKinodynamics implements Glassy {
         setMaxDriveDecelerationM_S2(maxDriveDeceleration);
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
         setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
-
-        m_logger.register(Level.TRACE, "max velocity m_s", m_MaxDriveVelocityM_S,
-                this::setMaxDriveVelocityM_S);
-        m_logger.register(Level.TRACE, "stall accel m_s2", m_StallAccelerationM_S2,
-                this::setStallAccelerationM_S2);
-        m_logger.register(Level.TRACE, "max accel m_s2", m_MaxDriveAccelerationM_S2,
-                this::setMaxDriveAccelerationM_S2);
-        m_logger.register(Level.TRACE, "max decel m_s2", m_MaxDriveDecelerationM_S2,
-                this::setMaxDriveDecelerationM_S2);
-        m_logger.register(Level.TRACE, "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
-                this::setMaxSteeringVelocityRad_S);
-        m_logger.register(Level.TRACE, "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
-                this::setMaxSteeringAccelerationRad_S2);
     }
 
     /**
@@ -185,19 +169,6 @@ public class SwerveKinodynamics implements Glassy {
         setMaxDriveDecelerationM_S2(maxDriveDeceleration);
         setMaxSteeringVelocityRad_S(maxSteeringVelocity);
         setMaxSteeringAccelerationRad_S2(maxSteeringAcceleration);
-
-        m_logger.register(Level.TRACE, "max velocity m_s", m_MaxDriveVelocityM_S,
-                this::setMaxDriveVelocityM_S);
-        m_logger.register(Level.TRACE, "stall accel m_s2", m_StallAccelerationM_S2,
-                this::setStallAccelerationM_S2);
-        m_logger.register(Level.TRACE, "max accel m_s2", m_MaxDriveAccelerationM_S2,
-                this::setMaxDriveAccelerationM_S2);
-        m_logger.register(Level.TRACE, "max decel m_s2", m_MaxDriveDecelerationM_S2,
-                this::setMaxDriveDecelerationM_S2);
-        m_logger.register(Level.TRACE, "max steering velocity rad_s", m_MaxSteeringVelocityRad_S,
-                this::setMaxSteeringVelocityRad_S);
-        m_logger.register(Level.TRACE, "max steering accel rad_s2", m_maxSteeringAccelerationRad_S2,
-                this::setMaxSteeringAccelerationRad_S2);
     }
 
     private void setMaxDriveVelocityM_S(double maxDriveVelocityM_S) {
@@ -327,7 +298,7 @@ public class SwerveKinodynamics implements Glassy {
     public void resetHeadings(Rotation2d... moduleHeadings) {
         m_kinematics.resetHeadings(moduleHeadings);
     }
-    
+
     /**
      * Inverse kinematics, chassis speeds => module states.
      * 
@@ -340,9 +311,10 @@ public class SwerveKinodynamics implements Glassy {
      * 
      * @param in            chassis speeds to transform
      * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
+     * @param accelM_S      magnitude of acceleration
      * @param dt            time to aim for
      */
-    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S, double dt) {
+    public SwerveModuleState[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S, double dt) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         // ... which is subtracted here; this isn't really a field-relative
@@ -357,119 +329,9 @@ public class SwerveKinodynamics implements Glassy {
     }
 
     /**
-     * Inverse kinematics, chassis speeds => module states.
-     * 
-     * The resulting state speeds are always positive.
-     * 
-     * This version does **DISCRETIZATION** to correct for swerve veering.
-     * 
-     * It also does extra veering correction proportional to rotation rate and
-     * translational acceleration.
-     * 
-     * @param in            chassis speeds to transform
-     * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
-     * @param dt            time to aim for
-     */
-    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, SwerveModuleState100[] prevStates, double gyroRateRad_S, double dt) {
-        // This is the extra correction angle ...
-        Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
-        // ... which is subtracted here; this isn't really a field-relative
-        // transformation it's just a rotation.
-        ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                in.vxMetersPerSecond,
-                in.vyMetersPerSecond,
-                in.omegaRadiansPerSecond,
-                angle);
-        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
-        return m_kinematics.toSwerveModuleStates(descretized, prevStates);
-    }
-
-    /**
-     * Inverse kinematics, chassis speeds => module states.
-     * 
-     * The resulting state speeds are always positive.
-     * 
-     * This version does **DISCRETIZATION** to correct for swerve veering.
-     * 
-     * It also does extra veering correction proportional to rotation rate and
-     * translational acceleration.
-     * 
-     * @param in            chassis speeds to transform
-     * @param prevIn        prev chassis speeds to transform
-     * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
-     * @param dt            time to aim for
-     */
-    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn, double gyroRateRad_S, double dt) {
-        // This is the extra correction angle ...
-        Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
-        // ... which is subtracted here; this isn't really a field-relative
-        // transformation it's just a rotation.
-        ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                in.vxMetersPerSecond,
-                in.vyMetersPerSecond,
-                in.omegaRadiansPerSecond,
-                angle);
-        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
-
-        ChassisSpeeds prevChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                prevIn.vxMetersPerSecond,
-                prevIn.vyMetersPerSecond,
-                prevIn.omegaRadiansPerSecond,
-                angle);
-        ChassisSpeeds prevDescretized = ChassisSpeeds.discretize(prevChassisSpeeds, dt);
-        ChassisSpeeds chassisSpeedsAcceleration = descretized.minus(prevDescretized).div(dt); 
-        return m_kinematics.toSwerveModuleStates(descretized,chassisSpeedsAcceleration, dt);
-    }
-
-    /**
-     * Inverse kinematics, chassis speeds => module states.
-     * 
-     * The resulting state speeds are always positive.
-     * 
-     * This version does **DISCRETIZATION** to correct for swerve veering.
-     * 
-     * It also does extra veering correction proportional to rotation rate and
-     * translational acceleration.
-     * 
-     * @param in            chassis speeds to transform
-     * @param prevIn        prev chassis speeds to transform
-     * @param prevStates    prev swerve states
-     * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
-     * @param dt            time to aim for
-     */
-    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn, SwerveModuleState100[] prevStates, double gyroRateRad_S, double dt) {
-        // This is the extra correction angle ...
-        Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
-        // ... which is subtracted here; this isn't really a field-relative
-        // transformation it's just a rotation.
-        ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                in.vxMetersPerSecond,
-                in.vyMetersPerSecond,
-                in.omegaRadiansPerSecond,
-                angle);
-        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
-
-        ChassisSpeeds prevChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                prevIn.vxMetersPerSecond,
-                prevIn.vyMetersPerSecond,
-                prevIn.omegaRadiansPerSecond,
-                angle);
-        ChassisSpeeds prevDescretized = ChassisSpeeds.discretize(prevChassisSpeeds, dt);
-        ChassisSpeeds chassisSpeedsAcceleration = descretized.minus(prevDescretized).div(dt); 
-        return m_kinematics.toSwerveModuleStates(descretized, chassisSpeedsAcceleration, prevStates, dt);
-    }
-
-    /**
      * The resulting state speeds are always positive.
      */
-    public SwerveModuleState100[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds, ChassisSpeeds prevIn, SwerveModuleState100[] prevStates, double dt) {
-        ChassisSpeeds chassisSpeedsAcceleration = speeds.minus(prevIn).div(dt);
-        return m_kinematics.toSwerveModuleStates(speeds, chassisSpeedsAcceleration, prevStates, dt);
-    }
-    /**
-     * The resulting state speeds are always positive.
-     */
-    public SwerveModuleState100[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
+    public SwerveModuleState[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
         return m_kinematics.toSwerveModuleStates(speeds);
     }
 
@@ -480,7 +342,7 @@ public class SwerveKinodynamics implements Glassy {
      * 
      * Does not take Tires into account.
      */
-    public ChassisSpeeds toChassisSpeeds(SwerveModuleState100... moduleStates) {
+    public ChassisSpeeds toChassisSpeeds(SwerveModuleState... moduleStates) {
         // does not take tires into account
         return m_kinematics.toChassisSpeeds(moduleStates);
     }
@@ -496,7 +358,7 @@ public class SwerveKinodynamics implements Glassy {
     public ChassisSpeeds toChassisSpeedsWithDiscretization(
             double gyroRateRad_S,
             double dt,
-            SwerveModuleState100... moduleStates) {
+            SwerveModuleState... moduleStates) {
         ChassisSpeeds discreteSpeeds = toChassisSpeeds(moduleStates);
         Twist2d twist = new Twist2d(
                 discreteSpeeds.vxMetersPerSecond * dt,
@@ -522,18 +384,14 @@ public class SwerveKinodynamics implements Glassy {
             Rotation2d gyroAngle,
             SwerveModulePosition[] modulePositions,
             Pose2d initialPoseMeters,
-            double timestampSeconds,
-            Matrix<N3, N1> stateStdDevs,
-            Matrix<N3, N1> visionMeasurementStdDevs) {
+            double timestampSeconds) {
         return new SwerveDrivePoseEstimator100(
                 m_logger,
                 this,
                 gyroAngle,
                 modulePositions,
                 initialPoseMeters,
-                timestampSeconds,
-                stateStdDevs,
-                visionMeasurementStdDevs);
+                timestampSeconds);
     }
 
     /**
@@ -634,6 +492,7 @@ public class SwerveKinodynamics implements Glassy {
         double xyRatio = Math.min(1, xySpeed / maxV);
         double ratio = Math.min(1 - oRatio, xyRatio);
         double xyAngle = Math.atan2(speeds.y(), speeds.x());
+
         return new FieldRelativeVelocity(
                 ratio * maxV * Math.cos(xyAngle),
                 ratio * maxV * Math.sin(xyAngle),
