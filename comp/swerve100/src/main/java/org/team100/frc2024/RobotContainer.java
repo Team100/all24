@@ -243,7 +243,7 @@ public class RobotContainer implements Glassy {
                         m_drive,
                         dthetaController,
                         swerveKinodynamics));
-        whileTrue(driverControl::actualCircle, new DriveInACircle(driveLogger, m_drive, controller, -1));
+        whileTrue(driverControl::actualCircle, new DriveInACircle(driveLogger, m_drive, controller, -1,viz));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(

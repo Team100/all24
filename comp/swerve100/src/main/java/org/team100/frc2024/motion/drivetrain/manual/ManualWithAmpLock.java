@@ -56,7 +56,6 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
-    private Pose2d m_prevPose;
 
     public ManualWithAmpLock(
             FieldLogger fieldLogger,
@@ -81,7 +80,6 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
     public void reset(Pose2d currentPose) {
         m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
-        m_prevPose = currentPose;
         m_thetaController.reset();
         m_omegaController.reset();
     }
@@ -170,8 +168,6 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
                     m_ball.getY(),
                     0 });
         }
-
-        m_prevPose = state.pose();
         return twistWithLockM_S;
     }
 
