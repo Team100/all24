@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import org.team100.lib.encoder.SimulatedLinearEncoder;
+import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
@@ -34,16 +34,14 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         // simulated drive motor free speed is 5 m/s
         SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
         // simulated gearing is 2 meter wheel, 1:1, so rad/s and m/s are the same.
-        LinearMechanism mech = new LinearMechanism(driveMotor, 1, 2);
-        SimulatedLinearEncoder driveEncoder = new SimulatedLinearEncoder(
-                parent,
-                mech,
-                Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY);
+        LinearMechanism mech = new LinearMechanism(
+                driveMotor,
+                new SimulatedBareEncoder(parent, driveMotor),
+                1, 
+                2);
         return new OutboardLinearVelocityServo(
                 parent,
-                mech,
-                driveEncoder);
+                mech);
     }
 
     private static AngularPositionServo simulatedTurningServo(

@@ -5,7 +5,7 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.encoder.SimulatedLinearEncoder;
+import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
@@ -23,19 +23,6 @@ import edu.wpi.first.math.controller.PIDController;
 
 public class ServoFactory {
 
-    /**
-     * 
-     * @param name
-     * @param canId
-     * @param motorPhase
-     * @param gearRatio
-     * @param wheelDiameter
-     * @param maxVel
-     * @param maxAccel
-     * @param maxDecel      maximum decleration: usually mechanisms can slow down
-     *                      faster than they can speed up.
-     * @return
-     */
     public static LimitedLinearVelocityServo limitedNeoVelocityServo(
             Logger parent,
             int canId,
@@ -49,22 +36,19 @@ public class ServoFactory {
                 canId,
                 motorPhase,
                 currentLimit,
-                // param.gearRatio(),
-                // param.wheelDiameter(),
                 ff,
                 lowLevelVelocityConstants);
-        LinearMechanism mech = new LinearMechanism(
-                motor,
-                param.gearRatio(),
-                param.wheelDiameter());
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 parent,
+                motor);
+        LinearMechanism mech = new LinearMechanism(
                 motor,
-                param.wheelDiameter() * Math.PI / param.gearRatio());
+                encoder,
+                param.gearRatio(),
+                param.wheelDiameter());
         LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
-                mech,
-                encoder);
+                mech);
         return new LimitedLinearVelocityServo(v,
                 param.maxVelM_S(),
                 param.maxAccelM_S2(),
@@ -78,12 +62,14 @@ public class ServoFactory {
             double wheelDiameterM) {
         // motor speed is rad/s
         BareMotor motor = new SimulatedBareMotor(parent, 600);
-        LinearMechanism mech = new LinearMechanism(motor, gearRatio, wheelDiameterM);
-        SimulatedLinearEncoder encoder = new SimulatedLinearEncoder(parent, mech, -1, 1);
+        LinearMechanism mech = new LinearMechanism(
+                motor,
+                new SimulatedBareEncoder(parent, motor),
+                gearRatio,
+                wheelDiameterM);
         LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
-                mech,
-                encoder);
+                mech);
         return new LimitedLinearVelocityServo(v,
                 param.maxVelM_S(),
                 param.maxAccelM_S2(),
@@ -108,7 +94,6 @@ public class ServoFactory {
                 canId,
                 motorPhase,
                 currentLimit,
-                // param.gearRatio(),
                 ff,
                 lowLevelVelocityConstants);
         NeoVortexTurningEncoder encoder = new NeoVortexTurningEncoder(

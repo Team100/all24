@@ -6,11 +6,9 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.encoder.IncrementalLinearEncoder;
-import org.team100.lib.encoder.SimulatedLinearEncoder;
-import org.team100.lib.encoder.VortexEncoder;
+import org.team100.lib.encoder.SimulatedBareEncoder;
+import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.motion.LinearMechanism;
-import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
@@ -25,111 +23,108 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final double kSprocketDiameterM = 0.055;
     // TODO: is this the right reduction?
     private static final double kReduction = 16;
+
     private final Logger m_logger;
-    private final BareMotor v1;
-    private final IncrementalLinearEncoder e1;
-    private final BareMotor v2;
-    private final IncrementalLinearEncoder e2;
+    private final LinearMechanism m1;
+    private final LinearMechanism m2;
 
     public ClimberSubsystem(Logger parent, int leftClimberID, int rightClimberID) {
         m_logger = parent.child(this);
+        Logger leftLogger = m_logger.child("left");
+        Logger rightLogger = m_logger.child("right");
         switch (Identity.instance) {
             case COMP_BOT:
                 NeoVortexCANSparkMotor vp1 = new NeoVortexCANSparkMotor(
-                        m_logger.child("left"),
+                        leftLogger,
                         leftClimberID,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
                         Feedforward100.makeNeoVortex(),
                         new PIDConstants(0, 0, 0));
-                e1 = new VortexEncoder(vp1);
-                v1 = vp1;
+                m1 = new LinearMechanism(vp1, new NeoDriveEncoder(leftLogger, vp1), kReduction, kSprocketDiameterM);
+
                 NeoVortexCANSparkMotor vp2 = new NeoVortexCANSparkMotor(
-                        m_logger.child("right"),
+                        rightLogger,
                         rightClimberID,
                         MotorPhase.REVERSE,
                         kCurrentLimit,
                         Feedforward100.makeNeoVortex(),
                         new PIDConstants(0, 0, 0));
-                e2 = new VortexEncoder(vp2);
-                v2 = vp2;
+                m2 = new LinearMechanism(vp2, new NeoDriveEncoder(rightLogger, vp2), kReduction, kSprocketDiameterM);
                 break;
             default:
                 // for testing and simulation
-                SimulatedBareMotor vs1 = new SimulatedBareMotor(m_logger.child("left"), 1);
-                LinearMechanism m1 = new LinearMechanism(vs1, kReduction, kSprocketDiameterM);
-                e1 = new SimulatedLinearEncoder(m_logger.child("left"),
-                        m1, -Double.MAX_VALUE, Double.MAX_VALUE);
-                v1 = vs1;
-                SimulatedBareMotor vs2 = new SimulatedBareMotor(m_logger.child("right"), 1);
-                LinearMechanism m2 = new LinearMechanism(vs2, kReduction, kSprocketDiameterM);
-                e2 = new SimulatedLinearEncoder(m_logger.child("right"), m2, -Double.MAX_VALUE,
-                        Double.MAX_VALUE);
-                v2 = vs2;
+                SimulatedBareMotor vs1 = new SimulatedBareMotor(leftLogger, 1);
+                m1 = new LinearMechanism(vs1, new SimulatedBareEncoder(leftLogger, vs1), kReduction,
+                        kSprocketDiameterM);
+
+                SimulatedBareMotor vs2 = new SimulatedBareMotor(rightLogger, 1);
+                m2 = new LinearMechanism(vs2, new SimulatedBareEncoder(rightLogger, vs2), kReduction,
+                        kSprocketDiameterM);
         }
     }
 
     public void setLeftWithSoftLimits(double value) {
-        OptionalDouble e1Position = e1.getPosition();
+        OptionalDouble e1Position = m1.getPositionM();
         if (e1Position.isEmpty()) {
-            v1.setDutyCycle(0);
+            m1.setDutyCycle(0);
             return;
         }
         if (e1Position.getAsDouble() > 300 && value >= 0) {
-            v1.setDutyCycle(0);
+            m1.setDutyCycle(0);
             return;
         }
         if (e1Position.getAsDouble() < 5 && value <= 0) {
-            v1.setDutyCycle(0);
+            m1.setDutyCycle(0);
             return;
         }
         m_logger.logDouble(Level.TRACE, "LEFT VALUE", () -> value);
     }
 
     public void setRightWithSoftLimits(double value) {
-        OptionalDouble e2Position = e2.getPosition();
+        OptionalDouble e2Position = m2.getPositionM();
         if (e2Position.isEmpty()) {
-            v2.setDutyCycle(0);
+            m2.setDutyCycle(0);
             return;
         }
         if (e2Position.getAsDouble() > 300 && value >= 0) {
-            v2.setDutyCycle(0);
+            m2.setDutyCycle(0);
             return;
         }
         if (e2Position.getAsDouble() < 5 && value <= 0) {
-            v2.setDutyCycle(0);
+            m2.setDutyCycle(0);
             return;
         }
         m_logger.logDouble(Level.TRACE, "RIGHT VALUE", () -> value);
     }
 
     public void zeroClimbers() {
-        e1.reset();
-        e2.reset();
+        m1.resetEncoderPosition();
+        m2.resetEncoderPosition();
     }
 
     public void setLeft(double value) {
-        v1.setDutyCycle(value);
+        m1.setDutyCycle(value);
     }
 
     public void setRight(double value) {
-        v2.setDutyCycle(value);
+        m2.setDutyCycle(value);
     }
 
     public OptionalDouble getRightPosition() {
-        return e2.getPosition();
+        return m2.getPositionM();
     }
 
     public OptionalDouble getLeftPosition() {
-        return e1.getPosition();
+        return m1.getPositionM();
     }
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.TRACE, "CLIMBER 1 ENCODER", e1::getPosition);
-        m_logger.logOptionalDouble(Level.TRACE, "CLIMBER 2 ENCODER", e2::getPosition);
-        m_logger.logOptionalDouble(Level.TRACE, "RPM 1", e1::getRate);
-        m_logger.logOptionalDouble(Level.TRACE, "RPM 2", e2::getRate);
+        m_logger.logOptionalDouble(Level.TRACE, "climber 1 position (m)", m1::getPositionM);
+        m_logger.logOptionalDouble(Level.TRACE, "climber 2 position (m)", m2::getPositionM);
+        m_logger.logOptionalDouble(Level.TRACE, "climber 1 velocity (m_s)", m1::getVelocityM_S);
+        m_logger.logOptionalDouble(Level.TRACE, "climber 2 velocity (m_s)", m2::getVelocityM_S);
     }
 
     @Override

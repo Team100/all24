@@ -31,10 +31,10 @@ public class AnalogTurningEncoder implements RotaryPositionSensor {
     private Double m_prevTimeS = null;
 
     /**
+     * @param logger 
      * @param channel     roboRIO analog input channel
      * @param inputOffset unit = turns, i.e. [0,1] subtracted from the raw
      *                    measurement
-     * @param gearRatio
      * @param drive       polarity
      */
     public AnalogTurningEncoder(

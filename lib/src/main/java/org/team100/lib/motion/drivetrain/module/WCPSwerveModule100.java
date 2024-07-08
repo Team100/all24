@@ -113,8 +113,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             DriveRatio ratio,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-        double distancePerTurn = kWheelDiameterM * Math.PI / ratio.m_ratio;
-
         Kraken6Motor driveMotor = new Kraken6Motor(
                 parent,
                 driveMotorCanId,
@@ -127,16 +125,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 ff);
         LinearMechanism mech = new LinearMechanism(
                 driveMotor,
+                new Talon6DriveEncoder(parent, driveMotor),
                 ratio.m_ratio,
                 kWheelDiameterM);
-        Talon6DriveEncoder encoder = new Talon6DriveEncoder(
-                parent,
-                driveMotor,
-                distancePerTurn);
         return new OutboardLinearVelocityServo(
                 parent,
-                mech,
-                encoder);
+                mech);
     }
 
     private static AngularPositionServo turningServo(

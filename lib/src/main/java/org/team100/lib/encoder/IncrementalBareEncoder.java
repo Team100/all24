@@ -4,25 +4,26 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
 
-/** Incremental, i.e. zero is arbitrary, and linear, i.e. measured in meters. */
-public interface IncrementalLinearEncoder extends Glassy {
-    /**
-     * Meters.
-     * 
-     * If the encoder can't return a valid measurement (e.g. because hardware is not
-     * connected), return empty.
-     */
-    OptionalDouble getPosition();
+/** Represents motor-shaft encoder, probably some kind of built-in. */
+public interface IncrementalBareEncoder extends Glassy {
 
     /**
-     * Meters per second.
+     * Radians per second.
      * 
      * Note some rate implementations can be noisy.
      * 
      * If the encoder can't return a valid measurement (e.g. because hardware is not
      * connected), return empty.
      */
-    OptionalDouble getRate();
+    OptionalDouble getVelocityRad_S();
+
+    /**
+     * Radians
+     * 
+     * If the encoder can't return a valid measurement (e.g. because hardware is not
+     * connected), return empty.
+     */
+    OptionalDouble getPositionRad();
 
     /**
      * Resets position to zero
@@ -36,7 +37,7 @@ public interface IncrementalLinearEncoder extends Glassy {
 
     @Override
     default String getGlassName() {
-        return "IncrementalLinearEncoder";
+        return "IncrementalBareEncoder";
     }
 
 }

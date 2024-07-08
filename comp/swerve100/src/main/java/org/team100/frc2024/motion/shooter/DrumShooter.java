@@ -85,8 +85,6 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         Logger rightLogger = parent.child("Right");
         switch (Identity.instance) {
             case COMP_BOT:
-                double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
-
                 Falcon6Motor leftMotor = new Falcon6Motor(
                         leftLogger,
                         leftID,
@@ -98,10 +96,11 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
                 LinearMechanism leftMech = new LinearMechanism(
-                    leftMotor, kDriveReduction, kWheelDiameterM);
-                Talon6DriveEncoder leftEncoder = new Talon6DriveEncoder(
-                        leftLogger, leftMotor, distancePerTurn);
-                leftRoller = new OutboardLinearVelocityServo(leftLogger, leftMech, leftEncoder);
+                        leftMotor,
+                        new Talon6DriveEncoder(leftLogger, leftMotor),
+                        kDriveReduction,
+                        kWheelDiameterM);
+                leftRoller = new OutboardLinearVelocityServo(leftLogger, leftMech);
 
                 Falcon6Motor rightMotor = new Falcon6Motor(
                         rightLogger,
@@ -114,13 +113,14 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
                 LinearMechanism rightMech = new LinearMechanism(
-                    rightMotor, kDriveReduction, kWheelDiameterM);
-                Talon6DriveEncoder rightEncoder = new Talon6DriveEncoder(
-                        rightLogger, rightMotor, distancePerTurn);
-                rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMech, rightEncoder);
+                        rightMotor,
+                        new Talon6DriveEncoder(rightLogger, rightMotor),
+                        kDriveReduction,
+                        kWheelDiameterM);
+                rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMech);
 
-                BareMotor pivotMotor = new NeoCANSparkMotor(parent, pivotID, MotorPhase.FORWARD, 40, Feedforward100.makeNeo(), new PIDConstants(0,0,0));
-
+                BareMotor pivotMotor = new NeoCANSparkMotor(parent, pivotID, MotorPhase.FORWARD, 40,
+                        Feedforward100.makeNeo(), new PIDConstants(0, 0, 0));
                 RotaryMechanism pivotMech = new RotaryMechanism(pivotMotor, kPivotReduction);
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(parent, 0, 0.508753,
                         EncoderDrive.DIRECT);
@@ -131,7 +131,6 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         profile,
                         period,
                         encoder);
-
                 break;
             default:
                 // For testing and simulation

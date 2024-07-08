@@ -77,29 +77,21 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-        double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
         Falcon6Motor driveMotor = new Falcon6Motor(
                 parent,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
                 currentLimit,
                 statorLimit,
-                // kDriveReduction,
-                // kWheelDiameterM,
                 pidConstants,
                 ff);
         LinearMechanism mech = new LinearMechanism(
-                driveMotor,
+                driveMotor, new Talon6DriveEncoder(parent, driveMotor),
                 kDriveReduction,
                 kWheelDiameterM);
-        Talon6DriveEncoder driveEncoder = new Talon6DriveEncoder(
-                parent,
-                driveMotor,
-                distancePerTurn);
         return new OutboardLinearVelocityServo(
                 parent,
-                mech,
-                driveEncoder);
+                mech);
     }
 
     private static OnboardAngularPositionServo turningServo(

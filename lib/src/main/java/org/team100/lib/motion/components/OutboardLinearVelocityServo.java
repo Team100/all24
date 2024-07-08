@@ -2,7 +2,6 @@ package org.team100.lib.motion.components;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.IncrementalLinearEncoder;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -13,7 +12,6 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
     private final Logger m_logger;
     private final LinearMechanism m_motor;
-    private final IncrementalLinearEncoder m_encoder;
 
     // for calculating acceleration
     private double previousSetpoint = 0;
@@ -22,11 +20,9 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
     public OutboardLinearVelocityServo(
             Logger parent,
-            LinearMechanism motor,
-            IncrementalLinearEncoder encoder) {
+            LinearMechanism motor) {
         m_logger = parent.child(this);
         m_motor = motor;
-        m_encoder = encoder;
     }
 
     @Override
@@ -51,7 +47,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
      */
     @Override
     public OptionalDouble getVelocity() {
-        return m_encoder.getRate();
+        return m_motor.getVelocityM_S();
     }
 
     @Override
@@ -61,7 +57,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
     @Override
     public OptionalDouble getDistance() {
-        return m_encoder.getPosition();
+        return m_motor.getPositionM();
     }
 
     @Override
