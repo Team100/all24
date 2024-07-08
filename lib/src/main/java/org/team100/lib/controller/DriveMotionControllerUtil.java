@@ -3,7 +3,6 @@ package org.team100.lib.controller;
 import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -23,15 +22,16 @@ public class DriveMotionControllerUtil implements Glassy {
     /**
      * Returns robot-relative direction of motion.
      */
-    private Rotation2d direction(Pose2d measurement, TimedPose setpoint) {
+    private Optional<Rotation2d> direction(Pose2d measurement, TimedPose setpoint) {
         // Field relative
         Optional<Rotation2d> course = setpoint.state().getCourse();
-        Rotation2d motion_direction = course.isPresent() ? course.get() : GeometryUtil.kRotationZero;
+        if (course.isEmpty())
+            return Optional.empty();
         // Adjust course by ACTUAL heading rather than planned to decouple heading and
         // translation errors.
-        motion_direction = measurement.getRotation().unaryMinus().rotateBy(motion_direction);
-        m_logger.log(Level.TRACE, "motion direction", motion_direction);
-        return motion_direction;
+        Rotation2d motion_direction = measurement.getRotation().unaryMinus().rotateBy(course.get());
+        m_logger.logRotation2d(Level.TRACE, "motion direction", () -> motion_direction);
+        return Optional.of(motion_direction);
     }
 
     /**
@@ -42,16 +42,23 @@ public class DriveMotionControllerUtil implements Glassy {
         m_logger.logDouble(Level.TRACE, "setpoint velocity", () -> velocity_m);
 
         // robot-relative motion direction
-        Rotation2d motion_direction = direction(currentPose, setpoint);
+        Optional<Rotation2d> motion_direction = direction(currentPose, setpoint);
 
-        double vx = motion_direction.getCos() * velocity_m;
-        double vy = motion_direction.getSin() * velocity_m;
+        ChassisSpeeds u_FF = ff(setpoint, velocity_m, motion_direction);
+        m_logger.logChassisSpeeds(Level.TRACE, "u_FF", () -> u_FF);
+        return u_FF;
+    }
+
+    private ChassisSpeeds ff(TimedPose setpoint, double velocity_m, Optional<Rotation2d> rot) {
         // heading rate is rad/m of movement, so multiply by m/s to get rad/s
         double omega = velocity_m * setpoint.state().getHeadingRate();
-
-        ChassisSpeeds u_FF = new ChassisSpeeds(vx, vy, omega);
-        m_logger.log(Level.DEBUG, "u_FF", u_FF);
-        return u_FF;
+        if (rot.isPresent()) {
+            Rotation2d motion_direction = rot.get();
+            double vx = motion_direction.getCos() * velocity_m;
+            double vy = motion_direction.getSin() * velocity_m;
+            return new ChassisSpeeds(vx, vy, omega);
+        }
+        return new ChassisSpeeds(0, 0, omega);
     }
 
     public ChassisSpeeds feedback(
@@ -60,12 +67,12 @@ public class DriveMotionControllerUtil implements Glassy {
             double kPCart,
             double kPTheta) {
         final Twist2d positionError = getErrorTwist(currentPose, setpoint);
-        m_logger.log(Level.DEBUG, "errorTwist", positionError);
+        m_logger.logTwist2d(Level.TRACE, "errorTwist", () -> positionError);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPCart * positionError.dx,
                 kPCart * positionError.dy,
                 kPTheta * positionError.dtheta);
-        m_logger.log(Level.DEBUG, "u_FB", u_FB);
+        m_logger.logChassisSpeeds(Level.TRACE, "u_FB", () -> u_FB);
         return u_FB;
     }
 
@@ -79,12 +86,12 @@ public class DriveMotionControllerUtil implements Glassy {
                 currentPose,
                 setpoint,
                 currentRobotRelativeVelocity);
-        m_logger.log(Level.TRACE, "velocityError", velocityError);
+        m_logger.logChassisSpeeds(Level.TRACE, "velocityError", () -> velocityError);
         final ChassisSpeeds u_VFB = new ChassisSpeeds(
                 kPCartV * velocityError.vxMetersPerSecond,
                 kPCartV * velocityError.vyMetersPerSecond,
                 kPThetaV * velocityError.omegaRadiansPerSecond);
-        m_logger.log(Level.TRACE, "u_VFB", u_VFB);
+        m_logger.logChassisSpeeds(Level.TRACE, "u_VFB", () -> u_VFB);
         return u_VFB;
     }
 
@@ -129,14 +136,23 @@ public class DriveMotionControllerUtil implements Glassy {
             TimedPose setpoint,
             ChassisSpeeds currentRobotRelativeVelocity) {
         final double velocity_m = setpoint.velocityM_S();
-        Rotation2d robotRelativeMotionDirection = direction(currentPose, setpoint);
-        double vx = robotRelativeMotionDirection.getCos() * velocity_m;
-        double vy = robotRelativeMotionDirection.getSin() * velocity_m;
         // heading rate is rad/m of movement, so multiply by m/s to get rad/s
         double omega = velocity_m * setpoint.state().getHeadingRate();
+
+        Optional<Rotation2d> rot = direction(currentPose, setpoint);
+
+        if (rot.isPresent()) {
+            Rotation2d robotRelativeMotionDirection = rot.get();
+            double vx = robotRelativeMotionDirection.getCos() * velocity_m;
+            double vy = robotRelativeMotionDirection.getSin() * velocity_m;
+            return new ChassisSpeeds(
+                    vx - currentRobotRelativeVelocity.vxMetersPerSecond,
+                    vy - currentRobotRelativeVelocity.vyMetersPerSecond,
+                    omega - currentRobotRelativeVelocity.omegaRadiansPerSecond);
+        }
         return new ChassisSpeeds(
-                vx - currentRobotRelativeVelocity.vxMetersPerSecond,
-                vy - currentRobotRelativeVelocity.vyMetersPerSecond,
+                -1.0 * currentRobotRelativeVelocity.vxMetersPerSecond,
+                -1.0 * currentRobotRelativeVelocity.vyMetersPerSecond,
                 omega - currentRobotRelativeVelocity.omegaRadiansPerSecond);
     }
 

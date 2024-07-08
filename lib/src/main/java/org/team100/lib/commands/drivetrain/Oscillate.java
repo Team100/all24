@@ -52,7 +52,6 @@ public class Oscillate extends Command100 {
         super(parent);
         m_swerve = swerve;
         m_period = 4 * kMaxSpeed / kAccel;
-        m_logger.logDouble(Level.DEBUG, "period", () -> m_period);
         m_square = new SquareWave(kAccel, m_period);
         m_triangle = new TriangleWave(kMaxSpeed, m_period);
         m_parabola = new ParabolicWave(kMaxSpeed * m_period / 4, m_period);
@@ -106,19 +105,20 @@ public class Oscillate extends Command100 {
 
         }
 
-        m_logger.logDouble(Level.DEBUG, "time", () -> time);
-        m_logger.logDouble(Level.DEBUG, "setpoint/accel", () -> accelM_S_S);
-        m_logger.logDouble(Level.DEBUG, "setpoint/speed", () -> speedM_S);
-        m_logger.logDouble(Level.DEBUG, "setpoint/position", () -> positionM);
+        m_logger.logDouble(Level.TRACE, "period", () -> m_period);
+        m_logger.logDouble(Level.TRACE, "time", () -> time);
+        m_logger.logDouble(Level.TRACE, "setpoint/accel", () -> accelM_S_S);
+        m_logger.logDouble(Level.TRACE, "setpoint/speed", () -> speedM_S);
+        m_logger.logDouble(Level.TRACE, "setpoint/position", () -> positionM);
 
         SwerveState swerveState = m_swerve.getState();
         if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
-            m_logger.logDouble(Level.DEBUG, "measurement/speed", () -> swerveState.theta().v());
-            m_logger.logDouble(Level.DEBUG, "measurement/position",
+            m_logger.logDouble(Level.TRACE, "measurement/speed", () -> swerveState.theta().v());
+            m_logger.logDouble(Level.TRACE, "measurement/position",
                     () -> swerveState.theta().x() - m_initial.theta().x());
         } else {
-            m_logger.logDouble(Level.DEBUG, "measurement/speed", () -> swerveState.x().v());
-            m_logger.logDouble(Level.DEBUG, "measurement/position",
+            m_logger.logDouble(Level.TRACE, "measurement/speed", () -> swerveState.x().v());
+            m_logger.logDouble(Level.TRACE, "measurement/position",
                     () -> swerveState.x().x() - m_initial.x().x());
         }
     }

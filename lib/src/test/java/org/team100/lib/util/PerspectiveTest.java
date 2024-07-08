@@ -2,7 +2,6 @@ package org.team100.lib.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +12,9 @@ import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
-import edu.wpi.first.cscore.CameraServerCvJNI;
+import edu.wpi.first.cscore.OpenCvLoader;
 
 class PerspectiveTest {
-
-    public PerspectiveTest() throws IOException {
-        CameraServerCvJNI.forceLoad();
-    }
 
     Mat calibrationSquareInWorldCoordinatesMeters() {
         // dst is the floor relative to the robot (robot is zero, x ahead, y to the
@@ -52,7 +47,7 @@ class PerspectiveTest {
 
     @Test
     void testPerspective() {
-
+        OpenCvLoader.forceStaticLoad();
         Mat src = calibrationSquareInCameraPixels();
         Mat dst = calibrationSquareInWorldCoordinatesMeters();
 

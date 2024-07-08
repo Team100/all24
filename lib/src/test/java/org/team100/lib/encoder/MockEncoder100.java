@@ -1,8 +1,7 @@
-package org.team100.lib.encoder.turning;
+package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.SettableEncoder;
 import org.team100.lib.units.Measure100;
 
 public class MockEncoder100<T extends Measure100> implements SettableEncoder<T> {

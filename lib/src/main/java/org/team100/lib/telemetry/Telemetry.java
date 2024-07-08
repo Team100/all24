@@ -3,8 +3,6 @@ package org.team100.lib.telemetry;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.team100.lib.dashboard.Glassy;
-
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -22,18 +20,21 @@ import edu.wpi.first.wpilibj.DataLogManager;
  */
 public class Telemetry {
     public enum Level {
-        /** Log nothing for maximum speed */
-        SILENT(1),
-        /** Serious problems */
-        ERROR(2),
-        /** Not-serious problems */
-        WARN(3),
-        /** useful for normal operations */
-        INFO(4),
-        /** primarily useful during development */
-        DEBUG(5),
-        /** slow, shows absolutely everything */
-        TRACE(6);
+        /**
+         * Minimal, curated set of measurements for competition matches. Comp mode
+         * overrides root logger enablement.
+         */
+        COMP(1),
+        /**
+         * Keep this set small enough to avoid overrunning. This should only contain
+         * things you're actively working on.
+         */
+        DEBUG(2),
+        /**
+         * Slow, shows absolutely everything. Overruns. Don't expect normal robot
+         * behavior in this mode.
+         */
+        TRACE(3);
 
         private int priority;
 
@@ -51,9 +52,7 @@ public class Telemetry {
      */
     static final boolean kAlsoPrint = false;
     private static final Telemetry instance = new Telemetry();
-    static final String kName = "Telemetry";
 
-    final Chronos m_chronos = Chronos.get();
     final NetworkTableInstance inst;
     final Map<String, Publisher> pubs;
     Level m_level;
@@ -74,19 +73,19 @@ public class Telemetry {
         m_level = level;
     }
 
+    public Level getLevel() {
+        return m_level;
+    }
+
     public static Telemetry get() {
         return instance;
     }
 
-    public Logger rootLogger(Glassy obj) {
-        return new RootLogger(this, obj.getGlassName());
+    public FieldLogger fieldLogger(boolean defaultEnabled) {
+        return new FieldLogger(this, defaultEnabled);
     }
 
-    public Logger fieldLogger() {
-        return new RootLogger(this, "field");
-    }
-
-    public Logger namedRootLogger(String str) {
-        return new RootLogger(this, str);
+    public RootLogger namedRootLogger(String str, boolean defaultEnabled) {
+        return new RootLogger(this, str, defaultEnabled);
     }
 }

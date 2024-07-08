@@ -37,6 +37,7 @@ public class DriveToWaypoint100 extends Command100 {
     private final List<TimingConstraint> m_constraints;
 
     private final double m_timeBuffer;
+    private final TrajectoryVisualization m_viz;
     private final Timer m_timer = new Timer();
 
     private Trajectory100 m_trajectory = new Trajectory100();
@@ -47,13 +48,15 @@ public class DriveToWaypoint100 extends Command100 {
             SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             List<TimingConstraint> constraints,
-            double timeBuffer) {
+            double timeBuffer,
+            TrajectoryVisualization viz) {
         super(parent);
         m_goal = goal;
         m_swerve = drivetrain;
         m_controller = controller;
         m_constraints = constraints;
         m_timeBuffer = timeBuffer;
+        m_viz = viz;
         addRequirements(m_swerve);
     }
 
@@ -82,7 +85,7 @@ public class DriveToWaypoint100 extends Command100 {
                 kMaxAccelM_S_S);
         m_trajectory = trajectory;
 
-        TrajectoryVisualization.setViz(trajectory);
+        m_viz.setViz(trajectory);
 
         if (trajectory.isEmpty()) {
             end(false);
@@ -103,7 +106,7 @@ public class DriveToWaypoint100 extends Command100 {
         if (output == null)
             return;
 
-        m_logger.log(Level.DEBUG, "chassis speeds", output);
+        m_logger.logChassisSpeeds(Level.TRACE, "chassis speeds", () -> output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeedsNormally(output, dt);
     }
@@ -118,7 +121,7 @@ public class DriveToWaypoint100 extends Command100 {
     public void end100(boolean interrupted) {
         m_timer.stop();
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 
     ////////////////////////////////////////////////////

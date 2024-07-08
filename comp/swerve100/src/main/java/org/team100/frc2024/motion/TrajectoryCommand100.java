@@ -25,24 +25,27 @@ public class TrajectoryCommand100 extends Command100 {
     private final DriveMotionController m_controller;
     private final Trajectory100 m_trajectory;
     private final Pose2d m_goal;
+    private final TrajectoryVisualization m_viz;
 
     public TrajectoryCommand100(
             Logger parent,
             SwerveDriveSubsystem robotDrive,
             Trajectory100 trajectory,
-            DriveMotionController controller) {
+            DriveMotionController controller,
+            TrajectoryVisualization viz) {
         super(parent);
         m_robotDrive = robotDrive;
         m_trajectory = trajectory;
         m_controller = controller;
         m_goal = m_trajectory.getLastPoint().state().state().getPose();
-        m_logger.log(Level.TRACE, "goal", m_goal);
+        m_viz = viz;
+        m_logger.logPose2d(Level.TRACE, "goal", () -> m_goal);
         addRequirements(m_robotDrive);
     }
 
     @Override
     public void initialize100() {
-        TrajectoryVisualization.setViz(m_trajectory);
+        m_viz.setViz(m_trajectory);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(m_trajectory));
         m_controller.setTrajectory(iter);
     }
@@ -56,11 +59,11 @@ public class TrajectoryCommand100 extends Command100 {
 
         m_robotDrive.setChassisSpeedsNormally(output, dt);
 
-        m_logger.log(Level.TRACE, "chassis speeds", output);
+        m_logger.logChassisSpeeds(Level.TRACE, "chassis speeds", () -> output);
         double thetaErrorRad = m_goal.getRotation().getRadians()
                 - m_robotDrive.getState().pose().getRotation().getRadians();
         m_logger.logDouble(Level.TRACE, "THETA ERROR", () -> thetaErrorRad);
-        m_logger.logBoolean(Level.TRACE, "FINSIHED", false);
+        m_logger.logBoolean(Level.TRACE, "FINSIHED", () -> false);
     }
 
     @Override
@@ -70,8 +73,8 @@ public class TrajectoryCommand100 extends Command100 {
 
     @Override
     public void end100(boolean interrupted) {
-        m_logger.logBoolean(Level.TRACE, "FINSIHED", true);
+        m_logger.logBoolean(Level.TRACE, "FINSIHED", () -> true);
         m_robotDrive.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 }

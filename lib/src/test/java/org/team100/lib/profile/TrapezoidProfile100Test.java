@@ -15,7 +15,7 @@ import org.team100.lib.util.Util;
  * of max velocity.
  */
 class TrapezoidProfile100Test {
-    private static final boolean actuallyPrint = true;
+    private static final boolean actuallyPrint = false;
     private static final double kDt = 0.01;
     private static final double kDelta = 0.001;
 

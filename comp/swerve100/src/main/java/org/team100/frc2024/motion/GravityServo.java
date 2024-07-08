@@ -4,23 +4,27 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.config.SysParam;
 import org.team100.lib.controller.State100;
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motor.DutyCycleMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
-public class GravityServo {
+/**
+ * Implements cosine feedforward for gravity compensation, using a duty cycle
+ * motor.
+ */
+public class GravityServo implements Glassy {
     private final Logger m_logger;
     private final DutyCycleMotor100 m_motor;
     private final SysParam m_params;
     private final PIDController m_controller;
     private final Profile100 m_profile;
     private final double m_period;
-    private final Encoder100<Distance100> m_encoder;
+    private final RotaryPositionSensor m_encoder;
     private final double[] m_softLimits;
 
     private State100 m_goal = new State100(0, 0);
@@ -33,10 +37,10 @@ public class GravityServo {
             PIDController controller,
             Profile100 profile,
             double period,
-            Encoder100<Distance100> encoder,
+            RotaryPositionSensor encoder,
             double[] softLimits) {
         m_motor = motor;
-        m_logger = parent.child(this.getClass());
+        m_logger = parent.child(this);
         m_params = params;
         m_controller = controller;
         m_controller.setTolerance(0.02);
@@ -49,26 +53,26 @@ public class GravityServo {
     /** Zeros controller errors, sets setpoint to current position. */
     public void reset() {
         m_controller.reset();
-        if (getPosition().isEmpty()) {
+        if (getPositionRad().isEmpty()) {
             return;
         }
-        m_setpoint = new State100(getPosition().getAsDouble(), 0);
+        m_setpoint = new State100(getPositionRad().getAsDouble(), 0);
     }
 
-    public OptionalDouble getPosition() {
-        return m_encoder.getPosition();
+    public OptionalDouble getPositionRad() {
+        return m_encoder.getPositionRad();
     }
 
     public void rezero() {
         m_encoder.reset();
     }
 
-    public OptionalDouble getRawPosition() {
-        return m_encoder.getPosition();
+    public OptionalDouble getRawPositionRad() {
+        return m_encoder.getPositionRad();
     }
 
     public void setPosition(double goal) {
-        OptionalDouble encoderPosition = m_encoder.getPosition();
+        OptionalDouble encoderPosition = m_encoder.getPositionRad();
         if (encoderPosition.isEmpty()) {
             return;
         }
@@ -96,20 +100,20 @@ public class GravityServo {
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        m_logger.logDouble(Level.DEBUG, "u_FB", () -> u_FB);
-        m_logger.logDouble(Level.DEBUG, "u_FF", () -> u_FF);
-        m_logger.logDouble(Level.DEBUG, "static FF", () -> staticFF);
-        m_logger.logDouble(Level.DEBUG, "gravity T", () -> gravityTorque);
-        m_logger.logDouble(Level.DEBUG, "u_TOTAL", () -> u_TOTAL);
-        m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        m_logger.log(Level.DEBUG, "Goal", m_goal);
-        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
-        m_logger.logDouble(Level.DEBUG, "Setpoint Velocity", m_setpoint::v);
-        m_logger.logDouble(Level.DEBUG, "Controller Position Error", m_controller::getPositionError);
-        m_logger.logDouble(Level.DEBUG, "Controller Velocity Error", m_controller::getVelocityError);
-        m_logger.logDouble(Level.DEBUG, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
-        m_logger.logDouble(Level.DEBUG, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
-        m_logger.logDouble(Level.DEBUG, "ENCODEr", () -> measurement);
+        m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
+        m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
+        m_logger.logDouble(Level.TRACE, "static FF", () -> staticFF);
+        m_logger.logDouble(Level.TRACE, "gravity T", () -> gravityTorque);
+        m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
+        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
+        m_logger.logState100(Level.TRACE, "Goal", () -> m_goal);
+        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
+        m_logger.logDouble(Level.TRACE, "Setpoint Velocity", m_setpoint::v);
+        m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
+        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
+        m_logger.logDouble(Level.TRACE, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
+        m_logger.logDouble(Level.TRACE, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
+        m_logger.logDouble(Level.TRACE, "ENCODEr", () -> measurement);
     }
 
     private double getStaticFF(double measurement, double u_FB, double u_FF) {
@@ -122,7 +126,7 @@ public class GravityServo {
     }
 
     public void setWithSoftLimits(double value) {
-        OptionalDouble encoderPosition = m_encoder.getPosition();
+        OptionalDouble encoderPosition = m_encoder.getPositionRad();
         if (encoderPosition.isEmpty()) {
             m_motor.setDutyCycle(0);
             return;
@@ -141,7 +145,7 @@ public class GravityServo {
     }
 
     public void setPositionWithSteadyState(double goal) {
-        OptionalDouble encoderPosition = m_encoder.getPosition();
+        OptionalDouble encoderPosition = m_encoder.getPositionRad();
         if (encoderPosition.isEmpty()) {
             m_motor.setDutyCycle(0);
             return;
@@ -170,19 +174,19 @@ public class GravityServo {
 
         m_controller.setIntegratorRange(0, 0.1);
 
-        m_logger.logDouble(Level.DEBUG, "u_FB", () -> u_FB);
-        m_logger.logDouble(Level.DEBUG, "u_FF", () -> u_FF);
-        m_logger.logDouble(Level.DEBUG, "GRAVITY", () -> gravityTorque);
-        m_logger.logDouble(Level.DEBUG, "u_TOTAL", () -> u_TOTAL);
-        m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        m_logger.log(Level.DEBUG, "Goal", m_goal);
-        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
-        m_logger.logDouble(Level.DEBUG, "Setpoint Velocity", () -> m_setpoint.v());
-        m_logger.logDouble(Level.DEBUG, "Controller Position Error", m_controller::getPositionError);
-        m_logger.logDouble(Level.DEBUG, "Controller Velocity Error", m_controller::getVelocityError);
-        m_logger.logDouble(Level.DEBUG, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
-        m_logger.logDouble(Level.DEBUG, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
-        m_logger.logDouble(Level.DEBUG, "ENCODEr", () -> measurement);
+        m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
+        m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
+        m_logger.logDouble(Level.TRACE, "GRAVITY", () -> gravityTorque);
+        m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
+        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
+        m_logger.logState100(Level.TRACE, "Goal", () -> m_goal);
+        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
+        m_logger.logDouble(Level.TRACE, "Setpoint Velocity", () -> m_setpoint.v());
+        m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
+        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
+        m_logger.logDouble(Level.TRACE, "COOSIIINEEE", () -> Math.cos((measurement / m_params.gearRatio())));
+        m_logger.logDouble(Level.TRACE, "POSE * GEAR RAT", () -> measurement / m_params.gearRatio());
+        m_logger.logDouble(Level.TRACE, "ENCODEr", () -> measurement);
     }
 
     public void set(double value) {
@@ -191,5 +195,10 @@ public class GravityServo {
 
     public void stop() {
         m_motor.setDutyCycle(0);
+    }
+
+    @Override
+    public String getGlassName() {
+        return "GravityServo";
     }
 }

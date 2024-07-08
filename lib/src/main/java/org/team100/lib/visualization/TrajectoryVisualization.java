@@ -3,7 +3,6 @@ package org.team100.lib.visualization;
 import java.util.List;
 
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPoint;
@@ -16,13 +15,18 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 
 public class TrajectoryVisualization {
     private static final String kTrajectory = "trajectory";
-    private static final Logger fieldLogger = Telemetry.get().fieldLogger();
 
-    private TrajectoryVisualization() {
-        //
+    private final Logger m_fieldLogger;
+
+    public TrajectoryVisualization(Logger fieldLogger) {
+        m_fieldLogger = fieldLogger;
     }
 
-    public static void setViz(Trajectory100 m_trajectory) {
+    public void setViz(Trajectory100 m_trajectory) {
+        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromTrajectory100(m_trajectory));
+    }
+
+    private static double[] fromTrajectory100(Trajectory100 m_trajectory) {
         double[] arr = new double[m_trajectory.length() * 3];
         int ndx = 0;
         for (TrajectoryPoint p : m_trajectory.getPoints()) {
@@ -32,10 +36,14 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        fieldLogger.log(Level.DEBUG, kTrajectory, arr);
+        return arr;
     }
 
-    public static void setViz(Trajectory m_trajectory) {
+    public void setViz(Trajectory m_trajectory) {
+        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromWPITrajectory(m_trajectory));
+    }
+
+    private static double[] fromWPITrajectory(Trajectory m_trajectory) {
         double[] arr = new double[m_trajectory.getStates().size() * 3];
         int ndx = 0;
         for (State p : m_trajectory.getStates()) {
@@ -45,10 +53,14 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        fieldLogger.log(Level.DEBUG, kTrajectory, arr);
+        return arr;
     }
 
-    public static void setViz(List<Pose2d> poses) {
+    public void setViz(List<Pose2d> poses) {
+        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromPoses(poses));
+    }
+
+    private static double[] fromPoses(List<Pose2d> poses) {
         double[] arr = new double[poses.size() * 3];
         int ndx = 0;
         for (Pose2d pose : poses) {
@@ -57,15 +69,15 @@ public class TrajectoryVisualization {
             arr[ndx + 2] = pose.getRotation().getDegrees();
             ndx += 3;
         }
-        fieldLogger.log(Level.DEBUG, kTrajectory, arr);
+        return arr;
     }
 
-    public static void setViz(ChoreoTrajectory trajectory) {
+    public void setViz(ChoreoTrajectory trajectory) {
         setViz(List.of(trajectory.getPoses()));
     }
 
-    public static void clear() {
-        fieldLogger.log(Level.DEBUG, kTrajectory, new double[0]);
+    public void clear() {
+        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> new double[0]);
     }
 
 }

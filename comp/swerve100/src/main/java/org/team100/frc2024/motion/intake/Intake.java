@@ -6,12 +6,11 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.LimitedVelocityServo;
+import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,7 +22,7 @@ public class Intake extends SubsystemBase implements Glassy {
     // this uses PWMSparkMax instead of PWM to get MotorSafety.
     private final PWMSparkMax m_intake;
     private final PWMSparkMax m_centering;
-    private final LimitedVelocityServo<Distance100> superRollers;
+    private final LimitedLinearVelocityServo superRollers;
 
     private int count = 0;
     private int currentCount = 0;
@@ -114,9 +113,9 @@ public class Intake extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.logDouble(Level.DEBUG, "lower", m_intake::get);
-        m_logger.log(Level.DEBUG, "upper", superRollers.getVelocity());
-        m_logger.logDouble(Level.DEBUG, "centering", m_centering::get);
+        m_logger.logDouble(Level.TRACE, "lower", m_intake::get);
+        m_logger.logOptionalDouble(Level.TRACE, "upper", superRollers::getVelocity);
+        m_logger.logDouble(Level.TRACE, "centering", m_centering::get);
     }
 
     @Override

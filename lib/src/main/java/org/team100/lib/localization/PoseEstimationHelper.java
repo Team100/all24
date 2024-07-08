@@ -3,6 +3,7 @@ package org.team100.lib.localization;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -19,12 +20,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 /**
  * Static methods used to interpret camera input.
  */
-public class PoseEstimationHelper {
+public class PoseEstimationHelper implements Glassy {
 
     private final Logger m_logger;
 
     public PoseEstimationHelper(Logger parent) {
-        m_logger = parent.child(this.getClass());
+        m_logger = parent.child(this);
     }
 
     /**
@@ -121,14 +122,14 @@ public class PoseEstimationHelper {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            m_logger.log(Level.DEBUG, "rotation_source", "CAMERA");
+            m_logger.logString(Level.TRACE, "rotation_source", () -> "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        m_logger.log(Level.DEBUG, "rotation_source", "GYRO");
+        m_logger.logString(Level.TRACE, "rotation_source", () -> "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -205,14 +206,17 @@ public class PoseEstimationHelper {
 
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
-        m_logger.log(Level.DEBUG, "CAMERA ROT IN FIELD COORDS", cameraRotationInFieldCoords.toRotation2d());
-        m_logger.log(Level.DEBUG, "TAG TRANSLATION IN CAM COORDS", tagTranslationInCameraCoords.toTranslation2d());
+        m_logger.logRotation2d(Level.TRACE, "CAMERA ROT IN FIELD COORDS",
+                cameraRotationInFieldCoords::toRotation2d);
+        m_logger.logTranslation2d(Level.TRACE, "TAG TRANSLATION IN CAM COORDS",
+                tagTranslationInCameraCoords::toTranslation2d);
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
-        m_logger.log(Level.DEBUG, "TAG ROTATION IN CAM COOORDS", tagRotationInCameraCoords.toRotation2d());
+        m_logger.logRotation2d(Level.TRACE, "TAG ROTATION IN CAM COORDS",
+                tagRotationInCameraCoords::toRotation2d);
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -222,7 +226,8 @@ public class PoseEstimationHelper {
                 tagInCameraCoords,
                 tagInFieldCoords);
 
-        m_logger.log(Level.DEBUG, "CAM IN FIELD COORDS", cameraInFieldCoords.getTranslation().toTranslation2d());
+        m_logger.logTranslation2d(Level.TRACE, "CAM IN FIELD COORDS",
+                () -> cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
                 cameraInFieldCoords,
@@ -326,5 +331,10 @@ public class PoseEstimationHelper {
         Translation3d t = PoseEstimationHelper.blipToTranslation(blip);
         return cameraInRobotCoordinates.plus(
                 new Transform3d(t, GeometryUtil.kRotation3Zero));
+    }
+
+    @Override
+    public String getGlassName() {
+        return "PoseEstimationHelper";
     }
 }

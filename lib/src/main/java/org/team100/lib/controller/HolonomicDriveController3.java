@@ -85,7 +85,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_logger.logDouble(Level.TRACE, "u_FB/x", () -> xFB);
         m_logger.logDouble(Level.TRACE, "u_FB/y", () -> yFB);
         m_logger.logDouble(Level.TRACE, "u_FB/theta", () -> thetaFB);
-        m_logger.log(Level.TRACE, "measurement", currentPose);
+        m_logger.logPose2d(Level.TRACE, "measurement", () -> currentPose);
 
         m_logger.logDouble(Level.TRACE, "setpoint/x", m_xController::getSetpoint);
         m_logger.logDouble(Level.TRACE, "setpoint/y", m_yController::getSetpoint);

@@ -66,7 +66,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getYawNEDDeg() {
         float yawDeg = m_gyro1.getYaw();
-        m_logger.log(Level.TRACE, "Yaw NED (deg)", yawDeg);
+        m_logger.logFloat(Level.TRACE, "Yaw NED (deg)", () -> yawDeg);
         return yawDeg;
     }
 
@@ -76,7 +76,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getPitchDeg() {
         float pitchDeg = m_gyro1.getPitch();
-        m_logger.log(Level.TRACE, "Pitch (deg)", pitchDeg);
+        m_logger.logFloat(Level.TRACE, "Pitch (deg)", () -> pitchDeg);
         return pitchDeg;
     }
 
@@ -86,7 +86,7 @@ public class SingleNavXGyro implements Gyro100 {
     @Override
     public float getRollDeg() {
         float rollDeg = m_gyro1.getRoll();
-        m_logger.log(Level.TRACE, "Roll (deg)", rollDeg);
+        m_logger.logFloat(Level.TRACE, "Roll (deg)", () -> rollDeg);
         return rollDeg;
     }
 
@@ -126,14 +126,14 @@ public class SingleNavXGyro implements Gyro100 {
 
     private void logStuff() {
         if (m_gyro1.isConnected()) {
-            m_logger.logBoolean(Level.TRACE, "Connected", true);
+            m_logger.logBoolean(Level.TRACE, "Connected", () -> true);
         } else {
-            m_logger.logBoolean(Level.ERROR, "Connected", false);
+            m_logger.logBoolean(Level.COMP, "Connected", () -> false);
         }
         m_logger.logDouble(Level.TRACE, "Angle (deg)", m_gyro1::getAngle);
-        m_logger.log(Level.TRACE, "Fused (deg)", m_gyro1.getFusedHeading());
-        m_logger.log(Level.TRACE, "Yaw (deg)", m_gyro1.getYaw());
+        m_logger.logFloat(Level.TRACE, "Fused (deg)", m_gyro1::getFusedHeading);
+        m_logger.logFloat(Level.TRACE, "Yaw (deg)", m_gyro1::getYaw);
         m_logger.logDouble(Level.TRACE, "Angle Mod 360 (deg)", () -> m_gyro1.getAngle() % 360);
-        m_logger.log(Level.TRACE, "Compass Heading (deg)", m_gyro1.getCompassHeading());
+        m_logger.logFloat(Level.TRACE, "Compass Heading (deg)", m_gyro1::getCompassHeading);
     }
 }

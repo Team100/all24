@@ -73,7 +73,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v1.setDutyCycle(0);
             return;
         }
-        m_logger.logDouble(Level.DEBUG, "LEFT VALUE", () -> value);
+        m_logger.logDouble(Level.TRACE, "LEFT VALUE", () -> value);
     }
 
     public void setRightWithSoftLimits(double value) {
@@ -90,7 +90,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
             v2.setDutyCycle(0);
             return;
         }
-        m_logger.logDouble(Level.DEBUG, "RIGHT VALUE", () -> value);
+        m_logger.logDouble(Level.TRACE, "RIGHT VALUE", () -> value);
     }
 
     public void zeroClimbers() {
@@ -116,10 +116,10 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.log(Level.DEBUG, "CLIMBER 1 ENCODER", e1.getPosition());
-        m_logger.log(Level.DEBUG, "CLIMBER 2 ENCODER", e2.getPosition());
-        m_logger.log(Level.DEBUG, "RPM 1", e1.getRate());
-        m_logger.log(Level.DEBUG, "RPM 2", e2.getRate());
+        m_logger.logOptionalDouble(Level.TRACE, "CLIMBER 1 ENCODER", e1::getPosition);
+        m_logger.logOptionalDouble(Level.TRACE, "CLIMBER 2 ENCODER", e2::getPosition);
+        m_logger.logOptionalDouble(Level.TRACE, "RPM 1", e1::getRate);
+        m_logger.logOptionalDouble(Level.TRACE, "RPM 2", e2::getRate);
     }
 
     @Override

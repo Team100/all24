@@ -14,22 +14,27 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
- * Creates a profile to the translation of a note and follows it
+ * Creates a profile to the translation of a note and follows it.
+ * 
+ * If the goal supplier runs empty, this remembers the previous goal for 1 sec,
+ * and then gives up.
+ * 
+ * TODO: coordinate the axes; currently it's three independent profiles.
+ * 
+ * TODO: force the theta axis to finish first, so that the approach is correct.
  */
 public class DriveWithProfileNote extends Command100 {
-
+    private final FieldLogger m_fieldLogger;
     private final Intake m_intake;
-
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController100 m_controller;
@@ -37,14 +42,15 @@ public class DriveWithProfileNote extends Command100 {
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
-    private final Logger fieldLogger;
-    private Optional<Translation2d> previousGoal;
-    private State100 xSetpoint;
-    private State100 ySetpoint;
-    private State100 thetaSetpoint;
-    private int count;
+
+    private Translation2d m_previousGoal;
+    private State100 m_xSetpoint;
+    private State100 m_ySetpoint;
+    private State100 m_thetaSetpoint;
+    private int m_count;
 
     public DriveWithProfileNote(
+            FieldLogger fieldLogger,
             Logger parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
@@ -52,9 +58,7 @@ public class DriveWithProfileNote extends Command100 {
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
         super(parent);
-        fieldLogger = Telemetry.get().fieldLogger();
-        previousGoal = null;
-        count = 0;
+        m_fieldLogger = fieldLogger;
         m_intake = intake;
         m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;
@@ -73,72 +77,100 @@ public class DriveWithProfileNote extends Command100 {
                 m_limits.getMaxAngleSpeedRad_S(),
                 m_limits.getMaxAngleAccelRad_S2() / 4,
                 0.01);
+
+        m_previousGoal = null;
+        m_count = 0;
+
         addRequirements(m_swerve, m_intake);
     }
 
     @Override
     public void initialize100() {
-        xSetpoint = m_swerve.getState().x();
-        ySetpoint = m_swerve.getState().y();
-        thetaSetpoint = m_swerve.getState().theta();
+        m_xSetpoint = m_swerve.getState().x();
+        m_ySetpoint = m_swerve.getState().y();
+        m_thetaSetpoint = m_swerve.getState().theta();
+    }
+
+    /**
+     * Returns the current goal, or the previous one if the current one is newly
+     * empty.
+     */
+    private Optional<Translation2d> getGoal() {
+        Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
+        m_logger.logBoolean(Level.TRACE, "Note detected", optGoal::isPresent);
+
+        if (optGoal.isPresent()) {
+            // Supplier is ok, use this goal and reset the history mechanism.
+            m_previousGoal = optGoal.get();
+            m_count = 0;
+            return optGoal;
+        }
+        if (m_count > 50) {
+            // Supplier is empty and timer has expired.
+            return Optional.empty();
+        }
+        if (m_previousGoal == null) {
+            // Nothing to fall back to.
+            return Optional.empty();
+        }
+        m_count++;
+        return Optional.of(m_previousGoal);
     }
 
     @Override
     public void execute100(double dt) {
         // intake the whole time
         m_intake.intakeSmart();
-        Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
+
+        Optional<Translation2d> optGoal = getGoal();
         if (optGoal.isEmpty()) {
-            if (previousGoal == null) {
-                m_swerve.setChassisSpeeds(new ChassisSpeeds(), dt);
-                m_logger.logBoolean(Level.DEBUG, "Note detected", false);
-                return;
-            }
-            optGoal = previousGoal;
-            count++;
-            if (count == 50) {
-                return;
-            }
-        } else {
-            count = 0;
+            // No current goal, timer expired, or no past goal.
+            return;
         }
+
         Translation2d goal = optGoal.get();
 
-        m_logger.logBoolean(Level.DEBUG, "Note detected", true);
-        Rotation2d rotationGoal;
-        if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
-            rotationGoal = new Rotation2d(
-                    goal.minus(m_swerve.getState().pose().getTranslation()).getAngle().getRadians() + Math.PI);
-        } else {
-            rotationGoal = m_swerve.getState().pose().getRotation();
-        }
-        // take the short path
-        double measurement = m_swerve.getState().pose().getRotation().getRadians();
-        rotationGoal = new Rotation2d(
-                Math100.getMinDistance(measurement, rotationGoal.getRadians()));
+        State100 thetaGoal = getThetaGoalState(m_swerve.getState().pose(), goal);
+        State100 xGoal = new State100(goal.getX(), 0, 0);
+        State100 yGoal = new State100(goal.getY(), 0, 0);
 
+        m_xSetpoint = xProfile.calculate(dt, m_xSetpoint, xGoal);
+        m_ySetpoint = yProfile.calculate(dt, m_ySetpoint, yGoal);
         // make sure the setpoint uses the modulus close to the measurement.
-        thetaSetpoint = new State100(
-                Math100.getMinDistance(measurement, thetaSetpoint.x()),
-                thetaSetpoint.v());
+        final double thetaMeasurement = m_swerve.getState().pose().getRotation().getRadians();
+        m_thetaSetpoint = new State100(
+                Math100.getMinDistance(thetaMeasurement, m_thetaSetpoint.x()),
+                m_thetaSetpoint.v());
+        m_thetaSetpoint = thetaProfile.calculate(dt, m_thetaSetpoint, thetaGoal);
 
-        State100 thetaGoal = new State100(rotationGoal.getRadians(), 0);
-        State100 xGoalRaw = new State100(goal.getX(), 0, 0);
-        State100 yGoalRaw = new State100(goal.getY(), 0, 0);
+        SwerveState measurement = m_swerve.getState();
+        SwerveState setpoint = new SwerveState(m_xSetpoint, m_ySetpoint, m_thetaSetpoint);
+        FieldRelativeVelocity output = m_controller.calculate(measurement, setpoint);
 
-        xSetpoint = xProfile.calculate(dt, xSetpoint, xGoalRaw);
-        ySetpoint = yProfile.calculate(dt, ySetpoint, yGoalRaw);
-        thetaSetpoint = thetaProfile.calculate(dt, thetaSetpoint, thetaGoal);
+        m_swerve.driveInFieldCoords(output, dt);
 
-        SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
-        FieldRelativeVelocity twistGoal = m_controller.calculate(m_swerve.getState(), goalState);
-
-        fieldLogger.log(Level.DEBUG, "target", new double[] {
+        m_fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
                 goal.getX(),
                 goal.getY(),
                 0 });
-        m_swerve.driveInFieldCoords(twistGoal, dt);
+    }
 
+    private static State100 getThetaGoalState(Pose2d pose, Translation2d goal) {
+        // take the short path
+        final double measurementRad = pose.getRotation().getRadians();
+        final double goalRad = getThetaGoalRad(goal, pose);
+        return new State100(Math100.getMinDistance(measurementRad, goalRad), 0);
+    }
+
+    private static double getThetaGoalRad(Translation2d goal, Pose2d pose) {
+        if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
+            // face the rear of the robot towards the goal.
+            Translation2d toGoal = goal.minus(pose.getTranslation());
+            return toGoal.getAngle().getRadians() + Math.PI;
+        } else {
+            // leave the rotation alone
+            return pose.getRotation().getRadians();
+        }
     }
 
     @Override

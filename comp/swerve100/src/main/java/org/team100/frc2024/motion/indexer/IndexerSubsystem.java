@@ -7,11 +7,10 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.LimitedVelocityServo;
+import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,7 +34,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
      */
     private static final double kIndexerVelocityM_S = 5;
     private final Logger m_logger;
-    private final LimitedVelocityServo<Distance100> m_servo;
+    private final LimitedLinearVelocityServo m_servo;
     private final PIDConstants m_velocityConstants;
     private final Feedforward100 m_lowLevelFeedforwardConstants;
 

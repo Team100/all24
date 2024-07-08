@@ -15,11 +15,11 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
 
     public Talon6TurningEncoder(
             Logger parent,
-            Talon6TurningMotor m_motor,
-            double m_gearRatio) {
+            Talon6TurningMotor motor,
+            double gearRatio) {
         m_logger = parent.child(this);
-        this.m_motor = m_motor;
-        this.m_gearRatio = m_gearRatio;
+        m_motor = motor;
+        m_gearRatio = gearRatio;
     }
 
     /** Position in radians */
@@ -28,7 +28,7 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
         double motorPositionRev = m_motor.getPositionRev();
         double positionRad = motorPositionRev * 2 * Math.PI / m_gearRatio;
         m_logger.logDouble(Level.TRACE,  "motor position (rev)", ()->motorPositionRev);
-        m_logger.logDouble(Level.DEBUG,  "output position (rad)",()-> positionRad);
+        m_logger.logDouble(Level.TRACE,  "output position (rad)",()-> positionRad);
         return OptionalDouble.of(positionRad);
     }
 
@@ -38,7 +38,7 @@ public class Talon6TurningEncoder implements SettableEncoder<Angle100> {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
         double outputVelocityRad_S = motorVelocityRev_S * 2 * Math.PI / m_gearRatio;
         m_logger.logDouble(Level.TRACE,  "motor velocity (rev_s)",()-> motorVelocityRev_S);
-        m_logger.logDouble(Level.DEBUG,  "output velocity (rad_s)",()->outputVelocityRad_S);
+        m_logger.logDouble(Level.TRACE,  "output velocity (rad_s)",()->outputVelocityRad_S);
         return OptionalDouble.of(outputVelocityRad_S);
     }
 

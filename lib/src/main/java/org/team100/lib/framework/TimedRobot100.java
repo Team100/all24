@@ -96,7 +96,7 @@ public class TimedRobot100 extends IterativeRobotBase {
      */
     protected TimedRobot100(double period) {
         super(period);
-        m_logger = Telemetry.get().namedRootLogger("ROBOT");
+        m_logger = Telemetry.get().namedRootLogger("ROBOT", false);
         chronos = Chronos.get();
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");
@@ -143,7 +143,7 @@ public class TimedRobot100 extends IterativeRobotBase {
             double endWaitingS = Timer.getFPGATimestamp();
             double slackS = endWaitingS - startWaitingS;
             // this is the main loop slack, don't let it go to zero!
-            m_logger.logDouble(Level.INFO, "slack time (s)", () -> slackS);
+            m_logger.logDouble(Level.COMP, "slack time (s)", () -> slackS);
 
             log(callback.func::run, callback.name);
 
@@ -164,9 +164,9 @@ public class TimedRobot100 extends IterativeRobotBase {
             for (Map.Entry<String, Double> durations : chronos.durations().entrySet()) {
                 Double duration = durations.getValue();
                 String name = durations.getKey();
-                m_logger.logDouble(Level.INFO, "duration (s)/" + name, () -> duration);
+                m_logger.logDouble(Level.COMP, "duration (s)/" + name, () -> duration);
                 double fraction = duration / elapsed;
-                m_logger.logDouble(Level.INFO, "fraction (pct)/" + name, () -> 100.0 * fraction);
+                m_logger.logDouble(Level.COMP, "fraction (pct)/" + name, () -> 100.0 * fraction);
             }
             chronos.reset();
         }
@@ -177,7 +177,7 @@ public class TimedRobot100 extends IterativeRobotBase {
         r.run();
         double endWaitingS = Timer.getFPGATimestamp();
         double durationS = endWaitingS - startWaitingS;
-        m_logger.logDouble(Level.INFO, "duration (s)/" + name, () -> durationS);
+        m_logger.logDouble(Level.COMP, "duration (s)/" + name, () -> durationS);
     }
 
     /** Ends the main loop in startCompetition(). */

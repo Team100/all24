@@ -14,13 +14,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 class CameraUpdaterTest {
+    private static final boolean kActuallyPrint = false;
+
     @Test
     void testRotation() throws IOException {
         Pose3d tagInFieldCoords = new Pose3d();
         Transform3d aprilTagTransform = PoseEstimationHelper.getTransformFromRobotPose(Camera.TEST2.getOffset(),
                 new Pose2d(1, tagInFieldCoords.getY(), new Rotation2d(Math.PI)), tagInFieldCoords);
         assertEquals(aprilTagTransform.getX(), 0, 0.0001);
-        System.out.println("APRIL TAG TRANSFORM: " + aprilTagTransform);
+        if (kActuallyPrint)
+            Util.println("APRIL TAG TRANSFORM: " + aprilTagTransform);
     }
 
     @Test
@@ -29,7 +32,8 @@ class CameraUpdaterTest {
         Transform3d aprilTagTransform = PoseEstimationHelper.getTransformFromRobotPose(Camera.TEST4.getOffset(),
                 new Pose2d(1, tagInFieldCoords.getY(), new Rotation2d(Math.PI)), tagInFieldCoords);
         assertEquals(aprilTagTransform.getX(), 0, 0.0001);
-        System.out.println("APRIL TAG TRANSFORM: " + aprilTagTransform);
+        if (kActuallyPrint)
+            Util.println("APRIL TAG TRANSFORM: " + aprilTagTransform);
     }
 
     @Test
@@ -38,6 +42,7 @@ class CameraUpdaterTest {
         Transform3d aprilTagTransform = PoseEstimationHelper.getTransformFromRobotPose(Camera.TEST4.getOffset(),
                 new Pose2d(1, tagInFieldCoords.getY(), new Rotation2d(Math.PI)), tagInFieldCoords);
         assertEquals(aprilTagTransform.getX(), 0, 0.0001);
-        System.out.println("APRIL TAG TRANSFORM: " + aprilTagTransform);
+        if (kActuallyPrint)
+            Util.println("APRIL TAG TRANSFORM: " + aprilTagTransform);
     }
 }

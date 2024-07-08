@@ -80,7 +80,7 @@ public class ShootPreload extends Command implements Glassy {
         if (!alliance.isPresent())
             return;
 
-        logger.log(Level.DEBUG, "command state", "initialize");
+        logger.logString(Level.TRACE, "command state", () -> "initialize");
 
         double distance = m_drive.getState().pose().getTranslation()
                 .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
@@ -94,8 +94,8 @@ public class ShootPreload extends Command implements Glassy {
 
     @Override
     public void execute() {
-        logger.log(Level.DEBUG, "command state", "end");
-        logger.log(Level.DEBUG, "END", 0);
+        logger.logString(Level.TRACE, "command state", () -> "end");
+        logger.logInt(Level.TRACE, "END", () -> 0);
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
@@ -112,7 +112,7 @@ public class ShootPreload extends Command implements Glassy {
         m_shooter.setAngle(pivotSetpoint);
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
-            logger.logDouble(Level.DEBUG, "PIVOT DEFECIT",
+            logger.logDouble(Level.TRACE, "PIVOT DEFECIT",
                     () -> Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
         }
 
@@ -141,9 +141,9 @@ public class ShootPreload extends Command implements Glassy {
 
     @Override
     public void end(boolean interrupted) {
-        logger.log(Level.DEBUG, "command state", "end");
-        logger.log(Level.DEBUG, "command state", "end");
-        logger.log(Level.DEBUG, "END", 1);
+        logger.logString(Level.TRACE, "command state", () -> "end");
+        logger.logString(Level.TRACE, "command state", () -> "end");
+        logger.logInt(Level.TRACE, "END", () -> 1);
         atVelocity = false;
         finished = false;
         m_timer.stop();

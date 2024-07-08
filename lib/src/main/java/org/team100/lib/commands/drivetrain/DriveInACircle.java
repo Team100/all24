@@ -36,6 +36,7 @@ public class DriveInACircle extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final double m_turnRatio;
     private final HolonomicDriveController3 m_controller;
+    private final TrajectoryVisualization m_viz;
 
     private Translation2d m_center;
     private double m_initialRotation;
@@ -57,11 +58,13 @@ public class DriveInACircle extends Command100 {
             Logger parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
-            double turnRatio) {
+            double turnRatio,
+            TrajectoryVisualization viz) {
         super(parent);
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
         m_controller = controller;
+        m_viz = viz;
 
         addRequirements(m_swerve);
     }
@@ -99,10 +102,10 @@ public class DriveInACircle extends Command100 {
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
-        m_logger.log(Level.TRACE, "center", m_center);
+        m_logger.logTranslation2d(Level.TRACE, "center", () -> m_center);
         m_logger.logDouble(Level.TRACE, "angle", () -> m_angleRad);
-        m_logger.log(Level.TRACE, "reference", reference);
-        m_logger.log(Level.TRACE, "target", fieldRelativeTarget);
+        m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
+        m_logger.logFieldRelativeVelocity(Level.TRACE, "target", () -> fieldRelativeTarget);
     }
 
     static Translation2d getCenter(Pose2d currentPose, double radiusM) {
@@ -152,12 +155,12 @@ public class DriveInACircle extends Command100 {
                     0.0);
             poses.add(s.pose());
         }
-        TrajectoryVisualization.setViz(poses);
+        m_viz.setViz(poses);
     }
 
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 }

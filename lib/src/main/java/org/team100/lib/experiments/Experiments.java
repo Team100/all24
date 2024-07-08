@@ -8,7 +8,6 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.telemetry.ExperimentChooser;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,11 +15,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * Controls Experiment enablement.
  * 
- * There are three methods of enablement:
+ * There are four methods of enablement:
  * 
  * -- global: enabled for all robots
  * -- per-identity: enabled for specific RoboRIO serial numbers
  * -- override: using a Sendable Chooser in a dashboard, e.g. glass.
+ * -- test override: to force a config for unit tests.
  */
 public class Experiments implements Glassy {
     public static final Experiments instance = new Experiments(Identity.instance);

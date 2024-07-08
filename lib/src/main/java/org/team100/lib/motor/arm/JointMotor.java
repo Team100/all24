@@ -31,8 +31,6 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, IdleMode.kBrake, MotorPhase.FORWARD, 10);
         Rev100.currentConfig(m_motor, currentLimit);
-
-        m_logger.log(Level.TRACE, "Device ID", m_motor.getDeviceId());
     }
 
     @Override
@@ -47,6 +45,7 @@ public class JointMotor implements Motor100<Angle100>, NeoTorqueModel {
     @Override
     public void setVelocity(double velocity, double accel, double torqueNm) {
         m_motor.set(kV * velocity);
+        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceId);
         m_logger.logDouble(Level.TRACE, "Velocity", () -> velocity);
         m_logger.logDouble(Level.TRACE, "Accel", () -> accel);
         m_logger.logDouble(Level.TRACE, "Desired torque Nm", () -> torqueNm);

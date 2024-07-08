@@ -22,21 +22,21 @@ public class CompSensors implements SensorInterface, Glassy {
     @Override
     public boolean getIntakeSensor() {
         boolean sensorState = intakeSensor.get();
-        m_logger.logBoolean(Level.DEBUG, "intake", sensorState);
+        m_logger.logBoolean(Level.TRACE, "intake", () -> sensorState);
         return sensorState;
     }
 
     @Override
     public boolean getAmpSensor() {
         boolean sensorState = ampSensor.get();
-        m_logger.logBoolean(Level.DEBUG, "amp", sensorState);
+        m_logger.logBoolean(Level.TRACE, "amp", () -> sensorState);
         return sensorState;
     }
 
     @Override
     public boolean getFeederSensor() {
         boolean sensorState = feederSensor.get();
-        m_logger.logBoolean(Level.DEBUG, "feeder", sensorState);
+        m_logger.logBoolean(Level.TRACE, "feeder", () -> sensorState);
         return sensorState;
     }
 

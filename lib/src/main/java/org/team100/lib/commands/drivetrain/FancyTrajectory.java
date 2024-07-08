@@ -77,7 +77,7 @@ public class FancyTrajectory extends Command100 {
         Pose2d currentPose = m_robotDrive.getState().pose();
         ChassisSpeeds currentSpeed = m_robotDrive.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
-        m_logger.log(Level.TRACE, "chassis speeds", output);
+        m_logger.logChassisSpeeds(Level.TRACE, "chassis speeds", () -> output);
         m_robotDrive.setChassisSpeeds(output, dt);
     }
 

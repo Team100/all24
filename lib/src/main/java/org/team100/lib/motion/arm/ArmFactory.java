@@ -1,9 +1,8 @@
 package org.team100.lib.motion.arm;
 
-import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
-import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.encoder.SimulatedEncoder;
+import org.team100.lib.encoder.RotaryPositionSensor;
+import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motor.Motor100;
@@ -20,38 +19,36 @@ public class ArmFactory {
     private static final String kLower = "arm/lower";
     private static final String kUpper = "arm/upper";
 
-    public static ArmSubsystem get(Logger parent, Async async) {
+    public static ArmSubsystem get(Logger parent) {
         switch (Identity.instance) {
             case TEST_BOARD_6B:
-                return real(parent, async);
+                return real(parent);
             case BLANK:
                 // for testing
-                return simulated(parent, async);
+                return simulated(parent);
             default:
-                return simulated(parent, async);
+                return simulated(parent);
         }
     }
 
-    private static ArmSubsystem real(Logger parent, Async async) {
+    private static ArmSubsystem real(Logger parent) {
         final double kLowerEncoderOffset = 0.861614;
         final double kUpperEncoderOffset = 0.266396;
 
         Motor100<Angle100> lowerMotor = new JointMotor(parent.child(kLower), 4, 8);
         // NOTE: the encoder inversion used to be in the subsystem,
         // but now it is here.
-        Encoder100<Angle100> lowerEncoder = new AnalogTurningEncoder(
+        RotaryPositionSensor lowerEncoder = new AnalogTurningEncoder(
                 parent.child(kLower),
                 1, // analog input 1
                 kLowerEncoderOffset,
-                1, // encoder is 1:1 with the arm joint
                 EncoderDrive.INVERSE);
 
         Motor100<Angle100> upperMotor = new JointMotor(parent.child(kUpper), 30, 1);
-        Encoder100<Angle100> upperEncoder = new AnalogTurningEncoder(
+        RotaryPositionSensor upperEncoder = new AnalogTurningEncoder(
                 parent.child(kUpper),
                 0, // analog input 0
                 kUpperEncoderOffset,
-                1, // encoder is 1:1 with the arm joint
                 EncoderDrive.DIRECT);
 
         return new ArmSubsystem(
@@ -59,29 +56,31 @@ public class ArmFactory {
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
-                upperEncoder,
-                async);
+                upperEncoder);
     }
 
-    private static ArmSubsystem simulated(Logger parent, Async async) {
+    private static ArmSubsystem simulated(Logger parent) {
         // for testing
         // note very high reduction ratio
         // motor speed is rad/s
 
         SimulatedMotor<Angle100> lowerMotor = new SimulatedMotor<>(parent.child(kLower), 600);
-        SimulatedEncoder<Angle100> lowerEncoder = new SimulatedEncoder<>(
-                parent.child(kLower), lowerMotor, 200, -1, 1);
+        // limits used to be -1, 1, when we used winding encoders.
+        // i don't think we ever actually *use* the limits for anything, though.
+        SimulatedRotaryPositionSensor lowerEncoder = new SimulatedRotaryPositionSensor(
+                parent.child(kLower), lowerMotor, 200);
 
         SimulatedMotor<Angle100> upperMotor = new SimulatedMotor<>(parent.child(kUpper), 600);
-        SimulatedEncoder<Angle100> upperEncoder = new SimulatedEncoder<>(
-                parent.child(kUpper), upperMotor, 200, 0.1, 2.5);
+        // limits used to be 0.1, 2.5, when we used winding encoders.
+        // i don't think we ever actually *use* the limits for anything, though.
+        SimulatedRotaryPositionSensor upperEncoder = new SimulatedRotaryPositionSensor(
+                parent.child(kUpper), upperMotor, 200);
         return new ArmSubsystem(
                 parent.child(kArm),
                 lowerMotor,
                 lowerEncoder,
                 upperMotor,
-                upperEncoder,
-                async);
+                upperEncoder);
     }
 
     private ArmFactory() {

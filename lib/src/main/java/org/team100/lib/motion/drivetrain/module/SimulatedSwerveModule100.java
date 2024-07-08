@@ -1,10 +1,11 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.SimulatedEncoder;
-import org.team100.lib.motion.components.OutboardVelocityServo;
-import org.team100.lib.motion.components.OnboardPositionServo;
-import org.team100.lib.motion.components.PositionServo;
-import org.team100.lib.motion.components.VelocityServo;
+import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.LinearVelocityServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.Profile100;
@@ -20,15 +21,16 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
             String name,
             Logger parent,
             SwerveKinodynamics kinodynamics) {
-        VelocityServo<Distance100> driveServo = simulatedDriveServo(
-                parent.child("Drive"));
-        PositionServo<Angle100> turningServo = simulatedTurningServo(
-                parent.child("Turning"),
+        Logger moduleLogger = parent.child(name);
+        LinearVelocityServo driveServo = simulatedDriveServo(
+                moduleLogger.child("Drive"));
+        AngularPositionServo turningServo = simulatedTurningServo(
+                moduleLogger.child("Turning"),
                 kinodynamics);
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static VelocityServo<Distance100> simulatedDriveServo(Logger parent) {
+    private static LinearVelocityServo simulatedDriveServo(Logger parent) {
         // simulated drive motor free speed is 5 m/s
         SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(parent, 5);
         SimulatedEncoder<Distance100> driveEncoder = new SimulatedEncoder<>(
@@ -37,23 +39,21 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 1,
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
-        return new OutboardVelocityServo<>(
+        return new OutboardLinearVelocityServo(
                 parent,
                 driveMotor,
                 driveEncoder);
     }
 
-    private static PositionServo<Angle100> simulatedTurningServo(
+    private static AngularPositionServo simulatedTurningServo(
             Logger parent,
             SwerveKinodynamics kinodynamics) {
         // simulated turning motor free speed is 20 rad/s
         SimulatedMotor<Angle100> turningMotor = new SimulatedMotor<>(parent, 20);
-        SimulatedEncoder<Angle100> turningEncoder = new SimulatedEncoder<>(
+        SimulatedRotaryPositionSensor turningEncoder = new SimulatedRotaryPositionSensor(
                 parent,
                 turningMotor,
-                1,
-                Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY);
+                1);
         PIDController turningPositionController = new PIDController(
                 20, // kP
                 0, // kI
@@ -63,22 +63,21 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         // note low tolerance
         turningPositionController.setTolerance(0.05, 0.05);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        PositionServo<Angle100> turningServo = new OnboardPositionServo<>(
+        OnboardAngularPositionServo turningServo = new OnboardAngularPositionServo(
                 parent,
                 turningMotor,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,
-                profile,
-                Angle100.instance);
+                profile);
         turningServo.reset();
         return turningServo;
     }
 
     private SimulatedSwerveModule100(
             String name,
-            VelocityServo<Distance100> driveServo,
-            PositionServo<Angle100> turningServo) {
+            LinearVelocityServo driveServo,
+            AngularPositionServo turningServo) {
         super(name, driveServo, turningServo);
         //
     }

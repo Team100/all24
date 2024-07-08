@@ -35,6 +35,7 @@ public class TrajectoryListCommand extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;
+    private final TrajectoryVisualization m_viz;
 
     private Iterator<Trajectory100> m_trajectoryIter;
     private TrajectoryTimeIterator m_iter;
@@ -45,11 +46,13 @@ public class TrajectoryListCommand extends Command100 {
             Logger parent,
             SwerveDriveSubsystem swerve,
             HolonomicFieldRelativeController controller,
-            Function<Pose2d, List<Trajectory100>> trajectories) {
+            Function<Pose2d, List<Trajectory100>> trajectories,
+            TrajectoryVisualization viz) {
         super(parent);
         m_swerve = swerve;
         m_controller = controller;
         m_trajectories = trajectories;
+        m_viz = viz;
         addRequirements(m_swerve);
     }
 
@@ -71,7 +74,7 @@ public class TrajectoryListCommand extends Command100 {
                 Trajectory100 m_currentTrajectory = m_trajectoryIter.next();
                 m_iter = new TrajectoryTimeIterator(
                         new TrajectoryTimeSampler(m_currentTrajectory));
-                TrajectoryVisualization.setViz(m_currentTrajectory);
+                m_viz.setViz(m_currentTrajectory);
                 m_aligned = false;
             } else {
                 done = true;
@@ -93,7 +96,7 @@ public class TrajectoryListCommand extends Command100 {
 
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            m_logger.log(Level.TRACE, "reference", reference);
+            m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
@@ -109,7 +112,7 @@ public class TrajectoryListCommand extends Command100 {
 
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            m_logger.log(Level.TRACE, "reference", reference);
+            m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
@@ -123,6 +126,6 @@ public class TrajectoryListCommand extends Command100 {
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 }

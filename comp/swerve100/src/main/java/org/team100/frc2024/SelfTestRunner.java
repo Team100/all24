@@ -68,7 +68,7 @@ public class SelfTestRunner extends Command implements Glassy {
         // addCase(new BatterySelfTest(m_container.m_monitor, m_listener));
 
         SwerveDriveSubsystem drivetrain = m_container.m_drive;
-        Logger logger = Telemetry.get().namedRootLogger("SELF TEST");
+        Logger logger = Telemetry.get().namedRootLogger("SELF TEST", false);
 
         if (kTestDrivetrain) {
             // "treatment" is in situ.

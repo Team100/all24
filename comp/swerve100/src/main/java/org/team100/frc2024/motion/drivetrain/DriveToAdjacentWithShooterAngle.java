@@ -39,6 +39,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     private final DriveMotionController m_controller;
     private final List<TimingConstraint> m_constraints;
     private final double kShooterScale;
+    private final TrajectoryVisualization m_viz;
 
     public DriveToAdjacentWithShooterAngle(
             Logger parent,
@@ -46,13 +47,15 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
             Translation2d goalTranslation,
             DriveMotionController controller,
             List<TimingConstraint> constraints,
-            double shooterScale) {
+            double shooterScale,
+            TrajectoryVisualization viz) {
         super(parent);
         m_swerve = swerve;
         m_goalTranslation = goalTranslation;
         m_controller = controller;
         m_constraints = constraints;
         kShooterScale = shooterScale;
+        m_viz = viz;
         addRequirements(m_swerve);
     }
 
@@ -96,7 +99,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
-        m_logger.log(Level.DEBUG, "chassis speeds", output);
+        m_logger.logChassisSpeeds(Level.TRACE, "chassis speeds", () -> output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }
@@ -109,6 +112,6 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 }

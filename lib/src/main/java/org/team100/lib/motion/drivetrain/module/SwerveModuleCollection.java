@@ -4,7 +4,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.encoder.turning.DutyCycleTurningEncoder;
+import org.team100.lib.encoder.turning.DutyCycleRotaryPositionSensor;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
@@ -17,10 +17,10 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection {
     private static final String kSwerveModules = "Swerve Modules";
-    private static final String kFrontLeft = kSwerveModules + "/Front Left";
-    private static final String kFrontRight = kSwerveModules + "/Front Right";
-    private static final String kRearLeft = kSwerveModules + "/Rear Left";
-    private static final String kRearRight = kSwerveModules + "/Rear Right";
+    private static final String kFrontLeft = "Front Left";
+    private static final String kFrontRight = "Front Right";
+    private static final String kRearLeft = "Rear Left";
+    private static final String kRearRight = "Rear Right";
 
     private final SwerveModule100 m_frontLeft;
     private final SwerveModule100 m_frontRight;
@@ -45,37 +45,46 @@ public class SwerveModuleCollection {
             double currentLimit,
             double statorLimit,
             SwerveKinodynamics kinodynamics) {
+        Logger collectionLogger = parent.child(kSwerveModules);
         switch (Identity.instance) {
             case COMP_BOT:
                 Util.println("************** WCP MODULES w/Duty-Cycle Encoders **************");
                 return new SwerveModuleCollection(
-                        WCPSwerveModule100.get(kFrontLeft, parent.child(kFrontLeft), currentLimit, statorLimit,
+                        WCPSwerveModule100.get(kFrontLeft, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 4,
-                                DriveRatio.FAST, DutyCycleTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 54,
                                 9,
                                 0.058735,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, MotorPhase.REVERSE),
-                        WCPSwerveModule100.get(kFrontRight, parent.child(kFrontRight), currentLimit, statorLimit,
+                        WCPSwerveModule100.get(kFrontRight, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 22,
-                                DriveRatio.FAST, DutyCycleTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 52,
                                 8,
                                 0.773486,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, MotorPhase.REVERSE),
-                        WCPSwerveModule100.get(kRearLeft, parent.child(kRearLeft), currentLimit, statorLimit,
+                        WCPSwerveModule100.get(kRearLeft, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 56,
-                                DriveRatio.FAST, DutyCycleTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 51,
                                 5,
                                 0.334580,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, MotorPhase.REVERSE),
-                        WCPSwerveModule100.get(kRearRight, parent.child(kRearRight), currentLimit, statorLimit,
+                        WCPSwerveModule100.get(kRearRight, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 11,
-                                DriveRatio.FAST, DutyCycleTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 21,
                                 7,
                                 0.714328,
@@ -84,7 +93,9 @@ public class SwerveModuleCollection {
             case BETA_BOT:
                 Util.println("************** WCP MODULES w/Analog Encoders **************");
                 return new SwerveModuleCollection(
-                        WCPSwerveModule100.get(kFrontLeft, parent.child(kFrontLeft), currentLimit, statorLimit,
+                        WCPSwerveModule100.get(kFrontLeft, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 30,
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 11,
@@ -92,7 +103,9 @@ public class SwerveModuleCollection {
                                 0.620381,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
-                        WCPSwerveModule100.get(kFrontRight, parent.child(kFrontRight), currentLimit, statorLimit,
+                        WCPSwerveModule100.get(kFrontRight, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 12,
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 32,
@@ -100,7 +113,9 @@ public class SwerveModuleCollection {
                                 0.162019,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
-                        WCPSwerveModule100.get(kRearLeft, parent.child(kRearLeft), currentLimit, statorLimit,
+                        WCPSwerveModule100.get(kRearLeft, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 31,
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 21,
@@ -108,7 +123,9 @@ public class SwerveModuleCollection {
                                 0.875648,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
-                        WCPSwerveModule100.get(kRearRight, parent.child(kRearRight), currentLimit, statorLimit,
+                        WCPSwerveModule100.get(kRearRight, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 22,
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 33,
@@ -119,25 +136,33 @@ public class SwerveModuleCollection {
             case SWERVE_ONE:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
-                        AMCANSwerveModule100.get(kFrontLeft, parent.child(kFrontLeft), currentLimit, statorLimit,
+                        AMCANSwerveModule100.get(kFrontLeft, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 11,
                                 5,
                                 2,
                                 0.694815,
                                 EncoderDrive.DIRECT, kinodynamics),
-                        AMCANSwerveModule100.get(kFrontRight, parent.child(kFrontRight), currentLimit, statorLimit,
+                        AMCANSwerveModule100.get(kFrontRight, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 12,
                                 2,
                                 0,
                                 0.718789,
                                 EncoderDrive.DIRECT, kinodynamics),
-                        AMCANSwerveModule100.get(kRearLeft, parent.child(kRearLeft), currentLimit, statorLimit,
+                        AMCANSwerveModule100.get(kRearLeft, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 21,
                                 3,
                                 3,
                                 0.365612,
                                 EncoderDrive.DIRECT, kinodynamics),
-                        AMCANSwerveModule100.get(kRearRight, parent.child(kRearRight), currentLimit, statorLimit,
+                        AMCANSwerveModule100.get(kRearRight, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 22,
                                 1,
                                 1,
@@ -146,25 +171,33 @@ public class SwerveModuleCollection {
             case SWERVE_TWO:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
-                        AMCANSwerveModule100.get(kFrontLeft, parent.child(kFrontLeft), currentLimit, statorLimit,
+                        AMCANSwerveModule100.get(kFrontLeft, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 3,
                                 36,
                                 2,
                                 0.354994,
                                 EncoderDrive.INVERSE, kinodynamics),
-                        AMCANSwerveModule100.get(kFrontRight, parent.child(kFrontRight), currentLimit, statorLimit,
+                        AMCANSwerveModule100.get(kFrontRight, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 12,
                                 13,
                                 3,
                                 0.880423,
                                 EncoderDrive.INVERSE, kinodynamics),
-                        AMCANSwerveModule100.get(kRearLeft, parent.child(kRearLeft), currentLimit, statorLimit,
+                        AMCANSwerveModule100.get(kRearLeft, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 22,
                                 1,
                                 1,
                                 0.916801,
                                 EncoderDrive.INVERSE, kinodynamics),
-                        AMCANSwerveModule100.get(kRearRight, parent.child(kRearRight), currentLimit, statorLimit,
+                        AMCANSwerveModule100.get(kRearRight, collectionLogger,
+                                currentLimit,
+                                statorLimit,
                                 21,
                                 0,
                                 0,
@@ -174,10 +207,10 @@ public class SwerveModuleCollection {
             default:
                 Util.println("************** SIMULATED MODULES **************");
                 return new SwerveModuleCollection(
-                        SimulatedSwerveModule100.get(kFrontLeft, parent.child(kFrontLeft), kinodynamics),
-                        SimulatedSwerveModule100.get(kFrontRight, parent.child(kFrontRight), kinodynamics),
-                        SimulatedSwerveModule100.get(kRearLeft, parent.child(kRearLeft), kinodynamics),
-                        SimulatedSwerveModule100.get(kRearRight, parent.child(kRearRight), kinodynamics));
+                        SimulatedSwerveModule100.get(kFrontLeft, collectionLogger, kinodynamics),
+                        SimulatedSwerveModule100.get(kFrontRight, collectionLogger, kinodynamics),
+                        SimulatedSwerveModule100.get(kRearLeft, collectionLogger, kinodynamics),
+                        SimulatedSwerveModule100.get(kRearRight, collectionLogger, kinodynamics));
         }
     }
 
@@ -288,5 +321,13 @@ public class SwerveModuleCollection {
                 m_frontRight,
                 m_rearLeft,
                 m_rearRight };
+    }
+
+    /** Updates visualization. */
+    public void periodic() {
+        m_frontLeft.periodic();
+        m_frontRight.periodic();
+        m_rearLeft.periodic();
+        m_rearRight.periodic();
     }
 }

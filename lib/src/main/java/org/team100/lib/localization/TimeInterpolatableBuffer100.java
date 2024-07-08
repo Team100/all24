@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -18,7 +19,7 @@ import edu.wpi.first.math.interpolation.Interpolatable;
  * 
  * The buffer is never empty, so get() always returns *something*.
  */
-public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
+public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> implements Glassy {
     private final Logger m_logger;
     private final double m_historyS;
     private final NavigableMap<Double, T> m_pastSnapshots = new ConcurrentSkipListMap<>();
@@ -33,7 +34,7 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
     private final ReadWriteLock m_lock = new ReentrantReadWriteLock();
 
     public TimeInterpolatableBuffer100(Logger parent, double historyS, double timeS, T initialValue) {
-        m_logger = parent.child(this.getClass());
+        m_logger = parent.child(this);
         m_historyS = historyS;
         // no lock needed in constructor
         m_pastSnapshots.put(timeS, initialValue);
@@ -96,11 +97,13 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
         }
         // Return the opposite bound if the other is null
         if (topBound == null) {
-            m_logger.log(Level.TRACE, "bottom", bottomBound.getValue().toString());
+            String bottomValue = bottomBound.getValue().toString();
+            m_logger.logString(Level.TRACE, "bottom", () -> bottomValue);
             return bottomBound.getValue();
         }
         if (bottomBound == null) {
-            m_logger.log(Level.TRACE, "top", topBound.getValue().toString());
+            String topValue = topBound.getValue().toString();
+            m_logger.logString(Level.TRACE, "top", () -> topValue);
             return topBound.getValue();
         }
 
@@ -109,8 +112,10 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
         // (the difference between the current time and bottom bound) and (the
         // difference between top and bottom bounds).
 
-        m_logger.log(Level.TRACE, "bottom", bottomBound.getValue().toString());
-        m_logger.log(Level.TRACE, "top", topBound.getValue().toString());
+        String bottomValue = bottomBound.getValue().toString();
+        m_logger.logString(Level.TRACE, "bottom", () -> bottomValue);
+        String topValue = topBound.getValue().toString();
+        m_logger.logString(Level.TRACE, "top", () -> topValue);
         double timeSinceBottom = timeSeconds - bottomBound.getKey();
         double timeSpan = topBound.getKey() - bottomBound.getKey();
         double timeFraction = timeSinceBottom / timeSpan;
@@ -176,5 +181,10 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> {
 
     public Entry<Double, T> ceilingEntry(double arg0) {
         return m_pastSnapshots.ceilingEntry(arg0);
+    }
+
+    @Override
+    public String getGlassName() {
+        return "TimeInterpolatableBuffer100";
     }
 }

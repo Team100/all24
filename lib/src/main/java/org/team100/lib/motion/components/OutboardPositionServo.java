@@ -8,42 +8,41 @@ import org.team100.lib.motor.PositionMotor100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Measure100;
+import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.MathUtil;
 
 /**
- * Passthrough to outboard closed-loop position control, using a profile with
+ * Passthrough to outboard closed-loop angular control, using a profile with
  * velocity feedforward, also extra torque (e.g. for gravity).
  * 
  * Must be used with a combined encoder, to "zero" the motor encoder.
  * 
  * TODO: allow other zeroing strategies.
+ * 
+ * TODO: change the name to OutboardAngularPositionServo.
  */
-public class OutboardPositionServo<T extends Measure100> implements PositionServo<T> {
+public class OutboardPositionServo implements AngularPositionServo {
     private static final double kDtSec = 0.02;
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
     private final Logger m_logger;
-    private final PositionMotor100<T> m_motor;
-    private final CombinedEncoder<T> m_encoder;
+    private final PositionMotor100<Angle100> m_motor;
+    private final CombinedEncoder<Angle100> m_encoder;
     private final Profile100 m_profile;
-    private final T m_instance;
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
 
     public OutboardPositionServo(
             Logger parent,
-            PositionMotor100<T> motor,
-            CombinedEncoder<T> encoder,
-            Profile100 profile,
-            T instance) {
+            PositionMotor100<Angle100> motor,
+            CombinedEncoder<Angle100> encoder,
+            Profile100 profile) {
         m_logger = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;
         m_profile = profile;
-        m_instance = instance;
     }
 
     @Override
@@ -60,14 +59,14 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
         OptionalDouble position = m_encoder.getPosition();
         if (position.isEmpty())
             return;
-        double measurement = m_instance.modulus(position.getAsDouble());
+        double measurement = MathUtil.angleModulus(position.getAsDouble());
 
         // use the modulus closest to the measurement.
         // note zero velocity in the goal.
-        m_goal = new State100(m_instance.modulus(goal - measurement) + measurement, 0.0);
+        m_goal = new State100(MathUtil.angleModulus(goal - measurement) + measurement, 0.0);
 
         m_setpoint = new State100(
-                m_instance.modulus(m_setpoint.x() - measurement) + measurement,
+                MathUtil.angleModulus(m_setpoint.x() - measurement) + measurement,
                 m_setpoint.v());
 
         // NOTE: fixed dt here
@@ -75,10 +74,10 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
 
         m_motor.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 
-        m_logger.logDouble(Level.TRACE,  "goal", ()->goal);
-        m_logger.logDouble(Level.DEBUG,  "Measurement",()-> measurement);
-        m_logger.log(Level.DEBUG,  "Setpoint", m_setpoint);
-        m_logger.logDouble(Level.TRACE,  "Feedforward Torque", ()->feedForwardTorqueNm);
+        m_logger.logDouble(Level.TRACE, "goal", () -> goal);
+        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
+        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
+        m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
     }
 
     @Override
@@ -96,7 +95,7 @@ public class OutboardPositionServo<T extends Measure100> implements PositionServ
         OptionalDouble position = m_encoder.getPosition();
         if (position.isEmpty())
             return false;
-        double positionMeasurement = m_instance.modulus(position.getAsDouble());
+        double positionMeasurement = MathUtil.angleModulus(position.getAsDouble());
         OptionalDouble velocity = m_encoder.getRate();
         if (velocity.isEmpty())
             return false;

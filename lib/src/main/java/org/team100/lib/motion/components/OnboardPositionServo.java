@@ -99,16 +99,16 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
 
         // pass the feedforward through unmodified
         m_motor.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
-        m_logger.logDouble(Level.DEBUG, "Desired velocity setpoint", () -> u_TOTAL);
+        m_logger.logDouble(Level.TRACE, "Desired velocity setpoint", () -> u_TOTAL);
 
         m_controller.setIntegratorRange(0, 0.1);
 
         m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
         m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
         m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
-        m_logger.log(Level.DEBUG, "Goal", m_goal);
-        m_logger.logDouble(Level.DEBUG, "Measurement", () -> measurement);
-        m_logger.log(Level.DEBUG, "Setpoint", m_setpoint);
+        m_logger.logState100(Level.TRACE, "Goal", () -> m_goal);
+        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
+        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
         m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
         m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
         m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
@@ -134,9 +134,9 @@ public class OnboardPositionServo<T extends Measure100> implements PositionServo
     @Override
     public boolean atSetpoint() {
         boolean atSetpoint = m_controller.atSetpoint();
-        m_logger.logDouble(Level.DEBUG, "Position Tolerance", m_controller::getPositionTolerance);
-        m_logger.logDouble(Level.DEBUG, "Velocity Tolerance", m_controller::getVelocityTolerance);
-        m_logger.logBoolean(Level.DEBUG, "At Setpoint", atSetpoint);
+        m_logger.logDouble(Level.TRACE, "Position Tolerance", m_controller::getPositionTolerance);
+        m_logger.logDouble(Level.TRACE, "Velocity Tolerance", m_controller::getVelocityTolerance);
+        m_logger.logBoolean(Level.TRACE, "At Setpoint", () -> atSetpoint);
         return atSetpoint;
     }
 

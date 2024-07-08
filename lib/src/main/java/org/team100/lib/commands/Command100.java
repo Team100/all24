@@ -15,7 +15,6 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Names;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -33,13 +32,11 @@ public abstract class Command100 extends Command implements Glassy {
             new MaxPriorityThreads());
 
     protected final Logger m_logger;
-    protected final String m_name;
 
     private double prevTime;
     private Future<?> m_task;
 
     protected Command100(Logger parent) {
-        m_name = Names.append(Command100.class.getSimpleName(), this);
         m_logger = parent.child(this);
     }
 
@@ -56,7 +53,7 @@ public abstract class Command100 extends Command implements Glassy {
 
     @Override
     public final void initialize() {
-        m_logger.log(Level.DEBUG, "command state", "initialize");
+        m_logger.logString(Level.TRACE, "command state", () -> "initialize");
         prevTime = Timer.getFPGATimestamp();
         initialize100();
         if (Experiments.instance.enabled(Experiment.UseCommandExecutor)) {
@@ -74,10 +71,10 @@ public abstract class Command100 extends Command implements Glassy {
         if (Experiments.instance.enabled(Experiment.UseCommandExecutor)) {
             return;
         }
-        m_logger.log(Level.DEBUG, "command state", "execute");
+        m_logger.logString(Level.TRACE, "command state", () -> "execute");
         double now = Timer.getFPGATimestamp();
         double dt = now - prevTime;
-        m_logger.logDouble(Level.DEBUG, "dt", ()->dt);
+        m_logger.logDouble(Level.TRACE, "dt", () -> dt);
         prevTime = now;
         execute100(dt);
     }
@@ -128,10 +125,10 @@ public abstract class Command100 extends Command implements Glassy {
         @Override
         public void run() {
             try {
-                m_logger.log(Level.DEBUG, "command state", "execute");
+                m_logger.logString(Level.TRACE, "command state", () -> "execute");
                 double now = Timer.getFPGATimestamp();
                 double dt = now - prevTime;
-                m_logger.logDouble(Level.DEBUG, "dt",()-> dt);
+                m_logger.logDouble(Level.TRACE, "dt", () -> dt);
                 prevTime = now;
                 execute100(dt);
             } catch (Throwable e) {

@@ -33,13 +33,15 @@ public class DriveWithTrajectory extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final DriveMotionController m_controller;
     private final Trajectory100 trajectory;
+    private final TrajectoryVisualization m_viz;
 
     public DriveWithTrajectory(
             Logger parent,
             SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             SwerveKinodynamics limits,
-            String fileName) {
+            String fileName,
+            TrajectoryVisualization viz) {
         super(parent);
         m_swerve = drivetrain;
         m_controller = controller;
@@ -59,13 +61,14 @@ public class DriveWithTrajectory extends Command100 {
                 kEndVel,
                 kMaxVel,
                 kMaxAcc);
+        m_viz = viz;
 
         addRequirements(m_swerve);
     }
 
     @Override
     public void initialize100() {
-        TrajectoryVisualization.setViz(trajectory);
+        m_viz.setViz(trajectory);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
         m_controller.setTrajectory(iter);
@@ -78,7 +81,7 @@ public class DriveWithTrajectory extends Command100 {
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
-        m_logger.log(Level.DEBUG, "chassis speeds", output);
+        m_logger.logChassisSpeeds(Level.TRACE, "chassis speeds", () -> output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }
@@ -86,7 +89,7 @@ public class DriveWithTrajectory extends Command100 {
     @Override
     public void end100(boolean interrupted) {
         m_swerve.stop();
-        TrajectoryVisualization.clear();
+        m_viz.clear();
     }
 
     @Override

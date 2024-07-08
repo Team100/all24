@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 class SlipperyTireUtilTest {
@@ -80,8 +79,8 @@ class SlipperyTireUtilTest {
         check(0, 0, position1[3], kDelta);
 
         SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
-                new SwerveDriveWheelPositions(position0),
-                new SwerveDriveWheelPositions(position1));
+                position0,
+                position1);
 
         Twist2d twist2 = kinematics.toTwist2d(modulePositionDelta);
         assertEquals(0, twist2.dx, kDelta);
@@ -158,8 +157,8 @@ class SlipperyTireUtilTest {
         check(0.02, 0, position1[3], kDelta);
 
         SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
-                new SwerveDriveWheelPositions(position0),
-                new SwerveDriveWheelPositions(position1));
+                position0,
+                position1);
 
         Twist2d twist2 = kinematics.toTwist2d(modulePositionDelta);
         assertEquals(0.02, twist2.dx, kDelta);
@@ -236,8 +235,8 @@ class SlipperyTireUtilTest {
         check(0.014, -45, position1[3], kDelta);
 
         SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
-                new SwerveDriveWheelPositions(position0),
-                new SwerveDriveWheelPositions(position1));
+                position0,
+                position1);
 
         Twist2d twist2 = kinematics.toTwist2d(modulePositionDelta);
         assertEquals(0, twist2.dx, kDelta);
