@@ -1,12 +1,11 @@
 package org.team100.lib.motor.duty_cycle;
 
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
 import org.team100.lib.motor.model.NeoTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -18,7 +17,7 @@ import com.revrobotics.CANSparkMax;
  * 
  * This makes the code that uses it easier to test.
  */
-public class NeoProxy implements Motor100<Distance100>, NeoTorqueModel {
+public class NeoProxy implements BareMotor, NeoTorqueModel {
     private final Logger m_logger;
 
     private final CANSparkMax m_motor;
@@ -58,11 +57,16 @@ public class NeoProxy implements Motor100<Distance100>, NeoTorqueModel {
 
     @Override
     public void setVelocity(double velocity, double accel, double torque) {
-        //
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setPosition(double position, double velocity, double torque) {
-        //
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public double getVelocityRad_S() {
+        throw new UnsupportedOperationException();
     }
 }

@@ -17,12 +17,13 @@ public class NeoDriveMotor extends CANSparkDriveMotor implements NeoTorqueModel 
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
-            double gearRatio,
-            double wheelDiameter,
+            // double gearRatio,
+            // double wheelDiameter,
             Feedforward100 ff,
             PIDConstants pid) {
         super(parent, new CANSparkMax(canId, MotorType.kBrushless),
-                motorPhase, currentLimit, gearRatio, wheelDiameter,
+                motorPhase, currentLimit,
+                //  gearRatio, wheelDiameter,
                 ff, pid);
     }
 }

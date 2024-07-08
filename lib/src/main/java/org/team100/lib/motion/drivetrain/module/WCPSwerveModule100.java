@@ -12,6 +12,7 @@ import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.encoder.turning.Talon6TurningEncoder;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
@@ -117,17 +118,21 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 MotorPhase.FORWARD,
                 supplyLimit,
                 statorLimit,
-                ratio.m_ratio,
-                kWheelDiameterM,
+                // ratio.m_ratio,
+                // kWheelDiameterM,
                 pidConstants,
                 ff);
+        LinearMechanism mech = new LinearMechanism(
+                driveMotor,
+                ratio.m_ratio,
+                kWheelDiameterM);
         Talon6DriveEncoder encoder = new Talon6DriveEncoder(
                 parent,
                 driveMotor,
                 distancePerTurn);
         return new OutboardLinearVelocityServo(
                 parent,
-                driveMotor,
+                mech,
                 encoder);
     }
 

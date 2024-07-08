@@ -15,12 +15,13 @@ public class Kraken6DriveMotor extends Talon6DriveMotor implements KrakenTorqueM
             MotorPhase motorPhase,
             double supplyLimit,
             double statorLimit,
-            double kDriveReduction,
-            double wheelDiameter,
+            // double kDriveReduction,
+            // double wheelDiameter,
             PIDConstants pid,
             Feedforward100 ff) {
         super(parent, canId, motorPhase, supplyLimit,
-                statorLimit, kDriveReduction, wheelDiameter,
+                statorLimit, 
+                // kDriveReduction, wheelDiameter,
                 pid, ff);
     }
 }

@@ -12,6 +12,7 @@ import org.team100.lib.encoder.AS5048RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
+import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
@@ -42,6 +43,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * up, so set the acceleration a bit higher than that to start.
  */
 public class DrumShooter extends SubsystemBase implements Glassy {
+    private static final double kPivotReduction = 165;
     /** Left roller setpoint, m/s */
     private static final double kLeftRollerVelocity = 20;
     /** Right roller setpoint m/s */
@@ -93,13 +95,15 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         MotorPhase.REVERSE,
                         supplyLimit,
                         statorLimit,
-                        kDriveReduction,
-                        kWheelDiameterM,
+                        // kDriveReduction,
+                        // kWheelDiameterM,
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
+                LinearMechanism leftMech = new LinearMechanism(
+                    leftMotor, kDriveReduction, kWheelDiameterM);
                 Talon6DriveEncoder leftEncoder = new Talon6DriveEncoder(
                         leftLogger, leftMotor, distancePerTurn);
-                leftRoller = new OutboardLinearVelocityServo(leftLogger, leftMotor, leftEncoder);
+                leftRoller = new OutboardLinearVelocityServo(leftLogger, leftMech, leftEncoder);
 
                 Falcon6DriveMotor rightMotor = new Falcon6DriveMotor(
                         rightLogger,
@@ -107,16 +111,18 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         MotorPhase.FORWARD,
                         supplyLimit,
                         statorLimit,
-                        kDriveReduction,
-                        kWheelDiameterM,
+                        // kDriveReduction,
+                        // kWheelDiameterM,
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
+                LinearMechanism rightMech = new LinearMechanism(
+                    rightMotor, kDriveReduction, kWheelDiameterM);
                 Talon6DriveEncoder rightEncoder = new Talon6DriveEncoder(
                         rightLogger, rightMotor, distancePerTurn);
-                rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMotor, rightEncoder);
+                rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMech, rightEncoder);
 
                 BareMotor pivotMotor = new AngularNeoProxy(parent, pivotID, IdleMode.kCoast, 40);
-                RotaryMechanism pivotMech = new RotaryMechanism(pivotMotor, 165);
+                RotaryMechanism pivotMech = new RotaryMechanism(pivotMotor, kPivotReduction);
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(parent, 0, 0.508753,
                         EncoderDrive.DIRECT);
                 pivotServo = new GravityServo(
@@ -132,10 +138,14 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 // For testing and simulation
                 leftRoller = ServoFactory.limitedSimulatedVelocityServo(
                         leftLogger,
-                        shooterParams);
+                        shooterParams,
+                        kDriveReduction,
+                        kWheelDiameterM);
                 rightRoller = ServoFactory.limitedSimulatedVelocityServo(
                         rightLogger,
-                        shooterParams);
+                        shooterParams,
+                        kDriveReduction,
+                        kWheelDiameterM);
                 // motor speed is rad/s
                 SimulatedBareMotor simMotor = new SimulatedBareMotor(parent, 600);
                 RotaryMechanism simMech = new RotaryMechanism(simMotor, 165);

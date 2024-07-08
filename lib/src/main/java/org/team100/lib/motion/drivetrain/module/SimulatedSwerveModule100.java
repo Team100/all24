@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.SimulatedLinearEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
@@ -9,10 +10,8 @@ import org.team100.lib.motion.components.OnboardAngularPositionServo2;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -33,16 +32,17 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     private static LinearVelocityServo simulatedDriveServo(Logger parent) {
         // simulated drive motor free speed is 5 m/s
-        SimulatedMotor<Distance100> driveMotor = new SimulatedMotor<>(parent, 5);
+        SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
+        // simulated gearing is 2 meter wheel, 1:1, so rad/s and m/s are the same.
+        LinearMechanism mech = new LinearMechanism(driveMotor, 1, 2);
         SimulatedLinearEncoder driveEncoder = new SimulatedLinearEncoder(
                 parent,
-                driveMotor,
-                1,
+                mech,
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
         return new OutboardLinearVelocityServo(
                 parent,
-                driveMotor,
+                mech,
                 driveEncoder);
     }
 

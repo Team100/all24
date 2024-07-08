@@ -9,15 +9,15 @@ import org.team100.lib.encoder.SimulatedLinearEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
+import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.motor.SimulatedMotor;
 import org.team100.lib.motor.drive.NeoDriveMotor;
 import org.team100.lib.motor.turning.NeoVortexTurningMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -49,17 +49,21 @@ public class ServoFactory {
                 canId,
                 motorPhase,
                 currentLimit,
-                param.gearRatio(),
-                param.wheelDiameter(),
+                // param.gearRatio(),
+                // param.wheelDiameter(),
                 ff,
                 lowLevelVelocityConstants);
+        LinearMechanism mech = new LinearMechanism(
+                motor,
+                param.gearRatio(),
+                param.wheelDiameter());
         NeoDriveEncoder encoder = new NeoDriveEncoder(
                 parent,
                 motor,
                 param.wheelDiameter() * Math.PI / param.gearRatio());
         LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
-                motor,
+                mech,
                 encoder);
         return new LimitedLinearVelocityServo(v,
                 param.maxVelM_S(),
@@ -69,13 +73,16 @@ public class ServoFactory {
 
     public static LimitedLinearVelocityServo limitedSimulatedVelocityServo(
             Logger parent,
-            SysParam param) {
+            SysParam param,
+            double gearRatio,
+            double wheelDiameterM) {
         // motor speed is rad/s
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(parent, 600);
-        SimulatedLinearEncoder encoder = new SimulatedLinearEncoder(parent, motor, 1, -1, 1);
+        BareMotor motor = new SimulatedBareMotor(parent, 600);
+        LinearMechanism mech = new LinearMechanism(motor, gearRatio, wheelDiameterM);
+        SimulatedLinearEncoder encoder = new SimulatedLinearEncoder(parent, mech, -1, 1);
         LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
-                motor,
+                mech,
                 encoder);
         return new LimitedLinearVelocityServo(v,
                 param.maxVelM_S(),

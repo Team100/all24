@@ -1,12 +1,11 @@
 package org.team100.lib.motor.duty_cycle;
 
-import org.team100.lib.motor.Motor100;
+import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Rev100;
 import org.team100.lib.motor.model.NeoVortexTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
@@ -18,7 +17,7 @@ import com.revrobotics.RelativeEncoder;
  * 
  * TODO: remove this class, use NeoVortexDriveEncoder instead.
  */
-public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel {
+public class VortexProxy implements BareMotor, NeoVortexTorqueModel {
     private final Logger m_logger;
     private final CANSparkFlex m_motor;
     private final RelativeEncoder m_encoder;
@@ -71,11 +70,16 @@ public class VortexProxy implements Motor100<Distance100>, NeoVortexTorqueModel 
 
     @Override
     public void setVelocity(double velocity, double accel, double torque) {
-        //
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setPosition(double position, double velocity, double torque) {
-        //
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public double getVelocityRad_S() {
+        throw new UnsupportedOperationException();
     }
 }

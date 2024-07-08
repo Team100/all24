@@ -5,6 +5,7 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.drive.Talon6DriveEncoder;
 import org.team100.lib.encoder.turning.AnalogTurningEncoder;
 import org.team100.lib.encoder.turning.EncoderDrive;
+import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
@@ -77,17 +78,21 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 MotorPhase.FORWARD,
                 currentLimit,
                 statorLimit,
-                kDriveReduction,
-                kWheelDiameterM,
+                // kDriveReduction,
+                // kWheelDiameterM,
                 pidConstants,
                 ff);
+        LinearMechanism mech = new LinearMechanism(
+                driveMotor,
+                kDriveReduction,
+                kWheelDiameterM);
         Talon6DriveEncoder driveEncoder = new Talon6DriveEncoder(
                 parent,
                 driveMotor,
                 distancePerTurn);
         return new OutboardLinearVelocityServo(
                 parent,
-                driveMotor,
+                mech,
                 driveEncoder);
     }
 

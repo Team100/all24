@@ -9,7 +9,6 @@ import org.team100.lib.motor.BareMotor;
  * using the supplied gear ratio.
  */
 public class RotaryMechanism {
-
     private final BareMotor m_motor;
     private final double m_gearRatio;
 

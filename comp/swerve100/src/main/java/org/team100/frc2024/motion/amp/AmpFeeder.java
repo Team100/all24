@@ -2,11 +2,10 @@ package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motor.Motor100;
-import org.team100.lib.motor.SimulatedMotor;
+import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.motor.duty_cycle.NeoProxy;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Distance100;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -17,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class AmpFeeder extends SubsystemBase implements Glassy {
     private final Logger m_logger;
-    private final Motor100<Distance100> ampDrive;
+    private final BareMotor ampDrive;
 
     public AmpFeeder(Logger parent) {
         m_logger = parent.child(this);
@@ -28,7 +27,7 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
             default:
                 // For testing and simulation
                 // motor speed is rad/s
-                ampDrive = new SimulatedMotor<>(m_logger, 600);
+                ampDrive = new SimulatedBareMotor(m_logger, 600);
         }
     }
 

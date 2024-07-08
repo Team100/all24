@@ -26,10 +26,10 @@ public class SimulatedBareMotor implements BareMotor, GenericTorqueModel {
     }
 
     @Override
-    public void setVelocity(double velocity, double accel, double torque) {
+    public void setVelocity(double velocityRad_S, double accelRad_S2, double torqueNm) {
         m_velocity = MathUtil.clamp(
-                Util.notNaN(velocity), -m_freeSpeedRad_S, m_freeSpeedRad_S);
-        m_logger.logDouble(Level.TRACE, "velocity", () -> m_velocity);
+                Util.notNaN(velocityRad_S), -m_freeSpeedRad_S, m_freeSpeedRad_S);
+        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> m_velocity);
     }
 
     @Override
