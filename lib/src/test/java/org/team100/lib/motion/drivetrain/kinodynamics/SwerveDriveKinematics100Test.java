@@ -338,7 +338,8 @@ class SwerveDriveKinematics100Test {
          * From equation (13.17), we know that chassis motion is th dot product of the
          * pseudoinverse of the inverseKinematics matrix (with the center of rotation at
          * (0,0) -- we don't want the motion of the center of rotation, we want it of
-         * the center of the robot). These above SwerveModuleState100s are known to be from
+         * the center of the robot). These above SwerveModuleState100s are known to be
+         * from
          * a velocity of [[0][3][1.5]] about (0, 24), and the expected numbers have been
          * calculated using Numpy's linalg.pinv function.
          */
@@ -361,7 +362,8 @@ class SwerveDriveKinematics100Test {
          * From equation (13.17), we know that chassis motion is th dot product of the
          * pseudoinverse of the inverseKinematics matrix (with the center of rotation at
          * (0,0) -- we don't want the motion of the center of rotation, we want it of
-         * the center of the robot). These above SwerveModuleState100s are known to be from
+         * the center of the robot). These above SwerveModuleState100s are known to be
+         * from
          * a velocity of [[0][3][1.5]] about (0, 24), and the expected numbers have been
          * calculated using Numpy's linalg.pinv function.
          */
@@ -375,27 +377,27 @@ class SwerveDriveKinematics100Test {
     @Test
     void testModuleKinematics() {
         SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
-            new Translation2d(0.5, 0.5),
-            new Translation2d(0.5, -0.5),
-            new Translation2d(-0.5, 0.5),
-            new Translation2d(-0.5, -0.5));
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
         SimpleMatrix accelerations = new SimpleMatrix(3, 1);
         SimpleMatrix expected = new SimpleMatrix(2, 1);
         accelerations.setColumn(0, 0, 0, 0, 0);
         expected.setColumn(0, 0, 0, 0);
         SimpleMatrix output = kinematics.getModuleAccelerationXY(0, accelerations);
-        Util.println(output.get(0,0) + " " + output.get(1,0));
-        assertEquals(expected.get(0,0), 0, 0.0001);
-        assertEquals(expected.get(1,0), 0, 0.0001);
+        Util.println(output.get(0, 0) + " " + output.get(1, 0));
+        assertEquals(expected.get(0, 0), 0, 0.0001);
+        assertEquals(expected.get(1, 0), 0, 0.0001);
     }
 
     @Test
     void testModuleKinematics2() {
         SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
-            new Translation2d(0.5, 0.5),
-            new Translation2d(0.5, -0.5),
-            new Translation2d(-0.5, 0.5),
-            new Translation2d(-0.5, -0.5));
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
         SimpleMatrix velocities = new SimpleMatrix(3, 1);
         SimpleMatrix velocities2 = new SimpleMatrix(3, 1);
         SimpleMatrix accelerations = new SimpleMatrix(3, 1);
@@ -412,20 +414,21 @@ class SwerveDriveKinematics100Test {
         accelerations3.setColumn(0, 0, 1.32, 1.2, 2.2);
         velocities4.setColumn(0, 0, 0, 0, 0);
         accelerations4.setColumn(0, 0, 1, 1.1, 2);
-        SwerveModuleState100[] prevStates = {new SwerveModuleState100(),new SwerveModuleState100(),new SwerveModuleState100(),new SwerveModuleState100()};
+        SwerveModuleState100[] prevStates = { new SwerveModuleState100(), new SwerveModuleState100(),
+                new SwerveModuleState100(), new SwerveModuleState100() };
         SwerveModuleState100[] output2 = kinematics.statesFromVector(velocities);
         SwerveModuleState100[] output = kinematics.accelerationFromVector(velocities,
-                accelerations,prevStates, 0.02);
+                accelerations, prevStates, 0.02);
         SwerveModuleState100[] output4 = kinematics.statesFromVector(velocities2);
         SwerveModuleState100[] output3 = kinematics.accelerationFromVector(velocities2,
-                accelerations2,prevStates, 0.02);
+                accelerations2, prevStates, 0.02);
         SwerveModuleState100[] output5 = kinematics.statesFromVector(velocities3);
         SwerveModuleState100[] output6 = kinematics.accelerationFromVector(velocities3,
-                accelerations3,prevStates, 0.02);
+                accelerations3, prevStates, 0.02);
         SwerveModuleState100[] output7 = kinematics.statesFromVector(velocities4);
         SwerveModuleState100[] output8 = kinematics.accelerationFromVector(velocities4,
-                accelerations4,prevStates, 0.02);
-                Util.println(output[0].toString());
+                accelerations4, prevStates, 0.02);
+        Util.println(output[0].toString());
         assertEquals(0, output[0].accelMetersPerSecond_2, 0.0001);
         for (int i = 0; i < output.length; i++) {
             assertEquals(output[i].angle, output2[i].angle);
@@ -442,6 +445,54 @@ class SwerveDriveKinematics100Test {
         for (int i = 0; i < output7.length; i++) {
             assertEquals(output7[i].angle, output8[i].angle);
             assertEquals(output7[i].speedMetersPerSecond, output8[i].speedMetersPerSecond);
+        }
+    }
+
+    @Test
+    void testModuleKinematics3() {
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
+        SwerveModuleState100[] prevStates = { new SwerveModuleState100(), new SwerveModuleState100(),
+                new SwerveModuleState100(), new SwerveModuleState100() };
+        SimpleMatrix[] velocities = new SimpleMatrix[2];
+        SimpleMatrix[] acceleration = new SimpleMatrix[2];
+        for (int i = 0; i < velocities.length; i++) {
+            velocities[i] = new SimpleMatrix(3, 1);
+            acceleration[i] = new SimpleMatrix(3, 1);
+        }
+        velocities[0].setColumn(0, 0, 0, 0, 0);
+        acceleration[0].setColumn(0, 0, 1, 0, 0);
+        velocities[1].setColumn(0, 0, 1, 0, 0);
+        acceleration[1].setColumn(0, 0, 1, 0, 0);
+        SwerveModuleState100[][] output = new SwerveModuleState100[4][2];
+        for (int i = 0; i < velocities.length; i++) {
+            output[i] = kinematics.accelerationFromVector(velocities[i],
+                    acceleration[i], prevStates, 0.02);
+        }
+        for (int i = 0; i < velocities.length; i++) {
+            switch (i) {
+                case 0:
+                    for (SwerveModuleState100 state : output[i]) {
+                        assertEquals(state.angle.getRadians(), 0, 0.0001);
+                        assertEquals(state.angle_2, 0, 0.0001);
+                        assertEquals(state.speedMetersPerSecond, 0, 0.0001);
+                        assertEquals(state.accelMetersPerSecond_2, 1, 0.0001);
+                    }
+                    break;
+                case 1:
+                    for (SwerveModuleState100 state : output[i]) {
+                        assertEquals(state.angle.getRadians(), 0, 0.0001);
+                        assertEquals(state.angle_2, 0, 0.0001);
+                        assertEquals(state.speedMetersPerSecond, 1, 0.0001);
+                        assertEquals(state.accelMetersPerSecond_2, 1, 0.0001);
+                    }
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Whoops, not a test");
+            }
         }
     }
 
