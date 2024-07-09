@@ -41,7 +41,10 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                         kCurrentLimit,
                         Feedforward100.makeNeoVortex(),
                         new PIDConstants(0, 0, 0));
-                m1 = new LinearMechanism(vp1, new CANSparkEncoder(leftLogger, vp1), kReduction, kSprocketDiameterM);
+                m1 = new LinearMechanism(vp1,
+                        new CANSparkEncoder(leftLogger, vp1),
+                        kReduction,
+                        kSprocketDiameterM);
 
                 NeoVortexCANSparkMotor vp2 = new NeoVortexCANSparkMotor(
                         rightLogger,
@@ -50,16 +53,24 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                         kCurrentLimit,
                         Feedforward100.makeNeoVortex(),
                         new PIDConstants(0, 0, 0));
-                m2 = new LinearMechanism(vp2, new CANSparkEncoder(rightLogger, vp2), kReduction, kSprocketDiameterM);
+                m2 = new LinearMechanism(vp2,
+                        new CANSparkEncoder(rightLogger, vp2),
+                        kReduction,
+                        kSprocketDiameterM);
                 break;
             default:
                 // for testing and simulation
-                SimulatedBareMotor vs1 = new SimulatedBareMotor(leftLogger, 1);
-                m1 = new LinearMechanism(vs1, new SimulatedBareEncoder(leftLogger, vs1), kReduction,
+                // neo vortex free speed is 6784 rpm, 710 rad/s
+                SimulatedBareMotor vs1 = new SimulatedBareMotor(leftLogger, 710);
+                m1 = new LinearMechanism(vs1,
+                        new SimulatedBareEncoder(leftLogger, vs1),
+                        kReduction,
                         kSprocketDiameterM);
 
-                SimulatedBareMotor vs2 = new SimulatedBareMotor(rightLogger, 1);
-                m2 = new LinearMechanism(vs2, new SimulatedBareEncoder(rightLogger, vs2), kReduction,
+                SimulatedBareMotor vs2 = new SimulatedBareMotor(rightLogger, 710);
+                m2 = new LinearMechanism(vs2,
+                        new SimulatedBareEncoder(rightLogger, vs2),
+                        kReduction,
                         kSprocketDiameterM);
         }
     }
