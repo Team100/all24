@@ -31,11 +31,6 @@ public class ProxyRotaryPositionSensor implements RotaryPositionSensor {
     }
 
     @Override
-    public void reset() {
-        m_delegate.resetEncoderPosition();
-    }
-
-    @Override
     public void close() {
         m_delegate.close();
     }

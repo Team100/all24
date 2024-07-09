@@ -62,19 +62,13 @@ public class CombinedEncoder implements RotaryPositionSensor {
 
     @Override
     public OptionalDouble getRateRad_S() {
-        OptionalDouble primaryRate = m_primary.getRateRad_S();
-        if (primaryRate.isPresent()) {
-            // Rate cannot be corrected so just return the primary value.
-            return primaryRate;
+        // an absolute position sensor isn't a very good velocity sensor, so prefer the secondary.
+        OptionalDouble rate = m_secondary.getVelocityRad_S();
+        if (rate.isPresent()) {
+            return rate;
         }
-        // Primary is broken, maybe the secondary is still working.
-        return m_secondary.getVelocityRad_S();
-    }
-
-    @Override
-    public void reset() {
-        m_primary.reset();
-        m_secondary.resetEncoderPosition();
+        // Secondary is broken, maybe the primary is still working.
+        return m_primary.getRateRad_S();
     }
 
     @Override

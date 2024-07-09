@@ -58,10 +58,6 @@ public class GravityServo implements Glassy {
         return m_encoder.getPositionRad();
     }
 
-    public void rezero() {
-        m_encoder.reset();
-    }
-
     public void setPosition(double goal) {
         OptionalDouble encoderPosition = m_encoder.getPositionRad();
         if (encoderPosition.isEmpty()) {

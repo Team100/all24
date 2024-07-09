@@ -21,7 +21,6 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
             RotaryMechanism motor) {
         m_logger = parent.child(this);
         m_motor = motor;
-        reset();
     }
 
     @Override
@@ -47,12 +46,6 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
             return OptionalDouble.empty();
         m_logger.logOptionalDouble(Level.TRACE, "rate", () -> m_rate);
         return m_rate;
-    }
-
-    @Override
-    public void reset() {
-        m_positionRad = 0;
-        m_timeS = Timer.getFPGATimestamp();
     }
 
     @Override
