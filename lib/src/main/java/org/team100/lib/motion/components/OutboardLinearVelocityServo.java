@@ -28,24 +28,19 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     @Override
     public void reset() {
         prevTime = Timer.getFPGATimestamp();
-        // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
-        // which is never what we want. but this might be wrong
-        // for some other reason
-        // m_encoder.reset();
     }
 
     @Override
-    public void setVelocity(double setpoint) {
-        m_setpoint = setpoint;
-        m_motor.setVelocity(setpoint, accel(setpoint), 0);
-        m_logger.logDouble(Level.TRACE, "setpoint (m_s)", () -> setpoint);
+    public void setVelocity(double setpointM_S) {
+        setVelocity(setpointM_S, accel(setpointM_S));
     }
 
     @Override
-    public void setVelocity(double setpoint, double setpoint_2) {
-        m_setpoint = setpoint;
-        m_motor.setVelocity(setpoint, setpoint_2, 0);
-        m_logger.logDouble(Level.TRACE, "Desired setpoint", () -> setpoint);
+    public void setVelocity(double setpointM_S, double setpointM_S2) {
+        m_setpoint = setpointM_S;
+        m_motor.setVelocity(setpointM_S, setpointM_S2, 0);
+        m_logger.logDouble(Level.TRACE, "setpoint v (m_s)", () -> setpointM_S);
+        m_logger.logDouble(Level.TRACE, "setpoint a (m_s2)", () -> setpointM_S2);
     }
 
     /**

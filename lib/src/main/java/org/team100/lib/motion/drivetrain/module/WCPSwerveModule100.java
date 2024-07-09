@@ -17,7 +17,7 @@ import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
-import org.team100.lib.motion.components.OutboardPositionServo;
+import org.team100.lib.motion.components.OutboardAngularPositionServo;
 import org.team100.lib.motion.components.SelectableAngularPositionServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.Falcon6Motor;
@@ -202,7 +202,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoder,
                 primaryAuthority,
                 mech);
-        AngularPositionServo outboard = new OutboardPositionServo(
+        AngularPositionServo outboard = new OutboardAngularPositionServo(
                 parent,
                 mech,
                 combinedEncoder,

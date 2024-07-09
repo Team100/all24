@@ -110,7 +110,7 @@ public class ServoFactory {
                 new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
     }
 
-    public static OnboardAngularPositionServo2 simulatedAngleServo(
+    public static OnboardAngularPositionServo simulatedAngleServo(
             Logger parent,
             SysParam param,
             PIDController controller) {
@@ -126,7 +126,7 @@ public class ServoFactory {
         // the new sim doesn't have hard stops; should it?
         // 0, // minimum hard stop
         // 2); // maximum hard stop
-        return new OnboardAngularPositionServo2(
+        return new OnboardAngularPositionServo(
                 parent,
                 mech,
                 sensor,

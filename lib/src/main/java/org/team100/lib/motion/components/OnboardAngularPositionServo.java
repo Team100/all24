@@ -19,9 +19,10 @@ import edu.wpi.first.wpilibj.Timer;
  * OnboardPositionServo.
  */
 public class OnboardAngularPositionServo implements AngularPositionServo {
+    private static final double kDtSec = 0.02;
 
     private final Logger m_logger;
-    private final RotaryMechanism m_motor;
+    private final RotaryMechanism m_mechanism;
     private final RotaryPositionSensor m_encoder;
     private final double m_maxVel;
     private final PIDController m_controller;
@@ -36,18 +37,19 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     public OnboardAngularPositionServo(
             Logger parent,
-            RotaryMechanism motor,
+            RotaryMechanism mech,
             RotaryPositionSensor encoder,
             double maxVel,
             PIDController controller,
             Profile100 profile) {
         m_logger = parent.child(this);
-        m_motor = motor;
+        m_mechanism = mech;
         m_encoder = encoder;
         m_maxVel = maxVel;
         m_controller = controller;
         m_period = controller.getPeriod();
         m_profile = profile;
+        m_controller.setIntegratorRange(0, 0.1);
     }
 
     /**
@@ -65,24 +67,20 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         if (position.isEmpty() || velocity.isEmpty())
             return;
         m_setpoint = new State100(position.getAsDouble(), velocity.getAsDouble());
-
-        // TODO figure this out
-        // ALERT! @joel 2/19/24: I think encoder reset changes the internal offset
-        // which is never what we want. but this might be wrong
-        // for some other reason
-        // m_encoder.reset();
     }
 
     @Override
-    public void setPositionWithVelocity(double goalRad, double goalVelocityRad_2, double feedForwardTorqueNm) {
+    public void setPositionWithVelocity(
+            double goalRad,
+            double goalVelocityRad_S,
+            double feedForwardTorqueNm) {
         OptionalDouble positionRad = m_encoder.getPositionRad();
         if (positionRad.isEmpty())
             return;
         double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
 
         // use the modulus closest to the measurement.
-        // note zero velocity in the goal.
-        m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocityRad_2);
+        m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocityRad_S);
 
         m_setpoint = new State100(
                 MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad,
@@ -96,61 +94,22 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
         final double u_TOTAL = MathUtil.clamp(u_FB + u_FF, -m_maxVel, m_maxVel);
 
-        // pass the feedforward through unmodified
-        m_motor.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
-        m_logger.logDouble(Level.TRACE, "Desired velocity setpoint", () -> u_TOTAL);
+        m_mechanism.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
 
-        m_controller.setIntegratorRange(0, 0.1);
-
-        m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
-        m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
-        m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
-        m_logger.logState100(Level.TRACE, "Goal", () -> m_goal);
-        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurementRad);
-        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
-        m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
-        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
-        m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
+        m_logger.logState100(Level.TRACE, "goal (rad)", () -> m_goal);
+        m_logger.logDouble(Level.TRACE, "Feedforward Torque (Nm)", () -> feedForwardTorqueNm);
+        m_logger.logDouble(Level.TRACE, "measurement (rad)", () -> measurementRad);
+        m_logger.logState100(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
+        m_logger.logDouble(Level.TRACE, "u_FB (rad_s)", () -> u_FB);
+        m_logger.logDouble(Level.TRACE, "u_FF (rad_s)", () -> u_FF);
+        m_logger.logDouble(Level.TRACE, "u_TOTAL (rad_s)", () -> u_TOTAL);
+        m_logger.logDouble(Level.TRACE, "Controller Position Error (rad)", m_controller::getPositionError);
+        m_logger.logDouble(Level.TRACE, "Controller Velocity Error (rad_s)", m_controller::getVelocityError);
     }
 
     @Override
     public void setPosition(double goalRad, double feedForwardTorqueNm) {
-        OptionalDouble positionRad = m_encoder.getPositionRad();
-        if (positionRad.isEmpty())
-            return;
-        double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
-
-        // use the modulus closest to the measurement.
-        // note zero velocity in the goal.
-        m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, 0.0);
-
-        m_setpoint = new State100(
-                MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad,
-                m_setpoint.v());
-
-        m_setpoint = m_profile.calculate(m_period, m_setpoint, m_goal);
-
-        final double u_FB = m_controller.calculate(measurementRad, m_setpoint.x());
-        final double u_FF = m_setpoint.v();
-        // note u_FF is rad/s, so a big number, u_FB should also be a big number.
-
-        final double u_TOTAL = MathUtil.clamp(u_FB + u_FF, -m_maxVel, m_maxVel);
-
-        // pass the feedforward through unmodified
-        m_motor.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
-        m_logger.logDouble(Level.TRACE, "Desired velocity setpoint", () -> u_TOTAL);
-
-        m_controller.setIntegratorRange(0, 0.1);
-
-        m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
-        m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
-        m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
-        m_logger.logState100(Level.TRACE, "Goal", () -> m_goal);
-        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurementRad);
-        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
-        m_logger.logDouble(Level.TRACE, "Controller Position Error", m_controller::getPositionError);
-        m_logger.logDouble(Level.TRACE, "Controller Velocity Error", m_controller::getVelocityError);
-        m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
+        setPositionWithVelocity(goalRad, 0.0, feedForwardTorqueNm);
     }
 
     /**
@@ -201,7 +160,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     @Override
     public void stop() {
-        m_motor.stop();
+        m_mechanism.stop();
     }
 
     @Override

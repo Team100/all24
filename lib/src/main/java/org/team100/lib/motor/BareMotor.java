@@ -49,6 +49,8 @@ public interface BareMotor extends Glassy {
             double velocityRad_S,
             double torqueNm);
 
+    // TODO: add position output
+
     void stop();
 
     /**

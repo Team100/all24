@@ -159,9 +159,27 @@ public class TalonSRXMotor implements BareMotor, GenericTorqueModel {
         log();
     }
 
+    /**
+     * The Talon SRX does not support outboard position control.
+     */
+    @Override
+    public void setPosition(double position, double velocity, double torque) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public void close() {
         m_motor.close();
+    }
+
+    @Override
+    public double getVelocityRad_S() {
+        return m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10;
+    }
+
+    @Override
+    public void setEncoderPositionRad(double positionRad) {
+        //
     }
 
     public void log() {
@@ -195,19 +213,4 @@ public class TalonSRXMotor implements BareMotor, GenericTorqueModel {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
     }
 
-    @Override
-    public void setPosition(double position, double velocity, double torque) {
-        //
-    }
-
-    @Override
-    public double getVelocityRad_S() {
-        return m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10;
-
-    }
-
-    @Override
-    public void setEncoderPositionRad(double positionRad) {
-        //
-    }
 }

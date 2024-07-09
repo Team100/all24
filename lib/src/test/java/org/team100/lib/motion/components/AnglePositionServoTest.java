@@ -65,7 +65,7 @@ class AnglePositionServoTest {
                 externalEncoder, 1.0, mech);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 
-        OutboardPositionServo servo = new OutboardPositionServo(
+        OutboardAngularPositionServo servo = new OutboardAngularPositionServo(
                 logger,
                 mech,
                 combinedEncoder,

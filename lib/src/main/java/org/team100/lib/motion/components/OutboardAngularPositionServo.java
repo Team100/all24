@@ -18,28 +18,27 @@ import edu.wpi.first.math.MathUtil;
  * Must be used with a combined encoder, to "zero" the motor encoder.
  * 
  * TODO: allow other zeroing strategies.
- * 
- * TODO: change the name to OutboardAngularPositionServo.
  */
-public class OutboardPositionServo implements AngularPositionServo {
+public class OutboardAngularPositionServo implements AngularPositionServo {
     private static final double kDtSec = 0.02;
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
+    
     private final Logger m_logger;
-    private final RotaryMechanism m_motor;
+    private final RotaryMechanism m_mechanism;
     private final CombinedEncoder m_encoder;
     private final Profile100 m_profile;
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
 
-    public OutboardPositionServo(
+    public OutboardAngularPositionServo(
             Logger parent,
-            RotaryMechanism motor,
+            RotaryMechanism mech,
             CombinedEncoder encoder,
             Profile100 profile) {
         m_logger = parent.child(this);
-        m_motor = motor;
+        m_mechanism = mech;
         m_encoder = encoder;
         m_profile = profile;
     }
@@ -54,55 +53,33 @@ public class OutboardPositionServo implements AngularPositionServo {
     }
 
     @Override
-    public void setPositionWithVelocity(double goal, double goalVelocity, double feedForwardTorqueNm) {
-        OptionalDouble position = m_encoder.getPositionRad();
-        if (position.isEmpty())
+    public void setPositionWithVelocity(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
+        OptionalDouble positionRad = m_encoder.getPositionRad();
+        if (positionRad.isEmpty())
             return;
-        double measurement = MathUtil.angleModulus(position.getAsDouble());
+        double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
 
         // use the modulus closest to the measurement.
-        // note zero velocity in the goal.
-        m_goal = new State100(MathUtil.angleModulus(goal - measurement) + measurement, goalVelocity);
+        m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocity);
 
         m_setpoint = new State100(
-                MathUtil.angleModulus(m_setpoint.x() - measurement) + measurement,
+                MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad,
                 m_setpoint.v());
 
         // NOTE: fixed dt here
         m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
 
-        m_motor.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
+        m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 
-        m_logger.logDouble(Level.TRACE, "goal", () -> goal);
-        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
-        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
-        m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
+        m_logger.logState100(Level.TRACE, "goal (rad)", () -> m_goal);
+        m_logger.logDouble(Level.TRACE, "Feedforward Torque (Nm)", () -> feedForwardTorqueNm);
+        m_logger.logDouble(Level.TRACE, "measurement (rad)", () -> measurementRad);
+        m_logger.logState100(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
     }
 
     @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
-        OptionalDouble position = m_encoder.getPositionRad();
-        if (position.isEmpty())
-            return;
-        double measurement = MathUtil.angleModulus(position.getAsDouble());
-
-        // use the modulus closest to the measurement.
-        // note zero velocity in the goal.
-        m_goal = new State100(MathUtil.angleModulus(goal - measurement) + measurement, 0.0);
-
-        m_setpoint = new State100(
-                MathUtil.angleModulus(m_setpoint.x() - measurement) + measurement,
-                m_setpoint.v());
-
-        // NOTE: fixed dt here
-        m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
-
-        m_motor.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
-
-        m_logger.logDouble(Level.TRACE, "goal", () -> goal);
-        m_logger.logDouble(Level.TRACE, "Measurement", () -> measurement);
-        m_logger.logState100(Level.TRACE, "Setpoint", () -> m_setpoint);
-        m_logger.logDouble(Level.TRACE, "Feedforward Torque", () -> feedForwardTorqueNm);
+        setPositionWithVelocity(goal, 0.0, feedForwardTorqueNm);
     }
 
     @Override
@@ -117,16 +94,16 @@ public class OutboardPositionServo implements AngularPositionServo {
 
     @Override
     public boolean atSetpoint() {
-        OptionalDouble position = m_encoder.getPositionRad();
-        if (position.isEmpty())
+        OptionalDouble positionRad = m_encoder.getPositionRad();
+        if (positionRad.isEmpty())
             return false;
-        double positionMeasurement = MathUtil.angleModulus(position.getAsDouble());
-        OptionalDouble velocity = m_encoder.getRateRad_S();
-        if (velocity.isEmpty())
+        double positionMeasurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
+        OptionalDouble velocityRad_S = m_encoder.getRateRad_S();
+        if (velocityRad_S.isEmpty())
             return false;
-        double velocityMeasurement = velocity.getAsDouble();
-        double positionError = m_setpoint.x() - positionMeasurement;
-        double velocityError = m_setpoint.v() - velocityMeasurement;
+        double velocityMeasurementRad_S = velocityRad_S.getAsDouble();
+        double positionError = m_setpoint.x() - positionMeasurementRad;
+        double velocityError = m_setpoint.v() - velocityMeasurementRad_S;
         return Math.abs(positionError) < kPositionTolerance
                 && Math.abs(velocityError) < kVelocityTolerance;
     }
@@ -151,12 +128,12 @@ public class OutboardPositionServo implements AngularPositionServo {
 
     @Override
     public void stop() {
-        m_motor.stop();
+        m_mechanism.stop();
     }
 
     @Override
     public void close() {
-        m_motor.close();
+        m_mechanism.close();
     }
 
     @Override
