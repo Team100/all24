@@ -37,7 +37,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         LinearMechanism mech = new LinearMechanism(
                 driveMotor,
                 new SimulatedBareEncoder(parent, driveMotor),
-                1, 
+                1,
                 2);
         return new OutboardLinearVelocityServo(
                 parent,
@@ -49,7 +49,10 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics) {
         // simulated turning motor free speed is 20 rad/s
         SimulatedBareMotor turningMotor = new SimulatedBareMotor(parent, 20);
-        RotaryMechanism turningMech = new RotaryMechanism(turningMotor, 1);
+        RotaryMechanism turningMech = new RotaryMechanism(
+                turningMotor,
+                new SimulatedBareEncoder(parent, turningMotor),
+                1);
         SimulatedRotaryPositionSensor turningEncoder = new SimulatedRotaryPositionSensor(
                 parent,
                 turningMech);

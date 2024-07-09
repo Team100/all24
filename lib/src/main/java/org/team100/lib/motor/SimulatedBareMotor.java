@@ -51,4 +51,9 @@ public class SimulatedBareMotor implements BareMotor, GenericTorqueModel {
     public double getVelocityRad_S() {
         return m_velocity;
     }
+
+    @Override
+    public void setEncoderPositionRad(double positionRad) {
+        //
+    }
 }

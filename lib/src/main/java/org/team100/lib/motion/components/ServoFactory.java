@@ -3,15 +3,15 @@ package org.team100.lib.motion.components;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
+import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
-import org.team100.lib.encoder.drive.NeoDriveEncoder;
-import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
@@ -38,7 +38,7 @@ public class ServoFactory {
                 currentLimit,
                 ff,
                 lowLevelVelocityConstants);
-        NeoDriveEncoder encoder = new NeoDriveEncoder(
+        CANSparkEncoder encoder = new CANSparkEncoder(
                 parent,
                 motor);
         LinearMechanism mech = new LinearMechanism(
@@ -89,19 +89,18 @@ public class ServoFactory {
             PIDController controller,
             Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
-        NeoVortexCANSparkMotor motor = new NeoVortexCANSparkMotor(
+        CANSparkMotor motor = new NeoVortexCANSparkMotor(
                 parent,
                 canId,
                 motorPhase,
                 currentLimit,
                 ff,
                 lowLevelVelocityConstants);
-        NeoVortexTurningEncoder encoder = new NeoVortexTurningEncoder(
-                parent,
+        RotaryMechanism mech = new RotaryMechanism(
                 motor,
+                new CANSparkEncoder(parent, motor),
                 param.gearRatio());
-        RotaryMechanism mech = new RotaryMechanism(motor, param.gearRatio());
-        RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(encoder);
+        RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(mech);
         return new OnboardAngularPositionServo(
                 parent,
                 mech,
@@ -117,7 +116,10 @@ public class ServoFactory {
             PIDController controller) {
         // motor speed is rad/s
         SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
-        RotaryMechanism mech = new RotaryMechanism(motor, 1);
+        RotaryMechanism mech = new RotaryMechanism(
+                motor,
+                new SimulatedBareEncoder(parent, motor),
+                1);
         RotaryPositionSensor sensor = new SimulatedRotaryPositionSensor(
                 parent,
                 mech);

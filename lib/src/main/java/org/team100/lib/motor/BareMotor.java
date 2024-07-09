@@ -33,6 +33,8 @@ public interface BareMotor extends Glassy {
     /** Motor shaft speed. */
     double getVelocityRad_S();
 
+    void setEncoderPositionRad(double positionRad);
+
     /**
      * Position control with holding torque.
      * 

@@ -65,6 +65,11 @@ public abstract class CANSparkMotor implements BareMotor, TorqueModel {
     }
 
     @Override
+    public void setEncoderPositionRad(double positionRad) {
+        setEncoderPosition(positionRad / (2 * Math.PI));
+    }
+
+    @Override
     public void stop() {
         m_motor.stopMotor();
     }

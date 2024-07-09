@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.CombinedEncoder;
+import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
-import org.team100.lib.encoder.MockSettableAngularEncoder;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.profile.Profile100;
@@ -28,7 +28,10 @@ class AnglePositionServoTest {
         double period = 1;
 
         MockBareMotor turningMotor = new MockBareMotor();
-        RotaryMechanism mech = new RotaryMechanism(turningMotor, 1);
+        RotaryMechanism mech = new RotaryMechanism(
+                turningMotor,
+                new MockIncrementalBareEncoder(),
+                1);
         MockRotaryPositionSensor turningEncoder = new MockRotaryPositionSensor();
 
         PIDController turningController2 = new PIDController(1, 0, 0, period);
@@ -53,11 +56,13 @@ class AnglePositionServoTest {
     @Test
     void testOutboard() {
         MockBareMotor motor = new MockBareMotor();
-        RotaryMechanism mech = new RotaryMechanism(motor, 1);
+        RotaryMechanism mech = new RotaryMechanism(
+                motor,
+                new MockIncrementalBareEncoder(),
+                1);
         MockRotaryPositionSensor externalEncoder = new MockRotaryPositionSensor();
-        MockSettableAngularEncoder builtInEncoder = new MockSettableAngularEncoder();
         CombinedEncoder combinedEncoder = new CombinedEncoder(
-                externalEncoder, 1.0, builtInEncoder);
+                externalEncoder, 1.0, mech);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 
         OutboardPositionServo servo = new OutboardPositionServo(

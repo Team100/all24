@@ -25,5 +25,10 @@ public class MockIncrementalBareEncoder implements IncrementalBareEncoder {
     public void close() {
         //
     }
-    
+
+    @Override
+    public void setEncoderPositionRad(double motorPositionRad) {
+        position = motorPositionRad;
+    }
+
 }

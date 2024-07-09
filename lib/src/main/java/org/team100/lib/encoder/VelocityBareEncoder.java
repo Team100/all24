@@ -6,17 +6,12 @@ import org.team100.lib.motor.BareMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
-import edu.wpi.first.wpilibj.Timer;
-
-public class SimulatedBareEncoder implements IncrementalBareEncoder {
+/** encoder implementation that supports only velocity measurement. */
+public class VelocityBareEncoder implements IncrementalBareEncoder {
     private final Logger m_logger;
     private final BareMotor m_motor;
 
-    // accumulates.
-    private double m_position = 0;
-    private double m_time = Timer.getFPGATimestamp();
-
-    public SimulatedBareEncoder(
+    public VelocityBareEncoder(
             Logger parent,
             BareMotor motor) {
         m_logger = parent.child(this);
@@ -32,19 +27,12 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
 
     @Override
     public OptionalDouble getPositionRad() {
-        double now = Timer.getFPGATimestamp();
-        double dt = now - m_time;
-        double m_rate = m_motor.getVelocityRad_S();
-        m_position += m_rate * dt;
-        m_time = now;
-        m_logger.logDouble(Level.TRACE, "position (m)", () -> m_position);
-        return OptionalDouble.of(m_position);
+        return OptionalDouble.empty();
     }
 
     @Override
     public void reset() {
-        m_position = 0;
-        m_time = Timer.getFPGATimestamp();
+        //
     }
 
     @Override

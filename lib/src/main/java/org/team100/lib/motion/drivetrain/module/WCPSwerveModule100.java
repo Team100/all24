@@ -3,13 +3,12 @@ package org.team100.lib.motion.drivetrain.module;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
+import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.CombinedEncoder;
+import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
+import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.encoder.drive.Talon6DriveEncoder;
-import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.DutyCycleRotaryPositionSensor;
-import org.team100.lib.encoder.turning.EncoderDrive;
-import org.team100.lib.encoder.turning.Talon6TurningEncoder;
+import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.LinearMechanism;
@@ -125,7 +124,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 ff);
         LinearMechanism mech = new LinearMechanism(
                 driveMotor,
-                new Talon6DriveEncoder(parent, driveMotor),
+                new Talon6Encoder(parent, driveMotor),
                 ratio.m_ratio,
                 kWheelDiameterM);
         return new OutboardLinearVelocityServo(
@@ -189,9 +188,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double turningGearRatio,
             PIDController turningPositionController,
             Profile100 profile) {
-        Talon6TurningEncoder builtInEncoder = new Talon6TurningEncoder(
+        Talon6Encoder builtInEncoder = new Talon6Encoder(
                 parent,
+                turningMotor);
+        RotaryMechanism mech = new RotaryMechanism(
                 turningMotor,
+                builtInEncoder,
                 turningGearRatio);
         // if we correct to exactly the primary reading, we effectively inject noise
         // into the secondary, so soften the response.
@@ -199,8 +201,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         CombinedEncoder combinedEncoder = new CombinedEncoder(
                 turningEncoder,
                 primaryAuthority,
-                builtInEncoder);
-        RotaryMechanism mech = new RotaryMechanism(turningMotor, turningGearRatio);
+                mech);
         AngularPositionServo outboard = new OutboardPositionServo(
                 parent,
                 mech,

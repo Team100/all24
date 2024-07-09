@@ -29,8 +29,10 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
         double nowS = Timer.getFPGATimestamp();
         double dtS = nowS - m_timeS;
         // motor velocity is rad/s
-        double velocityRad_S = m_motor.getVelocityRad_S();
-        m_positionRad += velocityRad_S * dtS;
+        OptionalDouble velocityRad_S = m_motor.getVelocityRad_S();
+        if (velocityRad_S.isEmpty())
+            return OptionalDouble.empty();
+        m_positionRad += velocityRad_S.getAsDouble() * dtS;
         m_positionRad = MathUtil.angleModulus(m_positionRad);
         m_timeS = nowS;
         m_logger.logDouble(Level.TRACE, "position", () -> m_positionRad);
@@ -40,9 +42,11 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
     @Override
     public OptionalDouble getRateRad_S() {
         // motor velocity is rad/s
-        double m_rate = m_motor.getVelocityRad_S();
-        m_logger.logDouble(Level.TRACE, "rate", () -> m_rate);
-        return OptionalDouble.of(m_rate);
+        OptionalDouble m_rate = m_motor.getVelocityRad_S();
+        if (m_rate.isEmpty())
+            return OptionalDouble.empty();
+        m_logger.logOptionalDouble(Level.TRACE, "rate", () -> m_rate);
+        return m_rate;
     }
 
     @Override

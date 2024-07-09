@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.frc2024.TestLogger24;
 import org.team100.frc2024.Timeless2024;
+import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.SimulatedBareMotor;
@@ -24,7 +25,10 @@ class GravityServoTest implements Timeless2024 {
         double period = 0.02;
         // motor speed is rad/s
         SimulatedBareMotor simMotor = new SimulatedBareMotor(logger, 600);
-        RotaryMechanism simMech = new RotaryMechanism(simMotor, 165);
+        RotaryMechanism simMech = new RotaryMechanism(
+                simMotor,
+                new SimulatedBareEncoder(logger, simMotor),
+                165);
         SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                 logger,
                 simMech);

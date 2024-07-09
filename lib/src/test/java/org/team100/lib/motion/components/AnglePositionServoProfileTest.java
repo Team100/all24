@@ -3,6 +3,7 @@ package org.team100.lib.motion.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.MockBareMotor;
@@ -25,7 +26,10 @@ class AnglePositionServoProfileTest {
 
     public AnglePositionServoProfileTest() {
         motor = new MockBareMotor();
-        RotaryMechanism mech = new RotaryMechanism(motor, 1);
+        RotaryMechanism mech = new RotaryMechanism(
+                motor,
+                new MockIncrementalBareEncoder(),
+                1);
         encoder = new MockRotaryPositionSensor();
         period = 0.1;
         controller2 = new PIDController(1, 0, 0, period);

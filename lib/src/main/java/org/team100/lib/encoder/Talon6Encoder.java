@@ -1,17 +1,16 @@
-package org.team100.lib.encoder.drive;
+package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.IncrementalBareEncoder;
 import org.team100.lib.motor.Talon6Motor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
-public class Talon6DriveEncoder implements IncrementalBareEncoder {
+public class Talon6Encoder implements IncrementalBareEncoder {
     private final Logger m_logger;
     private final Talon6Motor m_motor;
 
-    public Talon6DriveEncoder(
+    public Talon6Encoder(
             Logger parent,
             Talon6Motor motor) {
         m_logger = parent.child(this);
@@ -44,6 +43,11 @@ public class Talon6DriveEncoder implements IncrementalBareEncoder {
     @Override
     public void close() {
         m_motor.close();
+    }
+
+    @Override
+    public void setEncoderPositionRad(double motorPositionRad) {
+        m_motor.setEncoderPositionRad(motorPositionRad);
     }
 
 }

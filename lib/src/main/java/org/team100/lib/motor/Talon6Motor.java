@@ -186,6 +186,12 @@ public abstract class Talon6Motor implements BareMotor, TorqueModel {
         Phoenix100.warn(() -> m_motor.setPosition(motorPositionRev));
     }
 
+    @Override
+    public void setEncoderPositionRad(double positionRad) {
+        double motorPositionRev = positionRad / (2 * Math.PI);
+        setEncoderPosition(motorPositionRev);
+    }
+
     public double getVelocityRev_S() {
         return m_velocity.getAsDouble();
     }

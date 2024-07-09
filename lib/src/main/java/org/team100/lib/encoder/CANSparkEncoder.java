@@ -1,8 +1,7 @@
-package org.team100.lib.encoder.drive;
+package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.IncrementalBareEncoder;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -13,11 +12,11 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * This encoder simply senses the 14 rotor magnets in 3 places, so it's 42 ticks
  * per turn.
  */
-public class NeoDriveEncoder implements IncrementalBareEncoder {
+public class CANSparkEncoder implements IncrementalBareEncoder {
     private final Logger m_logger;
     private final CANSparkMotor m_motor;
 
-    public NeoDriveEncoder(
+    public CANSparkEncoder(
             Logger parent,
             CANSparkMotor motor) {
         m_logger = parent.child(this);
@@ -61,5 +60,10 @@ public class NeoDriveEncoder implements IncrementalBareEncoder {
         double velocityRad_S = m_motor.getRateRPM() * 2 * Math.PI / 60;
         m_logger.logDouble(Level.TRACE, "velocity (rad_s)", ()->velocityRad_S);
         return OptionalDouble.of(velocityRad_S);
+    }
+
+    @Override
+    public void setEncoderPositionRad(double motorPositionRad) {
+        m_motor.setEncoderPositionRad(motorPositionRad);
     }
 }

@@ -2,9 +2,10 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.encoder.drive.Talon6DriveEncoder;
-import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.EncoderDrive;
+import org.team100.lib.encoder.AnalogTurningEncoder;
+import org.team100.lib.encoder.EncoderDrive;
+import org.team100.lib.encoder.Talon6Encoder;
+import org.team100.lib.encoder.VelocityBareEncoder;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
@@ -86,7 +87,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 pidConstants,
                 ff);
         LinearMechanism mech = new LinearMechanism(
-                driveMotor, new Talon6DriveEncoder(parent, driveMotor),
+                driveMotor, new Talon6Encoder(parent, driveMotor),
                 kDriveReduction,
                 kWheelDiameterM);
         return new OutboardLinearVelocityServo(
@@ -116,7 +117,10 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        RotaryMechanism mech = new RotaryMechanism(turningMotor, kSteeringReduction);
+        RotaryMechanism mech = new RotaryMechanism(
+                turningMotor,
+                new VelocityBareEncoder(parent, turningMotor),
+                kSteeringReduction);
         OnboardAngularPositionServo turningServo = new OnboardAngularPositionServo(
                 parent,
                 mech,

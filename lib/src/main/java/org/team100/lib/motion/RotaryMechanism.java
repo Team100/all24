@@ -1,5 +1,8 @@
 package org.team100.lib.motion;
 
+import java.util.OptionalDouble;
+
+import org.team100.lib.encoder.IncrementalBareEncoder;
 import org.team100.lib.motor.BareMotor;
 
 /**
@@ -7,13 +10,17 @@ import org.team100.lib.motor.BareMotor;
  * 
  * Motor velocity and accel is higher than mechanism, required torque is lower,
  * using the supplied gear ratio.
+ * 
+ * The included encoder is the incremental motor encoder.
  */
 public class RotaryMechanism {
     private final BareMotor m_motor;
+    private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
 
-    public RotaryMechanism(BareMotor motor, double gearRatio) {
+    public RotaryMechanism(BareMotor motor, IncrementalBareEncoder encoder, double gearRatio) {
         m_motor = motor;
+        m_encoder = encoder;
         m_gearRatio = gearRatio;
     }
 
@@ -49,8 +56,27 @@ public class RotaryMechanism {
         m_motor.close();
     }
 
-    public double getVelocityRad_S() {
-        return m_motor.getVelocityRad_S() / m_gearRatio;
+    public void resetEncoderPosition() {
+        m_encoder.reset();
+    }
+
+    public void setEncoderPosition(double positionRad) {
+        double motorPositionRad = positionRad * m_gearRatio;
+        m_encoder.setEncoderPositionRad(motorPositionRad);
+    }
+
+    public OptionalDouble getVelocityRad_S() {
+        OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
+        if (velocityRad_S.isEmpty())
+            return OptionalDouble.empty();
+        return OptionalDouble.of(velocityRad_S.getAsDouble() / m_gearRatio);
+    }
+
+    public OptionalDouble getPositionRad() {
+        OptionalDouble positionRad = m_encoder.getPositionRad();
+        if (positionRad.isEmpty())
+            return OptionalDouble.empty();
+        return OptionalDouble.of(positionRad.getAsDouble() / m_gearRatio);
     }
 
 }

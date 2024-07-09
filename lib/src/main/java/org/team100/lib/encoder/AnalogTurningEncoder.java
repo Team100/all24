@@ -1,8 +1,7 @@
-package org.team100.lib.encoder.turning;
+package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;

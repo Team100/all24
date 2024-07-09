@@ -36,4 +36,9 @@ public class MockBareMotor implements BareMotor {
         return this.velocity;
     }
 
+    @Override
+    public void setEncoderPositionRad(double positionRad) {
+        this.position = positionRad;
+    }
+
 }

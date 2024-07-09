@@ -10,10 +10,12 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
+import org.team100.lib.encoder.CANSparkEncoder;
+import org.team100.lib.encoder.EncoderDrive;
+import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
-import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.motion.RotaryMechanism;
-import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
@@ -42,14 +44,17 @@ public class AmpPivot extends SubsystemBase implements Glassy {
 
         switch (Identity.instance) {
             case COMP_BOT:
-                BareMotor motor = new NeoCANSparkMotor(
+                CANSparkMotor motor = new NeoCANSparkMotor(
                         m_logger,
                         2,
                         MotorPhase.FORWARD,
                         30,
                         Feedforward100.makeNeo(),
                         new PIDConstants(0, 0, 0));
-                RotaryMechanism mech = new RotaryMechanism(motor, 55);
+                RotaryMechanism mech = new RotaryMechanism(
+                        motor,
+                        new CANSparkEncoder(m_logger, motor),
+                        55);
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(
                         m_logger, 3, 0.645439, EncoderDrive.INVERSE);
                 PIDController controller = new PIDController(0.8, 0, 0);
@@ -67,7 +72,10 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 SimulatedBareMotor simMotor = new SimulatedBareMotor(
                         m_logger, 600);
                 // guess the gear ratio?
-                RotaryMechanism simMech = new RotaryMechanism(simMotor, 75);
+                RotaryMechanism simMech = new RotaryMechanism(
+                        simMotor,
+                        new SimulatedBareEncoder(m_logger, simMotor),
+                        75);
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         m_logger, simMech);
                 PIDController controller2 = new PIDController(0.7, 0, 0);

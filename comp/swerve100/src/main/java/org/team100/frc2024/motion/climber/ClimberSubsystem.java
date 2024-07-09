@@ -6,8 +6,8 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.SimulatedBareEncoder;
-import org.team100.lib.encoder.drive.NeoDriveEncoder;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
@@ -41,7 +41,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                         kCurrentLimit,
                         Feedforward100.makeNeoVortex(),
                         new PIDConstants(0, 0, 0));
-                m1 = new LinearMechanism(vp1, new NeoDriveEncoder(leftLogger, vp1), kReduction, kSprocketDiameterM);
+                m1 = new LinearMechanism(vp1, new CANSparkEncoder(leftLogger, vp1), kReduction, kSprocketDiameterM);
 
                 NeoVortexCANSparkMotor vp2 = new NeoVortexCANSparkMotor(
                         rightLogger,
@@ -50,7 +50,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                         kCurrentLimit,
                         Feedforward100.makeNeoVortex(),
                         new PIDConstants(0, 0, 0));
-                m2 = new LinearMechanism(vp2, new NeoDriveEncoder(rightLogger, vp2), kReduction, kSprocketDiameterM);
+                m2 = new LinearMechanism(vp2, new CANSparkEncoder(rightLogger, vp2), kReduction, kSprocketDiameterM);
                 break;
             default:
                 // for testing and simulation

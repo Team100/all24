@@ -60,4 +60,9 @@ public class BareMotorController100 implements BareMotor, GenericTorqueModel {
     public double getVelocityRad_S() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void setEncoderPositionRad(double positionRad) {
+        throw new UnsupportedOperationException();
+    }
 }

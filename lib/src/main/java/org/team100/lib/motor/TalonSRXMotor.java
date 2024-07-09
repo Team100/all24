@@ -205,4 +205,9 @@ public class TalonSRXMotor implements BareMotor, GenericTorqueModel {
         return m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10;
 
     }
+
+    @Override
+    public void setEncoderPositionRad(double positionRad) {
+        //
+    }
 }
