@@ -8,6 +8,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Logger;
@@ -17,7 +18,6 @@ import org.team100.lib.util.ExpiringMemoizingSupplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -122,7 +122,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     }
 
     /** Does not desaturate. */
-    public void setRawModuleStates(SwerveModuleState[] states) {
+    public void setRawModuleStates(SwerveModuleState100[] states) {
         m_swerveLocal.setRawModuleStates(states);
     }
 

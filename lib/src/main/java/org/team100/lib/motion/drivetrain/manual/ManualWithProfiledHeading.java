@@ -108,7 +108,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      */
     public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity twist1_1) {
         Pose2d currentPose = state.pose();
-
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
         // scale to max in both translation and rotation
@@ -235,6 +234,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         if (Math.abs(thetaFB) < 0.1) {
             thetaFB = 0;
         }
+        
         return thetaFB;
     }
 

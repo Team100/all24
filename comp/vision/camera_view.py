@@ -71,10 +71,10 @@ class CameraData:
         elif model == "imx296":
             print("GS Camera")
             # full frame, 2x2, to set the detector mode to widest angle possible
-            fullwidth = 1472  # slightly larger than the detector, to match stride
+            fullwidth = 1408  # slightly larger than the detector, to match stride
             fullheight = 1088
             # medium detection resolution, compromise speed vs range
-            self.width = 1472
+            self.width = 1408
             self.height = 1088
         else:
             print("UNKNOWN CAMERA: " + model)
@@ -115,9 +115,6 @@ class CameraData:
         )
         print("SENSOR MODES AVAILABLE")
         pprint.pprint(self.camera.sensor_modes)
-        # if identity == Camera.FRONT:
-        #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
-
         print("\nREQUESTED CONFIG")
         print(camera_config)
         self.camera.align_configuration(camera_config)

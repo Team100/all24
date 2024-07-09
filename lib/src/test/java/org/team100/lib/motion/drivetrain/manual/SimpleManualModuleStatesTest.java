@@ -1,4 +1,5 @@
 package org.team100.lib.motion.drivetrain.manual;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -9,7 +10,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
 
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SimpleManualModuleStatesTest {
     private static final double kDelta = 0.001;
@@ -20,7 +20,7 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
-        SwerveModuleState[] ms = s.apply(input);
+        SwerveModuleState100[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
         assertEquals(0, ms[1].angle.getRadians(), kDelta);
         assertEquals(0, ms[2].angle.getRadians(), kDelta);
@@ -37,7 +37,7 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0.5);
-        SwerveModuleState[] ms = s.apply(input);
+        SwerveModuleState100[] ms = s.apply(input);
         assertEquals(Math.PI / 2, ms[0].angle.getRadians(), kDelta);
         assertEquals(Math.PI / 2, ms[1].angle.getRadians(), kDelta);
         assertEquals(Math.PI / 2, ms[2].angle.getRadians(), kDelta);
@@ -54,7 +54,7 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0.5, 0, 0);
-        SwerveModuleState[] ms = s.apply(input);
+        SwerveModuleState100[] ms = s.apply(input);
         assertEquals(0, ms[0].angle.getRadians(), kDelta);
         assertEquals(0, ms[1].angle.getRadians(), kDelta);
         assertEquals(0, ms[2].angle.getRadians(), kDelta);

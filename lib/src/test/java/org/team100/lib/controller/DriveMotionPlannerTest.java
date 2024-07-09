@@ -3,6 +3,7 @@ package org.team100.lib.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +30,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class DriveMotionPlannerTest {
     private static final Logger logger = new TestLogger();
@@ -121,7 +121,7 @@ class DriveMotionPlannerTest {
                 ChassisSpeeds speeds = controller.update(time, pose, velocity);
                 if (true) {// setpoint == null) {
                     // Initialize from first chassis speeds.
-                    SwerveModuleState[] states = kSmoothKinematicLimits.toSwerveModuleStates(speeds,
+                    SwerveModuleState100[] states = kSmoothKinematicLimits.toSwerveModuleStates(speeds,
                             velocity.omegaRadiansPerSecond,
                             0.02);
                     setpoint = new SwerveSetpoint(speeds, states);

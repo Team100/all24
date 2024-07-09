@@ -1,7 +1,7 @@
 package org.team100.lib.swerve;
 
 import java.util.function.DoubleBinaryOperator;
-
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Math100;
@@ -9,10 +9,8 @@ import org.team100.lib.util.Math100;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class SwerveUtil {
-
     /**
      * Check if it would be faster to go to the opposite of the goal heading (and
      * reverse drive direction).
@@ -55,12 +53,52 @@ public class SwerveUtil {
             double x_1,
             double y_1,
             double f_1,
+            double f_2,
             double max_deviation,
             int max_iterations) {
         f_1 = SwerveUtil.unwrapAngle(f_0, f_1);
 
-        double diff = f_1 - f_0;
+        if (Math.abs(f_2) <= max_deviation) {
+            // Can go all the way to s=1.
+            return 1.0;
+        }
 
+        double offset = f_0 + Math.signum(f_2) * max_deviation;
+
+        DoubleBinaryOperator func = (x, y) -> SwerveUtil.unwrapAngle(f_0, Math.atan2(y, x)) - offset;
+
+        return Math100.findRoot(
+                func,
+                x_0, y_0, f_0 - offset,
+                x_1, y_1, f_1 - offset,
+                max_iterations);
+    }
+
+    /**
+     * 
+     * @param x_0            previous vx
+     * @param y_0            previoux vy
+     * @param f_0            previous steering angle
+     * @param x_1            desired vx
+     * @param y_1            desired vy
+     * @param f_1            desired steering angle
+     * @param max_deviation  max angle step
+     * @param max_iterations
+     * @return
+     */
+    public static double findSteeringMaxS(
+            double x_0,
+            double y_0,
+            double f_0,
+            double x_1,
+            double y_1,
+            double f_1,
+            double max_deviation,
+            int max_iterations) {
+        f_1 = SwerveUtil.unwrapAngle(f_0, f_1);
+
+        double diff = f_1-f_0;
+        
         if (Math.abs(diff) <= max_deviation) {
             // Can go all the way to s=1.
             return 1.0;
@@ -103,8 +141,8 @@ public class SwerveUtil {
      */
     public static boolean desiredIsStopped(
             ChassisSpeeds desiredState,
-            SwerveModuleState[] desiredModuleStates,
-            SwerveModuleState[] prevModuleStates) {
+            SwerveModuleState100[] desiredModuleStates,
+            SwerveModuleState100[] prevModuleStates) {
         if (GeometryUtil.isZero(desiredState)) {
             for (int i = 0; i < prevModuleStates.length; ++i) {
                 desiredModuleStates[i].angle = prevModuleStates[i].angle;

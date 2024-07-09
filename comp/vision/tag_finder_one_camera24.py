@@ -115,23 +115,23 @@ class TagFinder:
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
     def analyze(self, request):
-        potentialTags = self.estimatedTagPose.get()
-        potentialArray = []
-        z = []
-        for Blip24s in potentialTags:
-            translation = Blip24s.pose.translation()
-            if (translation.Z() < 0):
-                continue
-            rvec = np.zeros((3, 1), np.float32) 
-            tvec = np.zeros((3, 1), np.float32) 
-            object_points = np.array([translation.X(), translation.Y(),translation.Z()],np.float32)
-            (point2D, _) = cv2.projectPoints(object_points,rvec,tvec,self.mtx,self.dist)
-            if (point2D[0][0][0] > 0 and point2D[0][0][0] < 1456 and point2D[0][0][1] > 0 and point2D[0][0][1] < 1088):
+        # potentialTags = self.estimatedTagPose.get()
+        # potentialArray = []
+        # z = []
+        # for Blip24s in potentialTags:
+        #     translation = Blip24s.pose.translation()
+        #     if (translation.Z() < 0):
+        #         continue
+        #     rvec = np.zeros((3, 1), np.float32) 
+        #     tvec = np.zeros((3, 1), np.float32) 
+        #     object_points = np.array([translation.X(), translation.Y(),translation.Z()],np.float32)
+        #     (point2D, _) = cv2.projectPoints(object_points,rvec,tvec,self.mtx,self.dist)
+        #     if (point2D[0][0][0] > 0 and point2D[0][0][0] < 1456 and point2D[0][0][1] > 0 and point2D[0][0][1] < 1088):
                 # print(Blip24s.id)
                 # print(object_points)
                 # print(point2D[0][0])
-                z.append(translation.Z())
-                potentialArray.append(point2D[0][0])
+                # z.append(translation.Z())
+                # potentialArray.append(point2D[0][0])
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
 
@@ -147,12 +147,10 @@ class TagFinder:
         # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
         # for now use the full frame
         # TODO: probably remove this
-        serial = getserial()
-        identity = Camera(serial)
-        if (len(potentialArray) == 1):
-            offset = 100/z[0]
-            if (potentialArray[0][1]-offset > 0 and potentialArray[0][0]-offset > 0 and potentialArray[0][0]+offset < self.width and potentialArray[0][1]+offset < self.height):
-                img = img[int(potentialArray[0][1]-offset) : int(potentialArray[0][1]+offset), int(potentialArray[0][0]-offset):int(potentialArray[0][0]+offset)]
+        # if (len(potentialArray) == 1):
+        #     offset = 100/z[0]
+        #     if (potentialArray[0][1]-offset > 0 and potentialArray[0][0]-offset > 0 and potentialArray[0][0]+offset < self.width and potentialArray[0][1]+offset < self.height):
+        #         img = img[int(potentialArray[0][1]-offset) : int(potentialArray[0][1]+offset), int(potentialArray[0][0]-offset):int(potentialArray[0][0]+offset)]
 
         img = cv2.undistort(img, self.mtx, self.dist)
 

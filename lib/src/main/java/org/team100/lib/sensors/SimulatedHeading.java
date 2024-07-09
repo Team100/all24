@@ -2,10 +2,10 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -28,7 +28,7 @@ public class SimulatedHeading implements HeadingInterface {
 
     @Override
     public Rotation2d getHeadingNWU() {
-        SwerveModuleState[] states = m_moduleCollection.states();
+        SwerveModuleState100[] states = m_moduleCollection.states();
         // discretization is not necessary here because we only use the rotation, which
         // is invariant
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);
@@ -41,7 +41,7 @@ public class SimulatedHeading implements HeadingInterface {
 
     @Override
     public double getHeadingRateNWU() {
-        SwerveModuleState[] states = m_moduleCollection.states();
+        SwerveModuleState100[] states = m_moduleCollection.states();
         // discretization is not necessary here because we only use the rotation, which
         // is invariant
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);

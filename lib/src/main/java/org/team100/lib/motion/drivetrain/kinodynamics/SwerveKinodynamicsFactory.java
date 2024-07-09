@@ -53,7 +53,7 @@ public class SwerveKinodynamicsFactory {
                         2, // decel m/s/s
                         13, // steering rate rad/s
                         20 * Math.PI, // steering accel rad/s/s
-                        0.380, // track m
+                        0.380, // track m 
                         0.445, // wheelbase m
                         0.2225, // front offset m
                         0.3, // vcg m

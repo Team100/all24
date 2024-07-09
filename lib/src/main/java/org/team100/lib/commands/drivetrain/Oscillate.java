@@ -11,10 +11,10 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -75,20 +75,20 @@ public class Oscillate extends Command100 {
 
         if (Experiments.instance.enabled(Experiment.OscillateDirect)) {
             if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
-                SwerveModuleState[] states = new SwerveModuleState[] {
-                        new SwerveModuleState(speedM_S, new Rotation2d(3 * Math.PI / 4)),
-                        new SwerveModuleState(speedM_S, new Rotation2d(Math.PI / 4)),
-                        new SwerveModuleState(speedM_S, new Rotation2d(-3 * Math.PI / 4)),
-                        new SwerveModuleState(speedM_S, new Rotation2d(-1 * Math.PI / 4))
+                SwerveModuleState100[] states = new SwerveModuleState100[] {
+                        new SwerveModuleState100(speedM_S, new Rotation2d(3 * Math.PI / 4)),
+                        new SwerveModuleState100(speedM_S, new Rotation2d(Math.PI / 4)),
+                        new SwerveModuleState100(speedM_S, new Rotation2d(-3 * Math.PI / 4)),
+                        new SwerveModuleState100(speedM_S, new Rotation2d(-1 * Math.PI / 4))
                 };
                 m_swerve.setRawModuleStates(states);
 
             } else {
-                SwerveModuleState[] states = new SwerveModuleState[] {
-                        new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
-                        new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
-                        new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero),
-                        new SwerveModuleState(speedM_S, GeometryUtil.kRotationZero)
+                SwerveModuleState100[] states = new SwerveModuleState100[] {
+                        new SwerveModuleState100(speedM_S, GeometryUtil.kRotationZero),
+                        new SwerveModuleState100(speedM_S, GeometryUtil.kRotationZero),
+                        new SwerveModuleState100(speedM_S, GeometryUtil.kRotationZero),
+                        new SwerveModuleState100(speedM_S, GeometryUtil.kRotationZero)
                 };
                 m_swerve.setRawModuleStates(states);
 

@@ -6,11 +6,11 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.RobotController;
 
 /**
@@ -65,11 +65,17 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             SwerveSetpoint prevSetpoint,
             ChassisSpeeds desiredState,
             double kDtSec) {
+        SwerveModuleState100[] prevModuleStates = prevSetpoint.getModuleStates();
         // the desired module state speeds are always positive.
-        SwerveModuleState[] desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
+        SwerveModuleState100[] desiredModuleStates;
+        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
+            desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
+                desiredState, prevSetpoint.getChassisSpeeds(), prevModuleStates, kDtSec);
+        } else {
+            desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
                 desiredState);
+        }
         desiredState = desaturate(desiredState, desiredModuleStates);
-        SwerveModuleState[] prevModuleStates = prevSetpoint.getModuleStates();
         boolean desiredIsStopped = SwerveUtil.desiredIsStopped(desiredState, desiredModuleStates, prevModuleStates);
 
         // For each module, compute local Vx and Vy vectors.
@@ -80,6 +86,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         double[] desired_vx = computeVx(desiredModuleStates);
         double[] desired_vy = computeVy(desiredModuleStates);
         Rotation2d[] desired_heading = computeHeading(desiredModuleStates);
+        double[] desired_heading_velocity = computeHeadingVelocity(desiredModuleStates);
 
         boolean shouldStopAndReverse = shouldStopAndReverse(prev_heading, desired_heading);
         if (shouldStopAndReverse
@@ -132,6 +139,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                     desired_vx,
                     desired_vy,
                     desired_heading,
+                    desired_heading_velocity,
                     overrideSteering,
                     kDtSec);
             min_s = Math.min(min_s, steering_min_s);
@@ -169,7 +177,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
     ///////////////////////////////////////////////////////
 
-    private double[] computeVx(SwerveModuleState[] states) {
+    private double[] computeVx(SwerveModuleState100[] states) {
         double[] vx = new double[states.length];
         for (int i = 0; i < states.length; ++i) {
             vx[i] = states[i].angle.getCos() * states[i].speedMetersPerSecond;
@@ -177,7 +185,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         return vx;
     }
 
-    private double[] computeVy(SwerveModuleState[] states) {
+    private double[] computeVy(SwerveModuleState100[] states) {
         double[] vy = new double[states.length];
         for (int i = 0; i < states.length; ++i) {
             vy[i] = states[i].angle.getSin() * states[i].speedMetersPerSecond;
@@ -188,13 +196,23 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     /**
      * Which way each module is actually going, taking speed polarity into account.
      */
-    private Rotation2d[] computeHeading(SwerveModuleState[] states) {
+    private Rotation2d[] computeHeading(SwerveModuleState100[] states) {
         Rotation2d[] heading = new Rotation2d[states.length];
         for (int i = 0; i < states.length; ++i) {
             heading[i] = states[i].angle;
             if (states[i].speedMetersPerSecond < 0.0) {
                 heading[i] = GeometryUtil.flip(heading[i]);
             }
+        }
+        return heading;
+    }
+    /**
+     * Which way each module is actually going, taking speed polarity into account.
+     */
+    private double[] computeHeadingVelocity(SwerveModuleState100[] states) {
+        double[] heading = new double[states.length];
+        for (int i = 0; i < states.length; ++i) {
+            heading[i] = states[i].angle_2;
         }
         return heading;
     }
@@ -221,7 +239,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
      */
     private ChassisSpeeds desaturate(
             ChassisSpeeds desiredState,
-            SwerveModuleState[] desiredModuleStates) {
+            SwerveModuleState100[] desiredModuleStates) {
         if (m_limits.getMaxDriveVelocityM_S() > 0.0) {
             SwerveDriveKinematics100.desaturateWheelSpeeds(desiredModuleStates, m_limits.getMaxDriveVelocityM_S());
             desiredState = m_limits.toChassisSpeeds(desiredModuleStates);
@@ -231,7 +249,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
     private SwerveSetpoint makeSetpoint(
             final SwerveSetpoint prevSetpoint,
-            SwerveModuleState[] prevModuleStates,
+            SwerveModuleState100[] prevModuleStates,
             double dx,
             double dy,
             double dtheta,
@@ -245,20 +263,30 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 dtheta,
                 min_s,
                 kDtSec);
-
+            SwerveModuleState100[] setpointStates;
         // the speeds in these states are always positive.
-        SwerveModuleState[] setpointStates = m_limits.toSwerveModuleStates(
+        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
+        setpointStates = m_limits.toSwerveModuleStates(
+            setpointSpeeds,
+            prevSetpoint.getChassisSpeeds(),
+            prevModuleStates,
+            setpointSpeeds.omegaRadiansPerSecond,
+            kDtSec);
+        } else{ 
+            setpointStates = m_limits.toSwerveModuleStates(
                 setpointSpeeds,
                 setpointSpeeds.omegaRadiansPerSecond,
                 kDtSec);
+        }
 
         applyOverrides(overrideSteering, setpointStates);
         flipIfRequired(prevModuleStates, setpointStates);
+        
         return new SwerveSetpoint(setpointSpeeds, setpointStates);
     }
 
     /** Overwrite the states with the supplied steering overrides, if any. */
-    private void applyOverrides(Rotation2d[] overrides, SwerveModuleState[] states) {
+    private void applyOverrides(Rotation2d[] overrides, SwerveModuleState100[] states) {
         for (int i = 0; i < states.length; ++i) {
             final Rotation2d maybeOverride = overrides[i];
             if (maybeOverride != null) {
@@ -271,12 +299,13 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         }
     }
 
-    private void flipIfRequired(SwerveModuleState[] prevStates, SwerveModuleState[] setpointStates) {
+    private void flipIfRequired(SwerveModuleState100[] prevStates, SwerveModuleState100[] setpointStates) {
         for (int i = 0; i < prevStates.length; ++i) {
             final Rotation2d deltaRotation = setpointStates[i].angle.minus(prevStates[i].angle);
             if (SwerveUtil.shouldFlip(deltaRotation)) {
                 setpointStates[i].angle = GeometryUtil.flip(setpointStates[i].angle);
                 setpointStates[i].speedMetersPerSecond *= -1.0;
+                setpointStates[i].accelMetersPerSecond_2 *= -1.0;
             }
         }
     }
@@ -300,7 +329,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             double min_s,
             double kDtSec) {
         double omega = prev.omegaRadiansPerSecond + min_s * dtheta;
-        double drift = -omega * kDtSec;
+        double drift = -1.0 * omega * kDtSec;
         double vx = prev.vxMetersPerSecond * Math.cos(drift)
                 - prev.vyMetersPerSecond * Math.sin(drift)
                 + min_s * dx;

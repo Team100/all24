@@ -57,8 +57,8 @@ class CameraData:
         elif model == "imx296":
             print("GS Camera")
             # full frame, 2x2, to set the detector mode to widest angle possible
-            fullwidth = 64   # slightly larger than the detector, to match stride
-            fullheight = 64
+            fullwidth = 1408   # slightly larger than the detector, to match stride
+            fullheight = 1088
             # medium detection resolution, compromise speed vs range
             self.width = 64
             self.height = 64

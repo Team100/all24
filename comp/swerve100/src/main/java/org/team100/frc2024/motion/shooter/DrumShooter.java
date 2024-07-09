@@ -227,7 +227,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         }
         double leftError = leftVelocity.getAsDouble() - kLeftRollerVelocity;
         double rightError = rightVelocity.getAsDouble() - kRightRollerVelocity;
-        return (Math.abs(leftError) < 10) && (Math.abs(rightError) < 10);
+        return (Math.abs(leftError) < 0.5) && (Math.abs(rightError) < 0.5);
     }
 
     /**

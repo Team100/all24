@@ -11,6 +11,7 @@ import edu.wpi.first.hal.NotifierJNI;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
@@ -96,7 +97,11 @@ public class TimedRobot100 extends IterativeRobotBase {
      */
     protected TimedRobot100(double period) {
         super(period);
-        m_logger = Telemetry.get().namedRootLogger("ROBOT", false);
+        boolean defaultEnabled = false;
+        if (Identity.instance.equals(Identity.BLANK)) {
+            defaultEnabled = true;
+        }
+        m_logger = Telemetry.get().namedRootLogger("ROBOT", defaultEnabled);
         chronos = Chronos.get();
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");

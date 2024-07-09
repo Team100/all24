@@ -1,11 +1,11 @@
 package org.team100.lib.selftest;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -42,7 +42,7 @@ public class DefenseSelfTest extends Command {
     @Override
     public void execute() {
         // check for progress
-        SwerveModuleState[] states = m_drivetrain.getSwerveLocal().states();
+        SwerveModuleState100[] states = m_drivetrain.getSwerveLocal().states();
         if (!MathUtil.isNear(Math.PI / 4, states[0].angle.getRotations(), kToleranceRad)) {
             return;
         }

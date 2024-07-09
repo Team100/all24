@@ -72,7 +72,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private BooleanSupplier m_trigger;
     private Pose2d m_prevPose;
     private boolean isAligned;
-    private boolean first;
 
     public ManualWithShooterLock(
             FieldLogger fieldLogger,
@@ -101,7 +100,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     public void reset(Pose2d currentPose) {
         m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
         m_ball = null;
-        first = true;
         m_prevPose = currentPose;
         m_thetaController.reset();
         m_omegaController.reset();
@@ -142,16 +140,9 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_logger.logDouble(Level.TRACE, "Bearing Check", () -> bearing.minus(currentRotation).getDegrees());
 
         // make sure the setpoint uses the modulus close to the measurement.
-        if (first) {
-            m_thetaSetpoint = new State100(
-                    measurement,
-                    headingRate);
-            first = false;
-        } else {
-            m_thetaSetpoint = new State100(
-                    Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
-                    m_thetaSetpoint.v());
-        }
+        m_thetaSetpoint = new State100(
+                Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
+                m_thetaSetpoint.v());
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);

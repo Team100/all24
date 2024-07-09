@@ -3,12 +3,12 @@ package org.team100.lib.swerve;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * if any module is stopped and misaligned, stop everything until it's aligned.
@@ -25,8 +25,8 @@ public class SteeringOverride implements Glassy {
     }
 
     public double overrideIfStopped(
-            SwerveModuleState[] desiredModuleStates,
-            SwerveModuleState[] prevModuleStates,
+            SwerveModuleState100[] desiredModuleStates,
+            SwerveModuleState100[] prevModuleStates,
             Rotation2d[] overrideSteering,
             double kDtSec) {
         // in one cycle we can go this many radians. note this assumes infinite
@@ -74,7 +74,7 @@ public class SteeringOverride implements Glassy {
     }
 
     /** Actual rotation required, taking flipping into account. */
-    private double rotationRad(SwerveModuleState desiredModuleState, SwerveModuleState prevModuleState) {
+    private double rotationRad(SwerveModuleState100 desiredModuleState, SwerveModuleState100 prevModuleState) {
         Rotation2d necessaryRotation = desiredModuleState.angle.minus(prevModuleState.angle);
         if (SwerveUtil.shouldFlip(necessaryRotation)) {
             necessaryRotation = necessaryRotation.rotateBy(GeometryUtil.kRotation180);

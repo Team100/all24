@@ -1,4 +1,5 @@
 package org.team100.lib.swerve;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,7 +16,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class AsymSwerveSetpointGeneratorTest {
     private static final double kDelta = 0.001;
@@ -71,11 +71,11 @@ class AsymSwerveSetpointGeneratorTest {
 
     @Test
     void testGenerateSetpoint() {
-        SwerveModuleState[] initialStates = {
-                new SwerveModuleState(),
-                new SwerveModuleState(),
-                new SwerveModuleState(),
-                new SwerveModuleState()
+        SwerveModuleState100[] initialStates = {
+                new SwerveModuleState100(),
+                new SwerveModuleState100(),
+                new SwerveModuleState100(),
+                new SwerveModuleState100()
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(new ChassisSpeeds(), initialStates);
         AsymSwerveSetpointGenerator generator = new AsymSwerveSetpointGenerator(logger, kKinematicLimits);
@@ -112,11 +112,11 @@ class AsymSwerveSetpointGeneratorTest {
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
-        SwerveModuleState[] initialStates = new SwerveModuleState[] {
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
 
@@ -146,11 +146,11 @@ class AsymSwerveSetpointGeneratorTest {
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
-        SwerveModuleState[] initialStates = new SwerveModuleState[] {
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
 
@@ -171,11 +171,11 @@ class AsymSwerveSetpointGeneratorTest {
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
-        SwerveModuleState[] initialStates = new SwerveModuleState[] {
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
 
@@ -202,11 +202,11 @@ class AsymSwerveSetpointGeneratorTest {
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
-        SwerveModuleState[] initialStates = new SwerveModuleState[] {
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero),
-                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
 
@@ -238,11 +238,11 @@ class AsymSwerveSetpointGeneratorTest {
 
         // initially moving full speed +x
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(4, 0, 0);
-        SwerveModuleState[] initialStates = new SwerveModuleState[] {
-                new SwerveModuleState(4, GeometryUtil.kRotationZero),
-                new SwerveModuleState(4, GeometryUtil.kRotationZero),
-                new SwerveModuleState(4, GeometryUtil.kRotationZero),
-                new SwerveModuleState(4, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(4, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(4, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(4, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(4, GeometryUtil.kRotationZero)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
 
@@ -295,11 +295,11 @@ class AsymSwerveSetpointGeneratorTest {
 
         // initially moving 0.5 +y
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0.5, 0);
-        SwerveModuleState[] initialStates = new SwerveModuleState[] {
-                new SwerveModuleState(0.5, GeometryUtil.kRotation90),
-                new SwerveModuleState(0.5, GeometryUtil.kRotation90),
-                new SwerveModuleState(0.5, GeometryUtil.kRotation90),
-                new SwerveModuleState(0.5, GeometryUtil.kRotation90)
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0.5, GeometryUtil.kRotation90),
+                new SwerveModuleState100(0.5, GeometryUtil.kRotation90),
+                new SwerveModuleState100(0.5, GeometryUtil.kRotation90),
+                new SwerveModuleState100(0.5, GeometryUtil.kRotation90)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
 
@@ -328,11 +328,11 @@ class AsymSwerveSetpointGeneratorTest {
 
         // initial speed is faster than possible.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(10, 0, 0);
-        SwerveModuleState[] initialStates = new SwerveModuleState[] {
-                new SwerveModuleState(10, GeometryUtil.kRotationZero),
-                new SwerveModuleState(10, GeometryUtil.kRotationZero),
-                new SwerveModuleState(10, GeometryUtil.kRotationZero),
-                new SwerveModuleState(10, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(10, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(10, GeometryUtil.kRotationZero)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
 
@@ -354,11 +354,11 @@ class AsymSwerveSetpointGeneratorTest {
 
         // initial speed is at the limit +x
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(5, 0, 0);
-        SwerveModuleState[] initialStates = new SwerveModuleState[] {
-                new SwerveModuleState(5, GeometryUtil.kRotationZero),
-                new SwerveModuleState(5, GeometryUtil.kRotationZero),
-                new SwerveModuleState(5, GeometryUtil.kRotationZero),
-                new SwerveModuleState(5, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(5, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(5, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(5, GeometryUtil.kRotationZero),
+                new SwerveModuleState100(5, GeometryUtil.kRotationZero)
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
 

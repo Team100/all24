@@ -48,6 +48,6 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
 
     @Override
     public String toString() {
-        return String.format("(%5.2f, %5.2f)", x, y);
+        return String.format("(%5.2f, %5.2f, %5.2f)", x, y, theta);
     }
 }

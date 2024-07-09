@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SteeringOverrideTest {
     private static final double kDelta = 0.001;
@@ -21,11 +21,11 @@ class SteeringOverrideTest {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
         SteeringOverride c = new SteeringOverride(logger, l);
 
-        SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
-                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] desiredModuleStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
         };
-        SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
-                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] prevModuleStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
         };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 
@@ -43,11 +43,11 @@ class SteeringOverrideTest {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2(logger);
         SteeringOverride c = new SteeringOverride(logger, l);
 
-        SwerveModuleState[] desiredModuleStates = new SwerveModuleState[] {
-                new SwerveModuleState(1, GeometryUtil.kRotation90)
+        SwerveModuleState100[] desiredModuleStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(1, GeometryUtil.kRotation90)
         };
-        SwerveModuleState[] prevModuleStates = new SwerveModuleState[] {
-                new SwerveModuleState(0, GeometryUtil.kRotationZero)
+        SwerveModuleState100[] prevModuleStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
         };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 

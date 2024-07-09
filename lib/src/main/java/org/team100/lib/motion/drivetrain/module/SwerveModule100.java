@@ -4,14 +4,16 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.util.Util;
 import org.team100.lib.visualization.SwerveModuleVisualization;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * Feedforward and feedback control of a single module.
@@ -37,12 +39,12 @@ public class SwerveModule100 implements Glassy {
     /**
      * Only SwerveModuleCollection calls this.
      */
-    void setDesiredState(SwerveModuleState desiredState) {
+    void setDesiredState(SwerveModuleState100 desiredState) {
         OptionalDouble position = m_turningServo.getPosition();
         if (position.isEmpty())
             return;
         setRawDesiredState(
-                SwerveModuleState.optimize(
+                SwerveModuleState100.optimize(
                         desiredState,
                         new Rotation2d(position.getAsDouble())));
     }
@@ -52,16 +54,21 @@ public class SwerveModule100 implements Glassy {
      * 
      * This is for testing only, it does not optimize.
      */
-    void setRawDesiredState(SwerveModuleState state) {
+    void setRawDesiredState(SwerveModuleState100 state) {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
-        m_driveServo.setVelocity(state.speedMetersPerSecond);
-        m_turningServo.setPosition(state.angle.getRadians(), 0);
+        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
+            m_driveServo.setVelocity(state.speedMetersPerSecond, state.accelMetersPerSecond_2);
+            m_turningServo.setPositionWithVelocity(state.angle.getRadians(), state.angle_2, 0);
+        } else {
+            m_driveServo.setVelocity(state.speedMetersPerSecond);
+            m_turningServo.setPosition(state.angle.getRadians(), 0);
+        }
     }
 
     /** For testing */
-    SwerveModuleState getDesiredState() {
-        return new SwerveModuleState(
+    SwerveModuleState100 getDesiredState() {
+        return new SwerveModuleState100(
                 m_driveServo.getSetpoint(),
                 new Rotation2d(m_turningServo.getGoal()));
     }
@@ -96,7 +103,7 @@ public class SwerveModule100 implements Glassy {
     //
 
     /** @return current measurements */
-    public SwerveModuleState getState() {
+    public SwerveModuleState100 getState() {
         OptionalDouble driveVelocity = m_driveServo.getVelocity();
         OptionalDouble turningPosition = m_turningServo.getPosition();
         if (driveVelocity.isEmpty()) {
@@ -107,7 +114,7 @@ public class SwerveModule100 implements Glassy {
             Util.warn("no turning position measurement!");
             return null;
         }
-        return new SwerveModuleState(
+        return new SwerveModuleState100(
                 driveVelocity.getAsDouble(),
                 new Rotation2d(turningPosition.getAsDouble()));
     }

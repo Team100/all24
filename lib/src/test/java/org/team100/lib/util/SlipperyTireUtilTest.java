@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.geometry.Vector2d;
@@ -14,7 +15,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 class SlipperyTireUtilTest {
     private static final double kDelta = 0.001;
@@ -47,7 +47,7 @@ class SlipperyTireUtilTest {
         // state is a velocity at an angle
         // i think the idea is that this angle would be fixed
         // during the whole time?
-        SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+        SwerveModuleState100[] states = kinematics.toSwerveModuleStates(speeds);
         check(0, 0, states[0]);
         check(0, 0, states[1]);
         check(0, 0, states[2]);
@@ -68,7 +68,7 @@ class SlipperyTireUtilTest {
         // all these angles should be somehow consistent
         // maybe just use the velocity angle.
         SwerveModulePosition[] position1 = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < position1.length; ++i) {
             position1[i] = new SwerveModulePosition(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
@@ -125,7 +125,7 @@ class SlipperyTireUtilTest {
         // state is a velocity at an angle
         // i think the idea is that this angle would be fixed
         // during the whole time?
-        SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+        SwerveModuleState100[] states = kinematics.toSwerveModuleStates(speeds);
         check(1, 0, states[0]);
         check(1, 0, states[1]);
         check(1, 0, states[2]);
@@ -146,7 +146,7 @@ class SlipperyTireUtilTest {
         // all these angles should be somehow consistent
         // maybe just use the velocity angle.
         SwerveModulePosition[] position1 = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < position1.length; ++i) {
             position1[i] = new SwerveModulePosition(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
@@ -202,7 +202,7 @@ class SlipperyTireUtilTest {
 
         // speed
         // 0.02 radians * radius of sqrt(2)/2 / 0.02 sec = sqrt(2)/2
-        SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+        SwerveModuleState100[] states = kinematics.toSwerveModuleStates(speeds);
         check(0.707, 135, states[0]);
         check(0.707, 45, states[1]);
         check(0.707, -135, states[2]);
@@ -224,7 +224,7 @@ class SlipperyTireUtilTest {
         // postion = speed * dt
         // 0.707 * 0.02 = 0.014
         SwerveModulePosition[] position1 = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < position1.length; ++i) {
             position1[i] = new SwerveModulePosition(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
@@ -325,7 +325,7 @@ class SlipperyTireUtilTest {
     void check(
             double metersPerSecond,
             double degrees,
-            SwerveModuleState state) {
+            SwerveModuleState100 state) {
         assertEquals(metersPerSecond, state.speedMetersPerSecond, kDelta);
         assertEquals(degrees, state.angle.getDegrees(), kDelta);
     }

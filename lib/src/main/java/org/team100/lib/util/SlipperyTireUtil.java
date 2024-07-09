@@ -5,12 +5,12 @@ import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * Utility functions for adjusting swerve module positions.
@@ -98,20 +98,20 @@ public class SlipperyTireUtil implements Glassy {
      * @param dtS     length of the current period
      * @return adjusted corner speeds, suitable for forward kinematics
      */
-    public SwerveModuleState[] adjust(
+    public SwerveModuleState100[] adjust(
             Vector2d[] corners,
-            SwerveModuleState[] states,
+            SwerveModuleState100[] states,
             double dtS) {
         if (corners.length != states.length)
             throw new IllegalArgumentException("delta length");
-        SwerveModuleState[] result = new SwerveModuleState[states.length];
+        SwerveModuleState100[] result = new SwerveModuleState100[states.length];
         for (int i = 0; i < states.length; i++) {
-            SwerveModuleState state = states[i];
+            SwerveModuleState100 state = states[i];
             Vector2d wheel = new Vector2d(
                     state.speedMetersPerSecond * state.angle.getCos(),
                     state.speedMetersPerSecond * state.angle.getSin());
             Vector2d actual = m_tire.actual(corners[i], wheel, dtS);
-            result[i] = new SwerveModuleState(
+            result[i] = new SwerveModuleState100(
                     Math.hypot(actual.getX(), actual.getY()),
                     new Rotation2d(actual.getX(), actual.getY()));
         }
