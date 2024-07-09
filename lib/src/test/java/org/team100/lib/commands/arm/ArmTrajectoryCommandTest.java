@@ -54,8 +54,7 @@ class ArmTrajectoryCommandTest implements Timeless {
                 armKinematicsM,
                 goal);
         command.initialize();
-        // the command takes 2s or so
-        for (int i = 0; i < 116; ++i) {
+        for (int i = 0; i < 800; ++i) {
             stepTime(0.02);
             command.execute100(0.02);
             assertFalse(command.isFinished());

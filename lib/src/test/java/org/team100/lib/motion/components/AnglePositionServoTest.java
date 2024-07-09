@@ -4,15 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.CombinedEncoder;
-import org.team100.lib.encoder.MockEncoder100;
+import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
-import org.team100.lib.motor.MockPositionMotor100;
-import org.team100.lib.motor.MockVelocityMotor100;
+import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
+import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -28,7 +27,11 @@ class AnglePositionServoTest {
         // long period to make the output bigger
         double period = 1;
 
-        MockVelocityMotor100<Angle100> turningMotor = new MockVelocityMotor100<>();
+        MockBareMotor turningMotor = new MockBareMotor();
+        RotaryMechanism mech = new RotaryMechanism(
+                turningMotor,
+                new MockIncrementalBareEncoder(),
+                1);
         MockRotaryPositionSensor turningEncoder = new MockRotaryPositionSensor();
 
         PIDController turningController2 = new PIDController(1, 0, 0, period);
@@ -37,7 +40,7 @@ class AnglePositionServoTest {
         double maxVel = 1;
         OnboardAngularPositionServo servo = new OnboardAngularPositionServo(
                 logger,
-                turningMotor,
+                mech,
                 turningEncoder,
                 maxVel,
                 turningController2,
@@ -52,16 +55,19 @@ class AnglePositionServoTest {
 
     @Test
     void testOutboard() {
-        MockPositionMotor100<Angle100> motor = new MockPositionMotor100<>();
+        MockBareMotor motor = new MockBareMotor();
+        RotaryMechanism mech = new RotaryMechanism(
+                motor,
+                new MockIncrementalBareEncoder(),
+                1);
         MockRotaryPositionSensor externalEncoder = new MockRotaryPositionSensor();
-        MockEncoder100<Angle100> builtInEncoder = new MockEncoder100<>();
-        CombinedEncoder<Angle100> combinedEncoder = new CombinedEncoder<>(
-                externalEncoder, 1.0, builtInEncoder);
+        CombinedEncoder combinedEncoder = new CombinedEncoder(
+                externalEncoder, 1.0, mech);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 
         OutboardPositionServo servo = new OutboardPositionServo(
                 logger,
-                motor,
+                mech,
                 combinedEncoder,
                 profile);
         servo.reset();

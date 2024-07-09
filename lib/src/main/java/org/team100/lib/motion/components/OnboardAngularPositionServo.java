@@ -4,11 +4,10 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.motor.VelocityMotor100;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -18,13 +17,11 @@ import edu.wpi.first.wpilibj.Timer;
  * Because the 2025 angular encoder classes do not wind up, this is a version of
  * the position servo that understands that; it's almost a copy of
  * OnboardPositionServo.
- * 
- * TODO: rationalize all these copies, maybe don't use generics?
  */
 public class OnboardAngularPositionServo implements AngularPositionServo {
 
     private final Logger m_logger;
-    private final VelocityMotor100<Angle100> m_motor;
+    private final RotaryMechanism m_motor;
     private final RotaryPositionSensor m_encoder;
     private final double m_maxVel;
     private final PIDController m_controller;
@@ -39,7 +36,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     public OnboardAngularPositionServo(
             Logger parent,
-            VelocityMotor100<Angle100> motor,
+            RotaryMechanism motor,
             RotaryPositionSensor encoder,
             double maxVel,
             PIDController controller,

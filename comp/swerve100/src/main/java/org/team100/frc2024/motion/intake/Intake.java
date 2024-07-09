@@ -16,6 +16,10 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase implements Glassy {
+    private static final double kGearRatio = 9;
+    private static final double kWheelDiameterM = 0.05;
+    private static final int kCurrentLimit = 20;
+
     private final Logger m_logger;
     private final SensorInterface m_sensors;
 
@@ -31,7 +35,8 @@ public class Intake extends SubsystemBase implements Glassy {
         m_logger = parent.child(this);
         m_sensors = sensors;
 
-        SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(9, 0.05, 15, 10, -10);
+        SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(
+                kGearRatio, kWheelDiameterM, 15, 10, -10);
 
         switch (Identity.instance) {
             case COMP_BOT:
@@ -41,7 +46,7 @@ public class Intake extends SubsystemBase implements Glassy {
                         m_logger.child("Super Roller"),
                         5,
                         MotorPhase.FORWARD,
-                        20,
+                        kCurrentLimit,
                         rollerParameter,
                         Feedforward100.makeNeo(),
                         new PIDConstants(0.0001, 0, 0));
@@ -52,7 +57,9 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
                         m_logger.child("Super Roller"),
-                        rollerParameter);
+                        rollerParameter,
+                        kGearRatio,
+                        kWheelDiameterM);
         }
     }
 

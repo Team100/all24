@@ -2,26 +2,24 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.units.Angle100;
+import org.team100.lib.motion.RotaryMechanism;
 
 import edu.wpi.first.math.MathUtil;
 
 /**
- * Proxies an Encoder100 to produce a RotaryPositionSensor, by taking the angle
+ * Proxies a RotaryMechanism to produce a RotaryPositionSensor, by taking the angle
  * modulus.
- * 
- * TODO: add some sort of zeroing?
  */
 public class ProxyRotaryPositionSensor implements RotaryPositionSensor {
-    private final Encoder100<Angle100> m_delegate;
+    private final RotaryMechanism m_delegate;
 
-    public ProxyRotaryPositionSensor(Encoder100<Angle100> delegate) {
+    public ProxyRotaryPositionSensor(RotaryMechanism delegate) {
         m_delegate = delegate;
     }
 
     @Override
     public OptionalDouble getPositionRad() {
-        OptionalDouble pos = m_delegate.getPosition();
+        OptionalDouble pos = m_delegate.getPositionRad();
         if (pos.isEmpty())
             return pos;
         return OptionalDouble.of(MathUtil.angleModulus(pos.getAsDouble()));
@@ -29,12 +27,7 @@ public class ProxyRotaryPositionSensor implements RotaryPositionSensor {
 
     @Override
     public OptionalDouble getRateRad_S() {
-        return m_delegate.getRate();
-    }
-
-    @Override
-    public void reset() {
-        m_delegate.reset();
+        return m_delegate.getVelocityRad_S();
     }
 
     @Override

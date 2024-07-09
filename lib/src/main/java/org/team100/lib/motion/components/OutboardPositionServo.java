@@ -4,11 +4,10 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
-import org.team100.lib.motor.PositionMotor100;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -27,8 +26,8 @@ public class OutboardPositionServo implements AngularPositionServo {
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
     private final Logger m_logger;
-    private final PositionMotor100<Angle100> m_motor;
-    private final CombinedEncoder<Angle100> m_encoder;
+    private final RotaryMechanism m_motor;
+    private final CombinedEncoder m_encoder;
     private final Profile100 m_profile;
 
     private State100 m_goal = new State100(0, 0);
@@ -36,8 +35,8 @@ public class OutboardPositionServo implements AngularPositionServo {
 
     public OutboardPositionServo(
             Logger parent,
-            PositionMotor100<Angle100> motor,
-            CombinedEncoder<Angle100> encoder,
+            RotaryMechanism motor,
+            CombinedEncoder encoder,
             Profile100 profile) {
         m_logger = parent.child(this);
         m_motor = motor;
@@ -56,7 +55,7 @@ public class OutboardPositionServo implements AngularPositionServo {
 
     @Override
     public void setPositionWithVelocity(double goal, double goalVelocity, double feedForwardTorqueNm) {
-        OptionalDouble position = m_encoder.getPosition();
+        OptionalDouble position = m_encoder.getPositionRad();
         if (position.isEmpty())
             return;
         double measurement = MathUtil.angleModulus(position.getAsDouble());
@@ -82,7 +81,7 @@ public class OutboardPositionServo implements AngularPositionServo {
 
     @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
-        OptionalDouble position = m_encoder.getPosition();
+        OptionalDouble position = m_encoder.getPositionRad();
         if (position.isEmpty())
             return;
         double measurement = MathUtil.angleModulus(position.getAsDouble());
@@ -108,21 +107,21 @@ public class OutboardPositionServo implements AngularPositionServo {
 
     @Override
     public OptionalDouble getPosition() {
-        return m_encoder.getPosition();
+        return m_encoder.getPositionRad();
     }
 
     @Override
     public OptionalDouble getVelocity() {
-        return m_encoder.getRate();
+        return m_encoder.getRateRad_S();
     }
 
     @Override
     public boolean atSetpoint() {
-        OptionalDouble position = m_encoder.getPosition();
+        OptionalDouble position = m_encoder.getPositionRad();
         if (position.isEmpty())
             return false;
         double positionMeasurement = MathUtil.angleModulus(position.getAsDouble());
-        OptionalDouble velocity = m_encoder.getRate();
+        OptionalDouble velocity = m_encoder.getRateRad_S();
         if (velocity.isEmpty())
             return false;
         double velocityMeasurement = velocity.getAsDouble();

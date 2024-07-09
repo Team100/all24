@@ -6,7 +6,8 @@ import org.team100.lib.dashboard.Glassy;
 /**
  * Absolute rotational measurement, as used in, for example, swerve steering,
  * arm angles, shooter angles, etc. Unlike Encoder100<Angle100>, this does not
- * "wind up", it only returns values within [-pi, pi].
+ * "wind up", it only returns values within [-pi, pi]. This type of sensor
+ * cannot be "reset" at runtime.
  */
 public interface RotaryPositionSensor extends Glassy {
 
@@ -27,11 +28,6 @@ public interface RotaryPositionSensor extends Glassy {
      * connected), return empty.
      */
     OptionalDouble getRateRad_S();
-
-    /**
-     * Resets position to zero
-     */
-    void reset();
 
     /**
      * Releases the encoder resource, if necessary (e.g. HAL ports).

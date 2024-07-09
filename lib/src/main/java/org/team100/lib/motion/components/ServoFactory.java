@@ -3,42 +3,26 @@ package org.team100.lib.motion.components;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
-import org.team100.lib.encoder.Encoder100;
+import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.encoder.SimulatedEncoder;
-import org.team100.lib.encoder.drive.NeoDriveEncoder;
-import org.team100.lib.encoder.drive.NeoVortexDriveEncoder;
-import org.team100.lib.encoder.turning.NeoTurningEncoder;
-import org.team100.lib.encoder.turning.NeoVortexTurningEncoder;
+import org.team100.lib.encoder.SimulatedBareEncoder;
+import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.SimulatedMotor;
-import org.team100.lib.motor.drive.NeoDriveMotor;
-import org.team100.lib.motor.drive.NeoVortexDriveMotor;
-import org.team100.lib.motor.turning.NeoTurningMotor;
-import org.team100.lib.motor.turning.NeoVortexTurningMotor;
+import org.team100.lib.motor.NeoCANSparkMotor;
+import org.team100.lib.motor.NeoVortexCANSparkMotor;
+import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
-import org.team100.lib.units.Angle100;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.math.controller.PIDController;
 
 public class ServoFactory {
 
-    /**
-     * 
-     * @param name
-     * @param canId
-     * @param motorPhase
-     * @param gearRatio
-     * @param wheelDiameter
-     * @param maxVel
-     * @param maxAccel
-     * @param maxDecel      maximum decleration: usually mechanisms can slow down
-     *                      faster than they can speed up.
-     * @return
-     */
     public static LimitedLinearVelocityServo limitedNeoVelocityServo(
             Logger parent,
             int canId,
@@ -47,23 +31,24 @@ public class ServoFactory {
             SysParam param,
             Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
-        NeoDriveMotor motor = new NeoDriveMotor(
+        NeoCANSparkMotor motor = new NeoCANSparkMotor(
                 parent,
                 canId,
                 motorPhase,
                 currentLimit,
-                param.gearRatio(),
-                param.wheelDiameter(),
                 ff,
                 lowLevelVelocityConstants);
-        NeoDriveEncoder encoder = new NeoDriveEncoder(
+        CANSparkEncoder encoder = new CANSparkEncoder(
                 parent,
+                motor);
+        LinearMechanism mech = new LinearMechanism(
                 motor,
-                param.wheelDiameter() * Math.PI / param.gearRatio());
-                LinearVelocityServo v = new OutboardLinearVelocityServo(
+                encoder,
+                param.gearRatio(),
+                param.wheelDiameter());
+        LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
-                motor,
-                encoder);
+                mech);
         return new LimitedLinearVelocityServo(v,
                 param.maxVelM_S(),
                 param.maxAccelM_S2(),
@@ -72,53 +57,23 @@ public class ServoFactory {
 
     public static LimitedLinearVelocityServo limitedSimulatedVelocityServo(
             Logger parent,
-            SysParam param) {
+            SysParam param,
+            double gearRatio,
+            double wheelDiameterM) {
         // motor speed is rad/s
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(parent, 600);
-        SimulatedEncoder<Distance100> encoder = new SimulatedEncoder<>(parent, motor, 1, -1, 1);
+        BareMotor motor = new SimulatedBareMotor(parent, 600);
+        LinearMechanism mech = new LinearMechanism(
+                motor,
+                new SimulatedBareEncoder(parent, motor),
+                gearRatio,
+                wheelDiameterM);
         LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
-                motor,
-                encoder);
+                mech);
         return new LimitedLinearVelocityServo(v,
                 param.maxVelM_S(),
                 param.maxAccelM_S2(),
                 param.maxDecelM_S2());
-    }
-
-    /**
-     * Position control using velocity feedforward and proportional feedback.
-     * Velocity control using outboard SparkMax controller.
-     */
-    public static OnboardAngularPositionServo neoAngleServo(
-            Logger parent,
-            int canId,
-            MotorPhase motorPhase,
-            int currentLimit,
-            SysParam param,
-            PIDConstants controller,
-            Feedforward100 ff,
-            PIDConstants lowLevelVelocityConstants) {
-        NeoTurningMotor motor = new NeoTurningMotor(
-                parent,
-                canId,
-                motorPhase,
-                currentLimit,
-                param.gearRatio(),
-                ff,
-                lowLevelVelocityConstants);
-        NeoTurningEncoder encoder = new NeoTurningEncoder(
-                parent,
-                motor,
-                param.gearRatio());
-        RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(encoder);
-        return new OnboardAngularPositionServo(
-                parent,
-                motor,
-                sensor,
-                param.maxVelM_S(),
-                new PIDController(controller.getP(), controller.getI(), controller.getD()),
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
     }
 
     /**
@@ -134,139 +89,50 @@ public class ServoFactory {
             PIDController controller,
             Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
-        NeoVortexTurningMotor motor = new NeoVortexTurningMotor(
+        CANSparkMotor motor = new NeoVortexCANSparkMotor(
                 parent,
                 canId,
                 motorPhase,
                 currentLimit,
-                param.gearRatio(),
                 ff,
                 lowLevelVelocityConstants);
-        NeoVortexTurningEncoder encoder = new NeoVortexTurningEncoder(
-                parent,
+        RotaryMechanism mech = new RotaryMechanism(
                 motor,
+                new CANSparkEncoder(parent, motor),
                 param.gearRatio());
-        RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(encoder);
+        RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(mech);
         return new OnboardAngularPositionServo(
                 parent,
-                motor,
+                mech,
                 sensor,
                 param.maxVelM_S(),
                 controller,
                 new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
     }
 
-    public static OnboardAngularPositionServo simulatedAngleServo(
+    public static OnboardAngularPositionServo2 simulatedAngleServo(
             Logger parent,
             SysParam param,
             PIDController controller) {
         // motor speed is rad/s
-        SimulatedMotor<Angle100> motor = new SimulatedMotor<>(parent, 600);
-        SimulatedEncoder<Angle100> encoder = new SimulatedEncoder<>(
-                parent,
+        SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
+        RotaryMechanism mech = new RotaryMechanism(
                 motor,
-                1,
-                0, // minimum hard stop
-                2); // maximum hard stop
-        RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(encoder);
-        return new OnboardAngularPositionServo(
+                new SimulatedBareEncoder(parent, motor),
+                1);
+        RotaryPositionSensor sensor = new SimulatedRotaryPositionSensor(
                 parent,
-                motor,
+                mech);
+        // the new sim doesn't have hard stops; should it?
+        // 0, // minimum hard stop
+        // 2); // maximum hard stop
+        return new OnboardAngularPositionServo2(
+                parent,
+                mech,
                 sensor,
                 param.maxVelM_S(),
                 controller,
                 new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
-    }
-
-    /**
-     * Position control using velocity feedforward and proportional feedback.
-     * Velocity control using outboard SparkMax controller.
-     */
-    public static PositionServo<Distance100> neoDistanceServo(
-            Logger parent,
-            int canId,
-            MotorPhase motorPhase,
-            int currentLimit,
-            SysParam param,
-            PIDController controller,
-            Feedforward100 ff,
-            PIDConstants lowLevelVelocityConstants) {
-        NeoDriveMotor motor = new NeoDriveMotor(
-                parent,
-                canId,
-                motorPhase,
-                currentLimit,
-                param.gearRatio(),
-                param.wheelDiameter(),
-                ff,
-                lowLevelVelocityConstants);
-        Encoder100<Distance100> encoder = new NeoDriveEncoder(
-                parent,
-                motor,
-                param.wheelDiameter() * Math.PI / param.gearRatio());
-        return new OnboardPositionServo<>(
-                parent,
-                motor,
-                encoder,
-                param.maxVelM_S(),
-                controller,
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
-                Distance100.instance);
-    }
-
-    /**
-     * Position control using velocity feedforward and proportional feedback.
-     * Velocity control using outboard SparkMax controller.
-     * 
-     * @param ff in VOLTS VOLTS VOLTS
-     */
-    public static OnboardPositionServo<Distance100> neoVortexDistanceServo(
-            Logger parent,
-            int canId,
-            MotorPhase motorPhase,
-            int currentLimit,
-            SysParam param,
-            PIDController controller,
-            Feedforward100 ff,
-            PIDConstants lowLevelVelocityConstants) {
-        NeoVortexDriveMotor motor = new NeoVortexDriveMotor(
-                parent,
-                canId,
-                motorPhase,
-                currentLimit,
-                param.gearRatio(),
-                param.wheelDiameter(),
-                ff,
-                lowLevelVelocityConstants);
-        Encoder100<Distance100> encoder = new NeoVortexDriveEncoder(
-                parent,
-                motor,
-                param.wheelDiameter() * Math.PI / param.gearRatio());
-        return new OnboardPositionServo<>(
-                parent,
-                motor,
-                encoder,
-                param.maxVelM_S(),
-                controller,
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
-                Distance100.instance);
-    }
-
-    public static PositionServo<Distance100> simulatedDistanceServo(
-            Logger parent,
-            SysParam param,
-            PIDController controller) {
-        // motor speed is rad/s
-        SimulatedMotor<Distance100> motor = new SimulatedMotor<>(parent, 600);
-        Encoder100<Distance100> encoder = new SimulatedEncoder<>(parent, motor, 1, -1, 1);
-        return new OnboardPositionServo<>(
-                parent,
-                motor,
-                encoder,
-                param.maxVelM_S(),
-                controller,
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05),
-                Distance100.instance);
     }
 
     private ServoFactory() {

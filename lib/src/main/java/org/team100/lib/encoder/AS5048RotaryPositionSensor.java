@@ -1,7 +1,5 @@
 package org.team100.lib.encoder;
 
-import org.team100.lib.encoder.turning.DutyCycleRotaryPositionSensor;
-import org.team100.lib.encoder.turning.EncoderDrive;
 import org.team100.lib.telemetry.Logger;
 
 /**

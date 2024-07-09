@@ -2,19 +2,16 @@ package org.team100.lib.motion.components;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.encoder.Encoder100;
-import org.team100.lib.motor.VelocityMotor100;
+import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Distance100;
 
 import edu.wpi.first.wpilibj.Timer;
 
 public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
     private final Logger m_logger;
-    private final VelocityMotor100<Distance100> m_motor;
-    private final Encoder100<Distance100> m_encoder;
+    private final LinearMechanism m_motor;
 
     // for calculating acceleration
     private double previousSetpoint = 0;
@@ -23,11 +20,9 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
     public OutboardLinearVelocityServo(
             Logger parent,
-            VelocityMotor100<Distance100> motor,
-            Encoder100<Distance100> encoder) {
+            LinearMechanism motor) {
         m_logger = parent.child(this);
         m_motor = motor;
-        m_encoder = encoder;
     }
 
     @Override
@@ -43,7 +38,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     public void setVelocity(double setpoint) {
         m_setpoint = setpoint;
         m_motor.setVelocity(setpoint, accel(setpoint), 0);
-        m_logger.logDouble(Level.TRACE, "Desired setpoint", () -> setpoint);
+        m_logger.logDouble(Level.TRACE, "setpoint (m_s)", () -> setpoint);
     }
 
     @Override
@@ -59,7 +54,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
      */
     @Override
     public OptionalDouble getVelocity() {
-        return m_encoder.getRate();
+        return m_motor.getVelocityM_S();
     }
 
     @Override
@@ -69,7 +64,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
     @Override
     public OptionalDouble getDistance() {
-        return m_encoder.getPosition();
+        return m_motor.getPositionM();
     }
 
     @Override

@@ -5,7 +5,6 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Measure100;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -14,8 +13,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
-public abstract class CANSparkMotor<T extends Measure100>
-        implements DutyCycleMotor100, VelocityMotor100<T>, PositionMotor100<T>, TorqueModel {
+public abstract class CANSparkMotor implements BareMotor, TorqueModel {
     protected final Logger m_logger;
     protected final Feedforward100 m_ff;
     protected final CANSparkBase m_motor;
@@ -43,8 +41,32 @@ public abstract class CANSparkMotor<T extends Measure100>
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        m_logger.logDouble(Level.TRACE, "Output", () -> output);
+        m_logger.logDouble(Level.TRACE, "Duty Cycle", () -> output);
         log();
+    }
+
+    @Override
+    public void setVelocity(double motorRad_S, double motorAccelRad_S2, double motorTorqueNm) {
+        double motorRev_S = motorRad_S / (2 * Math.PI);
+        double motorRev_S2 = motorAccelRad_S2 / (2 * Math.PI);
+        setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
+    }
+
+    @Override
+    public void setPosition(double motorPositionRad, double motorVelocityRad_S, double motorTorqueNm) {
+        double motorRev = motorPositionRad / (2 * Math.PI);
+        double motorRev_S = motorVelocityRad_S / (2 * Math.PI);
+        setMotorPosition(motorRev, motorRev_S, motorTorqueNm);
+    }
+
+    @Override
+    public double getVelocityRad_S() {
+        return getRateRPM() * 2 * Math.PI / 60;
+    }
+
+    @Override
+    public void setEncoderPositionRad(double positionRad) {
+        setEncoderPosition(positionRad / (2 * Math.PI));
     }
 
     @Override
@@ -52,13 +74,13 @@ public abstract class CANSparkMotor<T extends Measure100>
         m_motor.stopMotor();
     }
 
-    public double getMotorTorque() {
-        return m_motor.getOutputCurrent() * kTNm_amp();
-    }
-
     @Override
     public void close() {
         m_motor.close();
+    }
+
+    public double getMotorTorque() {
+        return m_motor.getOutputCurrent() * kTNm_amp();
     }
 
     /**
