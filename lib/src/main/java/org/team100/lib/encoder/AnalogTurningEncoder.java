@@ -12,15 +12,11 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * Analog angular encoder used in swerve modules: MA-3 and Thriftybot.
- * 
- * The 2025 changes to AnalogEncoder changed the way the zeros are calculated,
- * so I imported the old methods here for now.
- * 
- * TODO: the gear ratio is always 1, so streamline this a bit.
+ * Absolute rotary position sensor using ratiometric analog input.
  */
 public class AnalogTurningEncoder implements RotaryPositionSensor {
     private static final double kTwoPi = 2.0 * Math.PI;
+
     private final Logger m_logger;
     private final AnalogInput m_input;
     private final double m_positionOffset;
@@ -29,13 +25,6 @@ public class AnalogTurningEncoder implements RotaryPositionSensor {
     private Double m_prevAngleRad = null;
     private Double m_prevTimeS = null;
 
-    /**
-     * @param logger 
-     * @param channel     roboRIO analog input channel
-     * @param inputOffset unit = turns, i.e. [0,1] subtracted from the raw
-     *                    measurement
-     * @param drive       polarity
-     */
     public AnalogTurningEncoder(
             Logger parent,
             int channel,
@@ -49,13 +38,9 @@ public class AnalogTurningEncoder implements RotaryPositionSensor {
 
     @Override
     public OptionalDouble getPositionRad() {
-        // this should be fast, need not be cached.
         double positionRad = getRad();
         m_logger.logInt(Level.TRACE, "channel", m_input::getChannel);
         m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
-        m_logger.logDouble(Level.TRACE, "position (turns-offset)", this::get);
-        m_logger.logDouble(Level.TRACE, "position (turns)", this::getAbsolutePosition);
-        m_logger.logDouble(Level.TRACE, "position (volts)", m_input::getVoltage);
         return OptionalDouble.of(positionRad);
     }
 
@@ -105,27 +90,22 @@ public class AnalogTurningEncoder implements RotaryPositionSensor {
 
     //////////////////////////////////////////////
 
-    /** Turns [0, 1] */
-    private double getAbsolutePosition() {
-        return m_input.getVoltage() / RobotController.getVoltage5V();
-    }
-
-    /**
-     * Turns minus offset, could be outside [0, 1]
-     */
-    private double get() {
-        double posTurns = getAbsolutePosition();
-        return posTurns - m_positionOffset;
-    }
-
     /** Radians, [-pi, pi] */
     private double getRad() {
-        double posTurnsMinusOffset = get();
+        double voltage = m_input.getVoltage();
+        m_logger.logDouble(Level.TRACE, "voltage", () -> voltage);
+
+        double posTurns = voltage / RobotController.getVoltage5V();
+        m_logger.logDouble(Level.TRACE, "position (turns)", () -> posTurns);
+
+        double turnsMinusOffset = posTurns - m_positionOffset;
+        m_logger.logDouble(Level.TRACE, "position (turns-offset)", () -> turnsMinusOffset);
+
         switch (m_drive) {
             case DIRECT:
-                return MathUtil.angleModulus(posTurnsMinusOffset * kTwoPi);
+                return MathUtil.angleModulus(turnsMinusOffset * kTwoPi);
             case INVERSE:
-                return MathUtil.angleModulus(-1.0 * posTurnsMinusOffset * kTwoPi);
+                return MathUtil.angleModulus(-1.0 * turnsMinusOffset * kTwoPi);
             default:
                 throw new IllegalArgumentException();
         }

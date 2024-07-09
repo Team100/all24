@@ -12,36 +12,24 @@ import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- * Encoder using the AMS 5048 PWM output through a RoboRIO DIO port.
- * 
- * This is a near-copy of AnalogTurningEncoder; sadly the underlying WPI types
- * have no common parent, so there's some duplication here.
- * 
- * The 2025 update changed the DutyCycleEncoder class a lot, so i copied some of
- * the old methods here.
- * 
- * TODO: this should be further cleaned up once the 2025 transition work is
- * done.
- * 
- * TODO: combine with DutyCycleEncoder100.
- * 
- * TODO: remove gear ratio, it's always 1.
+ * Absolute rotary position sensor using duty cycle input.
  */
 public abstract class DutyCycleRotaryPositionSensor implements RotaryPositionSensor {
+    private static final double kTwoPi = 2.0 * Math.PI;
+
     private final Logger m_logger;
     private final DigitalInput m_digitalInput;
     private final DutyCycle m_dutyCycle;
     private final int m_frequencyThreshold;
     private final double m_positionOffset;
-    private final double m_distancePerRotation;
+    private final EncoderDrive m_drive;
 
-    // TODO: use these to fix https://github.com/Team100/all24/issues/383
-    // these are within [0,1]
-    protected abstract double m_sensorMin(); // = 0.0;
-    protected abstract double m_sensorMax(); // = 1.0;
 
-    private Double prevAngle = null;
-    private Double prevTime = null;
+    protected abstract double m_sensorMin();
+    protected abstract double m_sensorMax();
+
+    private Double m_prevAngleRad = null;
+    private Double m_prevTimeS = null;
 
     protected DutyCycleRotaryPositionSensor(
             Logger parent,
@@ -51,18 +39,8 @@ public abstract class DutyCycleRotaryPositionSensor implements RotaryPositionSen
         m_logger = parent.child(this);
         m_digitalInput = new DigitalInput(channel);
         m_dutyCycle = new DutyCycle(m_digitalInput);
-        m_positionOffset = inputOffset;
-
-        switch (drive) {
-            case DIRECT:
-                m_distancePerRotation = 2.0 * Math.PI;
-                break;
-            case INVERSE:
-                m_distancePerRotation = -2.0 * Math.PI;
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
+        m_positionOffset = Util.inRange(inputOffset, 0.0, 1.0);
+        m_drive = drive;
         m_frequencyThreshold = 1000;
     }
 
@@ -72,7 +50,11 @@ public abstract class DutyCycleRotaryPositionSensor implements RotaryPositionSen
             Util.warn(String.format("encoder %d not connected", m_dutyCycle.getSourceChannel()));
             return OptionalDouble.empty();
         }
-        return OptionalDouble.of(getRad());
+        double positionRad = getRad();
+        m_logger.logInt(Level.TRACE, "channel", m_dutyCycle::getSourceChannel);
+        m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
+
+        return OptionalDouble.of(positionRad);
     }
 
     @Override
@@ -117,49 +99,41 @@ public abstract class DutyCycleRotaryPositionSensor implements RotaryPositionSen
         return pos;
     }
 
-    /** return turns [0,1] */
-    private double getAbsolutePosition() {
-        return mapSensorRange(m_dutyCycle.getOutput());
-    }
-
-    /**
-     * return turns minus offset, can be outside [0,1]
-     * TODO: modulus to [0,1]
-     */
-    private double get() {
-        double dutyCycle = m_dutyCycle.getOutput();
-        double posTurns = mapSensorRange(dutyCycle);
-        return posTurns - m_positionOffset;
-    }
-
-    private double getDistance() {
-        return get() * m_distancePerRotation;
-    }
-
+    /** Radians, [-pi, pi] */
     private double getRad() {
-        double positionRad = getDistance();
-        m_logger.logInt(Level.TRACE, "channel", m_dutyCycle::getSourceChannel);
-        m_logger.logDouble(Level.TRACE, "position (rad) ROBOT USES THIS (CCW POSITIVE)", () -> positionRad);
-        m_logger.logDouble(Level.TRACE, "position (turns-offset) USE FOR OFFSETS", this::get);
-        m_logger.logDouble(Level.TRACE, "position (absolute)", this::getAbsolutePosition);
-        m_logger.logDouble(Level.TRACE, "Wrapped position rads (absolute)", () -> MathUtil.angleModulus(positionRad));
-        return positionRad;
+        double dutyCycle = m_dutyCycle.getOutput();
+        m_logger.logDouble(Level.TRACE, "duty cycle", () -> dutyCycle);
+
+        double posTurns = mapSensorRange(dutyCycle);
+        m_logger.logDouble(Level.TRACE, "position (turns)", () -> posTurns);
+
+        double turnsMinusOffset = posTurns - m_positionOffset;
+        m_logger.logDouble(Level.TRACE, "position (turns-offset)", () -> turnsMinusOffset);
+
+        switch (m_drive) {
+            case DIRECT:
+                return MathUtil.angleModulus(turnsMinusOffset * kTwoPi);
+            case INVERSE:
+                return MathUtil.angleModulus(-1.0 * turnsMinusOffset * kTwoPi);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     /** this is just finite difference over one time step. noisy! */
     private double getRad_S() {
         double angle = getRad();
         double time = Timer.getFPGATimestamp();
-        if (prevAngle == null) {
-            prevAngle = angle;
-            prevTime = time;
+        if (m_prevAngleRad == null) {
+            m_prevAngleRad = angle;
+            m_prevTimeS = time;
             return 0;
         }
-        double dx = angle - prevAngle;
-        double dt = time - prevTime;
+        double dx = angle - m_prevAngleRad;
+        double dt = time - m_prevTimeS;
 
-        prevAngle = angle;
-        prevTime = time;
+        m_prevAngleRad = angle;
+        m_prevTimeS = time;
 
         double rateRad_S = dx / dt;
         m_logger.logDouble(Level.TRACE, "rate (rad_s)", () -> rateRad_S);
