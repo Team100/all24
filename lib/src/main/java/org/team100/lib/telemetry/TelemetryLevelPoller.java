@@ -30,7 +30,7 @@ public class TelemetryLevelPoller {
     public void setDefault(Level level) {
         if (level.admit(Level.DEBUG)) {
             Util.warn(String.format(
-                    "Setting default telemetry to %s.  Comp should use INFO.",
+                    "Setting default telemetry to %s.  Comp should use COMP.",
                     level.name()));
         }
         m_levelChooser.setDefaultOption(level.name(), level);

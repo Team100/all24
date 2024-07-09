@@ -27,12 +27,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * though, so try a high accel limit.
  */
 public class IndexerSubsystem extends SubsystemBase implements Glassy {
+    private static final double kGearRatio = 12.0;
+    private static final double kWheelDiameterM = 0.05;
     private static final int kCurrentLimit = 30;
 
     /**
      * Surface velocity of whatever is turning in the indexer.
      */
     private static final double kIndexerVelocityM_S = 5;
+    
     private final Logger m_logger;
     private final LimitedLinearVelocityServo m_servo;
     private final PIDConstants m_velocityConstants;
@@ -47,17 +50,16 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
         m_lowLevelFeedforwardConstants = Feedforward100.makeNeo();
 
         SysParam params = SysParam.limitedNeoVelocityServoSystem(
-            12.0,
-             0.05,
-             15,
-             50,
-             -50);
+                kGearRatio,
+                kWheelDiameterM,
+                15,
+                50,
+                -50);
         switch (Identity.instance) {
             case COMP_BOT:
 
                 // beamBreak1 = new DigitalInput(4);
                 // beamBreak2 = new DigitalInput(8);
-
 
                 m_servo = ServoFactory.limitedNeoVelocityServo(
                         m_logger,
@@ -72,7 +74,9 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
             default:
                 m_servo = ServoFactory.limitedSimulatedVelocityServo(
                         m_logger,
-                        params);
+                        params,
+                        kGearRatio,
+                        kWheelDiameterM);
         }
     }
 
@@ -81,7 +85,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void indexWithBeamBreak() {
-        if(beamBreak1.get()){
+        if (beamBreak1.get()) {
             m_servo.setVelocity(0);
         } else {
             m_servo.setVelocity(kIndexerVelocityM_S);
@@ -96,7 +100,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
     public void stop() {
         m_servo.stop();
     }
-    
+
     public OptionalDouble getVelocity() {
         return m_servo.getVelocity();
     }

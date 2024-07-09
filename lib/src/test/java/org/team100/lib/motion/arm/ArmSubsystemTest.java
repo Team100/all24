@@ -19,14 +19,19 @@ class ArmSubsystemTest implements Timeless {
         assertEquals(0, armSubSystem.getPosition().get().th1, kDelta);
         assertEquals(0, armSubSystem.getPosition().get().th2, kDelta);
 
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 100; ++i) {
             stepTime(0.02);
+            // since i took out the limits this just spins
             armSubSystem.set(1, 1);
+            // you have to call getPosition on the simulated sensor for it to do the integraiton.
+            armSubSystem.getPosition();
+            // ArmAngles angles = armSubSystem.getPosition().get();
+            // System.out.printf("%d %5.3f %5.3f\n", i, angles.th1, angles.th2);
         }
 
-        // these values seem timing dependent?
-        assertEquals(0.2, armSubSystem.getPosition().get().th1, 0.2);
-        assertEquals(0.3, armSubSystem.getPosition().get().th2, 0.2);
+        // how far did it spin?
+        assertEquals(0.65, armSubSystem.getPosition().get().th1, 0.01);
+        assertEquals(0.65, armSubSystem.getPosition().get().th2, 0.01);
 
         armSubSystem.close();
     }

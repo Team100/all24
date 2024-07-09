@@ -2,17 +2,20 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.encoder.drive.Talon6DriveEncoder;
-import org.team100.lib.encoder.turning.AnalogTurningEncoder;
-import org.team100.lib.encoder.turning.EncoderDrive;
+import org.team100.lib.encoder.AnalogTurningEncoder;
+import org.team100.lib.encoder.EncoderDrive;
+import org.team100.lib.encoder.Talon6Encoder;
+import org.team100.lib.encoder.VelocityBareEncoder;
+import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
-import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo2;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motor.BareMotorController100;
+import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.drive.Falcon6DriveMotor;
-import org.team100.lib.motor.turning.TurningMotorController100;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Logger;
 
@@ -21,9 +24,17 @@ import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 
 /**
  * Stock AndyMark module with Falcon drive and PWM 775 steering.
+ * 
+ * 
  */
 public class AMSwerveModule100 extends SwerveModule100 {
-    // AndyMark Swerve & Steer has 4 inch wheel
+    /**
+     * There is a planetary gearbox between the motor and the steering gear, and the
+     * final is 48/40.
+     */
+    private static final double kSteeringReduction = 71.0 * 40 / 48;
+    // AndyMark Swerve & Steer has 4 inch wheel: this number is more like 3.75
+    // inches which represents a significantly worn wheel.
     private static final double kWheelDiameterM = 0.09628;
     // see andymark.com/products/swerve-and-steer
     private static final double kDriveReduction = 6.67;
@@ -67,25 +78,22 @@ public class AMSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-        double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
-        Falcon6DriveMotor driveMotor = new Falcon6DriveMotor(
+        Falcon6Motor driveMotor = new Falcon6Motor(
                 parent,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
                 currentLimit,
                 statorLimit,
-                kDriveReduction,
-                kWheelDiameterM,
                 pidConstants,
                 ff);
-        Talon6DriveEncoder driveEncoder = new Talon6DriveEncoder(
-                parent,
+        LinearMechanism mech = new LinearMechanism(
                 driveMotor,
-                distancePerTurn);
+                new Talon6Encoder(parent, driveMotor),
+                kDriveReduction,
+                kWheelDiameterM);
         return new OutboardLinearVelocityServo(
                 parent,
-                driveMotor,
-                driveEncoder);
+                mech);
     }
 
     private static AngularPositionServo turningServo(
@@ -94,10 +102,13 @@ public class AMSwerveModule100 extends SwerveModule100 {
             int turningEncoderChannel,
             double turningOffset,
             SwerveKinodynamics kinodynamics) {
-        TurningMotorController100 turningMotor = new TurningMotorController100(
+        BareMotorController100 turningMotor = new BareMotorController100(
                 parent,
-                new VictorSP(turningMotorChannel),
-                turningMotorChannel);
+                new VictorSP(turningMotorChannel));
+        RotaryMechanism steeringGears = new RotaryMechanism(
+                turningMotor,
+                new VelocityBareEncoder(parent, turningMotor),
+                kSteeringReduction);
         AnalogTurningEncoder turningEncoder = new AnalogTurningEncoder(
                 parent,
                 turningEncoderChannel,
@@ -112,9 +123,9 @@ public class AMSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        OnboardAngularPositionServo turningServo = new OnboardAngularPositionServo(
+        OnboardAngularPositionServo2 turningServo = new OnboardAngularPositionServo2(
                 parent,
-                turningMotor,
+                steeringGears,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
                 turningPositionController,

@@ -9,23 +9,25 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
+import org.team100.lib.encoder.CANSparkEncoder;
+import org.team100.lib.encoder.EncoderDrive;
+import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
-import org.team100.lib.encoder.drive.Talon6DriveEncoder;
-import org.team100.lib.encoder.turning.EncoderDrive;
+import org.team100.lib.encoder.Talon6Encoder;
+import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
+import org.team100.lib.motor.CANSparkMotor;
+import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.motor.SimulatedMotor;
-import org.team100.lib.motor.drive.Falcon6DriveMotor;
-import org.team100.lib.motor.duty_cycle.NeoProxy;
+import org.team100.lib.motor.NeoCANSparkMotor;
+import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.units.Angle100;
 import org.team100.lib.util.Util;
-
-import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,6 +43,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * up, so set the acceleration a bit higher than that to start.
  */
 public class DrumShooter extends SubsystemBase implements Glassy {
+    private static final double kPivotReduction = 165;
     /** Left roller setpoint, m/s */
     private static final double kLeftRollerVelocity = 20;
     /** Right roller setpoint m/s */
@@ -75,86 +78,93 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 30, // max vel
                 40, // max accel
                 -40); // max decel
-        SysParam pivotParams = SysParam.neoPositionServoSystem(
-                165, // gear ratio
-                300, // max vel
-                300); // max accel
 
         PIDController pivotController = new PIDController(4.5, 0.0, 0.000);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         double period = 0.02;
-        double[] softLimits = new double[] { 0, 45 };
 
         Logger leftLogger = parent.child("Left");
         Logger rightLogger = parent.child("Right");
         switch (Identity.instance) {
             case COMP_BOT:
-                double distancePerTurn = kWheelDiameterM * Math.PI / kDriveReduction;
-
-                Falcon6DriveMotor leftMotor = new Falcon6DriveMotor(
+                Falcon6Motor leftMotor = new Falcon6Motor(
                         leftLogger,
                         leftID,
                         MotorPhase.REVERSE,
                         supplyLimit,
                         statorLimit,
-                        kDriveReduction,
-                        kWheelDiameterM,
+                        // kDriveReduction,
+                        // kWheelDiameterM,
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
-                Talon6DriveEncoder leftEncoder = new Talon6DriveEncoder(
-                        leftLogger, leftMotor, distancePerTurn);
-                leftRoller = new OutboardLinearVelocityServo(leftLogger, leftMotor, leftEncoder);
+                LinearMechanism leftMech = new LinearMechanism(
+                        leftMotor,
+                        new Talon6Encoder(leftLogger, leftMotor),
+                        kDriveReduction,
+                        kWheelDiameterM);
+                leftRoller = new OutboardLinearVelocityServo(leftLogger, leftMech);
 
-                Falcon6DriveMotor rightMotor = new Falcon6DriveMotor(
+                Falcon6Motor rightMotor = new Falcon6Motor(
                         rightLogger,
                         rightID,
                         MotorPhase.FORWARD,
                         supplyLimit,
                         statorLimit,
-                        kDriveReduction,
-                        kWheelDiameterM,
+                        // kDriveReduction,
+                        // kWheelDiameterM,
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
-                Talon6DriveEncoder rightEncoder = new Talon6DriveEncoder(
-                        rightLogger, rightMotor, distancePerTurn);
-                rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMotor, rightEncoder);
+                LinearMechanism rightMech = new LinearMechanism(
+                        rightMotor,
+                        new Talon6Encoder(rightLogger, rightMotor),
+                        kDriveReduction,
+                        kWheelDiameterM);
+                rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMech);
 
+                CANSparkMotor pivotMotor = new NeoCANSparkMotor(parent, pivotID, MotorPhase.FORWARD, 40,
+                        Feedforward100.makeNeo(), new PIDConstants(0, 0, 0));
+                RotaryMechanism pivotMech = new RotaryMechanism(
+                        pivotMotor,
+                        new CANSparkEncoder(parent, pivotMotor),
+                        kPivotReduction);
+                AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(parent, 0, 0.508753,
+                        EncoderDrive.DIRECT);
                 pivotServo = new GravityServo(
-                        new NeoProxy(parent, pivotID, IdleMode.kCoast, 40),
+                        pivotMech,
                         parent.child("Pivot"),
-                        pivotParams,
                         pivotController,
                         profile,
                         period,
-                        new AS5048RotaryPositionSensor(parent, 0, 0.508753, EncoderDrive.DIRECT),
-                        softLimits);
-
+                        encoder);
                 break;
             default:
                 // For testing and simulation
                 leftRoller = ServoFactory.limitedSimulatedVelocityServo(
                         leftLogger,
-                        shooterParams);
+                        shooterParams,
+                        kDriveReduction,
+                        kWheelDiameterM);
                 rightRoller = ServoFactory.limitedSimulatedVelocityServo(
                         rightLogger,
-                        shooterParams);
+                        shooterParams,
+                        kDriveReduction,
+                        kWheelDiameterM);
                 // motor speed is rad/s
-                SimulatedMotor<Angle100> simMotor = new SimulatedMotor<>(parent, 600);
+                SimulatedBareMotor simMotor = new SimulatedBareMotor(parent, 600);
+                RotaryMechanism simMech = new RotaryMechanism(
+                        simMotor,
+                        new SimulatedBareEncoder(parent, simMotor),
+                        165);
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         parent,
-                        simMotor,
-                        165); // see above
-
+                        simMech);
                 pivotServo = new GravityServo(
-                        simMotor,
+                        simMech,
                         parent.child("Pivot"),
-                        pivotParams,
                         pivotController,
                         profile,
                         period,
-                        simEncoder,
-                        softLimits);
-
+                        simEncoder);
         }
     }
 
@@ -181,16 +191,12 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         pivotServo.setPosition(goalRad);
     }
 
-    public OptionalDouble getAngleRad() {
-        return pivotServo.getPositionRad();
-    }
-
     public boolean readyToShoot() {
         return atVelocitySetpoint(false);
     }
 
     public OptionalDouble getPivotPosition() {
-        return pivotServo.getRawPositionRad();
+        return pivotServo.getPositionRad();
     }
 
     public void setPivotPosition(double angleRad) {
