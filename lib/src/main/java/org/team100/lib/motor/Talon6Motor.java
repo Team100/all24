@@ -4,7 +4,6 @@ import java.util.function.DoubleSupplier;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.motor.model.TorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -17,7 +16,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 /**
  * Superclass for TalonFX motors.
  */
-public abstract class Talon6Motor implements BareMotor, TorqueModel {
+public abstract class Talon6Motor implements BareMotor {
     protected final Logger m_logger;
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
@@ -77,18 +76,70 @@ public abstract class Talon6Motor implements BareMotor, TorqueModel {
         log();
     }
 
+    /**
+     * Use VelocityVoltage outboard PID control to hold the given velocity, with
+     * acceleration and torque feedforwards.
+     */
     @Override
     public void setVelocity(double motorRad_S, double motorAccelRad_S2, double motorTorqueNm) {
         double motorRev_S = motorRad_S / (2 * Math.PI);
         double motorRev_S2 = motorAccelRad_S2 / (2 * Math.PI);
-        setMotorVelocity(motorRev_S, motorRev_S2, motorTorqueNm);
+        double currentMotorRev_S = m_velocity.getAsDouble();
+        
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
+        double torqueFFVolts = getTorqueFFVolts(motorTorqueNm);
+        
+        double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
+        
+        // VelocityVoltage has an acceleration field for kA feedforward but we use
+        // arbitrary feedforward for that.
+        Phoenix100.warn(() -> m_motor.setControl(
+                m_velocityVoltage
+                        .withVelocity(motorRev_S)
+                        .withFeedForward(kFFVolts)));
+        
+        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
+        m_logger.logDouble(Level.TRACE, "desired accel (rev_s2)", () -> motorRev_S2);
+        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
+        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
+        m_logger.logDouble(Level.TRACE, "accel feedforward (v)", () -> accelFFVolts);
+        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
+        log();
     }
 
+    /**
+     * Use PositionVoltage outboard PID control to hold the given position, with
+     * velocity and torque feedforwards.
+     * 
+     * Motor revolutions wind up, so setting 0 revs and 1 rev are different.
+     */
     @Override
     public void setPosition(double motorPositionRad, double motorVelocityRad_S, double motorTorqueNm) {
         double motorRev = motorPositionRad / (2 * Math.PI);
         double motorRev_S = motorVelocityRad_S / (2 * Math.PI);
-        setMotorPosition(motorRev, motorRev_S, motorTorqueNm);
+        double currentMotorRev_S = m_velocity.getAsDouble();
+        
+        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
+        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
+        double torqueFFVolts = getTorqueFFVolts(motorTorqueNm);
+        
+        double kFFVolts = frictionFFVolts + velocityFFVolts + torqueFFVolts;
+        
+        // PositionVoltage has a velocity field for kV feedforward but we use arbitrary
+        // feedforward for that.
+        Phoenix100.warn(() -> m_motor.setControl(
+                m_PositionVoltage
+                        .withPosition(motorRev)
+                        .withFeedForward(kFFVolts)));
+        
+        m_logger.logDouble(Level.TRACE, "desired position (rev)", () -> motorRev);
+        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
+        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
+        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
+        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
+        log();
     }
 
     @Override
@@ -104,72 +155,6 @@ public abstract class Talon6Motor implements BareMotor, TorqueModel {
     @Override
     public void close() {
         m_motor.close();
-    }
-
-    /**
-     * Set motor output using motor quantities (rev/s, rev/s^2, Nm).
-     */
-    protected void setMotorVelocity(
-            double motorRev_S,
-            double motorRev_S2,
-            double torqueNm) {
-        double currentMotorRev_S = m_velocity.getAsDouble();
-
-        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
-        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
-        double accelFFVolts = m_ff.accelFFVolts(motorRev_S2);
-        double torqueFFVolts = getTorqueFFVolts(torqueNm);
-
-        double kFFVolts = frictionFFVolts + velocityFFVolts + accelFFVolts + torqueFFVolts;
-
-        // VelocityVoltage has an acceleration field for kA feedforward but we use
-        // arbitrary feedforward for that.
-        Phoenix100.warn(() -> m_motor.setControl(
-                m_velocityVoltage
-                        .withVelocity(motorRev_S)
-                        .withFeedForward(kFFVolts)));
-
-        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
-        m_logger.logDouble(Level.TRACE, "desired accel (rev_s2)", () -> motorRev_S2);
-        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
-        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
-        m_logger.logDouble(Level.TRACE, "accel feedforward (v)", () -> accelFFVolts);
-        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
-        log();
-    }
-
-    /**
-     * Set motor output using motor quantities (rev, Nm).
-     * 
-     * Motor revolutions wind up, so setting 0 revs and 1 rev are different.
-     * 
-     * TODO: this is not done; finish it
-     */
-    protected void setMotorPosition(
-            double motorRev,
-            double motorRev_S,
-            double torqueNm) {
-        double currentMotorRev_S = m_velocity.getAsDouble();
-
-        double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
-        double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
-        double torqueFFVolts = getTorqueFFVolts(torqueNm);
-
-        double kFFVolts = frictionFFVolts + velocityFFVolts + torqueFFVolts;
-
-        // PositionVoltage has a velocity field for kV feedforward but we use arbitrary
-        // feedforward for that.
-        Phoenix100.warn(() -> m_motor.setControl(
-                m_PositionVoltage
-                        .withPosition(motorRev)
-                        .withFeedForward(kFFVolts)));
-
-        m_logger.logDouble(Level.TRACE, "desired position (rev)", () -> motorRev);
-        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
-        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
-        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
-        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
-        log();
     }
 
     /**

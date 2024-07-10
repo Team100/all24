@@ -20,21 +20,22 @@ public interface AngularPositionServo extends Glassy {
      * The measurements here are output measurements, e.g. shaft radians, not motor
      * radians.
      * 
-     * @param goal              radians
+     * @param goalRad           radians
      * @param feedForwardTorque used for gravity compensation
      */
-    void setPosition(double goal, double feedForwardTorqueNm);
-    
+    void setPosition(double goalRad, double feedForwardTorqueNm);
+
     /**
      * The angle measure here *does not* wind up, so 0 and 2pi are the same.
      * 
      * The measurements here are output measurements, e.g. shaft radians, not motor
      * radians.
      * 
-     * @param goal              radians
+     * @param goalRad           radians
+     * @param goalVelocityRad_S rad/s
      * @param feedForwardTorque used for gravity compensation
      */
-    void setPositionWithVelocity(double goal, double goalVelocity, double feedForwardTorqueNm);
+    void setPositionWithVelocity(double goalRad, double goalVelocityRad_S, double feedForwardTorqueNm);
 
     /**
      * @return Current position measurement, radians.

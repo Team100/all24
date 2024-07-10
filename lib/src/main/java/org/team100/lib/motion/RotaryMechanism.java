@@ -18,7 +18,10 @@ public class RotaryMechanism {
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
 
-    public RotaryMechanism(BareMotor motor, IncrementalBareEncoder encoder, double gearRatio) {
+    public RotaryMechanism(
+            BareMotor motor,
+            IncrementalBareEncoder encoder,
+            double gearRatio) {
         m_motor = motor;
         m_encoder = encoder;
         m_gearRatio = gearRatio;
@@ -48,6 +51,20 @@ public class RotaryMechanism {
                 outputTorqueNm / m_gearRatio);
     }
 
+    public OptionalDouble getVelocityRad_S() {
+        OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
+        if (velocityRad_S.isEmpty())
+            return OptionalDouble.empty();
+        return OptionalDouble.of(velocityRad_S.getAsDouble() / m_gearRatio);
+    }
+
+    public OptionalDouble getPositionRad() {
+        OptionalDouble positionRad = m_encoder.getPositionRad();
+        if (positionRad.isEmpty())
+            return OptionalDouble.empty();
+        return OptionalDouble.of(positionRad.getAsDouble() / m_gearRatio);
+    }
+
     public void stop() {
         m_motor.stop();
     }
@@ -63,20 +80,6 @@ public class RotaryMechanism {
     public void setEncoderPosition(double positionRad) {
         double motorPositionRad = positionRad * m_gearRatio;
         m_encoder.setEncoderPositionRad(motorPositionRad);
-    }
-
-    public OptionalDouble getVelocityRad_S() {
-        OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
-        if (velocityRad_S.isEmpty())
-            return OptionalDouble.empty();
-        return OptionalDouble.of(velocityRad_S.getAsDouble() / m_gearRatio);
-    }
-
-    public OptionalDouble getPositionRad() {
-        OptionalDouble positionRad = m_encoder.getPositionRad();
-        if (positionRad.isEmpty())
-            return OptionalDouble.empty();
-        return OptionalDouble.of(positionRad.getAsDouble() / m_gearRatio);
     }
 
 }

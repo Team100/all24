@@ -40,10 +40,6 @@ public class LinearMechanism {
                 outputForceN * m_wheelRadiusM / m_gearRatio);
     }
 
-    // public double getVelocityM_S() {
-    //     return m_motor.getVelocityRad_S() * m_wheelRadiusM / m_gearRatio;
-    // }
-
     public void setPosition(
             double outputPositionM,
             double outputVelocityM_S,
@@ -54,18 +50,18 @@ public class LinearMechanism {
                 outputForceN * m_wheelRadiusM / m_gearRatio);
     }
 
-    public OptionalDouble getPositionM() {
-        OptionalDouble positionRad = m_encoder.getPositionRad();
-        if (positionRad.isEmpty())
-            return OptionalDouble.empty();
-        return OptionalDouble.of(positionRad.getAsDouble() * m_wheelRadiusM / m_gearRatio);
-    }
-
     public OptionalDouble getVelocityM_S() {
         OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
         if (velocityRad_S.isEmpty())
             return OptionalDouble.empty();
         return OptionalDouble.of(velocityRad_S.getAsDouble() * m_wheelRadiusM / m_gearRatio);
+    }
+
+    public OptionalDouble getPositionM() {
+        OptionalDouble positionRad = m_encoder.getPositionRad();
+        if (positionRad.isEmpty())
+            return OptionalDouble.empty();
+        return OptionalDouble.of(positionRad.getAsDouble() * m_wheelRadiusM / m_gearRatio);
     }
 
     public void stop() {

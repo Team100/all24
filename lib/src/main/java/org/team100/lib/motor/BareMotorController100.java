@@ -1,12 +1,11 @@
 package org.team100.lib.motor;
 
-import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 
-public class BareMotorController100 implements BareMotor, GenericTorqueModel {
+public class BareMotorController100 implements BareMotor {
     /**
      * Very much not calibrated.
      * Say 600 rad/s max so 0.0016?
@@ -29,11 +28,6 @@ public class BareMotorController100 implements BareMotor, GenericTorqueModel {
         m_logger.logDouble(Level.TRACE, "duty cycle", () -> output);
     }
 
-    @Override
-    public void stop() {
-        m_motor.stopMotor();
-    }
-
     /**
      * Velocity kV only, ignores accel and torque.
      */
@@ -44,15 +38,32 @@ public class BareMotorController100 implements BareMotor, GenericTorqueModel {
         m_logger.logDouble(Level.TRACE, "duty cycle", () -> motorDutyCycle);
     }
 
-    @Override
-    public void close() {
-        // m_motor.close();
-    }
-
     /** MotorControllers do not support positional control. */
     @Override
     public void setPosition(double position, double velocity, double torque) {
         throw new UnsupportedOperationException();
+    }
+
+    /** placeholder */
+    @Override
+    public double kROhms() {
+        return 0.1;
+    }
+
+    /** placeholder */
+    @Override
+    public double kTNm_amp() {
+        return 0.02;
+    }
+
+    @Override
+    public void stop() {
+        m_motor.stopMotor();
+    }
+
+    @Override
+    public void close() {
+        // m_motor.close();
     }
 
     /** MotorControllers do not support velocity measurement. */

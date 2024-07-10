@@ -20,6 +20,18 @@ public class MockBareMotor implements BareMotor {
         this.position = position;
     }
 
+    /** placeholder */
+    @Override
+    public double kROhms() {
+        return 0.1;
+    }
+
+    /** placeholder */
+    @Override
+    public double kTNm_amp() {
+        return 0.02;
+    }
+
     @Override
     public void stop() {
         this.output = 0;
