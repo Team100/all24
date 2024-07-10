@@ -51,6 +51,27 @@ public interface BareMotor extends Glassy {
 
     // TODO: add position output
 
+    /**
+     * Motor resistance in ohms, used to calculate voltage from desired torque
+     * current.
+     */
+    double kROhms();
+
+    /**
+     * Motor torque constant, kT, in Nm per amp, used to calculate current from
+     * desired torque.
+     */
+    double kTNm_amp();
+
+    /**
+     * Incremental voltage required to produce the given torque, used for
+     * feedforward.
+     */
+    default double getTorqueFFVolts(double torqueNm) {
+        double torqueFFAmps = torqueNm / kTNm_amp();
+        return torqueFFAmps * kROhms();
+    }
+
     void stop();
 
     /**

@@ -1,6 +1,5 @@
 package org.team100.lib.motor;
 
-import org.team100.lib.motor.model.GenericTorqueModel;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -34,7 +33,7 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * Given the issues with feedback, this controller should rely mostly on
  * feedforward.
  */
-public class TalonSRXMotor implements BareMotor, GenericTorqueModel {
+public class TalonSRXMotor implements BareMotor {
     /**
      * There is a planetary gearbox between the motor and the steering gear, and the
      * final is 48/40.
@@ -134,11 +133,6 @@ public class TalonSRXMotor implements BareMotor, GenericTorqueModel {
         log();
     }
 
-    @Override
-    public void stop() {
-        m_motor.stopMotor();
-    }
-
     /**
      * ignores torque feedforward
      */
@@ -165,6 +159,23 @@ public class TalonSRXMotor implements BareMotor, GenericTorqueModel {
     @Override
     public void setPosition(double position, double velocity, double torque) {
         throw new UnsupportedOperationException();
+    }
+
+    /** placeholder */
+    @Override
+    public double kROhms() {
+        return 0.1;
+    }
+
+    /** placeholder */
+    @Override
+    public double kTNm_amp() {
+        return 0.02;
+    }
+
+    @Override
+    public void stop() {
+        m_motor.stopMotor();
     }
 
     @Override
