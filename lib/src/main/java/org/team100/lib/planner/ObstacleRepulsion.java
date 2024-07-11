@@ -3,9 +3,11 @@ package org.team100.lib.planner;
 import java.util.function.Supplier;
 
 import org.team100.lib.field.PracticeField;
+import org.team100.lib.geometry.Ellipse2d;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
-import edu.wpi.first.math.geometry.Ellipse2d;
+// TODO: 2025 version
+// import edu.wpi.first.math.geometry.Ellipse2d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
