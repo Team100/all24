@@ -48,7 +48,7 @@ public class SingleNavXGyro implements Gyro100 {
             default:
                 // this is the version i hacked to avoid wpilib 2025 breaking changes
                 // m_gyro1 = new AHRS100(SerialPort.Port.kUSB, AHRS100.SerialDataType.kProcessedData, kUpdateRateHz);
-                m_gyro1 = new AHRS(SerialPort.Port.kUSB, AHRS100.SerialDataType.kProcessedData, kUpdateRateHz);
+                m_gyro1 = new AHRS(SerialPort.Port.kUSB, AHRS.SerialDataType.kProcessedData, kUpdateRateHz);
         }
         m_gyro1.enableBoardlevelYawReset(true);
 
