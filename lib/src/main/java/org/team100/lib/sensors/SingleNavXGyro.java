@@ -2,12 +2,10 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
+import org.team100.lib.sensors.navx.AHRS100;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
-
-import com.kauailabs.navx.frc.AHRS;
-import com.kauailabs.navx.frc.AHRS.SerialDataType;
 
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SerialPort;
@@ -25,7 +23,7 @@ public class SingleNavXGyro implements Gyro100 {
 
     private static final int kSPIBitRateHz = 500000;
     private final Logger m_logger;
-    private final AHRS m_gyro1;
+    private final AHRS100 m_gyro1;
 
     /**
      * NOTE: the async is just for logging, maybe don't use a whole thread for it.
@@ -39,10 +37,10 @@ public class SingleNavXGyro implements Gyro100 {
             case COMP_BOT:
                 // Jun 29 2024: actually use the specified bit rate
                 // m_gyro1 = new AHRS(SPI.Port.kMXP);
-                m_gyro1 = new AHRS(SPI.Port.kMXP, kSPIBitRateHz, kUpdateRateHz);
+                m_gyro1 = new AHRS100(SPI.Port.kMXP, kSPIBitRateHz, kUpdateRateHz);
                 break;
             default:
-                m_gyro1 = new AHRS(SerialPort.Port.kUSB, SerialDataType.kProcessedData, kUpdateRateHz);
+                m_gyro1 = new AHRS100(SerialPort.Port.kUSB, AHRS100.SerialDataType.kProcessedData, kUpdateRateHz);
         }
         m_gyro1.enableBoardlevelYawReset(true);
 
