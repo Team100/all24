@@ -16,6 +16,7 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -63,23 +64,23 @@ public interface Logger {
         return "/" + root + "/" + leaf;
     }
 
-     void logBoolean(Level level, String leaf, BooleanSupplier val) ;
+    void logBoolean(Level level, String leaf, BooleanSupplier val);
 
-     void logDouble(Level level, String leaf, DoubleSupplier vals) ;
+    void logDouble(Level level, String leaf, DoubleSupplier vals);
 
-     void logInt(Level level, String leaf, IntSupplier vals);
+    void logInt(Level level, String leaf, IntSupplier vals);
 
-     void logFloat(Level level, String leaf, FloatSupplier val) ;
+    void logFloat(Level level, String leaf, FloatSupplier val);
 
-     void logDoubleArray(Level level, String leaf, Supplier<double[]> val) ;
+    void logDoubleArray(Level level, String leaf, Supplier<double[]> val);
 
-     void logDoubleObjArray(Level level, String leaf, Supplier<Double[]> val) ;
+    void logDoubleObjArray(Level level, String leaf, Supplier<Double[]> val);
 
-     void logLong(Level level, String leaf, LongSupplier val);
+    void logLong(Level level, String leaf, LongSupplier val);
 
-     void logString(Level level, String leaf, Supplier<String> val) ;
+    void logString(Level level, String leaf, Supplier<String> val);
 
-     void logStringArray(Level level, String leaf, Supplier<String[]> val) ;
+    void logStringArray(Level level, String leaf, Supplier<String[]> val);
 
     default void logOptionalDouble(Level level, String leaf, Supplier<OptionalDouble> vals) {
         OptionalDouble val = vals.get();
@@ -171,9 +172,11 @@ public interface Logger {
         logState100(level, append(leaf, "theta"), () -> state.get().theta());
     }
 
-    default void logSwerveModulePosition(Level level, String leaf, Supplier<SwerveModulePosition> val) {
+    default void logSwerveModulePosition100(Level level, String leaf, Supplier<SwerveModulePosition100> val) {
         logDouble(level, append(leaf, "distance"), () -> val.get().distanceMeters);
-        logRotation2d(level, append(leaf, "angle"), () -> val.get().angle);
+        if (val.get().angle.isPresent()) {
+            logRotation2d(level, append(leaf, "angle"), () -> val.get().angle.get());
+        }
     }
 
     default void logArmAngles(Level level, String leaf, Supplier<ArmAngles> angles) {

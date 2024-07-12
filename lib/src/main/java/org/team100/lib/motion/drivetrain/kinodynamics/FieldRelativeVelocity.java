@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -11,9 +13,10 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
         return Math.hypot(x, y);
     }
 
-    // TODO: handle the 0,0 case correctly
-    public Rotation2d angle() {
-        return new Rotation2d(x, y);
+    public Optional<Rotation2d> angle() {
+        if (Math.abs(x) < 1e-6 && Math.abs(y) < 1e-6)
+            return Optional.empty();
+        return Optional.of(new Rotation2d(x, y));
     }
 
     public FieldRelativeVelocity plus(FieldRelativeVelocity other) {

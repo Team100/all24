@@ -4,12 +4,12 @@ import java.util.Objects;
 
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /**
  * Represents an odometry record. The record contains the inputs provided as
@@ -28,7 +28,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     final Rotation2d m_gyroAngle;
 
     // The current encoder readings.
-    final SwerveModulePosition[] m_wheelPositions;
+    final SwerveModulePosition100[] m_wheelPositions;
 
     /**
      * Constructs an Interpolation Record with the specified parameters.
@@ -42,11 +42,11 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
             SwerveDriveKinematics100 kinematics,
             SwerveState state,
             Rotation2d gyro,
-            SwerveModulePosition[] wheelPositions) {
+            SwerveModulePosition100[] wheelPositions) {
         m_kinematics = kinematics;
         m_state = state;
         m_gyroAngle = gyro;
-        m_wheelPositions = new SwerveModulePosition[wheelPositions.length];
+        m_wheelPositions = new SwerveModulePosition100[wheelPositions.length];
         for (int i = 0; i < wheelPositions.length; ++i) {
             m_wheelPositions[i] = wheelPositions[i].copy();
         }
@@ -75,7 +75,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
             return endValue;
         }
         // Find the new wheel distances.
-        SwerveModulePosition[] wheelLerp = new SwerveModulePosition[m_wheelPositions.length];
+        SwerveModulePosition100[] wheelLerp = new SwerveModulePosition100[m_wheelPositions.length];
         for (int i = 0; i < m_wheelPositions.length; ++i) {
             wheelLerp[i] = m_wheelPositions[i].interpolate(endValue.m_wheelPositions[i], t);
         }

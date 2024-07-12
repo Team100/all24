@@ -1,6 +1,5 @@
 package org.team100.lib.util;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,14 +32,13 @@ public class NotePicker {
      *               right top IDs are 1-11
      * @return The field relative translation of the note you want to go for
      */
-    public static Optional<Translation2d> autoNotePick(Optional<List<Translation2d>> notes, Translation2d noteID) {
-        if (!notes.isPresent()) {
+    public static Optional<Translation2d> autoNotePick(List<Translation2d> notes, Translation2d noteID) {
+        if (notes.isEmpty()) {
             return Optional.empty();
         }
-        List<Translation2d> Tnotes = notes.get();
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
-        for (Translation2d note : Tnotes) {
+        for (Translation2d note : notes) {
             Translation2d fieldNote = noteID;
             Translation2d difference = note.minus(fieldNote);
             if (Math.abs(difference.getX()) < 1 && Math.abs(difference.getY()) < 1) {
@@ -59,14 +57,13 @@ public class NotePicker {
      * @param noteID the translation of note you want
      * @return The field relative translation of the note you want to go for
      */
-    public static Optional<Translation2d> autoNotePick(Optional<ArrayList<Translation2d>> notes, int noteID) {
-        if (!notes.isPresent()) {
+    public static Optional<Translation2d> autoNotePick(List<Translation2d> notes, int noteID) {
+        if (notes.isEmpty()) {
             return Optional.empty();
         }
-        ArrayList<Translation2d> Tnotes = notes.get();
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
-        for (Translation2d note : Tnotes) {
+        for (Translation2d note : notes) {
             Translation2d fieldNote = autoNotes[noteID - 1];
             Translation2d difference = note.minus(fieldNote);
             if (Math.abs(difference.getX()) < 1 && Math.abs(difference.getY()) < 1) {
@@ -85,14 +82,13 @@ public class NotePicker {
      * @param swervePose the pose of the swerve drivetrain
      * @return The field relative translation of the closest note, or empty if none nearby
      */
-    public static Optional<Translation2d> closestNote(Optional<List<Translation2d>> notes, Pose2d swervePose) {
-        if (!notes.isPresent()) {
+    public static Optional<Translation2d> closestNote(List<Translation2d> notes, Pose2d swervePose) {
+        if (notes.isEmpty()) {
             return Optional.empty();
         }
-        List<Translation2d> Tnotes = notes.get();
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
-        for (Translation2d note : Tnotes) {
+        for (Translation2d note : notes) {
             double difference = Math.abs(note.minus(swervePose.getTranslation()).getNorm());
             if (difference < bestNote) {
                 bestNote = difference;

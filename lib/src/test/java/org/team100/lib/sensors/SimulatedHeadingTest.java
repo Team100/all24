@@ -6,13 +6,13 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 class SimulatedHeadingTest implements Timeless {
     private static final double kDelta = 0.001;
@@ -31,7 +31,7 @@ class SimulatedHeadingTest implements Timeless {
     void testTranslation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
         SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l);
-        SwerveModulePosition[] p = c.positions();
+        SwerveModulePosition100[] p = c.positions();
         assertEquals(0, p[0].distanceMeters, kDelta);
         assertEquals(0, p[1].distanceMeters, kDelta);
         assertEquals(0, p[2].distanceMeters, kDelta);
@@ -92,10 +92,10 @@ class SimulatedHeadingTest implements Timeless {
         assertEquals(1.268, states[1].speedMetersPerSecond, kDelta);
         assertEquals(0.802, states[2].speedMetersPerSecond, kDelta);
         assertEquals(1.281, states[3].speedMetersPerSecond, kDelta);
-        assertEquals(0.279, states[0].angle.getRadians(), kDelta);
-        assertEquals(0.170, states[1].angle.getRadians(), kDelta);
-        assertEquals(-0.363, states[2].angle.getRadians(), kDelta);
-        assertEquals(-0.224, states[3].angle.getRadians(), kDelta);
+        assertEquals(0.279, states[0].angle.get().getRadians(), kDelta);
+        assertEquals(0.170, states[1].angle.get().getRadians(), kDelta);
+        assertEquals(-0.363, states[2].angle.get().getRadians(), kDelta);
+        assertEquals(-0.224, states[3].angle.get().getRadians(), kDelta);
 
         SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l);
         SimulatedHeading h = new SimulatedHeading(l, c);
@@ -114,10 +114,10 @@ class SimulatedHeadingTest implements Timeless {
         assertEquals(1.268, states2[1].speedMetersPerSecond, kDelta);
         assertEquals(0.802, states2[2].speedMetersPerSecond, kDelta);
         assertEquals(1.281, states2[3].speedMetersPerSecond, kDelta);
-        assertEquals(0.279, states2[0].angle.getRadians(), kDelta);
-        assertEquals(0.170, states2[1].angle.getRadians(), kDelta);
-        assertEquals(-0.363, states2[2].angle.getRadians(), kDelta);
-        assertEquals(-0.224, states2[3].angle.getRadians(), kDelta);
+        assertEquals(0.279, states2[0].angle.get().getRadians(), kDelta);
+        assertEquals(0.170, states2[1].angle.get().getRadians(), kDelta);
+        assertEquals(-0.363, states2[2].angle.get().getRadians(), kDelta);
+        assertEquals(-0.224, states2[3].angle.get().getRadians(), kDelta);
 
         // we wanted to turn 1 rad/s for 0.4s so this is close.
         assertEquals(0.42, h.getHeadingNWU().getRadians(), 0.03);

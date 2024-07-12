@@ -1,9 +1,12 @@
 package org.team100.lib.visualization;
 
+import java.util.Optional;
+
 import org.team100.lib.motion.drivetrain.module.SwerveModule100;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -29,27 +32,22 @@ public class SwerveModuleVisualization {
         // the root name cannot have slashes in it.
         MechanismRoot2d root = m_mechanism.getRoot(name, 50, 50);
         m_steer = new MechanismLigament2d("steer",
-                50, angle(), 3, new Color8Bit(Color.kWhite));
+                50, 0, 3, new Color8Bit(Color.kWhite));
         m_drive = new MechanismLigament2d("drive",
-                speed(), angle(), 10, new Color8Bit(Color.kOrange));
+                0, 0, 10, new Color8Bit(Color.kOrange));
         root.append(m_drive);
         root.append(m_steer);
         SmartDashboard.putData("Swerve Viz/" + name, m_mechanism);
     }
 
     public void viz() {
-        if (Telemetry.get().getLevel().admit(Level.TRACE)) {
-            m_drive.setAngle(angle());
-            m_drive.setLength(speed());
-            m_steer.setAngle(angle());
+        Optional<Rotation2d> angle = m_module.getPosition().angle;
+        if (Telemetry.get().getLevel().admit(Level.TRACE) && angle.isPresent()) {
+            m_drive.setAngle(angle.get().getDegrees());
+            m_drive.setLength(m_module.getState().speedMetersPerSecond * 10);
+            m_steer.setAngle(angle.get().getDegrees());
         }
     }
 
-    private double angle() {
-        return m_module.getPosition().angle.getDegrees();
-    }
 
-    private double speed() {
-        return m_module.getState().speedMetersPerSecond * 10;
-    }
 }

@@ -1,6 +1,7 @@
 package org.team100.lib.swerve;
 
-import org.team100.lib.geometry.GeometryUtil;
+import java.util.Optional;
+
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -12,15 +13,15 @@ public class SwerveSetpoint {
     private final ChassisSpeeds m_ChassisSpeeds;
     private final SwerveModuleState100[] m_ModuleStates;
 
-    /** New setpoint with zero speed and zero states */
+    /** New setpoint with zero speed and indeterminate steering */
     public SwerveSetpoint() {
         this(
                 new ChassisSpeeds(),
                 new SwerveModuleState100[] {
-                        new SwerveModuleState100(0, GeometryUtil.kRotationZero),
-                        new SwerveModuleState100(0, GeometryUtil.kRotationZero),
-                        new SwerveModuleState100(0, GeometryUtil.kRotationZero),
-                        new SwerveModuleState100(0, GeometryUtil.kRotationZero)
+                        new SwerveModuleState100(0, Optional.empty()),
+                        new SwerveModuleState100(0, Optional.empty()),
+                        new SwerveModuleState100(0, Optional.empty()),
+                        new SwerveModuleState100(0, Optional.empty())
                 });
     }
 

@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain.manual;
 
+import java.util.Optional;
+
 import org.team100.lib.commands.drivetrain.ModuleStateDriver;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -32,10 +34,10 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
     @Override
     public SwerveModuleState100[] apply(DriverControl.Velocity input) {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
-        Rotation2d angle = Rotation2d.fromRadians(Math.PI * input.theta());
+        Optional<Rotation2d> angle = Optional.of(Rotation2d.fromRadians(Math.PI * input.theta()));
         double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.x();
-        m_logger.logDouble(Level.TRACE, "speed m_s", ()->speedM_S);
-        m_logger.logDouble(Level.TRACE, "angle rad", ()->angle.getRadians());
+        m_logger.logDouble(Level.TRACE, "speed m_s", () -> speedM_S);
+        m_logger.logRotation2d(Level.TRACE, "angle rad", angle::get);
         return new SwerveModuleState100[] {
                 new SwerveModuleState100(speedM_S, angle),
                 new SwerveModuleState100(speedM_S, angle),

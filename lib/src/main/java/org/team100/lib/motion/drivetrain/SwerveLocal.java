@@ -1,5 +1,7 @@
 package org.team100.lib.motion.drivetrain;
 
+import java.util.Optional;
+
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
@@ -7,6 +9,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -18,7 +21,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /**
  * The swerve drive in local, or robot, reference frame. This class knows
@@ -26,23 +28,23 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
  */
 public class SwerveLocal implements Glassy, SwerveLocalObserver {
     private static final SwerveModuleState100[] states0 = new SwerveModuleState100[] {
-            new SwerveModuleState100(0, GeometryUtil.kRotationZero),
-            new SwerveModuleState100(0, GeometryUtil.kRotationZero),
-            new SwerveModuleState100(0, GeometryUtil.kRotationZero),
-            new SwerveModuleState100(0, GeometryUtil.kRotationZero)
+            new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero)),
+            new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero)),
+            new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero)),
+            new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero))
     };
     private static final SwerveModuleState100[] states90 = new SwerveModuleState100[] {
-            new SwerveModuleState100(0, new Rotation2d(Math.PI / 2)),
-            new SwerveModuleState100(0, new Rotation2d(Math.PI / 2)),
-            new SwerveModuleState100(0, new Rotation2d(Math.PI / 2)),
-            new SwerveModuleState100(0, new Rotation2d(Math.PI / 2))
+            new SwerveModuleState100(0, Optional.of(new Rotation2d(Math.PI / 2))),
+            new SwerveModuleState100(0, Optional.of(new Rotation2d(Math.PI / 2))),
+            new SwerveModuleState100(0, Optional.of(new Rotation2d(Math.PI / 2))),
+            new SwerveModuleState100(0, Optional.of(new Rotation2d(Math.PI / 2)))
     };
     private static final SwerveModuleState100[] statesX = new SwerveModuleState100[] {
             // note range is [-pi,pi]
-            new SwerveModuleState100(0, new Rotation2d(Math.PI / 4)),
-            new SwerveModuleState100(0, new Rotation2d(-1 * Math.PI / 4)),
-            new SwerveModuleState100(0, new Rotation2d(3 * Math.PI / 4)),
-            new SwerveModuleState100(0, new Rotation2d(-3 * Math.PI / 4))
+            new SwerveModuleState100(0, Optional.of(new Rotation2d(Math.PI / 4))),
+            new SwerveModuleState100(0, Optional.of(new Rotation2d(-1 * Math.PI / 4))),
+            new SwerveModuleState100(0, Optional.of(new Rotation2d(3 * Math.PI / 4))),
+            new SwerveModuleState100(0, Optional.of(new Rotation2d(-3 * Math.PI / 4)))
     };
 
     private final Logger m_logger;
@@ -99,8 +101,8 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState100[] swerveModuleStates = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
                 kDtSec);
-        for (int i =0; i < swerveModuleStates.length; i++) {
-            if (swerveModuleStates[i]== null) {
+        for (int i = 0; i < swerveModuleStates.length; i++) {
+            if (swerveModuleStates[i] == null) {
                 swerveModuleStates[i] = prevSetpoint.getModuleStates()[i];
             }
             swerveModuleStates[i].speedMetersPerSecond = 0;
@@ -109,10 +111,10 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         // previous setpoint should be at rest with the current states
         prevSetpoint = new SwerveSetpoint(new ChassisSpeeds(), swerveModuleStates);
         m_swerveKinodynamics.resetHeadings(
-                swerveModuleStates[0].angle,
-                swerveModuleStates[1].angle,
-                swerveModuleStates[2].angle,
-                swerveModuleStates[3].angle);
+                swerveModuleStates[0].angle.orElse(null),
+                swerveModuleStates[1].angle.orElse(null),
+                swerveModuleStates[2].angle.orElse(null),
+                swerveModuleStates[3].angle.orElse(null));
         return Util.all(atGoal());
     }
 
@@ -150,10 +152,11 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
      */
     public void setRawModuleStates(SwerveModuleState100[] targetModuleStates) {
         m_modules.setRawDesiredStates(targetModuleStates);
-        m_swerveKinodynamics.resetHeadings(targetModuleStates[0].angle,
-                targetModuleStates[1].angle,
-                targetModuleStates[2].angle,
-                targetModuleStates[3].angle);
+        m_swerveKinodynamics.resetHeadings(
+                targetModuleStates[0].angle.orElse(null),
+                targetModuleStates[1].angle.orElse(null),
+                targetModuleStates[2].angle.orElse(null),
+                targetModuleStates[3].angle.orElse(null));
     }
 
     ////////////////////////////////////////////////////////////////////
@@ -176,7 +179,7 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
     }
 
     @Override
-    public SwerveModulePosition[] positions() {
+    public SwerveModulePosition100[] positions() {
         return m_modules.positions();
     }
 
@@ -207,10 +210,11 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState100[] states;
         if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
-            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, prevSetpoint.getChassisSpeeds(), prevSetpoint.getModuleStates(),gyroRateRad_S,
+            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, prevSetpoint.getChassisSpeeds(),
+                    prevSetpoint.getModuleStates(), gyroRateRad_S,
                     kDtSec);
         } else {
-            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S, 
+            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
                     kDtSec);
         }
         setModuleStates(states);
@@ -249,7 +253,8 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
     /** Desaturation mutates states. */
     private void setModuleStates(SwerveModuleState100[] states) {
         SwerveDriveKinematics100.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S(),
-                m_swerveKinodynamics.getMaxDriveAccelerationM_S2(),m_swerveKinodynamics.getMaxDriveDecelerationM_S2(), m_swerveKinodynamics.getMaxSteeringVelocityRad_S());
+                m_swerveKinodynamics.getMaxDriveAccelerationM_S2(), m_swerveKinodynamics.getMaxDriveDecelerationM_S2(),
+                m_swerveKinodynamics.getMaxSteeringVelocityRad_S());
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);
     }

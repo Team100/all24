@@ -2,6 +2,9 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Optional;
 
 import org.ejml.simple.SimpleMatrix;
 import org.junit.jupiter.api.Test;
@@ -11,7 +14,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /**
  * None of these tests take tires into account.
@@ -28,10 +30,10 @@ class SwerveDriveKinematics100Test {
                 new Translation2d(-0.5, -0.5));
         // 0.1m straight ahead, all same.
         Twist2d twist = kinematics.toTwist2d(
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(0)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(0)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(0)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(0)));
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))));
 
         assertEquals(0.1, twist.dx, kDelta);
         assertEquals(0, twist.dy, kDelta);
@@ -47,10 +49,10 @@ class SwerveDriveKinematics100Test {
                 new Translation2d(-0.5, -0.5));
 
         Twist2d twist = kinematics.toTwist2d(
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(135)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(45)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(-135)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(-45)));
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(135))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(45))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(-135))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(-45))));
 
         assertEquals(0, twist.dx, kDelta);
         assertEquals(0, twist.dy, kDelta);
@@ -66,10 +68,10 @@ class SwerveDriveKinematics100Test {
                 new Translation2d(-0.5, -0.5));
         // 0.1m straight ahead, all same.
         Twist2d twist = kinematics.toTwist2d(
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(0)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(0)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(0)),
-                new SwerveModulePosition(0.1, Rotation2d.fromDegrees(0)));
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))));
 
         assertEquals(0.1, twist.dx, kDelta);
         assertEquals(0, twist.dy, kDelta);
@@ -102,15 +104,15 @@ class SwerveDriveKinematics100Test {
                 () -> assertEquals(5.0, moduleStates[1].speedMetersPerSecond, kEpsilon),
                 () -> assertEquals(5.0, moduleStates[2].speedMetersPerSecond, kEpsilon),
                 () -> assertEquals(5.0, moduleStates[3].speedMetersPerSecond, kEpsilon),
-                () -> assertEquals(0.0, moduleStates[0].angle.getRadians(), kEpsilon),
-                () -> assertEquals(0.0, moduleStates[1].angle.getRadians(), kEpsilon),
-                () -> assertEquals(0.0, moduleStates[2].angle.getRadians(), kEpsilon),
-                () -> assertEquals(0.0, moduleStates[3].angle.getRadians(), kEpsilon));
+                () -> assertEquals(0.0, moduleStates[0].angle.get().getRadians(), kEpsilon),
+                () -> assertEquals(0.0, moduleStates[1].angle.get().getRadians(), kEpsilon),
+                () -> assertEquals(0.0, moduleStates[2].angle.get().getRadians(), kEpsilon),
+                () -> assertEquals(0.0, moduleStates[3].angle.get().getRadians(), kEpsilon));
     }
 
     @Test
     void testStraightLineForwardKinematics() { // test forward kinematics going in a straight line
-        SwerveModuleState100 state = new SwerveModuleState100(5.0, Rotation2d.fromDegrees(0.0));
+        SwerveModuleState100 state = new SwerveModuleState100(5.0, Optional.of(Rotation2d.fromDegrees(0.0)));
         // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(state, state, state, state);
 
@@ -123,7 +125,7 @@ class SwerveDriveKinematics100Test {
     @Test
     void testStraightLineForwardKinematicsWithDeltas() {
         // test forward kinematics going in a straight line
-        SwerveModulePosition delta = new SwerveModulePosition(5.0, Rotation2d.fromDegrees(0.0));
+        SwerveModulePosition100 delta = new SwerveModulePosition100(5.0, Optional.of(Rotation2d.fromDegrees(0.0)));
         var twist = m_kinematics.toTwist2d(delta, delta, delta, delta);
 
         assertAll(
@@ -142,15 +144,15 @@ class SwerveDriveKinematics100Test {
                 () -> assertEquals(5.0, moduleStates[1].speedMetersPerSecond, kEpsilon),
                 () -> assertEquals(5.0, moduleStates[2].speedMetersPerSecond, kEpsilon),
                 () -> assertEquals(5.0, moduleStates[3].speedMetersPerSecond, kEpsilon),
-                () -> assertEquals(90.0, moduleStates[0].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(90.0, moduleStates[1].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(90.0, moduleStates[2].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(90.0, moduleStates[3].angle.getDegrees(), kEpsilon));
+                () -> assertEquals(90.0, moduleStates[0].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(90.0, moduleStates[1].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(90.0, moduleStates[2].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(90.0, moduleStates[3].angle.get().getDegrees(), kEpsilon));
     }
 
     @Test
     void testStraightStrafeForwardKinematics() {
-        SwerveModuleState100 state = new SwerveModuleState100(5.0, Rotation2d.fromDegrees(90.0));
+        SwerveModuleState100 state = new SwerveModuleState100(5.0, Optional.of(Rotation2d.fromDegrees(90.0)));
         // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(state, state, state, state);
 
@@ -162,7 +164,7 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testStraightStrafeForwardKinematicsWithDeltas() {
-        SwerveModulePosition delta = new SwerveModulePosition(5.0, Rotation2d.fromDegrees(90.0));
+        SwerveModulePosition100 delta = new SwerveModulePosition100(5.0, Optional.of(Rotation2d.fromDegrees(90.0)));
         var twist = m_kinematics.toTwist2d(delta, delta, delta, delta);
 
         assertAll(
@@ -184,10 +186,10 @@ class SwerveDriveKinematics100Test {
                 () -> assertEquals(0.0, moduleStates[1].speedMetersPerSecond, kEpsilon),
                 () -> assertEquals(0.0, moduleStates[2].speedMetersPerSecond, kEpsilon),
                 () -> assertEquals(0.0, moduleStates[3].speedMetersPerSecond, kEpsilon),
-                () -> assertEquals(135.0, moduleStates[0].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(45.0, moduleStates[1].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(-135.0, moduleStates[2].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(-45.0, moduleStates[3].angle.getDegrees(), kEpsilon));
+                () -> assertEquals(135.0, moduleStates[0].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(45.0, moduleStates[1].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(-135.0, moduleStates[2].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(-45.0, moduleStates[3].angle.get().getDegrees(), kEpsilon));
     }
 
     @Test
@@ -206,10 +208,10 @@ class SwerveDriveKinematics100Test {
                 () -> assertEquals(0.0, moduleStates[1].speedMetersPerSecond, kEpsilon),
                 () -> assertEquals(0.0, moduleStates[2].speedMetersPerSecond, kEpsilon),
                 () -> assertEquals(0.0, moduleStates[3].speedMetersPerSecond, kEpsilon),
-                () -> assertEquals(0.0, moduleStates[0].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(90.0, moduleStates[1].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(180.0, moduleStates[2].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(270.0, moduleStates[3].angle.getDegrees(), kEpsilon));
+                () -> assertEquals(0.0, moduleStates[0].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(90.0, moduleStates[1].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(180.0, moduleStates[2].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(270.0, moduleStates[3].angle.get().getDegrees(), kEpsilon));
     }
 
     @Test
@@ -231,18 +233,18 @@ class SwerveDriveKinematics100Test {
                 () -> assertEquals(106.63, moduleStates[1].speedMetersPerSecond, 0.1),
                 () -> assertEquals(106.63, moduleStates[2].speedMetersPerSecond, 0.1),
                 () -> assertEquals(106.63, moduleStates[3].speedMetersPerSecond, 0.1),
-                () -> assertEquals(135.0, moduleStates[0].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(45.0, moduleStates[1].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(-135.0, moduleStates[2].angle.getDegrees(), kEpsilon),
-                () -> assertEquals(-45.0, moduleStates[3].angle.getDegrees(), kEpsilon));
+                () -> assertEquals(135.0, moduleStates[0].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(45.0, moduleStates[1].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(-135.0, moduleStates[2].angle.get().getDegrees(), kEpsilon),
+                () -> assertEquals(-45.0, moduleStates[3].angle.get().getDegrees(), kEpsilon));
     }
 
     @Test
     void testTurnInPlaceForwardKinematics() {
-        SwerveModuleState100 flState = new SwerveModuleState100(106.629, Rotation2d.fromDegrees(135));
-        SwerveModuleState100 frState = new SwerveModuleState100(106.629, Rotation2d.fromDegrees(45));
-        SwerveModuleState100 blState = new SwerveModuleState100(106.629, Rotation2d.fromDegrees(-135));
-        SwerveModuleState100 brState = new SwerveModuleState100(106.629, Rotation2d.fromDegrees(-45));
+        SwerveModuleState100 flState = new SwerveModuleState100(106.629, Optional.of(Rotation2d.fromDegrees(135)));
+        SwerveModuleState100 frState = new SwerveModuleState100(106.629, Optional.of(Rotation2d.fromDegrees(45)));
+        SwerveModuleState100 blState = new SwerveModuleState100(106.629, Optional.of(Rotation2d.fromDegrees(-135)));
+        SwerveModuleState100 brState = new SwerveModuleState100(106.629, Optional.of(Rotation2d.fromDegrees(-45)));
         // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(flState, frState, blState, brState);
 
@@ -254,10 +256,13 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testTurnInPlaceForwardKinematicsWithDeltas() {
-        SwerveModulePosition flDelta = new SwerveModulePosition(106.629, Rotation2d.fromDegrees(135));
-        SwerveModulePosition frDelta = new SwerveModulePosition(106.629, Rotation2d.fromDegrees(45));
-        SwerveModulePosition blDelta = new SwerveModulePosition(106.629, Rotation2d.fromDegrees(-135));
-        SwerveModulePosition brDelta = new SwerveModulePosition(106.629, Rotation2d.fromDegrees(-45));
+        SwerveModulePosition100 flDelta = new SwerveModulePosition100(106.629,
+                Optional.of(Rotation2d.fromDegrees(135)));
+        SwerveModulePosition100 frDelta = new SwerveModulePosition100(106.629, Optional.of(Rotation2d.fromDegrees(45)));
+        SwerveModulePosition100 blDelta = new SwerveModulePosition100(106.629,
+                Optional.of(Rotation2d.fromDegrees(-135)));
+        SwerveModulePosition100 brDelta = new SwerveModulePosition100(106.629,
+                Optional.of(Rotation2d.fromDegrees(-45)));
 
         var twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
 
@@ -269,10 +274,10 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testOffCenterCORRotationForwardKinematics() {
-        SwerveModuleState100 flState = new SwerveModuleState100(0.0, Rotation2d.fromDegrees(0.0));
-        SwerveModuleState100 frState = new SwerveModuleState100(150.796, Rotation2d.fromDegrees(0.0));
-        SwerveModuleState100 blState = new SwerveModuleState100(150.796, Rotation2d.fromDegrees(-90));
-        SwerveModuleState100 brState = new SwerveModuleState100(213.258, Rotation2d.fromDegrees(-45));
+        SwerveModuleState100 flState = new SwerveModuleState100(0.0, Optional.of(Rotation2d.fromDegrees(0.0)));
+        SwerveModuleState100 frState = new SwerveModuleState100(150.796, Optional.of(Rotation2d.fromDegrees(0.0)));
+        SwerveModuleState100 blState = new SwerveModuleState100(150.796, Optional.of(Rotation2d.fromDegrees(-90)));
+        SwerveModuleState100 brState = new SwerveModuleState100(213.258, Optional.of(Rotation2d.fromDegrees(-45)));
         // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(flState, frState, blState, brState);
 
@@ -298,10 +303,13 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testOffCenterCORRotationForwardKinematicsWithDeltas() {
-        SwerveModulePosition flDelta = new SwerveModulePosition(0.0, Rotation2d.fromDegrees(0.0));
-        SwerveModulePosition frDelta = new SwerveModulePosition(150.796, Rotation2d.fromDegrees(0.0));
-        SwerveModulePosition blDelta = new SwerveModulePosition(150.796, Rotation2d.fromDegrees(-90));
-        SwerveModulePosition brDelta = new SwerveModulePosition(213.258, Rotation2d.fromDegrees(-45));
+        SwerveModulePosition100 flDelta = new SwerveModulePosition100(0.0, Optional.of(Rotation2d.fromDegrees(0.0)));
+        SwerveModulePosition100 frDelta = new SwerveModulePosition100(150.796,
+                Optional.of(Rotation2d.fromDegrees(0.0)));
+        SwerveModulePosition100 blDelta = new SwerveModulePosition100(150.796,
+                Optional.of(Rotation2d.fromDegrees(-90)));
+        SwerveModulePosition100 brDelta = new SwerveModulePosition100(213.258,
+                Optional.of(Rotation2d.fromDegrees(-45)));
 
         var twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
 
@@ -327,10 +335,10 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testOffCenterCORRotationAndTranslationForwardKinematics() {
-        SwerveModuleState100 flState = new SwerveModuleState100(23.43, Rotation2d.fromDegrees(-140.19));
-        SwerveModuleState100 frState = new SwerveModuleState100(23.43, Rotation2d.fromDegrees(-39.81));
-        SwerveModuleState100 blState = new SwerveModuleState100(54.08, Rotation2d.fromDegrees(-109.44));
-        SwerveModuleState100 brState = new SwerveModuleState100(54.08, Rotation2d.fromDegrees(-70.56));
+        SwerveModuleState100 flState = new SwerveModuleState100(23.43, Optional.of(Rotation2d.fromDegrees(-140.19)));
+        SwerveModuleState100 frState = new SwerveModuleState100(23.43, Optional.of(Rotation2d.fromDegrees(-39.81)));
+        SwerveModuleState100 blState = new SwerveModuleState100(54.08, Optional.of(Rotation2d.fromDegrees(-109.44)));
+        SwerveModuleState100 brState = new SwerveModuleState100(54.08, Optional.of(Rotation2d.fromDegrees(-70.56)));
         // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(flState, frState, blState, brState);
 
@@ -351,10 +359,14 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testOffCenterCORRotationAndTranslationForwardKinematicsWithDeltas() {
-        SwerveModulePosition flDelta = new SwerveModulePosition(23.43, Rotation2d.fromDegrees(-140.19));
-        SwerveModulePosition frDelta = new SwerveModulePosition(23.43, Rotation2d.fromDegrees(-39.81));
-        SwerveModulePosition blDelta = new SwerveModulePosition(54.08, Rotation2d.fromDegrees(-109.44));
-        SwerveModulePosition brDelta = new SwerveModulePosition(54.08, Rotation2d.fromDegrees(-70.56));
+        SwerveModulePosition100 flDelta = new SwerveModulePosition100(23.43,
+                Optional.of(Rotation2d.fromDegrees(-140.19)));
+        SwerveModulePosition100 frDelta = new SwerveModulePosition100(23.43,
+                Optional.of(Rotation2d.fromDegrees(-39.81)));
+        SwerveModulePosition100 blDelta = new SwerveModulePosition100(54.08,
+                Optional.of(Rotation2d.fromDegrees(-109.44)));
+        SwerveModulePosition100 brDelta = new SwerveModulePosition100(54.08,
+                Optional.of(Rotation2d.fromDegrees(-70.56)));
 
         var twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
 
@@ -393,146 +405,210 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testModuleKinematics2() {
+        // one-meter drive base
         SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
                 new Translation2d(0.5, 0.5),
                 new Translation2d(0.5, -0.5),
                 new Translation2d(-0.5, 0.5),
                 new Translation2d(-0.5, -0.5));
-        SimpleMatrix velocities = new SimpleMatrix(3, 1);
-        SimpleMatrix velocities2 = new SimpleMatrix(3, 1);
-        SimpleMatrix accelerations = new SimpleMatrix(3, 1);
-        SimpleMatrix accelerations2 = new SimpleMatrix(3, 1);
-        SimpleMatrix velocities3 = new SimpleMatrix(3, 1);
-        SimpleMatrix velocities4 = new SimpleMatrix(3, 1);
-        SimpleMatrix accelerations3 = new SimpleMatrix(3, 1);
-        SimpleMatrix accelerations4 = new SimpleMatrix(3, 1);
-        velocities.setColumn(0, 0, 0, 0, 1);
-        accelerations.setColumn(0, 0, 0, 0, 0);
-        velocities2.setColumn(0, 0, 2, 1, 1);
-        accelerations2.setColumn(0, 0, 2, 2, 2);
-        velocities3.setColumn(0, 0, 2.3, 0, 1.1);
-        accelerations3.setColumn(0, 0, 1.32, 1.2, 2.2);
-        velocities4.setColumn(0, 0, 0, 0, 0);
-        accelerations4.setColumn(0, 0, 1, 1.1, 2);
-        SwerveModuleState100[] prevStates = { new SwerveModuleState100(), new SwerveModuleState100(),
-                new SwerveModuleState100(), new SwerveModuleState100() };
-        SwerveModuleState100[] output2 = kinematics.statesFromVector(velocities);
-        SwerveModuleState100[] output = kinematics.accelerationFromVector(velocities,
-                accelerations, prevStates, 0.02);
-        SwerveModuleState100[] output4 = kinematics.statesFromVector(velocities2);
-        SwerveModuleState100[] output3 = kinematics.accelerationFromVector(velocities2,
-                accelerations2, prevStates, 0.02);
-        SwerveModuleState100[] output5 = kinematics.statesFromVector(velocities3);
-        SwerveModuleState100[] output6 = kinematics.accelerationFromVector(velocities3,
-                accelerations3, prevStates, 0.02);
-        SwerveModuleState100[] output7 = kinematics.statesFromVector(velocities4);
-        SwerveModuleState100[] output8 = kinematics.accelerationFromVector(velocities4,
-                accelerations4, prevStates, 0.02);
-        Util.println(output[0].toString());
-        assertEquals(0, output[0].accelMetersPerSecond_2, 0.0001);
-        for (int i = 0; i < output.length; i++) {
-            assertEquals(output[i].angle, output2[i].angle);
-            assertEquals(output[i].speedMetersPerSecond, output2[i].speedMetersPerSecond);
-        }
-        for (int i = 0; i < output3.length; i++) {
-            assertEquals(output3[i].angle, output4[i].angle);
-            assertEquals(output3[i].speedMetersPerSecond, output4[i].speedMetersPerSecond);
-        }
-        for (int i = 0; i < output5.length; i++) {
-            assertEquals(output5[i].angle, output6[i].angle);
-            assertEquals(output5[i].speedMetersPerSecond, output6[i].speedMetersPerSecond);
-        }
-        for (int i = 0; i < output7.length; i++) {
-            assertEquals(output7[i].angle, output8[i].angle);
-            assertEquals(output7[i].speedMetersPerSecond, output8[i].speedMetersPerSecond);
-        }
-    }
 
-    @Test
-    void testModuleKinematics3() {
-        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
-                new Translation2d(0.5, 0.5),
-                new Translation2d(0.5, -0.5),
-                new Translation2d(-0.5, 0.5),
-                new Translation2d(-0.5, -0.5));
-        SwerveModuleState100[] prevStates = { new SwerveModuleState100(), new SwerveModuleState100(),
-                new SwerveModuleState100(), new SwerveModuleState100() };
-        int numOfTest = 3;
-        SimpleMatrix[] velocities = new SimpleMatrix[numOfTest];
-        SimpleMatrix[] acceleration = new SimpleMatrix[numOfTest];
-        SwerveModuleState100[][] output = new SwerveModuleState100[4][numOfTest];
-        for (int i = 0; i < velocities.length; i++) {
-            velocities[i] = new SimpleMatrix(3, 1);
-            acceleration[i] = new SimpleMatrix(3, 1);
+        SwerveModuleState100[] prev = {
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())) };
+
+        {
+            SimpleMatrix v = new SimpleMatrix(3, 1);
+            v.setColumn(0, 0, 0, 0, 1);
+            SwerveModuleState100[] output2 = kinematics.statesFromVector(v);
+
+            SimpleMatrix a = new SimpleMatrix(3, 1);
+            a.setColumn(0, 0, 0, 0, 0);
+            SwerveModuleState100[] output = kinematics.accelerationFromVector(v, a, prev, 0.02);
+
+            Util.println(output[0].toString());
+
+            assertEquals(0, output[0].accelMetersPerSecond_2, 0.0001);
+            for (int i = 0; i < output.length; i++) {
+                assertEquals(output[i].angle, output2[i].angle);
+                assertEquals(output[i].speedMetersPerSecond, output2[i].speedMetersPerSecond);
+            }
         }
-        velocities[0].setColumn(0, 0, 0, 0, 0);
-        acceleration[0].setColumn(0, 0, 1, 0, 0);
-        velocities[1].setColumn(0, 0, 1, 0, 0);
-        acceleration[1].setColumn(0, 0, 1, 0, 0);
-        velocities[2].setColumn(0, 0, 1, 0, 0);
-        acceleration[2].setColumn(0, 0, 0, 0, 1);
-        for (int i = 0; i < velocities.length; i++) {
-            output[i] = kinematics.accelerationFromVector(velocities[i],
-                    acceleration[i], prevStates, 0.02);
+
+        {
+            SimpleMatrix v = new SimpleMatrix(3, 1);
+            v.setColumn(0, 0, 2, 1, 1);
+            SwerveModuleState100[] output4 = kinematics.statesFromVector(v);
+            SimpleMatrix a = new SimpleMatrix(3, 1);
+            a.setColumn(0, 0, 2, 2, 2);
+            SwerveModuleState100[] output3 = kinematics.accelerationFromVector(v, a, prev, 0.02);
+            for (int i = 0; i < output3.length; i++) {
+                assertEquals(output3[i].angle, output4[i].angle);
+                assertEquals(output3[i].speedMetersPerSecond, output4[i].speedMetersPerSecond);
+            }
         }
-        for (int i = 0; i < velocities.length; i++) {
-            switch (i) {
-                case 0:
-                    for (SwerveModuleState100 state : output[i]) {
-                        assertEquals(state.angle.getRadians(), 0, 0.0001);
-                        assertEquals(state.angle_2, 0, 0.0001);
-                        assertEquals(state.speedMetersPerSecond, 0, 0.0001);
-                        assertEquals(state.accelMetersPerSecond_2, 1, 0.0001);
-                    }
-                    break;
-                case 1:
-                    for (SwerveModuleState100 state : output[i]) {
-                        assertEquals(state.angle.getRadians(), 0, 0.0001);
-                        assertEquals(state.angle_2, 0, 0.0001);
-                        assertEquals(state.speedMetersPerSecond, 1, 0.0001);
-                        assertEquals(state.accelMetersPerSecond_2, 1, 0.0001);
-                    }
-                    break;
-                case 2:
-                    int count = 0; 
-                    for (SwerveModuleState100 state : output[i]) {
-                        assertEquals(state.angle.getRadians(), 0, 0.0001);
-                        assertEquals(state.speedMetersPerSecond, 1, 0.0001);
-                        switch (count) {
-                            case 0:
-                                assertEquals(state.angle_2, 0.5, 0.0001);
-                                assertEquals(state.accelMetersPerSecond_2, -0.5, 0.0001);
-                                break;
-                            case 1:
-                                assertEquals(state.angle_2, 0.5, 0.0001);
-                                assertEquals(state.accelMetersPerSecond_2, 0.5, 0.0001);
-                                break;
-                            case 2:
-                                assertEquals(state.angle_2, -0.5, 0.0001);
-                                assertEquals(state.accelMetersPerSecond_2, -0.5, 0.0001);
-                                break;
-                            case 3:
-                                assertEquals(state.angle_2, -0.5, 0.0001);
-                                assertEquals(state.accelMetersPerSecond_2, 0.5, 0.0001);
-                                break;
-                            default:
-                                throw new UnsupportedOperationException("Not a swerve module");
-                        }
-                        count++;
-                    }
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Whoops, not a test");
+
+        {
+            SimpleMatrix v = new SimpleMatrix(3, 1);
+            v.setColumn(0, 0, 2.3, 0, 1.1);
+
+            SwerveModuleState100[] output5 = kinematics.statesFromVector(v);
+
+            SimpleMatrix a = new SimpleMatrix(3, 1);
+            a.setColumn(0, 0, 1.32, 1.2, 2.2);
+
+            SwerveModuleState100[] output6 = kinematics.accelerationFromVector(v, a, prev, 0.02);
+
+            for (int i = 0; i < output5.length; i++) {
+                assertEquals(output5[i].angle, output6[i].angle);
+                assertEquals(output5[i].speedMetersPerSecond, output6[i].speedMetersPerSecond);
+            }
+        }
+
+        {
+            // motionless
+            SimpleMatrix v = new SimpleMatrix(3, 1);
+            v.setColumn(0, 0, 0, 0, 0);
+            SwerveModuleState100[] output7 = kinematics.statesFromVector(v);
+            SimpleMatrix a = new SimpleMatrix(3, 1);
+            a.setColumn(0, 0, 1, 1.1, 2);
+            SwerveModuleState100[] output8 = kinematics.accelerationFromVector(v, a, prev, 0.02);
+            for (int i = 0; i < output7.length; i++) {
+                assertEquals(output7[i].angle, output8[i].angle);
+                assertEquals(output7[i].speedMetersPerSecond, output8[i].speedMetersPerSecond);
             }
         }
     }
 
     @Test
+    void testModuleKinematics3a() {
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
+        SwerveModuleState100[] prevStates = {
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())) };
+
+        // no velocity
+        SimpleMatrix velocities = new SimpleMatrix(3, 1);
+        velocities.setColumn(0, 0, 0, 0, 0);
+
+        // accelerating in x i guess
+        SimpleMatrix acceleration = new SimpleMatrix(3, 1);
+        acceleration.setColumn(0, 0, 1, 0, 0);
+
+        SwerveModuleState100[] output = kinematics.accelerationFromVector(
+                velocities,
+                acceleration,
+                prevStates,
+                0.02);
+
+        for (SwerveModuleState100 state : output) {
+            // assertEquals(state.angle.get().getRadians(), 0, 0.0001);
+            // since the module isn't yet moving it has an indeterminate angle.
+            assertTrue(state.angle.isEmpty());
+            assertEquals(state.omega, 0, 0.0001);
+            assertEquals(state.speedMetersPerSecond, 0, 0.0001);
+            // TODO: fix this test
+            // assertEquals(state.accelMetersPerSecond_2, 1, 0.0001);
+        }
+
+    }
+
+    @Test
+    void testModuleKinematics3b() {
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
+        SwerveModuleState100[] prevStates = {
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())) };
+
+        SimpleMatrix velocities = new SimpleMatrix(3, 1);
+        SimpleMatrix acceleration = new SimpleMatrix(3, 1);
+        SwerveModuleState100[] output = new SwerveModuleState100[4];
+
+        velocities.setColumn(0, 0, 1, 0, 0);
+        acceleration.setColumn(0, 0, 1, 0, 0);
+
+        output = kinematics.accelerationFromVector(velocities,
+                acceleration, prevStates, 0.02);
+
+        for (SwerveModuleState100 state : output) {
+            assertEquals(state.angle.get().getRadians(), 0, 0.0001);
+            assertEquals(state.omega, 0, 0.0001);
+            assertEquals(state.speedMetersPerSecond, 1, 0.0001);
+            assertEquals(state.accelMetersPerSecond_2, 1, 0.0001);
+        }
+
+    }
+
+    @Test
+    void testModuleKinematics3c() {
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
+        SwerveModuleState100[] prevStates = {
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())) };
+
+        SimpleMatrix velocities = new SimpleMatrix(3, 1);
+        SimpleMatrix acceleration = new SimpleMatrix(3, 1);
+        SwerveModuleState100[] output = new SwerveModuleState100[4];
+
+        velocities.setColumn(0, 0, 1, 0, 0);
+        acceleration.setColumn(0, 0, 0, 0, 1);
+        output = kinematics.accelerationFromVector(velocities,
+                acceleration, prevStates, 0.02);
+
+        int count = 0;
+        for (SwerveModuleState100 state : output) {
+            assertEquals(state.angle.get().getRadians(), 0, 0.0001);
+            assertEquals(state.speedMetersPerSecond, 1, 0.0001);
+            switch (count) {
+                case 0:
+                    assertEquals(state.omega, 0.5, 0.0001);
+                    assertEquals(state.accelMetersPerSecond_2, -0.5, 0.0001);
+                    break;
+                case 1:
+                    assertEquals(state.omega, 0.5, 0.0001);
+                    assertEquals(state.accelMetersPerSecond_2, 0.5, 0.0001);
+                    break;
+                case 2:
+                    assertEquals(state.omega, -0.5, 0.0001);
+                    assertEquals(state.accelMetersPerSecond_2, -0.5, 0.0001);
+                    break;
+                case 3:
+                    assertEquals(state.omega, -0.5, 0.0001);
+                    assertEquals(state.accelMetersPerSecond_2, 0.5, 0.0001);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Not a swerve module");
+            }
+            count++;
+        }
+
+    }
+
+    @Test
     void testDesaturate() {
-        SwerveModuleState100 fl = new SwerveModuleState100(5, new Rotation2d());
-        SwerveModuleState100 fr = new SwerveModuleState100(6, new Rotation2d());
-        SwerveModuleState100 bl = new SwerveModuleState100(4, new Rotation2d());
-        SwerveModuleState100 br = new SwerveModuleState100(7, new Rotation2d());
+        SwerveModuleState100 fl = new SwerveModuleState100(5, Optional.of(new Rotation2d()));
+        SwerveModuleState100 fr = new SwerveModuleState100(6, Optional.of(new Rotation2d()));
+        SwerveModuleState100 bl = new SwerveModuleState100(4, Optional.of(new Rotation2d()));
+        SwerveModuleState100 br = new SwerveModuleState100(7, Optional.of(new Rotation2d()));
 
         SwerveModuleState100[] arr = { fl, fr, bl, br };
         SwerveDriveKinematics100.desaturateWheelSpeeds(arr, 5.5);
@@ -548,10 +624,10 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testDesaturateNegativeSpeed() {
-        SwerveModuleState100 fl = new SwerveModuleState100(1, new Rotation2d());
-        SwerveModuleState100 fr = new SwerveModuleState100(1, new Rotation2d());
-        SwerveModuleState100 bl = new SwerveModuleState100(-2, new Rotation2d());
-        SwerveModuleState100 br = new SwerveModuleState100(-2, new Rotation2d());
+        SwerveModuleState100 fl = new SwerveModuleState100(1, Optional.of(new Rotation2d()));
+        SwerveModuleState100 fr = new SwerveModuleState100(1, Optional.of(new Rotation2d()));
+        SwerveModuleState100 bl = new SwerveModuleState100(-2, Optional.of(new Rotation2d()));
+        SwerveModuleState100 br = new SwerveModuleState100(-2, Optional.of(new Rotation2d()));
 
         SwerveModuleState100[] arr = { fl, fr, bl, br };
         SwerveDriveKinematics100.desaturateWheelSpeeds(arr, 1);

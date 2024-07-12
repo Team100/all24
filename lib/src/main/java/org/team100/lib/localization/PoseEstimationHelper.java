@@ -2,6 +2,7 @@ package org.team100.lib.localization;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
@@ -34,28 +35,39 @@ public class PoseEstimationHelper implements Glassy {
      * it takes the the angle between the pitch and yaw (roll) to the object and
      * adds the offseted roll, then gets the Cos (x in unit circle) and multiples it
      * by the norm, it does the same for yaw
+     * 
+     * returns empty for target at the horizon.
      */
-    public static Translation2d cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates,
+    public static Optional<Translation2d> cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates,
             Rotation3d yawPitch) {
+        // TODO: when the target is near the bore of the camera, this will yield strange
+        // results. the solution is to change how this works to use the library 3d
+        // transforms instead.
         Rotation2d angleNoRollOffset = new Rotation2d(yawPitch.getZ(), yawPitch.getY());
         Rotation2d angleWRoll = new Rotation2d(cameraInRobotCoordinates.getRotation().getX()).plus(angleNoRollOffset);
         double normInCamera = Math.hypot(yawPitch.getZ(), yawPitch.getY());
         Rotation3d rotToObject = new Rotation3d(0, angleWRoll.getSin() * normInCamera,
                 angleWRoll.getCos() * normInCamera);
         double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + rotToObject.getY());
-        if (robotRelativeAngle == 0) {
-            return new Translation2d();
+        if (robotRelativeAngle <= 0) {
+            // target is at or above the horizon
+            return Optional.empty();
         }
         double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
         double y = x * Math.tan(rotToObject.getZ());
+
+        // TODO: this should not be a rotation2d object.
         Rotation2d cameraRelativeTranslation = new Rotation2d(x, y);
+
         double znorm = Math.hypot(x, y);
         Rotation2d angleToObject = new Rotation2d(cameraInRobotCoordinates.getRotation().getZ())
                 .plus(cameraRelativeTranslation);
         Translation2d robotRelativeTranslation2dNoOffsets = new Translation2d(
                 angleToObject.getCos() * znorm,
                 angleToObject.getSin() * znorm);
-        return robotRelativeTranslation2dNoOffsets.plus(cameraInRobotCoordinates.getTranslation().toTranslation2d());
+        return Optional.of(
+                robotRelativeTranslation2dNoOffsets
+                        .plus(cameraInRobotCoordinates.getTranslation().toTranslation2d()));
     }
 
     /**
@@ -66,11 +78,14 @@ public class PoseEstimationHelper implements Glassy {
         ArrayList<Translation2d> Tnotes = new ArrayList<>();
         for (Rotation3d note : rots)
             if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
-                Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
-                        cameraInRobotCoordinates,
-                        note);
+                Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
+                        .cameraRotationToRobotRelative(
+                                cameraInRobotCoordinates,
+                                note);
+                if (cameraRotationRobotRelative.isEmpty())
+                    continue;
                 Translation2d fieldRealtiveTranslation = currentPose
-                        .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                        .transformBy(new Transform2d(cameraRotationRobotRelative.get(), new Rotation2d()))
                         .getTranslation();
                 if (fieldRealtiveTranslation.getY() > -1 && fieldRealtiveTranslation.getX() > -1) {
                     if (fieldRealtiveTranslation.getY() < 9.21 && fieldRealtiveTranslation.getX() < 17.54) {
@@ -90,11 +105,14 @@ public class PoseEstimationHelper implements Glassy {
         ArrayList<Translation2d> Tnotes = new ArrayList<>();
         for (Rotation3d note : rots)
             if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
-                Translation2d cameraRotationRobotRelative = PoseEstimationHelper.cameraRotationToRobotRelative(
-                        cameraInRobotCoordinates,
-                        note);
+                Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
+                        .cameraRotationToRobotRelative(
+                                cameraInRobotCoordinates,
+                                note);
+                if (cameraRotationRobotRelative.isEmpty())
+                    continue;
                 Translation2d fieldRelativeNote = currentPose
-                        .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                        .transformBy(new Transform2d(cameraRotationRobotRelative.get(), new Rotation2d()))
                         .getTranslation();
                 Tnotes.add(fieldRelativeNote);
                 if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
