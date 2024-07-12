@@ -13,7 +13,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -52,7 +51,7 @@ public class Robot extends TimedRobot100 implements Glassy {
 
         m_robotContainer.onInit();
 
-        DataLogManager.start();
+        // DataLogManager.start();
 
         // This reduces the allocated heap size, not just the used heap size, which
         // means more-frequent and smaller subsequent GC's.

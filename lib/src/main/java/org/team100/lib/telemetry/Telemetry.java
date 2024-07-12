@@ -65,6 +65,9 @@ public class Telemetry {
      * Clients should use the static instance, not the constructor.
      */
     private Telemetry() {
+        // create a log file but don't write network tables to it
+        DataLogManager.logNetworkTables(false);
+
         inst = NetworkTableInstance.getDefault();
         pubs = new ConcurrentHashMap<>();
 
@@ -73,7 +76,7 @@ public class Telemetry {
 
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
-        DataLogManager.start();
+        // DataLogManager.start();
     }
 
     void setLevel(Level level) {
