@@ -128,10 +128,13 @@ public class RobotContainer implements Glassy {
         }
         final SupplierLogger sensorLogger = telemetry.namedRootLogger("SENSOR", defaultEnabled, false);
         final SupplierLogger driveLogger = telemetry.namedRootLogger("DRIVE", defaultEnabled, false);
+        final SupplierLogger driveLowLevelLogger = telemetry.namedRootLogger("DRIVE_LOW_LEVEL", defaultEnabled, false);
+        final SupplierLogger commandLogger = telemetry.namedRootLogger("COMMAND", defaultEnabled, false);
         final SupplierLogger shooterLogger = telemetry.namedRootLogger("SHOOTER", defaultEnabled, false);
         final SupplierLogger intakeLogger = telemetry.namedRootLogger("INTAKE", defaultEnabled, false);
         final SupplierLogger ampLogger = telemetry.namedRootLogger("AMP", defaultEnabled, false);
         final SupplierLogger climberLogger = telemetry.namedRootLogger("CLIMBER", defaultEnabled, false);
+        final SupplierLogger visionLogger = telemetry.namedRootLogger("VISION", defaultEnabled, false);
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(driveLogger, async);
@@ -149,7 +152,7 @@ public class RobotContainer implements Glassy {
         }
 
         m_modules = SwerveModuleCollection.get(
-                driveLogger,
+                driveLowLevelLogger,
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
@@ -171,7 +174,7 @@ public class RobotContainer implements Glassy {
 
         final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
         VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
-                driveLogger,
+                visionLogger,
                 m_layout,
                 poseEstimator,
                 fireControl);
@@ -228,31 +231,31 @@ public class RobotContainer implements Glassy {
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
         FullStateDriveController fullStateController = new FullStateDriveController();
-        HolonomicDriveController100 dthetaController = new HolonomicDriveController100(driveLogger);
+        HolonomicDriveController100 dthetaController = new HolonomicDriveController100(commandLogger);
 
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         whileTrue(driverControl::driveWithFancyTrajec,
-                new FancyTrajectory(driveLogger, m_drive, constraints));
+                new FancyTrajectory(commandLogger, m_drive, constraints));
 
         // 254 PID follower
-        HolonomicDriveController3 controller = new HolonomicDriveController3(driveLogger);
-        DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF(driveLogger);
+        HolonomicDriveController3 controller = new HolonomicDriveController3(commandLogger);
+        DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF(commandLogger);
 
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(
                         fieldLogger,
-                        driveLogger,
+                        commandLogger,
                         m_intake,
                         notePositionDetector::getClosestTranslation2d,
                         m_drive,
                         dthetaController,
                         swerveKinodynamics));
-        whileTrue(driverControl::actualCircle, new DriveInACircle(driveLogger, m_drive, controller, -1, viz));
+        whileTrue(driverControl::actualCircle, new DriveInACircle(commandLogger, m_drive, controller, -1, viz));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(
-                        driveLogger,
+                        commandLogger,
                         m_drive,
                         swerveKinodynamics,
                         m_ampPivot,
@@ -292,18 +295,18 @@ public class RobotContainer implements Glassy {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         PIDController omegaController = new PIDController(0.1, 0, 0); // .5
 
-        DriveManually driveManually = new DriveManually(driveLogger, driverControl::velocity, m_drive);
+        DriveManually driveManually = new DriveManually(commandLogger, driverControl::velocity, m_drive);
 
         driveManually.register("MODULE_STATE", false,
-                new SimpleManualModuleStates(driveLogger, swerveKinodynamics));
+                new SimpleManualModuleStates(commandLogger, swerveKinodynamics));
 
         driveManually.register("ROBOT_RELATIVE_CHASSIS_SPEED", false,
-                new ManualChassisSpeeds(driveLogger, swerveKinodynamics));
+                new ManualChassisSpeeds(commandLogger, swerveKinodynamics));
 
         driveManually.register("ROBOT_RELATIVE_FACING_NOTE", false,
                 new ManualWithNoteRotation(
                         fieldLogger,
-                        driveLogger,
+                        commandLogger,
                         swerveKinodynamics,
                         m_heading,
                         notePositionDetector::getClosestTranslation2d,
@@ -312,11 +315,11 @@ public class RobotContainer implements Glassy {
                         driverControl::trigger));
 
         driveManually.register("FIELD_RELATIVE_TWIST", false,
-                new ManualFieldRelativeSpeeds(driveLogger, swerveKinodynamics));
+                new ManualFieldRelativeSpeeds(commandLogger, swerveKinodynamics));
 
         driveManually.register("SNAPS_PROFILED", true,
                 new ManualWithProfiledHeading(
-                        driveLogger,
+                        commandLogger,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation,
@@ -326,7 +329,7 @@ public class RobotContainer implements Glassy {
         // these gains are not terrible; trying to go faster seems to induce oscillation
         driveManually.register("SNAPS_FULL_STATE", true,
                 new ManualWithFullStateHeading(
-                        driveLogger,
+                        commandLogger,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation,
@@ -334,7 +337,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("SNAPS_MIN_TIME", true,
                 new ManualWithMinTimeHeading(
-                        driveLogger,
+                        commandLogger,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::desiredRotation));
@@ -342,7 +345,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(
                         fieldLogger,
-                        driveLogger,
+                        commandLogger,
                         swerveKinodynamics,
                         m_heading,
                         notePositionDetector::getClosestTranslation2d,
@@ -353,7 +356,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(
                         fieldLogger,
-                        driveLogger,
+                        commandLogger,
                         swerveKinodynamics,
                         m_heading,
                         driverControl::target,
@@ -364,7 +367,7 @@ public class RobotContainer implements Glassy {
         driveManually.register("SHOOTER_LOCK", false,
                 new ManualWithShooterLock(
                         fieldLogger,
-                        driveLogger,
+                        commandLogger,
                         swerveKinodynamics,
                         m_heading,
                         thetaController,
@@ -374,7 +377,7 @@ public class RobotContainer implements Glassy {
 
         ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 fieldLogger,
-                driveLogger,
+                commandLogger,
                 swerveKinodynamics,
                 m_heading,
                 thetaController,
@@ -382,14 +385,14 @@ public class RobotContainer implements Glassy {
 
         ManualWithAmpLock ampLock = new ManualWithAmpLock(
                 fieldLogger,
-                driveLogger,
+                commandLogger,
                 swerveKinodynamics,
                 m_heading,
                 thetaController,
                 omega2Controller);
 
         AutoMaker m_AutoMaker = new AutoMaker(
-                driveLogger,
+                commandLogger,
                 m_drive,
                 drivePID,
                 0,
@@ -407,7 +410,7 @@ public class RobotContainer implements Glassy {
                 new AmpLockCommand(ampLock, driverControl::velocity, m_drive));
 
         whileTrue(driverControl::shooterLock,
-                new ShootSmartWithRotation(driveLogger, m_drive, m_shooter, m_feeder, m_intake, shooterLock,
+                new ShootSmartWithRotation(commandLogger, m_drive, m_shooter, m_feeder, m_intake, shooterLock,
                         driverControl::velocity));
 
         //////////////////
