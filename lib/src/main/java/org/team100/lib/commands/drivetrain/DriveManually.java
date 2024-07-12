@@ -9,7 +9,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.swerve.SwerveSetpoint;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.NamedChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -47,7 +47,7 @@ public class DriveManually extends Command100 {
     String currentManualMode = null;
 
     public DriveManually(
-            Logger parent,
+            SupplierLogger parent,
             Supplier<DriverControl.Velocity> twistSupplier,
             SwerveDriveSubsystem robotDrive) {
         super(parent);

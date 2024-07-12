@@ -6,7 +6,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class OnboardAngularPositionServo implements AngularPositionServo {
     private static final double kDtSec = 0.02;
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final RotaryMechanism m_mechanism;
     private final RotaryPositionSensor m_encoder;
     private final double m_maxVel;
@@ -36,7 +36,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     private double m_prevTime;
 
     public OnboardAngularPositionServo(
-            Logger parent,
+            SupplierLogger parent,
             RotaryMechanism mech,
             RotaryPositionSensor encoder,
             double maxVel,

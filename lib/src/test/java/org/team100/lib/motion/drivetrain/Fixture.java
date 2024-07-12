@@ -9,7 +9,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.SimulatedHeading;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 
 /**
@@ -25,12 +25,12 @@ public class Fixture {
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
     public HolonomicDriveController3 controller;
-    public Logger logger;
-    public Logger fieldLogger;
+    public SupplierLogger logger;
+    public SupplierLogger fieldLogger;
 
     public Fixture() {
-        logger = new TestLogger();
-        fieldLogger = new TestLogger();
+        logger = new TestLogger().getSupplierLogger();
+        fieldLogger = new TestLogger().getSupplierLogger();
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
         heading = new SimulatedHeading(swerveKinodynamics, collection);

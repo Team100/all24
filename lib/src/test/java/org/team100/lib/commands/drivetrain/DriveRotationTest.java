@@ -7,11 +7,11 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 class DriveRotationTest extends Fixtured {
     private static final double kDelta = 0.001;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
     private final double desiredRotation = 1;
 
     @Test

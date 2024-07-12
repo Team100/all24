@@ -13,7 +13,7 @@ import java.util.PriorityQueue;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Chronos;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -74,7 +74,7 @@ public class TimedRobot100 extends IterativeRobotBase {
     /** Default loop period. */
     public static final double kDefaultPeriod = 0.02;
 
-    protected final Logger m_logger;
+    protected final SupplierLogger m_logger;
     private final Chronos chronos;
 
     // The C pointer to the notifier object. We don't use it directly, it is
@@ -101,10 +101,11 @@ public class TimedRobot100 extends IterativeRobotBase {
         if (Identity.instance.equals(Identity.BLANK)) {
             defaultEnabled = true;
         }
-        m_logger = Telemetry.get().namedRootLogger("ROBOT", defaultEnabled);
+        m_logger = Telemetry.get().namedRootLogger("ROBOT", defaultEnabled, false);
         chronos = Chronos.get();
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");
+        addPeriodic(this::dumpChronos, period, "chronos output");
         NotifierJNI.setNotifierName(m_notifier, "TimedRobot");
 
         HAL.report(tResourceType.kResourceType_Framework, tInstances.kFramework_Timed);
@@ -156,6 +157,8 @@ public class TimedRobot100 extends IterativeRobotBase {
             m_callbacks.add(callback);
 
             // Process all other callbacks that are ready to run
+            // note when we're falling behind, we stay in this inner loop,
+            // perhaps never touching the outer loop.
             while ((long) (m_callbacks.peek().expirationTime * 1e6) <= curTime) {
                 callback = m_callbacks.poll();
 
@@ -164,17 +167,20 @@ public class TimedRobot100 extends IterativeRobotBase {
                 callback.expirationTime += callback.period;
                 m_callbacks.add(callback);
             }
-
-            final double elapsed = chronos.elapsed();
-            for (Map.Entry<String, Double> durations : chronos.durations().entrySet()) {
-                Double duration = durations.getValue();
-                String name = durations.getKey();
-                m_logger.logDouble(Level.COMP, "duration (s)/" + name, () -> duration);
-                double fraction = duration / elapsed;
-                m_logger.logDouble(Level.COMP, "fraction (pct)/" + name, () -> 100.0 * fraction);
-            }
-            chronos.reset();
         }
+    }
+
+    private void dumpChronos() {
+        final double elapsed = chronos.elapsed();
+        m_logger.logDouble(Level.COMP, "elapsed (s)", () -> elapsed);
+        for (Map.Entry<String, Double> durations : chronos.durations().entrySet()) {
+            Double duration = durations.getValue();
+            String name = durations.getKey();
+            m_logger.logDouble(Level.COMP, "duration (s)/" + name, () -> duration);
+            double fraction = duration / elapsed;
+            m_logger.logDouble(Level.COMP, "fraction (pct)/" + name, () -> 100.0 * fraction);
+        }
+        chronos.reset();
     }
 
     private void log(Runnable r, String name) {

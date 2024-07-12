@@ -3,21 +3,21 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.motion.RotaryMechanism;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 
 public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final RotaryMechanism m_motor;
 
     private double m_positionRad = 0;
     private double m_timeS = Timer.getFPGATimestamp();
 
     public SimulatedRotaryPositionSensor(
-            Logger parent,
+            SupplierLogger parent,
             RotaryMechanism motor) {
         m_logger = parent.child(this);
         m_motor = motor;

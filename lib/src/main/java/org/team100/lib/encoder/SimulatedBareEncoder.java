@@ -3,13 +3,13 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.motor.BareMotor;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.Timer;
 
 public class SimulatedBareEncoder implements IncrementalBareEncoder {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final BareMotor m_motor;
 
     // accumulates.
@@ -17,7 +17,7 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
     private double m_time = Timer.getFPGATimestamp();
 
     public SimulatedBareEncoder(
-            Logger parent,
+            SupplierLogger parent,
             BareMotor motor) {
         m_logger = parent.child(this);
         m_motor = motor;

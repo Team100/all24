@@ -1,11 +1,12 @@
 package org.team100.lib.selftest;
+
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -43,16 +44,23 @@ public class DefenseSelfTest extends Command {
     public void execute() {
         // check for progress
         SwerveModuleState100[] states = m_drivetrain.getSwerveLocal().states();
-        if (!MathUtil.isNear(Math.PI / 4, states[0].angle.getRotations(), kToleranceRad)) {
+        for (int i = 0; i < 4; ++i) {
+            if (states[i].angle.isEmpty()) {
+                // this should never happen, since we're measuring a real state; fail
+                terminate = true;
+                return;
+            }
+        }
+        if (!MathUtil.isNear(Math.PI / 4, states[0].angle.get().getRotations(), kToleranceRad)) {
             return;
         }
-        if (!MathUtil.isNear(-1 * Math.PI / 4, states[1].angle.getRotations(), kToleranceRad)) {
+        if (!MathUtil.isNear(-1 * Math.PI / 4, states[1].angle.get().getRotations(), kToleranceRad)) {
             return;
         }
-        if (!MathUtil.isNear(3 * Math.PI / 4, states[2].angle.getRotations(), kToleranceRad)) {
+        if (!MathUtil.isNear(3 * Math.PI / 4, states[2].angle.get().getRotations(), kToleranceRad)) {
             return;
         }
-        if (!MathUtil.isNear(-3 * Math.PI / 4, states[3].angle.getRotations(), kToleranceRad)) {
+        if (!MathUtil.isNear(-3 * Math.PI / 4, states[3].angle.get().getRotations(), kToleranceRad)) {
             return;
         }
         // we're all done
@@ -73,10 +81,10 @@ public class DefenseSelfTest extends Command {
         else
             m_listener.fail(this, fmt, kExpectedDuration, time);
 
-        SwerveModulePosition[] positions = m_drivetrain.getSwerveLocal().positions();
+        SwerveModulePosition100[] positions = m_drivetrain.getSwerveLocal().positions();
         fmt = "front left expected %5.3f actual %5.3f";
         double expected = Math.PI / 4;
-        double actual = positions[0].angle.getRadians();
+        double actual = positions[0].angle.get().getRadians();
         if (MathUtil.isNear(expected, actual, kToleranceRad))
             m_listener.pass(this, fmt, expected, actual);
         else
@@ -84,7 +92,7 @@ public class DefenseSelfTest extends Command {
 
         fmt = "front right expected %5.3f actual %5.3f";
         expected = -1 * Math.PI / 4;
-        actual = positions[1].angle.getRadians();
+        actual = positions[1].angle.get().getRadians();
         if (MathUtil.isNear(expected, actual, kToleranceRad))
             m_listener.pass(this, fmt, expected, actual);
         else
@@ -92,7 +100,7 @@ public class DefenseSelfTest extends Command {
 
         fmt = "rear left expected %5.3f actual %5.3f";
         expected = 3 * Math.PI / 4;
-        actual = positions[2].angle.getRadians();
+        actual = positions[2].angle.get().getRadians();
         if (MathUtil.isNear(expected, actual, kToleranceRad))
             m_listener.pass(this, fmt, expected, actual);
         else
@@ -100,7 +108,7 @@ public class DefenseSelfTest extends Command {
 
         fmt = "rear right expected %5.3f actual %5.3f";
         expected = -3 * Math.PI / 4;
-        actual = positions[3].angle.getRadians();
+        actual = positions[3].angle.get().getRadians();
         if (MathUtil.isNear(expected, actual, kToleranceRad))
             m_listener.pass(this, fmt, expected, actual);
         else

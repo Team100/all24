@@ -5,7 +5,7 @@ import java.util.List;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.timing.ConstantConstraint;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
@@ -31,7 +31,7 @@ public class DrawSquare extends SequentialCommandGroup {
      * .Y...2---1/5
      */
     public DrawSquare(
-            Logger parent,
+            SupplierLogger parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {

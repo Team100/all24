@@ -5,7 +5,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 
@@ -17,10 +17,10 @@ import edu.wpi.first.math.geometry.Pose2d;
  * The input is a twist, so the output is just scaled.
  */
 public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
 
-    public ManualFieldRelativeSpeeds(Logger parent, SwerveKinodynamics swerveKinodynamics) {
+    public ManualFieldRelativeSpeeds(SupplierLogger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_logger = parent.child(this);
     }

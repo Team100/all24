@@ -12,7 +12,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
@@ -29,7 +29,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Rotation uses simple full-state feedback and that's all..
  */
 public class ManualWithFullStateHeading implements FieldRelativeDriver {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     /** Absolute input supplier, null if free */
@@ -53,7 +53,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      * @param k                  full state gains
      */
     public ManualWithFullStateHeading(
-            Logger parent,
+            SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Rotation2d> desiredRotation,

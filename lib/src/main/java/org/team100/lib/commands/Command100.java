@@ -13,7 +13,7 @@ import java.io.Writer;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -31,12 +31,12 @@ public abstract class Command100 extends Command implements Glassy {
     private static final ScheduledExecutorService m_scheduler = Executors.newSingleThreadScheduledExecutor(
             new MaxPriorityThreads());
 
-    protected final Logger m_logger;
+    protected final SupplierLogger m_logger;
 
     private double prevTime;
     private Future<?> m_task;
 
-    protected Command100(Logger parent) {
+    protected Command100(SupplierLogger parent) {
         m_logger = parent.child(this);
     }
 

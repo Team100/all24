@@ -14,7 +14,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
@@ -45,8 +45,8 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
      */
     private static final double kRotationSpeed = 0.5;
 
-    private final Logger m_fieldLogger;
-    private final Logger m_logger;
+    private final SupplierLogger m_fieldLogger;
+    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     private final Supplier<Translation2d> m_target;
@@ -62,7 +62,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
 
     public ManualWithTargetLock(
             FieldLogger fieldLogger,
-            Logger parent,
+            SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
             Supplier<Translation2d> target,

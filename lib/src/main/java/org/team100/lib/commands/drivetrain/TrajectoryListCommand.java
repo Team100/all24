@@ -11,7 +11,7 @@ import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.Trajectory100;
@@ -43,7 +43,7 @@ public class TrajectoryListCommand extends Command100 {
     private boolean done;
 
     public TrajectoryListCommand(
-            Logger parent,
+            SupplierLogger parent,
             SwerveDriveSubsystem swerve,
             HolonomicFieldRelativeController controller,
             Function<Pose2d, List<Trajectory100>> trajectories,

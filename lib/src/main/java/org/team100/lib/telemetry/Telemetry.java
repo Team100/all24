@@ -1,11 +1,6 @@
 package org.team100.lib.telemetry;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.Publisher;
-import edu.wpi.first.wpilibj.DataLogManager;
 
 /**
  * Simple logging wrapper.
@@ -47,14 +42,12 @@ public class Telemetry {
         }
     }
 
-    /**
-     * useful for troubleshooting unit tests. it's quite slow.
-     */
-    static final boolean kAlsoPrint = false;
     private static final Telemetry instance = new Telemetry();
 
     final NetworkTableInstance inst;
-    final Map<String, Publisher> pubs;
+    final PrimitiveLogger ntLogger;
+    final PrimitiveLogger usbLogger;
+
     Level m_level;
 
     /**
@@ -62,11 +55,13 @@ public class Telemetry {
      * Clients should use the static instance, not the constructor.
      */
     private Telemetry() {
+
         inst = NetworkTableInstance.getDefault();
-        pubs = new ConcurrentHashMap<>();
+        ntLogger = new NTLogger();
+        usbLogger = new DataLogLogger();
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
-        DataLogManager.start();
+        // DataLogManager.start();
     }
 
     void setLevel(Level level) {
@@ -81,11 +76,15 @@ public class Telemetry {
         return instance;
     }
 
-    public FieldLogger fieldLogger(boolean defaultEnabled) {
-        return new FieldLogger(this, defaultEnabled);
+    public FieldLogger fieldLogger(boolean defaultEnabledNT, boolean defaultEnabledUSB) {
+        return new FieldLogger(this, defaultEnabledNT, defaultEnabledUSB);
     }
 
-    public RootLogger namedRootLogger(String str, boolean defaultEnabled) {
-        return new RootLogger(this, str, defaultEnabled);
+    public RootLogger namedRootLogger(
+            String str,
+            boolean defaultEnabledNT,
+            boolean defaultEnabledUSB) {
+        return new RootLogger(this, str, defaultEnabledNT, defaultEnabledUSB);
     }
+
 }

@@ -3,13 +3,13 @@ package org.team100.frc2024.motion.shooter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.frc2024.TestLogger24;
 import org.team100.frc2024.Timeless2024;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.telemetry.TestLogger;
 
 class DrumShooterTest implements Timeless2024 {
     private static final double kDelta = 0.001;
-    private static final Logger logger = new TestLogger24();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testAngle() {

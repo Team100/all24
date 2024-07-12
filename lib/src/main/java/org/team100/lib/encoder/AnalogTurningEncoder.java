@@ -2,7 +2,7 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.AnalogInput;
@@ -15,7 +15,7 @@ public class AnalogTurningEncoder extends RoboRioRotaryPositionSensor {
     private final AnalogInput m_input;
 
     public AnalogTurningEncoder(
-            Logger parent,
+            SupplierLogger parent,
             int channel,
             double inputOffset,
             EncoderDrive drive) {

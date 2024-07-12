@@ -15,7 +15,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.timing.TimingConstraint;
@@ -30,7 +30,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
     private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
     List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).allGood();
@@ -92,13 +92,13 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
             stepTime(kDtS);
             fixture.drive.periodic();
             command.execute100(kDtS);
-            double measurement = fixture.drive.getSwerveLocal().states()[0].angle.getRadians();
+            double measurement = fixture.drive.getSwerveLocal().states()[0].angle.get().getRadians();
             SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
                 Util.printf("goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
-                        goal.angle.getRadians(),
+                        goal.angle.get().getRadians(),
                         setpoint.x(),
                         setpoint.v(),
                         measurement);

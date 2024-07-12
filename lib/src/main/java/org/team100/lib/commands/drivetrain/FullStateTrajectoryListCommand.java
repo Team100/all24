@@ -10,7 +10,7 @@ import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.Trajectory100;
@@ -37,7 +37,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
     private boolean m_aligned;
 
     public FullStateTrajectoryListCommand(
-            Logger parent,
+            SupplierLogger parent,
             SwerveDriveSubsystem swerve,
             Function<Pose2d, List<Trajectory100>> trajectories,
             TrajectoryVisualization viz) {

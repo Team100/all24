@@ -2,11 +2,14 @@ package org.team100.lib.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.geometry.Vector2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,11 +17,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 class SlipperyTireUtilTest {
     private static final double kDelta = 0.001;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     // radius is sqrt(2)/2
     SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
@@ -54,11 +56,11 @@ class SlipperyTireUtilTest {
         check(0, 0, states[3]);
 
         // position is also an angle, maybe ignore it
-        SwerveModulePosition[] position0 = new SwerveModulePosition[] {
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d())
+        SwerveModulePosition100[] position0 = new SwerveModulePosition100[] {
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d()))
         };
         check(0, 0, position0[0], kDelta);
         check(0, 0, position0[1], kDelta);
@@ -67,9 +69,9 @@ class SlipperyTireUtilTest {
 
         // all these angles should be somehow consistent
         // maybe just use the velocity angle.
-        SwerveModulePosition[] position1 = new SwerveModulePosition[4];
+        SwerveModulePosition100[] position1 = new SwerveModulePosition100[4];
         for (int i = 0; i < position1.length; ++i) {
-            position1[i] = new SwerveModulePosition(
+            position1[i] = new SwerveModulePosition100(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
         }
@@ -78,7 +80,7 @@ class SlipperyTireUtilTest {
         check(0, 0, position1[2], kDelta);
         check(0, 0, position1[3], kDelta);
 
-        SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
+        SwerveModulePosition100[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 position0,
                 position1);
 
@@ -132,11 +134,11 @@ class SlipperyTireUtilTest {
         check(1, 0, states[3]);
 
         // position is also an angle, maybe ignore it
-        SwerveModulePosition[] position0 = new SwerveModulePosition[] {
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d())
+        SwerveModulePosition100[] position0 = new SwerveModulePosition100[] {
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d()))
         };
         check(0, 0, position0[0], kDelta);
         check(0, 0, position0[1], kDelta);
@@ -145,9 +147,9 @@ class SlipperyTireUtilTest {
 
         // all these angles should be somehow consistent
         // maybe just use the velocity angle.
-        SwerveModulePosition[] position1 = new SwerveModulePosition[4];
+        SwerveModulePosition100[] position1 = new SwerveModulePosition100[4];
         for (int i = 0; i < position1.length; ++i) {
-            position1[i] = new SwerveModulePosition(
+            position1[i] = new SwerveModulePosition100(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
         }
@@ -156,7 +158,7 @@ class SlipperyTireUtilTest {
         check(0.02, 0, position1[2], kDelta);
         check(0.02, 0, position1[3], kDelta);
 
-        SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
+        SwerveModulePosition100[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 position0,
                 position1);
 
@@ -210,11 +212,11 @@ class SlipperyTireUtilTest {
 
         // position is also an angle, maybe ignore it
         // for this one just set the starting position to be right
-        SwerveModulePosition[] position0 = new SwerveModulePosition[] {
-                new SwerveModulePosition(0, Rotation2d.fromDegrees(135)),
-                new SwerveModulePosition(0, Rotation2d.fromDegrees(45)),
-                new SwerveModulePosition(0, Rotation2d.fromDegrees(-135)),
-                new SwerveModulePosition(0, Rotation2d.fromDegrees(-45))
+        SwerveModulePosition100[] position0 = new SwerveModulePosition100[] {
+                new SwerveModulePosition100(0, Optional.of(Rotation2d.fromDegrees(135))),
+                new SwerveModulePosition100(0, Optional.of(Rotation2d.fromDegrees(45))),
+                new SwerveModulePosition100(0, Optional.of(Rotation2d.fromDegrees(-135))),
+                new SwerveModulePosition100(0, Optional.of(Rotation2d.fromDegrees(-45)))
         };
         check(0, 135, position0[0], kDelta);
         check(0, 45, position0[1], kDelta);
@@ -223,9 +225,9 @@ class SlipperyTireUtilTest {
 
         // postion = speed * dt
         // 0.707 * 0.02 = 0.014
-        SwerveModulePosition[] position1 = new SwerveModulePosition[4];
+        SwerveModulePosition100[] position1 = new SwerveModulePosition100[4];
         for (int i = 0; i < position1.length; ++i) {
-            position1[i] = new SwerveModulePosition(
+            position1[i] = new SwerveModulePosition100(
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
         }
@@ -234,7 +236,7 @@ class SlipperyTireUtilTest {
         check(0.014, -135, position1[2], kDelta);
         check(0.014, -45, position1[3], kDelta);
 
-        SwerveModulePosition[] modulePositionDelta = DriveUtil.modulePositionDelta(
+        SwerveModulePosition100[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 position0,
                 position1);
 
@@ -272,13 +274,13 @@ class SlipperyTireUtilTest {
         // corners are not moving
         Vector2d[] corners = u.cornerDeltas(kinematics, pose0, pose1);
         // but now there's some odometry showing 1 m/s (!)
-        SwerveModulePosition[] deltas = new SwerveModulePosition[] {
-                new SwerveModulePosition(0.02, new Rotation2d()),
-                new SwerveModulePosition(0.02, new Rotation2d()),
-                new SwerveModulePosition(0.02, new Rotation2d()),
-                new SwerveModulePosition(0.02, new Rotation2d())
+        SwerveModulePosition100[] deltas = new SwerveModulePosition100[] {
+                new SwerveModulePosition100(0.02, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0.02, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0.02, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0.02, Optional.of(new Rotation2d()))
         };
-        SwerveModulePosition[] adjusted = u.adjust(corners, dtSeconds, deltas, dtSeconds);
+        SwerveModulePosition100[] adjusted = u.adjust(corners, dtSeconds, deltas, dtSeconds);
         // we wanted to go 1 m/s but this is 50m/s/s of accel
         // which is way beyond the 10 m/s/s limit.
         // so you get 10 m/s/s for 0.02 s so you move 10*0.02*0.02=0.004.
@@ -298,13 +300,13 @@ class SlipperyTireUtilTest {
         SlipperyTireUtil u = new SlipperyTireUtil(logger, t);
         Vector2d[] corners = u.cornerDeltas(kinematics, pose0, pose1);
         // now lock the wheels
-        SwerveModulePosition[] deltas = new SwerveModulePosition[] {
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d()),
-                new SwerveModulePosition(0, new Rotation2d())
+        SwerveModulePosition100[] deltas = new SwerveModulePosition100[] {
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d())),
+                new SwerveModulePosition100(0, Optional.of(new Rotation2d()))
         };
-        SwerveModulePosition[] adjusted = u.adjust(corners, dtSeconds, deltas, dtSeconds);
+        SwerveModulePosition100[] adjusted = u.adjust(corners, dtSeconds, deltas, dtSeconds);
         // as above we are trying for 50 m/s/s but we get 10.
         // so slide along, instead of 0.02 go 0.016
         check(0.016, 0, adjusted[0], 1e-6);
@@ -316,10 +318,10 @@ class SlipperyTireUtilTest {
     void check(
             double meters,
             double degrees,
-            SwerveModulePosition position,
+            SwerveModulePosition100 position,
             double delta) {
         assertEquals(meters, position.distanceMeters, delta);
-        assertEquals(degrees, position.angle.getDegrees(), delta);
+        assertEquals(degrees, position.angle.get().getDegrees(), delta);
     }
 
     void check(
@@ -327,7 +329,7 @@ class SlipperyTireUtilTest {
             double degrees,
             SwerveModuleState100 state) {
         assertEquals(metersPerSecond, state.speedMetersPerSecond, kDelta);
-        assertEquals(degrees, state.angle.getDegrees(), kDelta);
+        assertEquals(degrees, state.angle.get().getDegrees(), kDelta);
     }
 
     void check(

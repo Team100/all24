@@ -13,14 +13,14 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.wpilibj.simulation.SimHooks;
 
 class DriveManuallyTest extends Fixtured implements Timeless {
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     String desiredMode = null;
     DriverControl.Velocity desiredTwist = new DriverControl.Velocity(1, 0, 0);

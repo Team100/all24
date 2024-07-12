@@ -6,7 +6,7 @@ import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Tire;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /**
  * Kinematics and dynamics of the swerve drive.
@@ -30,7 +29,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
  * lower it here.
  */
 public class SwerveKinodynamics implements Glassy {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
     // geometry
     private final double m_fronttrack;
@@ -74,7 +73,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
-            Logger parent,
+            SupplierLogger parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -130,7 +129,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
-            Logger parent,
+            SupplierLogger parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -294,6 +293,7 @@ public class SwerveKinodynamics implements Glassy {
                 new Translation2d(frontoffset - wheelbase, -backtrack / 2));
     }
 
+    /** arg elements are nullable */
     public void resetHeadings(Rotation2d... moduleHeadings) {
         m_kinematics.resetHeadings(moduleHeadings);
     }
@@ -426,7 +426,7 @@ public class SwerveKinodynamics implements Glassy {
 
     public SwerveDrivePoseEstimator100 newPoseEstimator(
             Rotation2d gyroAngle,
-            SwerveModulePosition[] modulePositions,
+            SwerveModulePosition100[] modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
         return new SwerveDrivePoseEstimator100(

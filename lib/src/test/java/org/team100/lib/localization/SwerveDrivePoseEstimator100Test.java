@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -17,7 +18,8 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.util.Util;
 
@@ -26,7 +28,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -35,13 +36,14 @@ import edu.wpi.first.wpilibj.DataLogManager;
 
 class SwerveDrivePoseEstimator100Test {
     private static final double kDelta = 0.001;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
     private static final boolean kPrint = false;
 
-    private final SwerveModulePosition p0 = new SwerveModulePosition(0, GeometryUtil.kRotationZero);
-    private final SwerveModulePosition[] positionZero = new SwerveModulePosition[] { p0, p0, p0, p0 };
-    private final SwerveModulePosition p01 = new SwerveModulePosition(0.1, GeometryUtil.kRotationZero);
-    private final SwerveModulePosition[] position01 = new SwerveModulePosition[] { p01, p01, p01, p01 };
+    private final SwerveModulePosition100 p0 = new SwerveModulePosition100(0, Optional.of(GeometryUtil.kRotationZero));
+    private final SwerveModulePosition100[] positionZero = new SwerveModulePosition100[] { p0, p0, p0, p0 };
+    private final SwerveModulePosition100 p01 = new SwerveModulePosition100(0.1,
+            Optional.of(GeometryUtil.kRotationZero));
+    private final SwerveModulePosition100[] position01 = new SwerveModulePosition100[] { p01, p01, p01, p01 };
     private final Pose2d visionRobotPoseMeters = new Pose2d(1, 0, GeometryUtil.kRotationZero);
 
     private static void verify(double x, SwerveState state) {
@@ -384,10 +386,10 @@ class SwerveDrivePoseEstimator100Test {
         // no wheel slip
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
 
-        var fl = new SwerveModulePosition();
-        var fr = new SwerveModulePosition();
-        var bl = new SwerveModulePosition();
-        var br = new SwerveModulePosition();
+        var fl = new SwerveModulePosition100();
+        var fr = new SwerveModulePosition100();
+        var bl = new SwerveModulePosition100();
+        var br = new SwerveModulePosition100();
 
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, 0.5 };
@@ -395,7 +397,7 @@ class SwerveDrivePoseEstimator100Test {
                 logger,
                 kinodynamics,
                 new Rotation2d(),
-                new SwerveModulePosition[] { fl, fr, bl, br },
+                new SwerveModulePosition100[] { fl, fr, bl, br },
                 new Pose2d(),
                 0); // zero initial time
 
@@ -433,10 +435,10 @@ class SwerveDrivePoseEstimator100Test {
         // no wheel slip
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
 
-        var fl = new SwerveModulePosition();
-        var fr = new SwerveModulePosition();
-        var bl = new SwerveModulePosition();
-        var br = new SwerveModulePosition();
+        var fl = new SwerveModulePosition100();
+        var fr = new SwerveModulePosition100();
+        var bl = new SwerveModulePosition100();
+        var br = new SwerveModulePosition100();
 
         // estimator initial pose is at (-1,-1) rotated 60 degrees to the right.
 
@@ -449,7 +451,7 @@ class SwerveDrivePoseEstimator100Test {
                 logger,
                 kinodynamics,
                 new Rotation2d(),
-                new SwerveModulePosition[] { fl, fr, bl, br },
+                new SwerveModulePosition100[] { fl, fr, bl, br },
                 new Pose2d(-1, -1, Rotation2d.fromRadians(-1)),
                 0); // zero initial time
 
@@ -512,11 +514,11 @@ class SwerveDrivePoseEstimator100Test {
             final double visionUpdateRate,
             final double visionUpdateDelay,
             final boolean checkError) {
-        SwerveModulePosition[] positions = {
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition()
+        SwerveModulePosition100[] positions = {
+                new SwerveModulePosition100(),
+                new SwerveModulePosition100(),
+                new SwerveModulePosition100(),
+                new SwerveModulePosition100()
         };
 
         // new starting pose here, so we don't actually use the earlier initial pose
@@ -566,7 +568,8 @@ class SwerveDrivePoseEstimator100Test {
             for (int i = 0; i < moduleStates.length; i++) {
                 positions[i].distanceMeters += moduleStates[i].speedMetersPerSecond * (1 - rand.nextGaussian() * 0.05)
                         * dt;
-                positions[i].angle = moduleStates[i].angle.plus(new Rotation2d(rand.nextGaussian() * 0.005));
+                positions[i].angle = Optional
+                        .of(moduleStates[i].angle.get().plus(new Rotation2d(rand.nextGaussian() * 0.005)));
             }
 
             SwerveState xHat = estimator.update(
@@ -625,10 +628,10 @@ class SwerveDrivePoseEstimator100Test {
 
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
 
-        var fl = new SwerveModulePosition();
-        var fr = new SwerveModulePosition();
-        var bl = new SwerveModulePosition();
-        var br = new SwerveModulePosition();
+        var fl = new SwerveModulePosition100();
+        var fr = new SwerveModulePosition100();
+        var bl = new SwerveModulePosition100();
+        var br = new SwerveModulePosition100();
 
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.9, 0.9, 0.9 };
@@ -636,13 +639,13 @@ class SwerveDrivePoseEstimator100Test {
                 logger,
                 kinodynamics,
                 new Rotation2d(),
-                new SwerveModulePosition[] { fl, fr, bl, br },
+                new SwerveModulePosition100[] { fl, fr, bl, br },
                 new Pose2d(1, 2, Rotation2d.fromDegrees(270)),
                 0); // zero initial time
 
         estimator.update(0,
                 new Rotation2d(),
-                new SwerveModulePosition[] { fl, fr, bl, br });
+                new SwerveModulePosition100[] { fl, fr, bl, br });
 
         var visionMeasurements = new Pose2d[] {
                 new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
@@ -679,11 +682,11 @@ class SwerveDrivePoseEstimator100Test {
                 logger,
                 kinodynamics,
                 new Rotation2d(),
-                new SwerveModulePosition[] {
-                        new SwerveModulePosition(),
-                        new SwerveModulePosition(),
-                        new SwerveModulePosition(),
-                        new SwerveModulePosition()
+                new SwerveModulePosition100[] {
+                        new SwerveModulePosition100(),
+                        new SwerveModulePosition100(),
+                        new SwerveModulePosition100(),
+                        new SwerveModulePosition100()
                 },
                 new Pose2d(),
                 0); // zero initial time
@@ -695,11 +698,11 @@ class SwerveDrivePoseEstimator100Test {
             estimator.update(
                     time,
                     new Rotation2d(),
-                    new SwerveModulePosition[] {
-                            new SwerveModulePosition(),
-                            new SwerveModulePosition(),
-                            new SwerveModulePosition(),
-                            new SwerveModulePosition()
+                    new SwerveModulePosition100[] {
+                            new SwerveModulePosition100(),
+                            new SwerveModulePosition100(),
+                            new SwerveModulePosition100(),
+                            new SwerveModulePosition100()
                     });
         }
 

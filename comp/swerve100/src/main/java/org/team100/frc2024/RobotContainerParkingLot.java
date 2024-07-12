@@ -79,9 +79,9 @@ public class RobotContainerParkingLot implements Glassy {
      */
     RobotContainerParkingLot(TimedRobot100 robot) {
         Telemetry telemetry = Telemetry.get();
-        final FieldLogger fieldLogger = telemetry.fieldLogger(true);
-        final RootLogger monitorLogger = telemetry.namedRootLogger("MONITOR", false);
-        final RootLogger driveLogger = telemetry.namedRootLogger("DRIVE", false);
+        final FieldLogger fieldLogger = telemetry.fieldLogger(true, true);
+        final RootLogger monitorLogger = telemetry.namedRootLogger("MONITOR", false, false);
+        final RootLogger driveLogger = telemetry.namedRootLogger("DRIVE", false, false);
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
 
         final AsyncFactory asyncFactory = new AsyncFactory(robot);

@@ -1,8 +1,7 @@
 package org.team100.lib.config;
 
 import java.util.ArrayList;
-import java.util.Optional;
-
+import java.util.List;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,14 +31,14 @@ public class SimulatedCamera {
      * @param robotPose Pose of the robot
      * @param notes field relative translation of any objects
      */
-    public Optional<ArrayList<Rotation3d>> getRotation(Pose2d robotPose, Translation2d[] notes) {
-        Optional<ArrayList<Rotation3d>> optionalList = Optional.empty();
+    public List<Rotation3d> getRotation(Pose2d robotPose, Translation2d[] notes) {
         ArrayList<Rotation3d> list = new ArrayList<>();
         for (Translation2d note : notes) {
             Pose2d pose = new Pose2d(note, new Rotation2d());
             Translation2d relative = pose.relativeTo(robotPose).getTranslation();
             double pitch;
             double x = relative.getX() - m_cameraInRobotCoordinates.getX();
+            // TODO: make this work for arbitrary camera orientation.
             if (m_cameraInRobotCoordinates.getRotation().getZ() == Math.PI) {
                 pitch = Math.atan2(m_cameraInRobotCoordinates.getZ(), -1.0 * x)
                         - m_cameraInRobotCoordinates.getRotation().getY();
@@ -53,9 +52,8 @@ public class SimulatedCamera {
             Rotation3d rot = new Rotation3d(0, pitch, yaw);
             if (Math.abs(pitch) < m_focalLength.getY() && Math.abs(yaw) < m_focalLength.getZ()) {
                 list.add(rot);
-                optionalList = Optional.of(list);
             }
         }
-        return optionalList;
+        return list;
     }
 }

@@ -7,12 +7,12 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.testing.Timeless;
 
 class SpinTest extends Fixtured implements Timeless {
     private static final double kDelta = 0.01;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testSimple() {
@@ -29,7 +29,7 @@ class SpinTest extends Fixtured implements Timeless {
         assertEquals(0, command.m_angleRad, kDelta);
         assertEquals(0.01, command.m_speedRad_S, kDelta);
         assertEquals(0, fixture.drive.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(-0.785, fixture.drive.getSwerveLocal().getDesiredStates()[0].angle.getRadians(), 0.01);
+        assertEquals(-0.785, fixture.drive.getSwerveLocal().getDesiredStates()[0].angle.get().getRadians(), 0.01);
 
         stepTime(5);
         command.execute100(5);
@@ -43,11 +43,11 @@ class SpinTest extends Fixtured implements Timeless {
 
         assertEquals(-0.176, fixture.drive.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(0.176, fixture.drive.getSwerveLocal().getDesiredStates()[1].speedMetersPerSecond, kDelta);
-        assertEquals(Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[1].angle.getRadians(), kDelta);
+        assertEquals(Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[1].angle.get().getRadians(), kDelta);
         assertEquals(-0.176, fixture.drive.getSwerveLocal().getDesiredStates()[2].speedMetersPerSecond, kDelta);
-        assertEquals(Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[2].angle.getRadians(), kDelta);
+        assertEquals(Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[2].angle.get().getRadians(), kDelta);
         assertEquals(0.176, fixture.drive.getSwerveLocal().getDesiredStates()[3].speedMetersPerSecond, kDelta);
-        assertEquals(-Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[3].angle.getRadians(), kDelta);
+        assertEquals(-Math.PI / 4, fixture.drive.getSwerveLocal().getDesiredStates()[3].angle.get().getRadians(), kDelta);
     }
 
 }

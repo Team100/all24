@@ -1,15 +1,15 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.ejml.simple.SimpleMatrix;
 import org.team100.lib.geometry.Vector2d;
-import edu.wpi.first.math.MathUtil;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /**
  * Helper class that converts between chassis state and module state.
@@ -87,7 +87,10 @@ public class SwerveDriveKinematics100 {
      * </pre>
      */
     private final SimpleMatrix m_forwardKinematics;
-    /** Used when velocity is zero, to keep the steering the same */
+    /**
+     * Used when velocity is zero, to keep the steering the same.
+     * elements are nullable.
+     */
     private Rotation2d[] m_moduleHeadings;
 
     /**
@@ -98,7 +101,7 @@ public class SwerveDriveKinematics100 {
         m_numModules = moduleTranslationsM.length;
         m_moduleLocations = Arrays.copyOf(moduleTranslationsM, m_numModules);
         for (int i = 0; i < m_moduleLocations.length; i++) {
-            m_mat[i] = new SimpleMatrix(2,3);
+            m_mat[i] = new SimpleMatrix(2, 3);
             m_mat[i].setRow(0, 0, 1, 0, -m_moduleLocations[i].getY());
             m_mat[i].setRow(1, 0, 0, 1, m_moduleLocations[i].getX());
         }
@@ -109,6 +112,8 @@ public class SwerveDriveKinematics100 {
 
     /**
      * Reset the internal swerve module headings
+     * 
+     * arg elements are nullable
      */
     public void resetHeadings(Rotation2d... moduleHeadings) {
         checkLength(moduleHeadings);
@@ -162,8 +167,11 @@ public class SwerveDriveKinematics100 {
         SimpleMatrix chassisSpeedsVector = chassisSpeeds2Vector(chassisSpeeds);
         SimpleMatrix chassisSpeedsAccelerationVector = chassisSpeeds2Vector(chassisSpeedsAcceleration);
         // [v cos; v sin; ...] (2n x 1)
-        SwerveModuleState100[] prevStates = { new SwerveModuleState100(), new SwerveModuleState100(), new SwerveModuleState100(),
-                new SwerveModuleState100() };
+        SwerveModuleState100[] prevStates = {
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())) };
         SwerveModuleState100[] states = accelerationFromVector(chassisSpeedsVector, chassisSpeedsAccelerationVector,
                 prevStates, dt);
         updateHeadings(states);
@@ -188,7 +196,7 @@ public class SwerveDriveKinematics100 {
     /**
      * INVERSE: twist -> module position deltas
      */
-    public SwerveModulePosition[] toSwerveModulePosition(Twist2d twist) {
+    public SwerveModulePosition100[] toSwerveModulePosition(Twist2d twist) {
         if (fullStop(twist)) {
             return constantModulePositions();
         }
@@ -196,15 +204,21 @@ public class SwerveDriveKinematics100 {
         SimpleMatrix twistVector = twist2Vector(twist);
         // [d cos; d sin; ...] (2n x 1)
         SimpleMatrix deltaVector = m_inverseKinematics.mult(twistVector);
-        SwerveModulePosition[] deltas = deltasFromVector(deltaVector);
+        SwerveModulePosition100[] deltas = deltasFromVector(deltaVector);
         updateHeadings(deltas);
         return deltas;
     }
 
-    public Vector2d[] pos2vec(SwerveModulePosition[] m) {
+    /** This is wrong, it assigns zero radians to the indeterminate case. */
+    public Vector2d[] pos2vec(SwerveModulePosition100[] m) {
         Vector2d[] vec = new Vector2d[m_numModules];
         for (int i = 0; i < m_numModules; ++i) {
-            vec[i] = new Vector2d(m[i].distanceMeters, m[i].angle);
+            SwerveModulePosition100 p = m[i];
+            if (p.angle.isEmpty()) {
+                vec[i] = new Vector2d(0, 0);
+            } else {
+                vec[i] = new Vector2d(p.distanceMeters, p.angle.get());
+            }
         }
         return vec;
     }
@@ -234,7 +248,7 @@ public class SwerveDriveKinematics100 {
      * Does not take Tires into account, so you should really call this
      * with corner deltas not wheel deltas.
      */
-    public Twist2d toTwist2d(SwerveModulePosition... deltas) {
+    public Twist2d toTwist2d(SwerveModulePosition100... deltas) {
         checkLength(deltas);
         // [d cos; d sin; ...] (2n x 1)
         SimpleMatrix deltaVector = deltas2Vector(deltas);
@@ -261,7 +275,7 @@ public class SwerveDriveKinematics100 {
             realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
             realMaxAccel = Math.max(realMaxAccel, moduleState.accelMetersPerSecond_2);
             realMaxDeccel = Math.min(realMaxDeccel, moduleState.accelMetersPerSecond_2);
-            realTurnVelocity = Math.max(maxTurnVelocityM_s, Math.abs(moduleState.angle_2));
+            realTurnVelocity = Math.max(maxTurnVelocityM_s, Math.abs(moduleState.omega));
         }
         if (realMaxSpeed > maxSpeedM_s) {
             for (SwerveModuleState100 moduleState : states) {
@@ -283,7 +297,7 @@ public class SwerveDriveKinematics100 {
         }
         if (realTurnVelocity > maxTurnVelocityM_s) {
             for (SwerveModuleState100 moduleState : states) {
-                moduleState.angle_2 = moduleState.angle_2 / realTurnVelocity
+                moduleState.omega = moduleState.omega / realTurnVelocity
                         * maxTurnVelocityM_s;
             }
         }
@@ -315,19 +329,31 @@ public class SwerveDriveKinematics100 {
         SimpleMatrix moduleStatesMatrix = new SimpleMatrix(m_numModules * 2, 1);
         for (int i = 0; i < m_numModules; i++) {
             SwerveModuleState100 module = moduleStates[i];
-            moduleStatesMatrix.set(i * 2, 0, module.speedMetersPerSecond * module.angle.getCos());
-            moduleStatesMatrix.set(i * 2 + 1, 0, module.speedMetersPerSecond * module.angle.getSin());
+            if (Math.abs(module.speedMetersPerSecond) < 1e-6 || module.angle.isEmpty()) {
+                // wheel is stopped, or angle is invalid so pretend it's stopped.
+                moduleStatesMatrix.set(i * 2, 0, 0);
+                moduleStatesMatrix.set(i * 2 + 1, 0, 0);
+            } else {
+                moduleStatesMatrix.set(i * 2, 0, module.speedMetersPerSecond * module.angle.get().getCos());
+                moduleStatesMatrix.set(i * 2 + 1, 0, module.speedMetersPerSecond * module.angle.get().getSin());
+
+            }
         }
         return moduleStatesMatrix;
     }
 
     /** deltas -> [d cos; d sin; ... ] (2n x 1) */
-    private SimpleMatrix deltas2Vector(SwerveModulePosition... moduleDeltas) {
+    private SimpleMatrix deltas2Vector(SwerveModulePosition100... moduleDeltas) {
         SimpleMatrix moduleDeltaMatrix = new SimpleMatrix(m_numModules * 2, 1);
         for (int i = 0; i < m_numModules; i++) {
-            SwerveModulePosition module = moduleDeltas[i];
-            moduleDeltaMatrix.set(i * 2, 0, module.distanceMeters * module.angle.getCos());
-            moduleDeltaMatrix.set(i * 2 + 1, 0, module.distanceMeters * module.angle.getSin());
+            SwerveModulePosition100 module = moduleDeltas[i];
+            if (Math.abs(module.distanceMeters) < 1e-6 || module.angle.isEmpty()) {
+                moduleDeltaMatrix.set(i * 2, 0, 0);
+                moduleDeltaMatrix.set(i * 2 + 1, 0, 0);
+            } else {
+                moduleDeltaMatrix.set(i * 2, 0, module.distanceMeters * module.angle.get().getCos());
+                moduleDeltaMatrix.set(i * 2 + 1, 0, module.distanceMeters * module.angle.get().getSin());
+            }
         }
         return moduleDeltaMatrix;
     }
@@ -382,15 +408,23 @@ public class SwerveDriveKinematics100 {
     private SwerveModuleState100[] constantModuleHeadings() {
         SwerveModuleState100[] mods = new SwerveModuleState100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
-            mods[i] = new SwerveModuleState100(0.0, m_moduleHeadings[i]);
+            if (m_moduleHeadings[i] == null) {
+                mods[i] = new SwerveModuleState100(0.0, Optional.empty());
+            } else {
+                mods[i] = new SwerveModuleState100(0.0, Optional.of(m_moduleHeadings[i]));
+            }
         }
         return mods;
     }
 
-    private SwerveModulePosition[] constantModulePositions() {
-        SwerveModulePosition[] mods = new SwerveModulePosition[m_numModules];
+    private SwerveModulePosition100[] constantModulePositions() {
+        SwerveModulePosition100[] mods = new SwerveModulePosition100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
-            mods[i] = new SwerveModulePosition(0.0, m_moduleHeadings[i]);
+            if (m_moduleHeadings[i] == null) {
+                mods[i] = new SwerveModulePosition100(0.0, Optional.empty());
+            } else {
+                mods[i] = new SwerveModulePosition100(0.0, Optional.of(m_moduleHeadings[i]));
+            }
         }
         return mods;
     }
@@ -406,14 +440,11 @@ public class SwerveDriveKinematics100 {
         for (int i = 0; i < m_numModules; i++) {
             double x = moduleStatesMatrix.get(i * 2, 0);
             double y = moduleStatesMatrix.get(i * 2 + 1, 0);
-            Rotation2d angle = new Rotation2d(x, y);
-            double speed = Math.hypot(x, y);
-            if (speed <= 1e-6) {
-                //TODO fix this
-                moduleStates[i]= new SwerveModuleState100(speed, angle);
-                // moduleStates[i] = new SwerveModuleState100(speed, null);
+            if (Math.abs(x) < 1e-6 && Math.abs(y) < 1e-6) {
+                moduleStates[i] = new SwerveModuleState100(0.0, Optional.empty());
             } else {
-                moduleStates[i]= new SwerveModuleState100(speed, angle);
+                moduleStates[i] = new SwerveModuleState100(Math.hypot(x, y),
+                        Optional.of(new Rotation2d(x, y)));
             }
         }
         return moduleStates;
@@ -426,29 +457,41 @@ public class SwerveDriveKinematics100 {
             SimpleMatrix chassisSpeedsAccelerationMatrix, SwerveModuleState100[] prevStates, double dt) {
         SwerveModuleState100[] moduleStates = new SwerveModuleState100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
+            Optional<Rotation2d> angle2 = prevStates[i].angle;
+
+            if (angle2.isEmpty()) {
+                throw new IllegalArgumentException();
+            }
+
             SimpleMatrix dmodulexy = m_mat[i].mult(chassisSpeedsMatrix);
             double vx = dmodulexy.get(0, 0);
             double vy = dmodulexy.get(1, 0);
             double speed = Math.hypot(vx, vy);
             Rotation2d angle;
             if (speed <= 1e-6) {
-                angle = new Rotation2d(MathUtil
-                        .angleModulus(prevStates[i].angle.getRadians() + prevStates[i].angle_2 * dt));
+                // avoid the garbage rotation, extrapolate the angle using omega
+                // double dtheta = prevStates[i].omega * dt;
+                // angle = new Rotation2d(MathUtil.angleModulus(
+                // angle2.get().getRadians() + dtheta));
+                // actually we really have no idea what the current state should be
+                moduleStates[i] = new SwerveModuleState100(0, Optional.empty());
+                continue;
             } else {
                 angle = new Rotation2d(vx, vy);
             }
             SimpleMatrix multiplier = new SimpleMatrix(2, 2);
-            multiplier.setRow(0, 0, Math.cos(angle.getRadians()), Math.sin(angle.getRadians()));
-            multiplier.setRow(1, 0, -Math.sin(angle.getRadians()), Math.cos(angle.getRadians()));
+            multiplier.setRow(0, 0, angle.getCos(), angle.getSin());
+            multiplier.setRow(1, 0, -1.0 * angle.getSin(), angle.getCos());
             SimpleMatrix moduleAccelerationXY = getModuleAccelerationXY(i,
                     chassisSpeedsAccelerationMatrix);
             SimpleMatrix moduleAccelMat = multiplier.mult(moduleAccelerationXY);
             if (speed != 0) {
                 moduleAccelMat.set(1, 0, (moduleAccelMat.get(1, 0) / speed));
             } else {
-                moduleAccelMat.set(1,0, moduleAccelMat.get(1, 0) * 100000);
+                // TODO: what is this 100000?
+                moduleAccelMat.set(1, 0, moduleAccelMat.get(1, 0) * 100000);
             }
-            moduleStates[i] = new SwerveModuleState100(speed, angle, moduleAccelMat.get(0, 0),
+            moduleStates[i] = new SwerveModuleState100(speed, Optional.of(angle), moduleAccelMat.get(0, 0),
                     moduleAccelMat.get(1, 0));
         }
         return moduleStates;
@@ -472,14 +515,12 @@ public class SwerveDriveKinematics100 {
     /**
      * The resulting distance is always positive.
      */
-    private SwerveModulePosition[] deltasFromVector(SimpleMatrix moduleDeltaVector) {
-        SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[m_numModules];
+    private SwerveModulePosition100[] deltasFromVector(SimpleMatrix moduleDeltaVector) {
+        SwerveModulePosition100[] moduleDeltas = new SwerveModulePosition100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
             double x = moduleDeltaVector.get(i * 2, 0);
             double y = moduleDeltaVector.get(i * 2 + 1, 0);
-            double dist = Math.hypot(x, y);
-            Rotation2d angle = new Rotation2d(x, y);
-            moduleDeltas[i] = new SwerveModulePosition(dist, angle);
+            moduleDeltas[i] = new SwerveModulePosition100(x, y);
         }
         return moduleDeltas;
     }
@@ -487,14 +528,21 @@ public class SwerveDriveKinematics100 {
     /** Keep a copy of headings in case we need them for full-stop. */
     private void updateHeadings(SwerveModuleState100[] moduleStates) {
         for (int i = 0; i < m_numModules; i++) {
-            if (moduleStates[i].angle == null) continue;
-            m_moduleHeadings[i] = moduleStates[i].angle;
+            if (moduleStates[i].angle.isEmpty()) {
+                // skip the update, remember the most-recent not-invalid value.
+                continue;
+            }
+            m_moduleHeadings[i] = moduleStates[i].angle.get();
         }
     }
 
-    private void updateHeadings(SwerveModulePosition[] mods) {
+    private void updateHeadings(SwerveModulePosition100[] mods) {
         for (int i = 0; i < m_numModules; i++) {
-            m_moduleHeadings[i] = mods[i].angle;
+            if (mods[i].angle.isEmpty()) {
+                // skip the update, remember the most-recent not-invalid value
+                continue;
+            }
+            m_moduleHeadings[i] = mods[i].angle.get();
         }
     }
 

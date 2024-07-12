@@ -9,7 +9,7 @@ import org.team100.lib.commands.drivetrain.DriveWithWaypoints;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class Amp extends SequentialCommandGroup {
     public Amp(
-            Logger parent,
+            SupplierLogger parent,
             Supplier<Pose2d> poseSupplier,
             SwerveDriveSubsystem m_swerve,
             DriveMotionController controller,

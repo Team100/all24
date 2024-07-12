@@ -4,7 +4,7 @@ import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.config.Identity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Util;
 
 /**
@@ -13,7 +13,7 @@ import org.team100.lib.util.Util;
 public class HeadingFactory {
 
     public static HeadingInterface get(
-            Logger parent,
+            SupplierLogger parent,
             SwerveKinodynamics kinodynamics,
             SwerveModuleCollection collection,
             AsyncFactory asyncFactory) {

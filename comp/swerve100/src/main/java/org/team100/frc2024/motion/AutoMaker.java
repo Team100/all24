@@ -20,7 +20,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -51,7 +51,7 @@ public class AutoMaker implements Glassy {
     private final FeederSubsystem m_feeder;
     private final NotePosition24ArrayListener m_notePosition24ArrayListener;
     private final double kShooterScale;
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final TrajectoryVisualization m_viz;
 
     public enum FieldPoint {
@@ -62,7 +62,7 @@ public class AutoMaker implements Glassy {
     }
 
     public AutoMaker(
-            Logger parent,
+            SupplierLogger parent,
             SwerveDriveSubsystem swerve,
             DriveMotionController controller,
             double shooterScale,

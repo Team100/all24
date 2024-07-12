@@ -6,13 +6,12 @@ import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Util;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 /** Represents the modules in the drivetrain. */
 public class SwerveModuleCollection {
@@ -26,6 +25,7 @@ public class SwerveModuleCollection {
     private final SwerveModule100 m_frontRight;
     private final SwerveModule100 m_rearLeft;
     private final SwerveModule100 m_rearRight;
+
     private SwerveModuleCollection(
             SwerveModule100 frontLeft,
             SwerveModule100 frontRight,
@@ -41,11 +41,11 @@ public class SwerveModuleCollection {
      * Creates collections according to Identity.
      */
     public static SwerveModuleCollection get(
-            Logger parent,
+            SupplierLogger parent,
             double currentLimit,
             double statorLimit,
             SwerveKinodynamics kinodynamics) {
-        Logger collectionLogger = parent.child(kSwerveModules);
+        SupplierLogger collectionLogger = parent.child(kSwerveModules);
         switch (Identity.instance) {
             case COMP_BOT:
                 Util.println("************** WCP MODULES w/Duty-Cycle Encoders **************");
@@ -270,8 +270,8 @@ public class SwerveModuleCollection {
         };
     }
 
-    public SwerveModulePosition[] positions() {
-        return new SwerveModulePosition[] {
+    public SwerveModulePosition100[] positions() {
+        return new SwerveModulePosition100[] {
                 m_frontLeft.getPosition(),
                 m_frontRight.getPosition(),
                 m_rearLeft.getPosition(),

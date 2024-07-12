@@ -2,7 +2,7 @@ package org.team100.lib.util;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Vector2d;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
@@ -19,23 +19,23 @@ public class Tire implements Glassy {
     private static final double kDefaultSaturationM_s_s = 10.0;
     private static final double kDefaultSlipAtSaturation0_1 = 0.1;
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
     private final double m_saturationM_s_s;
     private final double m_slipAtSaturation0_1;
 
     /** for testing */
-    Tire(Logger parent, double saturationM_s_s, double slip0_1) {
+    Tire(SupplierLogger parent, double saturationM_s_s, double slip0_1) {
         m_saturationM_s_s = saturationM_s_s;
         m_slipAtSaturation0_1 = slip0_1;
         m_logger = parent.child(this);
     }
 
-    public static Tire noslip(Logger parent) {
+    public static Tire noslip(SupplierLogger parent) {
         return new Tire(parent, Double.MAX_VALUE, 0.0);
     }
 
-    public static Tire defaultTire(Logger parent) {
+    public static Tire defaultTire(SupplierLogger parent) {
         return new Tire(parent, kDefaultSaturationM_s_s, kDefaultSlipAtSaturation0_1);
     }
 

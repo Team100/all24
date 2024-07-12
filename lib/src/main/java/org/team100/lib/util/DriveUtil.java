@@ -1,12 +1,14 @@
 package org.team100.lib.util;
 
+import java.util.Optional;
+
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public class DriveUtil {
@@ -115,21 +117,26 @@ public class DriveUtil {
      * Note the arc is assumed to be the same length as the chord, though, i.e. the
      * angles are assumed to be close to each other.
      */
-    public static SwerveModulePosition[] modulePositionDelta(
-            SwerveModulePosition[] start,
-            SwerveModulePosition[] end) {
+    public static SwerveModulePosition100[] modulePositionDelta(
+            SwerveModulePosition100[] start,
+            SwerveModulePosition100[] end) {
         if (start.length != end.length) {
             throw new IllegalArgumentException("Inconsistent number of modules!");
         }
-        SwerveModulePosition[] newPositions = new SwerveModulePosition[start.length];
+        SwerveModulePosition100[] newPositions = new SwerveModulePosition100[start.length];
         for (int i = 0; i < start.length; i++) {
-            SwerveModulePosition startModule = start[i];
-            SwerveModulePosition endModule = end[i];
-            newPositions[i] = new SwerveModulePosition(
-                    endModule.distanceMeters - startModule.distanceMeters,
-                    // this change breaks the odometry test on line 66, the 90 degree turn case.
-                    // endModule.angle);
-                    endModule.angle.interpolate(startModule.angle, 0.5));
+            SwerveModulePosition100 startModule = start[i];
+            SwerveModulePosition100 endModule = end[i];
+            double deltaM = endModule.distanceMeters - startModule.distanceMeters;
+            if (startModule.angle.isPresent() && endModule.angle.isPresent()) {
+                newPositions[i] = new SwerveModulePosition100(
+                        deltaM,
+                        // this change breaks the odometry test on line 66, the 90 degree turn case.
+                        // endModule.angle);
+                        Optional.of(endModule.angle.get().interpolate(startModule.angle.get(), 0.5)));
+            } else {
+                newPositions[i] = new SwerveModulePosition100(deltaM, Optional.empty());
+            }
         }
         return newPositions;
     }

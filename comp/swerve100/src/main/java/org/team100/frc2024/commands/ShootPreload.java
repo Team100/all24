@@ -10,7 +10,7 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootPreload extends Command implements Glassy {
-    private final Logger logger;
+    private final SupplierLogger logger;
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -33,7 +33,7 @@ public class ShootPreload extends Command implements Glassy {
     private boolean finished = false;
 
     public ShootPreload(
-            Logger parent,
+            SupplierLogger parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
@@ -54,7 +54,7 @@ public class ShootPreload extends Command implements Glassy {
     }
 
     public ShootPreload(
-            Logger parent,
+            SupplierLogger parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,

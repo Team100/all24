@@ -4,7 +4,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,10 +19,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public class SteeringRateLimiter implements Glassy {
     private static final int kMaxIterations = 10;
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_limits;
 
-    public SteeringRateLimiter(Logger parent, SwerveKinodynamics limits) {
+    public SteeringRateLimiter(SupplierLogger parent, SwerveKinodynamics limits) {
         m_logger = parent.child(this);
         m_limits = limits;
     }
@@ -30,10 +30,10 @@ public class SteeringRateLimiter implements Glassy {
     public double enforceSteeringLimit(
             double[] prev_vx,
             double[] prev_vy,
-            Rotation2d[] prev_heading,
+            Rotation2d[] prev_heading, // nullable entries
             double[] desired_vx,
             double[] desired_vy,
-            Rotation2d[] desired_heading,
+            Rotation2d[] desired_heading, // nullable entries
             double[] desired_heading_velocity,
             Rotation2d[] overrideSteering,
             double kDtSec) {
@@ -41,6 +41,10 @@ public class SteeringRateLimiter implements Glassy {
         double min_s = 1.0;
 
         for (int i = 0; i < prev_vx.length; ++i) {
+            if (prev_heading[i] == null || desired_heading[i] == null) {
+                // don't know what to do here
+                continue;
+            }
             if (overrideSteering[i] != null) {
                 // ignore overridden wheels
                 continue;

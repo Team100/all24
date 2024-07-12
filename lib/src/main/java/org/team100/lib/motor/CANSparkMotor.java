@@ -2,7 +2,7 @@ package org.team100.lib.motor;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.revrobotics.CANSparkBase;
@@ -13,14 +13,14 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 public abstract class CANSparkMotor implements BareMotor {
-    protected final Logger m_logger;
+    protected final SupplierLogger m_logger;
     protected final Feedforward100 m_ff;
     protected final CANSparkBase m_motor;
     protected final RelativeEncoder m_encoder;
     protected final SparkPIDController m_pidController;
 
     protected CANSparkMotor(
-            Logger parent,
+            SupplierLogger parent,
             CANSparkBase motor,
             MotorPhase motorPhase,
             int currentLimit,

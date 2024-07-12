@@ -6,7 +6,7 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
@@ -39,7 +39,7 @@ public class DriveToState101 extends Command100 {
     private final TrajectoryVisualization m_viz;
 
     public DriveToState101(
-            Logger parent,
+            SupplierLogger parent,
             Pose2d goal,
             FieldRelativeVelocity endVelocity,
             SwerveDriveSubsystem drivetrain,

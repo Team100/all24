@@ -19,7 +19,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.sensors.MockHeading;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -28,7 +28,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 class ManualWithMinTimeHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
 

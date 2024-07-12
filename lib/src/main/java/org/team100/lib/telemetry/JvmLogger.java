@@ -16,11 +16,11 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * LoggedRobot.GcStatsCollector().
  */
 public class JvmLogger implements Glassy {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final Map<String, Long> times;
     private final Map<String, Long> counts;
 
-    public JvmLogger(Logger parent) {
+    public JvmLogger(SupplierLogger parent) {
         m_logger = parent.child(this);
         times = new HashMap<>();
         counts = new HashMap<>();

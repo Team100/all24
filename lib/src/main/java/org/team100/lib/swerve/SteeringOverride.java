@@ -1,10 +1,12 @@
 package org.team100.lib.swerve;
 
+import java.util.OptionalDouble;
+
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
@@ -16,14 +18,20 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public class SteeringOverride implements Glassy {
     private static final double kEpsilon = 1e-3;
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_limits;
 
-    public SteeringOverride(Logger parent, SwerveKinodynamics limits) {
+    public SteeringOverride(SupplierLogger parent, SwerveKinodynamics limits) {
         m_logger = parent.child(this);
         m_limits = limits;
     }
 
+    /**
+     * @param desiredModuleStates
+     * @param prevModuleStates
+     * @param overrideSteering    outvar, nullable entries
+     * @param kDtSec
+     */
     public double overrideIfStopped(
             SwerveModuleState100[] desiredModuleStates,
             SwerveModuleState100[] prevModuleStates,
@@ -40,24 +48,38 @@ public class SteeringOverride implements Glassy {
                 if (Math.abs(desiredModuleStates[i].speedMetersPerSecond) <= kEpsilon) {
                     // Both previous and desired states are stopped.
                     // Just leave module at its current angle.
-                    overrideSteering[i] = prevModuleStates[i].angle;
+                    if (prevModuleStates[i].angle.isEmpty()) {
+                        // there is no current angle, give up
+                        overrideSteering[i] = null;
+                        continue;
+                    } else {
+                        overrideSteering[i] = prevModuleStates[i].angle.get();
+                        continue;
+                    }
+                }
+
+                OptionalDouble rotationRad = rotationRad(desiredModuleStates[i], prevModuleStates[i]);
+                if (rotationRad.isEmpty()) {
+                    overrideSteering[i] = null;
                     continue;
                 }
 
-                double rotationRad = rotationRad(desiredModuleStates[i], prevModuleStates[i]);
-
-                double numStepsNeeded = Math.abs(rotationRad) / maxThetaStepRad;
+                double numStepsNeeded = Math.abs(rotationRad.getAsDouble()) / maxThetaStepRad;
 
                 if (numStepsNeeded <= 1.0) {
                     // goal is achievable in one time step.
                     // note this angle is the *unflipped* one, which means that something downstream
                     // may decide to flip it.
-                    overrideSteering[i] = desiredModuleStates[i].angle;
+                    if (desiredModuleStates[i].angle.isEmpty()) {
+                        overrideSteering[i] = null;
+                    } else {
+                        overrideSteering[i] = desiredModuleStates[i].angle.get();
+                    }
                 } else {
                     // goal is not achievable, so move as much as possible in one step.
                     // note this moves in the "flipped" direction if required.
-                    Rotation2d oneStepOfRotation = Rotation2d.fromRadians(Math.signum(rotationRad) * maxThetaStepRad);
-                    overrideSteering[i] = prevModuleStates[i].angle.rotateBy(oneStepOfRotation);
+                    Rotation2d oneStepOfRotation = Rotation2d.fromRadians(Math.signum(rotationRad.getAsDouble()) * maxThetaStepRad);
+                    overrideSteering[i] = prevModuleStates[i].angle.get().rotateBy(oneStepOfRotation);
                     // stop all drive motors until steering is aligned
                     min_s = 0.0;
                 }
@@ -74,11 +96,14 @@ public class SteeringOverride implements Glassy {
     }
 
     /** Actual rotation required, taking flipping into account. */
-    private double rotationRad(SwerveModuleState100 desiredModuleState, SwerveModuleState100 prevModuleState) {
-        Rotation2d necessaryRotation = desiredModuleState.angle.minus(prevModuleState.angle);
+    private OptionalDouble rotationRad(SwerveModuleState100 desiredModuleState, SwerveModuleState100 prevModuleState) {
+        if (desiredModuleState.angle.isEmpty() || prevModuleState.angle.isEmpty()) {
+            return OptionalDouble.empty();
+        }
+        Rotation2d necessaryRotation = desiredModuleState.angle.get().minus(prevModuleState.angle.get());
         if (SwerveUtil.shouldFlip(necessaryRotation)) {
             necessaryRotation = necessaryRotation.rotateBy(GeometryUtil.kRotation180);
         }
-        return MathUtil.angleModulus(necessaryRotation.getRadians());
+        return OptionalDouble.of(MathUtil.angleModulus(necessaryRotation.getRadians()));
     }
 }

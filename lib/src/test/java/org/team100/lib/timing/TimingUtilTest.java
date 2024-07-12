@@ -18,7 +18,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 import org.team100.lib.trajectory.Trajectory100;
 
@@ -29,7 +29,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 
 public class TimingUtilTest {
     public static final double kTestEpsilon = 1e-12;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     public static final List<Pose2dWithMotion> kWaypoints = Arrays.asList(
             new Pose2dWithMotion(new Pose2d(new Translation2d(0.0, 0.0), GeometryUtil.kRotationZero)),

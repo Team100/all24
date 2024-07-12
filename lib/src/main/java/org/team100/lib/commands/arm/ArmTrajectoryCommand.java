@@ -7,7 +7,7 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.arm.ArmTrajectories;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -48,7 +48,7 @@ public class ArmTrajectoryCommand extends Command100 {
     private Trajectory m_trajectory;
 
     public ArmTrajectoryCommand(
-            Logger parent,
+            SupplierLogger parent,
             ArmSubsystem armSubSystem,
             ArmKinematics armKinematicsM,
             Translation2d goal) {

@@ -11,14 +11,14 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.util.Util;
 
 class DriveInALittleSquareTest extends Fixtured implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     /** Confirm that the steering commands are simple steps. */
     @Test
@@ -36,7 +36,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].angle.get().getRadians(), kDelta);
 
         // the second time, it knows, so we switch to driving.
         stepTime(0.02);
@@ -46,7 +46,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(0.02, command.m_setpoint.v(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
         assertEquals(0.02, swerve.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].angle.get().getRadians(), kDelta);
 
         // step through the driving phase
         stepTime(2.5);
@@ -60,7 +60,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
         assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
-        assertEquals(Math.PI / 2, swerve.getSwerveLocal().getDesiredStates()[0].angle.getRadians(), kDelta);
+        assertEquals(Math.PI / 2, swerve.getSwerveLocal().getDesiredStates()[0].angle.get().getRadians(), kDelta);
     }
 
     @Test
@@ -127,21 +127,21 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
             stepTime(0.02);
             fixture.drive.periodic();
             command.execute100(0.02);
-            double measurement = fixture.drive.getSwerveLocal().states()[0].angle.getRadians();
+            double measurement = fixture.drive.getSwerveLocal().states()[0].angle.get().getRadians();
             SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
                 Util.printf("t %5.3f goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",
                         t,
-                        goal.angle.getRadians(),
+                        goal.angle.get().getRadians(),
                         setpoint.x(),
                         setpoint.v(),
                         measurement);
         }
         // after that time, the wheels have rotated.
         // note the controller tolerance is
-        assertEquals(Math.PI / 2, fixture.drive.getSwerveLocal().states()[0].angle.getRadians(), 0.01);
+        assertEquals(Math.PI / 2, fixture.drive.getSwerveLocal().states()[0].angle.get().getRadians(), 0.01);
         assertTrue(fixture.drive.getSwerveLocal().atGoal()[0]);
         // and we're driving again
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);

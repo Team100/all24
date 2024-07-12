@@ -11,7 +11,8 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Chronos.Sample;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -82,7 +83,7 @@ public class VisionDataProvider24 implements Glassy {
             0.001,
             0.1 };
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
     private final PoseEstimator100 m_poseEstimator;
     private final FireControl m_fireControl;
@@ -105,7 +106,7 @@ public class VisionDataProvider24 implements Glassy {
      * @throws IOException
      */
     public VisionDataProvider24(
-            Logger parent,
+            SupplierLogger parent,
             AprilTagFieldLayoutWithCorrectOrientation layout,
             PoseEstimator100 poseEstimator,
             FireControl fireControl) {

@@ -1,12 +1,17 @@
 package org.team100.lib.motion.drivetrain;
+
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+
 /** Just exercises some code. */
 class SwerveLocalTest extends Fixtured {
 
@@ -20,10 +25,10 @@ class SwerveLocalTest extends Fixtured {
         local.defense();
         local.stop();
         local.setRawModuleStates(new SwerveModuleState100[] {
-                new SwerveModuleState100(),
-                new SwerveModuleState100(),
-                new SwerveModuleState100(),
-                new SwerveModuleState100() });
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())),
+                new SwerveModuleState100(0, Optional.of(new Rotation2d())) });
         assertEquals(0, local.positions()[0].distanceMeters, 0.001);
     }
 }

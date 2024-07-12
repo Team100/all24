@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class VisionDataProviderPerformanceTest {
     private static final double kDelta = 0.01;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
     FireControl f = new FireControl() {
     };
 
