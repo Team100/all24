@@ -39,16 +39,20 @@ public class StraightLineTrajectory {
 
         Translation2d currentTranslation = startState.translation();
         FieldRelativeVelocity currentSpeed = startState.velocity();
+
         Translation2d goalTranslation = end.getTranslation();
         Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
         Rotation2d angleToGoal = translationToGoal.getAngle();
+
+        // if we don't have a valid course, then just use the angle to the goal
+        Rotation2d startingAngle = currentSpeed.angle().orElse(angleToGoal);
 
         try {
             return TrajectoryPlanner.generateTrajectory(
                     List.of(
                             new Pose2d(
                                     currentTranslation,
-                                    currentSpeed.angle()),
+                                    startingAngle),
                             new Pose2d(
                                     goalTranslation,
                                     angleToGoal)),

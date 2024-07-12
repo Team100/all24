@@ -15,6 +15,7 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -24,7 +25,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.util.function.FloatSupplier;
@@ -132,8 +132,8 @@ public interface Logger {
 
     default void logSwerveState(Level level, String leaf, Supplier<SwerveState> state) {
     }
-
-    default void logSwerveModulePosition(Level level, String leaf, Supplier<SwerveModulePosition> val) {
+    
+    default void logSwerveModulePosition100(Level level, String leaf, Supplier<SwerveModulePosition100> val) {
     }
 
     default void logArmAngles(Level level, String leaf, Supplier<ArmAngles> angles) {

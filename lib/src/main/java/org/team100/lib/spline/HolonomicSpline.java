@@ -97,10 +97,13 @@ public class HolonomicSpline {
      * Course is the same for holonomic and nonholonomic splines.
      */
     public Optional<Rotation2d> getCourse(double t) {
-        if (Math100.epsilonEquals(dx(t), 0.0) && Math100.epsilonEquals(dy(t), 0.0)) {
+        double dx = dx(t);
+        double dy = dy(t);
+        if (Math100.epsilonEquals(dx, 0.0) && Math100.epsilonEquals(dy, 0.0)) {
+            // rotation below would be garbage so give up
             return Optional.empty();
         }
-        return Optional.of(new Rotation2d(dx(t), dy(t)));
+        return Optional.of(new Rotation2d(dx, dy));
     }
 
     /**
@@ -173,17 +176,29 @@ public class HolonomicSpline {
     }
 
     /** Returns pose in the nonholonomic sense, where the rotation is the course */
-    private Pose2d getStartPose() {
-        return new Pose2d(
+    private Optional<Pose2d> getStartPose() {
+        double dx = dx(0);
+        double dy = dy(0);
+        if (Math.abs(dx) < 1e-6 && Math.abs(dy) < 1e-6) {
+            // rotation below would be garbage, so give up.
+            return Optional.empty();
+        }
+        return Optional.of(new Pose2d(
                 getPoint(0),
-                new Rotation2d(dx(0), dy(0)));
+                new Rotation2d(dx, dy)));
     }
 
     /** Returns pose in the nonholonomic sense, where the rotation is the course */
-    private Pose2d getEndPose() {
-        return new Pose2d(
+    private Optional<Pose2d> getEndPose() {
+        double dx = dx(1);
+        double dy = dy(1);
+        if (Math.abs(dx) < 1e-6 && Math.abs(dy) < 1e-6) {
+            // rotation below would be garbage, so give up.
+            return Optional.empty();
+        }
+        return Optional.of(new Pose2d(
                 getPoint(1),
-                new Rotation2d(dx(1), dy(1)));
+                new Rotation2d(dx, dy)));
     }
 
     /**
@@ -336,8 +351,15 @@ public class HolonomicSpline {
     }
 
     private static void finish(List<HolonomicSpline> splines, ControlPoint[] controlPoints, double stepSize, int i) {
-        if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
-                || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+        Optional<Pose2d> startPose = splines.get(i).getStartPose();
+        Optional<Pose2d> startPose2 = splines.get(i + 1).getStartPose();
+        Optional<Pose2d> endPose = splines.get(i).getEndPose();
+        Optional<Pose2d> endPose2 = splines.get(i + 1).getEndPose();
+        if (startPose.isEmpty() || startPose2.isEmpty() || endPose.isEmpty() || endPose2.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        if (GeometryUtil.isColinear(startPose.get(), startPose2.get())
+                || GeometryUtil.isColinear(endPose.get(), endPose2.get())) {
             return;
         }
 
@@ -356,8 +378,15 @@ public class HolonomicSpline {
     }
 
     private static void forwards(List<HolonomicSpline> splines, ControlPoint[] controlPoints, int i) {
-        if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
-                || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+        Optional<Pose2d> startPose = splines.get(i).getStartPose();
+        Optional<Pose2d> startPose2 = splines.get(i + 1).getStartPose();
+        Optional<Pose2d> endPose = splines.get(i).getEndPose();
+        Optional<Pose2d> endPose2 = splines.get(i + 1).getEndPose();
+        if (startPose.isEmpty() || startPose2.isEmpty() || endPose.isEmpty() || endPose2.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        if (GeometryUtil.isColinear(startPose.get(), startPose2.get())
+                || GeometryUtil.isColinear(endPose.get(), endPose2.get())) {
             return;
         }
 
@@ -378,8 +407,15 @@ public class HolonomicSpline {
             ControlPoint[] controlPoints,
             double magnitude,
             int i) {
-        if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
-                || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+        Optional<Pose2d> startPose = splines.get(i).getStartPose();
+        Optional<Pose2d> startPose2 = splines.get(i + 1).getStartPose();
+        Optional<Pose2d> endPose = splines.get(i).getEndPose();
+        Optional<Pose2d> endPose2 = splines.get(i + 1).getEndPose();
+        if (startPose.isEmpty() || startPose2.isEmpty() || endPose.isEmpty() || endPose2.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        if (GeometryUtil.isColinear(startPose.get(), startPose2.get())
+                || GeometryUtil.isColinear(endPose.get(), endPose2.get())) {
             return;
         }
 
@@ -408,8 +444,15 @@ public class HolonomicSpline {
         double magnitude = 0;
         for (int i = 0; i < splines.size() - 1; ++i) {
             // don't try to optimize colinear points
-            if (GeometryUtil.isColinear(splines.get(i).getStartPose(), splines.get(i + 1).getStartPose())
-                    || GeometryUtil.isColinear(splines.get(i).getEndPose(), splines.get(i + 1).getEndPose())) {
+            Optional<Pose2d> startPose = splines.get(i).getStartPose();
+            Optional<Pose2d> startPose2 = splines.get(i + 1).getStartPose();
+            Optional<Pose2d> endPose = splines.get(i).getEndPose();
+            Optional<Pose2d> endPose2 = splines.get(i + 1).getEndPose();
+            if (startPose.isEmpty() || startPose2.isEmpty() || endPose.isEmpty() || endPose2.isEmpty()) {
+                throw new IllegalArgumentException();
+            }
+            if (GeometryUtil.isColinear(startPose.get(), startPose2.get())
+                    || GeometryUtil.isColinear(endPose.get(), endPose2.get())) {
                 continue;
             }
             double original = sumDCurvature2(splines);

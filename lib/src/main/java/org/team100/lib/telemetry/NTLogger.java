@@ -17,6 +17,7 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.telemetry.Chronos.Sample;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -28,7 +29,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.BooleanPublisher;
@@ -53,7 +53,6 @@ public class NTLogger implements Logger {
     private final String m_root;
     private final BooleanSupplier m_enabled;
     private final Chronos m_chronos;
-
 
     NTLogger(Telemetry telemetry, String root, BooleanSupplier enabled) {
         m_telemetry = telemetry;
@@ -307,9 +306,11 @@ public class NTLogger implements Logger {
     }
 
     @Override
-    public void logSwerveModulePosition(Level level, String leaf, Supplier<SwerveModulePosition> val) {
+    public void logSwerveModulePosition100(Level level, String leaf, Supplier<SwerveModulePosition100> val) {
         logDouble(level, append(leaf, "distance"), () -> val.get().distanceMeters);
-        logRotation2d(level, append(leaf, "angle"), () -> val.get().angle);
+        if (val.get().angle.isPresent()) {
+            logRotation2d(level, append(leaf, "angle"), () -> val.get().angle.get());
+        }
     }
 
     @Override

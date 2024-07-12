@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.Timer;
 /** For testing the NotePosition struct array */
 public class NotePosition24ArrayListener {
     private StructBuffer<Rotation3d> m_buf = StructBuffer.create(Rotation3d.struct);
-    private Optional<List<Translation2d>> notes = Optional.empty();
+    private List<Translation2d> notes = new ArrayList<>();
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private double latestTime = 0;
 
@@ -41,7 +41,7 @@ public class NotePosition24ArrayListener {
      * TODO: use the correct timing instead of this average.
      */
     private static final double kTotalLatencySeconds = 0.075;
-    
+
     public NotePosition24ArrayListener(SwerveDrivePoseEstimator100 poseEstimator) {
         m_poseEstimator = poseEstimator;
     }
@@ -74,11 +74,10 @@ public class NotePosition24ArrayListener {
                 return;
             }
             Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
-            notes = Optional.of(
-                    PoseEstimationHelper.cameraRotsToFieldRelativeArray(
-                            m_poseEstimator.getEstimatedPosition().pose(),
-                            cameraInRobotCoordinates,
-                            positions));
+            notes = PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+                    m_poseEstimator.getEstimatedPosition().pose(),
+                    cameraInRobotCoordinates,
+                    positions);
         } else {
             Util.warn("note weird vision update key: " + name);
         }
@@ -87,27 +86,24 @@ public class NotePosition24ArrayListener {
     /**
      * @return The translation of all the notes, field relative
      */
-    public Optional<List<Translation2d>> getTranslation2dArray() {
+    public List<Translation2d> getTranslation2dArray() {
         switch (Identity.instance) {
             case BLANK:
                 Transform3d cameraInRobotCoordinates = Camera.GAME_PIECE.getOffset();
                 SimulatedCamera simCamera = new SimulatedCamera(cameraInRobotCoordinates,
                         new Rotation3d(0, Math.toRadians(31.5), Math.toRadians(40)));
-                Optional<ArrayList<Rotation3d>> rot = simCamera.getRotation(
+                List<Rotation3d> rot = simCamera.getRotation(
                         m_poseEstimator.getEstimatedPosition().pose(),
                         NotePicker.autoNotes);
-                if (!rot.isPresent()) {
-                    return Optional.empty();
-                }
-                return Optional
-                        .of(PoseEstimationHelper.cameraRotsToFieldRelative(
+                if (rot.isEmpty()) return new ArrayList<>();
+                return PoseEstimationHelper.cameraRotsToFieldRelative(
                                 m_poseEstimator.getEstimatedPosition().pose(),
-                                cameraInRobotCoordinates, rot.get()));
+                                cameraInRobotCoordinates, rot);
             default:
                 if (latestTime > Timer.getFPGATimestamp() - 0.1) {
                     return notes;
                 }
-                return Optional.empty();
+                return new ArrayList<>();
         }
     }
 

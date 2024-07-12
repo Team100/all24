@@ -1,5 +1,7 @@
 package org.team100.lib.commands.drivetrain;
 
+import java.util.Optional;
+
 import org.team100.lib.commands.Command100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -76,19 +78,19 @@ public class Oscillate extends Command100 {
         if (Experiments.instance.enabled(Experiment.OscillateDirect)) {
             if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
                 SwerveModuleState100[] states = new SwerveModuleState100[] {
-                        new SwerveModuleState100(speedM_S, new Rotation2d(3 * Math.PI / 4)),
-                        new SwerveModuleState100(speedM_S, new Rotation2d(Math.PI / 4)),
-                        new SwerveModuleState100(speedM_S, new Rotation2d(-3 * Math.PI / 4)),
-                        new SwerveModuleState100(speedM_S, new Rotation2d(-1 * Math.PI / 4))
+                        new SwerveModuleState100(speedM_S, Optional.of(new Rotation2d(3 * Math.PI / 4))),
+                        new SwerveModuleState100(speedM_S, Optional.of(new Rotation2d(Math.PI / 4))),
+                        new SwerveModuleState100(speedM_S, Optional.of(new Rotation2d(-3 * Math.PI / 4))),
+                        new SwerveModuleState100(speedM_S, Optional.of(new Rotation2d(-1 * Math.PI / 4)))
                 };
                 m_swerve.setRawModuleStates(states);
 
             } else {
                 SwerveModuleState100[] states = new SwerveModuleState100[] {
-                        new SwerveModuleState100(speedM_S, GeometryUtil.kRotationZero),
-                        new SwerveModuleState100(speedM_S, GeometryUtil.kRotationZero),
-                        new SwerveModuleState100(speedM_S, GeometryUtil.kRotationZero),
-                        new SwerveModuleState100(speedM_S, GeometryUtil.kRotationZero)
+                        new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                        new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                        new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                        new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero))
                 };
                 m_swerve.setRawModuleStates(states);
 

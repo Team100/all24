@@ -2,6 +2,8 @@ package org.team100.lib.swerve;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -22,10 +24,10 @@ class SteeringOverrideTest {
         SteeringOverride c = new SteeringOverride(logger, l);
 
         SwerveModuleState100[] desiredModuleStates = new SwerveModuleState100[] {
-                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
+                new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero))
         };
         SwerveModuleState100[] prevModuleStates = new SwerveModuleState100[] {
-                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
+                new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero))
         };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 
@@ -44,10 +46,10 @@ class SteeringOverrideTest {
         SteeringOverride c = new SteeringOverride(logger, l);
 
         SwerveModuleState100[] desiredModuleStates = new SwerveModuleState100[] {
-                new SwerveModuleState100(1, GeometryUtil.kRotation90)
+                new SwerveModuleState100(1, Optional.of(GeometryUtil.kRotation90))
         };
         SwerveModuleState100[] prevModuleStates = new SwerveModuleState100[] {
-                new SwerveModuleState100(0, GeometryUtil.kRotationZero)
+                new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero))
         };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 

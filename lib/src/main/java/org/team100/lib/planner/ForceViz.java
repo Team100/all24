@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Logger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class ForceViz {
@@ -38,8 +40,11 @@ public class ForceViz {
         // ignore small forces
         if (v.norm() < 0.1)
             return;
+        Optional<Rotation2d> angle = v.angle();
+        if (angle.isEmpty())
+            return;
         items.putIfAbsent(name, new ArrayList<>());
-        double direction = v.angle().getDegrees();
+        double direction = angle.get().getDegrees();
         double x = p.getX() - v.x() * kScale;
         double y = p.getY() - v.y() * kScale;
         List<Double> f = items.get(name);
