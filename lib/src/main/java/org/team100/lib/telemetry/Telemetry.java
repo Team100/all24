@@ -5,6 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.Publisher;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DataLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 
 /**
@@ -47,14 +49,15 @@ public class Telemetry {
         }
     }
 
-    /**
-     * useful for troubleshooting unit tests. it's quite slow.
-     */
-    static final boolean kAlsoPrint = false;
     private static final Telemetry instance = new Telemetry();
 
+    // for writing to Network Tables.
     final NetworkTableInstance inst;
     final Map<String, Publisher> pubs;
+
+    // for logging to USB.
+    final DataLog m_log;
+    final Map<String, DataLogEntry> entries;
     Level m_level;
 
     /**
@@ -64,6 +67,10 @@ public class Telemetry {
     private Telemetry() {
         inst = NetworkTableInstance.getDefault();
         pubs = new ConcurrentHashMap<>();
+
+        m_log = DataLogManager.getLog();
+        entries = new ConcurrentHashMap<>();
+
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
         DataLogManager.start();
