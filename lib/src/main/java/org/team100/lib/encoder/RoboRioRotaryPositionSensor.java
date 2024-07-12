@@ -2,7 +2,7 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSensor {
     private static final double kTwoPi = 2.0 * Math.PI;
 
-    protected final Logger m_logger;
+    protected final SupplierLogger m_logger;
     private final double m_positionOffset;
     private final EncoderDrive m_drive;
 
@@ -24,7 +24,7 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
     private Double m_prevTimeS = null;
 
     protected RoboRioRotaryPositionSensor(
-            Logger parent,
+            SupplierLogger parent,
             double inputOffset,
             EncoderDrive drive) {
         m_logger = parent.child(this);

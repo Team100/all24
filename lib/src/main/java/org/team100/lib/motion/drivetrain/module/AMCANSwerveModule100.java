@@ -17,7 +17,7 @@ import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.TalonSRXMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -40,7 +40,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
 
     public static AMCANSwerveModule100 get(
             String name,
-            Logger parent,
+            SupplierLogger parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -49,7 +49,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
-        Logger moduleLogger = parent.child(name);
+        SupplierLogger moduleLogger = parent.child(name);
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         Feedforward100 ff = Feedforward100.makeAMSwerveDriveFalcon6();
         LinearVelocityServo driveServo = driveServo(
@@ -72,7 +72,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     }
 
     private static LinearVelocityServo driveServo(
-            Logger parent,
+            SupplierLogger parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -96,7 +96,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     }
 
     private static OnboardAngularPositionServo turningServo(
-            Logger parent,
+            SupplierLogger parent,
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,

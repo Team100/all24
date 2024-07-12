@@ -1,7 +1,7 @@
 package org.team100.lib.hid;
 
 import org.team100.lib.async.Async;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,13 +21,13 @@ public class DriverControlProxy implements DriverControl {
 
     private String m_name;
     private DriverControl m_driverControl;
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
     /**
      * The async is just to scan for control updates, maybe don't use a whole thread
      * for it.
      */
-    public DriverControlProxy(Logger parent, Async async) {
+    public DriverControlProxy(SupplierLogger parent, Async async) {
         m_logger = parent.child(this);
         refresh();
         async.addPeriodic(this::refresh, kFreq, "DriverControlProxy");
@@ -47,7 +47,7 @@ public class DriverControlProxy implements DriverControl {
                 m_driverControl.getClass().getSimpleName());
     }
 
-    private static DriverControl getDriverControl(Logger parent, String name) {
+    private static DriverControl getDriverControl(SupplierLogger parent, String name) {
         if (name.contains("F310")) {
             return new DriverXboxControl(parent);
         }

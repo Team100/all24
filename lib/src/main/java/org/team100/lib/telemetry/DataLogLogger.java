@@ -1,16 +1,12 @@
 package org.team100.lib.telemetry;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.function.IntSupplier;
-import java.util.function.LongSupplier;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.team100.lib.telemetry.Telemetry.Level;
-
 import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DataLogEntry;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
@@ -18,118 +14,86 @@ import edu.wpi.first.util.datalog.FloatLogEntry;
 import edu.wpi.first.util.datalog.IntegerLogEntry;
 import edu.wpi.first.util.datalog.StringArrayLogEntry;
 import edu.wpi.first.util.datalog.StringLogEntry;
-import edu.wpi.first.util.function.FloatSupplier;
+import edu.wpi.first.wpilibj.DataLogManager;
 
 /** An attempt to reduce logging CPU load by using DataLog */
-public class DataLogLogger implements Logger {
-    private final Telemetry m_telemetry;
-    private final String m_root;
-    private final BooleanSupplier m_enabled;
+public class DataLogLogger extends PrimitiveLogger {
+    private final DataLog m_log;
+    private final Map<String, DataLogEntry> entries;
 
-    public DataLogLogger(Telemetry telemetry, String root, BooleanSupplier enabled) {
-        m_telemetry = telemetry;
-        m_root = root;
-        m_enabled = enabled;
+    public DataLogLogger() {
+        // create a log file but don't write network tables to it
+        DataLogManager.logNetworkTables(false);
+        m_log = DataLogManager.getLog();
+        
+        entries = new ConcurrentHashMap<>();
     }
 
     @Override
-    public Logger child(String stem) {
-        return new DataLogLogger(m_telemetry, m_root + "/" + stem, m_enabled);
+    public void logBoolean(String key, boolean val) {
+        pub(key,
+                k -> new BooleanLogEntry(m_log, k),
+                BooleanLogEntry.class).append(val);
     }
 
     @Override
-    public void logBoolean(Level level, String leaf, BooleanSupplier val) {
-        if (!allow(level))
-            return;
-        pub(
-                append(m_root, leaf),
-                k -> new BooleanLogEntry(m_telemetry.m_log, k),
-                BooleanLogEntry.class).append(val.getAsBoolean());
+    public void logDouble(String key, double val) {
+        pub(key,
+                k -> new DoubleLogEntry(m_log, k),
+                DoubleLogEntry.class).append(val);
     }
 
     @Override
-    public void logDouble(Level level, String leaf, DoubleSupplier vals) {
-        if (!allow(level))
-            return;
-        pub(
-                append(m_root, leaf),
-                k -> new DoubleLogEntry(m_telemetry.m_log, k),
-                DoubleLogEntry.class).append(vals.getAsDouble());
+    public void logInt(String key, int val) {
+        pub(key,
+                k -> new IntegerLogEntry(m_log, k),
+                IntegerLogEntry.class).append(val);
     }
 
     @Override
-    public void logInt(Level level, String leaf, IntSupplier vals) {
-        if (!allow(level))
-            return;
-        pub(
-                append(m_root, leaf),
-                k -> new IntegerLogEntry(m_telemetry.m_log, k),
-                IntegerLogEntry.class).append(vals.getAsInt());
+    public void logFloat(String key, float val) {
+        pub(key,
+                k -> new FloatLogEntry(m_log, k),
+                FloatLogEntry.class).append(val);
     }
 
     @Override
-    public void logFloat(Level level, String leaf, FloatSupplier val) {
-        if (!allow(level))
-            return;
-        pub(
-                append(m_root, leaf),
-                k -> new FloatLogEntry(m_telemetry.m_log, k),
-                FloatLogEntry.class).append(val.getAsFloat());
+    public void logDoubleArray(String key, double[] val) {
+        pub(key,
+                k -> new DoubleArrayLogEntry(m_log, k),
+                DoubleArrayLogEntry.class).append(val);
     }
 
     @Override
-    public void logDoubleArray(Level level, String leaf, Supplier<double[]> val) {
-        if (!allow(level))
-            return;
-        pub(
-                append(m_root, leaf),
-                k -> new DoubleArrayLogEntry(m_telemetry.m_log, k),
-                DoubleArrayLogEntry.class).append(val.get());
+    public void logDoubleObjArray(String key, Double[] val) {
+        logDoubleArray(key, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
     }
 
     @Override
-    public void logDoubleObjArray(Level level, String leaf, Supplier<Double[]> vals) {
-        if (!allow(level))
-            return;
-        Double[] val = vals.get();
-        logDoubleArray(level, leaf, () -> Stream.of(val).mapToDouble(Double::doubleValue).toArray());
-
+    public void logLong(String key, long val) {
+        pub(key,
+                k -> new IntegerLogEntry(m_log, k),
+                IntegerLogEntry.class).append(val);
     }
 
     @Override
-    public void logLong(Level level, String leaf, LongSupplier vals) {
-        if (!allow(level))
-            return;
-        pub(
-                append(m_root, leaf),
-                k -> new IntegerLogEntry(m_telemetry.m_log, k),
-                IntegerLogEntry.class).append(vals.getAsLong());
+    public void logString(String key, String val) {
+        pub(key,
+                k -> new StringLogEntry(m_log, k),
+                StringLogEntry.class).append(val);
     }
 
     @Override
-    public void logString(Level level, String leaf, Supplier<String> vals) {
-        if (!allow(level))
-            return;
-        pub(
-                append(m_root, leaf),
-                k -> new StringLogEntry(m_telemetry.m_log, k),
-                StringLogEntry.class).append(vals.get());
-    }
-
-    @Override
-    public void logStringArray(Level level, String leaf, Supplier<String[]> vals) {
-        if (!allow(level))
-            return;
-        pub(
-                append(m_root, leaf),
-                k -> new StringArrayLogEntry(m_telemetry.m_log, k),
-                StringArrayLogEntry.class).append(vals.get());
+    public void logStringArray(String key, String[] val) {
+        pub(key,
+                k -> new StringArrayLogEntry(m_log, k),
+                StringArrayLogEntry.class).append(val);
     }
 
     ///////////////////////////////////////////////////////////
 
     private <T extends DataLogEntry> T pub(String key, Function<String, DataLogEntry> fn, Class<T> entryClass) {
-        DataLogEntry entry = m_telemetry.entries.computeIfAbsent(valid(key), fn);
+        DataLogEntry entry = entries.computeIfAbsent(valid(key), fn);
         if (!entryClass.isInstance(entry))
             throw new IllegalArgumentException(
                     String.format("value type clash for key %s old %s new %s",
@@ -147,15 +111,4 @@ public class DataLogLogger implements Logger {
         return key;
     }
 
-    private boolean allow(Level level) {
-        if (m_telemetry.m_level == Level.COMP && level == Level.COMP) {
-            // comp mode allows COMP level regardless of enablement.
-            return true;
-        }
-        return enabled() && m_telemetry.m_level.admit(level);
-    }
-
-    private boolean enabled() {
-        return m_enabled.getAsBoolean();
-    }
 }

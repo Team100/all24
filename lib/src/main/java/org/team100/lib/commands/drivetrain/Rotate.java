@@ -9,7 +9,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
@@ -43,7 +43,7 @@ public class Rotate extends Command100 {
     private boolean m_steeringAligned;
 
     public Rotate(
-            Logger parent,
+            SupplierLogger parent,
             SwerveDriveSubsystem drivetrain,
             HeadingInterface heading,
             SwerveKinodynamics swerveKinodynamics,

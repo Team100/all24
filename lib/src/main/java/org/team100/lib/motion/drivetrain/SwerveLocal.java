@@ -13,7 +13,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -47,14 +47,14 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
             new SwerveModuleState100(0, Optional.of(new Rotation2d(-3 * Math.PI / 4)))
     };
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final SwerveModuleCollection m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
-            Logger parent,
+            SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             SwerveModuleCollection modules) {
         m_swerveKinodynamics = swerveKinodynamics;

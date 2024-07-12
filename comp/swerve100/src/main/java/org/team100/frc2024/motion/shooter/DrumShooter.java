@@ -25,7 +25,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -57,14 +57,14 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private static final double kDriveReduction = 1;
     private static final double kWheelDiameterM = 0.1;
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
     private final LinearVelocityServo leftRoller;
     private final LinearVelocityServo rightRoller;
     private final GravityServo pivotServo;
 
     public DrumShooter(
-            Logger parent,
+            SupplierLogger parent,
             int leftID,
             int rightID,
             int pivotID,
@@ -83,8 +83,8 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         double period = 0.02;
 
-        Logger leftLogger = parent.child("Left");
-        Logger rightLogger = parent.child("Right");
+        SupplierLogger leftLogger = parent.child("Left");
+        SupplierLogger rightLogger = parent.child("Right");
         switch (Identity.instance) {
             case COMP_BOT:
                 Falcon6Motor leftMotor = new Falcon6Motor(

@@ -8,7 +8,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -50,7 +50,7 @@ public class DriveInALittleSquare extends Command100 {
     Rotation2d m_goal;
     DriveState m_state;
 
-    public DriveInALittleSquare(Logger parent, SwerveDriveSubsystem swerve) {
+    public DriveInALittleSquare(SupplierLogger parent, SwerveDriveSubsystem swerve) {
         super(parent);
         m_swerve = swerve;
         m_driveProfile = new TrapezoidProfile100(kMaxVel, kMaxAccel, 0.05);

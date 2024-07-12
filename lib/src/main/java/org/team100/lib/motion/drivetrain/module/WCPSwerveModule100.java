@@ -24,7 +24,7 @@ import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.Kraken6Motor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -60,7 +60,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     public static WCPSwerveModule100 get(
             String name,
-            Logger parent,
+            SupplierLogger parent,
             double supplyLimitAmps,
             double statorLimitAmps,
             int driveMotorCanId,
@@ -72,7 +72,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
             MotorPhase motorPhase) {
-        Logger moduleLogger = parent.child(name);
+        SupplierLogger moduleLogger = parent.child(name);
 
         PIDConstants drivePidConstants = new PIDConstants(.2); // .2
         PIDConstants turningPidConstants = new PIDConstants(.32); // 5
@@ -105,7 +105,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static LinearVelocityServo driveServo(
-            Logger parent,
+            SupplierLogger parent,
             double supplyLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -133,7 +133,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo turningServo(
-            Logger parent,
+            SupplierLogger parent,
             Class<? extends RotaryPositionSensor> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
@@ -181,7 +181,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo getTurningServo(
-            Logger parent,
+            SupplierLogger parent,
             SwerveKinodynamics kinodynamics,
             Falcon6Motor turningMotor,
             RotaryPositionSensor turningEncoder,
@@ -222,7 +222,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static RotaryPositionSensor turningEncoder(
             Class<? extends RotaryPositionSensor> encoderClass,
-            Logger parent,
+            SupplierLogger parent,
             int channel,
             double inputOffset,
             EncoderDrive drive) {

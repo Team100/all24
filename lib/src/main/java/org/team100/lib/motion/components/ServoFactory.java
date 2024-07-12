@@ -17,14 +17,14 @@ import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.controller.PIDController;
 
 public class ServoFactory {
 
     public static LimitedLinearVelocityServo limitedNeoVelocityServo(
-            Logger parent,
+            SupplierLogger parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -56,7 +56,7 @@ public class ServoFactory {
     }
 
     public static LimitedLinearVelocityServo limitedSimulatedVelocityServo(
-            Logger parent,
+            SupplierLogger parent,
             SysParam param,
             double gearRatio,
             double wheelDiameterM) {
@@ -81,7 +81,7 @@ public class ServoFactory {
      * Velocity control using outboard SparkMax controller.
      */
     public static OnboardAngularPositionServo neoVortexAngleServo(
-            Logger parent,
+            SupplierLogger parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -111,7 +111,7 @@ public class ServoFactory {
     }
 
     public static OnboardAngularPositionServo simulatedAngleServo(
-            Logger parent,
+            SupplierLogger parent,
             SysParam param,
             PIDController controller) {
         // motor speed is rad/s

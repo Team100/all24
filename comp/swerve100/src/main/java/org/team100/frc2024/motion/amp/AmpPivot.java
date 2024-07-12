@@ -20,7 +20,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,10 +29,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * The pivot is independent from the feeder, so it's a separate subsystem.
  */
 public class AmpPivot extends SubsystemBase implements Glassy {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final GravityServo ampAngleServo;
 
-    public AmpPivot(Logger parent) {
+    public AmpPivot(SupplierLogger parent) {
         m_logger = parent.child(this);
         SysParam m_params = SysParam.neoPositionServoSystem(
                 55,

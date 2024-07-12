@@ -3,7 +3,7 @@ package org.team100.lib.controller;
 import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 
@@ -13,9 +13,9 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveMotionControllerUtil implements Glassy {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
-    public DriveMotionControllerUtil(Logger parent) {
+    public DriveMotionControllerUtil(SupplierLogger parent) {
         m_logger = parent.child(this);
     }
 

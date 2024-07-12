@@ -8,7 +8,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
@@ -50,7 +50,7 @@ public class Oscillate extends Command100 {
 
     private SwerveState m_initial;
 
-    public Oscillate(Logger parent, SwerveDriveSubsystem swerve) {
+    public Oscillate(SupplierLogger parent, SwerveDriveSubsystem swerve) {
         super(parent);
         m_swerve = swerve;
         m_period = 4 * kMaxSpeed / kAccel;

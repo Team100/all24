@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,9 +23,9 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public class PoseEstimationHelper implements Glassy {
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
-    public PoseEstimationHelper(Logger parent) {
+    public PoseEstimationHelper(SupplierLogger parent) {
         m_logger = parent.child(this);
     }
 

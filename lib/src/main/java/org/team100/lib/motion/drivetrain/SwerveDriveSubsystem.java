@@ -11,7 +11,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.swerve.SwerveSetpoint;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ExpiringMemoizingSupplier;
 
@@ -25,8 +25,8 @@ import edu.wpi.first.wpilibj.Timer;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends Subsystem100 {
-    private final Logger m_fieldLogger;
-    private final Logger m_logger;
+    private final SupplierLogger m_fieldLogger;
+    private final SupplierLogger m_logger;
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
@@ -34,8 +34,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
-            Logger fieldLogger,
-            Logger parent,
+            SupplierLogger fieldLogger,
+            SupplierLogger parent,
             HeadingInterface heading,
             SwerveDrivePoseEstimator100 poseEstimator,
             SwerveLocal swerveLocal,

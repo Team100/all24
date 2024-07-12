@@ -9,7 +9,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.geometry.Vector2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,7 +20,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class SlipperyTireUtilTest {
     private static final double kDelta = 0.001;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     // radius is sqrt(2)/2
     SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(

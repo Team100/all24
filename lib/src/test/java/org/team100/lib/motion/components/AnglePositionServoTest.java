@@ -10,7 +10,7 @@ import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.util.Util;
 
@@ -18,7 +18,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 class AnglePositionServoTest {
     private static final double kDelta = 0.001;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
     private static final boolean kActuallyPrint = false;
 
     /** A minimal exercise. */

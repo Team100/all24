@@ -15,7 +15,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
 
@@ -51,7 +51,7 @@ public class DriveWithProfileNote extends Command100 {
 
     public DriveWithProfileNote(
             FieldLogger fieldLogger,
-            Logger parent,
+            SupplierLogger parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,

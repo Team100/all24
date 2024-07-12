@@ -2,7 +2,7 @@ package org.team100.lib.commands.arm;
 
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
  */
 public class Sequence extends SequentialCommandGroup {
 
-    public Sequence(Logger parent, ArmSubsystem armSubsystem, ArmKinematics armKinematicsM) {
+    public Sequence(SupplierLogger parent, ArmSubsystem armSubsystem, ArmKinematics armKinematicsM) {
 
         addCommands(new ArmTrajectoryCommand(parent, armSubsystem, armKinematicsM, new Translation2d(.6, .6)),
                 new ArmTrajectoryCommand(parent, armSubsystem, armKinematicsM, new Translation2d(1, .6)),

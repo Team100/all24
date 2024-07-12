@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -21,7 +21,7 @@ public class ForceViz {
     private static final String kDesired = "desired";
     private static final double kScale = 0.5;
 
-    private final Logger m_logger = Telemetry.get().fieldLogger(false);
+    private final SupplierLogger m_logger = Telemetry.get().fieldLogger(false, false);
     private final Map<String, List<Double>> items;
 
     public ForceViz() {

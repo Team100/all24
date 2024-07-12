@@ -2,7 +2,7 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.config.Identity;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 public class GyroFactory {
     private final Identity m_identity;
@@ -13,7 +13,7 @@ public class GyroFactory {
         m_asyncFactory = asyncFactory;
     }
 
-    public Gyro100 get(Logger parent) {
+    public Gyro100 get(SupplierLogger parent) {
         switch (m_identity) {
             case COMP_BOT:
             case SWERVE_ONE:

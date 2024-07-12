@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.interpolation.Interpolatable;
@@ -20,7 +20,7 @@ import edu.wpi.first.math.interpolation.Interpolatable;
  * The buffer is never empty, so get() always returns *something*.
  */
 public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> implements Glassy {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final double m_historyS;
     private final NavigableMap<Double, T> m_pastSnapshots = new ConcurrentSkipListMap<>();
 
@@ -33,7 +33,7 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      */
     private final ReadWriteLock m_lock = new ReentrantReadWriteLock();
 
-    public TimeInterpolatableBuffer100(Logger parent, double historyS, double timeS, T initialValue) {
+    public TimeInterpolatableBuffer100(SupplierLogger parent, double historyS, double timeS, T initialValue) {
         m_logger = parent.child(this);
         m_historyS = historyS;
         // no lock needed in constructor

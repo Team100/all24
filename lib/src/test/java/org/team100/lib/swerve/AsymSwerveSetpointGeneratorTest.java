@@ -11,7 +11,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,7 +22,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 class AsymSwerveSetpointGeneratorTest {
     private static final double kDelta = 0.001;
     private final static double kDt = 0.02; // s
-    private final static Logger logger = new TestLogger();
+    private final static SupplierLogger logger = new TestLogger().getSupplierLogger();
     private final static SwerveKinodynamics kKinematicLimits = SwerveKinodynamicsFactory.limiting(logger);
 
     private final static double kMaxSteeringVelocityError = Math.toRadians(2.0); // rad/s

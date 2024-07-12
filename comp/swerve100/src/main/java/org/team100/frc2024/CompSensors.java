@@ -1,18 +1,18 @@
 package org.team100.frc2024;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class CompSensors implements SensorInterface, Glassy {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final DigitalInput intakeSensor;
     private final DigitalInput feederSensor;
     private final DigitalInput ampSensor;
 
-    public CompSensors(Logger parent, int port1, int port2, int port3) {
+    public CompSensors(SupplierLogger parent, int port1, int port2, int port3) {
         m_logger = parent.child(this);
         intakeSensor = new DigitalInput(port1);
         feederSensor = new DigitalInput(port2);

@@ -11,7 +11,7 @@ import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.controller.PIDController;
 
@@ -19,9 +19,9 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     public static SimulatedSwerveModule100 get(
             String name,
-            Logger parent,
+            SupplierLogger parent,
             SwerveKinodynamics kinodynamics) {
-        Logger moduleLogger = parent.child(name);
+        SupplierLogger moduleLogger = parent.child(name);
         LinearVelocityServo driveServo = simulatedDriveServo(
                 moduleLogger.child("Drive"));
         AngularPositionServo turningServo = simulatedTurningServo(
@@ -30,7 +30,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static LinearVelocityServo simulatedDriveServo(Logger parent) {
+    private static LinearVelocityServo simulatedDriveServo(SupplierLogger parent) {
         // simulated drive motor free speed is 5 m/s
         SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
         // simulated gearing is 2 meter wheel, 1:1, so rad/s and m/s are the same.
@@ -45,7 +45,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo simulatedTurningServo(
-            Logger parent,
+            SupplierLogger parent,
             SwerveKinodynamics kinodynamics) {
         // simulated turning motor free speed is 20 rad/s
         SimulatedBareMotor turningMotor = new SimulatedBareMotor(parent, 20);

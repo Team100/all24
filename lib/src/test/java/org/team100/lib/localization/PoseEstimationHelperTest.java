@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 
 class PoseEstimationHelperTest {
     private static final double kDelta = 0.01;
-    private static final Logger m_logger = new TestLogger();
+    private static final SupplierLogger m_logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testGetRobotPoseInFieldCoords2() {

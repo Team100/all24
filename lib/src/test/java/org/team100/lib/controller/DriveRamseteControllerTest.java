@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
@@ -28,7 +28,7 @@ class DriveRamseteControllerTest {
     boolean dump = false;
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(logger);
 
     @Test

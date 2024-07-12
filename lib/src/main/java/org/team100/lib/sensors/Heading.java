@@ -1,6 +1,6 @@
 package org.team100.lib.sensors;
 
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,11 +10,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * counterclockwise-positive.
  */
 public class Heading implements HeadingInterface {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
     private final Gyro100 m_gyro;
 
-    public Heading(Logger parent, Gyro100 gyro) {
+    public Heading(SupplierLogger parent, Gyro100 gyro) {
         m_gyro = gyro;
         m_logger = parent.child(this);
     }

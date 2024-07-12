@@ -17,7 +17,7 @@ import org.team100.lib.motor.BareMotorController100;
 import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
@@ -42,7 +42,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
     /** @param name like "front left" or whatever */
     public static AMSwerveModule100 get(
             String name,
-            Logger parent,
+            SupplierLogger parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -52,7 +52,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-        Logger moduleLogger = parent.child(name);
+        SupplierLogger moduleLogger = parent.child(name);
         LinearVelocityServo driveServo = driveServo(
                 moduleLogger.child("Drive"),
                 currentLimit,
@@ -72,7 +72,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
     }
 
     private static LinearVelocityServo driveServo(
-            Logger parent,
+            SupplierLogger parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -97,7 +97,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo turningServo(
-            Logger parent,
+            SupplierLogger parent,
             int turningMotorChannel,
             int turningEncoderChannel,
             double turningOffset,

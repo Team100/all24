@@ -7,7 +7,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -19,7 +19,7 @@ import edu.wpi.first.math.controller.PIDController;
  * Sensor measures the mechanism (i.e. arm) 1:1.
  */
 public class GravityServo implements Glassy {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final RotaryMechanism m_motor;
     private final PIDController m_controller;
     private final Profile100 m_profile;
@@ -31,7 +31,7 @@ public class GravityServo implements Glassy {
 
     public GravityServo(
             RotaryMechanism motor,
-            Logger parent,
+            SupplierLogger parent,
             PIDController controller,
             Profile100 profile,
             double period,

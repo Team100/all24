@@ -18,7 +18,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
@@ -35,7 +35,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class DriveToWaypoint3Test extends Fixtured {
     private static final double kDelta = 0.001;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
     private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
     SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);

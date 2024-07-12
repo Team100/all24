@@ -3,14 +3,14 @@ package org.team100.lib.motion.components;
 import java.util.OptionalDouble;
 
 import org.team100.lib.motion.LinearMechanism;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.Timer;
 
 public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final LinearMechanism m_motor;
 
     // for calculating acceleration
@@ -19,7 +19,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     private double m_setpoint;
 
     public OutboardLinearVelocityServo(
-            Logger parent,
+            SupplierLogger parent,
             LinearMechanism motor) {
         m_logger = parent.child(this);
         m_motor = motor;

@@ -9,7 +9,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -42,7 +42,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
     private final BatterySagLimiter m_BatterySagLimiter;
 
-    public AsymSwerveSetpointGenerator(Logger parent, SwerveKinodynamics limits) {
+    public AsymSwerveSetpointGenerator(SupplierLogger parent, SwerveKinodynamics limits) {
         m_limits = limits;
         m_centripetalLimiter = new CapsizeAccelerationLimiter(parent, limits);
         m_SteeringOverride = new SteeringOverride(parent, limits);

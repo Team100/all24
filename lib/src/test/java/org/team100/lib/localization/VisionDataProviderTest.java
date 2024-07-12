@@ -12,7 +12,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 class VisionDataProviderTest implements Timeless {
     private static final double kDelta = 0.01;
-    private static final Logger logger = new TestLogger();
+    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
     FireControl f = new FireControl() {
     };

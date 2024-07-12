@@ -3,7 +3,7 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.motor.CANSparkMotor;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
@@ -13,11 +13,11 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * per turn.
  */
 public class CANSparkEncoder implements IncrementalBareEncoder {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final CANSparkMotor m_motor;
 
     public CANSparkEncoder(
-            Logger parent,
+            SupplierLogger parent,
             CANSparkMotor motor) {
         m_logger = parent.child(this);
         m_motor = motor;

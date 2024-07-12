@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 /**
  * Rotate in place at the specified speed.
@@ -15,7 +15,7 @@ public class DriveRotation extends Command100 {
     private final Supplier<Double> m_rotSpeed;
 
     public DriveRotation(
-            Logger parent,
+            SupplierLogger parent,
             SwerveDriveSubsystem robotDrive,
             Supplier<Double> rot) {
         super(parent);

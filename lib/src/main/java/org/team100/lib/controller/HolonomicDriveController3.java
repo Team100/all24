@@ -3,7 +3,7 @@ package org.team100.lib.controller;
 import org.team100.lib.config.Identity;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -15,17 +15,17 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Drivetrain control with three independent PID controllers.
  */
 public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
 
-    public HolonomicDriveController3(Logger parent) {
+    public HolonomicDriveController3(SupplierLogger parent) {
         this(parent, cartesian(), cartesian(), theta());
     }
 
     public HolonomicDriveController3(
-            Logger parent,
+            SupplierLogger parent,
             PIDController xController,
             PIDController yController,
             PIDController thetaController) {
@@ -36,7 +36,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     }
 
     public static HolonomicDriveController3 withTolerance(
-            Logger parent,
+            SupplierLogger parent,
             double cartesianPosition,
             double cartesianVelocity,
             double rotationPosition,

@@ -4,7 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
@@ -17,7 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
  * Superclass for TalonFX motors.
  */
 public abstract class Talon6Motor implements BareMotor {
-    protected final Logger m_logger;
+    protected final SupplierLogger m_logger;
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
 
@@ -37,7 +37,7 @@ public abstract class Talon6Motor implements BareMotor {
     private final PositionVoltage m_PositionVoltage = new PositionVoltage(0);
 
     protected Talon6Motor(
-            Logger parent,
+            SupplierLogger parent,
             int canId,
             MotorPhase motorPhase,
             double supplyLimit,

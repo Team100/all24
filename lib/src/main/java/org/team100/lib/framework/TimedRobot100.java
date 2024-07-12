@@ -13,7 +13,7 @@ import java.util.PriorityQueue;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.telemetry.Chronos;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -74,7 +74,7 @@ public class TimedRobot100 extends IterativeRobotBase {
     /** Default loop period. */
     public static final double kDefaultPeriod = 0.02;
 
-    protected final Logger m_logger;
+    protected final SupplierLogger m_logger;
     private final Chronos chronos;
 
     // The C pointer to the notifier object. We don't use it directly, it is
@@ -101,7 +101,7 @@ public class TimedRobot100 extends IterativeRobotBase {
         if (Identity.instance.equals(Identity.BLANK)) {
             defaultEnabled = true;
         }
-        m_logger = Telemetry.get().namedRootLogger("ROBOT", defaultEnabled);
+        m_logger = Telemetry.get().namedRootLogger("ROBOT", defaultEnabled, false);
         chronos = Chronos.get();
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");

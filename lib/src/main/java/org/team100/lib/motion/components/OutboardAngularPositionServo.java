@@ -6,7 +6,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
@@ -24,7 +24,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
     
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final RotaryMechanism m_mechanism;
     private final CombinedEncoder m_encoder;
     private final Profile100 m_profile;
@@ -33,7 +33,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private State100 m_setpoint = new State100(0, 0);
 
     public OutboardAngularPositionServo(
-            Logger parent,
+            SupplierLogger parent,
             RotaryMechanism mech,
             CombinedEncoder encoder,
             Profile100 profile) {

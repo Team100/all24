@@ -9,7 +9,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
@@ -20,7 +20,7 @@ public class Intake extends SubsystemBase implements Glassy {
     private static final double kWheelDiameterM = 0.05;
     private static final int kCurrentLimit = 20;
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final SensorInterface m_sensors;
 
     // this uses PWMSparkMax instead of PWM to get MotorSafety.
@@ -31,7 +31,7 @@ public class Intake extends SubsystemBase implements Glassy {
     private int count = 0;
     private int currentCount = 0;
 
-    public Intake(Logger parent, SensorInterface sensors) {
+    public Intake(SupplierLogger parent, SensorInterface sensors) {
         m_logger = parent.child(this);
         m_sensors = sensors;
 

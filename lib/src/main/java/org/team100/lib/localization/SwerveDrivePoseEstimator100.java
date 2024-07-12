@@ -15,7 +15,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.SlipperyTireUtil;
@@ -36,7 +36,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     // look back a little to get a pose for velocity estimation
     private static final double velocityDtS = 0.02;
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final int m_numModules;
     private final SwerveKinodynamics m_kinodynamics;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
@@ -55,7 +55,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      * @param initialPoseMeters The starting pose estimate.
      */
     public SwerveDrivePoseEstimator100(
-            Logger parent,
+            SupplierLogger parent,
             SwerveKinodynamics kinodynamics,
             Rotation2d gyroAngle,
             SwerveModulePosition100[] modulePositions,

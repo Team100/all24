@@ -2,17 +2,17 @@ package org.team100.lib.swerve;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
  * Enforces a fixed limit on delta v.
  */
 public class CapsizeAccelerationLimiter implements Glassy {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_limits;
 
-    public CapsizeAccelerationLimiter(Logger parent, SwerveKinodynamics limits) {
+    public CapsizeAccelerationLimiter(SupplierLogger parent, SwerveKinodynamics limits) {
         m_logger = parent.child(this);
         m_limits = limits;
     }

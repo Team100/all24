@@ -4,7 +4,7 @@ import org.team100.lib.commands.drivetrain.ChassisSpeedDriver;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 
@@ -18,10 +18,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * corresponding ChassisSpeeds components (and scaled).
  */
 public class ManualChassisSpeeds implements ChassisSpeedDriver {
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
 
-    public ManualChassisSpeeds(Logger parent, SwerveKinodynamics swerveKinodynamics) {
+    public ManualChassisSpeeds(SupplierLogger parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_logger = parent.child(this);
     }

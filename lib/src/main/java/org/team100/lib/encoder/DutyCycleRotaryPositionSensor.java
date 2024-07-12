@@ -2,7 +2,7 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -19,7 +19,7 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
     private final DutyCycle m_dutyCycle;
 
     protected DutyCycleRotaryPositionSensor(
-            Logger parent,
+            SupplierLogger parent,
             int channel,
             double inputOffset,
             EncoderDrive drive) {

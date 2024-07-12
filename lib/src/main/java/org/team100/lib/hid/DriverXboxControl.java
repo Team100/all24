@@ -5,7 +5,7 @@ import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,11 +19,11 @@ public class DriverXboxControl implements DriverControl {
     private static final double kExpo = 0.65;
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final XboxController m_controller;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
-    public DriverXboxControl(Logger parent) {
+    public DriverXboxControl(SupplierLogger parent) {
         m_controller = new XboxController(0);
         m_logger = parent.child(this);
     }

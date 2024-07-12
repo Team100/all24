@@ -12,7 +12,7 @@ import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,14 +24,14 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     // TODO: is this the right reduction?
     private static final double kReduction = 16;
 
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
     private final LinearMechanism m1;
     private final LinearMechanism m2;
 
-    public ClimberSubsystem(Logger parent, int leftClimberID, int rightClimberID) {
+    public ClimberSubsystem(SupplierLogger parent, int leftClimberID, int rightClimberID) {
         m_logger = parent.child(this);
-        Logger leftLogger = m_logger.child("left");
-        Logger rightLogger = m_logger.child("right");
+        SupplierLogger leftLogger = m_logger.child("left");
+        SupplierLogger rightLogger = m_logger.child("right");
         switch (Identity.instance) {
             case COMP_BOT:
                 NeoVortexCANSparkMotor vp1 = new NeoVortexCANSparkMotor(

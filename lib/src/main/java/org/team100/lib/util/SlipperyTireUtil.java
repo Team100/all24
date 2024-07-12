@@ -7,7 +7,7 @@ import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,11 +26,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 public class SlipperyTireUtil implements Glassy {
     /** Clip corner speeds to this. */
     private static final double kMaxSpeedM_s = 5.0;
-    private final Logger m_logger;
+    private final SupplierLogger m_logger;
 
     private final Tire m_tire;
 
-    public SlipperyTireUtil(Logger parent, Tire tire) {
+    public SlipperyTireUtil(SupplierLogger parent, Tire tire) {
         m_tire = tire;
         m_logger = parent.child(this);
     }

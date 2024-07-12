@@ -1,13 +1,6 @@
 package org.team100.lib.telemetry;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.Publisher;
-import edu.wpi.first.util.datalog.DataLog;
-import edu.wpi.first.util.datalog.DataLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 
 /**
  * Simple logging wrapper.
@@ -51,13 +44,10 @@ public class Telemetry {
 
     private static final Telemetry instance = new Telemetry();
 
-    // for writing to Network Tables.
     final NetworkTableInstance inst;
-    final Map<String, Publisher> pubs;
+    final PrimitiveLogger ntLogger;
+    final PrimitiveLogger usbLogger;
 
-    // for logging to USB.
-    final DataLog m_log;
-    final Map<String, DataLogEntry> entries;
     Level m_level;
 
     /**
@@ -65,15 +55,10 @@ public class Telemetry {
      * Clients should use the static instance, not the constructor.
      */
     private Telemetry() {
-        // create a log file but don't write network tables to it
-        DataLogManager.logNetworkTables(false);
 
         inst = NetworkTableInstance.getDefault();
-        pubs = new ConcurrentHashMap<>();
-
-        m_log = DataLogManager.getLog();
-        entries = new ConcurrentHashMap<>();
-
+        ntLogger = new NTLogger();
+        usbLogger = new DataLogLogger();
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
         // DataLogManager.start();
@@ -91,11 +76,15 @@ public class Telemetry {
         return instance;
     }
 
-    public FieldLogger fieldLogger(boolean defaultEnabled) {
-        return new FieldLogger(this, defaultEnabled);
+    public FieldLogger fieldLogger(boolean defaultEnabledNT, boolean defaultEnabledUSB) {
+        return new FieldLogger(this, defaultEnabledNT, defaultEnabledUSB);
     }
 
-    public RootLogger namedRootLogger(String str, boolean defaultEnabled) {
-        return new RootLogger(this, str, defaultEnabled);
+    public RootLogger namedRootLogger(
+            String str,
+            boolean defaultEnabledNT,
+            boolean defaultEnabledUSB) {
+        return new RootLogger(this, str, defaultEnabledNT, defaultEnabledUSB);
     }
+
 }

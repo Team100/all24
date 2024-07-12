@@ -76,7 +76,7 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
 import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelPoller;
@@ -120,18 +120,18 @@ public class RobotContainer implements Glassy {
         poller.setDefault(Level.TRACE);
 
         final Telemetry telemetry = Telemetry.get();
-        final FieldLogger fieldLogger = telemetry.fieldLogger(true);
-        
+        final FieldLogger fieldLogger = telemetry.fieldLogger(true, true);
+
         boolean defaultEnabled = false;
         if (Identity.instance.equals(Identity.BLANK)) {
             defaultEnabled = true;
         }
-        final Logger sensorLogger = telemetry.namedRootLogger("SENSOR", defaultEnabled);
-        final Logger driveLogger = telemetry.namedRootLogger("DRIVE", defaultEnabled);
-        final Logger shooterLogger = telemetry.namedRootLogger("SHOOTER", defaultEnabled);
-        final Logger intakeLogger = telemetry.namedRootLogger("INTAKE", defaultEnabled);
-        final Logger ampLogger = telemetry.namedRootLogger("AMP", defaultEnabled);
-        final Logger climberLogger = telemetry.namedRootLogger("CLIMBER", defaultEnabled);
+        final SupplierLogger sensorLogger = telemetry.namedRootLogger("SENSOR", defaultEnabled, false);
+        final SupplierLogger driveLogger = telemetry.namedRootLogger("DRIVE", defaultEnabled, false);
+        final SupplierLogger shooterLogger = telemetry.namedRootLogger("SHOOTER", defaultEnabled, false);
+        final SupplierLogger intakeLogger = telemetry.namedRootLogger("INTAKE", defaultEnabled, false);
+        final SupplierLogger ampLogger = telemetry.namedRootLogger("AMP", defaultEnabled, false);
+        final SupplierLogger climberLogger = telemetry.namedRootLogger("CLIMBER", defaultEnabled, false);
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(driveLogger, async);
@@ -248,7 +248,7 @@ public class RobotContainer implements Glassy {
                         m_drive,
                         dthetaController,
                         swerveKinodynamics));
-        whileTrue(driverControl::actualCircle, new DriveInACircle(driveLogger, m_drive, controller, -1,viz));
+        whileTrue(driverControl::actualCircle, new DriveInACircle(driveLogger, m_drive, controller, -1, viz));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(

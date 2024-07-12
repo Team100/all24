@@ -10,7 +10,7 @@ import org.team100.lib.commands.drivetrain.DriveWithProfile2;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Logger;
+import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class DriveToAmp extends SequentialCommandGroup {
     public DriveToAmp(
-            Logger parent,
+            SupplierLogger parent,
             SwerveDriveSubsystem drive,
             SwerveKinodynamics limits,
             AmpPivot amp,
