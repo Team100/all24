@@ -49,7 +49,9 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
      */
     @Override
     public OptionalDouble getVelocity() {
-        return m_motor.getVelocityM_S();
+        OptionalDouble velocityM_S = m_motor.getVelocityM_S();
+        m_logger.logOptionalDouble(Level.TRACE, "velocity (m_s)", () -> velocityM_S);
+        return velocityM_S;
     }
 
     @Override
@@ -59,7 +61,9 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
     @Override
     public OptionalDouble getDistance() {
-        return m_motor.getPositionM();
+        OptionalDouble positionM = m_motor.getPositionM();
+        m_logger.logOptionalDouble(Level.TRACE, "position (m)", () -> positionM);
+        return positionM;
     }
 
     @Override
