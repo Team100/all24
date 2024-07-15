@@ -75,6 +75,52 @@ class TagTest {
     }
 
     @Test
+    void testPractice() throws IOException {
+        {
+            AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
+            // from red perspective, 101 is far away
+            Pose3d tag101Pose = layout.getTagPose(Alliance.Red, 101).get();
+            assertEquals(8.0, tag101Pose.getTranslation().getX(), kDelta);
+            assertEquals(2.0, tag101Pose.getTranslation().getY(), kDelta);
+            assertEquals(1.0, tag101Pose.getTranslation().getZ(), kDelta);
+            assertEquals(0, tag101Pose.getRotation().getX(), kDelta);
+            assertEquals(0, tag101Pose.getRotation().getY(), kDelta);
+            assertEquals(0, tag101Pose.getRotation().getZ(), kDelta);
+        }
+        {
+            AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
+            Pose3d tag102Pose = layout.getTagPose(Alliance.Red, 102).get();
+            assertEquals(0.0, tag102Pose.getTranslation().getX(), kDelta);
+            assertEquals(2.0, tag102Pose.getTranslation().getY(), kDelta);
+            assertEquals(1.0, tag102Pose.getTranslation().getZ(), kDelta);
+            assertEquals(0, tag102Pose.getRotation().getX(), kDelta);
+            assertEquals(0, tag102Pose.getRotation().getY(), kDelta);
+            assertEquals(Math.PI, tag102Pose.getRotation().getZ(), kDelta);
+        }
+        {
+            AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
+            // from red perspective, 101 is near
+            Pose3d tag101Pose = layout.getTagPose(Alliance.Blue, 101).get();
+            assertEquals(0.0, tag101Pose.getTranslation().getX(), kDelta);
+            assertEquals(2.0, tag101Pose.getTranslation().getY(), kDelta);
+            assertEquals(1.0, tag101Pose.getTranslation().getZ(), kDelta);
+            assertEquals(0, tag101Pose.getRotation().getX(), kDelta);
+            assertEquals(0, tag101Pose.getRotation().getY(), kDelta);
+            assertEquals(Math.PI, tag101Pose.getRotation().getZ(), kDelta);
+        }
+        {
+            AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
+            Pose3d tag102Pose = layout.getTagPose(Alliance.Blue, 102).get();
+            assertEquals(8.0, tag102Pose.getTranslation().getX(), kDelta);
+            assertEquals(2.0, tag102Pose.getTranslation().getY(), kDelta);
+            assertEquals(1.0, tag102Pose.getTranslation().getZ(), kDelta);
+            assertEquals(0, tag102Pose.getRotation().getX(), kDelta);
+            assertEquals(0, tag102Pose.getRotation().getY(), kDelta);
+            assertEquals(0, tag102Pose.getRotation().getZ(), kDelta);
+        }
+    }
+
+    @Test
     void testPracticeRaw() throws IOException {
         Path path = Filesystem.getDeployDirectory().toPath().resolve("practice-field.json");
         AprilTagFieldLayout layout = new AprilTagFieldLayout(path);
