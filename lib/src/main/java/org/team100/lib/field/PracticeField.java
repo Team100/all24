@@ -40,9 +40,15 @@ public class PracticeField {
     public static final Pose3d goal2 = new Pose3d(new Translation3d(8, 2, 1), new Rotation3d());
     public static final Pose3d tag2 = new Pose3d(new Translation3d(8, 2, 1), new Rotation3d());
 
+    /**
+     * FRC apriltag id's in 2024 ranged from 1 to 16. We use id's starting with 101,
+     * to avoid conflicts with the FRC numbers.
+     * 
+     * See https://github.com/rgov/apriltag-pdfs/tree/main/tag36h11/us_letter/200mm
+     */
     public static final Map<Integer, Pose3d> tags = Map.of(
-            1, tag1,
-            2, tag2);
+            101, tag1,
+            102, tag2);
 
     private static final Pose3d blueOrigin = new Pose3d();
     private static final Pose3d redOrigin = new Pose3d(
