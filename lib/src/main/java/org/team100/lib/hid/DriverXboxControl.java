@@ -12,7 +12,31 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 
 /**
- * This is a Logitech F310 or similar.
+ * This is a Microsoft Xbox controller, Logitech F310, or similar.
+ * 
+ * Controls mapping (please keep this in sync with the code below):
+ * 
+ * <pre>
+ * left trigger [0,1]     == medium speed
+ * left bumper button     == slow speed
+ * left stick x [-1,1]    == omega
+ * left stick y [-1,1]    ==
+ * left stick button      == drive-to-amp
+ * dpad/pov angle [0,360] == snaps
+ * "back" button          == reset 0 rotation
+ * "start" button         == reset 180 rotation
+ * right stick x [-1,1]   == x velocity
+ * right stick y [-1,1]   == y velocity
+ * right stick button     == 
+ * x button               == 
+ * y button               == drive to note
+ * a button               == lock rotation to amp
+ * b button               == aim and shoot
+ * right trigger [0,1]    ==
+ * right bumper button    ==
+ * </pre>
+ * 
+ * Do not use stick buttons, they are prone to stray clicks
  */
 public class DriverXboxControl implements DriverControl {
     private static final double kDeadband = 0.05;
@@ -32,26 +56,6 @@ public class DriverXboxControl implements DriverControl {
     @Override
     public String getHIDName() {
         return m_controller.getName();
-    }
-
-    @Override
-    public boolean resetRotation0() {
-        return m_controller.getRawButton(7);
-    }
-
-    @Override
-    public boolean driveToNote() {
-        return m_controller.getYButton();
-    }
-
-    @Override
-    public boolean driveToAmp() {
-        return m_controller.getLeftStickButton();
-    }
-
-    @Override
-    public boolean resetRotation180() {
-        return m_controller.getRawButton(8);
     }
 
     /**
@@ -113,12 +117,33 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public boolean resetPose() {
-        // @joel 2/19/24 removed this for slow mode instead
-        // return m_controller.getLeftBumper();
-        // @joel 3/15/24 removed this entirely
-        // return m_controller.getRightStickButton();
-        return false;
+    public Rotation2d desiredRotation() {
+        double desiredAngleDegrees = m_controller.getPOV();
+
+        if (desiredAngleDegrees < 0) {
+            return null;
+        }
+        return Rotation2d.fromDegrees(-1.0 * desiredAngleDegrees);
+    }
+
+    @Override
+    public boolean resetRotation0() {
+        return m_controller.getBackButton();
+    }
+
+    @Override
+    public boolean resetRotation180() {
+        return m_controller.getStartButton();
+    }
+
+    @Override
+    public boolean driveToNote() {
+        return m_controller.getYButton();
+    }
+
+    @Override
+    public boolean driveToAmp() {
+        return m_controller.getLeftStickButton();
     }
 
     @Override
@@ -127,19 +152,13 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public Rotation2d desiredRotation() {
-        double desiredAngleDegrees = m_controller.getPOV();
-
-        if (desiredAngleDegrees < 0) {
-            return null;
-        }
-        previousRotation = Rotation2d.fromDegrees(-1.0 * desiredAngleDegrees);
-        return previousRotation;
+    public boolean shooterLock() {
+        return m_controller.getBButton();
     }
 
-    public boolean choreo() {
-        return m_controller.getRawButton(2);
-    }
+    ////////////////////////////////////
+    //
+    // TODO: clean these up
 
     @Override
     public boolean actualCircle() {
@@ -156,13 +175,4 @@ public class DriverXboxControl implements DriverControl {
         return false;
     }
 
-    @Override
-    public int pov() {
-        return m_controller.getPOV();
-    }
-
-    @Override
-    public boolean shooterLock() {
-        return m_controller.getBButton();
-    }
 }

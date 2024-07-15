@@ -65,33 +65,8 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public boolean doSomething() {
-        return m_operatorControl.doSomething();
-    }
-
-    @Override
-    public boolean index() {
-        return m_operatorControl.index();
-    }
-
-    @Override
-    public boolean shooter() {
-        return m_operatorControl.shooter();
-    }
-
-    @Override
     public boolean pivotToAmpPosition() {
         return m_operatorControl.pivotToAmpPosition();
-    }
-
-    @Override
-    public boolean pivotToDownPosition() {
-        return m_operatorControl.pivotToDownPosition();
-    }
-
-    @Override
-    public double shooterSpeed() {
-        return m_operatorControl.shooterSpeed();
     }
 
     @Override
@@ -105,31 +80,6 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public boolean indexState() {
-        return m_operatorControl.indexState();
-    }
-
-    @Override
-    public double climberState() {
-        return m_operatorControl.climberState();
-    }
-
-    @Override
-    public double lower() {
-        return m_operatorControl.lower();
-    }
-
-    @Override
-    public double upper() {
-        return m_operatorControl.upper();
-    }
-
-    @Override
-    public double elevator() {
-        return m_operatorControl.elevator();
-    }
-
-    @Override
     public boolean never() {
         return m_operatorControl.never();
     }
@@ -137,11 +87,6 @@ public class OperatorControlProxy implements OperatorControl {
     @Override
     public boolean selfTestEnable() {
         return m_operatorControl.selfTestEnable();
-    }
-
-    @Override
-    public boolean rampAndPivot() {
-        return m_operatorControl.rampAndPivot();
     }
 
     @Override
@@ -170,11 +115,6 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public boolean getClimberOveride() {
-        return m_operatorControl.getClimberOveride();
-    }
-
-    @Override
     public boolean feedToAmp() {
         return m_operatorControl.feedToAmp();
     }
@@ -185,8 +125,8 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public boolean rezero() {
-        return m_operatorControl.rezero();
+    public boolean testShoot() {
+        return m_operatorControl.testShoot();
     }
 
 }

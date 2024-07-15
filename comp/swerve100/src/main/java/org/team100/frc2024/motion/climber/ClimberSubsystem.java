@@ -114,10 +114,12 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         m2.resetEncoderPosition();
     }
 
+    /** set left climb duty cycle */
     public void setLeft(double value) {
         m1.setDutyCycle(value);
     }
 
+    /** set right climb duty cycle */
     public void setRight(double value) {
         m2.setDutyCycle(value);
     }

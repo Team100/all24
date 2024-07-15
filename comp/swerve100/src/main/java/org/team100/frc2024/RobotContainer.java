@@ -34,7 +34,6 @@ import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
-import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
@@ -224,11 +223,12 @@ public class RobotContainer implements Glassy {
 
         // RESET ZERO
         // on xbox this is "back"
-        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
+        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
         // RESET 180
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
+
         FullStateDriveController fullStateController = new FullStateDriveController();
         HolonomicDriveController100 dthetaController = new HolonomicDriveController100(commandLogger);
 
@@ -250,7 +250,8 @@ public class RobotContainer implements Glassy {
                         m_drive,
                         dthetaController,
                         swerveKinodynamics));
-        whileTrue(driverControl::actualCircle, new DriveInACircle(commandLogger, m_drive, controller, -1, viz));
+        whileTrue(driverControl::actualCircle,
+                new DriveInACircle(commandLogger, m_drive, controller, -1, viz));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(
@@ -263,7 +264,8 @@ public class RobotContainer implements Glassy {
                         m_shooter,
                         m_feeder));
 
-        whileTrue(operatorControl::intake, new RunIntakeAndAmpFeeder(m_intake, m_feeder, m_ampFeeder));
+        whileTrue(operatorControl::intake,
+                new RunIntakeAndAmpFeeder(m_intake, m_feeder, m_ampFeeder));
 
         whileTrue(operatorControl::outtake,
                 new OuttakeCommand(m_intake, m_shooter, m_ampFeeder, m_feeder));
@@ -273,11 +275,13 @@ public class RobotContainer implements Glassy {
         whileTrue(operatorControl::feed, new Feed(m_intake, m_feeder));
 
         // hold the amp up while holding the button
-        whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(ampLogger, m_ampPivot, 1.8));
+        whileTrue(operatorControl::pivotToAmpPosition,
+                new AmpSet(ampLogger, m_ampPivot, 1.8));
 
-        whileTrue(operatorControl::feedToAmp, new FeedToAmp(m_intake, m_shooter, m_ampFeeder, m_feeder));
+        whileTrue(operatorControl::feedToAmp,
+                new FeedToAmp(m_intake, m_shooter, m_ampFeeder, m_feeder));
 
-        whileTrue(operatorControl::rezero, new TestShoot(m_shooter));
+        whileTrue(operatorControl::testShoot, new TestShoot(m_shooter));
 
         whileTrue(operatorControl::outtakeFromAmp, m_ampFeeder.run(m_ampFeeder::outtake));
 

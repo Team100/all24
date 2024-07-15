@@ -35,12 +35,6 @@ public abstract class JoystickControl implements DriverControl {
     }
 
     @Override
-    public boolean circle() {
-        // return button(1);
-        return false;
-    }
-
-    @Override
     public boolean test() {
         return button(3);
     }
@@ -66,11 +60,6 @@ public abstract class JoystickControl implements DriverControl {
     public boolean outtakeFromAmp() {
         // return false;
         return button(5);
-    }
-
-    @Override
-    public boolean resetPose() {
-        return button(4);
     }
 
     /**

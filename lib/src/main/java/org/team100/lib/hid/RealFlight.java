@@ -89,11 +89,6 @@ public class RealFlight implements DriverControl {
         return Speed.NORMAL;
     }
 
-    @Override
-    public boolean resetPose() {
-        return hid.getRawButton(1);
-    }
-
     /////////////////////////////////////////
 
     public boolean leftSwitchOn() {

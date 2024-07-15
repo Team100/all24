@@ -108,11 +108,6 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public boolean resetPose() {
-        return m_driverControl.resetPose();
-    }
-
-    @Override
     public boolean resetRotation0() {
         return m_driverControl.resetRotation0();
     }
@@ -133,11 +128,6 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public boolean circle() {
-        return m_driverControl.circle();
-    }
-
-    @Override
     public boolean actualCircle() {
         return m_driverControl.actualCircle();
     }
@@ -155,11 +145,6 @@ public class DriverControlProxy implements DriverControl {
     @Override
     public boolean test() {
         return m_driverControl.test();
-    }
-
-    @Override
-    public int pov() {
-        return m_driverControl.pov();
     }
 
     @Override

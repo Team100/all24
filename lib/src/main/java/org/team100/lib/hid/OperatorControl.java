@@ -12,31 +12,11 @@ public interface OperatorControl extends Glassy {
         return "No HID Found!!";
     }
 
-    default boolean doSomething() {
-        return false;
-    }
-
-    default boolean index() {
-        return false;
-    }
-
-    default boolean shooter() {
-        return false;
-    }
-
     default boolean pivotToAmpPosition() {
         return false;
     }
 
-    default double shooterSpeed() {
-        return 0;
-    }
-
     default boolean outtake() {
-        return false;
-    }
-
-    default boolean rampAndPivot() {
         return false;
     }
 
@@ -51,26 +31,6 @@ public interface OperatorControl extends Glassy {
 
     default boolean intake() {
         return false;
-    }
-
-    default boolean indexState() {
-        return false;
-    }
-
-    default double climberState() {
-        return 0;
-    }
-
-    default double lower() {
-        return 0;
-    }
-
-    default double upper() {
-        return 0;
-    }
-
-    default double elevator() {
-        return 0;
     }
 
     default boolean ramp() {
@@ -95,14 +55,6 @@ public interface OperatorControl extends Glassy {
         return 0;
     }
 
-    default boolean getClimberOveride() {
-        return false;
-    }
-
-    default boolean pivotToDownPosition() {
-        return false;
-    }
-
     default boolean feedToAmp() {
         return false;
     }
@@ -111,7 +63,7 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default boolean rezero() {
+    default boolean testShoot() {
         return false;
     }
 
