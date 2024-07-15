@@ -61,7 +61,7 @@ public class DriverControlProxy implements DriverControl {
             return new LogitechExtremeJoystick();
         }
         if (name.startsWith("Great Planes")) {
-            return new RealFlight();
+            return new RealFlight(parent);
         }
         if (name.equals("Team 100 Pilot")) {
             return new Pilot();
@@ -120,11 +120,6 @@ public class DriverControlProxy implements DriverControl {
     @Override
     public boolean resetRotation180() {
         return m_driverControl.resetRotation180();
-    }
-
-    @Override
-    public Speed speed() {
-        return m_driverControl.speed();
     }
 
     @Override

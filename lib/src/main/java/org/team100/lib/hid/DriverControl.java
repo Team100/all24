@@ -93,10 +93,6 @@ public interface DriverControl extends Glassy {
         return false;
     }
 
-    default Speed speed() {
-        return Speed.NORMAL;
-    }
-
     default boolean defense() {
         return false;
     }

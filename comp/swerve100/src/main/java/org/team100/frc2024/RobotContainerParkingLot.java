@@ -111,8 +111,7 @@ public class RobotContainerParkingLot implements Glassy {
                 driveLogger,
                 m_heading,
                 poseEstimator,
-                swerveLocal,
-                driverControl::speed);
+                swerveLocal);
 
         // joel 2/22/24 removing for SVR, put back after that.
         // these should be fields

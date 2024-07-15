@@ -19,6 +19,7 @@ public class DriverXboxControl implements DriverControl {
     private static final double kExpo = 0.65;
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
+
     private final SupplierLogger m_logger;
     private final XboxController m_controller;
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
@@ -59,11 +60,17 @@ public class DriverXboxControl implements DriverControl {
      */
     @Override
     public Velocity velocity() {
+        final double rightY = m_controller.getRightY();
+        final double rightX = m_controller.getRightX();
+        final double leftX = m_controller.getLeftX();
+        m_logger.logDouble(Level.TRACE, "Xbox/right y", () -> rightY);
+        m_logger.logDouble(Level.TRACE, "Xbox/right x", () -> rightX);
+        m_logger.logDouble(Level.TRACE, "Xbox/left x", () -> leftX);
+
         double dx = 0;
         double dy = 0;
-
-        double x = -1.0 * clamp(m_controller.getRightY(), 1);
-        double y = -1.0 * clamp(m_controller.getRightX(), 1);
+        double x = -1.0 * clamp(rightY, 1);
+        double y = -1.0 * clamp(rightX, 1);
         double r = Math.hypot(x, y);
         if (r > kDeadband) {
             double expoR = expo(r, kExpo);
@@ -74,11 +81,12 @@ public class DriverXboxControl implements DriverControl {
             dx = 0;
             dy = 0;
         }
-        double dtheta = expo(deadband(-1.0 * clamp(m_controller.getLeftX(), 1), kDeadband, 1), kExpo);
+
+        double dtheta = expo(deadband(-1.0 * clamp(leftX, 1), kDeadband, 1), kExpo);
+
         Speed speed = speed();
-        m_logger.logDouble(Level.TRACE, "Xbox/right y", m_controller::getRightY);
-        m_logger.logDouble(Level.TRACE, "Xbox/right x", m_controller::getRightX);
-        m_logger.logDouble(Level.TRACE, "Xbox/left x", m_controller::getLeftX);
+        m_logger.logEnum(Level.TRACE, "control_speed", () -> speed);
+
         switch (speed) {
             case SLOW:
                 return new Velocity(kSlow * dx, kSlow * dy, kSlow * dtheta);
@@ -89,8 +97,11 @@ public class DriverXboxControl implements DriverControl {
         }
     }
 
-    @Override
-    public Speed speed() {
+    /**
+     * This used to be public and affect everything; now it just affects the
+     * velocity() output above.
+     */
+    private Speed speed() {
         // TODO 2025 version
         // if (m_controller.getLeftBumperButton())
         // TODO 2024 version
