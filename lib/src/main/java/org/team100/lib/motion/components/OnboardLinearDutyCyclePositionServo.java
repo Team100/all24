@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.PIDController;
  * Position control using duty cycle feature of linear mechanism
  */
 public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo {
+    private static final double kV = 0.1;
     private final SupplierLogger m_logger;
     private final LinearMechanism m_mechanism;
     private final PIDController m_controller;
@@ -39,6 +40,11 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
     @Override
     public void reset() {
         m_controller.reset();
+        OptionalDouble position = getPosition();
+        OptionalDouble velocity = getVelocity();
+        if (position.isEmpty() || velocity.isEmpty())
+            return;
+        m_setpoint = new State100(position.getAsDouble(), velocity.getAsDouble());
     }
 
     @Override
@@ -49,7 +55,7 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
         double measurementM = positionM.getAsDouble();
         State100 goal = new State100(goalM, 0);
         m_setpoint = m_profile.calculate(m_period, m_setpoint, goal);
-        double u_FF = m_setpoint.v();
+        double u_FF = kV * m_setpoint.v();
         double u_FB = m_controller.calculate(measurementM, m_setpoint.x());
         double u_TOTAL = MathUtil.clamp(u_FF + u_FB, -1.0, 1.0);
         m_mechanism.setDutyCycle(u_TOTAL);
@@ -62,6 +68,16 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
         m_logger.logDouble(Level.TRACE, "u_TOTAL (duty cycle)", () -> u_TOTAL);
         m_logger.logDouble(Level.TRACE, "Controller Position Error (m)", m_controller::getPositionError);
         m_logger.logDouble(Level.TRACE, "Controller Velocity Error (m_s)", m_controller::getVelocityError);
+    }
+
+    @Override
+    public OptionalDouble getPosition() {
+        return m_mechanism.getPositionM();
+    }
+
+    @Override
+    public OptionalDouble getVelocity() {
+        return m_mechanism.getVelocityM_S();
     }
 
     @Override
