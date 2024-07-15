@@ -40,7 +40,7 @@ class TagTest {
     @Test
     void testRedLayout() throws IOException {
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
-        
+
         /*
          * from the red perspective, tag 7 has large x
          * and small y, and oriented at zero theta.
@@ -72,5 +72,38 @@ class TagTest {
         assertEquals(0, tag7Pose.getRotation().getY(), kDelta);
         // raw rotation is "out of the page"
         assertEquals(0, tag7Pose.getRotation().getZ(), kDelta);
+    }
+
+    @Test
+    void testPracticeRaw() throws IOException {
+        Path path = Filesystem.getDeployDirectory().toPath().resolve("practice-field.json");
+        AprilTagFieldLayout layout = new AprilTagFieldLayout(path);
+        layout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+        {
+            Pose3d tag101Pose = layout.getTagPose(101).get();
+
+            // on our side, x is ~zero.
+            assertEquals(0, tag101Pose.getTranslation().getX(), kDelta); // behind the glass
+            assertEquals(2, tag101Pose.getTranslation().getY(), kDelta); // far to left
+            assertEquals(1, tag101Pose.getTranslation().getZ(), kDelta); // 1.5m feet up
+
+            assertEquals(0, tag101Pose.getRotation().getX(), kDelta);
+            assertEquals(0, tag101Pose.getRotation().getY(), kDelta);
+            // raw rotation is "out of the page"
+            assertEquals(0, tag101Pose.getRotation().getZ(), kDelta);
+        }
+        {
+            Pose3d tag102Pose = layout.getTagPose(102).get();
+
+            // on our side, x is ~zero.
+            assertEquals(8, tag102Pose.getTranslation().getX(), kDelta); // behind the glass
+            assertEquals(2, tag102Pose.getTranslation().getY(), kDelta); // far to left
+            assertEquals(1, tag102Pose.getTranslation().getZ(), kDelta); // 1.5m feet up
+
+            assertEquals(0, tag102Pose.getRotation().getX(), kDelta);
+            assertEquals(0, tag102Pose.getRotation().getY(), kDelta);
+            // raw rotation is "out of the page"
+            assertEquals(Math.PI, tag102Pose.getRotation().getZ(), kDelta);
+        }
     }
 }
