@@ -142,15 +142,10 @@ public class RobotContainer implements Glassy {
         final OperatorControl operatorControl = new OperatorControlProxy(async);
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
 
-        final SensorInterface m_sensors;
-        switch (Identity.instance) {
-            case COMP_BOT:
-                m_sensors = new CompSensors(sensorLogger, 2, 1, 4);
-                break;
-            default:
-                // always returns false
-                m_sensors = new MockSensors();
-        }
+        final SensorInterface m_sensors = switch (Identity.instance) {
+            case COMP_BOT -> new CompSensors(sensorLogger, 2, 1, 4);
+            default -> new MockSensors();
+        };
 
         m_modules = SwerveModuleCollection.get(
                 driveLowLevelLogger,
