@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj.XboxController;
  * right stick x [-1,1]   == x velocity
  * right stick y [-1,1]   == y velocity
  * right stick button     == 
- * x button               == 
+ * x button               == full cycle
  * y button               == drive to note
  * a button               == lock rotation to amp
  * b button               == aim and shoot
@@ -134,6 +134,11 @@ public class DriverXboxControl implements DriverControl {
     @Override
     public boolean resetRotation180() {
         return m_controller.getStartButton();
+    }
+
+    @Override
+    public boolean fullCycle() {
+        return m_controller.getXButton();
     }
 
     @Override

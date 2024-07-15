@@ -1,5 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
@@ -12,6 +13,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Math100;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,7 +26,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class DriveWithProfile2 extends Command100 {
     private static final double kTolerance = 0.1;
-    private final Supplier<Pose2d> m_fieldRelativeGoal;
+    private final Supplier<Optional<Pose2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController100 m_controller;
     private final SwerveKinodynamics m_limits;
@@ -42,7 +44,7 @@ public class DriveWithProfile2 extends Command100 {
 
     public DriveWithProfile2(
             SupplierLogger parent,
-            Supplier<Pose2d> fieldRelativeGoal,
+            Supplier<Optional<Pose2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
@@ -78,8 +80,15 @@ public class DriveWithProfile2 extends Command100 {
         Rotation2d currentRotation = m_swerve.getState().pose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
+        Optional<Pose2d> opt = m_fieldRelativeGoal.get();
+        if (opt.isEmpty()) {
+            Util.warn("DriveWithProfile2: no goal!");
+            return;
+        }
+        Pose2d fieldRelativeGoal = opt.get();
+
         Rotation2d bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, m_fieldRelativeGoal.get().getRotation().getRadians()));
+                Math100.getMinDistance(measurement, fieldRelativeGoal.getRotation().getRadians()));
 
         // make sure the setpoint uses the modulus close to the measurement.
         thetaSetpoint = new State100(
@@ -87,10 +96,10 @@ public class DriveWithProfile2 extends Command100 {
                 thetaSetpoint.v());
 
         m_thetaGoalRaw = new State100(bearing.getRadians(), 0);
-        m_xGoalRaw = new State100(m_fieldRelativeGoal.get().getX(), 0, 0);
+        m_xGoalRaw = new State100(fieldRelativeGoal.getX(), 0, 0);
         xSetpoint = xProfile.calculate(0.02, xSetpoint, m_xGoalRaw);
 
-        m_yGoalRaw = new State100(m_fieldRelativeGoal.get().getY(), 0, 0);
+        m_yGoalRaw = new State100(fieldRelativeGoal.getY(), 0, 0);
         ySetpoint = yProfile.calculate(0.02, ySetpoint, m_yGoalRaw);
 
         thetaSetpoint = thetaProfile.calculate(0.02, thetaSetpoint, m_thetaGoalRaw);

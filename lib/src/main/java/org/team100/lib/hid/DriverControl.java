@@ -80,6 +80,10 @@ public interface DriverControl extends Glassy {
         return false;
     }
 
+    default boolean fullCycle() {
+        return false;
+    }
+
     default Translation2d target() {
         return null;
     }

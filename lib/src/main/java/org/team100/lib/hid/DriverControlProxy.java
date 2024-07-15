@@ -88,6 +88,11 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
+    public boolean fullCycle() {
+        return m_driverControl.fullCycle();
+    }
+
+    @Override
     public boolean driveToNote() {
         return m_driverControl.driveToNote();
     }

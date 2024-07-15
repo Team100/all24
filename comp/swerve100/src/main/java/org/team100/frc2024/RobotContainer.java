@@ -32,6 +32,7 @@ import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
+import org.team100.lib.commands.FullCycle;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.SetRotation;
@@ -90,6 +91,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -263,6 +265,9 @@ public class RobotContainer implements Glassy {
                         m_intake,
                         m_shooter,
                         m_feeder));
+
+        whileTrue(driverControl::fullCycle,
+                new RepeatCommand(new FullCycle()));
 
         whileTrue(operatorControl::intake,
                 new RunIntakeAndAmpFeeder(m_intake, m_feeder, m_ampFeeder));
