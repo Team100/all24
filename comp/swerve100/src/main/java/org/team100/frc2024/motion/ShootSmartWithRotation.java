@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
 
+import org.team100.frc2024.commands.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
-import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.commands.Command100;

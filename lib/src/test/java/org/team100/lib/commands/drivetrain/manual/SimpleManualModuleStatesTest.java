@@ -1,4 +1,4 @@
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.lib.commands.drivetrain.manual;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

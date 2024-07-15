@@ -1,4 +1,4 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.lib.commands.drivetrain.manual;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,9 +10,6 @@ import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
-import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.testing.Timeless;

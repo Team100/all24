@@ -1,10 +1,8 @@
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.lib.commands.drivetrain.manual;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.commands.drivetrain.HeadingLatch;
-import org.team100.lib.controller.MinTimeController;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -27,17 +25,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Function that supports manual cartesian control, and both manual and locked
  * rotational control.
  * 
- * Rotation uses a profile, velocity feedforward, and positional feedback.
+ * Rotation uses simple full-state feedback and that's all..
  */
-public class ManualWithMinTimeHeading implements FieldRelativeDriver {
-    private static final double kDtSec = 0.02;
+public class ManualWithFullStateHeading implements FieldRelativeDriver {
     private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
-    private final MinTimeController m_controller;
+    // feedback gains
+    private final double[] m_K;
     private final LinearFilter m_outputFilter;
 
     // package private for testing
@@ -51,32 +49,21 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      * @param heading
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
-     * @param thetaController
-     * @param omegaController
+     * @param k                  full state gains
      */
-    public ManualWithMinTimeHeading(
+    public ManualWithFullStateHeading(
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
-            Supplier<Rotation2d> desiredRotation) {
+            Supplier<Rotation2d> desiredRotation,
+            double[] k) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_heading = heading;
         m_desiredRotation = desiredRotation;
         m_logger = parent.child(this);
+        m_K = k;
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
-
-        // these parameters are total guesses
-        m_controller = new MinTimeController(
-                parent,
-                MathUtil::angleModulus,
-                15, // maxV
-                12, // switchingA
-                9, // weakG
-                20, // strongI
-                0.01, // tolerance
-                0.1, // finish
-                new double[] { 5.0, 0.5 });
     }
 
     public void reset(Pose2d currentPose) {
@@ -122,10 +109,8 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         Rotation2d currentRotation = currentPose.getRotation();
-        double headingMeasurement = state.theta().x();
-        // not sure which is better
-        double headingRate = state.theta().v();
-        // double headingRate = getHeadingRateNWURad_S();
+        double headingMeasurement = currentRotation.getRadians();
+        double headingRate = getHeadingRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
         m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
@@ -144,45 +129,42 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
 
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
-        // min-time doesn't use this
-        // if (m_thetaSetpoint == null) {
-        // // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
-        // // overshoot?
-        // // updateSetpoint(headingMeasurement, headingRate);
-        // m_thetaSetpoint = state.theta();
-        // }
+        if (m_thetaSetpoint == null) {
+            // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
+            // overshoot?
+            updateSetpoint(headingMeasurement, headingRate);
+        }
 
-        // use the modulus closest to the measurement
-        // m_thetaSetpoint = new State100(
-        // Math100.getMinDistance(headingMeasurement, m_thetaSetpoint.x()),
-        // m_thetaSetpoint.v());
-
-        // in snap mode we take dx and dy from the user, and use the profile for dtheta.
+        // in snap mode we take dx and dy from the user, and control dtheta.
         // the omega goal in snap mode is always zero.
-        State100 goalState = new State100(
-                Math100.getMinDistance(headingMeasurement, m_goal.getRadians()), 0);
-
-        m_thetaSetpoint = m_controller.calculate(kDtSec, state.theta(), goalState);
+        m_thetaSetpoint = new State100(m_goal.getRadians(), 0);
 
         // the snap overrides the user input for omega.
-        final double thetaFF = getThetaFF();
+        double thetaFF = m_thetaSetpoint.v();
+
+        double thetaError = MathUtil.angleModulus(m_thetaSetpoint.x() - headingMeasurement);
+        double omegaError = m_thetaSetpoint.v() - headingRate;
+
+        final double omegaFB = getOmegaFB(omegaError);
+        final double thetaFB = getThetaFB(thetaError);
 
         final double omega = MathUtil.clamp(
-                thetaFF,
+                thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         m_logger.logString(Level.TRACE, "mode", () -> "snap");
-        m_logger.logDouble(Level.TRACE, "goal/theta", () -> m_goal.getRadians());
+        m_logger.logDouble(Level.TRACE, "goal/theta", m_goal::getRadians);
         m_logger.logState100(Level.TRACE, "setpoint/theta", () -> m_thetaSetpoint);
         m_logger.logDouble(Level.TRACE, "measurement/theta", () -> headingMeasurement);
         m_logger.logDouble(Level.TRACE, "measurement/omega", () -> headingRate);
-        m_logger.logDouble(Level.TRACE, "error/theta", () -> m_thetaSetpoint.x() - headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "error/omega", () -> m_thetaSetpoint.v() - headingRate);
-        m_logger.logDouble(Level.TRACE, "goal_error/theta", () -> m_thetaSetpoint.x() - goalState.x());
-        m_logger.logDouble(Level.TRACE, "goal_error/omega", () -> m_thetaSetpoint.v() - goalState.v());
+        m_logger.logDouble(Level.TRACE, "error/theta", () -> thetaError);
+        m_logger.logDouble(Level.TRACE, "error/omega", () -> omegaError);
         m_logger.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);
+        m_logger.logDouble(Level.TRACE, "thetaFB", () -> thetaFB);
+        m_logger.logDouble(Level.TRACE, "omegaFB", () -> omegaFB);
         m_logger.logDouble(Level.TRACE, "output/omega", () -> omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
@@ -191,22 +173,30 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         return twistWithSnapM_S;
     }
 
-    private double getThetaFF() {
-        double thetaFF = m_thetaSetpoint.v();
+    private double getOmegaFB(double omegaError) {
+        double omegaFB = m_K[1] * omegaError;
 
         if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
             // output filtering to prevent oscillation due to delay
-            thetaFF = m_outputFilter.calculate(thetaFF);
+            omegaFB = m_outputFilter.calculate(omegaFB);
         }
-        if (Math.abs(thetaFF) < 0.05) {
-            thetaFF = 0;
+        if (Math.abs(omegaFB) < 0.05) {
+            omegaFB = 0;
         }
-        return thetaFF;
+        return omegaFB;
+    }
+
+    private double getThetaFB(double thetaError) {
+        double thetaFB = m_K[0] * thetaError;
+        if (Math.abs(thetaFB) < 0.05) {
+            thetaFB = 0;
+        }
+        return thetaFB;
     }
 
     @Override
     public String getGlassName() {
-        return "ManualWithMinTimeHeading";
+        return "ManualWithFullStateHeading";
     }
 
 }

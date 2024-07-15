@@ -1,4 +1,4 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.lib.commands.drivetrain.manual;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.hid.DriverControl;

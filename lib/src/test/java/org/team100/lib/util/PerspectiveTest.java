@@ -1,15 +1,11 @@
 package org.team100.lib.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
 
 // TODO 2025 version
