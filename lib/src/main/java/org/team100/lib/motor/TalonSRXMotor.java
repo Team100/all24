@@ -35,6 +35,14 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  */
 public class TalonSRXMotor implements BareMotor {
     /**
+     * see https://motors.vex.com/vexpro-motors/775pro
+     */
+    private static final double kStallTorqueNm = 0.71;
+    /**
+     * see https://motors.vex.com/vexpro-motors/775pro
+     */
+    private static final double kStallCurrentA = 134;
+    /**
      * There is a planetary gearbox between the motor and the steering gear, and the
      * final is 48/40.
      */
@@ -161,16 +169,14 @@ public class TalonSRXMotor implements BareMotor {
         throw new UnsupportedOperationException();
     }
 
-    /** placeholder */
     @Override
     public double kROhms() {
-        return 0.1;
+        return 12.0 / kStallCurrentA;
     }
 
-    /** placeholder */
     @Override
     public double kTNm_amp() {
-        return 0.02;
+        return kStallTorqueNm / kStallCurrentA;
     }
 
     @Override
@@ -222,6 +228,13 @@ public class TalonSRXMotor implements BareMotor {
      */
     private static double accelFF(double accelM_S_S) {
         return accelFFVoltS2_M * accelM_S_S / saturationVoltage;
+    }
+
+    @Override
+    public void setTorqueLimit(double torqueNm) {
+        double currentA = torqueNm / kTNm_amp();
+        m_motor.configSupplyCurrentLimit(
+                new SupplyCurrentLimitConfiguration(true, currentA, currentA, 0));
     }
 
 }

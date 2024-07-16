@@ -67,4 +67,9 @@ public class SimulatedBareMotor implements BareMotor {
     public void setEncoderPositionRad(double positionRad) {
         //
     }
+
+    @Override
+    public void setTorqueLimit(double torqueNm) {
+        //
+    }
 }

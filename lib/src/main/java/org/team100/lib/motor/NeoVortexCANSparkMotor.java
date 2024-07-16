@@ -33,5 +33,4 @@ public class NeoVortexCANSparkMotor extends CANSparkMotor {
     public double kTNm_amp() {
         return 0.017;
     }
-
 }

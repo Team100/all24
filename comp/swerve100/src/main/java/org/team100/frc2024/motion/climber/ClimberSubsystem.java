@@ -55,6 +55,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      * TODO: hard stops, top and bottom.
      */
     private static final int kCurrentLimit = 20;
+    private static final double kClimbingForceN = 676;
+    private static final double kHomingForceN = 10;
 
     /**
      * 15 tooth 35-series sprocket
@@ -119,14 +121,16 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 kSprocketDiameterM);
     }
 
-    /** Use a low, safe torque limit for homing. */
+    /** Use a low, safe force limit for homing. */
     public void setHomingForce() {
-
+        m_left.setForceLimit(kHomingForceN);
+        m_right.setForceLimit(kHomingForceN);
     }
 
     /** Use a force sufficient to climb. */
     public void setClimbingForce() {
-
+        m_left.setForceLimit(kClimbingForceN);
+        m_right.setForceLimit(kClimbingForceN);
     }
 
     public void setLeftWithSoftLimits(double value) {
@@ -165,6 +169,14 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     public void zeroClimbers() {
         m_left.resetEncoderPosition();
+        m_right.resetEncoderPosition();
+    }
+
+    public void zeroLeft() {
+        m_left.resetEncoderPosition();
+    }
+
+    public void zeroRight() {
         m_right.resetEncoderPosition();
     }
 

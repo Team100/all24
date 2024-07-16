@@ -44,6 +44,12 @@ public abstract class CANSparkMotor implements BareMotor {
         log();
     }
 
+    @Override
+    public void setTorqueLimit(double torqueNm) {
+        int currentA = (int) (torqueNm / kTNm_amp());
+        Rev100.currentConfig(m_motor, currentA);
+    }
+
     /**
      * Use outboard PID control to hold the given velocty, with acceleration and
      * torque feedforwards.

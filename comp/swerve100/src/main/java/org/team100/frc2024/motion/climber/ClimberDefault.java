@@ -33,6 +33,7 @@ public class ClimberDefault extends Command {
 
     @Override
     public void initialize() {
+        m_climber.setClimbingForce();
     }
 
     @Override
