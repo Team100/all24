@@ -95,23 +95,18 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public int pov() {
-        return m_operatorControl.pov();
-    }
-
-    @Override
     public boolean ramp() {
         return m_operatorControl.ramp();
     }
 
     @Override
-    public double getLeftAxis() {
-        return m_operatorControl.getLeftAxis();
+    public double leftClimb() {
+        return m_operatorControl.leftClimb();
     }
 
     @Override
-    public double getRightAxis() {
-        return m_operatorControl.getRightAxis();
+    public double rightClimb() {
+        return m_operatorControl.rightClimb();
     }
 
     @Override

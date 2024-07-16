@@ -5,7 +5,7 @@ import static org.team100.lib.hid.ControlUtil.deadband;
 import edu.wpi.first.wpilibj.XboxController;
 
 /**
- *  This is a Microsoft Xbox controller, Logitech F310, or similar.
+ * This is a Microsoft Xbox controller, Logitech F310, or similar.
  * 
  * Controls mapping (please keep this in sync with the code below):
  * 
@@ -64,8 +64,13 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public int pov() {
-        return m_controller.getPOV();
+    public boolean climbUpPosition() {
+        return m_controller.getPOV() == 0;
+    }
+
+    @Override
+    public boolean climbDownPosition() {
+        return m_controller.getPOV() == 180;
     }
 
     @Override
@@ -74,12 +79,12 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public double getLeftAxis() {
+    public double leftClimb() {
         return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
     }
 
     @Override
-    public double getRightAxis() {
+    public double rightClimb() {
         return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
     }
 

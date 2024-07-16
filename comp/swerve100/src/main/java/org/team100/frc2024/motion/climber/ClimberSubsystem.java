@@ -14,15 +14,59 @@ import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimberSubsystem extends SubsystemBase implements Glassy {
-    private static final int kCurrentLimit = 40;
-    // is this an 18 tooth 35-series sprocket?
-    private static final double kSprocketDiameterM = 0.055;
-    // TODO: is this the right reduction?
-    private static final double kReduction = 16;
+    /*******************************************
+     * ALERT ALERT ALERT this current limit is uncalibrated.
+     * 
+     * The climber is rigged with ANSI #35 chain
+     * 
+     * https://www.peerchain.com/product/35r-roller-chain/
+     * 
+     * breaking strength is ~2500 lbs == ~11 kN.
+     * 
+     * Sprocket radius (below) is 0.022m, reduction is 45,
+     * so breaking torque at the motor is 5.5 Nm, which is beyond the stall torque,
+     * so it's not possible to break the chain with the motor.
+     * 
+     * In the past I think we broke the *hooks* which replaced the steel chain
+     * plates with aluminum. The renewed design doubles the hook plates.
+     * 
+     * https://docs.revrobotics.com/brushless/neo/vortex
+     * 
+     * Lifting the 152-lb (max) robot with two climbers would take 676/2=338N
+     * per side, which is only 0.165Nm, which is about 5% of the stall torque. The
+     * stall current is 211 A, and 5% of that is about 10 A, so that's the "holding"
+     * current.
+     * 
+     * To actually move the climber takes more than the holding current. Say we want
+     * to move 0.2m with the same 338N gravity force, that would require about 68 J.
+     * Say we wanted to do that in 1s, that would require 68 W. Assuming a bit of
+     * sag, 68 W would require something like 7 amps.
+     * 
+     * There's also some friction.
+     * 
+     * A reasonable starting point would be 20: it shouldn't self destruct but it
+     * should lift the robot.
+     * 
+     * TODO: hard stops, top and bottom.
+     */
+    private static final int kCurrentLimit = 20;
+
+    /**
+     * 15 tooth 35-series sprocket
+     * https://wcproducts.info/files/frc/drawings/Web-%2335%20Double%20Hub%20Sprockets.pdf
+     */
+    private static final double kSprocketDiameterM = 0.045;
+    /**
+     * one 5:1 and one 9:1 stage
+     * https://www.revrobotics.com/rev-21-2103/
+     * https://www.revrobotics.com/rev-21-2129/
+     */
+    private static final double kReduction = 45;
 
     private final SupplierLogger m_logger;
     private final LinearMechanism m1;
@@ -30,6 +74,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     public ClimberSubsystem(SupplierLogger parent, int leftClimberID, int rightClimberID) {
         m_logger = parent.child(this);
+        Util.warn("\n**** Uncalibrated climber current limit!!!  FIX THIS FOR COMP! ****\n");
+        Util.warn("\n**** Uncalibrated climber polarity!!!  FIX THIS FOR COMP! ****\n");
         SupplierLogger leftLogger = m_logger.child("left");
         SupplierLogger rightLogger = m_logger.child("right");
         switch (Identity.instance) {
@@ -37,7 +83,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 NeoVortexCANSparkMotor vp1 = new NeoVortexCANSparkMotor(
                         leftLogger,
                         leftClimberID,
-                        MotorPhase.FORWARD,
+                        MotorPhase.REVERSE,
                         kCurrentLimit,
                         Feedforward100.makeNeoVortex(),
                         new PIDConstants(0, 0, 0));
@@ -49,7 +95,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 NeoVortexCANSparkMotor vp2 = new NeoVortexCANSparkMotor(
                         rightLogger,
                         rightClimberID,
-                        MotorPhase.REVERSE,
+                        MotorPhase.FORWARD,
                         kCurrentLimit,
                         Feedforward100.makeNeoVortex(),
                         new PIDConstants(0, 0, 0));

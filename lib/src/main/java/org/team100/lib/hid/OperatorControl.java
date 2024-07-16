@@ -24,11 +24,6 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default int pov() {
-        // the "null" state is -1
-        return -1;
-    }
-
     default boolean intake() {
         return false;
     }
@@ -47,12 +42,22 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default double getLeftAxis() {
+    default double leftClimb() {
         return 0;
     }
 
-    default double getRightAxis() {
+    default double rightClimb() {
         return 0;
+    }
+
+    /** Put the climber hooks in the "up" position. */
+    default boolean climbUpPosition() {
+        return false;
+    }
+
+    /** Put the climber hooks in the "down" position. */
+    default boolean climbDownPosition() {
+        return false;
     }
 
     default boolean feedToAmp() {

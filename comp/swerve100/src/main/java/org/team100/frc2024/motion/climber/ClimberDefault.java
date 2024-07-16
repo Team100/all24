@@ -1,6 +1,7 @@
 package org.team100.frc2024.motion.climber;
 
 import java.util.OptionalDouble;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -10,7 +11,8 @@ public class ClimberDefault extends Command {
     private final ClimberSubsystem m_climber;
     private final Supplier<Double> m_leftSupplier;
     private final Supplier<Double> m_rightSupplier;
-    private final Supplier<Integer> m_povSupplier;
+    private final BooleanSupplier m_upSupplier;
+    private final BooleanSupplier m_downSupplier;
 
     private final PIDController leftController = new PIDController(0.1, 0, 0);
     private final PIDController rightController = new PIDController(0.1, 0, 0);
@@ -19,30 +21,27 @@ public class ClimberDefault extends Command {
             ClimberSubsystem climber,
             Supplier<Double> leftSupplier,
             Supplier<Double> rightSupplier,
-            Supplier<Integer> povSupplier) {
-        m_povSupplier = povSupplier;
+            BooleanSupplier up,
+            BooleanSupplier down) {
+        m_climber = climber;
         m_leftSupplier = leftSupplier;
         m_rightSupplier = rightSupplier;
-        m_climber = climber;
+        m_upSupplier = up;
+        m_downSupplier = down;
         addRequirements(m_climber);
     }
 
     @Override
     public void execute() {
-        if (m_povSupplier.get() == -1) {
-            m_climber.setLeft(m_leftSupplier.get());
-            m_climber.setRight(m_rightSupplier.get());
-            return;
-        }
-        if (m_povSupplier.get() == 0) {
+        if (m_upSupplier.getAsBoolean()) {
             double setpoint = 85;
             actuate(setpoint);
-        } else if (m_povSupplier.get() == 180) {
+        } else if (m_downSupplier.getAsBoolean()) {
             double setpoint = 10;
             actuate(setpoint);
         } else {
-            m_climber.setLeft(0);
-            m_climber.setRight(0);
+            m_climber.setLeft(m_leftSupplier.get());
+            m_climber.setRight(m_rightSupplier.get());
         }
     }
 

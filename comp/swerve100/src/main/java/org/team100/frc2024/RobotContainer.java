@@ -426,9 +426,10 @@ public class RobotContainer implements Glassy {
         intake.setDefaultCommand(intake.run(intake::stop));
         climber.setDefaultCommand(new ClimberDefault(
                 climber,
-                operatorControl::getLeftAxis,
-                operatorControl::getRightAxis,
-                operatorControl::pov));
+                operatorControl::leftClimb,
+                operatorControl::rightClimb,
+                operatorControl::climbUpPosition,
+                operatorControl::climbDownPosition));
         m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
         m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
 
