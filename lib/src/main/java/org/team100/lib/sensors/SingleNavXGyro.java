@@ -180,8 +180,6 @@ public class SingleNavXGyro implements Gyro100 {
         m_logger.logFloat(Level.TRACE, "Yaw (deg)", m_ahrs::getYaw);
         // note we don't actually use any of the measurements below.  maybe remove them?
         m_logger.logDouble(Level.TRACE, "Angle (deg)", m_ahrs::getAngle);
-        m_logger.logFloat(Level.TRACE, "Fused (deg)", m_ahrs::getFusedHeading);
         m_logger.logDouble(Level.TRACE, "Angle Mod 360 (deg)", () -> m_ahrs.getAngle() % 360);
-        m_logger.logFloat(Level.TRACE, "Compass Heading (deg)", m_ahrs::getCompassHeading);
     }
 }
