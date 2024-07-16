@@ -30,6 +30,10 @@ public class LinearMechanism {
         m_motor.setDutyCycle(output);
     }
 
+    public void setForceLimit(double forceN) {
+        m_motor.setTorqueLimit(forceN * m_wheelRadiusM / m_gearRatio);
+    }
+
     public void setVelocity(
             double outputVelocityM_S,
             double outputAccelM_S2,

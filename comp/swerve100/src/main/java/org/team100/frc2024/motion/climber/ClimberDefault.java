@@ -32,6 +32,10 @@ public class ClimberDefault extends Command {
     }
 
     @Override
+    public void initialize() {
+    }
+
+    @Override
     public void execute() {
         if (m_upSupplier.getAsBoolean()) {
             double setpoint = 85;
