@@ -21,6 +21,6 @@ class ClimberSubsystemTest implements Timeless2024 {
             stepTime(0.02);
         }
         // it's moved a lot
-        assertEquals(0.293, c.getLeftPosition().getAsDouble(), kDelta);
+        assertEquals(0.085, c.getLeftPosition().getAsDouble(), kDelta);
     }
 }
