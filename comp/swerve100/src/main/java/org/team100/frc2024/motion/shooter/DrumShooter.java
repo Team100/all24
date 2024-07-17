@@ -15,6 +15,7 @@ import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.LinearMechanismInterface;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
@@ -97,7 +98,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         // kWheelDiameterM,
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
-                LinearMechanism leftMech = new LinearMechanism(
+                LinearMechanismInterface leftMech = new LinearMechanism(
                         leftMotor,
                         new Talon6Encoder(leftLogger, leftMotor),
                         kDriveReduction,
@@ -114,7 +115,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         // kWheelDiameterM,
                         new PIDConstants(0.3, 0, 0), // 0.4
                         Feedforward100.makeShooterFalcon6());
-                LinearMechanism rightMech = new LinearMechanism(
+                LinearMechanismInterface rightMech = new LinearMechanism(
                         rightMotor,
                         new Talon6Encoder(rightLogger, rightMotor),
                         kDriveReduction,

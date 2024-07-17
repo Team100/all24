@@ -6,7 +6,9 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Timer100;
 import org.team100.lib.util.Util;
 
@@ -34,11 +36,15 @@ import edu.wpi.first.wpilibj2.command.Command;
  * done state (start timer > limit, end timer > limit): set speed to zero
  * </pre>
  */
-public class HomeClimber extends Command {
-    private static final double kTargetSpeedM_S = 0.02;
+public class HomeClimber extends Command implements Glassy {
+    /** Target speed is negative, i.e. down. */
+    private static final double kTargetSpeedM_S = -0.02;
+    /** Threshold is unsigned. */
     private static final double kThresholdSpeedM_S = 0.002;
-    private static final double kStartTimeS = 0.5;
-    private static final double kHomeTimeS = 0.5;
+    /** Wait 0.5s to start moving. */
+    private static final double kStartTimeS = 0.2;
+    /** Wait 0.5s to stop moving. */
+    private static final double kHomeTimeS = 0.2;
 
     private final SupplierLogger m_logger;
     private final ClimberSubsystem m_climber;
@@ -50,7 +56,7 @@ public class HomeClimber extends Command {
     public HomeClimber(
             SupplierLogger logger,
             ClimberSubsystem climber) {
-        m_logger = logger;
+        m_logger = logger.child(this);
         m_climber = climber;
         m_leftStartTimer = new Timer100();
         m_leftDoneTimer = new Timer100();
@@ -79,6 +85,10 @@ public class HomeClimber extends Command {
                 m_climber::setRightVelocityM_S,
                 m_climber::getRightVelocity,
                 m_climber::zeroRight);
+        m_logger.logDouble(Level.TRACE, "left start timer (s)", m_leftStartTimer::get);
+        m_logger.logDouble(Level.TRACE, "left done timer (s)", m_leftDoneTimer::get);
+        m_logger.logDouble(Level.TRACE, "right start timer (s)", m_rightStartTimer::get);
+        m_logger.logDouble(Level.TRACE, "right done timer (s)", m_rightDoneTimer::get);
     }
 
     private static void init(Timer100 start, Timer100 done) {
@@ -129,6 +139,11 @@ public class HomeClimber extends Command {
 
     @Override
     public void end(boolean interrupted) {
+    }
+
+    @Override
+    public String getGlassName() {
+        return "HomeClimber";
     }
 
 }

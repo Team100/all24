@@ -100,6 +100,11 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
+    public boolean homeClimber() {
+        return m_operatorControl.homeClimber();
+    }
+
+    @Override
     public double leftClimb() {
         return m_operatorControl.leftClimb();
     }
@@ -107,6 +112,16 @@ public class OperatorControlProxy implements OperatorControl {
     @Override
     public double rightClimb() {
         return m_operatorControl.rightClimb();
+    }
+
+    @Override
+    public boolean climbUpPosition() {
+        return m_operatorControl.climbUpPosition();
+    }
+
+    @Override
+    public boolean climbDownPosition() {
+        return m_operatorControl.climbDownPosition();
     }
 
     @Override

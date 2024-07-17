@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.commands.AutonCommand;
 import org.team100.frc2024.commands.Feed;
 import org.team100.frc2024.commands.Lob;
+import org.team100.frc2024.commands.climber.HomeClimber;
 import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.commands.drivetrain.manual.ManualWithAmpLock;
 import org.team100.frc2024.commands.drivetrain.manual.ManualWithShooterLock;
@@ -286,6 +287,11 @@ public class RobotContainer implements Glassy {
 
         whileTrue(operatorControl::never, new Lob(m_shooter, intake));
 
+        whileTrue(operatorControl::homeClimber, new HomeClimber(commandLogger, climber));
+
+        whileTrue(operatorControl::climbUpPosition, climber.upPosition(commandLogger));
+        whileTrue(operatorControl::climbDownPosition, climber.downPosition(commandLogger));
+
         ///////////////////////////
         //
         // DRIVE
@@ -425,11 +431,10 @@ public class RobotContainer implements Glassy {
         feeder.setDefaultCommand(feeder.run(feeder::stop));
         intake.setDefaultCommand(intake.run(intake::stop));
         climber.setDefaultCommand(new ClimberDefault(
+                commandLogger,
                 climber,
                 operatorControl::leftClimb,
-                operatorControl::rightClimb,
-                operatorControl::climbUpPosition,
-                operatorControl::climbDownPosition));
+                operatorControl::rightClimb));
         m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
         m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
 

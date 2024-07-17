@@ -42,6 +42,10 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
+    default boolean homeClimber() {
+        return false;
+    }
+
     default double leftClimb() {
         return 0;
     }

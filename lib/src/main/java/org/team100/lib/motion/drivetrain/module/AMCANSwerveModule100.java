@@ -7,6 +7,7 @@ import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.encoder.VelocityBareEncoder;
 import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.LinearMechanismInterface;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
@@ -86,7 +87,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 statorLimit,
                 pidConstants,
                 ff);
-        LinearMechanism mech = new LinearMechanism(
+        LinearMechanismInterface mech = new LinearMechanism(
                 driveMotor, new Talon6Encoder(parent, driveMotor),
                 kDriveReduction,
                 kWheelDiameterM);

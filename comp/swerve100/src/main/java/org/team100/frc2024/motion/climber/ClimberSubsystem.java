@@ -9,6 +9,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.LinearMechanismInterface;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
@@ -16,9 +17,14 @@ import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimberSubsystem extends SubsystemBase implements Glassy {
+    private static final double kMaxPositionM = 0.3;
+    private static final double kUpPositionM = 0.28;
+    private static final double kDownPositionM = 0.02;
+    private static final double kMinPositionM = 0.01;
     /*******************************************
      * ALERT ALERT ALERT this current limit is uncalibrated.
      * 
@@ -71,8 +77,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final double kReduction = 45;
 
     private final SupplierLogger m_logger;
-    private final LinearMechanism m_left;
-    private final LinearMechanism m_right;
+    private final LinearMechanismInterface m_left;
+    private final LinearMechanismInterface m_right;
 
     public ClimberSubsystem(SupplierLogger parent, int leftClimberID, int rightClimberID) {
         m_logger = parent.child(this);
@@ -83,8 +89,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         SupplierLogger rightLogger = m_logger.child("right");
         switch (Identity.instance) {
             case COMP_BOT -> {
-                m_left = comp(leftLogger, leftClimberID);
-                m_right = comp(rightLogger, rightClimberID);
+                m_left = comp(leftLogger, leftClimberID, MotorPhase.REVERSE);
+                m_right = comp(rightLogger, rightClimberID, MotorPhase.FORWARD);
             }
             default -> {
                 m_left = simulated(leftLogger);
@@ -93,11 +99,19 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         }
     }
 
-    private static LinearMechanism comp(SupplierLogger logger, int id) {
+    public Command upPosition(SupplierLogger logger) {
+        return new ClimberPosition(logger, kUpPositionM, this);
+    }
+
+    public Command downPosition(SupplierLogger logger) {
+        return new ClimberPosition(logger, kDownPositionM, this);
+    }
+
+    private static LinearMechanismInterface comp(SupplierLogger logger, int id, MotorPhase phase) {
         NeoVortexCANSparkMotor vp2 = new NeoVortexCANSparkMotor(
                 logger,
                 id,
-                MotorPhase.FORWARD,
+                phase,
                 kCurrentLimit,
                 Feedforward100.makeNeoVortex(),
                 new PIDConstants(0, 0, 0));
@@ -113,7 +127,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      * 
      * https://docs.revrobotics.com/brushless/neo/vortex
      */
-    private static LinearMechanism simulated(SupplierLogger logger) {
+    private static LinearMechanismInterface simulated(SupplierLogger logger) {
         SimulatedBareMotor vs2 = new SimulatedBareMotor(logger, 710);
         return new LinearMechanism(vs2,
                 new SimulatedBareEncoder(logger, vs2),
@@ -198,11 +212,11 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         m_right.setVelocity(v, 0, 0);
     }
 
-    public OptionalDouble getLeftPosition() {
+    public OptionalDouble getLeftPositionM() {
         return m_left.getPositionM();
     }
 
-    public OptionalDouble getRightPosition() {
+    public OptionalDouble getRightPositionM() {
         return m_right.getPositionM();
     }
 
@@ -212,6 +226,14 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     public OptionalDouble getRightVelocity() {
         return m_right.getVelocityM_S();
+    }
+
+    public LinearMechanismInterface getLeft() {
+        return m_left;
+    }
+
+    public LinearMechanismInterface getRight() {
+        return m_right;
     }
 
     @Override

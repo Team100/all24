@@ -9,7 +9,7 @@ import org.team100.lib.motor.BareMotor;
  * Uses a motor, gears, and a wheel to produce linear output, e.g. a drive wheel
  * or conveyor belt.
  */
-public class LinearMechanism {
+public class LinearMechanism implements LinearMechanismInterface {
     private final BareMotor m_motor;
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
@@ -26,14 +26,17 @@ public class LinearMechanism {
         m_wheelRadiusM = wheelDiameterM / 2;
     }
 
+    @Override
     public void setDutyCycle(double output) {
         m_motor.setDutyCycle(output);
     }
 
+    @Override
     public void setForceLimit(double forceN) {
         m_motor.setTorqueLimit(forceN * m_wheelRadiusM / m_gearRatio);
     }
 
+    @Override
     public void setVelocity(
             double outputVelocityM_S,
             double outputAccelM_S2,
@@ -44,6 +47,7 @@ public class LinearMechanism {
                 outputForceN * m_wheelRadiusM / m_gearRatio);
     }
 
+    @Override
     public void setPosition(
             double outputPositionM,
             double outputVelocityM_S,
@@ -54,6 +58,7 @@ public class LinearMechanism {
                 outputForceN * m_wheelRadiusM / m_gearRatio);
     }
 
+    @Override
     public OptionalDouble getVelocityM_S() {
         OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
         if (velocityRad_S.isEmpty())
@@ -61,6 +66,7 @@ public class LinearMechanism {
         return OptionalDouble.of(velocityRad_S.getAsDouble() * m_wheelRadiusM / m_gearRatio);
     }
 
+    @Override
     public OptionalDouble getPositionM() {
         OptionalDouble positionRad = m_encoder.getPositionRad();
         if (positionRad.isEmpty())
@@ -68,15 +74,18 @@ public class LinearMechanism {
         return OptionalDouble.of(positionRad.getAsDouble() * m_wheelRadiusM / m_gearRatio);
     }
 
+    @Override
     public void stop() {
         m_motor.stop();
     }
 
+    @Override
     public void close() {
         m_motor.close();
         m_encoder.close();
     }
 
+    @Override
     public void resetEncoderPosition() {
         m_encoder.reset();
     }

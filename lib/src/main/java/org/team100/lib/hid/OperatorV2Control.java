@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.XboxController;
  * left stick y [-1,1]    == right climber duty cycle
  * left stick button      == feed to amp
  * dpad/pov angle [0,360] == climber position (0=up, 180=down)
- * "back" button          == 
+ * "back" button          == home climber
  * "start" button         == test shoot (and selftest enable)
  * right stick x [-1,1]   == 
  * right stick y [-1,1]   == left climber duty cycle
@@ -64,6 +64,11 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
+    public boolean homeClimber() {
+        return m_controller.getBackButton();
+    }
+
+    @Override
     public boolean climbUpPosition() {
         return m_controller.getPOV() == 0;
     }
@@ -80,12 +85,14 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public double leftClimb() {
-        return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
+        // NOTE this used to use rightY, i.e. it was reversed.
+        return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
     }
 
     @Override
     public double rightClimb() {
-        return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);
+        // NOTE this used to use leftY, i.e. it was reversed.
+        return -deadband(m_controller.getRightY(), 0.2, Double.MAX_VALUE);
     }
 
     @Override

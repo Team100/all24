@@ -14,6 +14,12 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Single NavX over USB or SPI.
+ * 
+ * TODO: to work around SPI issues, implement the SPI reset in AHRS as suggested
+ * 
+ * https://www.chiefdelphi.com/t/navx2-disconnecting-reconnecting-intermittently-not-browning-out/425487/39
+ * 
+ * TODO: try USB supplemental power for the NavX-MXP
  */
 public class SingleNavXGyro implements Gyro100 {
     /**
@@ -25,8 +31,12 @@ public class SingleNavXGyro implements Gyro100 {
 
     /**
      * 60 Hz is the default, use that until we get a handle on the load issue.
+     * 
+     * Note that the actual update rate is 66
+     * 
+     * https://www.chiefdelphi.com/t/navx2-disconnecting-reconnecting-intermittently-not-browning-out/425487/39
      */
-    private static final byte kUpdateRateHz = (byte) 60;
+    private static final byte kUpdateRateHz = (byte) 66;
 
     /**
      * RoboRIO SPI can go up to 4 MHz:
