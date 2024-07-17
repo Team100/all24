@@ -8,8 +8,8 @@ import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motion.LinearMechanism;
-import org.team100.lib.motion.LinearMechanismInterface;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.CANSparkMotor;
@@ -42,7 +42,7 @@ public class ServoFactory {
         CANSparkEncoder encoder = new CANSparkEncoder(
                 parent,
                 motor);
-        LinearMechanismInterface mech = new LinearMechanism(
+        LinearMechanism mech = new SimpleLinearMechanism(
                 motor,
                 encoder,
                 param.gearRatio(),
@@ -63,7 +63,7 @@ public class ServoFactory {
             double wheelDiameterM) {
         // motor speed is rad/s
         BareMotor motor = new SimulatedBareMotor(parent, 600);
-        LinearMechanismInterface mech = new LinearMechanism(
+        LinearMechanism mech = new SimpleLinearMechanism(
                 motor,
                 new SimulatedBareEncoder(parent, motor),
                 gearRatio,

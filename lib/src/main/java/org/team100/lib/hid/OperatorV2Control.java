@@ -13,20 +13,20 @@ import edu.wpi.first.wpilibj.XboxController;
  * left trigger [0,1]     == 
  * left bumper button     == amp arm up
  * left stick x [-1,1]    == 
- * left stick y [-1,1]    == right climber duty cycle
+ * left stick y [-1,1]    == left climber duty cycle
  * left stick button      == feed to amp
  * dpad/pov angle [0,360] == climber position (0=up, 180=down)
  * "back" button          == home climber
  * "start" button         == test shoot (and selftest enable)
  * right stick x [-1,1]   == 
- * right stick y [-1,1]   == left climber duty cycle
+ * right stick y [-1,1]   == right climber duty cycle
  * right stick button     == outtake from amp
  * x button               == intake
- * y button               == feed to shoot
+ * y button               == 
  * a button               == ramp shooter speed and angle
  * b button               == outtake
  * right trigger [0,1]    ==
- * right bumper button    ==
+ * right bumper button    == feed to shoot
  * </pre>
  * 
  * Do not use stick buttons, they are prone to stray clicks
@@ -60,7 +60,8 @@ public class OperatorV2Control implements OperatorControl {
 
     @Override
     public boolean feed() {
-        return m_controller.getYButton();
+        // this used to be "Y" but right bumper seems easier since you're holding "A".
+        return m_controller.getRightBumper();
     }
 
     @Override

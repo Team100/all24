@@ -7,7 +7,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.motion.LimitedLinearMechanism;
-import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
@@ -117,7 +117,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 kCurrentLimit,
                 Feedforward100.makeNeoVortex(),
                 new PIDConstants(0, 0, 0));
-        LinearMechanism lm = new LinearMechanism(
+        SimpleLinearMechanism lm = new SimpleLinearMechanism(
                 vp2,
                 new CANSparkEncoder(logger, vp2),
                 kReduction,
@@ -133,7 +133,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      */
     private static LimitedLinearMechanism simulated(SupplierLogger logger) {
         SimulatedBareMotor vs2 = new SimulatedBareMotor(logger, 710);
-        LinearMechanism lm = new LinearMechanism(
+        SimpleLinearMechanism lm = new SimpleLinearMechanism(
                 vs2,
                 new SimulatedBareEncoder(logger, vs2),
                 kReduction,

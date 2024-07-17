@@ -6,13 +6,13 @@ import java.util.OptionalDouble;
  * Proxies a linear mechanism and imposes positional limits, like a software
  * "limit switch." This only makes sense if the "zero" is set correctly.
  */
-public class LimitedLinearMechanism implements LinearMechanismInterface {
-    private final LinearMechanism m_delegate;
+public class LimitedLinearMechanism implements LinearMechanism {
+    private final SimpleLinearMechanism m_delegate;
     private final double m_minPositionM;
     private final double m_maxPositionM;
 
     public LimitedLinearMechanism(
-            LinearMechanism delegate,
+            SimpleLinearMechanism delegate,
             double minPositionM,
             double maxPositionM) {
         m_delegate = delegate;

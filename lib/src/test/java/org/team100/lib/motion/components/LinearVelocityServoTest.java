@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.MockIncrementalBareEncoder;
-import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
@@ -16,7 +16,7 @@ class LinearVelocityServoTest {
     void testSimple() {
         MockBareMotor driveMotor = new MockBareMotor();
         MockIncrementalBareEncoder driveEncoder = new MockIncrementalBareEncoder();
-        LinearMechanism mech = new LinearMechanism(driveMotor, driveEncoder, 1, 1);
+        SimpleLinearMechanism mech = new SimpleLinearMechanism(driveMotor, driveEncoder, 1, 1);
         OutboardLinearVelocityServo servo = new OutboardLinearVelocityServo(
                 logger,
                 mech);

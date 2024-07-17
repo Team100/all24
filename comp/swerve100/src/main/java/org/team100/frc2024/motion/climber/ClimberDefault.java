@@ -3,7 +3,7 @@ package org.team100.frc2024.motion.climber;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.LinearMechanismInterface;
+import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -42,7 +42,7 @@ public class ClimberDefault extends Command implements Glassy {
     private void manual(
             String name,
             DoubleSupplier inputSupplier,
-            LinearMechanismInterface mech) {
+            LinearMechanism mech) {
         double input = inputSupplier.getAsDouble();
         m_logger.logDouble(Level.TRACE, name + "manual", () -> input);
         mech.setDutyCycle(input);
