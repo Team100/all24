@@ -1,6 +1,5 @@
 package org.team100.frc2024.motion.climber;
 
-import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LinearPositionServo;
 import org.team100.lib.motion.components.OnboardLinearDutyCyclePositionServo;
@@ -58,11 +57,11 @@ public class ClimberPosition extends Command implements Glassy {
     public boolean isFinished() {
         return MathUtil.isNear(
                 m_goalM,
-                m_climber.getLeftPositionM().orElse(m_goalM),
-                kToleranceM)
-                && MathUtil.isNear(
+                m_climber.getLeft().getPositionM().orElse(m_goalM),
+                kToleranceM) &&
+                MathUtil.isNear(
                         m_goalM,
-                        m_climber.getRightPositionM().orElse(m_goalM),
+                        m_climber.getRight().getPositionM().orElse(m_goalM),
                         kToleranceM);
     }
 

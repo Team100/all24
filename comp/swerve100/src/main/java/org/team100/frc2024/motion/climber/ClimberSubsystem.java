@@ -1,15 +1,13 @@
 package org.team100.frc2024.motion.climber;
 
-import java.util.OptionalDouble;
-
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.SimulatedBareEncoder;
+import org.team100.lib.motion.LimitedLinearMechanism;
 import org.team100.lib.motion.LinearMechanism;
-import org.team100.lib.motion.LinearMechanismInterface;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
@@ -61,7 +59,11 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      * TODO: hard stops, top and bottom.
      */
     private static final int kCurrentLimit = 20;
+
+    /** This will break the mechanism if you hit the hard stop. */
     private static final double kClimbingForceN = 676;
+
+    /** This won't break anything. */
     private static final double kHomingForceN = 10;
 
     /**
@@ -77,8 +79,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private static final double kReduction = 45;
 
     private final SupplierLogger m_logger;
-    private final LinearMechanismInterface m_left;
-    private final LinearMechanismInterface m_right;
+    private final LimitedLinearMechanism m_left;
+    private final LimitedLinearMechanism m_right;
 
     public ClimberSubsystem(SupplierLogger parent, int leftClimberID, int rightClimberID) {
         m_logger = parent.child(this);
@@ -107,7 +109,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         return new ClimberPosition(logger, kDownPositionM, this);
     }
 
-    private static LinearMechanismInterface comp(SupplierLogger logger, int id, MotorPhase phase) {
+    private static LimitedLinearMechanism comp(SupplierLogger logger, int id, MotorPhase phase) {
         NeoVortexCANSparkMotor vp2 = new NeoVortexCANSparkMotor(
                 logger,
                 id,
@@ -115,10 +117,12 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 kCurrentLimit,
                 Feedforward100.makeNeoVortex(),
                 new PIDConstants(0, 0, 0));
-        return new LinearMechanism(vp2,
+        LinearMechanism lm = new LinearMechanism(
+                vp2,
                 new CANSparkEncoder(logger, vp2),
                 kReduction,
                 kSprocketDiameterM);
+        return new LimitedLinearMechanism(lm, kMinPositionM, kMaxPositionM);
     }
 
     /**
@@ -127,12 +131,14 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      * 
      * https://docs.revrobotics.com/brushless/neo/vortex
      */
-    private static LinearMechanismInterface simulated(SupplierLogger logger) {
+    private static LimitedLinearMechanism simulated(SupplierLogger logger) {
         SimulatedBareMotor vs2 = new SimulatedBareMotor(logger, 710);
-        return new LinearMechanism(vs2,
+        LinearMechanism lm = new LinearMechanism(
+                vs2,
                 new SimulatedBareEncoder(logger, vs2),
                 kReduction,
                 kSprocketDiameterM);
+        return new LimitedLinearMechanism(lm, kMinPositionM, kMaxPositionM);
     }
 
     /** Use a low, safe force limit for homing. */
@@ -147,92 +153,11 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         m_right.setForceLimit(kClimbingForceN);
     }
 
-    public void setLeftWithSoftLimits(double value) {
-        OptionalDouble e1Position = m_left.getPositionM();
-        if (e1Position.isEmpty()) {
-            m_left.setDutyCycle(0);
-            return;
-        }
-        if (e1Position.getAsDouble() > 300 && value >= 0) {
-            m_left.setDutyCycle(0);
-            return;
-        }
-        if (e1Position.getAsDouble() < 5 && value <= 0) {
-            m_left.setDutyCycle(0);
-            return;
-        }
-        m_logger.logDouble(Level.TRACE, "LEFT VALUE", () -> value);
-    }
-
-    public void setRightWithSoftLimits(double value) {
-        OptionalDouble e2Position = m_right.getPositionM();
-        if (e2Position.isEmpty()) {
-            m_right.setDutyCycle(0);
-            return;
-        }
-        if (e2Position.getAsDouble() > 300 && value >= 0) {
-            m_right.setDutyCycle(0);
-            return;
-        }
-        if (e2Position.getAsDouble() < 5 && value <= 0) {
-            m_right.setDutyCycle(0);
-            return;
-        }
-        m_logger.logDouble(Level.TRACE, "RIGHT VALUE", () -> value);
-    }
-
-    public void zeroClimbers() {
-        m_left.resetEncoderPosition();
-        m_right.resetEncoderPosition();
-    }
-
-    public void zeroLeft() {
-        m_left.resetEncoderPosition();
-    }
-
-    public void zeroRight() {
-        m_right.resetEncoderPosition();
-    }
-
-    /** Sets left climb duty cycle */
-    public void setLeft(double value) {
-        m_left.setDutyCycle(value);
-    }
-
-    /** Sets right climb duty cycle */
-    public void setRight(double value) {
-        m_right.setDutyCycle(value);
-    }
-
-    public void setLeftVelocityM_S(double v) {
-        m_left.setVelocity(v, 0, 0);
-    }
-
-    public void setRightVelocityM_S(double v) {
-        m_right.setVelocity(v, 0, 0);
-    }
-
-    public OptionalDouble getLeftPositionM() {
-        return m_left.getPositionM();
-    }
-
-    public OptionalDouble getRightPositionM() {
-        return m_right.getPositionM();
-    }
-
-    public OptionalDouble getLeftVelocity() {
-        return m_left.getVelocityM_S();
-    }
-
-    public OptionalDouble getRightVelocity() {
-        return m_right.getVelocityM_S();
-    }
-
-    public LinearMechanismInterface getLeft() {
+    public LimitedLinearMechanism getLeft() {
         return m_left;
     }
 
-    public LinearMechanismInterface getRight() {
+    public LimitedLinearMechanism getRight() {
         return m_right;
     }
 
