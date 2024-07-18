@@ -12,7 +12,7 @@ public class MockLinearVelocityServo implements LinearVelocityServo {
     }
 
     @Override
-    public void setVelocity(double setpoint) {
+    public void setVelocityM_S(double setpoint) {
         m_setpoint = setpoint;
     }
 
