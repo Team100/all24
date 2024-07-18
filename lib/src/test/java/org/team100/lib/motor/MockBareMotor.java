@@ -53,4 +53,9 @@ public class MockBareMotor implements BareMotor {
         this.position = positionRad;
     }
 
+    @Override
+    public void setTorqueLimit(double torqueNm) {
+        //
+    }
+
 }

@@ -16,14 +16,18 @@ public class SetRotation extends Command {
     private final SwerveDriveSubsystem m_drive;
     private final Rotation2d m_rotation;
 
-    public SetRotation(SwerveDriveSubsystem drivetrain, Rotation2d rotation) {
+    public SetRotation(SwerveDriveSubsystem drivetrain,
+            Rotation2d rotation) {
         m_drive = drivetrain;
         m_rotation = rotation;
     }
 
     @Override
     public void initialize() {
-        m_drive.resetPose(new Pose2d(m_drive.getState().pose().getTranslation(), m_rotation));
+        m_drive.resetPose(
+                new Pose2d(
+                        m_drive.getState().pose().getTranslation(),
+                        m_rotation));
     }
 
     @Override

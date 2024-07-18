@@ -1,8 +1,7 @@
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.lib.commands.drivetrain.manual;
 
 import java.util.Optional;
 
-import org.team100.lib.commands.drivetrain.ModuleStateDriver;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.SupplierLogger;

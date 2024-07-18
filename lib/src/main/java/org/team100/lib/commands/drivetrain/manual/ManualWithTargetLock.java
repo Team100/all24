@@ -1,12 +1,9 @@
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.lib.commands.drivetrain.manual;
 
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.drivetrain.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -38,7 +35,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
  */
-public class FieldManualWithNoteRotation implements FieldRelativeDriver {
+public class ManualWithTargetLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
     private static final double kDtSec = 0.02;
     /**
@@ -51,22 +48,23 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final HeadingInterface m_heading;
-    private final Supplier<Optional<Translation2d>> m_target;
+    private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
     private final BooleanSupplier m_trigger;
+
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
     private Pose2d m_prevPose;
 
-    public FieldManualWithNoteRotation(
+    public ManualWithTargetLock(
             FieldLogger fieldLogger,
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             HeadingInterface heading,
-            Supplier<Optional<Translation2d>> target,
+            Supplier<Translation2d> target,
             PIDController thetaController,
             PIDController omegaController,
             BooleanSupplier trigger) {
@@ -104,26 +102,13 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     @Override
     public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity input) {
         // clip the input to the unit circle
-        double omega;
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
-        Optional<Translation2d> target = m_target.get();
-        FieldRelativeVelocity scaledInput = DriveUtil.scale(
-                clipped,
-                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        if (!target.isPresent()) {
-            FieldRelativeVelocity twistWithLockM_S = new FieldRelativeVelocity(scaledInput.x(), scaledInput.y(),
-                    scaledInput.theta());
-
-            // desaturate to feasibility by preferring the rotational velocity.
-            twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
-            m_prevPose = state.pose();
-            return twistWithLockM_S;
-        }
         Rotation2d currentRotation = state.pose().getRotation();
         double headingRate = m_heading.getHeadingRateNWU();
+
         Translation2d currentTranslation = state.pose().getTranslation();
-        Rotation2d bearing = TargetUtil.bearing(currentTranslation, target.get()).plus(GeometryUtil.kRotation180);
+        Translation2d target = m_target.get();
+        Rotation2d bearing = TargetUtil.bearing(currentTranslation, target);
 
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -136,7 +121,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
                 m_thetaSetpoint.v());
 
         // the goal omega should match the target's apparent motion
-        double targetMotion = TargetUtil.targetMotion(state, target.get());
+        double targetMotion = TargetUtil.targetMotion(state, target);
         m_logger.logDouble(Level.TRACE, "apparent motion", () -> targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
@@ -144,6 +129,10 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
 
         // this is user input scaled to m/s and rad/s
+        FieldRelativeVelocity scaledInput = DriveUtil.scale(
+                clipped,
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         double thetaFF = m_thetaSetpoint.v();
 
@@ -159,15 +148,19 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         m_logger.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
 
-        omega = MathUtil.clamp(
+        double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        FieldRelativeVelocity twistWithLockM_S = new FieldRelativeVelocity(scaledInput.x(), scaledInput.y(), omega);
+
+        // desaturate to feasibility by preferring the rotational velocity.
+        twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
 
         // this name needs to be exactly "/field/target" for glass.
         m_fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
-                target.get().getX(),
-                target.get().getY(),
+                target.getX(),
+                target.getY(),
                 0 });
 
         // this is just for simulation
@@ -185,17 +178,14 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
                     m_ball.getY(),
                     0 });
         }
-        FieldRelativeVelocity twistWithLockM_S = new FieldRelativeVelocity(scaledInput.x(), scaledInput.y(), omega);
 
-        // desaturate to feasibility by preferring the rotational velocity.
-        twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
         m_prevPose = state.pose();
         return twistWithLockM_S;
     }
 
     @Override
     public String getGlassName() {
-        return "FieldManualWithNoteRotation";
+        return "ManualWithTargetLock";
     }
 
 }

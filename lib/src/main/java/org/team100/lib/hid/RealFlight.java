@@ -4,6 +4,9 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
+import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.telemetry.Telemetry.Level;
+
 import edu.wpi.first.wpilibj.GenericHID;
 
 /**
@@ -37,11 +40,15 @@ import edu.wpi.first.wpilibj.GenericHID;
 public class RealFlight implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
+    private static final double kMedium = 0.5;
+    private static final double kSlow = 0.15;
 
+    private final SupplierLogger m_logger;
     private final GenericHID hid;
 
-    public RealFlight() {
+    public RealFlight(SupplierLogger parent) {
         hid = new GenericHID(0);
+        m_logger = parent.child(this);
     }
 
     @Override
@@ -54,20 +61,25 @@ public class RealFlight implements DriverControl {
      * The square response of this joystick should be clamped by the consumer.
      */
     @Override
-    public DriverControl.Velocity velocity() {
+    public Velocity velocity() {
         double dx = expo(deadband(-1.0 * clamp(scaled(0), 1), kDeadband, 1), kExpo);
         double dy = expo(deadband(-1.0 * clamp(scaled(1), 1), kDeadband, 1), kExpo);
         double dtheta = expo(deadband(-1.0 * clamp(scaled(4), 1), kDeadband, 1), kExpo);
-        return new DriverControl.Velocity(dx, dy, dtheta);
+        
+        Speed speed = speed();
+        m_logger.logEnum(Level.TRACE, "control_speed", () -> speed);
+
+        switch (speed) {
+            case SLOW:
+                return new Velocity(kSlow * dx, kSlow * dy, kSlow * dtheta);
+            case MEDIUM:
+                return new Velocity(kMedium * dx, kMedium * dy, kMedium * dtheta);
+            default:
+                return new Velocity(dx, dy, dtheta);
+        }
     }
 
-    @Override
-    public boolean resetPose() {
-        return hid.getRawButton(1);
-    }
-
-    @Override
-    public Speed speed() {
+    private Speed speed() {
         // left
         if (hid.getRawButton(2))
             return Speed.SLOW;

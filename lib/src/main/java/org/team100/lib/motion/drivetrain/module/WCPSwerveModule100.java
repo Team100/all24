@@ -11,6 +11,7 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
@@ -122,7 +123,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 // kWheelDiameterM,
                 pidConstants,
                 ff);
-        LinearMechanism mech = new LinearMechanism(
+        LinearMechanism mech = new SimpleLinearMechanism(
                 driveMotor,
                 new Talon6Encoder(parent, driveMotor),
                 ratio.m_ratio,

@@ -12,6 +12,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.geometry.Vector2d;
+import org.team100.lib.localization.Blip24;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
@@ -23,7 +24,10 @@ import org.team100.lib.trajectory.TrajectorySamplePoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.spline.PoseWithCurvature;
@@ -237,6 +241,32 @@ public class SupplierLogger {
         logRotation2d(level, append(leaf, "rotation"), pose2d::getRotation);
     }
 
+    public void logTransform3d(Level level, String leaf, Supplier<Transform3d> vals) {
+        if (!allow(level))
+            return;
+        Transform3d transform3d = vals.get();
+        logTranslation3d(level, append(leaf, "translation"), transform3d::getTranslation);
+        logRotation3d(level, append(leaf, "rotation"), transform3d::getRotation);
+    }
+
+    public void logTranslation3d(Level level, String leaf, Supplier<Translation3d> vals) {
+        if (!allow(level))
+            return;
+        Translation3d translation3d = vals.get();
+        logDouble(level, append(leaf, "x"), translation3d::getX);
+        logDouble(level, append(leaf, "y"), translation3d::getY);
+        logDouble(level, append(leaf, "z"), translation3d::getZ);
+    }
+
+    public void logRotation3d(Level level, String leaf, Supplier<Rotation3d> vals) {
+        if (!allow(level))
+            return;
+        Rotation3d rotation3d = vals.get();
+        logDouble(level, append(leaf, "roll"), rotation3d::getX);
+        logDouble(level, append(leaf, "pitch"), rotation3d::getY);
+        logDouble(level, append(leaf, "yaw"), rotation3d::getZ);
+    }
+
     public void logTranslation2d(Level level, String leaf, Supplier<Translation2d> vals) {
         if (!allow(level))
             return;
@@ -375,6 +405,14 @@ public class SupplierLogger {
         logDouble(level, append(leaf, "curvature"), () -> state.curvatureRadPerMeter);
         logDouble(level, append(leaf, "velocity"), () -> state.velocityMetersPerSecond);
         logDouble(level, append(leaf, "accel"), () -> state.accelerationMetersPerSecondSq);
+    }
+
+    public void logBlip24(Level level, String leaf, Supplier<Blip24> vals) {
+        if (!allow(level))
+            return;
+        Blip24 blip = vals.get();
+        logInt(level, append(leaf, "id"), blip::getId);
+        logTransform3d(level, append(leaf, "transform"), blip::getPose);
     }
 
 }

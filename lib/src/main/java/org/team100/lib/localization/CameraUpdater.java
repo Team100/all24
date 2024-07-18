@@ -45,7 +45,7 @@ public class CameraUpdater {
             blipsPublishers.put(camera, inst
                     .getStructArrayTopic("vision/" + camera.getSerial() + "/estimatedTagPose", struct).publish());
         }
-        for (int i = 0; i < m_layout.getLayout(Alliance.Red).getTags().size(); i++) {
+        for (int i = 0; i < m_layout.getTags(Alliance.Red).size(); i++) {
             blips.add(new Blip24(i + 1, new Transform3d()));
         }
     }
@@ -59,7 +59,7 @@ public class CameraUpdater {
             if (camera == Camera.UNKNOWN || camera == Camera.TEST1 || camera == Camera.TEST2 || camera == Camera.TEST3
                     || camera == Camera.TEST4)
                 return;
-            for (int i = 1; i <= m_layout.getLayout(alliance.get()).getTags().size(); i++) {
+            for (int i = 1; i <= m_layout.getTags(alliance.get()).size(); i++) {
                 Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance.get(), i);
                 if (!tagInFieldCoordsOptional.isPresent())
                     return;
@@ -75,7 +75,7 @@ public class CameraUpdater {
                 // blip.getPose().getRotation().getY()
                 // + " Z: " + blip.getPose().getRotation().getZ());
             }
-            Blip24[] arrayList = new Blip24[m_layout.getLayout(alliance.get()).getTags().size()];
+            Blip24[] arrayList = new Blip24[m_layout.getTags(alliance.get()).size()];
             blips.toArray(arrayList);
             blipsPublishers.get(camera).set(arrayList);
         }

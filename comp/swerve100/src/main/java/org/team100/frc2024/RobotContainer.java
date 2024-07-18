@@ -8,7 +8,10 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.commands.AutonCommand;
 import org.team100.frc2024.commands.Feed;
 import org.team100.frc2024.commands.Lob;
+import org.team100.frc2024.commands.climber.HomeClimber;
 import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
+import org.team100.frc2024.commands.drivetrain.manual.ManualWithAmpLock;
+import org.team100.frc2024.commands.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.config.AutonChooser;
 import org.team100.frc2024.motion.AutoMaker;
 import org.team100.frc2024.motion.FeedToAmp;
@@ -22,8 +25,6 @@ import org.team100.frc2024.motion.amp.DriveToAmp;
 import org.team100.frc2024.motion.climber.ClimberDefault;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
-import org.team100.frc2024.motion.drivetrain.manual.ManualWithAmpLock;
-import org.team100.frc2024.motion.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.RunIntakeAndAmpFeeder;
 import org.team100.frc2024.motion.shooter.DrumShooter;
@@ -32,11 +33,20 @@ import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
+import org.team100.lib.commands.FullCycle;
 import org.team100.lib.commands.drivetrain.DriveInACircle;
-import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
-import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.SetRotation;
+import org.team100.lib.commands.drivetrain.manual.DriveManually;
+import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
+import org.team100.lib.commands.drivetrain.manual.ManualChassisSpeeds;
+import org.team100.lib.commands.drivetrain.manual.ManualFieldRelativeSpeeds;
+import org.team100.lib.commands.drivetrain.manual.ManualWithFullStateHeading;
+import org.team100.lib.commands.drivetrain.manual.ManualWithMinTimeHeading;
+import org.team100.lib.commands.drivetrain.manual.ManualWithNoteRotation;
+import org.team100.lib.commands.drivetrain.manual.ManualWithProfiledHeading;
+import org.team100.lib.commands.drivetrain.manual.ManualWithTargetLock;
+import org.team100.lib.commands.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
@@ -63,15 +73,6 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.manual.FieldManualWithNoteRotation;
-import org.team100.lib.motion.drivetrain.manual.ManualChassisSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualFieldRelativeSpeeds;
-import org.team100.lib.motion.drivetrain.manual.ManualWithFullStateHeading;
-import org.team100.lib.motion.drivetrain.manual.ManualWithMinTimeHeading;
-import org.team100.lib.motion.drivetrain.manual.ManualWithNoteRotation;
-import org.team100.lib.motion.drivetrain.manual.ManualWithProfiledHeading;
-import org.team100.lib.motion.drivetrain.manual.ManualWithTargetLock;
-import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.HeadingFactory;
 import org.team100.lib.sensors.HeadingInterface;
@@ -91,6 +92,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -108,7 +110,7 @@ public class RobotContainer implements Glassy {
     private final Command m_auton;
     private final SelfTestRunner m_selfTest;
     private final DrumShooter m_shooter;
-    private final CameraUpdater cameraUpdater;
+    private final CameraUpdater m_cameraUpdater;
     final SwerveDriveSubsystem m_drive;
     final AmpFeeder m_ampFeeder;
     final AmpPivot m_ampPivot;
@@ -122,10 +124,8 @@ public class RobotContainer implements Glassy {
         final Telemetry telemetry = Telemetry.get();
         final FieldLogger fieldLogger = telemetry.fieldLogger(true, true);
 
-        boolean defaultEnabled = false;
-        if (Identity.instance.equals(Identity.BLANK)) {
-            defaultEnabled = true;
-        }
+        final boolean defaultEnabled = Identity.instance.equals(Identity.BLANK);
+
         final SupplierLogger sensorLogger = telemetry.namedRootLogger("SENSOR", defaultEnabled, false);
         final SupplierLogger driveLogger = telemetry.namedRootLogger("DRIVE", defaultEnabled, false);
         final SupplierLogger driveLowLevelLogger = telemetry.namedRootLogger("DRIVE_LOW_LEVEL", defaultEnabled, false);
@@ -141,62 +141,56 @@ public class RobotContainer implements Glassy {
         final OperatorControl operatorControl = new OperatorControlProxy(async);
         final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
 
-        final SensorInterface m_sensors;
-        switch (Identity.instance) {
-            case COMP_BOT:
-                m_sensors = new CompSensors(sensorLogger, 2, 1, 4);
-                break;
-            default:
-                // always returns false
-                m_sensors = new MockSensors();
-        }
+        final SensorInterface m_sensors = switch (Identity.instance) {
+            case COMP_BOT -> new CompSensors(sensorLogger, 2, 1, 4);
+            default -> new MockSensors();
+        };
 
         m_modules = SwerveModuleCollection.get(
                 driveLowLevelLogger,
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
-        final HeadingInterface m_heading = HeadingFactory.get(
+        final HeadingInterface heading = HeadingFactory.get(
                 driveLogger,
                 swerveKinodynamics,
                 m_modules,
                 asyncFactory);
 
         // ignores the rotation derived from vision.
-        SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
-                m_heading.getHeadingNWU(),
+        final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
+                heading.getHeadingNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
 
-        FireControl fireControl = new FireControl() {
+        final FireControl fireControl = new FireControl() {
         };
 
         final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
-        VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
+        final VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 visionLogger,
                 m_layout,
                 poseEstimator,
                 fireControl);
         visionDataProvider.enable();
 
-        NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
+        final NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
         notePositionDetector.enable();
 
-        SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
+        final SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
 
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
                 driveLogger,
-                m_heading,
+                heading,
                 poseEstimator,
-                swerveLocal,
-                driverControl::speed);
-        cameraUpdater = new CameraUpdater(() -> poseEstimator.getEstimatedPosition().pose(), m_layout);
+                swerveLocal);
+        m_cameraUpdater = new CameraUpdater(() -> poseEstimator.getEstimatedPosition().pose(), m_layout);
 
-        final FeederSubsystem m_feeder = new FeederSubsystem(shooterLogger, m_sensors);
+        final FeederSubsystem feeder = new FeederSubsystem(shooterLogger, m_sensors);
 
-        final Intake m_intake = new Intake(intakeLogger, m_sensors);
+        final Intake intake = new Intake(intakeLogger, m_sensors);
 
         m_shooter = new DrumShooter(shooterLogger, 3, 13, 27, 58, 100);
 
@@ -205,10 +199,10 @@ public class RobotContainer implements Glassy {
         // LEDS
         //
 
-        final LEDIndicator m_indicator = new LEDIndicator(0);
+        final LEDIndicator ledIndicator = new LEDIndicator(0);
         // has no default command, registers its own periodic.
         new LEDSubsystem(
-                m_indicator,
+                ledIndicator,
                 m_sensors,
                 m_shooter,
                 visionDataProvider);
@@ -216,7 +210,7 @@ public class RobotContainer implements Glassy {
         m_ampFeeder = new AmpFeeder(ampLogger);
         m_ampPivot = new AmpPivot(ampLogger);
 
-        final ClimberSubsystem m_climber = new ClimberSubsystem(climberLogger, 60, 61);
+        final ClimberSubsystem climber = new ClimberSubsystem(climberLogger, 60, 61);
 
         ////////////////////////////
         //
@@ -225,33 +219,35 @@ public class RobotContainer implements Glassy {
 
         // RESET ZERO
         // on xbox this is "back"
-        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
+        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
 
         // RESET 180
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
-        FullStateDriveController fullStateController = new FullStateDriveController();
-        HolonomicDriveController100 dthetaController = new HolonomicDriveController100(commandLogger);
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
+        final FullStateDriveController fullStateController = new FullStateDriveController();
+        final HolonomicDriveController100 dthetaController = new HolonomicDriveController100(commandLogger);
+
+        final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         whileTrue(driverControl::driveWithFancyTrajec,
                 new FancyTrajectory(commandLogger, m_drive, constraints));
 
         // 254 PID follower
-        HolonomicDriveController3 controller = new HolonomicDriveController3(commandLogger);
-        DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF(commandLogger);
+        final HolonomicDriveController3 controller = new HolonomicDriveController3(commandLogger);
+        final DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF(commandLogger);
 
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(
                         fieldLogger,
                         commandLogger,
-                        m_intake,
+                        intake,
                         notePositionDetector::getClosestTranslation2d,
                         m_drive,
                         dthetaController,
                         swerveKinodynamics));
-        whileTrue(driverControl::actualCircle, new DriveInACircle(commandLogger, m_drive, controller, -1, viz));
+        whileTrue(driverControl::actualCircle,
+                new DriveInACircle(commandLogger, m_drive, controller, -1, viz));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(
@@ -260,29 +256,41 @@ public class RobotContainer implements Glassy {
                         swerveKinodynamics,
                         m_ampPivot,
                         m_ampFeeder,
-                        m_intake,
+                        intake,
                         m_shooter,
-                        m_feeder));
+                        feeder));
 
-        whileTrue(operatorControl::intake, new RunIntakeAndAmpFeeder(m_intake, m_feeder, m_ampFeeder));
+        whileTrue(driverControl::fullCycle,
+                new RepeatCommand(
+                        new FullCycle(commandLogger, m_drive, controller, viz)));
+
+        whileTrue(operatorControl::intake,
+                new RunIntakeAndAmpFeeder(intake, feeder, m_ampFeeder));
 
         whileTrue(operatorControl::outtake,
-                new OuttakeCommand(m_intake, m_shooter, m_ampFeeder, m_feeder));
+                new OuttakeCommand(intake, m_shooter, m_ampFeeder, feeder));
 
         whileTrue(operatorControl::ramp, new Ramp(m_shooter, m_drive));
 
-        whileTrue(operatorControl::feed, new Feed(m_intake, m_feeder));
+        whileTrue(operatorControl::feed, new Feed(intake, feeder));
 
         // hold the amp up while holding the button
-        whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(ampLogger, m_ampPivot, 1.8));
+        whileTrue(operatorControl::pivotToAmpPosition,
+                new AmpSet(ampLogger, m_ampPivot, 1.8));
 
-        whileTrue(operatorControl::feedToAmp, new FeedToAmp(m_intake, m_shooter, m_ampFeeder, m_feeder));
+        whileTrue(operatorControl::feedToAmp,
+                new FeedToAmp(intake, m_shooter, m_ampFeeder, feeder));
 
-        whileTrue(operatorControl::rezero, new TestShoot(m_shooter));
+        whileTrue(operatorControl::testShoot, new TestShoot(m_shooter));
 
         whileTrue(operatorControl::outtakeFromAmp, m_ampFeeder.run(m_ampFeeder::outtake));
 
-        whileTrue(operatorControl::never, new Lob(m_shooter, m_intake));
+        whileTrue(operatorControl::never, new Lob(m_shooter, intake));
+
+        whileTrue(operatorControl::homeClimber, new HomeClimber(commandLogger, climber));
+
+        whileTrue(operatorControl::climbUpPosition, climber.upPosition(commandLogger));
+        whileTrue(operatorControl::climbDownPosition, climber.downPosition(commandLogger));
 
         ///////////////////////////
         //
@@ -291,11 +299,11 @@ public class RobotContainer implements Glassy {
 
         // TODO (jun 24) tune theta and omega control
         // TODO replace with min-time or full-state
-        PIDController thetaController = new PIDController(2.0, 0, 0); // 1.7
+        final PIDController thetaController = new PIDController(2.0, 0, 0); // 1.7
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        PIDController omegaController = new PIDController(0.1, 0, 0); // .5
+        final PIDController omegaController = new PIDController(0.1, 0, 0); // .5
 
-        DriveManually driveManually = new DriveManually(commandLogger, driverControl::velocity, m_drive);
+        final DriveManually driveManually = new DriveManually(commandLogger, driverControl::velocity, m_drive);
 
         driveManually.register("MODULE_STATE", false,
                 new SimpleManualModuleStates(commandLogger, swerveKinodynamics));
@@ -308,7 +316,7 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         swerveKinodynamics,
-                        m_heading,
+                        heading,
                         notePositionDetector::getClosestTranslation2d,
                         thetaController,
                         omegaController,
@@ -321,7 +329,7 @@ public class RobotContainer implements Glassy {
                 new ManualWithProfiledHeading(
                         commandLogger,
                         swerveKinodynamics,
-                        m_heading,
+                        heading,
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
@@ -331,7 +339,7 @@ public class RobotContainer implements Glassy {
                 new ManualWithFullStateHeading(
                         commandLogger,
                         swerveKinodynamics,
-                        m_heading,
+                        heading,
                         driverControl::desiredRotation,
                         new double[] { 5.0, 0.5 }));
 
@@ -339,7 +347,7 @@ public class RobotContainer implements Glassy {
                 new ManualWithMinTimeHeading(
                         commandLogger,
                         swerveKinodynamics,
-                        m_heading,
+                        heading,
                         driverControl::desiredRotation));
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
@@ -347,7 +355,7 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         swerveKinodynamics,
-                        m_heading,
+                        heading,
                         notePositionDetector::getClosestTranslation2d,
                         thetaController,
                         omegaController,
@@ -358,7 +366,7 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         swerveKinodynamics,
-                        m_heading,
+                        heading,
                         driverControl::target,
                         thetaController,
                         omegaController,
@@ -369,36 +377,36 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         swerveKinodynamics,
-                        m_heading,
+                        heading,
                         thetaController,
                         omegaController));
 
-        PIDController omega2Controller = new PIDController(0.5, 0, 0); // .5
+        final PIDController omega2Controller = new PIDController(0.5, 0, 0); // .5
 
-        ManualWithShooterLock shooterLock = new ManualWithShooterLock(
+        final ManualWithShooterLock shooterLock = new ManualWithShooterLock(
                 fieldLogger,
                 commandLogger,
                 swerveKinodynamics,
-                m_heading,
+                heading,
                 thetaController,
                 omega2Controller);
 
-        ManualWithAmpLock ampLock = new ManualWithAmpLock(
+        final ManualWithAmpLock ampLock = new ManualWithAmpLock(
                 fieldLogger,
                 commandLogger,
                 swerveKinodynamics,
-                m_heading,
+                heading,
                 thetaController,
                 omega2Controller);
 
-        AutoMaker m_AutoMaker = new AutoMaker(
+        final AutoMaker m_AutoMaker = new AutoMaker(
                 commandLogger,
                 m_drive,
                 drivePID,
                 0,
-                m_feeder,
+                feeder,
                 m_shooter,
-                m_intake,
+                intake,
                 m_sensors,
                 notePositionDetector,
                 constraints,
@@ -410,7 +418,7 @@ public class RobotContainer implements Glassy {
                 new AmpLockCommand(ampLock, driverControl::velocity, m_drive));
 
         whileTrue(driverControl::shooterLock,
-                new ShootSmartWithRotation(commandLogger, m_drive, m_shooter, m_feeder, m_intake, shooterLock,
+                new ShootSmartWithRotation(commandLogger, m_drive, m_shooter, feeder, intake, shooterLock,
                         driverControl::velocity));
 
         //////////////////
@@ -420,13 +428,13 @@ public class RobotContainer implements Glassy {
 
         m_drive.setDefaultCommand(driveManually);
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
-        m_feeder.setDefaultCommand(m_feeder.run(m_feeder::stop));
-        m_intake.setDefaultCommand(m_intake.run(m_intake::stop));
-        m_climber.setDefaultCommand(new ClimberDefault(
-                m_climber,
-                operatorControl::getLeftAxis,
-                operatorControl::getRightAxis,
-                operatorControl::pov));
+        feeder.setDefaultCommand(feeder.run(feeder::stop));
+        intake.setDefaultCommand(intake.run(intake::stop));
+        climber.setDefaultCommand(new ClimberDefault(
+                commandLogger,
+                climber,
+                operatorControl::leftClimb,
+                operatorControl::rightClimb));
         m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
         m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
 
@@ -436,7 +444,7 @@ public class RobotContainer implements Glassy {
         //
 
         // this illustrates how to use AutonCommand together with AllianceCommand
-        Command choosableAuton = new AutonCommand(
+        m_auton = new AutonCommand(
                 Map.of(
                         AutonChooser.Routine.FIVE_NOTE, new AllianceCommand(
                                 m_AutoMaker.fourNoteAuto(
@@ -462,7 +470,6 @@ public class RobotContainer implements Glassy {
                                 new PrintCommand("nothing red goes here"),
                                 new PrintCommand("nothing blue goes here"))),
                 AutonChooser::routine);
-        m_auton = choosableAuton;
 
         // selftest uses fields we just initialized above, so it comes last.
         m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
@@ -507,7 +514,7 @@ public class RobotContainer implements Glassy {
 
     public void periodic() {
         if (Experiments.instance.enabled(Experiment.UseCameraUpdater))
-            cameraUpdater.update();
+            m_cameraUpdater.update();
     }
 
     public void cancelAuton() {

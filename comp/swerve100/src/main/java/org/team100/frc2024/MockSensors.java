@@ -1,5 +1,8 @@
 package org.team100.frc2024;
 
+/**
+ * Always returns false
+ */
 public class MockSensors implements SensorInterface {
 
     @Override

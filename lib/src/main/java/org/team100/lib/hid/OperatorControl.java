@@ -12,31 +12,11 @@ public interface OperatorControl extends Glassy {
         return "No HID Found!!";
     }
 
-    default boolean doSomething() {
-        return false;
-    }
-
-    default boolean index() {
-        return false;
-    }
-
-    default boolean shooter() {
-        return false;
-    }
-
     default boolean pivotToAmpPosition() {
         return false;
     }
 
-    default double shooterSpeed() {
-        return 0;
-    }
-
     default boolean outtake() {
-        return false;
-    }
-
-    default boolean rampAndPivot() {
         return false;
     }
 
@@ -44,33 +24,8 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default int pov() {
-        // the "null" state is -1
-        return -1;
-    }
-
     default boolean intake() {
         return false;
-    }
-
-    default boolean indexState() {
-        return false;
-    }
-
-    default double climberState() {
-        return 0;
-    }
-
-    default double lower() {
-        return 0;
-    }
-
-    default double upper() {
-        return 0;
-    }
-
-    default double elevator() {
-        return 0;
     }
 
     default boolean ramp() {
@@ -87,19 +42,25 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default double getLeftAxis() {
-        return 0;
-    }
-
-    default double getRightAxis() {
-        return 0;
-    }
-
-    default boolean getClimberOveride() {
+    default boolean homeClimber() {
         return false;
     }
 
-    default boolean pivotToDownPosition() {
+    default double leftClimb() {
+        return 0;
+    }
+
+    default double rightClimb() {
+        return 0;
+    }
+
+    /** Put the climber hooks in the "up" position. */
+    default boolean climbUpPosition() {
+        return false;
+    }
+
+    /** Put the climber hooks in the "down" position. */
+    default boolean climbDownPosition() {
         return false;
     }
 
@@ -111,7 +72,7 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default boolean rezero() {
+    default boolean testShoot() {
         return false;
     }
 

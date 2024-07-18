@@ -3,9 +3,11 @@ package org.team100.lib.localization;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -39,7 +41,8 @@ import edu.wpi.first.wpilibj.Filesystem;
  * 
  */
 public class AprilTagFieldLayoutWithCorrectOrientation {
-    private static final String kFilename = "2024-crescendo.json";
+    private static final String kProdFilename = "2024-crescendo.json";
+    private static final String kPracticeFilename = "practice-field.json";
 
     // Inverts yaw
     private static final Transform3d kFix = new Transform3d(
@@ -47,12 +50,10 @@ public class AprilTagFieldLayoutWithCorrectOrientation {
             new Rotation3d(0, 0, Math.PI));
 
     private final Map<Alliance, AprilTagFieldLayout> layouts = new EnumMap<>(Alliance.class);
+    private final Map<Alliance, AprilTagFieldLayout> practiceLayouts = new EnumMap<>(Alliance.class);
 
-    /**
-     * @param filename filename allows experimentation with other layouts
-     */
     public AprilTagFieldLayoutWithCorrectOrientation() throws IOException {
-        Path path = Filesystem.getDeployDirectory().toPath().resolve(kFilename);
+        Path path = Filesystem.getDeployDirectory().toPath().resolve(kProdFilename);
 
         AprilTagFieldLayout blueLayout = new AprilTagFieldLayout(path);
         blueLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
@@ -62,22 +63,40 @@ public class AprilTagFieldLayoutWithCorrectOrientation {
 
         layouts.put(Alliance.Red, redLayout);
         layouts.put(Alliance.Blue, blueLayout);
+
+        Path practicePath = Filesystem.getDeployDirectory().toPath().resolve(kPracticeFilename);
+
+        AprilTagFieldLayout bluePracticeLayout = new AprilTagFieldLayout(practicePath);
+        bluePracticeLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+
+        AprilTagFieldLayout redPracticeLayout = new AprilTagFieldLayout(practicePath);
+        redPracticeLayout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
+
+        practiceLayouts.put(Alliance.Red, redPracticeLayout);
+        practiceLayouts.put(Alliance.Blue, bluePracticeLayout);
     }
 
-    public AprilTagFieldLayout getLayout(Alliance alliance) {
-        AprilTagFieldLayout layout = layouts.get(alliance);
-        return layout;
+    /** Always use prod layouts. */
+    public List<AprilTag> getTags(Alliance alliance) {
+        return getLayout(alliance, 0).getTags();
     }
 
     /**
      * @return Tag pose with correct yaw (inverted compared to json file)
      */
     public Optional<Pose3d> getTagPose(Alliance alliance, int id) {
-        AprilTagFieldLayout layout = layouts.get(alliance);
+        AprilTagFieldLayout layout = getLayout(alliance, id);
         Optional<Pose3d> pose = layout.getTagPose(id);
         if (pose.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(pose.get().transformBy(kFix));
+    }
+
+    private AprilTagFieldLayout getLayout(Alliance alliance, int id) {
+        if (id >= 100) {
+            return practiceLayouts.get(alliance);
+        }
+        return layouts.get(alliance);
     }
 }

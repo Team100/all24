@@ -36,8 +36,8 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         m_logger = parent.child(this);
         SysParam m_params = SysParam.neoPositionServoSystem(
                 55,
-                60,
-                60);
+                5,
+                5);
 
         TrapezoidProfile100 profile = new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05);
         double period = 0.02;

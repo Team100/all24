@@ -111,8 +111,7 @@ public class RobotContainerParkingLot implements Glassy {
                 driveLogger,
                 m_heading,
                 poseEstimator,
-                swerveLocal,
-                driverControl::speed);
+                swerveLocal);
 
         // joel 2/22/24 removing for SVR, put back after that.
         // these should be fields
@@ -256,7 +255,7 @@ public class RobotContainerParkingLot implements Glassy {
 
         // this should be a field.
         final DrawSquare m_drawCircle = new DrawSquare(driveLogger, m_drive, controller, viz);
-        whileTrue(driverControl::circle, m_drawCircle);
+        whileTrue(driverControl::never, m_drawCircle);
     }
 
     private void whileTrue(BooleanSupplier condition, Command command) {

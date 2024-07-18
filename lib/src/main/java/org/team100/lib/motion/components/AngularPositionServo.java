@@ -5,6 +5,9 @@ import java.util.OptionalDouble;
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 
+/**
+ * Angular position control, e.g. for swerve steering axes or arm axes.
+ */
 public interface AngularPositionServo extends Glassy {
     /**
      * It is essential to call this after a period of disuse, to prevent transients.
