@@ -5,7 +5,6 @@ import java.util.OptionalDouble;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
@@ -27,6 +26,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * though, so try a high accel limit.
  */
 public class IndexerSubsystem extends SubsystemBase implements Glassy {
+    private static final double kMaxDecel = -50;
+    private static final double kMaxAccel = 50;
+    private static final double kMaxVelocity = 15;
     private static final double kGearRatio = 12.0;
     private static final double kWheelDiameterM = 0.05;
     private static final int kCurrentLimit = 30;
@@ -35,7 +37,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
      * Surface velocity of whatever is turning in the indexer.
      */
     private static final double kIndexerVelocityM_S = 5;
-    
+
     private final SupplierLogger m_logger;
     private final LimitedLinearVelocityServo m_servo;
     private final PIDConstants m_velocityConstants;
@@ -49,12 +51,6 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
         m_velocityConstants = new PIDConstants(0.0001, 0, 0);
         m_lowLevelFeedforwardConstants = Feedforward100.makeNeo();
 
-        SysParam params = SysParam.limitedNeoVelocityServoSystem(
-                kGearRatio,
-                kWheelDiameterM,
-                15,
-                50,
-                -50);
         switch (Identity.instance) {
             case COMP_BOT:
 
@@ -66,7 +62,11 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
                         driveID,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
-                        params,
+                        kGearRatio,
+                        kWheelDiameterM,
+                        kMaxVelocity,
+                        kMaxAccel,
+                        kMaxDecel,
                         m_lowLevelFeedforwardConstants,
                         m_velocityConstants);
                 break;
@@ -74,9 +74,11 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
             default:
                 m_servo = ServoFactory.limitedSimulatedVelocityServo(
                         m_logger,
-                        params,
                         kGearRatio,
-                        kWheelDiameterM);
+                        kWheelDiameterM,
+                        kMaxVelocity,
+                        kMaxAccel,
+                        kMaxDecel);
         }
     }
 

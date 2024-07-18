@@ -4,7 +4,6 @@ import org.team100.frc2024.SensorInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
@@ -16,6 +15,9 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase implements Glassy {
+    private static final double kMaxDecel = -10;
+    private static final double kMaxAccel = 10;
+    private static final double kMaxVelocity = 15;
     private static final double kGearRatio = 9;
     private static final double kWheelDiameterM = 0.05;
     private static final int kCurrentLimit = 20;
@@ -35,9 +37,6 @@ public class Intake extends SubsystemBase implements Glassy {
         m_logger = parent.child(this);
         m_sensors = sensors;
 
-        SysParam rollerParameter = SysParam.limitedNeoVelocityServoSystem(
-                kGearRatio, kWheelDiameterM, 15, 10, -10);
-
         switch (Identity.instance) {
             case COMP_BOT:
                 m_intake = new PWMSparkMax(1);
@@ -47,7 +46,11 @@ public class Intake extends SubsystemBase implements Glassy {
                         5,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
-                        rollerParameter,
+                        kGearRatio,
+                        kWheelDiameterM,
+                        kMaxVelocity,
+                        kMaxAccel,
+                        kMaxDecel,
                         Feedforward100.makeNeo(),
                         new PIDConstants(0.0001, 0, 0));
                 break;
@@ -57,9 +60,11 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
                         m_logger.child("Super Roller"),
-                        rollerParameter,
                         kGearRatio,
-                        kWheelDiameterM);
+                        kWheelDiameterM,
+                        kMaxVelocity,
+                        kMaxAccel,
+                        kMaxDecel);
         }
     }
 

@@ -7,7 +7,6 @@ import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
 import org.team100.lib.encoder.CANSparkEncoder;
@@ -29,32 +28,33 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * The pivot is independent from the feeder, so it's a separate subsystem.
  */
 public class AmpPivot extends SubsystemBase implements Glassy {
+    private static final int kCurrentLimit = 30;
+    private static final int kCanId = 2;
+    private static final int kMaxAccel = 5;
+    private static final int kMaxVelocity = 5;
+    private static final int kGearRatio = 55;
     private final SupplierLogger m_logger;
     private final GravityServo ampAngleServo;
 
     public AmpPivot(SupplierLogger parent) {
         m_logger = parent.child(this);
-        SysParam m_params = SysParam.neoPositionServoSystem(
-                55,
-                5,
-                5);
 
-        TrapezoidProfile100 profile = new TrapezoidProfile100(m_params.maxVelM_S(), m_params.maxAccelM_S2(), 0.05);
+        TrapezoidProfile100 profile = new TrapezoidProfile100(kMaxVelocity, kMaxAccel, 0.05);
         double period = 0.02;
 
         switch (Identity.instance) {
             case COMP_BOT:
                 CANSparkMotor motor = new NeoCANSparkMotor(
                         m_logger,
-                        2,
+                        kCanId,
                         MotorPhase.FORWARD,
-                        30,
+                        kCurrentLimit,
                         Feedforward100.makeNeo(),
                         new PIDConstants(0, 0, 0));
                 RotaryMechanism mech = new RotaryMechanism(
                         motor,
                         new CANSparkEncoder(m_logger, motor),
-                        55);
+                        kGearRatio);
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(
                         m_logger, 3, 0.645439, EncoderDrive.INVERSE);
                 PIDController controller = new PIDController(0.8, 0, 0);
@@ -75,7 +75,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 RotaryMechanism simMech = new RotaryMechanism(
                         simMotor,
                         new SimulatedBareEncoder(m_logger, simMotor),
-                        75);
+                        kGearRatio);
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         m_logger, simMech);
                 PIDController controller2 = new PIDController(0.7, 0, 0);

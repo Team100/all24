@@ -6,7 +6,6 @@ import org.team100.frc2024.motion.GravityServo;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SysParam;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
 import org.team100.lib.encoder.CANSparkEncoder;
@@ -44,6 +43,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * up, so set the acceleration a bit higher than that to start.
  */
 public class DrumShooter extends SubsystemBase implements Glassy {
+    private static final int kMaxDecel = -40;
+    private static final int kMaxAccel = 40;
+    private static final int kMaxVelocity = 30;
     private static final double kPivotReduction = 165;
     /** Left roller setpoint, m/s */
     private static final double kLeftRollerVelocity = 20;
@@ -72,13 +74,6 @@ public class DrumShooter extends SubsystemBase implements Glassy {
             double supplyLimit,
             double statorLimit) {
         m_logger = parent.child(this);
-
-        SysParam shooterParams = SysParam.limitedNeoVelocityServoSystem(
-                1, // gear ratio
-                0.1, // wheel diameter
-                30, // max vel
-                40, // max accel
-                -40); // max decel
 
         PIDController pivotController = new PIDController(4.5, 0.0, 0.000);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
@@ -142,14 +137,18 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 // For testing and simulation
                 leftRoller = ServoFactory.limitedSimulatedVelocityServo(
                         leftLogger,
-                        shooterParams,
                         kDriveReduction,
-                        kWheelDiameterM);
+                        kWheelDiameterM,
+                        kMaxVelocity,
+                        kMaxAccel,
+                        kMaxDecel);
                 rightRoller = ServoFactory.limitedSimulatedVelocityServo(
                         rightLogger,
-                        shooterParams,
                         kDriveReduction,
-                        kWheelDiameterM);
+                        kWheelDiameterM,
+                        kMaxVelocity,
+                        kMaxAccel,
+                        kMaxDecel);
                 // motor speed is rad/s
                 SimulatedBareMotor simMotor = new SimulatedBareMotor(parent, 600);
                 RotaryMechanism simMech = new RotaryMechanism(

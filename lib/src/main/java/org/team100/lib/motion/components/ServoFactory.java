@@ -2,7 +2,6 @@ package org.team100.lib.motion.components;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SysParam;
 import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.RotaryPositionSensor;
@@ -29,7 +28,11 @@ public class ServoFactory {
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
-            SysParam param,
+            double gearRatio,
+            double wheelDiameter,
+            double maxVelocity,
+            double maxAccel,
+            double maxDecel,
             Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
         NeoCANSparkMotor motor = new NeoCANSparkMotor(
@@ -45,22 +48,24 @@ public class ServoFactory {
         LinearMechanism mech = new SimpleLinearMechanism(
                 motor,
                 encoder,
-                param.gearRatio(),
-                param.wheelDiameter());
+                gearRatio,
+                wheelDiameter);
         LinearVelocityServo v = new OutboardLinearVelocityServo(
                 parent,
                 mech);
         return new LimitedLinearVelocityServo(v,
-                param.maxVelM_S(),
-                param.maxAccelM_S2(),
-                param.maxDecelM_S2());
+                maxVelocity,
+                maxAccel,
+                maxDecel);
     }
 
     public static LimitedLinearVelocityServo limitedSimulatedVelocityServo(
             SupplierLogger parent,
-            SysParam param,
             double gearRatio,
-            double wheelDiameterM) {
+            double wheelDiameterM,
+            double maxVelocity,
+            double maxAccel,
+            double maxDecel) {
         // motor speed is rad/s
         BareMotor motor = new SimulatedBareMotor(parent, 600);
         LinearMechanism mech = new SimpleLinearMechanism(
@@ -72,9 +77,9 @@ public class ServoFactory {
                 parent,
                 mech);
         return new LimitedLinearVelocityServo(v,
-                param.maxVelM_S(),
-                param.maxAccelM_S2(),
-                param.maxDecelM_S2());
+                maxVelocity,
+                maxAccel,
+                maxDecel);
     }
 
     /**
@@ -86,7 +91,9 @@ public class ServoFactory {
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
-            SysParam param,
+            double gearRatio,
+            double maxVelocity,
+            double maxAccel,
             PIDController controller,
             Feedforward100 ff,
             PIDConstants lowLevelVelocityConstants) {
@@ -100,20 +107,21 @@ public class ServoFactory {
         RotaryMechanism mech = new RotaryMechanism(
                 motor,
                 new CANSparkEncoder(parent, motor),
-                param.gearRatio());
+                gearRatio);
         RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(mech);
         return new OnboardAngularPositionServo(
                 parent,
                 mech,
                 sensor,
-                param.maxVelM_S(),
+                maxVelocity,
                 controller,
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
+                new TrapezoidProfile100(maxVelocity, maxAccel, 0.05));
     }
 
     public static OnboardAngularPositionServo simulatedAngleServo(
             SupplierLogger parent,
-            SysParam param,
+            double maxVelocity,
+            double maxAccel,
             PIDController controller) {
         // motor speed is rad/s
         SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
@@ -131,9 +139,9 @@ public class ServoFactory {
                 parent,
                 mech,
                 sensor,
-                param.maxVelM_S(),
+                maxVelocity,
                 controller,
-                new TrapezoidProfile100(param.maxVelM_S(), param.maxAccelM_S2(), 0.05));
+                new TrapezoidProfile100(maxVelocity, maxAccel, 0.05));
     }
 
     private ServoFactory() {
