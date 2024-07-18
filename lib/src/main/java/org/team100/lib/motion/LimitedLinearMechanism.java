@@ -5,6 +5,8 @@ import java.util.OptionalDouble;
 /**
  * Proxies a linear mechanism and imposes positional limits, like a software
  * "limit switch." This only makes sense if the "zero" is set correctly.
+ * 
+ * TODO: make this class aware of whether it's been "homed" correctly.
  */
 public class LimitedLinearMechanism implements LinearMechanism {
     private final SimpleLinearMechanism m_delegate;
