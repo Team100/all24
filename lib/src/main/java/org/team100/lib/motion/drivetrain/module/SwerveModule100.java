@@ -58,13 +58,17 @@ public class SwerveModule100 implements Glassy {
     void setRawDesiredState(SwerveModuleState100 state) {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
-        if (state.angle.isEmpty())
-            throw new IllegalArgumentException();
+        if (state.angle.isEmpty()) {
+            Util.warn("SwerveModule100.setRawDesiredState: empty angle!");
+            m_driveServo.setVelocityM_S(0);
+            return;
+            // throw new IllegalArgumentException();
+        }
         if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
             m_driveServo.setVelocity(state.speedMetersPerSecond, state.accelMetersPerSecond_2);
             m_turningServo.setPositionWithVelocity(state.angle.get().getRadians(), state.omega, 0);
         } else {
-            m_driveServo.setVelocity(state.speedMetersPerSecond);
+            m_driveServo.setVelocityM_S(state.speedMetersPerSecond);
             m_turningServo.setPosition(state.angle.get().getRadians(), 0);
         }
     }
