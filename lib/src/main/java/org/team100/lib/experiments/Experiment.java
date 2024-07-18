@@ -82,5 +82,9 @@ public enum Experiment {
     /**
      * Use outboard closed-loop position control for steering instead of onboard PID
      */
-    OutboardSteering
+    OutboardSteering,
+    /**
+     * Use dashpot and jerk limiting
+     */
+    FancyProfile
 }

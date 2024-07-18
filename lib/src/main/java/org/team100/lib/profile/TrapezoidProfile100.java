@@ -73,6 +73,8 @@ public class TrapezoidProfile100 implements Profile100 {
      * Therefore, if you blindly use the reported acceleration as the only input to
      * a real system, it will tend to get ahead of the profile, but only by one time
      * period.
+     * 
+     * Returns the goal if the intial is within tolerance of it.
      */
     @Override
     public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
@@ -177,7 +179,8 @@ public class TrapezoidProfile100 implements Profile100 {
     }
 
     private State100 keepCruising(double dt, State100 initial, State100 goal) {
-        // System.out.printf("keep cruising x_i %6.3f v_i %6.3f a_i %6.3f\n", initial.x(), initial.v(), initial.a());
+        // System.out.printf("keep cruising x_i %6.3f v_i %6.3f a_i %6.3f\n",
+        // initial.x(), initial.v(), initial.a());
 
         // We're already at positive cruising speed, which means G- is next.
         // will we reach it during dt?
