@@ -173,7 +173,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_logger.logState100(Level.TRACE, "goal", () -> goal);
 
         double omega = MathUtil.clamp(
-                thetaFF,
+                thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         FieldRelativeVelocity twistWithLockM_S = new FieldRelativeVelocity(scaledInput.x(), scaledInput.y(), omega);
