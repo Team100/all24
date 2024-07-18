@@ -29,12 +29,17 @@ public abstract class CANSparkMotor implements BareMotor {
         m_motor = motor;
         m_logger = parent.child(this);
         m_ff = ff;
+        // make config synchronous so we can see the errors
+        Rev100.crash(() -> m_motor.setCANTimeout(500));
         Rev100.baseConfig(m_motor);
         Rev100.motorConfig(m_motor, IdleMode.kBrake, motorPhase, 20);
         Rev100.currentConfig(m_motor, currentLimit);
         m_encoder = m_motor.getEncoder();
         m_pidController = m_motor.getPIDController();
         Rev100.pidConfig(m_pidController, pid);
+        // make everything after this asynchronous.
+        // NOTE: this makes error-checking not work at all.
+        Rev100.crash(() -> m_motor.setCANTimeout(0));
     }
 
     @Override
