@@ -10,6 +10,11 @@ import org.team100.lib.dashboard.Glassy;
 public interface BareMotor extends Glassy {
 
     /**
+     * Some motors allow torque limiting through current limiting.
+     */
+    void setTorqueLimit(double torqueNm);
+
+    /**
      * Open-loop duty cycle control.
      * 
      * @param output in range [-1, 1]

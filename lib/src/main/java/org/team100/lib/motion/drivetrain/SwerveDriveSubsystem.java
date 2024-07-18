@@ -1,11 +1,8 @@
 package org.team100.lib.motion.drivetrain;
 
-import java.util.function.Supplier;
-
 import org.team100.lib.commands.Subsystem100;
 import org.team100.lib.config.DriverSkill;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.hid.DriverControl;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -30,7 +27,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     private final HeadingInterface m_heading;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
-    private final Supplier<DriverControl.Speed> m_speed;
     private final ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
@@ -38,14 +34,12 @@ public class SwerveDriveSubsystem extends Subsystem100 {
             SupplierLogger parent,
             HeadingInterface heading,
             SwerveDrivePoseEstimator100 poseEstimator,
-            SwerveLocal swerveLocal,
-            Supplier<DriverControl.Speed> speed) {
+            SwerveLocal swerveLocal) {
         m_fieldLogger = fieldLogger;
         m_logger = parent.child(this);
         m_heading = heading;
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
-        m_speed = speed;
         // state update at 100 hz.
         m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
         stop();
@@ -67,8 +61,6 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      */
     public void driveInFieldCoords(FieldRelativeVelocity vIn, double kDtSec) {
         m_logger.logFieldRelativeVelocity(Level.TRACE, "drive input", () -> vIn);
-        DriverControl.Speed speed = m_speed.get();
-        m_logger.logEnum(Level.TRACE, "control_speed", () -> speed);
 
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();

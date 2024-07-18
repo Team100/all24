@@ -76,4 +76,9 @@ public class BareMotorController100 implements BareMotor {
     public void setEncoderPositionRad(double positionRad) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void setTorqueLimit(double torqueNm) {
+        throw new UnsupportedOperationException();
+    }
 }

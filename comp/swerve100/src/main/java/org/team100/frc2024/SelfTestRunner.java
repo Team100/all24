@@ -4,13 +4,13 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.selftest.AmpSelfTest;
-import org.team100.lib.commands.drivetrain.DriveManually;
 import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.Veering;
+import org.team100.lib.commands.drivetrain.manual.DriveManually;
+import org.team100.lib.commands.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.selftest.DefenseSelfTest;
 import org.team100.lib.selftest.DriveManuallySelfTest;
 import org.team100.lib.selftest.OscillateSelfTest;

@@ -21,7 +21,6 @@ public interface DriverControl extends Glassy {
      * the control, so the ranges are [-1,1]
      */
     public static record Velocity(double x, double y, double theta) {
-
     }
 
     public enum Speed {
@@ -65,6 +64,26 @@ public interface DriverControl extends Glassy {
         return null;
     }
 
+    /**
+     * Reset the pose estimator's gyro offset so that the current gyro rotation
+     * corresponds to zero.
+     */
+    default boolean resetRotation0() {
+        return false;
+    }
+
+    /**
+     * Reset the pose estimator's gyro offset so that the current gyro rotation
+     * corresponds to 180.
+     */
+    default boolean resetRotation180() {
+        return false;
+    }
+
+    default boolean fullCycle() {
+        return false;
+    }
+
     default Translation2d target() {
         return null;
     }
@@ -81,31 +100,11 @@ public interface DriverControl extends Glassy {
         return false;
     }
 
-    default boolean resetPose() {
-        return false;
-    }
-
-    default boolean resetRotation0() {
-        return false;
-    }
-
-    default boolean resetRotation180() {
-        return false;
-    }
-
-    default Speed speed() {
-        return Speed.NORMAL;
-    }
-
     default boolean defense() {
         return false;
     }
 
     default boolean driveWithFancyTrajec() {
-        return false;
-    }
-
-    default boolean circle() {
         return false;
     }
 
@@ -125,10 +124,6 @@ public interface DriverControl extends Glassy {
 
     default boolean test() {
         return false;
-    }
-
-    default int pov() {
-        return -1;
     }
 
     default boolean shooterLock() {

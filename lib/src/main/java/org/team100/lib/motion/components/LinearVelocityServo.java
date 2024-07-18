@@ -16,7 +16,7 @@ public interface LinearVelocityServo extends Glassy {
     void reset();
 
     /** meters/sec */
-    void setVelocity(double setpoint);
+    void setVelocityM_S(double setpointM_S);
 
     /** meters/sec meters/sec_2 */
     void setVelocity(double setpoint, double setpoint_2);

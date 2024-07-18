@@ -38,19 +38,24 @@ public class DrawSquare extends SequentialCommandGroup {
         TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(maxVelocityM_S, maxAccelM_S_S)));
         StraightLineTrajectory maker = new StraightLineTrajectory(tmaker);
         addCommands(
-                new DriveToWaypoint3(parent, new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),
+                new DriveToWaypoint3(parent,
+                        new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz),
-                new DriveToWaypoint3(parent, new Pose2d(-0.5, 0.5, GeometryUtil.kRotationZero),
+                new DriveToWaypoint3(parent,
+                        new Pose2d(-0.5, 0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz),
-                new DriveToWaypoint3(parent, new Pose2d(0.5, 0.5, GeometryUtil.kRotationZero),
+                new DriveToWaypoint3(parent,
+                        new Pose2d(0.5, 0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz),
-                new DriveToWaypoint3(parent, new Pose2d(0.5, -0.5, GeometryUtil.kRotationZero),
+                new DriveToWaypoint3(parent,
+                        new Pose2d(0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz),
-                new DriveToWaypoint3(parent, new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),
+                new DriveToWaypoint3(parent,
+                        new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz)
 

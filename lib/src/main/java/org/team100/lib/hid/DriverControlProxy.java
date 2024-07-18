@@ -61,7 +61,7 @@ public class DriverControlProxy implements DriverControl {
             return new LogitechExtremeJoystick();
         }
         if (name.startsWith("Great Planes")) {
-            return new RealFlight();
+            return new RealFlight(parent);
         }
         if (name.equals("Team 100 Pilot")) {
             return new Pilot();
@@ -88,6 +88,11 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
+    public boolean fullCycle() {
+        return m_driverControl.fullCycle();
+    }
+
+    @Override
     public boolean driveToNote() {
         return m_driverControl.driveToNote();
     }
@@ -108,11 +113,6 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public boolean resetPose() {
-        return m_driverControl.resetPose();
-    }
-
-    @Override
     public boolean resetRotation0() {
         return m_driverControl.resetRotation0();
     }
@@ -123,11 +123,6 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public Speed speed() {
-        return m_driverControl.speed();
-    }
-
-    @Override
     public boolean defense() {
         return m_driverControl.defense();
     }
@@ -135,11 +130,6 @@ public class DriverControlProxy implements DriverControl {
     @Override
     public boolean driveWithFancyTrajec() {
         return m_driverControl.driveWithFancyTrajec();
-    }
-
-    @Override
-    public boolean circle() {
-        return m_driverControl.circle();
     }
 
     @Override
@@ -160,11 +150,6 @@ public class DriverControlProxy implements DriverControl {
     @Override
     public boolean test() {
         return m_driverControl.test();
-    }
-
-    @Override
-    public int pov() {
-        return m_driverControl.pov();
     }
 
     @Override

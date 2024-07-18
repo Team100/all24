@@ -2,6 +2,7 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
+// import org.team100.lib.sensors.navx.AHRS100;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
@@ -14,6 +15,12 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Single NavX over USB or SPI.
+ * 
+ * TODO: to work around SPI issues, implement the SPI reset in AHRS as suggested
+ * 
+ * https://www.chiefdelphi.com/t/navx2-disconnecting-reconnecting-intermittently-not-browning-out/425487/39
+ * 
+ * TODO: try USB supplemental power for the NavX-MXP
  */
 public class SingleNavXGyro implements Gyro100 {
     /**
@@ -25,7 +32,12 @@ public class SingleNavXGyro implements Gyro100 {
 
     /**
      * 60 Hz is the default, use that until we get a handle on the load issue.
+     * 
+     * Note that the actual update rate is 66
+     * 
+     * https://www.chiefdelphi.com/t/navx2-disconnecting-reconnecting-intermittently-not-browning-out/425487/39
      */
+    // private static final byte kUpdateRateHz = (byte) 66;
     private static final byte kUpdateRateHz = (byte) 60;
 
     /**
@@ -45,7 +57,7 @@ public class SingleNavXGyro implements Gyro100 {
     private final SupplierLogger m_logger;
 
     // TODO: remove this if it's not useful
-    // private final AHRS100 m_gyro1;
+    // private final AHRS100 m_ahrs;
     private final AHRS m_ahrs;
 
     /**
@@ -69,35 +81,46 @@ public class SingleNavXGyro implements Gyro100 {
         // maximum update rate == minimum latency (use most-recent updates). maybe too
         // much CPU?
         switch (Identity.instance) {
-            case COMP_BOT:
+            // case COMP_BOT:
+            default:
                 // Jun 29 2024: actually use the specified bit rate
                 // m_gyro1 = new AHRS(SPI.Port.kMXP);
                 // this is the version i hacked to avoid wpilib 2025 breaking changes
-                // m_gyro1 = new AHRS100(SPI.Port.kMXP, kSPIBitRateHz, kUpdateRateHz);
-                m_ahrs = new AHRS(SPI.Port.kMXP, kSPIBitRateHz, kUpdateRateHz);
-                // TODO: remove this message when calibration is finished.
-                Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
+                // m_ahrs = new AHRS100(SPI.Port.kMXP, kSPIBitRateHz, kUpdateRateHz);
+                m_ahrs = new AHRS(
+                        SPI.Port.kMXP,
+                        kSPIBitRateHz,
+                        kUpdateRateHz);
                 m_yawScaleFactor = 1.0f;
                 m_yawRateScaleFactor = 1.0f;
+                // TODO: remove this message when calibration is finished.
+                Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
                 break;
-            default:
+            // default:
+            case COMP_BOT:
                 // this is the version i hacked to avoid wpilib 2025 breaking changes
-                // m_gyro1 = new AHRS100(SerialPort.Port.kUSB,
+                // m_ahrs = new AHRS100(SerialPort.Port.kUSB,
                 // AHRS100.SerialDataType.kProcessedData, kUpdateRateHz);
-                // TODO: remove this message when calibration is finished.
-                Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
-                m_ahrs = new AHRS(SerialPort.Port.kUSB, AHRS.SerialDataType.kProcessedData, kUpdateRateHz);
+                m_ahrs = new AHRS(
+                        SerialPort.Port.kUSB,
+                        AHRS.SerialDataType.kProcessedData,
+                        kUpdateRateHz);
                 m_yawScaleFactor = 1.0f;
                 m_yawRateScaleFactor = 1.0f;
+                // TODO: remove this message when calibration is finished.
+                Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
+
         }
         m_ahrs.enableBoardlevelYawReset(true);
 
-        Util.println("waiting for navx connection...");
-        Timer.delay(2);
+        while (!m_ahrs.isConnected()) {
+            Util.println("waiting for navx connection...");
+            Timer.delay(1);
+        }
 
         while ((m_ahrs.isConnected() && m_ahrs.isCalibrating())) {
-            Timer.delay(0.5);
             Util.println("Waiting for navx startup calibration...");
+            Timer.delay(1);
         }
 
         m_ahrs.zeroYaw();
@@ -178,10 +201,8 @@ public class SingleNavXGyro implements Gyro100 {
             m_logger.logBoolean(Level.COMP, "Connected", () -> false);
         }
         m_logger.logFloat(Level.TRACE, "Yaw (deg)", m_ahrs::getYaw);
-        // note we don't actually use any of the measurements below.  maybe remove them?
+        // note we don't actually use any of the measurements below. maybe remove them?
         m_logger.logDouble(Level.TRACE, "Angle (deg)", m_ahrs::getAngle);
-        m_logger.logFloat(Level.TRACE, "Fused (deg)", m_ahrs::getFusedHeading);
         m_logger.logDouble(Level.TRACE, "Angle Mod 360 (deg)", () -> m_ahrs.getAngle() % 360);
-        m_logger.logFloat(Level.TRACE, "Compass Heading (deg)", m_ahrs::getCompassHeading);
     }
 }

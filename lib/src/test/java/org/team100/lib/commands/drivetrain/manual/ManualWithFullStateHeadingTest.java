@@ -1,4 +1,4 @@
-package org.team100.lib.motion.drivetrain.manual;
+package org.team100.lib.commands.drivetrain.manual;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +25,7 @@ import org.team100.lib.telemetry.TestLogger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
-class ManualWithMinTimeHeadingTest {
+class ManualWithFullStateHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
     private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
@@ -38,11 +38,12 @@ class ManualWithMinTimeHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
+        ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 logger,
                 swerveKinodynamics,
                 heading,
-                rotationSupplier);
+                rotationSupplier,
+                new double[] { 1.0, 1.0 });
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
 
@@ -68,11 +69,12 @@ class ManualWithMinTimeHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
+        ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 logger,
                 swerveKinodynamics,
                 heading,
-                rotationSupplier);
+                rotationSupplier,
+                new double[] { 1.0, 1.0 });
 
         Pose2d currentPose = GeometryUtil.kPoseZero;
 
@@ -104,11 +106,12 @@ class ManualWithMinTimeHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
+        ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 logger,
                 swerveKinodynamics,
                 heading,
-                rotationSupplier);
+                rotationSupplier,
+                new double[] { 1.0, 1.0 });
 
         // facing +x
         Pose2d currentPose = GeometryUtil.kPoseZero;
@@ -130,10 +133,10 @@ class ManualWithMinTimeHeadingTest {
         // but at t0 it hasn't started yet.
         // confirm the goal is what desiredRotation says.
         assertEquals(Math.PI / 2, m_manualWithHeading.m_goal.getRadians(), kDelta);
-        // we did one calculation so setpoint is not zero
-        assertEquals(0.0002, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(0.4, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
-        verify(0, 0, 0.4, twistM_S);
+        // setpoint is the goal
+        assertEquals(1.571, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        verify(0, 0, 1.571, twistM_S);
 
         // let go of the pov to let the profile run.
         desiredRotation = null;
@@ -143,18 +146,22 @@ class ManualWithMinTimeHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
-        assertEquals(0.8, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        // setpoint is the goal
+        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 0.8, twistM_S);
+        // some output
+        verify(0, 0, 1.071, twistM_S);
 
         // mostly rotated
         currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(1.55, 0.2);
         twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
-        assertEquals(0.4, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        // setpoint is the goal
+        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 0.4, twistM_S);
+        // very light pushing
+        verify(0, 0, 0, twistM_S);
 
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
@@ -174,11 +181,12 @@ class ManualWithMinTimeHeadingTest {
         HeadingInterface heading = new MockHeading();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
+        ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 logger,
                 swerveKinodynamics,
                 heading,
-                rotationSupplier);
+                rotationSupplier,
+                new double[] { 1.0, 1.0 });
 
         // currently facing +x
         Pose2d currentPose = GeometryUtil.kPoseZero;
@@ -197,8 +205,8 @@ class ManualWithMinTimeHeadingTest {
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
 
-        // ?
-        verify(0, 0, 0.4, v);
+        // at t0 there's not much position in the profile but there is velocity
+        verify(0, 0, 1.571, v);
 
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
@@ -206,20 +214,22 @@ class ManualWithMinTimeHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
         v = m_manualWithHeading.apply(new SwerveState(currentPose, v), twist1_1);
-        assertEquals(0.8, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        // the setpoint is the goal
+        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 0.8, v);
+        verify(0, 0, 1.071, v);
 
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(1.555, 0.2);
         v = m_manualWithHeading.apply(new SwerveState(currentPose, v), twist1_1);
-        assertEquals(0.4, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        // the setpoint is the goal
+        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
-        // ?
-        verify(0, 0, 0.4, v);
+        // pretty close to the goal now, so low output
+        verify(0, 0, 0, v);
 
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
@@ -237,11 +247,12 @@ class ManualWithMinTimeHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
+        ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 logger,
                 swerveKinodynamics,
                 heading,
-                rotationSupplier);
+                rotationSupplier,
+                new double[] { 1.0, 1.0 });
 
         // driver rotates a bit
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
@@ -279,11 +290,11 @@ class ManualWithMinTimeHeadingTest {
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // goal is the current state but at rest
         assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
-        // ?
-        assertEquals(0.058, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(2.796, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
-        // ?
-        verify(0, 0, 2.796, v);
+        // setpoint is the goal
+        assertEquals(0.399, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        // trying to stop
+        verify(0, 0, -2.428, v);
     }
 
     @Test
@@ -293,11 +304,12 @@ class ManualWithMinTimeHeadingTest {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
-        ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
+        ManualWithFullStateHeading m_manualWithHeading = new ManualWithFullStateHeading(
                 logger,
                 swerveKinodynamics,
                 heading,
-                rotationSupplier);
+                rotationSupplier,
+                new double[] { 1.0, 1.0 });
 
         // driver rotates a bit
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
@@ -333,13 +345,13 @@ class ManualWithMinTimeHeadingTest {
         // gyro rate is still full speed.
         heading.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
-        // velocity carries forward
+        // goal is the current state but at rest
         assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
-        // ?
-        assertEquals(0.058, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(2.796, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
-        // ?
-        verify(0, 0, 2.796, v);
+        // in this version the setpoint is the goal
+        assertEquals(0.399, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        // try very hard to stop
+        verify(0, 0, -2.428, v);
     }
 
     /**

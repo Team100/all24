@@ -1,4 +1,4 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.lib.commands.drivetrain.manual;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

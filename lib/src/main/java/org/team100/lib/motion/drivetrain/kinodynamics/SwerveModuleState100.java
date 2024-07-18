@@ -14,6 +14,8 @@ import edu.wpi.first.util.struct.StructSerializable;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.team100.lib.util.Util;
+
 /**
  * This is a copy of {@link edu.wpi.first.math.kinematics.SwerveModuleState} but
  * with second-order fields.
@@ -140,8 +142,11 @@ public class SwerveModuleState100
      */
     public static SwerveModuleState100 optimize(
             SwerveModuleState100 desiredState, Rotation2d currentAngle) {
-        if (desiredState.angle.isEmpty())
-            throw new IllegalArgumentException();
+        // this does happen
+        if (desiredState.angle.isEmpty()) {
+            Util.warn("SwerveModuleState100.optimize: empty angle!");
+            return desiredState;
+        }
         var delta = desiredState.angle.get().minus(currentAngle);
         if (Math.abs(delta.getDegrees()) > 90.0) {
             return new SwerveModuleState100(
