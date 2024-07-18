@@ -52,7 +52,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     /** Spin the rollers gently all the time to reduce starting current. */
     private static final double kIdleVelocity = 1;
     /** Feed velocity. */
-    private static final double kFeed = 5;
+    private static final double kFeedM_S = 1;
     /** Outtake velocity. */
     private static final double kOut = -6;
     private static final double kDriveReduction = 1;
@@ -170,13 +170,13 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     }
 
     public void forward() {
-        leftRoller.setVelocity(kLeftRollerVelocity);
-        rightRoller.setVelocity(kRightRollerVelocity);
+        leftRoller.setVelocityM_S(kLeftRollerVelocity);
+        rightRoller.setVelocityM_S(kRightRollerVelocity);
     }
 
     public void stop() {
-        leftRoller.setVelocity(kIdleVelocity);
-        rightRoller.setVelocity(kIdleVelocity);
+        leftRoller.setVelocityM_S(kIdleVelocity);
+        rightRoller.setVelocityM_S(kIdleVelocity);
         pivotServo.stop();
     }
 
@@ -205,13 +205,13 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     }
 
     public void feed() {
-        leftRoller.setVelocity(kFeed);
-        rightRoller.setVelocity(kFeed);
+        leftRoller.setVelocityM_S(kFeedM_S);
+        rightRoller.setVelocityM_S(kFeedM_S);
     }
 
     public void outtake() {
-        leftRoller.setVelocity(kOut);
-        rightRoller.setVelocity(kOut);
+        leftRoller.setVelocityM_S(kOut);
+        rightRoller.setVelocityM_S(kOut);
     }
 
     /** Returns the average of the two rollers */

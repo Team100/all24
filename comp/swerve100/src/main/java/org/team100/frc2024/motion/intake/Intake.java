@@ -77,14 +77,14 @@ public class Intake extends SubsystemBase implements Glassy {
             if (currentCount >= 2) {
                 m_intake.set(-1);
                 m_centering.set(0.2);
-                superRollers.setVelocity(1);
+                superRollers.setVelocityM_S(1);
             }
         }
 
         if (count >= 4) {
             m_intake.set(0);
             m_centering.set(0);
-            superRollers.setVelocity(0);
+            superRollers.setVelocityM_S(0);
             count = 0;
         }
 
@@ -94,7 +94,7 @@ public class Intake extends SubsystemBase implements Glassy {
     public void intake() {
         m_centering.set(0.8);
         m_intake.set(-1);
-        superRollers.setVelocity(0.8);
+        superRollers.setVelocityM_S(0.8);
     }
 
     public void resetCurrentCount() {
@@ -109,13 +109,13 @@ public class Intake extends SubsystemBase implements Glassy {
     public void outtake() {
         m_intake.set(0.8);
         m_centering.set(-0.8);
-        superRollers.setVelocity(-0.8);
+        superRollers.setVelocityM_S(-0.8);
     }
 
     public void stop() {
         m_intake.set(0);
         m_centering.set(0);
-        superRollers.setVelocity(0);
+        superRollers.setVelocityM_S(0);
     }
 
     @Override

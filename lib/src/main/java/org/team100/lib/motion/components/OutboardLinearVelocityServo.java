@@ -31,7 +31,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     }
 
     @Override
-    public void setVelocity(double setpointM_S) {
+    public void setVelocityM_S(double setpointM_S) {
         setVelocity(setpointM_S, accel(setpointM_S));
     }
 

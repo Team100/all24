@@ -81,20 +81,20 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void index() {
-        m_servo.setVelocity(kIndexerVelocityM_S);
+        m_servo.setVelocityM_S(kIndexerVelocityM_S);
     }
 
     public void indexWithBeamBreak() {
         if (beamBreak1.get()) {
-            m_servo.setVelocity(0);
+            m_servo.setVelocityM_S(0);
         } else {
-            m_servo.setVelocity(kIndexerVelocityM_S);
+            m_servo.setVelocityM_S(kIndexerVelocityM_S);
 
         }
     }
 
     public void outdex() {
-        m_servo.setVelocity(-kIndexerVelocityM_S);
+        m_servo.setVelocityM_S(-kIndexerVelocityM_S);
     }
 
     public void stop() {
