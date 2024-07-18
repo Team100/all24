@@ -196,6 +196,7 @@ public class VisionDataProvider24 implements Glassy {
             String cameraSerialNumber,
             final Blip24[] blips,
             Alliance alliance) {
+        m_logger.logEnum(Level.TRACE, "alliance", () -> alliance);
         final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
         // Estimated instant represented by the blips
@@ -271,7 +272,9 @@ public class VisionDataProvider24 implements Glassy {
             Alliance alliance) {
         Sample s = m_chronos.sample(kName + "/estimateFromBlips");
         try {
-            for (Blip24 blip : blips) {
+            for (int i = 0; i < blips.length; ++i) {
+                Blip24 blip = blips[i];
+                m_logger.logBlip24(Level.TRACE, cameraSerialNumber + "/blip/" + i, () -> blip);
 
                 // this is just for logging
                 m_logger.logDouble(Level.TRACE, cameraSerialNumber + "/Blip Tag Rotation",
