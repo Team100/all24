@@ -13,6 +13,10 @@ import com.revrobotics.CANSparkMax;
  * @see https://www.revrobotics.com/rev-21-1650/
  */
 public class NeoCANSparkMotor extends CANSparkMotor {
+    /**
+     * Note the PID values should be in duty cycle per RPM, i.e. very small. {@link
+     * Rev100}
+     */
     public NeoCANSparkMotor(
             SupplierLogger parent,
             int canId,

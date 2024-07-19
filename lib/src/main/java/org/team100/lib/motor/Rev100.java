@@ -31,7 +31,8 @@ public class Rev100 {
         crash(motor::restoreFactoryDefaults);
     }
 
-    public static void motorConfig(CANSparkBase motor, IdleMode idleMode, MotorPhase phase, int velocityMeasurementPeriod) {
+    public static void motorConfig(CANSparkBase motor, IdleMode idleMode, MotorPhase phase,
+            int velocityMeasurementPeriod) {
         crash(() -> motor.setIdleMode(idleMode));
         motor.setInverted(phase == MotorPhase.REVERSE);
         // velocity is in the Status1 frame
@@ -45,6 +46,12 @@ public class Rev100 {
         crash(() -> motor.setSmartCurrentLimit(currentLimit));
     }
 
+    /**
+     * The PID parameters here use units of duty cycle per RPM, so for a typical
+     * motor speed of a few thousand RPM, and a typical error of a few hundred RPM,
+     * a desired control output would be a duty cycle of 0.1 or so, which implies a
+     * value of P like 3e-4.
+     */
     public static void pidConfig(SparkPIDController control, PIDConstants pid) {
         crash(() -> control.setPositionPIDWrappingEnabled(false)); // don't use position control
         crash(() -> control.setP(pid.getP()));

@@ -32,16 +32,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class AmpPivot extends SubsystemBase implements Glassy {
 
     /**
-     * The outboard velocity PID units are duty cycle per RPM.
+     * The outboard velocity PID units are duty cycle per RPM, so tiny values are normal
      */
-    private static final double kOutboardP = 0.0;// 0.0005;
+    private static final double kOutboardP = 0.0002;
     private static final double kOutboardI = 0.0;
-    private static final double kOutboardD = 0.0;// 0.0005;
+    private static final double kOutboardD = 0.0001;
     private static final int kCurrentLimit = 30;
     private static final int kCanId = 2;
-    // private static final double kMaxJerkRad_S3 = 2;// 5;
-    // private static final double kMaxAccelRad_S2 = 2;// 5;
-    // private static final double kMaxVelocityRad_S = 2;// 5;
     // TODO: verify this ratio
     private static final double kGearRatio = 55;
 

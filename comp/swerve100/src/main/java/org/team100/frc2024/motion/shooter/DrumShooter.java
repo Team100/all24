@@ -79,8 +79,16 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         double period = 0.02;
 
-        SupplierLogger leftLogger = parent.child("Left");
-        SupplierLogger rightLogger = parent.child("Right");
+        SupplierLogger leftLogger = m_logger.child("Left");
+        SupplierLogger rightLogger = m_logger.child("Right");
+        SupplierLogger pivotLogger = m_logger.child("Pivot");
+
+        // we use velocityvoltage control so the P value here is volts per rev/s of the
+        // motor. Typical rev/s is 50, so typical error might be 5, and for that we'd
+        // want correction of something like 1v, so a good value might be 0.2.
+        PIDConstants rollerPID = new PIDConstants(0.3, 0, 0);
+        Feedforward100 rollerFF = Feedforward100.makeShooterFalcon6();
+
         switch (Identity.instance) {
             case COMP_BOT:
                 Falcon6Motor leftMotor = new Falcon6Motor(
@@ -89,10 +97,8 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         MotorPhase.REVERSE,
                         supplyLimit,
                         statorLimit,
-                        // kDriveReduction,
-                        // kWheelDiameterM,
-                        new PIDConstants(0.3, 0, 0), // 0.4
-                        Feedforward100.makeShooterFalcon6());
+                        rollerPID,
+                        rollerFF);
                 LinearMechanism leftMech = new SimpleLinearMechanism(
                         leftMotor,
                         new Talon6Encoder(leftLogger, leftMotor),
@@ -106,10 +112,8 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         MotorPhase.FORWARD,
                         supplyLimit,
                         statorLimit,
-                        // kDriveReduction,
-                        // kWheelDiameterM,
-                        new PIDConstants(0.3, 0, 0), // 0.4
-                        Feedforward100.makeShooterFalcon6());
+                        rollerPID,
+                        rollerFF);
                 LinearMechanism rightMech = new SimpleLinearMechanism(
                         rightMotor,
                         new Talon6Encoder(rightLogger, rightMotor),
@@ -117,17 +121,24 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         kWheelDiameterM);
                 rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMech);
 
-                CANSparkMotor pivotMotor = new NeoCANSparkMotor(parent, pivotID, MotorPhase.FORWARD, 40,
-                        Feedforward100.makeNeo(), new PIDConstants(0, 0, 0));
+                Feedforward100 pivotFF = Feedforward100.makeNeo();
+                PIDConstants pivotPID = new PIDConstants(0, 0, 0);
+                CANSparkMotor pivotMotor = new NeoCANSparkMotor(
+                        pivotLogger,
+                        pivotID,
+                        MotorPhase.FORWARD,
+                        40,
+                        pivotFF,
+                        pivotPID);
                 RotaryMechanism pivotMech = new RotaryMechanism(
                         pivotMotor,
-                        new CANSparkEncoder(parent, pivotMotor),
+                        new CANSparkEncoder(pivotLogger, pivotMotor),
                         kPivotReduction);
-                AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(parent, 0, 0.508753,
+                AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(pivotLogger, 0, 0.508753,
                         EncoderDrive.DIRECT);
                 pivotServo = new GravityServo(
                         pivotMech,
-                        parent.child("Pivot"),
+                        pivotLogger,
                         pivotController,
                         period,
                         encoder);
@@ -150,17 +161,17 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         kMaxAccel,
                         kMaxDecel);
                 // motor speed is rad/s
-                SimulatedBareMotor simMotor = new SimulatedBareMotor(parent, 600);
+                SimulatedBareMotor simMotor = new SimulatedBareMotor(pivotLogger, 600);
                 RotaryMechanism simMech = new RotaryMechanism(
                         simMotor,
-                        new SimulatedBareEncoder(parent, simMotor),
+                        new SimulatedBareEncoder(pivotLogger, simMotor),
                         165);
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
-                        parent,
+                        pivotLogger,
                         simMech);
                 pivotServo = new GravityServo(
                         simMech,
-                        parent.child("Pivot"),
+                        pivotLogger,
                         pivotController,
                         period,
                         simEncoder);

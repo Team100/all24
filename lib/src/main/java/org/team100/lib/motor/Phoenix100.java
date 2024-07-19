@@ -60,6 +60,11 @@ public class Phoenix100 {
         crash(() -> conf.apply(currentConfigs));
     }
 
+    /**
+     * parameter units depend on the mode. We use velocityvoltage for velocity
+     * control, so the units would be volts per rev/s. For position control we use
+     * positionvoltage, so the units would be volts per revolution.
+     */
     public static void pidConfig(TalonFXConfigurator conf, PIDConstants pid) {
         Slot0Configs slot0Configs = new Slot0Configs();
         slot0Configs.kV = 0.0; // we use "arbitrary feedforward", not this.
