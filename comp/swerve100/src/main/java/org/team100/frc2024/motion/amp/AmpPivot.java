@@ -98,7 +98,9 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         Profile100 fast = new TrapezoidProfile100(kMaxVelocity, kMaxAccel, 0.05);
         if (Experiments.instance.enabled(Experiment.FancyProfile)) {
             Profile100 slow = new TrapezoidProfile100(0.1 * kMaxVelocity, 0.1 * kMaxAccel, 0.05);
-            Dashpot d = new Dashpot(fast, slow, 0.2);
+            // TODO: make sure this distance is enough
+            final double distance = 0.2;
+            Dashpot d = new Dashpot(fast, slow, distance, 0.1 * kMaxVelocity);
             return new JerkLimiter(d, kMaxJerk);
         }
         return fast;
