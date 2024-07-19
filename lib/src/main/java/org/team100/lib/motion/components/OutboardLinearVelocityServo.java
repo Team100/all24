@@ -18,7 +18,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     private double prevTime;
     private double m_setpoint;
 
-    public  OutboardLinearVelocityServo(
+    public OutboardLinearVelocityServo(
             SupplierLogger parent,
             LinearMechanism motor) {
         m_logger = parent.child(this);

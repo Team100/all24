@@ -6,8 +6,6 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.tank.TankDriveSubsystem;
-import org.team100.lib.tank.TankDriver;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.NamedChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -54,6 +52,14 @@ public class DriveManually extends Command100 {
         m_drivers = new ConcurrentHashMap<>();
         SmartDashboard.putData(m_manualModeChooser);
         addRequirements(m_drive);
+        addName("Manual", true);
+        m_drivers.put(
+            "Manual",
+                new TankDriver() {
+                    public void apply(DriverControl.Velocity t, double dt) {
+                        m_drive.set(t.x(), t.y());
+                    }
+        });
     }
 
     @Override
@@ -86,18 +92,6 @@ public class DriveManually extends Command100 {
      */
     public void overrideMode(Supplier<String> mode) {
         m_mode = mode;
-    }
-
-    /** Register a TankDriver for module state mode */
-    public void register(String name, boolean isDefault) {
-        addName(name, isDefault);
-        m_drivers.put(
-                name,
-                new TankDriver() {
-                    public void apply(DriverControl.Velocity t, double dt) {
-                        m_drive.set(t.x(), t.y());
-                    }
-                });
     }
 
     //////////////
