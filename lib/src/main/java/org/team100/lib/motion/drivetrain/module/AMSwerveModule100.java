@@ -129,8 +129,8 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 steeringGears,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
-                turningPositionController,
-                profile);
+                turningPositionController);
+        turningServo.setProfile(profile);
         turningServo.reset();
         return turningServo;
     }

@@ -3,7 +3,6 @@ package org.team100.frc2024.motion;
 import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
-import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
@@ -23,7 +22,7 @@ import edu.wpi.first.math.controller.PIDController;
  * Note there is no "friction" term here since it uses the motor velocity
  * setter.
  */
-public class GravityServo implements Glassy {
+public class GravityServo implements GravityServoInterface {
     /** Max gravity torque, "" */
     private static final double kGravityNm = 5.0;
 
@@ -55,6 +54,7 @@ public class GravityServo implements Glassy {
     }
 
     /** Zeros controller errors, sets setpoint to current position. */
+    @Override
     public void reset() {
         m_controller.reset();
         OptionalDouble opt = getPositionRad();
@@ -65,16 +65,19 @@ public class GravityServo implements Glassy {
         m_setpointRad = new State100(opt.getAsDouble(), 0);
     }
 
+    @Override
     public OptionalDouble getPositionRad() {
         return m_encoder.getPositionRad();
     }
 
     /** set position with zero velocity */
+    @Override
     public void setPosition(double goalRad) {
         setState(new State100(goalRad, 0));
     }
 
     /** allow moving end-state */
+    @Override
     public void setState(State100 goal) {
         OptionalDouble opt = getPositionRad();
         if (opt.isEmpty()) {
@@ -109,18 +112,22 @@ public class GravityServo implements Glassy {
         m_logger.logDouble(Level.TRACE, "Controller Velocity Error (rad_s)", m_controller::getVelocityError);
     }
 
+    @Override
     public void stop() {
         m_mech.stop();
     }
 
+    @Override
     public void setProfile(Profile100 profile) {
         m_profile = profile;
     }
 
+    @Override
     public void setTorqueLimit(double torqueNm) {
         m_mech.setTorqueLimit(torqueNm);
     }
 
+    @Override
     public void periodic() {
         OptionalDouble opt = getPositionRad();
         if (opt.isEmpty()) {
@@ -131,8 +138,4 @@ public class GravityServo implements Glassy {
         m_logger.logDouble(Level.TRACE, "Measurement (rad)", () -> mechanismPositionRad);
     }
 
-    @Override
-    public String getGlassName() {
-        return "GravityServo";
-    }
 }

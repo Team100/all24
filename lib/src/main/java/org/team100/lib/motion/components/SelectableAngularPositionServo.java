@@ -4,6 +4,7 @@ import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.profile.Profile100;
 
 public class SelectableAngularPositionServo implements AngularPositionServo {
     private final AngularPositionServo m_whenTrue;
@@ -26,6 +27,12 @@ public class SelectableAngularPositionServo implements AngularPositionServo {
         } else {
             m_whenFalse.reset();
         }
+    }
+
+    @Override
+    public void setProfile(Profile100 profile) {
+        m_whenTrue.setProfile(profile);
+        m_whenFalse.setProfile(profile);
     }
 
     @Override

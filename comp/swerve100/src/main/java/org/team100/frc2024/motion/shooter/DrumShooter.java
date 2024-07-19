@@ -3,6 +3,7 @@ package org.team100.frc2024.motion.shooter;
 import java.util.OptionalDouble;
 
 import org.team100.frc2024.motion.GravityServo;
+import org.team100.frc2024.motion.GravityServoInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -64,7 +65,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     private final LinearVelocityServo leftRoller;
     private final LinearVelocityServo rightRoller;
-    private final GravityServo pivotServo;
+    private final GravityServoInterface pivotServo;
 
     public DrumShooter(
             SupplierLogger parent,

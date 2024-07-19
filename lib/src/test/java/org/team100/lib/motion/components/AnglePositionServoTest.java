@@ -38,13 +38,13 @@ class AnglePositionServoTest {
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         double maxVel = 1;
-        OnboardAngularPositionServo servo = new OnboardAngularPositionServo(
+        AngularPositionServo servo = new OnboardAngularPositionServo(
                 logger,
                 mech,
                 turningEncoder,
                 maxVel,
-                turningController2,
-                profile);
+                turningController2);
+        servo.setProfile(profile);
         servo.reset();
         servo.setPosition(1, 0);
         assertEquals(0, turningMotor.output, 0.001);
@@ -65,11 +65,11 @@ class AnglePositionServoTest {
                 externalEncoder, 1.0, mech);
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 
-        OutboardAngularPositionServo servo = new OutboardAngularPositionServo(
+        AngularPositionServo servo = new OutboardAngularPositionServo(
                 logger,
                 mech,
-                combinedEncoder,
-                profile);
+                combinedEncoder);
+        servo.setProfile(profile);
         servo.reset();
         // it moves slowly
         servo.setPosition(1, 0);

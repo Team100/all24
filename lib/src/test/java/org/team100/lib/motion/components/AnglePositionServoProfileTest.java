@@ -22,7 +22,7 @@ class AnglePositionServoProfileTest {
     private final MockRotaryPositionSensor encoder;
     private final double period;
     private final PIDController controller2;
-    private final OnboardAngularPositionServo servo;
+    private final AngularPositionServo servo;
 
     public AnglePositionServoProfileTest() {
         motor = new MockBareMotor();
@@ -41,8 +41,8 @@ class AnglePositionServoProfileTest {
                 mech,
                 encoder,
                 1,
-                controller2,
-                profile);
+                controller2);
+        servo.setProfile(profile);
         servo.reset();
     }
 

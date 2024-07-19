@@ -1,9 +1,9 @@
 package org.team100.frc2024.motion.amp;
 
-import java.util.Optional;
 import java.util.OptionalDouble;
 
 import org.team100.frc2024.motion.GravityServo;
+import org.team100.frc2024.motion.GravityServoInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -43,7 +43,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
     private static final double kGearRatio = 55;
 
     private final SupplierLogger m_logger;
-    private final GravityServo m_ampAngleServo;
+    private final GravityServoInterface m_ampAngleServo;
 
     public AmpPivot(SupplierLogger parent) {
         m_logger = parent.child(this);
@@ -117,15 +117,6 @@ public class AmpPivot extends SubsystemBase implements Glassy {
 
     public OptionalDouble getPositionRad() {
         return m_ampAngleServo.getPositionRad();
-    }
-
-    public Optional<Boolean> inPosition() {
-        OptionalDouble position = getPositionRad();
-        if (position.isEmpty())
-            return Optional.empty();
-        return Optional.of(
-                position.getAsDouble() < 0.75 * Math.PI
-                        && position.getAsDouble() > .5 * Math.PI);
     }
 
     public void setTorqueLimit(double torqueNm) {

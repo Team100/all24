@@ -4,6 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.profile.Profile100;
 
 /**
  * Angular position control, e.g. for swerve steering axes or arm axes.
@@ -16,6 +17,8 @@ public interface AngularPositionServo extends Glassy {
      * but there needs to be an initial setpoint.
      */
     void reset();
+
+    void setProfile(Profile100 profile);
 
     /**
      * The angle measure here *does not* wind up, so 0 and 2pi are the same.

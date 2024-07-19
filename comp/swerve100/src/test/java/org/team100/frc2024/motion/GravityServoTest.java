@@ -33,7 +33,7 @@ class GravityServoTest implements Timeless2024 {
                 logger,
                 simMech);
 
-        GravityServo g = new GravityServo(
+        GravityServoInterface g = new GravityServo(
                 simMech,
                 logger,
                 pivotController,

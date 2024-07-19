@@ -28,7 +28,8 @@ class AngularPositionProfileTest implements Timeless {
     private final MockRotaryPositionSensor encoder;
     private final double period;
     private final PIDController controller2;
-    private OnboardAngularPositionServo servo;
+
+    private AngularPositionServo servo;
 
     public AngularPositionProfileTest() {
         motor = new MockBareMotor();
@@ -53,8 +54,8 @@ class AngularPositionProfileTest implements Timeless {
                 mech,
                 encoder,
                 1,
-                controller2,
-                profile);
+                controller2);
+        servo.setProfile(profile);
         servo.reset();
 
         verifyTrapezoid();
@@ -68,8 +69,8 @@ class AngularPositionProfileTest implements Timeless {
                 mech,
                 encoder,
                 1,
-                controller2,
-                profile);
+                controller2);
+        servo.setProfile(profile);
         servo.reset();
         verifyTrapezoid();
     }

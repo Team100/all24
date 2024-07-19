@@ -183,7 +183,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         Talon6Encoder builtInEncoder = new Talon6Encoder(
                 parent,
                 turningMotor);
-                
+
         RotaryMechanism mech = new RotaryMechanism(
                 turningMotor,
                 builtInEncoder,
@@ -195,7 +195,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 profile,
                 mech);
 
-        OnboardAngularPositionServo onboard = getOnboard(
+        AngularPositionServo onboard = getOnboard(
                 parent,
                 kinodynamics,
                 turningEncoder,
@@ -208,8 +208,11 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 () -> Experiments.instance.enabled(Experiment.OutboardSteering));
     }
 
-    private static AngularPositionServo getOutboard(SupplierLogger parent, RotaryPositionSensor turningEncoder,
-            Profile100 profile, RotaryMechanism mech) {
+    private static AngularPositionServo getOutboard(
+            SupplierLogger parent,
+            RotaryPositionSensor turningEncoder,
+            Profile100 profile,
+            RotaryMechanism mech) {
         // if we correct to exactly the primary reading, we effectively inject noise
         // into the secondary, so soften the response.
         final double primaryAuthority = 0.1;
@@ -217,14 +220,15 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoder,
                 primaryAuthority,
                 mech);
-        return new OutboardAngularPositionServo(
+        AngularPositionServo servo = new OutboardAngularPositionServo(
                 parent,
                 mech,
-                combinedEncoder,
-                profile);
+                combinedEncoder);
+        servo.setProfile(profile);
+        return servo;
     }
 
-    private static OnboardAngularPositionServo getOnboard(
+    private static AngularPositionServo getOnboard(
             SupplierLogger parent,
             SwerveKinodynamics kinodynamics,
             RotaryPositionSensor turningEncoder, Profile100 profile, RotaryMechanism mech) {
@@ -235,13 +239,14 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 dt);
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
-        return new OnboardAngularPositionServo(
+        AngularPositionServo servo = new OnboardAngularPositionServo(
                 parent,
                 mech,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
-                turningPositionController,
-                profile);
+                turningPositionController);
+        servo.setProfile(profile);
+        return servo;
     }
 
     private static RotaryPositionSensor turningEncoder(
