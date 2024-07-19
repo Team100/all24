@@ -31,6 +31,10 @@ public class RotaryMechanism {
         m_motor.setDutyCycle(output);
     }
 
+    public void setTorqueLimit(double torqueNm) {
+        m_motor.setTorqueLimit(torqueNm / m_gearRatio);
+    }
+
     public void setVelocity(
             double outputRad_S,
             double outputAccelRad_S2,
