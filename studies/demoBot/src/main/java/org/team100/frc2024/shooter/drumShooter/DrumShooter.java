@@ -2,13 +2,14 @@ package org.team100.frc2024.shooter.drumShooter;
 
 import java.util.OptionalDouble;
 
+import org.ejml.simple.UnsupportedOperation;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
- * Direct-drive shooter with top and bottom drums.
+ * Direct-drive shooter with left and right drums.
  * 
  * Typical free speed of 6k rpm => 100 turn/sec
  * diameter of 0.1m => 0.314 m/turn
@@ -55,24 +56,45 @@ public class DrumShooter implements Glassy {
     }
 
     /** Returns the average of the two rollers */
-    public OptionalDouble getVelocity() {
-        OptionalDouble leftVelocity = getLeftVelocity();
-        OptionalDouble rightVelocity = getRightVelocity();
-        if (leftVelocity.isEmpty() || rightVelocity.isEmpty())
-            return OptionalDouble.empty();
-        return OptionalDouble.of((leftVelocity.getAsDouble() + rightVelocity.getAsDouble()) / 2);
+    public double getVelocity() {
+        return getLeftVelocityM_S() + getRightVelocityM_S() / 2;
     }
 
     public boolean atVeloctity() {
-        return Math.abs(getRightVelocity().getAsDouble() - currentDesiredRightVelocity) < 0.5 && Math.abs(getLeftVelocity().getAsDouble() - currentDesiredLeftVelocity) < 0.5;
+        return atVeloctity(0.5);
     }
 
-    public OptionalDouble getLeftVelocity() {
-        return m_leftRoller.getVelocity();
+    /**
+     * 
+     * @param tolerance Units are M_S
+     * @return If the absolute value of the error is less than the tolerance
+     */
+    public boolean atVeloctity(double tolerance) {
+        return Math.abs(rightError()) < tolerance && Math.abs(leftError()) < tolerance;
     }
 
-    public OptionalDouble getRightVelocity() {
-        return m_rightRoller.getVelocity();
+    public double rightError() {
+        return getRightVelocityM_S() - currentDesiredRightVelocity;
+    }
+
+    public double leftError() {
+        return getLeftVelocityM_S() - currentDesiredLeftVelocity;
+    }
+
+    public double getLeftVelocityM_S() {
+        OptionalDouble velocity = m_leftRoller.getVelocity();
+        if (velocity.isEmpty()) {
+            throw new UnsupportedOperation("Left shooter roller sensor is broken!");
+        }
+        return velocity.getAsDouble();
+    }
+
+    public double getRightVelocityM_S() {
+        OptionalDouble velocity = m_rightRoller.getVelocity();
+        if (velocity.isEmpty()) {
+            throw new UnsupportedOperation("Right shooter roller sensor is broken!");
+        }
+        return velocity.getAsDouble();
     }
     
     @Override

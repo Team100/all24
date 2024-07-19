@@ -23,10 +23,9 @@ public class PivotShooter extends Subsystem100{
             SupplierLogger parent,
             ShooterCollection shooterCollection) {
         m_logger = parent.child(this);
-        // 50*Math.PI*kIndexWheelDiameterM,80*(Math.PI)*kIndexWheelDiameterM,0.02
         m_indexerSubsystem = new IndexerSubsystem(m_logger, shooterCollection.getIndexer(), shooterCollection.getIndexAccelM_S2(),shooterCollection.getIndexerDiameterM()*Math.PI/4,0.1);
         LinearVelocityServo[] shooter = shooterCollection.getShooters();
-        m_shooter = new DrumShooter(parent, shooter[0], shooter[1]);
+        m_shooter = new DrumShooter(m_logger, shooter[0], shooter[1]);
         m_pivot = shooterCollection.getPivot();
     }
 

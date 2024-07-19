@@ -88,7 +88,7 @@ class TagFinder:
         elif self.model == "imx296":
             fx = 1680
             fy = 1680
-            cx = int(1456/2)
+            cx = int(1408/2)
             cy = int(1088/2)
             k1 = 0
             k2 = 0

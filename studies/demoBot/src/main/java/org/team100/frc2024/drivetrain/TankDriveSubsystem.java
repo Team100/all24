@@ -2,6 +2,7 @@ package org.team100.frc2024.drivetrain;
 
 import org.team100.lib.commands.Subsystem100;
 import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -22,7 +23,11 @@ public class TankDriveSubsystem extends Subsystem100 {
     }
 
     @Override
-    public void periodic100(double dt) {}
+    public void periodic100(double dt) {
+      m_logger.logOptionalDouble(Level.TRACE, "Left Drive Velocity M_S",() -> m_modules.getSpeeds()[0]);
+      m_logger.logOptionalDouble(Level.TRACE, "Right Drive Velocity M_S",() -> m_modules.getSpeeds()[1]);
+
+    }
 
     /**
      * 

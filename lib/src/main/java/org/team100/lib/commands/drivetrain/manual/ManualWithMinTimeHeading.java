@@ -166,6 +166,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // the snap overrides the user input for omega.
         final double thetaFF = getThetaFF();
 
+        
         final double omega = MathUtil.clamp(
                 thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),

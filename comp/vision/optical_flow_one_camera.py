@@ -269,7 +269,7 @@ def main():
         height = 616
     elif model == "imx296":
         print("GS Camera")
-        fullwidth = 1456  # slightly larger than the detector, to match stride
+        fullwidth = 1408  # slightly larger than the detector, to match stride
         fullheight = 1088
         # medium detection resolution, compromise speed vs range
         width = 64    
