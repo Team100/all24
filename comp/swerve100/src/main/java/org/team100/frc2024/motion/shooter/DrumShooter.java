@@ -129,9 +129,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         pivotMech,
                         parent.child("Pivot"),
                         pivotController,
-                        profile,
                         period,
                         encoder);
+                pivotServo.setProfile(profile);
                 break;
             default:
                 // For testing and simulation
@@ -162,9 +162,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         simMech,
                         parent.child("Pivot"),
                         pivotController,
-                        profile,
                         period,
                         simEncoder);
+                pivotServo.setProfile(profile);
         }
     }
 
