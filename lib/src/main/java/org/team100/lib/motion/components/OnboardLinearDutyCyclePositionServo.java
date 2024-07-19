@@ -48,12 +48,12 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
     }
 
     @Override
-    public void setPosition(double goalM) {
+    public void setPositionWithVelocity(double goalM, double goalVelocityM_S, double feedForwardTorqueNm) {
         OptionalDouble positionM = m_mechanism.getPositionM();
         if (positionM.isEmpty())
             return;
         double measurementM = positionM.getAsDouble();
-        State100 goal = new State100(goalM, 0);
+        State100 goal = new State100(goalM, goalVelocityM_S);
         m_setpoint = m_profile.calculate(m_period, m_setpoint, goal);
         double u_FF = kV * m_setpoint.v();
         double u_FB = m_controller.calculate(measurementM, m_setpoint.x());
@@ -68,6 +68,11 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
         m_logger.logDouble(Level.TRACE, "u_TOTAL (duty cycle)", () -> u_TOTAL);
         m_logger.logDouble(Level.TRACE, "Controller Position Error (m)", m_controller::getPositionError);
         m_logger.logDouble(Level.TRACE, "Controller Velocity Error (m_s)", m_controller::getVelocityError);
+    }
+
+    @Override
+    public void setPosition(double goalM, double feedForwardTorqueNm) {
+        setPositionWithVelocity(goalM, 0, feedForwardTorqueNm);
     }
 
     @Override

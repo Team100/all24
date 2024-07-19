@@ -34,7 +34,7 @@ public class Feedforward100 {
     private final double kDS;
     private final double staticFrictionSpeedLimit;
 
-    Feedforward100(double kV, double kA, double kSS, double kDS, double staticFrictionSpeedLimit) {
+    public Feedforward100(double kV, double kA, double kSS, double kDS, double staticFrictionSpeedLimit) {
         this.kV = kV;
         this.kA = kA;
         this.kSS = kSS;
@@ -44,6 +44,10 @@ public class Feedforward100 {
 
     public static Feedforward100 makeNeo() {
         return new Feedforward100(0.122, 0.000, 0.100, 0.065, 0.5);
+    }
+
+    public static Feedforward100 makeNeo550() {
+        return new Feedforward100(0.32, 0, 0, .07, 0);
     }
 
     public static Feedforward100 makeNeoVortex() {

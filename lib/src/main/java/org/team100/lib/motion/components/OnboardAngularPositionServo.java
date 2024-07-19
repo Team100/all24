@@ -19,8 +19,6 @@ import edu.wpi.first.wpilibj.Timer;
  * OnboardPositionServo.
  */
 public class OnboardAngularPositionServo implements AngularPositionServo {
-    private static final double kDtSec = 0.02;
-
     private final SupplierLogger m_logger;
     private final RotaryMechanism m_mechanism;
     private final RotaryPositionSensor m_encoder;
