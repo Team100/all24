@@ -43,7 +43,7 @@ class GravityServoTest implements Timeless2024 {
         // start at zero
         assertEquals(0, g.getPositionRad().getAsDouble(), kDelta);
         // one second
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < 70; ++i) {
             g.setPosition(1);
             stepTime(0.02);
         }

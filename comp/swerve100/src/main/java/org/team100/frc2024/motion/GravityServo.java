@@ -14,12 +14,21 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.math.controller.PIDController;
 
 /**
- * Implements cosine feedforward for gravity compensation, using a duty cycle
- * motor.
+ * Implements cosine feedforward for gravity compensation, using motor velocity
+ * output.
  * 
  * Sensor measures the mechanism (i.e. arm) 1:1.
+ * 
+ * Note there is no "friction" term here since it uses the motor velocity
+ * setter.
  */
 public class GravityServo implements Glassy {
+    /** Max gravity torque, "" */
+    private static final double kGravityNm = 5.0;
+
+    /** Offset from horizontal */
+    private static final double kOffsetRad = 0.0;
+
     private final SupplierLogger m_logger;
     private final RotaryMechanism m_motor;
     private final PIDController m_controller;
@@ -74,20 +83,20 @@ public class GravityServo implements Glassy {
         m_setpointRad = m_profile.calculate(m_period, m_setpointRad, m_goal);
 
         final double u_FB = m_controller.calculate(mechanismPositionRad, m_setpointRad.x());
-        final double u_FF = m_setpointRad.v() * 0.5;
+        // rad/s
+        final double u_FF = m_setpointRad.v();
 
-        final double gravityTorque = 0.006 * Math.cos(mechanismPositionRad);
-        final double staticFF = getStaticFF(mechanismPositionRad, goalRad, u_FB, u_FF);
+        final double gravityTorque = kGravityNm * Math.cos(mechanismPositionRad + kOffsetRad);
 
-        // final double u_TOTAL = gravityTorque + u_FF + u_FB + staticFF;
-        final double u_TOTAL = gravityTorque + u_FF + u_FB;
-        m_motor.setDutyCycle(u_TOTAL);
+        final double u_TOTAL = u_FF + u_FB;
+
+        m_motor.setVelocity(u_TOTAL, 0, gravityTorque);
 
         m_controller.setIntegratorRange(0, 0.1);
 
+        m_logger.logDouble(Level.TRACE, "goal (rad)", () -> goalRad);
         m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
         m_logger.logDouble(Level.TRACE, "u_FF", () -> u_FF);
-        m_logger.logDouble(Level.TRACE, "static FF", () -> staticFF);
         m_logger.logDouble(Level.TRACE, "gravity T", () -> gravityTorque);
         m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
         m_logger.logDouble(Level.TRACE, "Measurement (rad)", () -> mechanismPositionRad);
@@ -102,18 +111,18 @@ public class GravityServo implements Glassy {
         m_motor.stop();
     }
 
+    public void periodic() {
+        OptionalDouble opt = getPositionRad();
+        if (opt.isEmpty()) {
+            Util.warn("GravityServo: Broken sensor!");
+            return;
+        }
+        double mechanismPositionRad = opt.getAsDouble();
+        m_logger.logDouble(Level.TRACE, "Measurement (rad)", () -> mechanismPositionRad);
+    }
+
     @Override
     public String getGlassName() {
         return "GravityServo";
     }
-
-    private double getStaticFF(double measurementRad, double goalRad, double u_FB, double u_FF) {
-        double staticFF = 0.01 * Math.signum(u_FF + u_FB);
-
-        if (Math.abs(goalRad - measurementRad) < m_controller.getPositionTolerance()) {
-            staticFF = 0;
-        }
-        return staticFF;
-    }
-
 }
