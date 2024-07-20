@@ -59,7 +59,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         m_logger = parent.child(this);
 
         double period = 0.02;
-        PIDController controller = new PIDController(2.0, 0, 0);
+        PIDController controller = new PIDController(2.0, 0, 0, period);
         controller.setTolerance(0.02);
         controller.setIntegratorRange(0, 0.1);
 
