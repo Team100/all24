@@ -59,6 +59,11 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     }
 
     @Override
+    public void setTorqueLimit(double torqueNm) {
+        m_mechanism.setTorqueLimit(torqueNm);
+    }
+
+    @Override
     public void setPositionWithVelocity(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
         OptionalDouble positionRad = m_encoder.getPositionRad();
         if (positionRad.isEmpty())
