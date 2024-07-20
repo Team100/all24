@@ -42,4 +42,7 @@ public interface IncrementalBareEncoder extends Glassy {
 
     void setEncoderPositionRad(double motorPositionRad);
 
+    /** For logging */
+    void periodic();
+
 }

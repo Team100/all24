@@ -5,7 +5,6 @@ import java.util.OptionalDouble;
 import org.team100.lib.encoder.IncrementalBareEncoder;
 import org.team100.lib.motor.BareMotor;
 
-
 public class SimpleLinearMechanism implements LinearMechanism {
     private final BareMotor m_motor;
     private final IncrementalBareEncoder m_encoder;
@@ -85,6 +84,12 @@ public class SimpleLinearMechanism implements LinearMechanism {
     @Override
     public void resetEncoderPosition() {
         m_encoder.reset();
+    }
+
+    public void periodic() {
+        // do some logging
+        m_motor.periodic();
+        m_encoder.periodic();
     }
 
 }

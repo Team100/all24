@@ -3,6 +3,7 @@ package org.team100.frc2024.motion.shooter;
 import java.util.OptionalDouble;
 
 import org.team100.frc2024.motion.GravityServo;
+import org.team100.frc2024.motion.GravityServoInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -52,7 +53,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     /** Right roller setpoint m/s */
     private static final double kRightRollerVelocity = 15;
     /** Spin the rollers gently all the time to reduce starting current. */
-    private static final double kIdleVelocity = 1;
+    // private static final double kIdleVelocity = 1;
+    // actually stop idling for now
+    private static final double kIdleVelocity = 0;
     /** Feed velocity. */
     private static final double kFeedM_S = 1;
     /** Outtake velocity. */
@@ -64,7 +67,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     private final LinearVelocityServo leftRoller;
     private final LinearVelocityServo rightRoller;
-    private final GravityServo pivotServo;
+    private final GravityServoInterface pivotServo;
 
     public DrumShooter(
             SupplierLogger parent,
@@ -79,8 +82,16 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         double period = 0.02;
 
-        SupplierLogger leftLogger = parent.child("Left");
-        SupplierLogger rightLogger = parent.child("Right");
+        SupplierLogger leftLogger = m_logger.child("Left");
+        SupplierLogger rightLogger = m_logger.child("Right");
+        SupplierLogger pivotLogger = m_logger.child("Pivot");
+
+        // we use velocityvoltage control so the P value here is volts per rev/s of the
+        // motor. Typical rev/s is 50, so typical error might be 5, and for that we'd
+        // want correction of something like 1v, so a good value might be 0.2.
+        PIDConstants rollerPID = new PIDConstants(0.3, 0, 0);
+        Feedforward100 rollerFF = Feedforward100.makeShooterFalcon6();
+
         switch (Identity.instance) {
             case COMP_BOT:
                 Falcon6Motor leftMotor = new Falcon6Motor(
@@ -89,10 +100,8 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         MotorPhase.REVERSE,
                         supplyLimit,
                         statorLimit,
-                        // kDriveReduction,
-                        // kWheelDiameterM,
-                        new PIDConstants(0.3, 0, 0), // 0.4
-                        Feedforward100.makeShooterFalcon6());
+                        rollerPID,
+                        rollerFF);
                 LinearMechanism leftMech = new SimpleLinearMechanism(
                         leftMotor,
                         new Talon6Encoder(leftLogger, leftMotor),
@@ -106,10 +115,8 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         MotorPhase.FORWARD,
                         supplyLimit,
                         statorLimit,
-                        // kDriveReduction,
-                        // kWheelDiameterM,
-                        new PIDConstants(0.3, 0, 0), // 0.4
-                        Feedforward100.makeShooterFalcon6());
+                        rollerPID,
+                        rollerFF);
                 LinearMechanism rightMech = new SimpleLinearMechanism(
                         rightMotor,
                         new Talon6Encoder(rightLogger, rightMotor),
@@ -117,21 +124,29 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         kWheelDiameterM);
                 rightRoller = new OutboardLinearVelocityServo(rightLogger, rightMech);
 
-                CANSparkMotor pivotMotor = new NeoCANSparkMotor(parent, pivotID, MotorPhase.FORWARD, 40,
-                        Feedforward100.makeNeo(), new PIDConstants(0, 0, 0));
+                Feedforward100 pivotFF = Feedforward100.makeNeo();
+                PIDConstants pivotPID = new PIDConstants(0, 0, 0);
+                CANSparkMotor pivotMotor = new NeoCANSparkMotor(
+                        pivotLogger,
+                        pivotID,
+                        MotorPhase.FORWARD,
+                        40,
+                        pivotFF,
+                        pivotPID);
                 RotaryMechanism pivotMech = new RotaryMechanism(
+                        pivotLogger,
                         pivotMotor,
-                        new CANSparkEncoder(parent, pivotMotor),
+                        new CANSparkEncoder(pivotLogger, pivotMotor),
                         kPivotReduction);
-                AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(parent, 0, 0.508753,
+                AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(pivotLogger, 0, 0.508753,
                         EncoderDrive.DIRECT);
                 pivotServo = new GravityServo(
                         pivotMech,
-                        parent.child("Pivot"),
+                        pivotLogger,
                         pivotController,
-                        profile,
                         period,
                         encoder);
+                pivotServo.setProfile(profile);
                 break;
             default:
                 // For testing and simulation
@@ -150,21 +165,22 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         kMaxAccel,
                         kMaxDecel);
                 // motor speed is rad/s
-                SimulatedBareMotor simMotor = new SimulatedBareMotor(parent, 600);
+                SimulatedBareMotor simMotor = new SimulatedBareMotor(pivotLogger, 600);
                 RotaryMechanism simMech = new RotaryMechanism(
+                        pivotLogger,
                         simMotor,
-                        new SimulatedBareEncoder(parent, simMotor),
+                        new SimulatedBareEncoder(pivotLogger, simMotor),
                         165);
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
-                        parent,
+                        pivotLogger,
                         simMech);
                 pivotServo = new GravityServo(
                         simMech,
-                        parent.child("Pivot"),
+                        pivotLogger,
                         pivotController,
-                        profile,
                         period,
                         simEncoder);
+                pivotServo.setProfile(profile);
         }
     }
 

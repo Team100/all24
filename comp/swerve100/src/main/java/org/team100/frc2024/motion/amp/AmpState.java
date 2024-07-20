@@ -1,0 +1,94 @@
+package org.team100.frc2024.motion.amp;
+
+import java.util.OptionalDouble;
+
+import org.team100.lib.commands.Command100;
+import org.team100.lib.controller.State100;
+import org.team100.lib.profile.Profile100;
+import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.telemetry.SupplierLogger;
+
+/**
+ * Set the amp pivot state, including current limit, position, and velocity.
+ * 
+ * These can be used in sequence, to allow varying levels of speed and effort in
+ * a single motion: make the goal velocity of the first one equal to the cruise
+ * velocity of the second, for example.
+ */
+public class AmpState extends Command100 {
+    private final AmpPivot m_pivot;
+    private final State100 m_goal;
+    private final Profile100 m_profile;
+    private final double m_torqueLimit;
+    private final double m_toleranceRad;
+    // run forever
+    private final boolean m_hold;
+
+    public AmpState(
+            SupplierLogger parent,
+            AmpPivot pivot,
+            State100 goal,
+            double maxVelRad_S,
+            double maxAccelRad_S2,
+            double torqueLimit,
+            double toleranceRad,
+            boolean hold) {
+        super(parent);
+        m_pivot = pivot;
+        m_goal = goal;
+        m_profile = new TrapezoidProfile100(maxVelRad_S, maxAccelRad_S2, toleranceRad);
+        m_torqueLimit = torqueLimit;
+        m_toleranceRad = toleranceRad;
+        m_hold = hold;
+        addRequirements(m_pivot);
+    }
+
+    @Override
+    public void initialize100() {
+        if (isFinished()) {
+            return;
+        }
+        m_pivot.setTorqueLimit(m_torqueLimit);
+        m_pivot.setProfile(m_profile);
+        m_pivot.reset();
+    }
+
+    @Override
+    public void execute100(double dt) {
+        if (isFinished()) {
+            // don't pulse the output if we're going to be "finished"
+            return;
+        }
+        m_pivot.setAmpState(m_goal);
+    }
+
+    // depend on the SelectCommand to decide when to switch, and
+    // hold position forever.
+    public boolean done() {
+        OptionalDouble opt = m_pivot.getPositionRad();
+        if (opt.isEmpty())
+            return true;
+        double positionRad = opt.getAsDouble();
+        if (m_goal.v() > 0) {
+            // going up
+            return (positionRad > m_goal.x() - m_toleranceRad);
+            // already passed the goal
+        } else if (m_goal.v() < 0) {
+            // going down
+            return (positionRad < m_goal.x() + m_toleranceRad);
+            // already passed the goal
+        } else {
+            // goal is stationary, are we close?
+            return Math.abs(m_goal.x() - positionRad) < m_toleranceRad;
+        }
+
+    }
+
+    @Override
+    public boolean isFinished() {
+        if (m_hold)
+            return false;
+        return done();
+    }
+
+}

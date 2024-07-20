@@ -86,7 +86,7 @@ public class ServoFactory {
      * Position control using velocity feedforward and proportional feedback.
      * Velocity control using outboard SparkMax controller.
      */
-    public static OnboardAngularPositionServo neoVortexAngleServo(
+    public static AngularPositionServo neoVortexAngleServo(
             SupplierLogger parent,
             int canId,
             MotorPhase motorPhase,
@@ -105,20 +105,22 @@ public class ServoFactory {
                 ff,
                 lowLevelVelocityConstants);
         RotaryMechanism mech = new RotaryMechanism(
+                parent,
                 motor,
                 new CANSparkEncoder(parent, motor),
                 gearRatio);
         RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(mech);
-        return new OnboardAngularPositionServo(
+        AngularPositionServo servo = new OnboardAngularPositionServo(
                 parent,
                 mech,
                 sensor,
                 maxVelocity,
-                controller,
-                new TrapezoidProfile100(maxVelocity, maxAccel, 0.05));
+                controller);
+        servo.setProfile(new TrapezoidProfile100(maxVelocity, maxAccel, 0.05));
+        return servo;
     }
 
-    public static OnboardAngularPositionServo simulatedAngleServo(
+    public static AngularPositionServo simulatedAngleServo(
             SupplierLogger parent,
             double maxVelocity,
             double maxAccel,
@@ -126,6 +128,7 @@ public class ServoFactory {
         // motor speed is rad/s
         SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
         RotaryMechanism mech = new RotaryMechanism(
+                parent,
                 motor,
                 new SimulatedBareEncoder(parent, motor),
                 1);
@@ -135,13 +138,14 @@ public class ServoFactory {
         // the new sim doesn't have hard stops; should it?
         // 0, // minimum hard stop
         // 2); // maximum hard stop
-        return new OnboardAngularPositionServo(
+        AngularPositionServo servo = new OnboardAngularPositionServo(
                 parent,
                 mech,
                 sensor,
                 maxVelocity,
-                controller,
-                new TrapezoidProfile100(maxVelocity, maxAccel, 0.05));
+                controller);
+        servo.setProfile(new TrapezoidProfile100(maxVelocity, maxAccel, 0.05));
+        return servo;
     }
 
     private ServoFactory() {

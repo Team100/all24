@@ -31,4 +31,9 @@ public class MockIncrementalBareEncoder implements IncrementalBareEncoder {
         position = motorPositionRad;
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
 }

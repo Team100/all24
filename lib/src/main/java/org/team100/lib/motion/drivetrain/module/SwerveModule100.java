@@ -155,8 +155,10 @@ public class SwerveModule100 implements Glassy {
         m_turningServo.stop();
     }
 
-    /** Update visualization. */
+    /** Update visualization and logs. */
     void periodic() {
         m_viz.viz();
+        m_driveServo.periodic();
+        m_turningServo.periodic();
     }
 }

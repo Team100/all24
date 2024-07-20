@@ -41,4 +41,9 @@ public class MockLinearVelocityServo implements LinearVelocityServo {
         return m_setpoint;
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
 }

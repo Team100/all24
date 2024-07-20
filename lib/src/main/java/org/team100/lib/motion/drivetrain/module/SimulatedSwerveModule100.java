@@ -51,6 +51,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         // simulated turning motor free speed is 20 rad/s
         SimulatedBareMotor turningMotor = new SimulatedBareMotor(parent, 20);
         RotaryMechanism turningMech = new RotaryMechanism(
+                parent,
                 turningMotor,
                 new SimulatedBareEncoder(parent, turningMotor),
                 1);
@@ -71,8 +72,8 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 turningMech,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
-                turningPositionController,
-                profile);
+                turningPositionController);
+        turningServo.setProfile(profile);
         turningServo.reset();
         return turningServo;
     }
