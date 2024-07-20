@@ -214,4 +214,9 @@ public abstract class Talon6Motor implements BareMotor {
         // to be such a thing for current.
         return m_torque.getAsDouble() * kTNm_amp();
     }
+
+    @Override
+    public void periodic() {
+        log();
+    }
 }

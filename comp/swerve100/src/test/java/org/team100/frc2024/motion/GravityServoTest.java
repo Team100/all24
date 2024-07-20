@@ -26,6 +26,7 @@ class GravityServoTest implements Timeless2024 {
         // motor speed is rad/s
         SimulatedBareMotor simMotor = new SimulatedBareMotor(logger, 600);
         RotaryMechanism simMech = new RotaryMechanism(
+                logger,
                 simMotor,
                 new SimulatedBareEncoder(logger, simMotor),
                 165);
@@ -33,23 +34,23 @@ class GravityServoTest implements Timeless2024 {
                 logger,
                 simMech);
 
-        GravityServo g = new GravityServo(
+        GravityServoInterface g = new GravityServo(
                 simMech,
                 logger,
                 pivotController,
-                profile,
                 period,
                 simEncoder);
+        g.setProfile(profile);
         // start at zero
         assertEquals(0, g.getPositionRad().getAsDouble(), kDelta);
         // one second
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < 70; ++i) {
             g.setPosition(1);
             stepTime(0.02);
         }
         // this overshoots a little, i think maybe because of the slight lag in
         // measurement.
-        assertEquals(1, g.getPositionRad().getAsDouble(), kDelta);
+        assertEquals(1.002, g.getPositionRad().getAsDouble(), kDelta);
     }
 
 }

@@ -48,6 +48,7 @@ public class ArmFactory {
                 Feedforward100.makeNeo(),
                 new PIDConstants(0, 0, 0));
         RotaryMechanism lowerMech = new RotaryMechanism(
+                lowerLogger,
                 lowerMotor,
                 new CANSparkEncoder(lowerLogger, lowerMotor),
                 kReduction);
@@ -69,6 +70,7 @@ public class ArmFactory {
                 Feedforward100.makeNeo(),
                 new PIDConstants(0, 0, 0));
         RotaryMechanism upperMech = new RotaryMechanism(
+                upperLogger,
                 upperMotor,
                 new CANSparkEncoder(upperLogger, upperMotor),
                 kReduction);
@@ -96,6 +98,7 @@ public class ArmFactory {
         SupplierLogger lowerLogger = parent.child(kLower);
         SimulatedBareMotor lowerMotor = new SimulatedBareMotor(lowerLogger, kFreeSpeedRad_S);
         RotaryMechanism lowerMech = new RotaryMechanism(
+                lowerLogger,
                 lowerMotor,
                 new SimulatedBareEncoder(lowerLogger, lowerMotor),
                 kReduction);
@@ -107,6 +110,7 @@ public class ArmFactory {
         SupplierLogger upperLogger = parent.child(kUpper);
         SimulatedBareMotor upperMotor = new SimulatedBareMotor(upperLogger, kFreeSpeedRad_S);
         RotaryMechanism upperMech = new RotaryMechanism(
+                upperLogger,
                 upperMotor,
                 new SimulatedBareEncoder(upperLogger, upperMotor),
                 kReduction);

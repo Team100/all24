@@ -107,6 +107,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 parent,
                 new VictorSP(turningMotorChannel));
         RotaryMechanism steeringGears = new RotaryMechanism(
+                parent,
                 turningMotor,
                 new VelocityBareEncoder(parent, turningMotor),
                 kSteeringReduction);
@@ -129,8 +130,8 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 steeringGears,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
-                turningPositionController,
-                profile);
+                turningPositionController);
+        turningServo.setProfile(profile);
         turningServo.reset();
         return turningServo;
     }

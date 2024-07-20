@@ -207,6 +207,11 @@ public class TalonSRXMotor implements BareMotor {
                 () -> m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 
+    @Override
+    public void periodic() {
+        log();
+    }
+
     ///////////////////////////////////////////////////////
 
     /**

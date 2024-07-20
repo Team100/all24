@@ -110,19 +110,22 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     }
 
     private static LimitedLinearMechanism comp(SupplierLogger logger, int id, MotorPhase phase) {
-        NeoVortexCANSparkMotor vp2 = new NeoVortexCANSparkMotor(
+        Feedforward100 ff = Feedforward100.makeNeoVortex();
+        /** The PID constants units are duty cycle per RPM, so very small numbers. */
+        PIDConstants pid = new PIDConstants(0, 0, 0);
+        NeoVortexCANSparkMotor motor = new NeoVortexCANSparkMotor(
                 logger,
                 id,
                 phase,
                 kCurrentLimit,
-                Feedforward100.makeNeoVortex(),
-                new PIDConstants(0, 0, 0));
-        SimpleLinearMechanism lm = new SimpleLinearMechanism(
-                vp2,
-                new CANSparkEncoder(logger, vp2),
+                ff,
+                pid);
+        SimpleLinearMechanism mech = new SimpleLinearMechanism(
+                motor,
+                new CANSparkEncoder(logger, motor),
                 kReduction,
                 kSprocketDiameterM);
-        return new LimitedLinearMechanism(lm, kMinPositionM, kMaxPositionM);
+        return new LimitedLinearMechanism(mech, kMinPositionM, kMaxPositionM);
     }
 
     /**

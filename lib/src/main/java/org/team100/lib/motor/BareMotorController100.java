@@ -81,4 +81,9 @@ public class BareMotorController100 implements BareMotor {
     public void setTorqueLimit(double torqueNm) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void periodic() {
+        m_logger.logDouble(Level.TRACE, "duty cycle reported", m_motor::get);
+    }
 }

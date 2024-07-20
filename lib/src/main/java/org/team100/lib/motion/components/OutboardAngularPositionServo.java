@@ -23,24 +23,25 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private static final double kDtSec = 0.02;
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
-    
+
     private final SupplierLogger m_logger;
     private final RotaryMechanism m_mechanism;
     private final CombinedEncoder m_encoder;
-    private final Profile100 m_profile;
+
+    /** Profile may be updated at runtime. */
+    private Profile100 m_profile;
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
 
+    /** Don't forget to set a profile. */
     public OutboardAngularPositionServo(
             SupplierLogger parent,
             RotaryMechanism mech,
-            CombinedEncoder encoder,
-            Profile100 profile) {
+            CombinedEncoder encoder) {
         m_logger = parent.child(this);
         m_mechanism = mech;
         m_encoder = encoder;
-        m_profile = profile;
     }
 
     @Override
@@ -50,6 +51,11 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         if (position.isEmpty() || velocity.isEmpty())
             return;
         m_setpoint = new State100(position.getAsDouble(), velocity.getAsDouble());
+    }
+
+    @Override
+    public void setProfile(Profile100 profile) {
+        m_profile = profile;
     }
 
     @Override
@@ -139,6 +145,11 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     @Override
     public State100 getSetpoint() {
         return m_goal;
+    }
+
+    @Override
+    public void periodic() {
+        m_mechanism.periodic();
     }
 
 }

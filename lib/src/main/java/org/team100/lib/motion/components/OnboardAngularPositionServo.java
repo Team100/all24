@@ -5,9 +5,11 @@ import java.util.OptionalDouble;
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -25,7 +27,9 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     private final double m_maxVel;
     private final PIDController m_controller;
     private final double m_period;
-    private final Profile100 m_profile;
+
+    /** Profile may be updated at runtime. */
+    private Profile100 m_profile = new NullProfile();
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpoint = new State100(0, 0);
@@ -33,20 +37,19 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     private double m_previousSetpoint = 0;
     private double m_prevTime;
 
+    /** Don't forget to set a profile. */
     public OnboardAngularPositionServo(
             SupplierLogger parent,
             RotaryMechanism mech,
             RotaryPositionSensor encoder,
             double maxVel,
-            PIDController controller,
-            Profile100 profile) {
+            PIDController controller) {
         m_logger = parent.child(this);
         m_mechanism = mech;
         m_encoder = encoder;
         m_maxVel = maxVel;
         m_controller = controller;
         m_period = controller.getPeriod();
-        m_profile = profile;
         m_controller.setIntegratorRange(0, 0.1);
     }
 
@@ -62,9 +65,16 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         m_prevTime = Timer.getFPGATimestamp();
         OptionalDouble position = getPosition();
         OptionalDouble velocity = getVelocity();
-        if (position.isEmpty() || velocity.isEmpty())
+        if (position.isEmpty() || velocity.isEmpty()) {
+            Util.warn("OnboardAngularPositionServo: Broken sensor!");
             return;
+        }
         m_setpoint = new State100(position.getAsDouble(), velocity.getAsDouble());
+    }
+
+    @Override
+    public void setProfile(Profile100 profile) {
+        m_profile = profile;
     }
 
     @Override
@@ -169,6 +179,13 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     /** for testing only */
     public State100 getSetpoint() {
         return m_setpoint;
+    }
+
+    @Override
+    public void periodic() {
+        m_mechanism.periodic();
+        m_logger.logState100(Level.TRACE, "setpoint", () -> m_setpoint);
+        m_logger.logState100(Level.TRACE, "goal", () -> m_goal);
     }
 
     ////////////////////////////////////////////////

@@ -72,4 +72,9 @@ public class SimulatedBareMotor implements BareMotor {
     public void setTorqueLimit(double torqueNm) {
         //
     }
+
+    @Override
+    public void periodic() {
+        //
+    }
 }

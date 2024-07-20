@@ -31,6 +31,9 @@ public interface LinearVelocityServo extends Glassy {
     /** For testing */
     double getSetpoint();
 
+    /** For logging */
+    void periodic();
+
     @Override
     default String getGlassName() {
         return "LinearVelocityServo";

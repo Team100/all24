@@ -58,4 +58,9 @@ public class MockBareMotor implements BareMotor {
         //
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
 }

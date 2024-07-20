@@ -26,8 +26,8 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
     // /** Position in meters. */
     // @Override
     // public void setPosition(double positionM) {
-    //     double motorPositionRev = positionM / m_distancePerTurn;
-    //     m_motor.setEncoderPosition(motorPositionRev);
+    // double motorPositionRev = positionM / m_distancePerTurn;
+    // m_motor.setEncoderPosition(motorPositionRev);
     // }
 
     @Override
@@ -48,8 +48,8 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
         // this is fast so we don't need to cache it
         double motorPositionRev = m_motor.getPositionRot();
         double positionRad = motorPositionRev * 2 * Math.PI;
-        m_logger.logDouble(Level.TRACE, "motor position (rev)", ()->motorPositionRev);
-        m_logger.logDouble(Level.TRACE, "position (rad)",()-> positionRad);
+        m_logger.logDouble(Level.TRACE, "motor position (rev)", () -> motorPositionRev);
+        m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
         return OptionalDouble.of(positionRad);
     }
 
@@ -58,12 +58,18 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
         // raw velocity is in RPM
         // this is fast so we don't need to cache it
         double velocityRad_S = m_motor.getRateRPM() * 2 * Math.PI / 60;
-        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", ()->velocityRad_S);
+        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> velocityRad_S);
         return OptionalDouble.of(velocityRad_S);
     }
 
     @Override
     public void setEncoderPositionRad(double motorPositionRad) {
         m_motor.setEncoderPositionRad(motorPositionRad);
+    }
+
+    @Override
+    public void periodic() {
+        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", this::getPositionRad);
+        m_logger.logOptionalDouble(Level.TRACE, "velocity (rad_s)", this::getVelocityRad_S);
     }
 }
