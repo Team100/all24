@@ -9,6 +9,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.telemetry.JvmLogger;
+import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -58,8 +59,16 @@ public class Robot extends TimedRobot100 implements Glassy {
         System.gc();
     }
 
+    /**
+     * robotPeriodic is called in the IterativeRobotBase.loopFunc, which is what the
+     * TimedRobot runs in the main loop.
+     */
     @Override
     public void robotPeriodic() {
+        // set the load-shedding timer; this happens before any other work in this
+        // cycle.
+        Telemetry.get().getLoadShedder().start();
+
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
         // t.log(Level.TRACE, "Voltage", m_pdh.getVoltage());
@@ -104,6 +113,8 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void teleopInit() {
+        // this cancels all the default commands, resulting in them being rescheduled
+        // immediately, which seems like maybe not great?
         CommandScheduler.getInstance().cancelAll();
         m_robotContainer.cancelAuton();
         m_robotContainer.onTeleop();

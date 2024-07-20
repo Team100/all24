@@ -42,26 +42,37 @@ public class Telemetry {
         }
     }
 
+    /**
+     * Logging is prevented after this much time per cycle.
+     * TODO: tune this value to leave time for real work.
+     */
+    private static final double kLoggingTimeBudgetS = 0.01;
     private static final Telemetry instance = new Telemetry();
+
+    private final LoadShedder m_loadShedder;
 
     final NetworkTableInstance inst;
     final PrimitiveLogger ntLogger;
     final PrimitiveLogger usbLogger;
 
-    Level m_level;
+    private Level m_level;
 
     /**
      * Uses the default network table instance.
      * Clients should use the static instance, not the constructor.
      */
     private Telemetry() {
-
         inst = NetworkTableInstance.getDefault();
+        m_loadShedder = new LoadShedder(kLoggingTimeBudgetS);
         ntLogger = new NTLogger();
         usbLogger = new DataLogLogger();
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
         // DataLogManager.start();
+    }
+
+    public LoadShedder getLoadShedder() {
+        return m_loadShedder;
     }
 
     void setLevel(Level level) {
