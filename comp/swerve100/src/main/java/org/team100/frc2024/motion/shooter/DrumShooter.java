@@ -2,7 +2,6 @@ package org.team100.frc2024.motion.shooter;
 
 import java.util.OptionalDouble;
 
-import org.team100.frc2024.motion.GravityServo;
 import org.team100.frc2024.motion.GravityServo2;
 import org.team100.frc2024.motion.GravityServoInterface;
 import org.team100.lib.config.Feedforward100;
@@ -81,11 +80,11 @@ public class DrumShooter extends SubsystemBase implements Glassy {
             double statorLimit) {
         m_logger = parent.child(this);
 
-        PIDController pivotController = new PIDController(4.5, 0.0, 0.000);
+        double period = 0.02;
+        PIDController pivotController = new PIDController(4.5, 0.0, 0.000, period);
         pivotController.setTolerance(0.02);
         pivotController.setIntegratorRange(0, 0.1);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
-        double period = 0.02;
 
         SupplierLogger leftLogger = m_logger.child("Left");
         SupplierLogger rightLogger = m_logger.child("Right");

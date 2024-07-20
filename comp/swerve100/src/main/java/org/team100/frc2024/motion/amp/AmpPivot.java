@@ -2,7 +2,6 @@ package org.team100.frc2024.motion.amp;
 
 import java.util.OptionalDouble;
 
-import org.team100.frc2024.motion.GravityServo;
 import org.team100.frc2024.motion.GravityServo2;
 import org.team100.frc2024.motion.GravityServoInterface;
 import org.team100.lib.config.Feedforward100;
