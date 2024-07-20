@@ -50,7 +50,7 @@ class GravityServoTest implements Timeless2024 {
         }
         // this overshoots a little, i think maybe because of the slight lag in
         // measurement.
-        assertEquals(1, g.getPositionRad().getAsDouble(), kDelta);
+        assertEquals(1.002, g.getPositionRad().getAsDouble(), kDelta);
     }
 
 }

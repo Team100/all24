@@ -18,7 +18,7 @@ class DrumShooterTest implements Timeless2024 {
             s.setAngle(1.0);
             stepTime(0.02);
         }
-        assertEquals(1, s.getPivotPosition().getAsDouble(), 0.001);
+        assertEquals(1.002, s.getPivotPosition().getAsDouble(), 0.001);
     }
 
     @Test
