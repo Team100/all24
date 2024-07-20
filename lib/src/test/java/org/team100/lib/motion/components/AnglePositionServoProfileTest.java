@@ -27,6 +27,7 @@ class AnglePositionServoProfileTest {
     public AnglePositionServoProfileTest() {
         motor = new MockBareMotor();
         RotaryMechanism mech = new RotaryMechanism(
+                logger,
                 motor,
                 new MockIncrementalBareEncoder(),
                 1);

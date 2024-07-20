@@ -26,6 +26,7 @@ class GravityServoTest implements Timeless2024 {
         // motor speed is rad/s
         SimulatedBareMotor simMotor = new SimulatedBareMotor(logger, 600);
         RotaryMechanism simMech = new RotaryMechanism(
+                logger,
                 simMotor,
                 new SimulatedBareEncoder(logger, simMotor),
                 165);

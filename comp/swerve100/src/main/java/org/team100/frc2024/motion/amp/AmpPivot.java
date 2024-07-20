@@ -32,15 +32,23 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class AmpPivot extends SubsystemBase implements Glassy {
 
     /**
-     * The outboard velocity PID units are duty cycle per RPM, so tiny values are normal
+     * The outboard velocity PID units are duty cycle per RPM, so tiny values are
+     * normal
      */
     private static final double kOutboardP = 0.0002;
     private static final double kOutboardI = 0.0;
-    private static final double kOutboardD = 0.0001;
+    private static final double kOutboardD = 0.0;
     private static final int kCurrentLimit = 30;
     private static final int kCanId = 2;
-    // TODO: verify this ratio
-    private static final double kGearRatio = 55;
+    /**
+     * Jul 19 2024 found this to be wrong, it was 55 but looks like 70.
+     * Final is 3.75 inch sprocket 48t driven by 16t, so 3:1.
+     * Intermediate is mystery gears, close to 1:1.
+     * Primary is 4:1 * 5:1 planetary
+     * so 4*5*3=60, but it measures as 70, so the mystery gears must be something
+     * like 18:22.
+     */
+    private static final double kGearRatio = 70;
 
     private final SupplierLogger m_logger;
     private final GravityServoInterface m_ampAngleServo;
@@ -49,7 +57,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         m_logger = parent.child(this);
 
         double period = 0.02;
-        PIDController controller = new PIDController(0.8, 0, 0);
+        PIDController controller = new PIDController(2.0, 0, 0);
 
         switch (Identity.instance) {
             case COMP_BOT:
@@ -63,6 +71,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                         ff,
                         pid);
                 RotaryMechanism mech = new RotaryMechanism(
+                        m_logger,
                         motor,
                         new CANSparkEncoder(m_logger, motor),
                         kGearRatio);
@@ -84,6 +93,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 SimulatedBareMotor simMotor = new SimulatedBareMotor(
                         m_logger, freeSpeedRad_S);
                 RotaryMechanism simMech = new RotaryMechanism(
+                        m_logger,
                         simMotor,
                         new SimulatedBareEncoder(m_logger, simMotor),
                         kGearRatio);

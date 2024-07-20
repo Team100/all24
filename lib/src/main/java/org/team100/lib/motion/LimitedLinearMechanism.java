@@ -83,6 +83,11 @@ public class LimitedLinearMechanism implements LinearMechanism {
         m_delegate.setVelocity(outputVelocityM_S, outputAccelM_S2, outputForceN);
     }
 
+    @Override
+    public void periodic() {
+        m_delegate.periodic();
+    }
+
     public void setForceLimit(double forceN) {
         m_delegate.setForceLimit(forceN);
     }

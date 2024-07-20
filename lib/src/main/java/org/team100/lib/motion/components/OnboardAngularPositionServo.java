@@ -183,6 +183,13 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         return m_setpoint;
     }
 
+    @Override
+    public void periodic() {
+        m_mechanism.periodic();
+        m_logger.logState100(Level.TRACE, "setpoint", () -> m_setpoint);
+        m_logger.logState100(Level.TRACE, "goal", () -> m_goal);
+    }
+
     ////////////////////////////////////////////////
 
     /**

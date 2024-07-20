@@ -29,6 +29,7 @@ class AnglePositionServoTest {
 
         MockBareMotor turningMotor = new MockBareMotor();
         RotaryMechanism mech = new RotaryMechanism(
+                logger,
                 turningMotor,
                 new MockIncrementalBareEncoder(),
                 1);
@@ -57,6 +58,7 @@ class AnglePositionServoTest {
     void testOutboard() {
         MockBareMotor motor = new MockBareMotor();
         RotaryMechanism mech = new RotaryMechanism(
+                logger,
                 motor,
                 new MockIncrementalBareEncoder(),
                 1);

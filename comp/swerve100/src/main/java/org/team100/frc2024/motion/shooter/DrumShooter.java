@@ -53,7 +53,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     /** Right roller setpoint m/s */
     private static final double kRightRollerVelocity = 15;
     /** Spin the rollers gently all the time to reduce starting current. */
-    private static final double kIdleVelocity = 1;
+    // private static final double kIdleVelocity = 1;
+    // actually stop idling for now
+    private static final double kIdleVelocity = 0;
     /** Feed velocity. */
     private static final double kFeedM_S = 1;
     /** Outtake velocity. */
@@ -132,6 +134,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         pivotFF,
                         pivotPID);
                 RotaryMechanism pivotMech = new RotaryMechanism(
+                        pivotLogger,
                         pivotMotor,
                         new CANSparkEncoder(pivotLogger, pivotMotor),
                         kPivotReduction);
@@ -164,6 +167,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 // motor speed is rad/s
                 SimulatedBareMotor simMotor = new SimulatedBareMotor(pivotLogger, 600);
                 RotaryMechanism simMech = new RotaryMechanism(
+                        pivotLogger,
                         simMotor,
                         new SimulatedBareEncoder(pivotLogger, simMotor),
                         165);

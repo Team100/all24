@@ -34,6 +34,7 @@ class AngularPositionProfileTest implements Timeless {
     public AngularPositionProfileTest() {
         motor = new MockBareMotor();
         mech = new RotaryMechanism(
+                logger,
                 motor,
                 new MockIncrementalBareEncoder(),
                 1);

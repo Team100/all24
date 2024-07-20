@@ -2,8 +2,11 @@ package org.team100.lib.motion;
 
 import java.util.OptionalDouble;
 
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.IncrementalBareEncoder;
 import org.team100.lib.motor.BareMotor;
+import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
  * Uses a motor and gears to produce rotational output, e.g. an arm joint.
@@ -13,15 +16,18 @@ import org.team100.lib.motor.BareMotor;
  * 
  * The included encoder is the incremental motor encoder.
  */
-public class RotaryMechanism {
+public class RotaryMechanism implements Glassy {
+    private final SupplierLogger m_logger;
     private final BareMotor m_motor;
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
 
     public RotaryMechanism(
+            SupplierLogger parent,
             BareMotor motor,
             IncrementalBareEncoder encoder,
             double gearRatio) {
+        m_logger = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;
         m_gearRatio = gearRatio;
@@ -59,7 +65,9 @@ public class RotaryMechanism {
         OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
         if (velocityRad_S.isEmpty())
             return OptionalDouble.empty();
-        return OptionalDouble.of(velocityRad_S.getAsDouble() / m_gearRatio);
+        double velo = velocityRad_S.getAsDouble() / m_gearRatio;
+        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> velo);
+        return OptionalDouble.of(velo);
     }
 
     public OptionalDouble getPositionRad() {
@@ -84,6 +92,19 @@ public class RotaryMechanism {
     public void setEncoderPosition(double positionRad) {
         double motorPositionRad = positionRad * m_gearRatio;
         m_encoder.setEncoderPositionRad(motorPositionRad);
+    }
+
+    public void periodic() {
+        // do some logging
+        m_logger.logOptionalDouble(Level.TRACE, "velocity (rad_s)", this::getVelocityRad_S);
+        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", this::getPositionRad);
+        m_motor.periodic();
+        m_encoder.periodic();
+    }
+
+    @Override
+    public String getGlassName() {
+        return "RotaryMechanism";
     }
 
 }

@@ -125,4 +125,13 @@ public class SelectableAngularPositionServo implements AngularPositionServo {
         }
     }
 
+    @Override
+    public void periodic() {
+        if (m_selector.getAsBoolean()) {
+            m_whenTrue.periodic();
+        } else {
+            m_whenFalse.periodic();
+        }
+    }
+
 }

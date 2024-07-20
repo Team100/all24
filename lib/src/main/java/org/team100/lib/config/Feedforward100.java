@@ -49,10 +49,11 @@ public class Feedforward100 {
 
     public static Feedforward100 makeArmPivot() {
         return new Feedforward100(
-                0.2, // more kV than normal
-                0.000, // ignore accel
-                0.200, // lots of friction
-                0.100, 0.5);
+                0.09,
+                0.005,
+                0.100,
+                0.065,
+                0.5);
     }
 
     public static Feedforward100 zero() {

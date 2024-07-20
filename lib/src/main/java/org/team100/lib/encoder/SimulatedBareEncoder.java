@@ -57,4 +57,10 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
         m_motor.setEncoderPositionRad(motorPositionRad);
     }
 
+    @Override
+    public void periodic() {
+        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", this::getPositionRad);
+        m_logger.logOptionalDouble(Level.TRACE, "velocity (rad_s)", this::getVelocityRad_S);
+    }
+
 }

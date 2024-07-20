@@ -105,6 +105,7 @@ public class ServoFactory {
                 ff,
                 lowLevelVelocityConstants);
         RotaryMechanism mech = new RotaryMechanism(
+                parent,
                 motor,
                 new CANSparkEncoder(parent, motor),
                 gearRatio);
@@ -127,6 +128,7 @@ public class ServoFactory {
         // motor speed is rad/s
         SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
         RotaryMechanism mech = new RotaryMechanism(
+                parent,
                 motor,
                 new SimulatedBareEncoder(parent, motor),
                 1);

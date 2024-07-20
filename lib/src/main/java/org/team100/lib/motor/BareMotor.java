@@ -84,6 +84,9 @@ public interface BareMotor extends Glassy {
      */
     void close();
 
+    /** For logging */
+    void periodic();
+
     @Override
     default String getGlassName() {
         return "BareMotor";

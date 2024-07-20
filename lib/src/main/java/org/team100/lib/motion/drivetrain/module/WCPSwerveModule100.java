@@ -185,6 +185,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningMotor);
 
         RotaryMechanism mech = new RotaryMechanism(
+                parent,
                 turningMotor,
                 builtInEncoder,
                 turningGearRatio);

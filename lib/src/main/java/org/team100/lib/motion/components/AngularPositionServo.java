@@ -62,6 +62,9 @@ public interface AngularPositionServo extends Glassy {
 
     State100 getSetpoint();
 
+    /** for logging */
+    void periodic();
+
     @Override
     default String getGlassName() {
         return "AngularPositionServo";

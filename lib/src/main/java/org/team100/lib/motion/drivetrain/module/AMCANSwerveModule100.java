@@ -119,6 +119,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
         RotaryMechanism mech = new RotaryMechanism(
+                parent,
                 turningMotor,
                 new VelocityBareEncoder(parent, turningMotor),
                 kSteeringReduction);

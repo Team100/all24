@@ -76,4 +76,9 @@ public class LimitedLinearVelocityServo implements LinearVelocityServo {
     public double getSetpoint() {
         return m_servo.getSetpoint();
     }
+
+    @Override
+    public void periodic() {
+        m_servo.periodic();
+    }
 }

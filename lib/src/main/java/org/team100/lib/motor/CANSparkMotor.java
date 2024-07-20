@@ -178,4 +178,9 @@ public abstract class CANSparkMotor implements BareMotor {
         m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
         m_logger.logDouble(Level.TRACE, "temperature (C)", m_motor::getMotorTemperature);
     }
+
+    @Override
+    public void periodic() {
+        log();
+    }
 }

@@ -9,7 +9,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.wpilibj.Timer;
 
 public class OutboardLinearVelocityServo implements LinearVelocityServo {
-
     private final SupplierLogger m_logger;
     private final LinearMechanism m_motor;
 
@@ -69,6 +68,11 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     @Override
     public double getSetpoint() {
         return m_setpoint;
+    }
+
+    @Override
+    public void periodic() {
+        m_motor.periodic();
     }
 
     ////////////////////////////////////////////////

@@ -280,7 +280,8 @@ public class RobotContainer implements Glassy {
 
         // fast, then slow.
         // TODO: tune these numbers
-        whileTrue(operatorControl::pivotToAmpPosition, new AmpFastThenSlow(ampLogger, m_ampPivot, 1.6, 1.8));
+        whileTrue(operatorControl::pivotToAmpPosition,
+                new AmpFastThenSlow(ampLogger, m_ampPivot, 1.7, 1.8));
 
         whileTrue(operatorControl::feedToAmp,
                 new FeedToAmp(intake, m_shooter, m_ampFeeder, feeder));
@@ -443,7 +444,7 @@ public class RobotContainer implements Glassy {
         // m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
         // if far from the goal, go fast. if near, go slow.
         // TODO: tune these numbers
-        m_ampPivot.setDefaultCommand(new AmpFastThenSlow(ampLogger, m_ampPivot, 0.2, 0));
+        m_ampPivot.setDefaultCommand(new AmpFastThenSlow(ampLogger, m_ampPivot, 0.1, 0));
 
         ////////////////////
         //

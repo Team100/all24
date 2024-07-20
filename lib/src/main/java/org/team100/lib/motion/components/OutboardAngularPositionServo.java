@@ -147,4 +147,9 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         return m_goal;
     }
 
+    @Override
+    public void periodic() {
+        m_mechanism.periodic();
+    }
+
 }

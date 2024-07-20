@@ -32,4 +32,6 @@ public interface LinearMechanism {
 
     void resetEncoderPosition();
 
+    void periodic();
+
 }
