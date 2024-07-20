@@ -49,7 +49,8 @@ public class Feedforward100 {
 
     public static Feedforward100 makeNeo550() {
         return new Feedforward100(0.32, 0, 0, .07, 0);
-
+    }
+    
   public static Feedforward100 makeArmPivot() {
         return new Feedforward100(
                 0.09,
