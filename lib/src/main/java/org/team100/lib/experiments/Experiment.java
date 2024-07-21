@@ -44,10 +44,6 @@ public enum Experiment {
      */
     DriveToNoteWithRotation,
     /**
-     * Use note detection in auto
-     */
-    AutoNoteDetection,
-    /**
      * Use full state feedback for trajectory following
      */
     FullStateTrajectoryFollower,

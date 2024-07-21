@@ -34,7 +34,7 @@ class SimulatedCameraTest {
 
         // goal is straight ahead, same as height, so should be on-bore
         Translation2d[] notes = { new Translation2d(1, 0) };
-        List<Rotation3d> sights = simCamera.getRotation(robotPose, notes);
+        List<Rotation3d> sights = simCamera.getRotations(robotPose, notes);
 
         assertEquals(1, sights.size());
         // on-bore
@@ -68,7 +68,7 @@ class SimulatedCameraTest {
         // goal is straight ahead, 2x further than height, so ~26 degrees down
         Translation2d[] notes = { new Translation2d(2, 0) };
 
-        List<Rotation3d> sights = simCamera.getRotation(robotPose, notes);
+        List<Rotation3d> sights = simCamera.getRotations(robotPose, notes);
 
         assertEquals(1, sights.size());
         // on-bore
@@ -101,7 +101,7 @@ class SimulatedCameraTest {
 
         // note is to the left, 2x further than height, so ~26 degrees
         Translation2d[] notes = { new Translation2d(2, 1) };
-        List<Rotation3d> sights = simCamera.getRotation(robotPose, notes);
+        List<Rotation3d> sights = simCamera.getRotations(robotPose, notes);
 
         assertEquals(1, sights.size());
         // roll?
@@ -146,7 +146,7 @@ class SimulatedCameraTest {
 
         Pose2d robotPose = new Pose2d();
 
-        List<Rotation3d> sights = simCamera.getRotation(robotPose, notes);
+        List<Rotation3d> sights = simCamera.getRotations(robotPose, notes);
 
         assertEquals(1, sights.size());
         // roll doesn't matter
@@ -178,7 +178,7 @@ class SimulatedCameraTest {
         Pose2d robotPose = new Pose2d();
 
         Translation2d[] notes = { new Translation2d(0, 2) };
-        List<Rotation3d> sights = simCamera.getRotation(robotPose, notes);
+        List<Rotation3d> sights = simCamera.getRotations(robotPose, notes);
 
         assertEquals(1, sights.size());
         // camera should see target straight ahead

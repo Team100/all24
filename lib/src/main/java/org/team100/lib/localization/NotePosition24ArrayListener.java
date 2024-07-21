@@ -22,6 +22,8 @@ import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -98,19 +100,14 @@ public class NotePosition24ArrayListener {
         Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
         switch (Identity.instance) {
             case BLANK:
-                Transform3d simCameraInRobotCoordinates = Camera.GAME_PIECE.getOffset();
-                SimulatedCamera simCamera = new SimulatedCamera(
-                        simCameraInRobotCoordinates,
-                        Math.toRadians(40),
-                        Math.toRadians(31.5));
-                List<Rotation3d> rot = simCamera.getRotation(
-                        robotPose,
-                        NotePicker.autoNotes);
-                if (rot.isEmpty())
+                SimulatedCamera simCamera = SimulatedCamera.getGamePieceCamera();
+                Optional<Alliance> alliance = DriverStation.getAlliance();
+                if (alliance.isEmpty())
                     return new ArrayList<>();
+                List<Rotation3d> rot = simCamera.getKnownLocations(alliance.get(), robotPose);
                 return TargetLocalizer.cameraRotsToFieldRelativeArray(
                         robotPose,
-                        simCameraInRobotCoordinates,
+                        simCamera.getOffset(),
                         rot.toArray(new Rotation3d[0]));
             default:
                 if (latestTime > Timer.getFPGATimestamp() - kMaxSightAgeS) {
@@ -128,10 +125,6 @@ public class NotePosition24ArrayListener {
         return NotePicker.closestNote(
                 getTranslation2dArray(),
                 robotPose);
-    }
-
-    public Optional<Translation2d> getTranslation2dAuto(Translation2d note) {
-        return NotePicker.autoNotePick(getTranslation2dArray(), note);
     }
 
     public void enable() {
