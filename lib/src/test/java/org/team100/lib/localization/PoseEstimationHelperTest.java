@@ -1,9 +1,12 @@
 package org.team100.lib.localization;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.SupplierLogger;
@@ -11,9 +14,12 @@ import org.team100.lib.telemetry.TestLogger;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -499,6 +505,102 @@ class PoseEstimationHelperTest {
             Transform3d t = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip);
             assertEquals(0, t.getTranslation().toTranslation2d().getAngle().getRadians(), kDelta);
             assertEquals(1, t.getTranslation().toTranslation2d().getNorm(), kDelta);
+        }
+    }
+
+    @Test
+    void testCameraRotsToFieldRelativeArray() {
+
+        {
+            // robot at origin
+            Pose2d robotFieldRelative = new Pose2d();
+            // camera at robot center, one meter high
+            Transform3d cameraInRobotCoordinates = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
+            Rotation3d[] rots = new Rotation3d[] {
+                    new Rotation3d(0, 0, 0)
+            };
+            List<Translation2d> translations = PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+                    robotFieldRelative, cameraInRobotCoordinates, rots);
+            assertEquals(0, translations.size());
+        }
+        {
+            // robot at origin
+            Pose2d robotFieldRelative = new Pose2d();
+            // camera at robot center, one meter high
+            Transform3d cameraInRobotCoordinates = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
+            Rotation3d[] rots = new Rotation3d[] {
+                    new Rotation3d(0, Math.PI / 4, 0) // pitch 45 down, straight ahead
+            };
+            List<Translation2d> translations = PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+                    robotFieldRelative, cameraInRobotCoordinates, rots);
+            assertEquals(1, translations.size());
+            Translation2d t = translations.get(0);
+            // camera is 1m high, pointing 45 down so 1m away
+            assertEquals(1, t.getX(), kDelta);
+            assertEquals(0, t.getY(), kDelta);
+        }
+        {
+            // robot at origin
+            Pose2d robotFieldRelative = new Pose2d();
+            // camera at robot center, one meter high
+            Transform3d cameraInRobotCoordinates = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
+            Rotation3d[] rots = new Rotation3d[] {
+                    new Rotation3d(0, Math.PI / 4, Math.PI/4) // pitch 45 down, 45 to the left
+            };
+            List<Translation2d> translations = PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+                    robotFieldRelative, cameraInRobotCoordinates, rots);
+            assertEquals(1, translations.size());
+            Translation2d t = translations.get(0);
+            // camera is 1m high, pointing 45 down so 1m away
+            assertEquals(1, t.getX(), kDelta);
+            assertEquals(1, t.getY(), kDelta);
+        }
+    }
+
+    @Test
+    void testcameraRotationToRobotRelative() {
+        {
+            Transform3d cameraInRobotCoordinates = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
+            Rotation3d note = new Rotation3d(0, Math.PI / 4, 0); // pitch 45 down, straight ahead
+            Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
+                    .cameraRotationToRobotRelative(
+                            cameraInRobotCoordinates,
+                            note);
+            assertTrue(cameraRotationRobotRelative.isPresent());
+            Translation2d t = cameraRotationRobotRelative.get();
+            assertEquals(1, t.getX(), kDelta);
+            assertEquals(0, t.getY(), kDelta);
+        }
+    }
+
+    @Test
+    void testGetFieldRelativeNote() {
+        {
+            Pose2d robotFieldRelative = new Pose2d();
+            Translation2d cameraRotationRobotRelative = new Translation2d(1, 0);
+            Translation2d t = PoseEstimationHelper.getFieldRelativeNote(robotFieldRelative,
+                    cameraRotationRobotRelative);
+            // since the robot is at the origin this doesn't do anything.
+            assertEquals(1, t.getX(), kDelta);
+            assertEquals(0, t.getY(), kDelta);
+        }
+        {
+            Pose2d robotFieldRelative = new Pose2d(1, 0, new Rotation2d());
+            Translation2d cameraRotationRobotRelative = new Translation2d(1, 0);
+            Translation2d t = PoseEstimationHelper.getFieldRelativeNote(robotFieldRelative,
+                    cameraRotationRobotRelative);
+            // since the robot is at the origin this doesn't do anything.
+            assertEquals(2, t.getX(), kDelta);
+            assertEquals(0, t.getY(), kDelta);
+        }
+        {
+            Pose2d robotFieldRelative = new Pose2d(1, 0, new Rotation2d(Math.PI / 4));
+            Translation2d cameraRotationRobotRelative = new Translation2d(1, 0);
+            Translation2d t = PoseEstimationHelper.getFieldRelativeNote(robotFieldRelative,
+                    cameraRotationRobotRelative);
+            // since the robot is at the origin this doesn't do anything.
+            assertEquals(1.707, t.getX(), kDelta);
+            assertEquals(0.707, t.getY(), kDelta);
         }
     }
 

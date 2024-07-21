@@ -38,7 +38,8 @@ public class PoseEstimationHelper implements Glassy {
      * 
      * returns empty for target at the horizon.
      */
-    public static Optional<Translation2d> cameraRotationToRobotRelative(Transform3d cameraInRobotCoordinates,
+    public static Optional<Translation2d> cameraRotationToRobotRelative(
+            Transform3d cameraInRobotCoordinates,
             Rotation3d yawPitch) {
         // TODO: when the target is near the bore of the camera, this will yield strange
         // results. the solution is to change how this works to use the library 3d
@@ -84,9 +85,7 @@ public class PoseEstimationHelper implements Glassy {
                                 note);
                 if (cameraRotationRobotRelative.isEmpty())
                     continue;
-                Translation2d fieldRealtiveTranslation = currentPose
-                        .transformBy(new Transform2d(cameraRotationRobotRelative.get(), new Rotation2d()))
-                        .getTranslation();
+                Translation2d fieldRealtiveTranslation = getFieldRelativeNote(currentPose, cameraRotationRobotRelative);
                 if (fieldRealtiveTranslation.getY() > -1 && fieldRealtiveTranslation.getX() > -1) {
                     if (fieldRealtiveTranslation.getY() < 9.21 && fieldRealtiveTranslation.getX() < 17.54) {
                         Tnotes.add(fieldRealtiveTranslation);
@@ -104,16 +103,24 @@ public class PoseEstimationHelper implements Glassy {
             Transform3d cameraInRobotCoordinates, Rotation3d[] rots) {
         ArrayList<Translation2d> Tnotes = new ArrayList<>();
         for (Rotation3d note : rots)
-            if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
+            //
+            // this appears to have filtered out very close poses, which i think is the
+            // opposite of what it is supposed to do: avoid the horizon.
+            // i'm kinda suspicious how this ever worked. there was no unit test
+            // for it as of Jul 2024.
+            // if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
+            //
+            // filter out targets above the horizon:
+            if (note.getY() > -1.0 * cameraInRobotCoordinates.getRotation().getY()) {
                 Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
                         .cameraRotationToRobotRelative(
                                 cameraInRobotCoordinates,
                                 note);
                 if (cameraRotationRobotRelative.isEmpty())
                     continue;
-                Translation2d fieldRelativeNote = currentPose
-                        .transformBy(new Transform2d(cameraRotationRobotRelative.get(), new Rotation2d()))
-                        .getTranslation();
+                Translation2d fieldRelativeNote = getFieldRelativeNote(
+                        currentPose,
+                        cameraRotationRobotRelative.get());
                 Tnotes.add(fieldRelativeNote);
                 if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
                     if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
@@ -122,6 +129,14 @@ public class PoseEstimationHelper implements Glassy {
                 }
             }
         return Tnotes;
+    }
+
+    static Translation2d getFieldRelativeNote(
+            Pose2d currentPose,
+            Translation2d cameraRotationRobotRelative) {
+        return currentPose
+                .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                .getTranslation();
     }
 
     /**
