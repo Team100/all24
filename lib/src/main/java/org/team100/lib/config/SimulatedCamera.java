@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.team100.lib.field.FieldPoint2024;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /**
  * Creates a simulated camera with the given parameters, used for game piece
@@ -35,13 +38,28 @@ public class SimulatedCamera {
         m_vFovHalfAngleRad = vFovHalfAngleRad;
     }
 
+    public static SimulatedCamera getGamePieceCamera() {
+        return new SimulatedCamera(
+                Camera.GAME_PIECE.getOffset(),
+                Math.toRadians(40),
+                Math.toRadians(31.5));
+    }
+
+    public Transform3d getOffset() {
+        return m_offset;
+    }
+
+    public List<Rotation3d> getKnownLocations(Alliance alliance, Pose2d robotPose) {
+        return getRotations(robotPose, FieldPoint2024.allNotes(alliance));
+    }
+
     /**
      * Gets the rotation to the object in the frame
      * 
      * @param robotPose Pose of the robot
      * @param notes     field relative translation of any objects
      */
-    public List<Rotation3d> getRotation(Pose2d robotPose, Translation2d[] notes) {
+    public List<Rotation3d> getRotations(Pose2d robotPose, Translation2d[] notes) {
         ArrayList<Rotation3d> list = new ArrayList<>();
         for (Translation2d note : notes) {
             getRotInCamera(robotPose, note).ifPresent(list::add);

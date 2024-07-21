@@ -175,8 +175,8 @@ public class RobotContainer implements Glassy {
                 fireControl);
         visionDataProvider.enable();
 
-        final NotePosition24ArrayListener notePositionDetector = new NotePosition24ArrayListener(poseEstimator);
-        notePositionDetector.enable();
+        final NotePosition24ArrayListener noteListener = new NotePosition24ArrayListener(poseEstimator);
+        noteListener.enable();
 
         final SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
 
@@ -242,7 +242,7 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         intake,
-                        notePositionDetector::getClosestTranslation2d,
+                        noteListener::getClosestTranslation2d,
                         m_drive,
                         dthetaController,
                         swerveKinodynamics));
@@ -322,7 +322,7 @@ public class RobotContainer implements Glassy {
                         commandLogger,
                         swerveKinodynamics,
                         heading,
-                        notePositionDetector::getClosestTranslation2d,
+                        noteListener::getClosestTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -361,7 +361,7 @@ public class RobotContainer implements Glassy {
                         commandLogger,
                         swerveKinodynamics,
                         heading,
-                        notePositionDetector::getClosestTranslation2d,
+                        noteListener::getClosestTranslation2d,
                         thetaController,
                         omegaController,
                         driverControl::trigger));
@@ -413,7 +413,6 @@ public class RobotContainer implements Glassy {
                 m_shooter,
                 intake,
                 m_sensors,
-                notePositionDetector,
                 constraints,
                 viz);
 
