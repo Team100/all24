@@ -27,9 +27,8 @@ public class NotePicker {
     };
 
     /**
-     * @param notes  the field relative pose of detected notes
-     * @param noteID the field id of the note you want to go for, left bottom to
-     *               right top IDs are 1-11
+     * @param notes  the field relative translations of detected notes
+     * @param noteID the field-relative translation of the note you want
      * @return The field relative translation of the note you want to go for
      */
     public static Optional<Translation2d> autoNotePick(
@@ -86,12 +85,14 @@ public class NotePicker {
     }
 
     /**
-     * @param notes      the field relative pose of detected notes
+     * @param notes     the field relative pose of detected notes
      * @param robotPose the pose of the swerve drivetrain
      * @return The field relative translation of the closest note, or empty if none
      *         nearby
      */
-    public static Optional<Translation2d> closestNote(List<Translation2d> notes, Pose2d robotPose) {
+    public static Optional<Translation2d> closestNote(
+            List<Translation2d> notes,
+            Pose2d robotPose) {
         if (notes.isEmpty()) {
             return Optional.empty();
         }

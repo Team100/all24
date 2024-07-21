@@ -20,6 +20,7 @@ class NotePickerTest {
     void noNote() {
         // no sights == no notes
         assertTrue(NotePicker.autoNotePick(new ArrayList<>(), 1).isEmpty());
+        assertTrue(NotePicker.autoNotePick(new ArrayList<>(), new Translation2d(2.91, 0.76)).isEmpty());
         Pose2d robotPose = new Pose2d();
         assertTrue(NotePicker.closestNote(new ArrayList<>(), robotPose).isEmpty());
     }
@@ -72,12 +73,34 @@ class NotePickerTest {
     }
 
     @Test
+    void testAutoNotePickObvious2() {
+        List<Translation2d> sights = List.of(
+                new Translation2d(),
+                new Translation2d(1, 1),
+                new Translation2d(2.9, 0.77));
+        Translation2d note = NotePicker.autoNotePick(sights, new Translation2d(2.91, 0.76)).get();
+        assertEquals(note, new Translation2d(2.9, 0.77));
+        assertEquals(2.9, note.getX(), kDelta);
+        assertEquals(0.77, note.getY(), kDelta);
+    }
+
+    @Test
     void testFar() {
         List<Translation2d> sights = List.of(
                 new Translation2d(10, 10),
                 new Translation2d(41, 41),
                 new Translation2d(22.9, 0.77));
         Optional<Translation2d> note = NotePicker.autoNotePick(sights, 1);
+        assertTrue(note.isEmpty());
+    }
+
+    @Test
+    void testFar2() {
+        List<Translation2d> sights = List.of(
+                new Translation2d(10, 10),
+                new Translation2d(41, 41),
+                new Translation2d(22.9, 0.77));
+        Optional<Translation2d> note = NotePicker.autoNotePick(sights, new Translation2d(2.91, 0.76));
         assertTrue(note.isEmpty());
     }
 }

@@ -24,7 +24,10 @@ import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
 import edu.wpi.first.wpilibj.Timer;
 
-/** For testing the NotePosition struct array */
+/**
+ * Listen for updates from the note-detector camera and remember them for
+ * awhile.
+ */
 public class NotePosition24ArrayListener {
     /** Ignore sights older than this. */
     private static final double kMaxSightAgeS = 0.1;
@@ -67,6 +70,7 @@ public class NotePosition24ArrayListener {
             if (b.length == 0) {
                 return;
             }
+            // NOTE! sights are x-ahead WPI coordinates, not z-ahead camera coordinates.
             Rotation3d[] sights;
             try {
                 synchronized (m_buf) {
@@ -78,7 +82,7 @@ public class NotePosition24ArrayListener {
             }
             Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
             Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
-            notes = PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+            notes = TargetLocalizer.cameraRotsToFieldRelativeArray(
                     robotPose,
                     cameraInRobotCoordinates,
                     sights);
@@ -88,21 +92,23 @@ public class NotePosition24ArrayListener {
     }
 
     /**
-     * @return The translation of all the notes, field relative
+     * Field-relative translations of recent sights.
      */
     public List<Translation2d> getTranslation2dArray() {
         Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
         switch (Identity.instance) {
             case BLANK:
                 Transform3d simCameraInRobotCoordinates = Camera.GAME_PIECE.getOffset();
-                SimulatedCamera simCamera = new SimulatedCamera(simCameraInRobotCoordinates,
-                        new Rotation3d(0, Math.toRadians(31.5), Math.toRadians(40)));
+                SimulatedCamera simCamera = new SimulatedCamera(
+                        simCameraInRobotCoordinates,
+                        Math.toRadians(40),
+                        Math.toRadians(31.5));
                 List<Rotation3d> rot = simCamera.getRotation(
                         robotPose,
                         NotePicker.autoNotes);
                 if (rot.isEmpty())
                     return new ArrayList<>();
-                return PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+                return TargetLocalizer.cameraRotsToFieldRelativeArray(
                         robotPose,
                         simCameraInRobotCoordinates,
                         rot.toArray(new Rotation3d[0]));
@@ -115,7 +121,7 @@ public class NotePosition24ArrayListener {
     }
 
     /**
-     * @return The translation of all the closest note, field relative
+     * The field-relative translation of the closest note, if any.
      */
     public Optional<Translation2d> getClosestTranslation2d() {
         Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();

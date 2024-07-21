@@ -1,9 +1,5 @@
 package org.team100.lib.localization;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.telemetry.SupplierLogger;
@@ -29,81 +25,8 @@ public class PoseEstimationHelper implements Glassy {
         m_logger = parent.child(this);
     }
 
-    /**
-     * input is a 3d rotation representing the camera's view of an object on the floor.
-     * 
-     * output is the 2d robot-relative translation of the object.
-     * 
-     * returns empty for target at the horizon.
-     */
-    public static Optional<Translation2d> cameraRotationToRobotRelative(
-            Transform3d cameraInRobotCoordinates,
-            Rotation3d sight) {
-  
-        Rotation2d angleNoRollOffset = new Rotation2d(sight.getZ(), sight.getY());
-        Rotation2d angleWRoll = new Rotation2d(cameraInRobotCoordinates.getRotation().getX()).plus(angleNoRollOffset);
-        double normInCamera = Math.hypot(sight.getZ(), sight.getY());
-        Rotation3d rotToObject = new Rotation3d(0, angleWRoll.getSin() * normInCamera,
-                angleWRoll.getCos() * normInCamera);
-        double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + rotToObject.getY());
-        if (robotRelativeAngle <= 0) {
-            // target is at or above the horizon
-            return Optional.empty();
-        }
-        double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
-        double y = x * Math.tan(rotToObject.getZ());
-
-    
-        Rotation2d cameraRelativeTranslation = new Rotation2d(x, y);
-
-        double znorm = Math.hypot(x, y);
-        Rotation2d angleToObject = new Rotation2d(cameraInRobotCoordinates.getRotation().getZ())
-                .plus(cameraRelativeTranslation);
-        Translation2d robotRelativeTranslation2dNoOffsets = new Translation2d(
-                angleToObject.getCos() * znorm,
-                angleToObject.getSin() * znorm);
-        return Optional.of(
-                robotRelativeTranslation2dNoOffsets
-                        .plus(cameraInRobotCoordinates.getTranslation().toTranslation2d()));
-    }
-
-    /**
-     * Converts camera rotation to objects into field relative translations
-     */
-    public static List<Translation2d> cameraRotsToFieldRelativeArray(
-            Pose2d currentPose,
-            Transform3d cameraInRobotCoordinates,
-            Rotation3d[] rots) {
-        ArrayList<Translation2d> Tnotes = new ArrayList<>();
-        for (Rotation3d note : rots) {
-            //
-            // this appears to have filtered out very close poses, which i think is the
-            // opposite of what it is supposed to do: avoid the horizon.
-            // i'm kinda suspicious how this ever worked. there was no unit test
-            // for it as of Jul 2024.
-            // if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
-            //
-            if (note.getY() <= -1.0 * cameraInRobotCoordinates.getRotation().getY()) {
-                // filter out targets above the horizon. note that the function below also does
-                // this same filtering, so maybe don't do it twice?
-                continue;
-            }
-            Optional<Translation2d> robotRelative = PoseEstimationHelper
-                    .cameraRotationToRobotRelative(cameraInRobotCoordinates, note);
-            if (robotRelative.isEmpty()) {
-                continue;
-            }
-            Translation2d fieldRelativeNote = getFieldRelativeNote(
-                    currentPose,
-                    robotRelative.get());
-            Tnotes.add(fieldRelativeNote);
-        }
-
-        return Tnotes;
-    }
-
-    /** robot relative to field relative */
-    static Translation2d getFieldRelativeNote(
+    /** Convert robot-relative translation to field-relative translation. */
+    static Translation2d robotRelativeToFieldRelative(
             Pose2d currentPose,
             Translation2d robotRelative) {
         return currentPose
