@@ -30,23 +30,19 @@ public class PoseEstimationHelper implements Glassy {
     }
 
     /**
-     * Converts camera rotation to an object to a robot relative translation,
-     * accounts for roll, pitch, and yaw offsets by using the unit circle. For roll,
-     * it takes the the angle between the pitch and yaw (roll) to the object and
-     * adds the offseted roll, then gets the Cos (x in unit circle) and multiples it
-     * by the norm, it does the same for yaw
+     * input is a 3d rotation representing the camera's view of an object on the floor.
+     * 
+     * output is the 2d robot-relative translation of the object.
      * 
      * returns empty for target at the horizon.
      */
     public static Optional<Translation2d> cameraRotationToRobotRelative(
             Transform3d cameraInRobotCoordinates,
-            Rotation3d yawPitch) {
-        // TODO: when the target is near the bore of the camera, this will yield strange
-        // results. the solution is to change how this works to use the library 3d
-        // transforms instead.
-        Rotation2d angleNoRollOffset = new Rotation2d(yawPitch.getZ(), yawPitch.getY());
+            Rotation3d sight) {
+  
+        Rotation2d angleNoRollOffset = new Rotation2d(sight.getZ(), sight.getY());
         Rotation2d angleWRoll = new Rotation2d(cameraInRobotCoordinates.getRotation().getX()).plus(angleNoRollOffset);
-        double normInCamera = Math.hypot(yawPitch.getZ(), yawPitch.getY());
+        double normInCamera = Math.hypot(sight.getZ(), sight.getY());
         Rotation3d rotToObject = new Rotation3d(0, angleWRoll.getSin() * normInCamera,
                 angleWRoll.getCos() * normInCamera);
         double robotRelativeAngle = (cameraInRobotCoordinates.getRotation().getY() + rotToObject.getY());
@@ -57,7 +53,7 @@ public class PoseEstimationHelper implements Glassy {
         double x = cameraInRobotCoordinates.getZ() / Math.tan(robotRelativeAngle);
         double y = x * Math.tan(rotToObject.getZ());
 
-        // TODO: this should not be a rotation2d object.
+    
         Rotation2d cameraRelativeTranslation = new Rotation2d(x, y);
 
         double znorm = Math.hypot(x, y);
@@ -74,35 +70,12 @@ public class PoseEstimationHelper implements Glassy {
     /**
      * Converts camera rotation to objects into field relative translations
      */
-    public static List<Translation2d> cameraRotsToFieldRelative(Pose2d currentPose,
-            Transform3d cameraInRobotCoordinates, List<Rotation3d> rots) {
+    public static List<Translation2d> cameraRotsToFieldRelativeArray(
+            Pose2d currentPose,
+            Transform3d cameraInRobotCoordinates,
+            Rotation3d[] rots) {
         ArrayList<Translation2d> Tnotes = new ArrayList<>();
-        for (Rotation3d note : rots)
-            if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
-                Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
-                        .cameraRotationToRobotRelative(
-                                cameraInRobotCoordinates,
-                                note);
-                if (cameraRotationRobotRelative.isEmpty())
-                    continue;
-                Translation2d fieldRealtiveTranslation = getFieldRelativeNote(currentPose, cameraRotationRobotRelative);
-                if (fieldRealtiveTranslation.getY() > -1 && fieldRealtiveTranslation.getX() > -1) {
-                    if (fieldRealtiveTranslation.getY() < 9.21 && fieldRealtiveTranslation.getX() < 17.54) {
-                        Tnotes.add(fieldRealtiveTranslation);
-                    }
-                }
-            }
-
-        return Tnotes;
-    }
-
-    /**
-     * Converts camera rotation to objects into field relative translations
-     */
-    public static List<Translation2d> cameraRotsToFieldRelativeArray(Pose2d currentPose,
-            Transform3d cameraInRobotCoordinates, Rotation3d[] rots) {
-        ArrayList<Translation2d> Tnotes = new ArrayList<>();
-        for (Rotation3d note : rots)
+        for (Rotation3d note : rots) {
             //
             // this appears to have filtered out very close poses, which i think is the
             // opposite of what it is supposed to do: avoid the horizon.
@@ -110,32 +83,31 @@ public class PoseEstimationHelper implements Glassy {
             // for it as of Jul 2024.
             // if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
             //
-            // filter out targets above the horizon:
-            if (note.getY() > -1.0 * cameraInRobotCoordinates.getRotation().getY()) {
-                Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
-                        .cameraRotationToRobotRelative(
-                                cameraInRobotCoordinates,
-                                note);
-                if (cameraRotationRobotRelative.isEmpty())
-                    continue;
-                Translation2d fieldRelativeNote = getFieldRelativeNote(
-                        currentPose,
-                        cameraRotationRobotRelative.get());
-                Tnotes.add(fieldRelativeNote);
-                if (fieldRelativeNote.getX() > 0 && fieldRelativeNote.getY() > 0) {
-                    if (fieldRelativeNote.getX() < 16.54 && fieldRelativeNote.getY() < 8.21) {
-                        // Tnotes.add(fieldRelativeNote);
-                    }
-                }
+            if (note.getY() <= -1.0 * cameraInRobotCoordinates.getRotation().getY()) {
+                // filter out targets above the horizon. note that the function below also does
+                // this same filtering, so maybe don't do it twice?
+                continue;
             }
+            Optional<Translation2d> robotRelative = PoseEstimationHelper
+                    .cameraRotationToRobotRelative(cameraInRobotCoordinates, note);
+            if (robotRelative.isEmpty()) {
+                continue;
+            }
+            Translation2d fieldRelativeNote = getFieldRelativeNote(
+                    currentPose,
+                    robotRelative.get());
+            Tnotes.add(fieldRelativeNote);
+        }
+
         return Tnotes;
     }
 
+    /** robot relative to field relative */
     static Translation2d getFieldRelativeNote(
             Pose2d currentPose,
-            Translation2d cameraRotationRobotRelative) {
+            Translation2d robotRelative) {
         return currentPose
-                .transformBy(new Transform2d(cameraRotationRobotRelative, new Rotation2d()))
+                .transformBy(new Transform2d(robotRelative, new Rotation2d()))
                 .getTranslation();
     }
 

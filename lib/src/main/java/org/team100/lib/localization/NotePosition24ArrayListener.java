@@ -11,6 +11,7 @@ import org.team100.lib.config.SimulatedCamera;
 import org.team100.lib.util.NotePicker;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,6 +26,8 @@ import edu.wpi.first.wpilibj.Timer;
 
 /** For testing the NotePosition struct array */
 public class NotePosition24ArrayListener {
+    /** Ignore sights older than this. */
+    private static final double kMaxSightAgeS = 0.1;
     private StructBuffer<Rotation3d> m_buf = StructBuffer.create(Rotation3d.struct);
     private List<Translation2d> notes = new ArrayList<>();
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
@@ -64,20 +67,21 @@ public class NotePosition24ArrayListener {
             if (b.length == 0) {
                 return;
             }
-            Rotation3d[] positions;
+            Rotation3d[] sights;
             try {
                 synchronized (m_buf) {
-                    positions = m_buf.readArray(b);
+                    sights = m_buf.readArray(b);
                     latestTime = Timer.getFPGATimestamp();
                 }
             } catch (RuntimeException ex) {
                 return;
             }
             Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
+            Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
             notes = PoseEstimationHelper.cameraRotsToFieldRelativeArray(
-                    m_poseEstimator.getEstimatedPosition().pose(),
+                    robotPose,
                     cameraInRobotCoordinates,
-                    positions);
+                    sights);
         } else {
             Util.warn("note weird vision update key: " + name);
         }
@@ -87,20 +91,23 @@ public class NotePosition24ArrayListener {
      * @return The translation of all the notes, field relative
      */
     public List<Translation2d> getTranslation2dArray() {
+        Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
         switch (Identity.instance) {
             case BLANK:
-                Transform3d cameraInRobotCoordinates = Camera.GAME_PIECE.getOffset();
-                SimulatedCamera simCamera = new SimulatedCamera(cameraInRobotCoordinates,
+                Transform3d simCameraInRobotCoordinates = Camera.GAME_PIECE.getOffset();
+                SimulatedCamera simCamera = new SimulatedCamera(simCameraInRobotCoordinates,
                         new Rotation3d(0, Math.toRadians(31.5), Math.toRadians(40)));
                 List<Rotation3d> rot = simCamera.getRotation(
-                        m_poseEstimator.getEstimatedPosition().pose(),
+                        robotPose,
                         NotePicker.autoNotes);
-                if (rot.isEmpty()) return new ArrayList<>();
-                return PoseEstimationHelper.cameraRotsToFieldRelative(
-                                m_poseEstimator.getEstimatedPosition().pose(),
-                                cameraInRobotCoordinates, rot);
+                if (rot.isEmpty())
+                    return new ArrayList<>();
+                return PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+                        robotPose,
+                        simCameraInRobotCoordinates,
+                        rot.toArray(new Rotation3d[0]));
             default:
-                if (latestTime > Timer.getFPGATimestamp() - 0.1) {
+                if (latestTime > Timer.getFPGATimestamp() - kMaxSightAgeS) {
                     return notes;
                 }
                 return new ArrayList<>();
@@ -111,13 +118,14 @@ public class NotePosition24ArrayListener {
      * @return The translation of all the closest note, field relative
      */
     public Optional<Translation2d> getClosestTranslation2d() {
+        Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
         return NotePicker.closestNote(
                 getTranslation2dArray(),
-                m_poseEstimator.getEstimatedPosition().pose());
+                robotPose);
     }
 
-    public Optional<Translation2d> getTranslation2dAuto(Translation2d noteID) {
-        return NotePicker.autoNotePick(getTranslation2dArray(), noteID);
+    public Optional<Translation2d> getTranslation2dAuto(Translation2d note) {
+        return NotePicker.autoNotePick(getTranslation2dArray(), note);
     }
 
     public void enable() {

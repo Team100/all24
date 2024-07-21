@@ -32,7 +32,9 @@ class SimulatedCameraTest {
         List<Rotation3d> actual = simCamera.getRotation(currentPose, array);
         assertEquals(arrayList, actual);
         assertEquals(
-                PoseEstimationHelper.cameraRotsToFieldRelative(currentPose, cameraInRobotCoordinates, actual),
+                PoseEstimationHelper.cameraRotsToFieldRelativeArray(
+                        currentPose, cameraInRobotCoordinates,
+                        actual.toArray(new Rotation3d[0])),
                 translationArrayList);
     }
 }

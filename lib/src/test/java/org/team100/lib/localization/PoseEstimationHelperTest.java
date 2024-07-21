@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -545,7 +546,7 @@ class PoseEstimationHelperTest {
             // camera at robot center, one meter high
             Transform3d cameraInRobotCoordinates = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
             Rotation3d[] rots = new Rotation3d[] {
-                    new Rotation3d(0, Math.PI / 4, Math.PI/4) // pitch 45 down, 45 to the left
+                    new Rotation3d(0, Math.PI / 4, Math.PI / 4) // pitch 45 down, 45 to the left
             };
             List<Translation2d> translations = PoseEstimationHelper.cameraRotsToFieldRelativeArray(
                     robotFieldRelative, cameraInRobotCoordinates, rots);
@@ -562,6 +563,50 @@ class PoseEstimationHelperTest {
         {
             Transform3d cameraInRobotCoordinates = new Transform3d(new Translation3d(0, 0, 1), new Rotation3d());
             Rotation3d note = new Rotation3d(0, Math.PI / 4, 0); // pitch 45 down, straight ahead
+            Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
+                    .cameraRotationToRobotRelative(
+                            cameraInRobotCoordinates,
+                            note);
+            assertTrue(cameraRotationRobotRelative.isPresent());
+            Translation2d t = cameraRotationRobotRelative.get();
+            assertEquals(1, t.getX(), kDelta);
+            assertEquals(0, t.getY(), kDelta);
+        }
+        {
+            Transform3d cameraInRobotCoordinates = new Transform3d(
+                    new Translation3d(0, 0, 1),
+                    new Rotation3d(0, Math.PI / 4, 0)); // pitch 45 down, straight ahead.
+            Rotation3d note = new Rotation3d(0, 0, 0); // on the camera bore
+            Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
+                    .cameraRotationToRobotRelative(
+                            cameraInRobotCoordinates,
+                            note);
+            assertTrue(cameraRotationRobotRelative.isPresent());
+            Translation2d t = cameraRotationRobotRelative.get();
+            assertEquals(1, t.getX(), kDelta);
+            assertEquals(0, t.getY(), kDelta);
+        }
+        {
+            // pitch 45 down, straight ahead, roll doesn't matter for this case.
+            Transform3d cameraInRobotCoordinates = new Transform3d(
+                    new Translation3d(0, 0, 1),
+                    new Rotation3d(1, Math.PI / 4, 0));
+            Rotation3d note = new Rotation3d(0, 0, 0); // on the camera bore
+            Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
+                    .cameraRotationToRobotRelative(
+                            cameraInRobotCoordinates,
+                            note);
+            assertTrue(cameraRotationRobotRelative.isPresent());
+            Translation2d t = cameraRotationRobotRelative.get();
+            assertEquals(1, t.getX(), kDelta);
+            assertEquals(0, t.getY(), kDelta);
+        }
+        {
+            // roll 90, pitch 45 down, straight ahead.
+            Transform3d cameraInRobotCoordinates = new Transform3d(
+                    new Translation3d(0, 0, 1),
+                    new Rotation3d(Math.PI / 2, Math.PI / 4, 0));
+            Rotation3d note = new Rotation3d(0, 0, -Math.PI / 4); // 45 right
             Optional<Translation2d> cameraRotationRobotRelative = PoseEstimationHelper
                     .cameraRotationToRobotRelative(
                             cameraInRobotCoordinates,
@@ -601,6 +646,122 @@ class PoseEstimationHelperTest {
             // since the robot is at the origin this doesn't do anything.
             assertEquals(1.707, t.getX(), kDelta);
             assertEquals(0.707, t.getY(), kDelta);
+        }
+    }
+
+    @Test
+    void testPose() {
+        // given a robot-relative camera offset and a camera-relative rotation,
+        // produce the corresponding robot-relative pose
+        {
+            Transform3d camera = new Transform3d(0, 0, 1, new Rotation3d(0, 0, 0));
+            // sight is on-bore
+            Rotation3d sight = new Rotation3d();
+            Transform3d sightTransform = new Transform3d(0, 0, 0, sight);
+            Transform3d cameraInverse = camera.inverse();
+            Pose3d sightPose = new Pose3d(new Translation3d(), sight);
+            // Pose3d robotRelative = sightPose.transformBy(camera);
+            Transform3d robotRelative = camera.plus(sightTransform);
+            // robot relative translation is the same as the camera translation
+            assertEquals(0, robotRelative.getX(), kDelta);
+            assertEquals(0, robotRelative.getY(), kDelta);
+            assertEquals(1, robotRelative.getZ(), kDelta);
+            // robot relative rotation is the same as the camera-relative translation since
+            // the camera is parallel
+            assertEquals(0, robotRelative.getRotation().getX(), kDelta);
+            assertEquals(0, robotRelative.getRotation().getY(), kDelta);
+            assertEquals(0, robotRelative.getRotation().getZ(), kDelta);
+        }
+        {
+            // camera is pitched down 45
+            Transform3d camera = new Transform3d(0, 0, 1, new Rotation3d(0, Math.PI / 4, 0));
+            // sight is on-bore
+            Rotation3d sight = new Rotation3d();
+            Transform3d sightTransform = new Transform3d(0, 0, 0, sight);
+            Transform3d cameraInverse = camera.inverse();
+            Pose3d sightPose = new Pose3d(new Translation3d(), sight);
+            // Pose3d robotRelative = sightPose.transformBy(camera);
+            Transform3d robotRelative = camera.plus(sightTransform);
+            // robot relative translation is the same as the camera translation
+            assertEquals(0, robotRelative.getX(), kDelta);
+            assertEquals(0, robotRelative.getY(), kDelta);
+            assertEquals(1, robotRelative.getZ(), kDelta);
+            // robot relative rotation is down 45
+            assertEquals(0, robotRelative.getRotation().getX(), kDelta);
+            assertEquals(Math.PI / 4, robotRelative.getRotation().getY(), kDelta);
+            assertEquals(0, robotRelative.getRotation().getZ(), kDelta);
+        }
+        {
+            // camera is pitched down 45
+            Transform3d camera = new Transform3d(0, 0, 1, new Rotation3d(0, Math.PI / 4, 0));
+            // sight is to the left
+            Rotation3d sight = new Rotation3d(0, 0, Math.PI / 4);
+            Transform3d sightTransform = new Transform3d(0, 0, 0, sight);
+            Transform3d cameraInverse = camera.inverse();
+            Pose3d sightPose = new Pose3d(new Translation3d(), sight);
+            // Pose3d robotRelative = sightPose.transformBy(camera);
+            Transform3d robotRelative = camera.plus(sightTransform);
+            // robot relative translation is the same as the camera translation
+            assertEquals(0, robotRelative.getX(), kDelta);
+            assertEquals(0, robotRelative.getY(), kDelta);
+            assertEquals(1, robotRelative.getZ(), kDelta);
+            // robot relative rotation is down 45 and left 45, which yields a roll
+            assertEquals(0.615, robotRelative.getRotation().getX(), kDelta);
+            // and less pitch
+            assertEquals(0.523, robotRelative.getRotation().getY(), kDelta);
+            // and more yaw
+            assertEquals(0.955, robotRelative.getRotation().getZ(), kDelta);
+        }
+        {
+            // camera is rolled 90 and pitched down 45
+            Transform3d camera = new Transform3d(0, 0, 1, new Rotation3d(Math.PI / 2, Math.PI / 4, 0));
+            // in camera sight is down 45 which means left 45 in the rotated frame
+            Rotation3d sight = new Rotation3d(0, Math.PI / 4, 0);
+            Transform3d sightTransform = new Transform3d(0, 0, 0, sight);
+            Transform3d cameraInverse = camera.inverse();
+            Pose3d sightPose = new Pose3d(new Translation3d(), sight);
+            // Pose3d robotRelative = sightPose.transformBy(camera);
+            Transform3d robotRelative = camera.plus(sightTransform);
+            // robot relative translation is the same as the camera translation
+            assertEquals(0, robotRelative.getX(), kDelta);
+            assertEquals(0, robotRelative.getY(), kDelta);
+            assertEquals(1, robotRelative.getZ(), kDelta);
+            // roll doesn't matter
+            assertEquals(2.186, robotRelative.getRotation().getX(), kDelta);
+            // pitch down
+            assertEquals(0.523, robotRelative.getRotation().getY(), kDelta);
+            // yaw as above
+            assertEquals(0.955, robotRelative.getRotation().getZ(), kDelta);
+        }
+    }
+
+    @Test
+    void testIntersection() {
+        {
+            // intersect a pose or transform or whatever with the xy plane.
+            // the transform is like a point (the translation part) and a vector (the
+            // rotation part)
+            // the robot-relative transform is from above, corresponding to 45 down and 45
+            // to the left (roll is irrelevant)
+            Transform3d robotRelative = new Transform3d(0, 0, 1, new Rotation3d(1, 0.523, 0.955));
+            double h = robotRelative.getZ();
+            double yaw = robotRelative.getRotation().getZ();
+            double pitch = robotRelative.getRotation().getY();
+            Translation2d t = new Translation2d(
+                    h * Math.cos(yaw) / Math.tan(pitch),
+                    h * Math.sin(yaw) / Math.tan(pitch));
+            // 1 meter up, 45 degrees down, means 1 meter away
+            assertEquals(1, t.getX(), kDelta);
+            // 45 to the left means sqrt(2) to the left.
+            assertEquals(1.419, t.getY(), kDelta);
+        }
+        {
+            // same using the library
+            Transform3d camera = new Transform3d(0, 0, 1, new Rotation3d(0, Math.PI / 4, 0));
+            Rotation3d sight = new Rotation3d(0, 0, Math.PI / 4);
+            Translation2d t = PoseEstimationHelper.cameraRotationToRobotRelative(camera, sight).get();
+            assertEquals(1, t.getX(), kDelta);
+            assertEquals(1.419, t.getY(), kDelta);
         }
     }
 

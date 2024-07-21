@@ -88,142 +88,52 @@ public class AutoMaker implements Glassy {
 
     private Translation2d getTranslation(Alliance m_alliance, FieldPoint point) {
         if (Experiments.instance.enabled(Experiment.AutoNoteDetection)) {
-            Translation2d pose;
-            Optional<Translation2d> translation2d;
-            switch (point) {
-                case NOTE1:
-                    pose = forAlliance(new Translation2d(2.8956, 7.0061), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
-                case NOTE2:
-                    pose = forAlliance(new Translation2d(2.8956, 5.5583), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
-                case NOTE3:
-                    pose = forAlliance(new Translation2d(2.8956, 4.1105), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
-                case NOTE4:
-                    pose = forAlliance(new Translation2d(8.271, 0.7577), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
-                case NOTE5:
-                    pose = forAlliance(new Translation2d(8.271, 2.4341), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
-                case NOTE6:
-                    pose = forAlliance(new Translation2d(8.271, 4.1105), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
-                case NOTE7:
-                    pose = forAlliance(new Translation2d(8.271, 5.7869), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
-                case NOTE8:
-                    pose = forAlliance(new Translation2d(8.271, 7.4633), m_alliance);
-                    translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
-                    if (translation2d.isPresent()) {
-                        return translation2d.get();
-                    }
-                    return pose;
-                case CLOSEWINGSHOT:
-                    pose = forAlliance(new Translation2d(5.87248, 6.4), m_alliance);
-                    return pose;
-                case FARWINGSHOT:
-                    pose = forAlliance(new Translation2d(4, 1.5), m_alliance);
-                    return pose;
-                case STAGESHOT:
-                    pose = forAlliance(new Translation2d(4.25, 5), m_alliance);
-                    return pose;
-                case CENTRALSTAGEOPENING:
-                    pose = forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
-                    return pose;
-                case FARSTAGEOPENING:
-                    pose = forAlliance(new Translation2d(4.3, 3.3), m_alliance);
-                    return pose;
-                case DROPSHOT:
-                    pose = forAlliance(new Translation2d(.5, 1.8), m_alliance);
-                    return pose;
-                case DRIVETONOTEHANDOFF:
-                    pose = forAlliance(new Translation2d(6.2, 7.8), m_alliance);
-                    return pose;
-                default:
-                    return new Translation2d();
-            }
+            return switch (point) {
+                case NOTE1 -> findForAlliance(new Translation2d(2.8956, 7.0061), m_alliance);
+                case NOTE2 -> findForAlliance(new Translation2d(2.8956, 5.5583), m_alliance);
+                case NOTE3 -> findForAlliance(new Translation2d(2.8956, 4.1105), m_alliance);
+                case NOTE4 -> findForAlliance(new Translation2d(8.271, 0.7577), m_alliance);
+                case NOTE5 -> findForAlliance(new Translation2d(8.271, 2.4341), m_alliance);
+                case NOTE6 -> findForAlliance(new Translation2d(8.271, 4.1105), m_alliance);
+                case NOTE7 -> findForAlliance(new Translation2d(8.271, 5.7869), m_alliance);
+                case NOTE8 -> findForAlliance(new Translation2d(8.271, 7.4633), m_alliance);
+                case CLOSEWINGSHOT -> forAlliance(new Translation2d(5.87248, 6.4), m_alliance);
+                case FARWINGSHOT -> forAlliance(new Translation2d(4, 1.5), m_alliance);
+                case STAGESHOT -> forAlliance(new Translation2d(4.25, 5), m_alliance);
+                case CENTRALSTAGEOPENING -> forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
+                case FARSTAGEOPENING -> forAlliance(new Translation2d(4.3, 3.3), m_alliance);
+                case DROPSHOT -> forAlliance(new Translation2d(.5, 1.8), m_alliance);
+                case DRIVETONOTEHANDOFF -> forAlliance(new Translation2d(6.2, 7.8), m_alliance);
+                default -> new Translation2d();
+            };
         }
-        switch (point) {
-            case NOTE1:
-                return forAlliance(new Translation2d(2.8956, 7.0061), m_alliance); // 7.0061
-            case NOTE2:
-                return forAlliance(new Translation2d(2.8956, 5.5583), m_alliance);
-            case NOTE3:
-                return forAlliance(new Translation2d(2.8956, 4.1105), m_alliance); // 2.6956, 4.2105
-            case NOTE4:
-                return forAlliance(new Translation2d(8.271, 0.75), m_alliance); // WAS 0.75
-            case NOTE5:
-                return forAlliance(new Translation2d(8.271, 2.4341), m_alliance);
-            case NOTE6:
-                return forAlliance(new Translation2d(8.271, 4.1105), m_alliance);
-            case NOTE7:
-                return forAlliance(new Translation2d(8.271, 5.7869), m_alliance);
-            case NOTE8:
-                return forAlliance(new Translation2d(8.2, 7.6), m_alliance); // WAS 7.4 //8.4 fudge
-            case CLOSEWINGSHOT:
-                return forAlliance(new Translation2d(3, 6.4), m_alliance);
-            case FARWINGSHOT:
-                return forAlliance(new Translation2d(4, 1.5), m_alliance);
-            case STAGESHOT:
-                return forAlliance(new Translation2d(4.25, 5), m_alliance);
-            case CENTRALSTAGEOPENING:
-                return forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
-            case FARSTAGEOPENING:
-                return forAlliance(new Translation2d(4.3, 3.3), m_alliance);
-            case FARSTAGEADJACENT:
-                return forAlliance(new Translation2d(5.87248, 1.9), m_alliance);
-            case CLOSESTAGEADJACENT:
-                return forAlliance(new Translation2d(5.87248, 6.45), m_alliance);
-            case DROPSHOT:
-                return forAlliance(new Translation2d(.5, 1.8), m_alliance);
-            case STARTSUBWOOFER:
-                return forAlliance(new Translation2d(1.38, 5.566847), m_alliance);
-            case DRIVETONOTEHANDOFF:
-                return forAlliance(new Translation2d(4.9, 7.5), m_alliance);
-            case CITRUSMID:
-                return forAlliance(new Translation2d(3.269011, 1.306543), m_alliance);
-            case CITRUSEND:
-                return forAlliance(new Translation2d(6.964483, 1.476407), m_alliance);
-            case CITRUSBEGIN:
-                return forAlliance(new Translation2d(0.865358, 4.215958), m_alliance);
-            case COMPLEMENTBEGIN:
-                return forRedAlliance(new Translation2d(0.663879, 3.917024), m_alliance);
-            case COMPLEMENTSHOOT:
-                return forRedAlliance(new Translation2d(3.47, 5.06), m_alliance); // 3.183978, 4.8
-            case COMPLEMENTSHOOT2:
-                return forRedAlliance(new Translation2d(3.94, 2.94), m_alliance);
-            default:
-                return new Translation2d();
-        }
+        return switch (point) {
+            case NOTE1 -> forAlliance(new Translation2d(2.8956, 7.0061), m_alliance);
+            case NOTE2 -> forAlliance(new Translation2d(2.8956, 5.5583), m_alliance);
+            case NOTE3 -> forAlliance(new Translation2d(2.8956, 4.1105), m_alliance);// 2.6956, 4.2105
+            case NOTE4 -> forAlliance(new Translation2d(8.271, 0.75), m_alliance);
+            case NOTE5 -> forAlliance(new Translation2d(8.271, 2.4341), m_alliance);
+            case NOTE6 -> forAlliance(new Translation2d(8.271, 4.1105), m_alliance);
+            case NOTE7 -> forAlliance(new Translation2d(8.271, 5.7869), m_alliance);
+            case NOTE8 -> forAlliance(new Translation2d(8.2, 7.6), m_alliance);// WAS 7.4 //8.4 fudge
+            case CLOSEWINGSHOT -> forAlliance(new Translation2d(3, 6.4), m_alliance);
+            case FARWINGSHOT -> forAlliance(new Translation2d(4, 1.5), m_alliance);
+            case STAGESHOT -> forAlliance(new Translation2d(4.25, 5), m_alliance);
+            case CENTRALSTAGEOPENING -> forAlliance(new Translation2d(5.87248, 4.1105), m_alliance);
+            case FARSTAGEOPENING -> forAlliance(new Translation2d(4.3, 3.3), m_alliance);
+            case FARSTAGEADJACENT -> forAlliance(new Translation2d(5.87248, 1.9), m_alliance);
+            case CLOSESTAGEADJACENT -> forAlliance(new Translation2d(5.87248, 6.45), m_alliance);
+            case DROPSHOT -> forAlliance(new Translation2d(.5, 1.8), m_alliance);
+            case STARTSUBWOOFER -> forAlliance(new Translation2d(1.38, 5.566847), m_alliance);
+            case DRIVETONOTEHANDOFF -> forAlliance(new Translation2d(4.9, 7.5), m_alliance);
+            case CITRUSMID -> forAlliance(new Translation2d(3.269011, 1.306543), m_alliance);
+            case CITRUSEND -> forAlliance(new Translation2d(6.964483, 1.476407), m_alliance);
+            case CITRUSBEGIN -> forAlliance(new Translation2d(0.865358, 4.215958), m_alliance);
+            case COMPLEMENTBEGIN -> forRedAlliance(new Translation2d(0.663879, 3.917024), m_alliance);
+            case COMPLEMENTSHOOT -> forRedAlliance(new Translation2d(3.47, 5.06), m_alliance);// 3.183978, 4.8
+            case COMPLEMENTSHOOT2 -> forRedAlliance(new Translation2d(3.94, 2.94), m_alliance);
+            default -> new Translation2d();
+        };
     }
 
     private Pose2d getPose(Alliance alliance, FieldPoint point) {
@@ -257,6 +167,12 @@ public class AutoMaker implements Glassy {
             default:
                 return new Pose2d(translation.plus(new Translation2d(-kIntakeOffset, 0)), heading);
         }
+    }
+
+    Translation2d findForAlliance(Translation2d translation, Alliance alliance) {
+        Translation2d pose = forAlliance(translation, alliance);
+        Optional<Translation2d> translation2d = m_notePosition24ArrayListener.getTranslation2dAuto(pose);
+        return translation2d.orElse(pose);
     }
 
     public Translation2d forAlliance(Translation2d translation, Alliance alliance) {
