@@ -107,7 +107,9 @@ public class SwerveDriveKinematics100 {
         }
         m_inverseKinematics = inverseMatrix(m_moduleLocations);
         m_forwardKinematics = m_inverseKinematics.pseudoInverse();
-        m_moduleHeadings = zeros(m_numModules);
+        // try to avoid startup transient
+        // m_moduleHeadings = zeros(m_numModules);
+        m_moduleHeadings = nulls(m_numModules);
     }
 
     /**
@@ -550,6 +552,13 @@ public class SwerveDriveKinematics100 {
     private static Rotation2d[] zeros(int numModules) {
         Rotation2d[] moduleHeadings = new Rotation2d[numModules];
         Arrays.fill(moduleHeadings, new Rotation2d());
+        return moduleHeadings;
+    }
+
+    /** Module headings null to start to avoid transients? */
+    private static Rotation2d[] nulls(int numModules) {
+        Rotation2d[] moduleHeadings = new Rotation2d[numModules];
+        Arrays.fill(moduleHeadings, null);
         return moduleHeadings;
     }
 

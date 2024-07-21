@@ -84,7 +84,8 @@ public enum Experiment {
      */
     OutboardSteering,
     /**
-     * Use dashpot and jerk limiting
+     * Use low-pass filter and deadbanding on controller feedback, to prevent
+     * overresponse to noise and jitter around zero.
      */
-    FancyProfile
+    FilterFeedback
 }

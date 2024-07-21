@@ -5,7 +5,6 @@ import java.util.OptionalDouble;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.SupplierLogger;
 
 /**
@@ -28,15 +27,14 @@ public class AmpState extends Command100 {
             SupplierLogger parent,
             AmpPivot pivot,
             State100 goal,
-            double maxVelRad_S,
-            double maxAccelRad_S2,
+            Profile100 profile,
             double torqueLimit,
             double toleranceRad,
             boolean hold) {
         super(parent);
         m_pivot = pivot;
         m_goal = goal;
-        m_profile = new TrapezoidProfile100(maxVelRad_S, maxAccelRad_S2, toleranceRad);
+        m_profile = profile;
         m_torqueLimit = torqueLimit;
         m_toleranceRad = toleranceRad;
         m_hold = hold;

@@ -1,6 +1,7 @@
 package org.team100.lib.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
@@ -50,10 +51,10 @@ class SlipperyTireUtilTest {
         // i think the idea is that this angle would be fixed
         // during the whole time?
         SwerveModuleState100[] states = kinematics.toSwerveModuleStates(speeds);
-        check(0, 0, states[0]);
-        check(0, 0, states[1]);
-        check(0, 0, states[2]);
-        check(0, 0, states[3]);
+        checkEmpty(states[0]);
+        checkEmpty(states[1]);
+        checkEmpty(states[2]);
+        checkEmpty(states[3]);
 
         // position is also an angle, maybe ignore it
         SwerveModulePosition100[] position0 = new SwerveModulePosition100[] {
@@ -75,10 +76,10 @@ class SlipperyTireUtilTest {
                     position0[i].distanceMeters + states[i].speedMetersPerSecond * dtSeconds,
                     states[i].angle);
         }
-        check(0, 0, position1[0], kDelta);
-        check(0, 0, position1[1], kDelta);
-        check(0, 0, position1[2], kDelta);
-        check(0, 0, position1[3], kDelta);
+        checkEmpty(position1[0]);
+        checkEmpty(position1[1]);
+        checkEmpty(position1[2]);
+        checkEmpty(position1[3]);
 
         SwerveModulePosition100[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 position0,
@@ -329,7 +330,18 @@ class SlipperyTireUtilTest {
             double degrees,
             SwerveModuleState100 state) {
         assertEquals(metersPerSecond, state.speedMetersPerSecond, kDelta);
-        assertEquals(degrees, state.angle.get().getDegrees(), kDelta);
+        Optional<Rotation2d> angle = state.angle;
+        assertEquals(degrees, angle.get().getDegrees(), kDelta);
+    }
+
+    void checkEmpty(SwerveModuleState100 state) {
+        assertEquals(0, state.speedMetersPerSecond, kDelta);
+        assertTrue(state.angle.isEmpty());
+    }
+
+    void checkEmpty(SwerveModulePosition100 state) {
+        assertEquals(0, state.distanceMeters, kDelta);
+        assertTrue(state.angle.isEmpty());
     }
 
     void check(

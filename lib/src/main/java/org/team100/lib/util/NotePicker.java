@@ -27,18 +27,23 @@ public class NotePicker {
     };
 
     /**
-     * @param notes  the field relative pose of detected notes
-     * @param noteID the field id of the note you want to go for, left bottom to
-     *               right top IDs are 1-11
+     * @param notes  the field relative translations of detected notes
+     * @param noteID the field-relative translation of the note you want
      * @return The field relative translation of the note you want to go for
      */
-    public static Optional<Translation2d> autoNotePick(List<Translation2d> notes, Translation2d noteID) {
+    public static Optional<Translation2d> autoNotePick(
+            List<Translation2d> notes,
+            Translation2d noteID) {
         if (notes.isEmpty()) {
             return Optional.empty();
         }
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
         for (Translation2d note : notes) {
+            if (note.getY() < -1 || note.getX() < -1 || note.getY() > 9.21 || note.getX() > 17.54) {
+                // ignore out-of-bounds
+                continue;
+            }
             Translation2d fieldNote = noteID;
             Translation2d difference = note.minus(fieldNote);
             if (Math.abs(difference.getX()) < 1 && Math.abs(difference.getY()) < 1) {
@@ -57,7 +62,9 @@ public class NotePicker {
      * @param noteID the translation of note you want
      * @return The field relative translation of the note you want to go for
      */
-    public static Optional<Translation2d> autoNotePick(List<Translation2d> notes, int noteID) {
+    public static Optional<Translation2d> autoNotePick(
+            List<Translation2d> notes,
+            int noteID) {
         if (notes.isEmpty()) {
             return Optional.empty();
         }
@@ -78,18 +85,25 @@ public class NotePicker {
     }
 
     /**
-     * @param notes      the field relative pose of detected notes
-     * @param swervePose the pose of the swerve drivetrain
-     * @return The field relative translation of the closest note, or empty if none nearby
+     * @param notes     the field relative pose of detected notes
+     * @param robotPose the pose of the swerve drivetrain
+     * @return The field relative translation of the closest note, or empty if none
+     *         nearby
      */
-    public static Optional<Translation2d> closestNote(List<Translation2d> notes, Pose2d swervePose) {
+    public static Optional<Translation2d> closestNote(
+            List<Translation2d> notes,
+            Pose2d robotPose) {
         if (notes.isEmpty()) {
             return Optional.empty();
         }
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
         for (Translation2d note : notes) {
-            double difference = Math.abs(note.minus(swervePose.getTranslation()).getNorm());
+            if (note.getY() < -1 || note.getX() < -1 || note.getY() > 9.21 || note.getX() > 17.54) {
+                // ignore out-of-bounds
+                continue;
+            }
+            double difference = Math.abs(note.minus(robotPose.getTranslation()).getNorm());
             if (difference < bestNote) {
                 bestNote = difference;
                 bestNoteTranslation = Optional.of(note);

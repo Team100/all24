@@ -15,7 +15,9 @@ public interface GravityServoInterface extends Glassy {
     OptionalDouble getPositionRad();
 
     /** set position with zero velocity */
-    void setPosition(double goalRad);
+    default void setPosition(double goalRad) {
+        setState(new State100(goalRad, 0));
+    }
 
     /** allow moving end-state */
     void setState(State100 goal);

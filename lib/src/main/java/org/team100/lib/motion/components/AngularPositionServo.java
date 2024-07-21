@@ -20,6 +20,8 @@ public interface AngularPositionServo extends Glassy {
 
     void setProfile(Profile100 profile);
 
+    void setTorqueLimit(double torqueNm);
+
     /**
      * The angle measure here *does not* wind up, so 0 and 2pi are the same.
      * 
