@@ -8,8 +8,12 @@ distributions {
         distributionBaseName = 'app'
         contents {
             from ('app') {
-                exclude '**/__pycache__'
-            }  
+                into('/app')
+            }
+            from ('app2') {
+                into('/app2')
+            }
+            exclude '**/__pycache__'
         }
     }
 }
