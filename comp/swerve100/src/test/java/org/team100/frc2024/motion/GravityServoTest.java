@@ -7,6 +7,8 @@ import org.team100.frc2024.Timeless2024;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.SupplierLogger;
@@ -20,9 +22,9 @@ class GravityServoTest implements Timeless2024 {
 
     @Test
     void testSetPosition() {
-        PIDController pivotController = new PIDController(4.5, 0.0, 0.000);
-        TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         double period = 0.02;
+        PIDController pivotController = new PIDController(4.5, 0.0, 0.000, period);
+        TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         // motor speed is rad/s
         SimulatedBareMotor simMotor = new SimulatedBareMotor(logger, 600);
         RotaryMechanism simMech = new RotaryMechanism(
@@ -34,12 +36,18 @@ class GravityServoTest implements Timeless2024 {
                 logger,
                 simMech);
 
-        GravityServoInterface g = new GravityServo(
-                simMech,
+
+        AngularPositionServo servo = new OnboardAngularPositionServo(
                 logger,
-                pivotController,
-                period,
-                simEncoder);
+                simMech,
+                simEncoder,
+                8,
+                pivotController);
+        servo.setProfile(profile);
+        servo.reset();
+
+        GravityServoInterface g = new GravityServo2(
+                servo, 5.0, 0.0);
         g.setProfile(profile);
         // start at zero
         assertEquals(0, g.getPositionRad().getAsDouble(), kDelta);
@@ -47,10 +55,11 @@ class GravityServoTest implements Timeless2024 {
         for (int i = 0; i < 70; ++i) {
             g.setPosition(1);
             stepTime(0.02);
+            System.out.printf("%5.3f\n", g.getPositionRad().getAsDouble());
+
         }
         // this overshoots a little, i think maybe because of the slight lag in
         // measurement.
-        assertEquals(1.002, g.getPositionRad().getAsDouble(), kDelta);
+        assertEquals(1.0004, g.getPositionRad().getAsDouble(), kDelta);
     }
-
 }

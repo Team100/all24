@@ -24,9 +24,10 @@ import edu.wpi.first.math.filter.LinearFilter;
  * Note there is no "friction" term here since it uses the motor velocity
  * setter.
  */
+@Deprecated // TODO: remove this after testing
 public class GravityServo implements GravityServoInterface {
     private static final double kFeedbackDeadbandRad_S = 0.01;
-    /** Max gravity torque, "" */
+    /** Max gravity torque */
     private static final double kGravityNm = 5.0;
 
     /** Offset from horizontal */
@@ -43,7 +44,7 @@ public class GravityServo implements GravityServoInterface {
     private State100 m_setpointRad = new State100(0, 0);
 
     /** Smooth out the feedback output */
-    private LinearFilter m_filter = LinearFilter.singlePoleIIR(0.02, 0.02);
+    private final LinearFilter m_filter = LinearFilter.singlePoleIIR(0.02, 0.02);
 
     /** Remember to set a profile! */
     public GravityServo(
@@ -55,7 +56,6 @@ public class GravityServo implements GravityServoInterface {
         m_mech = motor;
         m_logger = parent.child(this);
         m_controller = controller;
-        m_controller.setTolerance(0.02);
         m_period = period;
         m_encoder = encoder;
     }
@@ -80,12 +80,6 @@ public class GravityServo implements GravityServoInterface {
 
     public OptionalDouble getVelocityRad_S() {
         return m_mech.getVelocityRad_S();
-    }
-
-    /** set position with zero velocity */
-    @Override
-    public void setPosition(double goalRad) {
-        setState(new State100(goalRad, 0));
     }
 
     /** allow moving end-state */
@@ -113,8 +107,6 @@ public class GravityServo implements GravityServoInterface {
 
         m_mech.setVelocity(u_TOTAL, m_setpointRad.a(), gravityTorqueNm);
 
-        m_controller.setIntegratorRange(0, 0.1);
-
         m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
         m_logger.logDouble(Level.TRACE, "gravity T", () -> gravityTorqueNm);
         m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
@@ -122,7 +114,6 @@ public class GravityServo implements GravityServoInterface {
         m_logger.logDouble(Level.TRACE, "Measurement velocity (rad_s)", () -> mechanismVelocityRad_S);
         m_logger.logState100(Level.TRACE, "Goal (rad)", () -> goal);
         m_logger.logState100(Level.TRACE, "Setpoint (rad)", () -> m_setpointRad);
-        m_logger.logDouble(Level.TRACE, "Setpoint Velocity", m_setpointRad::v);
         m_logger.logDouble(Level.TRACE, "Controller Position Error (rad)", m_controller::getPositionError);
         m_logger.logDouble(Level.TRACE, "Controller Velocity Error (rad_s)", m_controller::getVelocityError);
     }

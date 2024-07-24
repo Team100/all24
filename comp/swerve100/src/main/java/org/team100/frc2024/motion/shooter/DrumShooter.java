@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.shooter;
 
 import java.util.OptionalDouble;
 
-import org.team100.frc2024.motion.GravityServo;
+import org.team100.frc2024.motion.GravityServo2;
 import org.team100.frc2024.motion.GravityServoInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
@@ -17,7 +17,9 @@ import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
+import org.team100.lib.motion.components.OnboardAngularPositionServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.CANSparkMotor;
@@ -78,9 +80,11 @@ public class DrumShooter extends SubsystemBase implements Glassy {
             double statorLimit) {
         m_logger = parent.child(this);
 
-        PIDController pivotController = new PIDController(4.5, 0.0, 0.000);
-        TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         double period = 0.02;
+        PIDController pivotController = new PIDController(4.5, 0.0, 0.000, period);
+        pivotController.setTolerance(0.02);
+        pivotController.setIntegratorRange(0, 0.1);
+        TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
 
         SupplierLogger leftLogger = m_logger.child("Left");
         SupplierLogger rightLogger = m_logger.child("Right");
@@ -140,12 +144,21 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         kPivotReduction);
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(pivotLogger, 0, 0.508753,
                         EncoderDrive.DIRECT);
-                pivotServo = new GravityServo(
-                        pivotMech,
-                        pivotLogger,
-                        pivotController,
-                        period,
-                        encoder);
+
+                // pivotServo = new GravityServo(
+                // pivotMech,
+                // pivotLogger,
+                // pivotController,
+                // period,
+                // encoder);
+
+                AngularPositionServo pivotAngleServo = new OnboardAngularPositionServo(
+                        pivotLogger, pivotMech, encoder,
+                        10, // TODO: remove this
+                        pivotController);
+                pivotServo = new GravityServo2(pivotAngleServo,
+                        5.0, // TODO: tune this
+                        0.0);
                 pivotServo.setProfile(profile);
                 break;
             default:
@@ -174,12 +187,22 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         pivotLogger,
                         simMech);
-                pivotServo = new GravityServo(
-                        simMech,
-                        pivotLogger,
-                        pivotController,
-                        period,
-                        simEncoder);
+
+                // pivotServo = new GravityServo(
+                // simMech,
+                // pivotLogger,
+                // pivotController,
+                // period,
+                // simEncoder);
+
+                AngularPositionServo simPivotAngleServo = new OnboardAngularPositionServo(
+                        pivotLogger, simMech, simEncoder,
+                        10, // TODO: remove this
+                        pivotController);
+                pivotServo = new GravityServo2(simPivotAngleServo,
+                        5.0, // TODO: tune this
+                        0.0);
+
                 pivotServo.setProfile(profile);
         }
     }

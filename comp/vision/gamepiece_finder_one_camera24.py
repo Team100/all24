@@ -168,10 +168,15 @@ class GamePieceFinder:
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
 
-            pitchRad = math.atan((cY-self.height/2)/self.mtx[1,1])
-            yawRad = math.atan((self.width/2-cX)/self.mtx[0,0])
+            yNormalized = (cY-self.height/2)/self.mtx[1,1]
+            zNormalized = (self.width/2-cX)/self.mtx[0,0]
+            # pitchRad = math.atan(yNormalized)
+            # yawRad = math.atan(zNormalized)
             # Puts up angle to the target from the POV of the camera
-            rotation = Rotation3d(0, pitchRad, yawRad)
+            # these are not extrinsic euler angles; this is wrong.
+            # rotation = Rotation3d(0, pitchRad, yawRad)
+            # the correct rotation is one that matches the normalized (x,y) coordinates
+            rotation = Rotation3d(initial=np.array([1, 0, 0]), final=np.array([1, yNormalized, zNormalized]))
             objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
         img_output = cv2.resize(img_bgr, (269,162)) 

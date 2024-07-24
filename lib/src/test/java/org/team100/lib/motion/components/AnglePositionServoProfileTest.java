@@ -49,7 +49,8 @@ class AnglePositionServoProfileTest {
 
     /**
      * Profile invariant to support refactoring the servo. This is the WPILib
-     * TrapezoidalProfile.
+     * TrapezoidalProfile. This only works with
+     * {@link org.team100.lib.experiments.Experiment.FilterFeedback} off.
      */
     @Test
     void testProfile() {

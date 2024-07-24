@@ -44,10 +44,6 @@ public enum Experiment {
      */
     DriveToNoteWithRotation,
     /**
-     * Use note detection in auto
-     */
-    AutoNoteDetection,
-    /**
      * Use full state feedback for trajectory following
      */
     FullStateTrajectoryFollower,
@@ -84,7 +80,8 @@ public enum Experiment {
      */
     OutboardSteering,
     /**
-     * Use dashpot and jerk limiting
+     * Use low-pass filter and deadbanding on controller feedback, to prevent
+     * overresponse to noise and jitter around zero.
      */
-    FancyProfile
+    FilterFeedback
 }

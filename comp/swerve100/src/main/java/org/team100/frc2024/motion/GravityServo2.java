@@ -5,17 +5,26 @@ import java.util.OptionalDouble;
 import org.team100.lib.controller.State100;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.util.Util;
 
 /**
  * Wraps an angular position servo, supplying it with the correct feed forward
- * torque for gravity compensation
+ * torque for gravity compensation.
  */
 public class GravityServo2 implements GravityServoInterface {
     private final AngularPositionServo m_servo;
+    /** Max gravity torque, newton-meters */
+    private final double m_gravityNm; // = 5.0;
+    /** Offset from horizontal */
+    private final double m_offsetRad; // = 0.0;
 
     public GravityServo2(
-            AngularPositionServo servo) {
+            AngularPositionServo servo,
+            double gravityNm,
+            double offsetRad) {
         m_servo = servo;
+        m_gravityNm = gravityNm;
+        m_offsetRad = offsetRad;
     }
 
     @Override
@@ -29,15 +38,15 @@ public class GravityServo2 implements GravityServoInterface {
     }
 
     @Override
-    public void setPosition(double goalRad) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPosition'");
-    }
-
-    @Override
     public void setState(State100 goal) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setState'");
+        OptionalDouble optPos = getPositionRad();
+        if (optPos.isEmpty()) {
+            Util.warn("GravityServo: Broken sensor!");
+            return;
+        }
+        double mechanismPositionRad = optPos.getAsDouble();
+        final double gravityTorqueNm = m_gravityNm * Math.cos(mechanismPositionRad + m_offsetRad);
+        m_servo.setPositionWithVelocity(goal.x(), goal.v(), gravityTorqueNm);
     }
 
     @Override
@@ -52,14 +61,12 @@ public class GravityServo2 implements GravityServoInterface {
 
     @Override
     public void setTorqueLimit(double torqueNm) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setTorqueLimit'");
+        m_servo.setTorqueLimit(torqueNm);
     }
 
     @Override
     public void periodic() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'periodic'");
+        m_servo.periodic();
     }
 
 }

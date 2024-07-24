@@ -36,6 +36,12 @@ public class SelectableAngularPositionServo implements AngularPositionServo {
     }
 
     @Override
+    public void setTorqueLimit(double torqueNm) {
+        m_whenTrue.setTorqueLimit(torqueNm);
+        m_whenFalse.setTorqueLimit(torqueNm);
+    }
+
+    @Override
     public void setPositionWithVelocity(double goal, double goalVelocity, double feedForwardTorqueNm) {
         if (m_selector.getAsBoolean()) {
             m_whenTrue.setPositionWithVelocity(goal, goalVelocity, feedForwardTorqueNm);
