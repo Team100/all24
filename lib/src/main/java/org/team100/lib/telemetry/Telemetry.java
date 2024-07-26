@@ -1,5 +1,7 @@
 package org.team100.lib.telemetry;
 
+import com.ctre.phoenix6.SignalLogger;
+
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 /**
@@ -69,6 +71,8 @@ public class Telemetry {
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
         // DataLogManager.start();
+        // turn off the CTRE log we never use
+        SignalLogger.enableAutoLogging(false);
     }
 
     public LoadShedder getLoadShedder() {
