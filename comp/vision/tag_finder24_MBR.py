@@ -18,6 +18,7 @@ import robotpy_apriltag
 
 from cscore import CameraServer
 from picamera2 import Picamera2
+from picamera2.request import _MappedBuffer
 from wpimath.geometry import Transform3d
 from wpiutil import wpistruct
 
@@ -31,6 +32,7 @@ class Blip24:
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
+
     # TODO get correct serial numbers for Delta
     A = "10000000caeaae82"  # "BETA FRONT"
     # B = "1000000013c9c96c"  # "BETA BACK"
@@ -51,7 +53,7 @@ class Camera(Enum):
 
 class TagFinder:
     def __init__(self, serial, width, height, model):
-        self.frame_time = time.time()
+        self.frame_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
         # the cpu serial number
         self.serial = serial
         self.width = width
@@ -119,19 +121,10 @@ class TagFinder:
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
-    #def analyze(self, request):
     def analyze(self, metadata, buffer):
         # how old is the frame when we receive it?
-        # sensor timestamp is the boottime when the first byte was received from the sensor
-        sensor_timestamp = metadata["SensorTimestamp"]
         received_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
-        fetch_time_ms = (received_time - sensor_timestamp) // 1000000
 
-        # how long does it take to copy the buffer?  about 0.7 ms.
-        # capture_start = time.time()
-        # buffer = request.make_buffer("lores")
-        # capture_duration = time.time() - capture_start
-        # metadata = request.get_metadata()
 
         y_len = self.width * self.height
 
@@ -152,9 +145,15 @@ class TagFinder:
         else:        
             img = img[: self.height, : self.width]
 
-        img = cv2.undistort(img, self.mtx, self.dist)
+        # TODO: undistorting is too slow.
+        # instead, use undistortPoints.
+        # img = cv2.undistort(img, self.mtx, self.dist)
+
+        undistort_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
 
         result = self.at_detector.detect(img)
+
+        detect_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
 
         blips = []
         for result_item in result:
@@ -165,32 +164,39 @@ class TagFinder:
             # TODO: turn this off for prod
             self.draw_result(img, result_item, pose)
 
+        estimate_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+
         # compute time since last frame
-        current_time = time.time()
-        total_et = current_time - self.frame_time
+        current_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+        total_time_ms = (current_time - self.frame_time) // 1000000
+        # total_et = current_time - self.frame_time
         self.frame_time = current_time
 
-        fps = 1 / total_et
+        sensor_timestamp = metadata["SensorTimestamp"]
+        image_age_ms = (received_time - sensor_timestamp) // 1000000
+        undistort_time_ms = (undistort_time - received_time) // 1000000
+        detect_time_ms = (detect_time - undistort_time) // 1000000
+        estimate_time_ms = (estimate_time - detect_time) // 1000000
+        # oldest_pixel_ms = (system_time_ns - (sensor_timestamp - 1000 * metadata["ExposureTime"])) // 1000000
+        # sensor timestamp is the boottime when the first byte was received from the sensor
 
         self.vision_nt_struct.set(blips)
-        self.vision_fps.set(fps)
-
-
-        # the time it took to do the detection work
-        work_time_ms = (time.clock_gettime_ns(time.CLOCK_BOOTTIME) - received_time) // 1000000
-        # oldest_pixel_ms = (system_time_ns - (sensor_timestamp - 1000 * metadata["ExposureTime"])) // 1000000
-        self.vision_latency.set(fetch_time_ms + work_time_ms)
+        self.vision_total_time_ms.set(total_time_ms)
+        self.vision_image_age_ms.set(image_age_ms)
+        self.vision_detect_time_ms.set(detect_time_ms)
 
         # must flush!  otherwise 100ms update rate.
         self.inst.flush()
 
         # now do the drawing (after the NT payload is written)
         # none of this is particularly fast or important for prod,
-        # TODO: consider disabling it after dev is done
-        self.draw_text(img, f"fps {fps:.1f}", (5, 65))
-        self.draw_text(img, f"fetch (ms) {fetch_time_ms:.0f}", (5, 105))
-        self.draw_text(img, f"work (ms) {work_time_ms:.0f}", (5, 145))
-        # self.draw_text(img, f"buffer {(capture_duration*1000):.3f}", (5, 185))
+
+        # self.draw_text(img, f"fps {fps:.1f}", (5, 65))
+        self.draw_text(img, f"total (ms) {total_time_ms:.0f}", (5, 65))
+        self.draw_text(img, f"age (ms) {image_age_ms:.0f}", (5, 105))
+        self.draw_text(img, f"undistort (ms) {undistort_time_ms:.0f}", (5, 145))
+        self.draw_text(img, f"detect (ms) {detect_time_ms:.0f}", (5, 185))
+        self.draw_text(img, f"estimate (ms) {estimate_time_ms:.0f}", (5, 225))
 
         # shrink the driver view to avoid overloading the radio
         # TODO: turn this back on for prod!!
@@ -199,7 +205,7 @@ class TagFinder:
 
         # for now put big images
         # TODO: turn this off for prod!!
-        img_output = cv2.resize(img, (416,308)) 
+        img_output = cv2.resize(img, (416, 308))
         self.output_stream.putFrame(img_output)
 
     def draw_result(self, image, result_item, pose: Transform3d):
@@ -232,6 +238,9 @@ class TagFinder:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
+    def log_capture_time(self, ms):
+        self.vision_capture_time_ms.set(ms)
+
     def initialize_nt(self):
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = ntcore.NetworkTableInstance.getDefault()
@@ -241,9 +250,17 @@ class TagFinder:
         self.inst.setServer("10.1.0.2")
 
         topic_name = "vision/" + self.serial
-        self.vision_fps = self.inst.getDoubleTopic(topic_name + "/fps").publish()
-        self.vision_latency = self.inst.getDoubleTopic(
-            topic_name + "/latency"
+        self.vision_capture_time_ms = self.inst.getDoubleTopic(
+            topic_name + "/capture_time_ms"
+        ).publish()
+        self.vision_image_age_ms = self.inst.getDoubleTopic(
+            topic_name + "/image_age_ms"
+        ).publish()
+        self.vision_total_time_ms = self.inst.getDoubleTopic(
+            topic_name + "/total_time_ms"
+        ).publish()
+        self.vision_detect_time_ms = self.inst.getDoubleTopic(
+            topic_name + "/detect_time_ms"
         ).publish()
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
@@ -291,7 +308,7 @@ def main():
     elif model == "imx296":
         print("GS Camera")
         # full frame, 2x2, to set the detector mode to widest angle possible
-        fullwidth = 1472   # slightly larger than the detector, to match stride
+        fullwidth = 1472  # slightly larger than the detector, to match stride
         fullheight = 1088
         # medium detection resolution, compromise speed vs range
         width = 1472
@@ -304,12 +321,11 @@ def main():
         height = 100
 
     camera_config = camera.create_still_configuration(
-        # 2 buffers => low latency (32-48 ms), low fps (15-20)
-        # 5 buffers => mid latency (40-55 ms), high fps (22-28)
-        # 3 buffers => high latency (50-70 ms), mid fps (20-23)
-        # robot goes at 50 fps, so roughly a frame every other loop
-        # fps doesn't matter much, so minimize latency
-        buffer_count=4,
+        # more buffers seem to make the pipeline a little smoother
+        buffer_count=5,
+        # hang on to one camera buffer (zero copy) and leave one
+        # other for the camera to fill.
+        queue=True,
         main={
             "format": "YUV420",
             "size": (fullwidth, fullheight),
@@ -354,17 +370,20 @@ def main():
     try:
         while True:
             # the most recent completed frame, from the recent past
-            # capture_start = time.time()
+            capture_start = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
             request = camera.capture_request()
+            capture_end = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+            # capture time is how long we wait for the camera
+            capture_time_ms = (capture_end - capture_start) // 1000000
+            output.log_capture_time(capture_time_ms)
             try:
-#                output.analyze(request)
                 metadata = request.get_metadata()
-                # uses np.array to make a copy
-                buffer = request.make_buffer("lores")
+                # avoid copying the buffer
+                with _MappedBuffer(request, "lores") as buffer:
+                    output.analyze(metadata, buffer)
             finally:
                 # the frame is owned by the camera so remember to release it
                 request.release()
-            output.analyze(metadata, buffer)
     finally:
         camera.stop()
 
