@@ -145,10 +145,6 @@ class TagFinder:
         else:        
             img = img[: self.height, : self.width]
 
-        # TODO: undistorting is too slow.
-        # instead, use undistortPoints.
-        # img = cv2.undistort(img, self.mtx, self.dist)
-
         undistort_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
 
         result = self.at_detector.detect(img)
@@ -159,7 +155,20 @@ class TagFinder:
         for result_item in result:
             if result_item.getHamming() > 0:
                 continue
-            pose = self.estimator.estimate(result_item)
+
+            # UNDISTORT EACH ITEM
+            # undistortPoints is muuuuuch faster than undistort on the whole image.
+            corners = result_item.getCorners(np.zeros(8))
+            # undistortPoints wants [[x0,y0],[x1,y1],...]
+            pairs = np.reshape(corners, [4,2])
+            # the P argument here is required to get denormalized u' and v' in pixels
+            pairs = cv2.undistortPoints(pairs, self.mtx, self.dist, np.identity(3), self.mtx)
+            # the estimator wants [x0, y0, x1, y1, ...]
+            corners = np.reshape(pairs, [8])
+
+            homography = result_item.getHomography()
+            pose = self.estimator.estimate(homography, corners)
+
             blips.append(Blip24(result_item.getId(), pose))
             # TODO: turn this off for prod
             self.draw_result(img, result_item, pose)
