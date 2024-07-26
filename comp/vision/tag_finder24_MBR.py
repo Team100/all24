@@ -157,12 +157,11 @@ class TagFinder:
                 continue
 
             # UNDISTORT EACH ITEM
-            # undistortPoints is muuuuuch faster than undistort on the whole image.
+            # undistortPoints is at least 10X faster than undistort on the whole image.
             corners = result_item.getCorners(np.zeros(8))
             # undistortPoints wants [[x0,y0],[x1,y1],...]
             pairs = np.reshape(corners, [4,2])
-            # the P argument here is required to get denormalized u' and v' in pixels
-            pairs = cv2.undistortPoints(pairs, self.mtx, self.dist, np.identity(3), self.mtx)
+            pairs = cv2.undistortImagePoints(pairs, self.mtx, self.dist);
             # the estimator wants [x0, y0, x1, y1, ...]
             corners = np.reshape(pairs, [8])
 
