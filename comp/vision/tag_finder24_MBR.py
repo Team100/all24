@@ -66,6 +66,9 @@ class TagFinder:
         self.initialize_nt()
 
         self.at_detector = robotpy_apriltag.AprilTagDetector()
+        config = self.at_detector.Config()
+        config.numThreads = 4
+        self.at_detector.setConfig(config)
         self.at_detector.addFamily("tag36h11")
         
         # from testing on 3/22/24, k1 and k2 only
@@ -116,9 +119,19 @@ class TagFinder:
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
-    def analyze(self, request):
-        buffer = request.make_buffer("lores")
-        metadata = request.get_metadata()
+    #def analyze(self, request):
+    def analyze(self, metadata, buffer):
+        # how old is the frame when we receive it?
+        # sensor timestamp is the boottime when the first byte was received from the sensor
+        sensor_timestamp = metadata["SensorTimestamp"]
+        received_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+        fetch_time_ms = (received_time - sensor_timestamp) // 1000000
+
+        # how long does it take to copy the buffer?  about 0.7 ms.
+        # capture_start = time.time()
+        # buffer = request.make_buffer("lores")
+        # capture_duration = time.time() - capture_start
+        # metadata = request.get_metadata()
 
         y_len = self.width * self.height
 
@@ -162,12 +175,11 @@ class TagFinder:
         self.vision_nt_struct.set(blips)
         self.vision_fps.set(fps)
 
-        # sensor timestamp is the boottime when the first byte was received from the sensor
-        sensor_timestamp = metadata["SensorTimestamp"]
-        # include all the work above in the latency
-        system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
-        time_delta_ms = (system_time_ns - sensor_timestamp) // 1000000
-        self.vision_latency.set(time_delta_ms)
+
+        # the time it took to do the detection work
+        work_time_ms = (time.clock_gettime_ns(time.CLOCK_BOOTTIME) - received_time) // 1000000
+        # oldest_pixel_ms = (system_time_ns - (sensor_timestamp - 1000 * metadata["ExposureTime"])) // 1000000
+        self.vision_latency.set(fetch_time_ms + work_time_ms)
 
         # must flush!  otherwise 100ms update rate.
         self.inst.flush()
@@ -176,7 +188,9 @@ class TagFinder:
         # none of this is particularly fast or important for prod,
         # TODO: consider disabling it after dev is done
         self.draw_text(img, f"fps {fps:.1f}", (5, 65))
-        # self.draw_text(img, f"latency(ms) {time_delta_ms:.0f}", (5, 105))
+        self.draw_text(img, f"fetch (ms) {fetch_time_ms:.0f}", (5, 105))
+        self.draw_text(img, f"work (ms) {work_time_ms:.0f}", (5, 145))
+        # self.draw_text(img, f"buffer {(capture_duration*1000):.3f}", (5, 185))
 
         # shrink the driver view to avoid overloading the radio
         # TODO: turn this back on for prod!!
@@ -295,7 +309,7 @@ def main():
         # 3 buffers => high latency (50-70 ms), mid fps (20-23)
         # robot goes at 50 fps, so roughly a frame every other loop
         # fps doesn't matter much, so minimize latency
-        buffer_count=2,
+        buffer_count=4,
         main={
             "format": "YUV420",
             "size": (fullwidth, fullheight),
@@ -340,12 +354,17 @@ def main():
     try:
         while True:
             # the most recent completed frame, from the recent past
+            # capture_start = time.time()
             request = camera.capture_request()
             try:
-                output.analyze(request)
+#                output.analyze(request)
+                metadata = request.get_metadata()
+                # uses np.array to make a copy
+                buffer = request.make_buffer("lores")
             finally:
                 # the frame is owned by the camera so remember to release it
                 request.release()
+            output.analyze(metadata, buffer)
     finally:
         camera.stop()
 
