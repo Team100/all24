@@ -24,6 +24,3 @@ class Network:
 
     def log_capture_time(self, ms: float) -> None:
         self.vision_capture_time_ms.set(ms)
-
-
-

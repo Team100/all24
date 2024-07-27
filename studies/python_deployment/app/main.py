@@ -6,7 +6,7 @@ on network tables.
 
 import time
 
-from app.camera import Camera, Request, Size
+from app.camera import Camera, Factory, Request, Size
 from app.identity import Identity
 from app.network import Network
 from app.tag_detector import TagDetector
@@ -14,7 +14,7 @@ from app.tag_detector import TagDetector
 
 def main() -> None:
     print("main")
-    camera: Camera = Camera()
+    camera: Camera = Factory.get()
     size: Size = camera.get_size()
     tag_detector: TagDetector = TagDetector(size.width, size.height)
     identity: Identity = Identity.get()
