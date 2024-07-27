@@ -9,5 +9,9 @@
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
-    "workbench.colorTheme": "Default Light Modern"
+    "workbench.colorTheme": "Default Light Modern",
+    "mypy-type-checker.reportingScope": "file",
+    "mypy-type-checker.args": [
+        "--strict",
+    ]
 }

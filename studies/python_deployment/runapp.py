@@ -23,7 +23,7 @@ else:
 
 try:
     from app import main
-except ImportError:
-    sys.exit("app import failed!")
+except ImportError as e:
+    sys.exit("app import failed!", e)
 
 main.main()
