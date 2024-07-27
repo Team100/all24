@@ -11,13 +11,26 @@ and the source:
 https://github.com/raspberrypi/picamera2/
 """
 
+from picamera2 import Picamera2, CompletedRequest # type: ignore
+
+
+class Request:
+    def __init__(self, req: CompletedRequest):
+        self.req = req
+
+    def release(self):
+        self.req.release()
+
 
 class Camera:
     def __init__(self):
-        pass
+        self.cam = Picamera2()
 
-    def capture_request(self):
-        return 0
+    def capture_request(self) -> Request:
+        return Request(self.cam.capture_request)
+
+    def start(self):
+        self.cam.start()
 
     def stop(self):
-        pass
+        print("Camera stop")
