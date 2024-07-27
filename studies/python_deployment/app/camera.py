@@ -5,6 +5,7 @@ from mmap import mmap
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Any, Protocol
+from app.identity import Identity
 
 
 class Request(Protocol):
@@ -30,12 +31,12 @@ class Camera(Protocol):
 
 class Factory:
     @staticmethod
-    def get() -> Camera:
+    def get(identity: Identity) -> Camera:
         try:
             # this will fail if we're not running on a Raspberry Pi.
             from app.real_camera import RealCamera
 
-            return RealCamera()
+            return RealCamera(identity)
 
         except ImportError:
             from app.fake_camera import FakeCamera

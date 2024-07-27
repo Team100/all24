@@ -13,10 +13,12 @@ https://github.com/raspberrypi/picamera2/
 
 from mmap import mmap
 from contextlib import AbstractContextManager
+from pprint import pprint
 from typing import Any
 from picamera2 import Picamera2, CompletedRequest  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
 from app.camera import Request, Size
+from app.identity import Identity
 
 
 class RealRequest:
@@ -34,12 +36,29 @@ class RealRequest:
 
 
 class RealCamera:
-    def __init__(self) -> None:
+    def __init__(self, identity: Identity) -> None:
         self.cam: Picamera2 = Picamera2()
         model: str = self.cam.camera_properties["Model"]
         print("\nMODEL " + model)
         self.size: Size = RealCamera.__size_from_model(model)
-
+        self.camera_config: dict[str, Any] = RealCamera.__get_config(
+            self.cam, self.size
+        )
+        print("SENSOR MODES AVAILABLE")
+        pprint(self.cam.sensor_modes)
+        if identity == Identity.FLIPPED:
+            # see libcamera/src/libcamera/transform.cpp
+            self.camera_config["transform"] = 3
+            
+        print("\nREQUESTED CONFIG")
+        print(self.camera_config)
+        self.cam.align_configuration(self.camera_config)
+        print("\nALIGNED CONFIG")
+        print(self.camera_config)
+        self.cam.configure(self.camera_config)
+        print("\nCONTROLS")
+        print(self.cam.camera_controls)
+        
     def capture_request(self) -> Request:
         return RealRequest(self.cam.capture_request)
 

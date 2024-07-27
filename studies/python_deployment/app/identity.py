@@ -10,6 +10,7 @@ class Identity(Enum):
     RIGHTAMP = "10000000caeaae82"
     LEFTAMP = "100000004e0a1fb9"
     GAME_PIECE = "1000000013c9c96c"
+    FLIPPED = "flipme" # example for per-identity config
     UNKNOWN = "unknown"
 
     @classmethod
@@ -19,7 +20,10 @@ class Identity(Enum):
     @staticmethod
     def get() -> "Identity":
         serial = Identity.get_serial()
-        return Identity(serial)
+        print(f"Coprocessor serial: {serial}")
+        identity: Identity = Identity(serial)
+        print(f"Coprocessor identity: {identity.name}")
+        return identity
 
     @staticmethod
     def get_serial() -> str:
