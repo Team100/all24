@@ -2,14 +2,16 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=import-error
+# pylint: disable=no-member
+# type: ignore
+
 import dataclasses
 import time
 import pprint
-
+import sys
 from enum import Enum
 
 import cv2
-import sys
 import libcamera
 import numpy as np
 import ntcore
@@ -72,9 +74,9 @@ class TagFinder:
         config.numThreads = 4
         self.at_detector.setConfig(config)
         self.at_detector.addFamily("tag36h11")
-        
+
         # from testing on 3/22/24, k1 and k2 only
-        
+
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
             fx = 498
@@ -125,7 +127,6 @@ class TagFinder:
         # how old is the frame when we receive it?
         received_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
 
-
         y_len = self.width * self.height
 
         # truncate, ignore chrominance. this makes a view, very fast (300 ns)
@@ -142,7 +143,7 @@ class TagFinder:
         identity = Camera(serial)
         if identity == Camera.SHOOTER:
             img = img[62:554, : self.width]
-        else:        
+        else:
             img = img[: self.height, : self.width]
 
         undistort_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
@@ -160,8 +161,8 @@ class TagFinder:
             # undistortPoints is at least 10X faster than undistort on the whole image.
             corners = result_item.getCorners(np.zeros(8))
             # undistortPoints wants [[x0,y0],[x1,y1],...]
-            pairs = np.reshape(corners, [4,2])
-            pairs = cv2.undistortImagePoints(pairs, self.mtx, self.dist);
+            pairs = np.reshape(corners, [4, 2])
+            pairs = cv2.undistortImagePoints(pairs, self.mtx, self.dist)
             # the estimator wants [x0, y0, x1, y1, ...]
             corners = np.reshape(pairs, [8])
 
@@ -352,7 +353,8 @@ def main():
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
-            "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            # "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            "NoiseReductionMode": 0,
             # "ScalerCrop":(0,0,width/2,height/2),
         },
     )
