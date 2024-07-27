@@ -6,10 +6,15 @@ from contextlib import AbstractContextManager, nullcontext
 from tempfile import TemporaryFile
 from typing import Any
 
-from app.camera import Size
+import numpy as np
+from numpy.typing import NDArray
+
+from app.camera import Camera, Request, Size
+
+Mat = NDArray[np.uint8]
 
 
-class FakeRequest:
+class FakeRequest(Request):
     def __init__(self) -> None:
         self.tempfile = TemporaryFile()
         self.tempfile.write(b"foo")
@@ -26,7 +31,7 @@ class FakeRequest:
         return {}
 
 
-class FakeCamera:
+class FakeCamera(Camera):
     def capture_request(self) -> FakeRequest:
         return FakeRequest()
 
@@ -38,3 +43,12 @@ class FakeCamera:
 
     def get_size(self) -> Size:
         return Size(fullwidth=0, fullheight=0, width=0, height=0)
+
+    def get_intrinsic(self) -> Mat:
+        return np.array(
+            [
+                [100, 0, 50],
+                [0, 100, 50],
+                [0, 0, 1],
+            ]
+        )

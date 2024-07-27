@@ -16,7 +16,7 @@ def main() -> None:
     identity: Identity = Identity.get()
     camera: Camera = Factory.get(identity)
     size: Size = camera.get_size()
-    tag_detector: TagDetector = TagDetector(size.width, size.height)
+    tag_detector: TagDetector = TagDetector(identity, size.width, size.height, camera)
     network: Network = Network(identity)
 
     camera.start()

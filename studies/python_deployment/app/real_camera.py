@@ -11,17 +11,24 @@ and the source:
 https://github.com/raspberrypi/picamera2/
 """
 
+from enum import unique, Enum
 from mmap import mmap
 from contextlib import AbstractContextManager
 from pprint import pprint
 from typing import Any
+
+import numpy as np
+from numpy.typing import NDArray
+
 from picamera2 import Picamera2, CompletedRequest  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
-from app.camera import Request, Size
+from app.camera import Camera, Request, Size
 from app.identity import Identity
 
+Mat = NDArray[np.uint8]
 
-class RealRequest:
+
+class RealRequest(Request):
     def __init__(self, req: CompletedRequest):
         self._req = req
 
@@ -35,21 +42,42 @@ class RealRequest:
         return self._req.get_metadata()  # type: ignore
 
 
-class RealCamera:
+@unique
+class Model(Enum):
+    V3_WIDE = "imx708_wide"
+    V2 = "imx219"
+    GS = "imx296"
+    UNKNOWN = "unknown"
+
+    @classmethod
+    def _missing_(cls, value: object) -> Any:
+        return Identity.UNKNOWN
+
+    @staticmethod
+    def get(cam: Picamera2) -> "Model":
+        model_str: str = cam.camera_properties["Model"]
+        print(f"Camera model string: {model_str}")
+        model: Model = Model(model_str)
+        print(f"Camera model: {model.name}")
+        return model
+
+
+class RealCamera(Camera):
     def __init__(self, identity: Identity) -> None:
         self.cam: Picamera2 = Picamera2()
-        model: str = self.cam.camera_properties["Model"]
-        print("\nMODEL " + model)
+        model: Model = Model.get(self.cam)
         self.size: Size = RealCamera.__size_from_model(model)
         self.camera_config: dict[str, Any] = RealCamera.__get_config(
             self.cam, self.size
         )
+        self.mtx = RealCamera.__mtx_from_model(model)
+        self.dist = RealCamera.__dist_from_model(model)
         print("SENSOR MODES AVAILABLE")
         pprint(self.cam.sensor_modes)
         if identity == Identity.FLIPPED:
             # see libcamera/src/libcamera/transform.cpp
             self.camera_config["transform"] = 3
-            
+
         print("\nREQUESTED CONFIG")
         print(self.camera_config)
         self.cam.align_configuration(self.camera_config)
@@ -58,7 +86,7 @@ class RealCamera:
         self.cam.configure(self.camera_config)
         print("\nCONTROLS")
         print(self.cam.camera_controls)
-        
+
     def capture_request(self) -> Request:
         return RealRequest(self.cam.capture_request)
 
@@ -71,30 +99,23 @@ class RealCamera:
     def get_size(self) -> Size:
         return self.size
 
+    def get_intrinsic(self) -> Mat:
+        return self.mtx
+
     @staticmethod
-    def __size_from_model(model: str) -> Size:
-        if model == "imx708_wide":
-            print("V3 Wide Camera")
-            # full frame is 4608x2592; this is 2x2
-            # medium detection resolution, compromise speed vs range
-            return Size(fullwidth=2304, fullheight=1296, width=1152, height=648)
+    def __size_from_model(model: Model) -> Size:
+        match model:
+            case Model.V3_WIDE:
+                return Size(fullwidth=2304, fullheight=1296, width=1152, height=648)
 
-        if model == "imx219":
-            print("V2 Camera")
-            # full frame, 2x2, to set the detector mode to widest angle possible
-            # width is slightly larger than the detector, to match stride
-            # medium detection resolution, compromise speed vs range
-            return Size(fullwidth=1664, fullheight=1232, width=832, height=616)
+            case Model.V2:
+                return Size(fullwidth=1664, fullheight=1232, width=832, height=616)
 
-        if model == "imx296":
-            print("GS Camera")
-            # full frame, 2x2, to set the detector mode to widest angle possible
-            # width is slightly larger than the detector, to match stride
-            # medium detection resolution, compromise speed vs range
-            return Size(fullwidth=1472, fullheight=1088, width=1472, height=1088)
+            case Model.GS:
+                return Size(fullwidth=1472, fullheight=1088, width=1472, height=1088)
 
-        print("UNKNOWN CAMERA: " + model)
-        return Size(fullwidth=100, fullheight=100, width=100, height=100)
+            case _:
+                return Size(fullwidth=100, fullheight=100, width=100, height=100)
 
     @staticmethod
     def __get_config(cam: Picamera2, size: Size) -> dict[str, Any]:
@@ -127,3 +148,54 @@ class RealCamera:
             },
         )
         return camera_config
+
+    @staticmethod
+    def __mtx_from_model(model: Model) -> Mat:
+        """Intrinsic matrix."""
+        match model:
+            case Model.V3_WIDE:
+                return np.array(
+                    [
+                        [498, 0, 584],
+                        [0, 498, 316],
+                        [0, 0, 1],
+                    ]
+                )
+            case Model.V2:
+                return np.array(
+                    [
+                        [660, 0, 426],
+                        [0, 660, 303],
+                        [0, 0, 1],
+                    ]
+                )
+            case Model.GS:
+                return np.array(
+                    [
+                        [1680, 0, 728],
+                        [0, 1680, 544],
+                        [0, 0, 1],
+                    ]
+                )
+            case _:
+                return np.array(
+                    [
+                        [100, 0, 50],
+                        [0, 100, 50],
+                        [0, 0, 1],
+                    ]
+                )
+
+    @staticmethod
+    def __dist_from_model(model: Model) -> Mat:
+        """Minimal distortion matrix with four elements, [k1, k2, p1, p2]
+        see https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html"""
+        match model:
+            case Model.V3_WIDE:
+                return np.array([[0.01, -0.0365, 0, 0]])
+            case Model.V2:
+                return np.array([[-0.003, 0.04, 0, 0]])
+            case Model.GS:
+                return np.array([[0, 0, 0, 0]])
+            case _:
+                return np.array([[0, 0, 0, 0]])

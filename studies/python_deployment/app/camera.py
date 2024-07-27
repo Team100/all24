@@ -1,11 +1,24 @@
+""" Interface spec for camera types.
+
+To learn about Protocols for interface specification, see
+https://typing.readthedocs.io/en/latest/spec/protocol.html
+"""
+
 # pylint: disable=import-outside-toplevel
 # pylint: disable=too-few-public-methods
+
 
 from mmap import mmap
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Any, Protocol
+
+import numpy as np
+from numpy.typing import NDArray
+
 from app.identity import Identity
+
+Mat = NDArray[np.uint8]
 
 
 class Request(Protocol):
@@ -27,6 +40,7 @@ class Camera(Protocol):
     def start(self) -> None: ...
     def stop(self) -> None: ...
     def get_size(self) -> Size: ...
+    def get_intrinsic(self) -> Mat: ...
 
 
 class Factory:
