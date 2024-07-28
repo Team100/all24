@@ -27,6 +27,7 @@ class Identity(Enum):
     RIGHTAMP = "10000000caeaae82"
     LEFTAMP = "100000004e0a1fb9"
     GAME_PIECE = "1000000013c9c96c"
+    DEV = "10000000a7c673d9" # rpi4 used for development
     FLIPPED = "flipme"  # example for per-identity config
     UNKNOWN = "unknown"
 

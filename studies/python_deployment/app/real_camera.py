@@ -88,7 +88,7 @@ class RealCamera(Camera):
         print(self.cam.camera_controls)
 
     def capture_request(self) -> Request:
-        return RealRequest(self.cam.capture_request)
+        return RealRequest(self.cam.capture_request())
 
     def start(self) -> None:
         self.cam.start()
