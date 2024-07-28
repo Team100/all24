@@ -40,6 +40,13 @@ class Network:
             topic_name + "/detect_time_ms"
         ).publish()
 
+        self.gyro_yaw = self.inst.getDoubleTopic(
+            topic_name + "/gyro_yaw"
+        ).publish()
+        self.gyro_rate = self.inst.getDoubleTopic(
+            topic_name + "/gyro_rate"
+        ).publish()
+
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Blip24).publish().set(
             Blip24(0, Transform3d())
