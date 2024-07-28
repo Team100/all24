@@ -14,6 +14,7 @@ it exits with an error.
 
 import os
 import sys
+import traceback
 
 if os.path.isfile("app.zip"):
     print("using the zip file")
@@ -24,6 +25,7 @@ else:
 try:
     from app import main
 except ImportError as e:
-    sys.exit("app import failed!", e)
+    print(''.join(traceback.format_exception(e)))
+    sys.exit("app import failed!")
 
 main.main()
