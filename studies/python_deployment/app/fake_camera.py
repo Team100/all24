@@ -52,3 +52,6 @@ class FakeCamera(Camera):
                 [0, 0, 1],
             ]
         )
+
+    def get_dist(self) -> Mat:
+        return np.array([0, 0, 0, 0])

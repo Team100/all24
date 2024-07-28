@@ -1,14 +1,19 @@
 """ This is a wrapper for the AprilTag detector. """
 
+# pylint: disable=no-name-in-module
+
 from mmap import mmap
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
 
-from robotpy_apriltag import AprilTagDetector, AprilTagPoseEstimator
+from cv2 import undistortImagePoints, resize
+from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
 from app.camera import Camera, Request
+from app.display import Display
 from app.identity import Identity
+from app.network import Blip24, Network
 from app.timer import Timer
 
 Mat = NDArray[np.uint8]
@@ -16,11 +21,21 @@ Mat = NDArray[np.uint8]
 
 class TagDetector:
     def __init__(
-        self, identity: Identity, width: int, height: int, cam: Camera
+        self,
+        identity: Identity,
+        width: int,
+        height: int,
+        cam: Camera,
+        display: Display,
+        network: Network,
     ) -> None:
         self.identity: Identity = identity
         self.width: int = width
         self.height: int = height
+        self.display: Display = display
+        self.network: Network = network
+
+        self.y_len = self.width * self.height
 
         self.frame_time = Timer.time_ns()
 
@@ -33,15 +48,16 @@ class TagDetector:
 
         tag_size = 0.1651  # tagsize 6.5 inches
 
-        mtx: Mat = cam.get_intrinsic()
+        self.mtx: Mat = cam.get_intrinsic()
+        self.dist: Mat = cam.get_dist()
 
         self.estimator = AprilTagPoseEstimator(
             AprilTagPoseEstimator.Config(
                 tag_size,
-                mtx[0,0],
-                mtx[1,1],
-                mtx[0,2],
-                mtx[1,2],
+                self.mtx[0, 0],
+                self.mtx[1, 1],
+                self.mtx[0, 2],
+                self.mtx[1, 2],
             )
         )
 
@@ -54,3 +70,103 @@ class TagDetector:
         # how old is the frame when we receive it?
         received_time: int = Timer.time_ns()
         print("hello")
+        # truncate, ignore chrominance. this makes a view, very fast (300 ns)
+        img = np.frombuffer(buffer, dtype=np.uint8, count=self.y_len)
+
+        # this  makes a view, very fast (150 ns)
+        img = img.reshape((self.height, self.width))
+
+        # TODO: crop regions that never have targets
+        # this also makes a view, very fast (150 ns)
+        # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
+        # for now use the full frame
+        # TODO: probably remove this
+        if self.identity == Identity.SHOOTER:
+            img = img[62:554, : self.width]
+        else:
+            img = img[: self.height, : self.width]
+
+        undistort_time: int = Timer.time_ns()
+        print("one")
+        # this segv's with fake data.
+        result: list[AprilTagDetection] = self.at_detector.detect(img.data)
+        print("two")
+        detect_time: int = Timer.time_ns()
+
+        blips = []
+        result_item: AprilTagDetection
+        for result_item in result:
+            if result_item.getHamming() > 0:
+                continue
+
+            # UNDISTORT EACH ITEM
+            # undistortPoints is at least 10X faster than undistort on the whole image.
+            corners: tuple[float, float, float, float, float, float, float, float] = (
+                result_item.getCorners((0, 0, 0, 0, 0, 0, 0, 0))
+            )
+            # undistortPoints wants [[x0,y0],[x1,y1],...]
+            pairs = np.reshape(corners, [4, 2])
+            pairs = undistortImagePoints(pairs, self.mtx, self.dist)
+            # the estimator wants [x0, y0, x1, y1, ...]
+            # corners = np.reshape(pairs, [8])
+            corners = (
+                pairs[0, 0],
+                pairs[0, 1],
+                pairs[1, 0],
+                pairs[1, 1],
+                pairs[2, 0],
+                pairs[2, 1],
+                pairs[3, 0],
+                pairs[3, 1],
+            )
+
+            homography = result_item.getHomography()
+            pose = self.estimator.estimate(homography, corners)
+
+            blips.append(Blip24(result_item.getId(), pose))
+            # TODO: turn this off for prod
+            self.display.draw_result(img, result_item, pose)
+
+        estimate_time = Timer.time_ns()
+
+        # compute time since last frame
+        current_time = Timer.time_ns()
+        total_time_ms = (current_time - self.frame_time) // 1000000
+        # total_et = current_time - self.frame_time
+        self.frame_time = current_time
+
+        sensor_timestamp = metadata["SensorTimestamp"]
+        image_age_ms = (received_time - sensor_timestamp) // 1000000
+        undistort_time_ms = (undistort_time - received_time) // 1000000
+        detect_time_ms = (detect_time - undistort_time) // 1000000
+        estimate_time_ms = (estimate_time - detect_time) // 1000000
+        # oldest_pixel_ms = (system_time_ns - (sensor_timestamp - 1000 * metadata["ExposureTime"])) // 1000000
+        # sensor timestamp is the boottime when the first byte was received from the sensor
+
+        self.network.vision_nt_struct.set(blips)
+        self.network.vision_total_time_ms.set(total_time_ms)
+        self.network.vision_image_age_ms.set(image_age_ms)
+        self.network.vision_detect_time_ms.set(detect_time_ms)
+
+        # must flush!  otherwise 100ms update rate.
+        self.network.flush()
+
+        # now do the drawing (after the NT payload is written)
+        # none of this is particularly fast or important for prod,
+
+        # self.draw_text(img, f"fps {fps:.1f}", (5, 65))
+        self.display.draw_text(img, f"total (ms) {total_time_ms:.0f}", (5, 65))
+        self.display.draw_text(img, f"age (ms) {image_age_ms:.0f}", (5, 105))
+        self.display.draw_text(img, f"undistort (ms) {undistort_time_ms:.0f}", (5, 145))
+        self.display.draw_text(img, f"detect (ms) {detect_time_ms:.0f}", (5, 185))
+        self.display.draw_text(img, f"estimate (ms) {estimate_time_ms:.0f}", (5, 225))
+
+        # shrink the driver view to avoid overloading the radio
+        # TODO: turn this back on for prod!!
+        # driver_img = cv2.resize(img, (self.view_width, self.view_height))
+        # self.output_stream.putFrame(driver_img)
+
+        # for now put big images
+        # TODO: turn this off for prod!!
+        img_output = resize(img, (416, 308))
+        self.display.put_frame(img_output)

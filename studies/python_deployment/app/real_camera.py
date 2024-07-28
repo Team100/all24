@@ -102,6 +102,9 @@ class RealCamera(Camera):
     def get_intrinsic(self) -> Mat:
         return self.mtx
 
+    def get_dist(self) -> Mat:
+        return self.dist
+
     @staticmethod
     def __size_from_model(model: Model) -> Size:
         match model:
