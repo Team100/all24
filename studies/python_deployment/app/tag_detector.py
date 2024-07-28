@@ -69,7 +69,6 @@ class TagDetector:
     def analyze2(self, metadata: dict[str, Any], buffer: mmap) -> None:
         # how old is the frame when we receive it?
         received_time: int = Timer.time_ns()
-        print("hello")
         # truncate, ignore chrominance. this makes a view, very fast (300 ns)
         img = np.frombuffer(buffer, dtype=np.uint8, count=self.y_len)
 
@@ -87,10 +86,7 @@ class TagDetector:
             img = img[: self.height, : self.width]
 
         undistort_time: int = Timer.time_ns()
-        print("one")
-        # this segv's with fake data.
         result: list[AprilTagDetection] = self.at_detector.detect(img.data)
-        print("two")
         detect_time: int = Timer.time_ns()
 
         blips = []
@@ -109,15 +105,16 @@ class TagDetector:
             pairs = undistortImagePoints(pairs, self.mtx, self.dist)
             # the estimator wants [x0, y0, x1, y1, ...]
             # corners = np.reshape(pairs, [8])
+            # pairs has an extra dimension
             corners = (
-                pairs[0, 0],
-                pairs[0, 1],
-                pairs[1, 0],
-                pairs[1, 1],
-                pairs[2, 0],
-                pairs[2, 1],
-                pairs[3, 0],
-                pairs[3, 1],
+                pairs[0][0][0],
+                pairs[0][0][1],
+                pairs[1][0][0],
+                pairs[1][0][1],
+                pairs[2][0][0],
+                pairs[2][0][1],
+                pairs[3][0][0],
+                pairs[3][0][1],
             )
 
             homography = result_item.getHomography()
@@ -168,5 +165,6 @@ class TagDetector:
 
         # for now put big images
         # TODO: turn this off for prod!!
-        img_output = resize(img, (416, 308))
-        self.display.put_frame(img_output)
+        #img_output = resize(img, (416, 308))
+        #self.display.put_frame(img_output)
+        self.display.put_frame(img)

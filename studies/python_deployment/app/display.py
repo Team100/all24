@@ -52,4 +52,5 @@ class Display:
         putText(image, msg, loc, FONT, 1.5, WHITE, 2)
 
     def put_frame(self, img: Mat) -> None:
+          # connect to localhost:1181 to see this
           self.output_stream.putFrame(img)
