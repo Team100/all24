@@ -13,5 +13,6 @@
     "mypy-type-checker.reportingScope": "file",
     "mypy-type-checker.args": [
         "--strict",
-    ]
+    ],
+    "editor.minimap.enabled": false
 }

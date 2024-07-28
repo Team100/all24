@@ -70,7 +70,7 @@ class TagDetector:
         # how old is the frame when we receive it?
         received_time: int = Timer.time_ns()
         # truncate, ignore chrominance. this makes a view, very fast (300 ns)
-        img = np.frombuffer(buffer, dtype=np.uint8, count=self.y_len)
+        img: Mat = np.frombuffer(buffer, dtype=np.uint8, count=self.y_len)
 
         # this  makes a view, very fast (150 ns)
         img = img.reshape((self.height, self.width))

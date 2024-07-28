@@ -19,9 +19,6 @@ Mat = NDArray[np.uint8]
 
 class FakeRequest(Request):
     def __init__(self, pathstr: str) -> None:
-
-        p = Path(__file__).with_name("tag_and_board.png")
-        pstr = str(p)
         img = cv2.imread(pathstr, 0)
 
         self.tempfile = TemporaryFile()
