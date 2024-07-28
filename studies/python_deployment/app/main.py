@@ -6,6 +6,7 @@ on network tables.
 
 from app.camera import Camera, Factory, Request, Size
 from app.display import Display
+from app.gyro import Gyro
 from app.identity import Identity
 from app.network import Network
 from app.tag_detector import TagDetector
@@ -22,6 +23,7 @@ def main() -> None:
     tag_detector: TagDetector = TagDetector(
         identity, size.width, size.height, camera, display, network
     )
+    gyro: Gyro = Gyro(network)
 
     camera.start()
     try:
@@ -35,6 +37,7 @@ def main() -> None:
             network.vision_capture_time_ms.set(capture_time_ms)
             try:
                 tag_detector.analyze(request)
+                gyro.sample()
             finally:
                 request.release()
     finally:

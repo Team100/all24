@@ -1,12 +1,16 @@
 """ Annotate and show the captured image through the CameraServer. """
 
 # pylint: disable=no-name-in-module
+
+from platform import system
 import numpy as np
 from numpy.typing import NDArray
 from cscore import CameraServer
 from robotpy_apriltag import AprilTagDetection
-from cv2 import circle, line, putText, FONT_HERSHEY_SIMPLEX
+from cv2 import circle, line, putText, resize, FONT_HERSHEY_SIMPLEX
 from wpimath.geometry import Transform3d
+
+from app.mjpeg_streamer import MjpegServer, Stream
 
 FONT = FONT_HERSHEY_SIMPLEX
 BLACK = (0, 0, 0)
@@ -17,7 +21,16 @@ Mat = NDArray[np.uint8]
 
 class Display:
     def __init__(self, width: int, height: int) -> None:
-        self.output_stream = CameraServer.putVideo("Processed", width, height)
+        print("width ", width)
+        print("height ", height)
+        if system() == "Windows":
+            # on windows, cvsource breaks with cvnp contiguous-array error
+            self.stream = Stream("Processed", (width, height), quality=50, fps=30)
+            self.server = MjpegServer("localhost", 1181)
+            self.server.add_stream(self.stream)
+            self.server.start()
+        else:
+            self.cvsource = CameraServer.putVideo("Processed", 416, 308)
 
     def draw_result(
         self, image: Mat, result_item: AprilTagDetection, pose: Transform3d
@@ -52,5 +65,22 @@ class Display:
         putText(image, msg, loc, FONT, 1.5, WHITE, 2)
 
     def put_frame(self, img: Mat) -> None:
-          # connect to localhost:1181 to see this
-          self.output_stream.putFrame(img)
+        # connect to localhost:1181 to see this
+        # windows complains about noncontiguous
+        # img = np.zeros((100,100), dtype=np.uint8)
+        # print("shape ", img.shape)
+        # print("itemsize ", img.itemsize)
+        # print("strides ", img.strides)
+        # print("ndim ", img.ndim)
+        # print("dtype ", img.dtype)
+        # self.output_stream.putFrame(np.ascontiguousarray(img))
+        #
+        # shrink the driver view to avoid overloading the radio
+#
+        # for now put big images
+        # TODO: turn this off for prod!!
+        img_out = resize(img, (416, 308))
+        if system() == "Windows":
+            self.stream.set_frame(img_out)
+        else:
+            self.cvsource.putFrame(img_out)

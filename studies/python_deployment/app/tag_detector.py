@@ -8,7 +8,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from cv2 import undistortImagePoints, resize
+from cv2 import undistortImagePoints
 from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
 from app.camera import Camera, Request
 from app.display import Display
@@ -70,7 +70,7 @@ class TagDetector:
         # how old is the frame when we receive it?
         received_time: int = Timer.time_ns()
         # truncate, ignore chrominance. this makes a view, very fast (300 ns)
-        img = np.frombuffer(buffer, dtype=np.uint8, count=self.y_len)
+        img: Mat = np.frombuffer(buffer, dtype=np.uint8, count=self.y_len)
 
         # this  makes a view, very fast (150 ns)
         img = img.reshape((self.height, self.width))
@@ -158,13 +158,6 @@ class TagDetector:
         self.display.draw_text(img, f"detect (ms) {detect_time_ms:.0f}", (5, 185))
         self.display.draw_text(img, f"estimate (ms) {estimate_time_ms:.0f}", (5, 225))
 
-        # shrink the driver view to avoid overloading the radio
-        # TODO: turn this back on for prod!!
-        # driver_img = cv2.resize(img, (self.view_width, self.view_height))
-        # self.output_stream.putFrame(driver_img)
 
-        # for now put big images
-        # TODO: turn this off for prod!!
-        #img_output = resize(img, (416, 308))
-        #self.display.put_frame(img_output)
+
         self.display.put_frame(img)

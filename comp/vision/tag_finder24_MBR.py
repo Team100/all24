@@ -148,7 +148,7 @@ class TagFinder:
 
         undistort_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
 
-        result = self.at_detector.detect(img)
+        result = self.at_detector.detect(img.data)
 
         detect_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
 
