@@ -29,7 +29,8 @@ class Network:
         ntcore._now()
 
         # roboRio address. windows machines can impersonate this for simulation.
-        self.inst.setServer("10.1.0.2")
+        # also localhost for testing
+        self.inst.setServer(["10.1.0.2", "127.0.0.1"])
         topic_name: str = "vision/" + self.serial
         self.vision_capture_time_ms: ntcore.DoublePublisher = self.inst.getDoubleTopic(
             topic_name + "/capture_time_ms"
