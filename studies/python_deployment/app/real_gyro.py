@@ -10,6 +10,9 @@ of some kind, e.g. notice when the robot is not
 moving, and measure the offset, or do it once
 at startup, or something.
 
+TODO: watch the accelerometers;
+spikes in acceleration can decalibrate the gyro.
+
 
 windows installation
 python3 -m pip install hidapi
@@ -39,6 +42,7 @@ _SCALE = 1.0
 # a point estimate of 5 ms ago.
 _DELAY_US = 5000
 
+
 class RealGyro(Gyro):
     def __init__(self, network: Network) -> None:
         self.network = network
@@ -51,7 +55,7 @@ class RealGyro(Gyro):
         self.prev_rate_rad_s = None
 
     def sample(self) -> None:
-        """ NWU counterclockwise-positive. """
+        """NWU counterclockwise-positive."""
         rate_rad_s = (self.imu.gyro[2] - _OFFSET) * _SCALE
         if self.prev_rate_rad_s is None:
             self.prev_rate_rad_s = rate_rad_s
