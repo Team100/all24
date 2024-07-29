@@ -28,7 +28,10 @@ from app.timer import Timer
 
 # this is just experimentally measured.
 # TODO: automatic calibration at startup
+# TODO: or per-identity offset
 _OFFSET = -0.014935  # for 100hz
+# TODO: measure this
+_SCALE = 1.0
 
 # at 100hz output data rate, each sample represents
 # the average signal over the previous 10 ms (with a bit
@@ -48,7 +51,8 @@ class RealGyro(Gyro):
         self.prev_rate_rad_s = None
 
     def sample(self) -> None:
-        rate_rad_s = self.imu.gyro[2] - _OFFSET
+        """ NWU counterclockwise-positive. """
+        rate_rad_s = (self.imu.gyro[2] - _OFFSET) * _SCALE
         if self.prev_rate_rad_s is None:
             self.prev_rate_rad_s = rate_rad_s
         endtime_ns = Timer.time_ns()
