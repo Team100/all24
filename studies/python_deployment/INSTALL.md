@@ -25,3 +25,11 @@ python3 -m pip install robotpy-cscore
 python3 -m pip install robotpy-apriltag
 python3 -m pip install opencv-python
 ```
+
+## Gyro
+
+```
+python3 -m pip install hidapi
+python3 -m pip install adafruit-blinka
+python3 -m pip install adafruit-circuitpython-lsm6ds
+```

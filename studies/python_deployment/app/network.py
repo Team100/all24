@@ -1,6 +1,8 @@
 """ This is a wrapper for network tables.
 """
 
+# pylint: disable=protected-access
+
 import dataclasses
 import ntcore
 from wpimath.geometry import Transform3d
@@ -24,6 +26,8 @@ class Network:
         )
         self.inst.startClient4("tag_finder24")
 
+        ntcore._now()
+
         # roboRio address. windows machines can impersonate this for simulation.
         self.inst.setServer("10.1.0.2")
         topic_name: str = "vision/" + self.serial
@@ -40,12 +44,8 @@ class Network:
             topic_name + "/detect_time_ms"
         ).publish()
 
-        self.gyro_yaw = self.inst.getDoubleTopic(
-            topic_name + "/gyro_yaw"
-        ).publish()
-        self.gyro_rate = self.inst.getDoubleTopic(
-            topic_name + "/gyro_rate"
-        ).publish()
+        self._gyro_yaw = self.inst.getDoubleTopic(topic_name + "/gyro_yaw").publish()
+        self._gyro_rate = self.inst.getDoubleTopic(topic_name + "/gyro_rate").publish()
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Blip24).publish().set(
@@ -56,6 +56,12 @@ class Network:
         self.vision_nt_struct = self.inst.getStructArrayTopic(
             topic_name + "/blips", Blip24
         ).publish()
+
+    def set_gyro_yaw(self, value: float, delay_us: int) -> None:
+        self._gyro_yaw.set(value, ntcore._now() - delay_us)
+
+    def set_gyro_rate(self, value: float, delay_us: int) -> None:
+        self._gyro_rate.set(value, ntcore._now() - delay_us)
 
     def flush(self) -> None:
         self.inst.flush()

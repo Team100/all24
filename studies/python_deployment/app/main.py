@@ -4,9 +4,11 @@ It takes data from the camera and the gyro, and publishes it
 on network tables.
 """
 
-from app.camera import Camera, Factory, Request, Size
+from app.camera import Camera, Request, Size
+from app.camera_factory import CameraFactory
 from app.display import Display
 from app.gyro import Gyro
+from app.gyro_factory import GyroFactory
 from app.identity import Identity
 from app.network import Network
 from app.tag_detector import TagDetector
@@ -16,14 +18,14 @@ from app.timer import Timer
 def main() -> None:
     print("main")
     identity: Identity = Identity.get()
-    camera: Camera = Factory.get(identity)
+    camera: Camera = CameraFactory.get(identity)
     size: Size = camera.get_size()
     display: Display = Display(size.width, size.height)
     network: Network = Network(identity)
     tag_detector: TagDetector = TagDetector(
         identity, size.width, size.height, camera, display, network
     )
-    gyro: Gyro = Gyro(network)
+    gyro: Gyro = GyroFactory.get(network)
 
     camera.start()
     try:

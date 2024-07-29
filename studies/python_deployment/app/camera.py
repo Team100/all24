@@ -4,7 +4,7 @@ To learn about Protocols for interface specification, see
 https://typing.readthedocs.io/en/latest/spec/protocol.html
 """
 
-# pylint: disable=import-outside-toplevel
+
 # pylint: disable=too-few-public-methods
 
 
@@ -16,7 +16,6 @@ from typing import Any, Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-from app.identity import Identity
 
 Mat = NDArray[np.uint8]
 
@@ -44,16 +43,3 @@ class Camera(Protocol):
     def get_dist(self) -> Mat: ...
 
 
-class Factory:
-    @staticmethod
-    def get(identity: Identity) -> Camera:
-        try:
-            # this will fail if we're not running on a Raspberry Pi.
-            from app.real_camera import RealCamera
-
-            return RealCamera(identity)
-
-        except ImportError:
-            from app.fake_camera import FakeCamera
-
-            return FakeCamera()
