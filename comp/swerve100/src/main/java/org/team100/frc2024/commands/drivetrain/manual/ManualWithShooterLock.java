@@ -15,7 +15,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -59,7 +59,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private final SupplierLogger m_fieldLogger;
     private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final HeadingInterface m_heading;
+    private final Gyro m_gyro;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
@@ -77,13 +77,13 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
             FieldLogger fieldLogger,
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
-            HeadingInterface heading,
+            Gyro gyro,
             PIDController thetaController,
             PIDController omegaController) {
         m_fieldLogger = fieldLogger;
         m_logger = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_heading = heading;
+        m_gyro = gyro;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_profile = new TrapezoidProfile100(
@@ -98,7 +98,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
     @Override
     public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
+        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
         m_thetaController.reset();
@@ -121,7 +121,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
-        double headingRate = m_heading.getHeadingRateNWU();
+        double yawRate = m_gyro.getYawRateNWU();
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get());
 
@@ -159,14 +159,14 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
         final double thetaFF = m_thetaSetpoint.v();
         final double thetaFB = getThetaFB(measurement);
-        final double omegaFB = getOmegaFB(headingRate);
+        final double omegaFB = getOmegaFB(yawRate);
 
         m_logger.logTranslation2d(Level.TRACE, "target", () -> target);
         m_logger.logState100(Level.TRACE, "theta/setpoint", () -> m_thetaSetpoint);
         m_logger.logDouble(Level.TRACE, "theta/measurement", () -> measurement);
         m_logger.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "theta/fb", () -> thetaFB);
-        m_logger.logDouble(Level.TRACE, "omega/measurement", () -> headingRate);
+        m_logger.logDouble(Level.TRACE, "omega/measurement", () -> yawRate);
         m_logger.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
         m_logger.logDouble(Level.TRACE, "target motion", () -> targetMotion);
@@ -205,8 +205,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         return twistWithLockM_S;
     }
 
-    private double getOmegaFB(double headingRate) {
-        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
+    private double getOmegaFB(double yawRate) {
+        double omegaFB = m_omegaController.calculate(yawRate, m_thetaSetpoint.v());
 
         if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
             // output filtering to prevent oscillation due to delay

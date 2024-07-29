@@ -34,8 +34,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.sensors.HeadingFactory;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.GyroFactory;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Monitor;
@@ -66,7 +66,7 @@ public class RobotContainerParkingLot implements Glassy {
     private static final double kDriveStatorLimit = 120;
 
     private final SwerveModuleCollection m_modules;
-    final HeadingInterface m_heading;
+    final Gyro m_gyro;
     final SwerveDriveSubsystem m_drive;
     final DriverControl driverControl;
     final OperatorControl operatorControl;
@@ -95,13 +95,13 @@ public class RobotContainerParkingLot implements Glassy {
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
-        m_heading = HeadingFactory.get(
+        m_gyro = GyroFactory.get(
                 driveLogger,
                 swerveKinodynamics,
                 m_modules,
                 asyncFactory);
         SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
-                m_heading.getHeadingNWU(),
+                m_gyro.getYawNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
@@ -109,7 +109,7 @@ public class RobotContainerParkingLot implements Glassy {
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
                 driveLogger,
-                m_heading,
+                m_gyro,
                 poseEstimator,
                 swerveLocal);
 

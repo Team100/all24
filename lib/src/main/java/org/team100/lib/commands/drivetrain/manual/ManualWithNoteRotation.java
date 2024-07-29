@@ -12,7 +12,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -49,7 +49,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private final SupplierLogger m_fieldLogger;
     private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final HeadingInterface m_heading;
+    private final Gyro m_gyro;
     private final Supplier<Optional<Translation2d>> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
@@ -65,7 +65,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
             FieldLogger fieldLogger,
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
-            HeadingInterface heading,
+            Gyro gyro,
             Supplier<Optional<Translation2d>> target,
             PIDController thetaController,
             PIDController omegaController,
@@ -73,7 +73,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         m_fieldLogger = fieldLogger;
         m_logger = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_heading = heading;
+        m_gyro = gyro;
         m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
@@ -85,7 +85,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     }
 
     public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_heading.getHeadingRateNWU());
+        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
         m_thetaController.reset();
@@ -121,7 +121,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
             return m_swerveKinodynamics.analyticDesaturation(scaled);
         }
         Rotation2d currentRotation = state.pose().getRotation();
-        double headingRate = m_heading.getHeadingRateNWU();
+        double yawRate = m_gyro.getYawRateNWU();
         Translation2d currentTranslation = state.pose().getTranslation();
         Rotation2d bearing = TargetUtil.bearing(currentTranslation, target.get()).plus(GeometryUtil.kRotation180);
         // take the short path
@@ -148,9 +148,9 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         m_logger.logDouble(Level.TRACE, "theta/measurement", () -> measurement);
         m_logger.logDouble(Level.TRACE, "theta/error", m_thetaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "theta/fb", () -> thetaFB);
-        double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
+        double omegaFB = m_omegaController.calculate(yawRate, m_thetaSetpoint.v());
         m_logger.logState100(Level.TRACE, "omega/reference", () -> m_thetaSetpoint);
-        m_logger.logDouble(Level.TRACE, "omega/measurement", () -> headingRate);
+        m_logger.logDouble(Level.TRACE, "omega/measurement", () -> yawRate);
         m_logger.logDouble(Level.TRACE, "omega/error", m_omegaController::getPositionError);
         m_logger.logDouble(Level.TRACE, "omega/fb", () -> omegaFB);
 

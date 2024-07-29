@@ -1,5 +1,6 @@
 package org.team100.lib.sensors;
 
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -13,13 +14,13 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * Does not use the tire model.
  */
-public class SimulatedHeading implements HeadingInterface {
+public class SimulatedGyro implements Gyro {
     private double m_heading = 0;
     private final SwerveKinodynamics m_kinodynamics;
     private final SwerveModuleCollection m_moduleCollection;
     private double m_time = Timer.getFPGATimestamp();
 
-    public SimulatedHeading(
+    public SimulatedGyro(
             SwerveKinodynamics kinodynamics,
             SwerveModuleCollection collection) {
         m_kinodynamics = kinodynamics;
@@ -27,7 +28,7 @@ public class SimulatedHeading implements HeadingInterface {
     }
 
     @Override
-    public Rotation2d getHeadingNWU() {
+    public Rotation2d getYawNWU() {
         SwerveModuleState100[] states = m_moduleCollection.states();
         // discretization is not necessary here because we only use the rotation, which
         // is invariant
@@ -40,12 +41,22 @@ public class SimulatedHeading implements HeadingInterface {
     }
 
     @Override
-    public double getHeadingRateNWU() {
+    public double getYawRateNWU() {
         SwerveModuleState100[] states = m_moduleCollection.states();
         // discretization is not necessary here because we only use the rotation, which
         // is invariant
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);
         return speeds.omegaRadiansPerSecond;
+    }
+
+    @Override
+    public Rotation2d getPitchNWU() {
+        return GeometryUtil.kRotationZero;
+    }
+
+    @Override
+    public Rotation2d getRollNWU() {
+        return GeometryUtil.kRotationZero;
     }
 
 }

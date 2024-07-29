@@ -10,7 +10,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
@@ -30,7 +30,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public class ManualWithFullStateHeading implements FieldRelativeDriver {
     private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final HeadingInterface m_heading;
+    private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
@@ -46,7 +46,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      * 
      * @param parent
      * @param swerveKinodynamics
-     * @param heading
+     * @param gyro
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
      * @param k                  full state gains
@@ -54,11 +54,11 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
     public ManualWithFullStateHeading(
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
-            HeadingInterface heading,
+            Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             double[] k) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_heading = heading;
+        m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_logger = parent.child(this);
         m_K = k;
@@ -69,11 +69,11 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
     public void reset(Pose2d currentPose) {
         m_goal = null;
         m_latch.unlatch();
-        updateSetpoint(currentPose.getRotation().getRadians(), getHeadingRateNWURad_S());
+        updateSetpoint(currentPose.getRotation().getRadians(), getYawRateNWURad_S());
     }
 
-    private double getHeadingRateNWURad_S() {
-        return m_heading.getHeadingRateNWU();
+    private double getYawRateNWURad_S() {
+        return m_gyro.getYawRateNWU();
     }
 
     /** Call this to keep the setpoint in sync with the manual rotation. */
@@ -109,8 +109,8 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         Rotation2d currentRotation = currentPose.getRotation();
-        double headingMeasurement = currentRotation.getRadians();
-        double headingRate = getHeadingRateNWURad_S();
+        double yawMeasurement = currentRotation.getRadians();
+        double yawRate = getYawRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
         m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
@@ -125,14 +125,14 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
 
         // take the short path
         m_goal = new Rotation2d(
-                Math100.getMinDistance(headingMeasurement, m_goal.getRadians()));
+                Math100.getMinDistance(yawMeasurement, m_goal.getRadians()));
 
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
         if (m_thetaSetpoint == null) {
             // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
             // overshoot?
-            updateSetpoint(headingMeasurement, headingRate);
+            updateSetpoint(yawMeasurement, yawRate);
         }
 
         // in snap mode we take dx and dy from the user, and control dtheta.
@@ -142,8 +142,8 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
 
-        double thetaError = MathUtil.angleModulus(m_thetaSetpoint.x() - headingMeasurement);
-        double omegaError = m_thetaSetpoint.v() - headingRate;
+        double thetaError = MathUtil.angleModulus(m_thetaSetpoint.x() - yawMeasurement);
+        double omegaError = m_thetaSetpoint.v() - yawRate;
 
         final double omegaFB = getOmegaFB(omegaError);
         final double thetaFB = getThetaFB(thetaError);
@@ -158,8 +158,8 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         m_logger.logString(Level.TRACE, "mode", () -> "snap");
         m_logger.logDouble(Level.TRACE, "goal/theta", m_goal::getRadians);
         m_logger.logState100(Level.TRACE, "setpoint/theta", () -> m_thetaSetpoint);
-        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> headingRate);
+        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> yawMeasurement);
+        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> yawRate);
         m_logger.logDouble(Level.TRACE, "error/theta", () -> thetaError);
         m_logger.logDouble(Level.TRACE, "error/omega", () -> omegaError);
         m_logger.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);

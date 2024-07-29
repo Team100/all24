@@ -74,8 +74,8 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.sensors.HeadingFactory;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.GyroFactory;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
@@ -151,7 +151,7 @@ public class RobotContainer implements Glassy {
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
-        final HeadingInterface heading = HeadingFactory.get(
+        final Gyro gyro = GyroFactory.get(
                 driveLogger,
                 swerveKinodynamics,
                 m_modules,
@@ -159,7 +159,7 @@ public class RobotContainer implements Glassy {
 
         // ignores the rotation derived from vision.
         final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
-                heading.getHeadingNWU(),
+                gyro.getYawNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
@@ -183,7 +183,7 @@ public class RobotContainer implements Glassy {
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
                 driveLogger,
-                heading,
+                gyro,
                 poseEstimator,
                 swerveLocal);
         m_cameraUpdater = new CameraUpdater(() -> poseEstimator.getEstimatedPosition().pose(), m_layout);
@@ -321,7 +321,7 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         swerveKinodynamics,
-                        heading,
+                        gyro,
                         noteListener::getClosestTranslation2d,
                         thetaController,
                         omegaController,
@@ -334,7 +334,7 @@ public class RobotContainer implements Glassy {
                 new ManualWithProfiledHeading(
                         commandLogger,
                         swerveKinodynamics,
-                        heading,
+                        gyro,
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
@@ -344,7 +344,7 @@ public class RobotContainer implements Glassy {
                 new ManualWithFullStateHeading(
                         commandLogger,
                         swerveKinodynamics,
-                        heading,
+                        gyro,
                         driverControl::desiredRotation,
                         new double[] { 5.0, 0.5 }));
 
@@ -352,7 +352,7 @@ public class RobotContainer implements Glassy {
                 new ManualWithMinTimeHeading(
                         commandLogger,
                         swerveKinodynamics,
-                        heading,
+                        gyro,
                         driverControl::desiredRotation));
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
@@ -360,7 +360,7 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         swerveKinodynamics,
-                        heading,
+                        gyro,
                         noteListener::getClosestTranslation2d,
                         thetaController,
                         omegaController,
@@ -371,7 +371,7 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         swerveKinodynamics,
-                        heading,
+                        gyro,
                         driverControl::target,
                         thetaController,
                         omegaController,
@@ -382,7 +382,7 @@ public class RobotContainer implements Glassy {
                         fieldLogger,
                         commandLogger,
                         swerveKinodynamics,
-                        heading,
+                        gyro,
                         thetaController,
                         omegaController));
 
@@ -392,7 +392,7 @@ public class RobotContainer implements Glassy {
                 fieldLogger,
                 commandLogger,
                 swerveKinodynamics,
-                heading,
+                gyro,
                 thetaController,
                 omega2Controller);
 
@@ -400,7 +400,7 @@ public class RobotContainer implements Glassy {
                 fieldLogger,
                 commandLogger,
                 swerveKinodynamics,
-                heading,
+                gyro,
                 thetaController,
                 omega2Controller);
 

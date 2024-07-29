@@ -10,7 +10,7 @@ import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.sensors.MockGyro;
 import org.team100.lib.telemetry.TestLogger;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.testing.Timeless;
@@ -23,7 +23,7 @@ class RotateTest extends Fixtured implements Timeless {
     void testRotate() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         SwerveDriveSubsystem swerveDriveSubsystem = fixture.drive;
-        MockHeading heading = new MockHeading();
+        MockGyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         // remember the test rotation rate is *very* slow.
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), 0.001);
@@ -32,7 +32,7 @@ class RotateTest extends Fixtured implements Timeless {
         Rotate rotate = new Rotate(
                 logger,
                 swerveDriveSubsystem,
-                heading,
+                gyro,
                 swerveKinodynamics,
                 targetAngle);
         Rotate.shutDownForTest();

@@ -8,7 +8,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -30,7 +30,7 @@ public class Rotate extends Command100 {
     private static final double kSpeed = 0.5;
 
     private final SwerveDriveSubsystem m_robotDrive;
-    private final HeadingInterface m_heading;
+    private final Gyro m_gyro;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final State100 m_goalState;
     final HolonomicDriveController3 m_controller;
@@ -45,7 +45,7 @@ public class Rotate extends Command100 {
     public Rotate(
             SupplierLogger parent,
             SwerveDriveSubsystem drivetrain,
-            HeadingInterface heading,
+            Gyro gyro,
             SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
         super(parent);
@@ -63,7 +63,7 @@ public class Rotate extends Command100 {
         tc.setP(3.5);
 
         m_controller = new HolonomicDriveController3(parent, xc, yc, tc);
-        m_heading = heading;
+        m_gyro = gyro;
         m_swerveKinodynamics = swerveKinodynamics;
         m_goalState = new State100(targetAngleRadians, 0);
         refTheta = new State100(0, 0);
@@ -122,7 +122,7 @@ public class Rotate extends Command100 {
         }
 
         double headingMeasurement = currentPose.getRotation().getRadians();
-        double headingRate = m_heading.getHeadingRateNWU();
+        double headingRate = m_gyro.getYawRateNWU();
 
         // log what we did
         m_logger.logDouble(Level.TRACE, "errorX", () -> refTheta.x() - headingMeasurement);
