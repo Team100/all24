@@ -83,5 +83,9 @@ public enum Experiment {
      * Use low-pass filter and deadbanding on controller feedback, to prevent
      * overresponse to noise and jitter around zero.
      */
-    FilterFeedback
+    FilterFeedback,
+    /**
+     * Use the network-tables gyro. 
+     */
+    NetworkGyro
 }
