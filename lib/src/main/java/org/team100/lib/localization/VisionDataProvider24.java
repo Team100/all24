@@ -21,8 +21,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.MultiSubscriber;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableListenerPoller;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
@@ -119,6 +121,12 @@ public class VisionDataProvider24 implements Glassy {
 
     /** Start listening for updates. */
     public void enable() {
+        // NetworkTableInstance inst = NetworkTableInstance.getDefault();
+        // MultiSubscriber sub = new MultiSubscriber(inst, new String[] { "vision" });
+        // NetworkTableListenerPoller p = new NetworkTableListenerPoller(inst);
+        // p.addListener(sub, EnumSet.of(NetworkTableEvent.Kind.kValueAll));
+
+
         NetworkTableInstance.getDefault().addListener(
                 new String[] { "vision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
