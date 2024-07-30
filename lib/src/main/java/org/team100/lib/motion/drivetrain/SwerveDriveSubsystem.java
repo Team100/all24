@@ -1,7 +1,5 @@
 package org.team100.lib.motion.drivetrain;
 
-import java.util.function.Supplier;
-
 import org.team100.lib.config.DriverSkill;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
@@ -45,7 +43,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         m_swerveLocal = swerveLocal;
         // this was previously TimedCache with a 0.01 sec timeout
         // but that seems unnecessarily complex; the CotemporalCache
-        // is invalidated by the command scheduler, which seems simpler. 
+        // is invalidated by the command scheduler, which seems simpler.
         m_stateSupplier = new CotemporalCache<>(this::update);
         stop();
     }
@@ -76,7 +74,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
                 v.x(),
                 v.y(),
                 v.theta(),
-                m_stateSupplier.get().pose().getRotation());
+                getState().pose().getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_gyro.getYawRateNWU(), kDtSec);
     }
 
@@ -93,7 +91,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
                 twist.x(),
                 twist.y(),
                 twist.theta(),
-                m_stateSupplier.get().pose().getRotation());
+                getState().pose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_gyro.getYawRateNWU(), kDtSec);
     }
 
@@ -144,21 +142,21 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
 
     /** The effect won't be seen until the next cycle. */
     public void resetTranslation(Translation2d translation) {
-        m_poseEstimator.resetPosition(
+        m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
                 m_swerveLocal.positions(),
                 new Pose2d(translation, m_gyro.getYawNWU()),
                 Timer.getFPGATimestamp());
-        // m_stateSupplier.reset();
+        m_stateSupplier.reset();
     }
 
     public void resetPose(Pose2d robotPose) {
-        m_poseEstimator.resetPosition(
+        m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
                 m_swerveLocal.positions(),
                 robotPose,
                 Timer.getFPGATimestamp());
-        // m_stateSupplier.reset();
+        m_stateSupplier.reset();
     }
 
     public void resetSetpoint(SwerveSetpoint setpoint) {
@@ -175,6 +173,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      * acceleration. This is rate-limited and cached.
      */
     public SwerveState getState() {
+        // return m_poseEstimator.get(Timer.getFPGATimestamp());
         return m_stateSupplier.get();
     }
 
@@ -189,23 +188,24 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      */
     @Override
     public void periodic() {
+        // m_poseEstimator.periodic();
         m_stateSupplier.reset();
-        m_logger.logSwerveState(Level.COMP, "state", m_stateSupplier::get);
-        m_logger.logDouble(Level.TRACE, "Tur Deg", () -> m_stateSupplier.get().pose().getRotation().getDegrees());
+        m_logger.logSwerveState(Level.COMP, "state", this::getState);
+        m_logger.logDouble(Level.TRACE, "Tur Deg", () -> getState().pose().getRotation().getDegrees());
         m_logger.logDoubleArray(Level.COMP, "pose array",
                 () -> new double[] {
-                        m_stateSupplier.get().pose().getX(),
-                        m_stateSupplier.get().pose().getY(),
-                        m_stateSupplier.get().pose().getRotation().getRadians()
+                        getState().pose().getX(),
+                        getState().pose().getY(),
+                        getState().pose().getRotation().getRadians()
                 });
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
         m_fieldLogger.logDoubleArray(Level.COMP, "robot", () -> new double[] {
-                m_stateSupplier.get().pose().getX(),
-                m_stateSupplier.get().pose().getY(),
-                m_stateSupplier.get().pose().getRotation().getDegrees()
+                getState().pose().getX(),
+                getState().pose().getY(),
+                getState().pose().getRotation().getDegrees()
         });
         m_logger.logDouble(Level.TRACE, "heading rate rad_s", m_gyro::getYawRateNWU);
         m_swerveLocal.periodic();
@@ -224,9 +224,12 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
 
     /** used by the supplier */
     private SwerveState update() {
-        return m_poseEstimator.update(
-                Timer.getFPGATimestamp(),
+        double now = Timer.getFPGATimestamp();
+        m_poseEstimator.put(
+                now,
                 m_gyro.getYawNWU(),
                 m_swerveLocal.positions());
+        // TODO: put vision data too
+        return m_poseEstimator.get(now);
     }
 }

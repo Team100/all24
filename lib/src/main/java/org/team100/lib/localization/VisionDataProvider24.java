@@ -13,7 +13,6 @@ import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Chronos.Sample;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -21,10 +20,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.MultiSubscriber;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableListenerPoller;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.ValueEventData;
 import edu.wpi.first.util.struct.StructBuffer;
@@ -126,7 +123,6 @@ public class VisionDataProvider24 implements Glassy {
         // NetworkTableListenerPoller p = new NetworkTableListenerPoller(inst);
         // p.addListener(sub, EnumSet.of(NetworkTableEvent.Kind.kValueAll));
 
-
         NetworkTableInstance.getDefault().addListener(
                 new String[] { "vision" },
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll),
@@ -209,14 +205,8 @@ public class VisionDataProvider24 implements Glassy {
 
         // Estimated instant represented by the blips
         final double frameTimeSec = Timer.getFPGATimestamp() - kTotalLatencySeconds;
-        Optional<Rotation2d> optionalGyroRotation = m_poseEstimator.getSampledRotation(frameTimeSec);
 
-        if (optionalGyroRotation.isEmpty()) {
-            Util.warn("No gyro rotation available!");
-            return;
-        }
-
-        final Rotation2d gyroRotation = optionalGyroRotation.get();
+        final Rotation2d gyroRotation = m_poseEstimator.get(frameTimeSec).pose().getRotation();
 
         estimateFromBlips(
                 cameraSerialNumber,
@@ -326,9 +316,9 @@ public class VisionDataProvider24 implements Glassy {
                         // this hard limit excludes false positives, which were a bigger problem in 2023
                         // due to the coarse tag family used. in 2024 this might not be an issue.
                         latestTimeUs = RobotController.getFPGATime();
-                        m_poseEstimator.addVisionMeasurement(
-                                currentRobotinFieldCoords,
+                        m_poseEstimator.put(
                                 frameTimeSec,
+                                currentRobotinFieldCoords,
                                 stateStdDevs(),
                                 visionMeasurementStdDevs(distanceM));
                     }
@@ -396,9 +386,9 @@ public class VisionDataProvider24 implements Glassy {
                         // this hard limit excludes false positives, which were a bigger problem in 2023
                         // due to the coarse tag family used. in 2024 this might not be an issue.
                         latestTimeUs = RobotController.getFPGATime();
-                        m_poseEstimator.addVisionMeasurement(
-                                currentRobotinFieldCoords,
+                        m_poseEstimator.put(
                                 frameTimeSec,
+                                currentRobotinFieldCoords,
                                 stateStdDevs(),
                                 visionMeasurementStdDevs(distanceM));
                     }

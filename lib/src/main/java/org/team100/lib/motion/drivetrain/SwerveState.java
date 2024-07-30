@@ -43,6 +43,14 @@ public class SwerveState {
                 new State100(x.getRotation().getRadians(), v.theta(), a.theta()));
     }
 
+    public SwerveState(Pose2d x) {
+        this(x, new FieldRelativeVelocity(0, 0, 0));
+    }
+
+    public SwerveState(Rotation2d x) {
+        this(new Pose2d(0, 0, x));
+    }
+
     public SwerveState() {
         this(new State100(), new State100(), new State100());
     }

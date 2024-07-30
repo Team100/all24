@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.team100.lib.config.Camera;
 import org.team100.lib.config.Identity;
@@ -35,7 +36,7 @@ public class NotePosition24ArrayListener {
     private static final double kMaxSightAgeS = 0.1;
     private StructBuffer<Rotation3d> m_buf = StructBuffer.create(Rotation3d.struct);
     private List<Translation2d> notes = new ArrayList<>();
-    private final SwerveDrivePoseEstimator100 m_poseEstimator;
+    private final Supplier<Pose2d> m_poseSupplier;
     private double latestTime = 0;
 
     /**
@@ -50,8 +51,8 @@ public class NotePosition24ArrayListener {
      */
     private static final double kTotalLatencySeconds = 0.075;
 
-    public NotePosition24ArrayListener(SwerveDrivePoseEstimator100 poseEstimator) {
-        m_poseEstimator = poseEstimator;
+    public NotePosition24ArrayListener(Supplier<Pose2d> poseSupplier) {
+        m_poseSupplier = poseSupplier;
     }
 
     void consumeValues(NetworkTableEvent e) {
@@ -83,7 +84,8 @@ public class NotePosition24ArrayListener {
                 return;
             }
             Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
-            Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
+            // TODO: this should use the timestamp of the camera data, not the current time.
+            Pose2d robotPose = m_poseSupplier.get();
             notes = TargetLocalizer.cameraRotsToFieldRelativeArray(
                     robotPose,
                     cameraInRobotCoordinates,
@@ -97,7 +99,7 @@ public class NotePosition24ArrayListener {
      * Field-relative translations of recent sights.
      */
     public List<Translation2d> getTranslation2dArray() {
-        Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
+        Pose2d robotPose = m_poseSupplier.get();
         switch (Identity.instance) {
             case BLANK:
                 SimulatedCamera simCamera = SimulatedCamera.getGamePieceCamera();
@@ -121,7 +123,7 @@ public class NotePosition24ArrayListener {
      * The field-relative translation of the closest note, if any.
      */
     public Optional<Translation2d> getClosestTranslation2d() {
-        Pose2d robotPose = m_poseEstimator.getEstimatedPosition().pose();
+        Pose2d robotPose = m_poseSupplier.get();
         return NotePicker.closestNote(
                 getTranslation2dArray(),
                 robotPose);

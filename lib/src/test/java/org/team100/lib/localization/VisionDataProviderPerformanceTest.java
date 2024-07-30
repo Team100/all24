@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 
@@ -35,14 +35,14 @@ class VisionDataProviderPerformanceTest {
         final List<Double> timeEstimate = new ArrayList<Double>();
         PoseEstimator100 poseEstimator = new PoseEstimator100() {
             @Override
-            public void addVisionMeasurement(Pose2d p, double t, double[] sd1, double[] sd2) {
+            public void put(double t, Pose2d p, double[] sd1, double[] sd2) {
                 poseEstimate.add(p);
                 timeEstimate.add(t);
             }
 
             @Override
-            public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
-                return Optional.of(new Rotation2d(-Math.PI / 4));
+            public SwerveState get(double timestampSeconds) {
+                return new SwerveState(new Rotation2d(-Math.PI / 4));
             }
         };
 

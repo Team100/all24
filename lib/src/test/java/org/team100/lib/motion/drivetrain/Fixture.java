@@ -33,13 +33,12 @@ public class Fixture {
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
         gyro = new SimulatedGyro(swerveKinodynamics, collection);
+        swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
                 gyro.getYawNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,
                 0); // initial time is zero here for testing
-
-        swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
 
         drive = new SwerveDriveSubsystem(
                 fieldLogger,

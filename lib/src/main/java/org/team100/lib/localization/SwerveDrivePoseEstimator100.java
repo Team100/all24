@@ -3,7 +3,6 @@ package org.team100.lib.localization;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
@@ -24,13 +23,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 
-/**
- * Collapses WPI SwerveDrivePoseEstimator and PoseEstimator.
- *
- * call update() periodically.
- *
- * call addVisionMeasurement} asynchronously.
- */
 public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private static final double kBufferDuration = 1.5;
     // look back a little to get a pose for velocity estimation
@@ -41,6 +33,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private final SwerveKinodynamics m_kinodynamics;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
     private final SlipperyTireUtil m_tireUtil;
+
     /**
      * maintained in resetPosition().
      */
@@ -80,23 +73,13 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
     }
 
-    /**
-     * Gets the estimated robot pose.
-     * 
-     * This should really only be used by other threads, so the order of
-     * update and reading doesn't matter.
-     */
-    public SwerveState getEstimatedPosition() {
-        return m_poseBuffer.lastEntry().getValue().m_state;
-    }
-
     @Override
-    public Optional<Rotation2d> getSampledRotation(double timestampSeconds) {
-        InterpolationRecord sample = m_poseBuffer.get(timestampSeconds);
-        return Optional.of(sample.m_state.pose().getRotation());
+    public SwerveState get(double timestampSeconds) {
+        return m_poseBuffer.get(timestampSeconds).m_state;
     }
 
-    public void resetPosition(
+    /** Empty the buffer and add the given measurements. */
+    public void reset(
             Rotation2d gyroAngle,
             SwerveModulePosition100[] modulePositions,
             Pose2d pose,
@@ -121,17 +104,10 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
     }
 
-    void resetOdometry(
-            Rotation2d gyroAngle,
-            Pose2d pose) {
-        m_gyroOffset = pose.getRotation().minus(gyroAngle);
-        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
-    }
-
     @Override
-    public void addVisionMeasurement(
-            Pose2d measurement,
+    public void put(
             double timestampS,
+            Pose2d measurement,
             double[] stateSigma,
             double[] visionSigma) {
 
@@ -144,7 +120,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         // Step 0: If this measurement is old enough to be outside the pose buffer's
         // timespan, skip.
 
-        if (m_poseBuffer.lastKey() - kBufferDuration > timestampS) {
+        if (m_poseBuffer.tooOld(timestampS)) {
             return;
         }
 
@@ -194,36 +170,16 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             double entryTimestampS = entry.getKey();
             Rotation2d entryGyroAngle = entry.getValue().m_gyroAngle;
             SwerveModulePosition100[] wheelPositions = entry.getValue().m_wheelPositions;
-            update(entryTimestampS, entryGyroAngle, wheelPositions);
+            put(entryTimestampS, entryGyroAngle, wheelPositions);
         }
 
     }
 
     /**
-     * Given q and r stddev's, what mixture should that yield?
-     * This is the "closed form Kalman gain for continuous Kalman filter with A = 0
-     * and C = I. See wpimath/algorithms.md." ... but really it's just a mixer.
+     * Put a new state estimate based on gyro and wheel data. These are expected to
+     * be current measurements -- there is no history replay here.
      */
-    private double mix(final double q, final double r) {
-        if (q == 0.0)
-            return 0.0;
-        return q / (q + Math.sqrt(q * r));
-    }
-
-    /**
-     * Updates the pose estimator with wheel encoder and gyro information and
-     * returns
-     * the pose estimate for the given time.
-     * 
-     * This should be called periodically.
-     *
-     * @param currentTimeS   Time at which this method was called, in seconds.
-     * @param gyroAngle      Current gyroscope angle.
-     * @param wheelPositions Current distance measurements and rotations of
-     *                       the swerve modules.
-     * @return The estimated pose of the robot at the given time.
-     */
-    public SwerveState update(
+    public void put(
             double currentTimeS,
             Rotation2d gyroAngle,
             SwerveModulePosition100[] wheelPositions) {
@@ -233,9 +189,9 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 currentTimeS, velocityDtS);
 
         if (consistentPair.isEmpty()) {
-            // we're at the beginning. there's nothing to apply the wheel position delta to.
-            // the buffer is never empty, so there's always a ceiling.
-            return m_poseBuffer.ceilingEntry(currentTimeS).getValue().m_state;
+            // We're at the beginning. There's nothing to apply the wheel position delta to.
+            // This should never happen.
+            return;
         }
 
         // the entry right before this one, the basis for integration.
@@ -304,8 +260,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_poseBuffer.put(
                 currentTimeS,
                 new InterpolationRecord(m_kinodynamics.getKinematics(), swerveState, gyroAngle, wheelPositions));
-
-        return swerveState;
     }
 
     @Override
@@ -320,5 +274,16 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         if (ct != m_numModules) {
             throw new IllegalArgumentException("Wrong module count: " + ct);
         }
+    }
+
+    /**
+     * Given q and r stddev's, what mixture should that yield?
+     * This is the "closed form Kalman gain for continuous Kalman filter with A = 0
+     * and C = I. See wpimath/algorithms.md." ... but really it's just a mixer.
+     */
+    private double mix(final double q, final double r) {
+        if (q == 0.0)
+            return 0.0;
+        return q / (q + Math.sqrt(q * r));
     }
 }
