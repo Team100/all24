@@ -1,7 +1,8 @@
 """ Fake gyro for testing. """
 
 # pylint: disable=too-few-public-methods
-
+import math
+import time
 from app.gyro import Gyro
 from app.network import Network
 
@@ -11,5 +12,10 @@ class FakeGyro(Gyro):
         self.network = network
 
     def sample(self) -> None:
-        self.network.set_gyro_yaw(0, 0)
-        self.network.set_gyro_rate(0, 0)
+        # some fake data just to see if it moves
+        t: float = time.time()
+        self.network.set_gyro_yaw(math.sin(t), 0)
+        self.network.set_gyro_rate(math.cos(t), 0)
+
+        # self.network.set_gyro_yaw(0, 0)
+        # self.network.set_gyro_rate(0, 0)
