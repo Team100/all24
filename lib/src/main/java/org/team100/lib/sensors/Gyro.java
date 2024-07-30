@@ -4,7 +4,11 @@ import org.team100.lib.dashboard.Glassy;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
-/** Three-axis gyro, NWU. */
+/**
+ * Three-axis gyro, NWU.
+ * 
+ * TODO: make all these optionals in case the gyro fails
+ */
 public interface Gyro extends Glassy {
     /** Yaw in radians, NWU, counterclockwise positive. */
     Rotation2d getYawNWU();

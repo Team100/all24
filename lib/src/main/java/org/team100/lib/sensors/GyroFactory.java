@@ -2,6 +2,8 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.config.Identity;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.telemetry.SupplierLogger;
@@ -25,8 +27,11 @@ public class GyroFactory {
                     // it can't find this library, so check here first.
                     // this seems only to be a problem in some test or
                     // simulation scenarios.
-                    // System.loadLibrary("vmxHaljni");                   
-                    return new SingleNavXGyro(parent, asyncFactory.get());
+                    // System.loadLibrary("vmxHaljni");
+                    return new SelectGyro(
+                            new NTGyro(),
+                            new SingleNavXGyro(parent, asyncFactory.get()),
+                            () -> Experiments.instance.enabled(Experiment.NetworkGyro));
                 } catch (UnsatisfiedLinkError e) {
                     // fall back to simulated heading for testing.
                     Util.warn("No NavX Library!");
@@ -35,7 +40,10 @@ public class GyroFactory {
                 }
             default:
                 // for simulation
-                return new SimulatedGyro(kinodynamics, collection);
+                return new SelectGyro(
+                        new NTGyro(),
+                        new SimulatedGyro(kinodynamics, collection),
+                        () -> Experiments.instance.enabled(Experiment.NetworkGyro));
 
         }
     }
