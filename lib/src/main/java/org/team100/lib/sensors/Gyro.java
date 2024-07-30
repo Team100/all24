@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 /**
  * Three-axis gyro, NWU.
  * 
+ * Implementations should extrapolate measurements to the current instant.
+ * 
  * TODO: make all these optionals in case the gyro fails
  */
 public interface Gyro extends Glassy {
