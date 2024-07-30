@@ -1,7 +1,9 @@
 package org.team100.lib.motion.drivetrain;
 
-import org.team100.lib.commands.Subsystem100;
+import java.util.function.Supplier;
+
 import org.team100.lib.config.DriverSkill;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -10,24 +12,25 @@ import org.team100.lib.sensors.Gyro;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.ExpiringMemoizingSupplier;
+import org.team100.lib.util.CotemporalCache;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * There are four mutually exclusive drive methods.
  * We depend on CommandScheduler to enforce the mutex.
  */
-public class SwerveDriveSubsystem extends Subsystem100 {
+public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     private final SupplierLogger m_fieldLogger;
     private final SupplierLogger m_logger;
     private final Gyro m_gyro;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
-    private final ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
+    private final CotemporalCache<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
             SupplierLogger fieldLogger,
@@ -40,8 +43,10 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_gyro = gyro;
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
-        // state update at 100 hz.
-        m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
+        // this was previously TimedCache with a 0.01 sec timeout
+        // but that seems unnecessarily complex; the CotemporalCache
+        // is invalidated by the command scheduler, which seems simpler. 
+        m_stateSupplier = new CotemporalCache<>(this::update);
         stop();
     }
 
@@ -137,13 +142,14 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal.stop();
     }
 
+    /** The effect won't be seen until the next cycle. */
     public void resetTranslation(Translation2d translation) {
         m_poseEstimator.resetPosition(
                 m_gyro.getYawNWU(),
                 m_swerveLocal.positions(),
                 new Pose2d(translation, m_gyro.getYawNWU()),
                 Timer.getFPGATimestamp());
-        m_stateSupplier.reset();
+        // m_stateSupplier.reset();
     }
 
     public void resetPose(Pose2d robotPose) {
@@ -152,7 +158,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 m_swerveLocal.positions(),
                 robotPose,
                 Timer.getFPGATimestamp());
-        m_stateSupplier.reset();
+        // m_stateSupplier.reset();
     }
 
     public void resetSetpoint(SwerveSetpoint setpoint) {
@@ -179,12 +185,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     ///////////////////////////////////////////////////////////////
 
     /**
-     * Updates odometry.
-     * 
      * Periodic() should not do actuation. Let commands do that.
      */
     @Override
-    public void periodic100(double dt) {
+    public void periodic() {
+        m_stateSupplier.reset();
         m_logger.logSwerveState(Level.COMP, "state", m_stateSupplier::get);
         m_logger.logDouble(Level.TRACE, "Tur Deg", () -> m_stateSupplier.get().pose().getRotation().getDegrees());
         m_logger.logDoubleArray(Level.COMP, "pose array",

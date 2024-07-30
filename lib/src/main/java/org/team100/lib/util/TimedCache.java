@@ -7,13 +7,15 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj.RobotController;
 
 /**
- * Memoize a supplier, and expire the memo.
+ * Cache a supplier, and expire after a fixed time.
  * 
  * Use this to rate-limit an expensive supplier.
  * 
+ * NOTE: the independent clock here seems bad; try CotemporalCache instead.
+ * 
  * Cribbed from guava.
  */
-public class ExpiringMemoizingSupplier<T> implements Supplier<T> {
+public class TimedCache<T> implements Supplier<T> {
     private final Supplier<T> m_delegate;
     private final long m_durationMicroS;
     private final AtomicReference<T> m_value;
@@ -23,7 +25,7 @@ public class ExpiringMemoizingSupplier<T> implements Supplier<T> {
      * @param delegate
      * @param durationMicroS zero is allowed, in which case there is no memo.
      */
-    public ExpiringMemoizingSupplier(Supplier<T> delegate, long durationMicroS) {
+    public TimedCache(Supplier<T> delegate, long durationMicroS) {
         if (durationMicroS < 0)
             throw new IllegalArgumentException("durationMicroS cannot be negative");
         m_delegate = delegate;

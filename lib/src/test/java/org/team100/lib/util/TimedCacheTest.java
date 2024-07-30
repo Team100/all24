@@ -4,19 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-class ExpiringMemoizingSupplierTest {
+class TimedCacheTest {
     private int value = 0;
 
     @Test
     void testSimple() {
-        ExpiringMemoizingSupplier<String> s = new ExpiringMemoizingSupplier<>(
+        TimedCache<String> s = new TimedCache<>(
                 () -> "hi", 10000);
         assertEquals("hi", s.get());
     }
 
     @Test
     void testTiming() throws InterruptedException {
-        ExpiringMemoizingSupplier<Integer> s = new ExpiringMemoizingSupplier<>(
+        TimedCache<Integer> s = new TimedCache<>(
                 () -> ++value, 10000);
         // first call increments
         assertEquals(1, s.get());
