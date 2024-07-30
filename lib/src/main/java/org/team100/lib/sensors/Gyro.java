@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Implementations should extrapolate measurements to the current instant.
  * 
  * TODO: make all these optionals in case the gyro fails
+ * TODO: maybe include timestamp here somehow?
  */
 public interface Gyro extends Glassy {
     /** Yaw in radians, NWU, counterclockwise positive. */

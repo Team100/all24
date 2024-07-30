@@ -2,6 +2,8 @@ package org.team100.lib.sensors;
 
 import java.util.EnumSet;
 
+import org.team100.lib.util.TimestampedDouble;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.MultiSubscriber;
 import edu.wpi.first.networktables.NetworkTableEvent;
@@ -9,6 +11,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableListenerPoller;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.ValueEventData;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Gyro data from network tables.
@@ -24,15 +27,17 @@ import edu.wpi.first.networktables.ValueEventData;
 public class NTGyro implements Gyro {
     private static final String kYaw = "gyro_yaw";
     private static final String kYawRate = "gyro_rate";
+    private static final String kPitch = "gyro_pitch";
+    private static final String kRoll = "gyro_roll";
     /** For now, we just average all the inputs. */
     private static final double kAuthority = 0.5;
 
     private final NetworkTableListenerPoller m_poller;
 
-    private double m_yaw;
-    private double m_yawRate;
-    private double m_pitch;
-    private double m_roll;
+    private TimestampedDouble m_yaw;
+    private TimestampedDouble m_yawRate;
+    private TimestampedDouble m_pitch;
+    private TimestampedDouble m_roll;
 
     public NTGyro() {
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -46,25 +51,33 @@ public class NTGyro implements Gyro {
     @Override
     public Rotation2d getYawNWU() {
         update();
-        return new Rotation2d(m_yaw);
+        // extrapolate to now, assuming the rate is current
+        double nowS = Timer.getFPGATimestamp();
+        double dtS = nowS - m_yaw.getTimeS();
+        double dYaw = m_yawRate.getValue() * dtS;
+        double nowYaw = m_yaw.getValue() + dYaw;
+        return new Rotation2d(nowYaw);
     }
 
     @Override
     public double getYawRateNWU() {
         update();
-        return m_yawRate;
+        // TODO: extrapolate based on yaw acceleration?
+        return m_yawRate.getValue();
     }
 
     @Override
     public Rotation2d getPitchNWU() {
         update();
-        return new Rotation2d(m_pitch);
+        // TODO: extrapolate based on pitch rate
+        return new Rotation2d(m_pitch.getValue());
     }
 
     @Override
     public Rotation2d getRollNWU() {
         update();
-        return new Rotation2d(m_roll);
+        // TODO: extrapolate based on roll rate
+        return new Rotation2d(m_roll.getValue());
     }
 
     ///////////////////////////////////
@@ -90,19 +103,24 @@ public class NTGyro implements Gyro {
                 continue;
             if (!v.isDouble())
                 continue;
-            // TODO: do something with timestamp, maybe include it in the gyro API
-            long timestamp = v.getServerTime();
             String measure = fields[2];
             if (measure.equals(kYaw)) {
                 m_yaw = updateMeasure(m_yaw, v);
             } else if (measure.equals(kYawRate)) {
                 m_yawRate = updateMeasure(m_yawRate, v);
+            } else if (measure.equals(kPitch)) {
+                m_pitch = updateMeasure(m_pitch, v);
+            } else if (measure.equals(kRoll)) {
+                m_roll = updateMeasure(m_roll, v);
             }
-            // TODO: add the other dimensions
         }
     }
 
-    private double updateMeasure(double val, NetworkTableValue v) {
-        return (1 - kAuthority) * val + kAuthority * v.getDouble();
+    private TimestampedDouble updateMeasure(TimestampedDouble val, NetworkTableValue v) {
+        // TODO: if it's been a long time since the previous value, just use the new
+        // one.
+        return new TimestampedDouble(
+                (1 - kAuthority) * val.getValue() + kAuthority * v.getDouble(),
+                v.getServerTime() / 1000000.0);
     }
 }
