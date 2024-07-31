@@ -341,7 +341,8 @@ public class SwerveKinodynamics implements Glassy {
      * @param accelM_S      magnitude of acceleration
      * @param dt            time to aim for
      */
-    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn, SwerveModuleState100[] prevSwerveModuleState, double gyroRateRad_S, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn,
+            SwerveModuleState100[] prevSwerveModuleState, double gyroRateRad_S, double dt) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         // ... which is subtracted here; this isn't really a field-relative
@@ -352,14 +353,14 @@ public class SwerveKinodynamics implements Glassy {
                 in.omegaRadiansPerSecond,
                 angle);
         ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
-        
+
         ChassisSpeeds prevChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 prevIn.vxMetersPerSecond,
                 prevIn.vyMetersPerSecond,
                 prevIn.omegaRadiansPerSecond,
                 angle);
         ChassisSpeeds prevDescretized = ChassisSpeeds.discretize(prevChassisSpeeds, dt);
-        
+
         ChassisSpeeds acceleration = (chassisSpeeds.minus(prevDescretized)).div(dt);
 
         return m_kinematics.toSwerveModuleStates(descretized, acceleration, prevSwerveModuleState, dt);
@@ -368,7 +369,8 @@ public class SwerveKinodynamics implements Glassy {
     /**
      * The resulting state speeds are always positive.
      */
-    public SwerveModuleState100[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds, ChassisSpeeds prevChassisSpeeds, SwerveModuleState100[] prevModuleStates, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds,
+            ChassisSpeeds prevChassisSpeeds, SwerveModuleState100[] prevModuleStates, double dt) {
         return m_kinematics.toSwerveModuleStates(speeds, prevChassisSpeeds, prevModuleStates, dt);
     }
 

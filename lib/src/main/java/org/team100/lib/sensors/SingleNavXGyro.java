@@ -2,13 +2,13 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
-// import org.team100.lib.sensors.navx.AHRS100;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
@@ -22,7 +22,8 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * TODO: try USB supplemental power for the NavX-MXP
  */
-public class SingleNavXGyro implements Gyro100 {
+public class SingleNavXGyro implements Gyro {
+
     /**
      * The java code in {@link edu.wpi.first.hal.SPIJNI.spiReadB} has to read and
      * parse every update. 200 Hz seems to make it do a lot of work (7.5%
@@ -76,6 +77,7 @@ public class SingleNavXGyro implements Gyro100 {
      * NOTE: the async is just for logging, maybe don't use a whole thread for it.
      */
     public SingleNavXGyro(SupplierLogger parent, Async async) {
+
         m_logger = parent.child(this);
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
@@ -125,15 +127,48 @@ public class SingleNavXGyro implements Gyro100 {
 
         m_ahrs.zeroYaw();
         async.addPeriodic(this::logStuff, 1, "SingleNavXGyro");
+
     }
+
+    @Override
+    public Rotation2d getYawNWU() {
+        Rotation2d currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * getYawNEDDeg());
+        m_logger.logDouble(Level.TRACE, "Heading NWU (rad)", currentHeadingNWU::getRadians);
+        return currentHeadingNWU;
+    }
+
+    @Override
+    public double getYawRateNWU() {
+        double currentHeadingRateNWU = Math.toRadians(getYawRateNEDDeg_s());
+        m_logger.logDouble(Level.TRACE, "Heading Rate NWU (rad_s)", () -> currentHeadingRateNWU);
+        return currentHeadingRateNWU;
+    }
+
+    @Override
+    public Rotation2d getPitchNWU() {
+        Rotation2d pitchNWU = Rotation2d.fromDegrees(-1.0 * getPitchDeg());
+        m_logger.logDouble(Level.TRACE, "Pitch NWU (rad)", pitchNWU::getRadians);
+        return pitchNWU;
+    }
+
+    @Override
+    public Rotation2d getRollNWU() {
+        Rotation2d rollNWU = Rotation2d.fromDegrees(-1.0 * getRollDeg());
+        m_logger.logDouble(Level.TRACE, "Pitch NWU (rad)", rollNWU::getRadians);
+        return rollNWU;
+    }
+
+    ///////////////////////
+    //
+    // below was previously in SingleNavXGyro.
+    //
 
     /**
      * NOTE NOTE NOTE this is NED = clockwise positive = backwards
      * 
      * @returns yaw in degrees [-180,180]
      */
-    @Override
-    public float getYawNEDDeg() {
+    private float getYawNEDDeg() {
         float yawDeg = m_ahrs.getYaw() * m_yawScaleFactor;
         m_logger.logFloat(Level.TRACE, "Yaw NED (deg)", () -> yawDeg);
         return yawDeg;
@@ -142,8 +177,7 @@ public class SingleNavXGyro implements Gyro100 {
     /**
      * @returns pitch in degrees [-180,180]
      */
-    @Override
-    public float getPitchDeg() {
+    private float getPitchDeg() {
         float pitchDeg = m_ahrs.getPitch();
         m_logger.logFloat(Level.TRACE, "Pitch (deg)", () -> pitchDeg);
         return pitchDeg;
@@ -152,8 +186,7 @@ public class SingleNavXGyro implements Gyro100 {
     /**
      * @returns roll in degrees [-180,180]
      */
-    @Override
-    public float getRollDeg() {
+    private float getRollDeg() {
         float rollDeg = m_ahrs.getRoll();
         m_logger.logFloat(Level.TRACE, "Roll (deg)", () -> rollDeg);
         return rollDeg;
@@ -167,8 +200,7 @@ public class SingleNavXGyro implements Gyro100 {
      * 
      * @returns rate in degrees/sec
      */
-    @Override
-    public float getYawRateNEDDeg_s() {
+    private float getYawRateNEDDeg_s() {
         final float rateDeg_S = getRateDeg_S() * m_yawRateScaleFactor;
         m_logger.logFloat(Level.TRACE, "Rate NED (deg_s)", () -> rateDeg_S);
         return rateDeg_S;
@@ -187,10 +219,10 @@ public class SingleNavXGyro implements Gyro100 {
         // The zero offset is specified as 1 deg/s (0.02 rad/s).
         // The deadband here is very slow: 0.05 rad/s is 2 min/revolution
         // measurement here is degrees, 0.05 rad is about 2.9 deg
-        // TODO: use a filter instead of a deadband?
-        if (Math.abs(rateDeg_S) < 2.9) {
-            rateDeg_S = 0;
-        }
+        // TODO: use a filter instead of a deadband.
+        // if (Math.abs(rateDeg_S) < 2.9) {
+        // rateDeg_S = 0;
+        // }
         return rateDeg_S;
     }
 
@@ -205,4 +237,5 @@ public class SingleNavXGyro implements Gyro100 {
         m_logger.logDouble(Level.TRACE, "Angle (deg)", m_ahrs::getAngle);
         m_logger.logDouble(Level.TRACE, "Angle Mod 360 (deg)", () -> m_ahrs.getAngle() % 360);
     }
+
 }

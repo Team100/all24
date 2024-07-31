@@ -11,7 +11,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
@@ -33,7 +33,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private static final double kDtSec = 0.02;
     private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final HeadingInterface m_heading;
+    private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
@@ -49,7 +49,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * 
      * @param parent
      * @param swerveKinodynamics
-     * @param heading
+     * @param gyro
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
      * @param thetaController
@@ -58,12 +58,12 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     public ManualWithProfiledHeading(
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
-            HeadingInterface heading,
+            Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController,
             PIDController omegaController) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_heading = heading;
+        m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
@@ -77,11 +77,11 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_latch.unlatch();
         m_thetaController.reset();
         m_omegaController.reset();
-        updateSetpoint(currentPose.getRotation().getRadians(), getHeadingRateNWURad_S());
+        updateSetpoint(currentPose.getRotation().getRadians(), getYawRateNWURad_S());
     }
 
-    private double getHeadingRateNWURad_S() {
-        return m_heading.getHeadingRateNWU();
+    private double getYawRateNWURad_S() {
+        return m_gyro.getYawRateNWU();
     }
 
     /** Call this to keep the setpoint in sync with the manual rotation. */
@@ -116,8 +116,8 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         Rotation2d currentRotation = currentPose.getRotation();
-        double headingMeasurement = currentRotation.getRadians();
-        double headingRate = getHeadingRateNWURad_S();
+        double yawMeasurement = currentRotation.getRadians();
+        double yawRate = getYawRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
         m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
@@ -132,17 +132,17 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
 
         // take the short path
         m_goal = new Rotation2d(
-                Math100.getMinDistance(headingMeasurement, m_goal.getRadians()));
+                Math100.getMinDistance(yawMeasurement, m_goal.getRadians()));
 
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
         if (m_thetaSetpoint == null) {
-            updateSetpoint(headingMeasurement, headingRate);
+            updateSetpoint(yawMeasurement, yawRate);
         }
 
         // use the modulus closest to the measurement
         m_thetaSetpoint = new State100(
-                Math100.getMinDistance(headingMeasurement, m_thetaSetpoint.x()),
+                Math100.getMinDistance(yawMeasurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
@@ -169,7 +169,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         // kinodynamic max A seems too high?
         final double lessA = 0.1;
 
-        double maxSpeedRad_S = Math.max(Math.abs(headingRate) + 0.001,
+        double maxSpeedRad_S = Math.max(Math.abs(yawRate) + 0.001,
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed) * lessV;
         double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * lessA;
 
@@ -186,9 +186,9 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
 
-        final double thetaFB = getThetaFB(headingMeasurement);
+        final double thetaFB = getThetaFB(yawMeasurement);
 
-        final double omegaFB = getOmegaFB(headingRate);
+        final double omegaFB = getOmegaFB(yawRate);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -199,10 +199,10 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_logger.logString(Level.TRACE, "mode", () -> "snap");
         m_logger.logDouble(Level.TRACE, "goal/theta", m_goal::getRadians);
         m_logger.logState100(Level.TRACE, "setpoint/theta", () -> m_thetaSetpoint);
-        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> headingRate);
-        m_logger.logDouble(Level.TRACE, "error/theta", () -> m_thetaSetpoint.x() - headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "error/omega", () -> m_thetaSetpoint.v() - headingRate);
+        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> yawMeasurement);
+        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> yawRate);
+        m_logger.logDouble(Level.TRACE, "error/theta", () -> m_thetaSetpoint.x() - yawMeasurement);
+        m_logger.logDouble(Level.TRACE, "error/omega", () -> m_thetaSetpoint.v() - yawRate);
         m_logger.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);
         m_logger.logDouble(Level.TRACE, "thetaFB", () -> thetaFB);
         m_logger.logDouble(Level.TRACE, "omegaFB", () -> omegaFB);

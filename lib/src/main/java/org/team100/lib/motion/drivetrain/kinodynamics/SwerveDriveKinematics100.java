@@ -455,8 +455,11 @@ public class SwerveDriveKinematics100 {
     /**
      * https://www.chiefdelphi.com/uploads/short-url/qzj4k2LyBs7rLxAem0YajNIlStH.pdf
      */
-    public SwerveModuleState100[] accelerationFromVector(SimpleMatrix chassisSpeedsMatrix,
-            SimpleMatrix chassisSpeedsAccelerationMatrix, SwerveModuleState100[] prevStates, double dt) {
+    public SwerveModuleState100[] accelerationFromVector(
+            SimpleMatrix chassisSpeedsMatrix,
+            SimpleMatrix chassisSpeedsAccelerationMatrix,
+            SwerveModuleState100[] prevStates,
+            double dt) {
         SwerveModuleState100[] moduleStates = new SwerveModuleState100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
             Optional<Rotation2d> angle2 = prevStates[i].angle;

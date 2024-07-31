@@ -162,17 +162,11 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         return m_pastSnapshots.tailMap(t, inclusive);
     }
 
-    /**
-     * The most recent timestamp in seconds. Never throws since the buffer is never
-     * empty.
-     */
-    public double lastKey() {
-        return m_pastSnapshots.lastKey();
-    }
-
-    /** The most recent entry. */
-    public Entry<Double, T> lastEntry() {
-        return m_pastSnapshots.lastEntry();
+    /** True if the timestamp is older than the history window. */
+    boolean tooOld(double timestampS) {
+        Double newestSeenS = m_pastSnapshots.lastKey();
+        double oldestAcceptableS = newestSeenS - m_historyS;
+        return timestampS < oldestAcceptableS;
     }
 
     public Entry<Double, T> lowerEntry(double t) {

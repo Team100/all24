@@ -47,7 +47,7 @@ class DriveManuallyTest extends Fixtured implements Timeless {
         desiredMode = "MODULE_STATE";
         command.execute100(0.02);
 
-        robotDrive.periodic100(0.02);
+        robotDrive.periodic();
         SimHooks.stepTiming(0.02);
         assertEquals(1, robotDrive.getState().chassisSpeeds().vxMetersPerSecond, 0.001);
 

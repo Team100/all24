@@ -3,11 +3,12 @@ package org.team100.lib.motion.drivetrain;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
+import org.team100.lib.localization.VisionData;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.sensors.SimulatedHeading;
+import org.team100.lib.sensors.Gyro;
+import org.team100.lib.sensors.SimulatedGyro;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 
@@ -17,7 +18,7 @@ import org.team100.lib.telemetry.TestLogger;
  */
 public class Fixture {
     public SwerveModuleCollection collection;
-    public HeadingInterface heading;
+    public Gyro gyro;
     public SwerveDrivePoseEstimator100 poseEstimator;
     public VeeringCorrection veering;
     public SwerveKinodynamics swerveKinodynamics;
@@ -32,21 +33,26 @@ public class Fixture {
         fieldLogger = new TestLogger().getSupplierLogger();
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
-        heading = new SimulatedHeading(swerveKinodynamics, collection);
+        gyro = new SimulatedGyro(swerveKinodynamics, collection);
+        swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
-                heading.getHeadingNWU(),
+                gyro.getYawNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,
                 0); // initial time is zero here for testing
-
-        swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
+        VisionData v = new VisionData() {
+            @Override
+            public void update() {
+            }
+        };
 
         drive = new SwerveDriveSubsystem(
                 fieldLogger,
                 logger,
-                heading,
+                gyro,
                 poseEstimator,
-                swerveLocal);
+                swerveLocal,
+                v);
 
         controller = new HolonomicDriveController3(logger);
     }
