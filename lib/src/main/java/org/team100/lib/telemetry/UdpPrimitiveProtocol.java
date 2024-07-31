@@ -1,16 +1,9 @@
-package org.team100;
+package org.team100.lib.telemetry;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
-public class UdpSender {
+public class UdpPrimitiveProtocol {
     private enum Types {
         BOOLEAN(1),
         DOUBLE(2),
@@ -25,77 +18,6 @@ public class UdpSender {
         private Types(int typeId) {
             id = (byte) typeId;
         }
-    }
-
-    private static final int kPort = 1995;
-    private final InetAddress m_addr;
-    private final DatagramSocket m_socket;
-    // hang on to the buffer to prevent GC churn
-    private final byte[] m_bytes;
-    private final ByteBuffer m_bb;
-
-    public UdpSender() throws SocketException, UnknownHostException {
-        // m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 100 });
-        m_addr = InetAddress.getLocalHost();
-        m_socket = new DatagramSocket();
-        // 1k seems like enough!
-        m_bytes = new byte[1000];
-        m_bb = ByteBuffer.wrap(m_bytes);
-        // this is the default, but just to make it clear...
-        m_bb.order(ByteOrder.BIG_ENDIAN);
-    }
-
-    void send(DatagramPacket p) {
-        try {
-            m_socket.send(p);
-        } catch (IOException e) {
-        }
-    }
-
-    public void sendBoolean(String key, boolean val) {
-        int len = encodeBoolean(m_bb, key, val);
-        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        send(p);
-    }
-
-    public void sendDouble(String key, double val) {
-        int len = encodeDouble(m_bb, key, val);
-        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        send(p);
-    }
-
-    public void sendInt(String key, int val) {
-        int len = encodeInt(m_bb, key, val);
-        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        send(p);
-    }
-
-    public void sendFloat(String key, float val) {
-        int len = encodeFloat(m_bb, key, val);
-        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        send(p);
-    }
-
-    public void sendDoubleArray(String key, double[] val) {
-        int len = encodeDoubleArray(m_bb, key, val);
-        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        send(p);
-    }
-
-    public void sendLong(String key, long val) {
-        int len = encodeLong(m_bb, key, val);
-        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        send(p);
-    }
-
-    public void sendString(String key, String val) {
-        int len = encodeString(m_bb, key, val);
-        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        send(p);
-    }
-
-    public void close() {
-        m_socket.close();
     }
 
     static int encodeKey(ByteBuffer buf, String key) {
