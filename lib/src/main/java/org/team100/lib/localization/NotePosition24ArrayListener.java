@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.MultiSubscriber;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableListenerPoller;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.ValueEventData;
@@ -30,6 +31,10 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * Listen for updates from the note-detector camera and remember them for
  * awhile.
+ * 
+ * TODO: as described below, use a buffer here, don't just remember the very
+ * last thing the camera saw. Also use multiple sights to get a better idea of
+ * where the target is.
  */
 public class NotePosition24ArrayListener {
     /** Ignore sights older than this. */
@@ -37,6 +42,8 @@ public class NotePosition24ArrayListener {
     private StructBuffer<Rotation3d> m_buf = StructBuffer.create(Rotation3d.struct);
     private List<Translation2d> notes = new ArrayList<>();
     private final Supplier<Pose2d> m_poseSupplier;
+    private final NetworkTableListenerPoller m_poller;
+
     private double latestTime = 0;
 
     /**
@@ -53,45 +60,57 @@ public class NotePosition24ArrayListener {
 
     public NotePosition24ArrayListener(Supplier<Pose2d> poseSupplier) {
         m_poseSupplier = poseSupplier;
+
+        NetworkTableInstance inst = NetworkTableInstance.getDefault();
+        m_poller = new NetworkTableListenerPoller(inst);
+        m_poller.addListener(
+                new MultiSubscriber(
+                        inst,
+                        new String[] { "noteVision" },
+                        PubSubOption.keepDuplicates(true)),
+                EnumSet.of(NetworkTableEvent.Kind.kValueAll));
     }
 
-    void consumeValues(NetworkTableEvent e) {
-        ValueEventData ve = e.valueData;
-        NetworkTableValue v = ve.value;
-        String name = ve.getTopic().getName();
-        String[] fields = name.split("/");
-        if (fields.length != 3) {
-            return;
-        }
-        if (fields[2].equals("fps")) {
-            // FPS is not used by the robot
-        } else if (fields[2].equals("latency")) {
-            // latency is not used by the robot
-        } else if (fields[2].equals("Rotation3d")) {
-            // decode the way StructArrayEntryImpl does
-            byte[] b = v.getRaw();
-            if (b.length == 0) {
+    public void update() {
+        for (NetworkTableEvent e : m_poller.readQueue()) {
+            ValueEventData ve = e.valueData;
+            NetworkTableValue v = ve.value;
+            String name = ve.getTopic().getName();
+            String[] fields = name.split("/");
+            if (fields.length != 3) {
                 return;
             }
-            // NOTE! sights are x-ahead WPI coordinates, not z-ahead camera coordinates.
-            Rotation3d[] sights;
-            try {
-                synchronized (m_buf) {
-                    sights = m_buf.readArray(b);
-                    latestTime = Timer.getFPGATimestamp();
+            if (fields[2].equals("fps")) {
+                // FPS is not used by the robot
+            } else if (fields[2].equals("latency")) {
+                // latency is not used by the robot
+            } else if (fields[2].equals("Rotation3d")) {
+                // decode the way StructArrayEntryImpl does
+                byte[] b = v.getRaw();
+                if (b.length == 0) {
+                    return;
                 }
-            } catch (RuntimeException ex) {
-                return;
+                // NOTE! sights are x-ahead WPI coordinates, not z-ahead camera coordinates.
+                Rotation3d[] sights;
+                try {
+                    synchronized (m_buf) {
+                        sights = m_buf.readArray(b);
+                        latestTime = Timer.getFPGATimestamp();
+                    }
+                } catch (RuntimeException ex) {
+                    return;
+                }
+                Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
+                // TODO: this should use the timestamp of the camera data, not the current time.
+                Pose2d robotPose = m_poseSupplier.get();
+                // TODO: this should accumulate sights, not replace the list every time.
+                notes = TargetLocalizer.cameraRotsToFieldRelativeArray(
+                        robotPose,
+                        cameraInRobotCoordinates,
+                        sights);
+            } else {
+                Util.warn("note weird vision update key: " + name);
             }
-            Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
-            // TODO: this should use the timestamp of the camera data, not the current time.
-            Pose2d robotPose = m_poseSupplier.get();
-            notes = TargetLocalizer.cameraRotsToFieldRelativeArray(
-                    robotPose,
-                    cameraInRobotCoordinates,
-                    sights);
-        } else {
-            Util.warn("note weird vision update key: " + name);
         }
     }
 
@@ -99,6 +118,7 @@ public class NotePosition24ArrayListener {
      * Field-relative translations of recent sights.
      */
     public List<Translation2d> getTranslation2dArray() {
+        update();
         Pose2d robotPose = m_poseSupplier.get();
         switch (Identity.instance) {
             case BLANK:
@@ -123,20 +143,10 @@ public class NotePosition24ArrayListener {
      * The field-relative translation of the closest note, if any.
      */
     public Optional<Translation2d> getClosestTranslation2d() {
+        update();
         Pose2d robotPose = m_poseSupplier.get();
         return NotePicker.closestNote(
                 getTranslation2dArray(),
                 robotPose);
-    }
-
-    public void enable() {
-        var inst = NetworkTableInstance.getDefault();
-        inst.startServer();
-        MultiSubscriber sub = new MultiSubscriber(inst, new String[] { "noteVision" },
-                PubSubOption.keepDuplicates(true));
-        inst.addListener(
-                sub,
-                EnumSet.of(NetworkTableEvent.Kind.kValueAll),
-                this::consumeValues);
     }
 }

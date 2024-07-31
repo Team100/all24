@@ -4,6 +4,7 @@ import org.team100.lib.config.DriverSkill;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
+import org.team100.lib.localization.VisionData;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.sensors.Gyro;
@@ -28,6 +29,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     private final Gyro m_gyro;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
+    private final VisionData m_cameras;
     private final CotemporalCache<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
@@ -35,15 +37,14 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
             SupplierLogger parent,
             Gyro gyro,
             SwerveDrivePoseEstimator100 poseEstimator,
-            SwerveLocal swerveLocal) {
+            SwerveLocal swerveLocal,
+            VisionData cameras) {
         m_fieldLogger = fieldLogger;
         m_logger = parent.child(this);
         m_gyro = gyro;
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
-        // this was previously TimedCache with a 0.01 sec timeout
-        // but that seems unnecessarily complex; the CotemporalCache
-        // is invalidated by the command scheduler, which seems simpler.
+        m_cameras = cameras;
         m_stateSupplier = new CotemporalCache<>(this::update);
         stop();
     }
@@ -229,7 +230,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
                 now,
                 m_gyro.getYawNWU(),
                 m_swerveLocal.positions());
-        // TODO: put vision data too
+        m_cameras.update();
         return m_poseEstimator.get(now);
     }
 }

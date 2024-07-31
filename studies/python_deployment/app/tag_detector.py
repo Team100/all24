@@ -1,12 +1,14 @@
 """ This is a wrapper for the AprilTag detector. """
 
-# pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module, protected-access
 
 from mmap import mmap
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+
+import ntcore
 
 from cv2 import undistortImagePoints
 from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
@@ -132,15 +134,26 @@ class TagDetector:
         # total_et = current_time - self.frame_time
         self.frame_time = current_time
 
-        sensor_timestamp = metadata["SensorTimestamp"]
-        image_age_ms = (received_time - sensor_timestamp) // 1000000
+        # first row
+        sensor_timestamp_ns = metadata["SensorTimestamp"]
+        # how long for all the rows
+        frame_duration_ns = metadata["FrameDuration"] * 1000
+        # time of the middle row in the sensor
+        # note this assumes a continuously rolling shutter
+        # and will be completely wrong for a global shutter
+        # TODO: global shutter case
+        sensor_midpoint_ns = sensor_timestamp_ns + frame_duration_ns / 2
+        image_age_ms = (received_time - sensor_timestamp_ns) // 1000000
         undistort_time_ms = (undistort_time - received_time) // 1000000
         detect_time_ms = (detect_time - undistort_time) // 1000000
         estimate_time_ms = (estimate_time - detect_time) // 1000000
         # oldest_pixel_ms = (system_time_ns - (sensor_timestamp - 1000 * metadata["ExposureTime"])) // 1000000
         # sensor timestamp is the boottime when the first byte was received from the sensor
 
-        self.network.vision_nt_struct.set(blips)
+        delay_ns: int = Timer.time_ns() - sensor_midpoint_ns
+        delay_us = delay_ns // 1000
+
+        self.network.vision_nt_struct.set(blips, ntcore._now() - delay_us)
         self.network.vision_total_time_ms.set(total_time_ms)
         self.network.vision_image_age_ms.set(image_age_ms)
         self.network.vision_detect_time_ms.set(detect_time_ms)
@@ -157,7 +170,5 @@ class TagDetector:
         self.display.draw_text(img, f"undistort (ms) {undistort_time_ms:.0f}", (5, 145))
         self.display.draw_text(img, f"detect (ms) {detect_time_ms:.0f}", (5, 185))
         self.display.draw_text(img, f"estimate (ms) {estimate_time_ms:.0f}", (5, 225))
-
-
 
         self.display.put_frame(img)

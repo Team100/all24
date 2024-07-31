@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 
 class VisionDataProviderPerformanceTest {
     private static final double kDelta = 0.01;
@@ -46,7 +47,9 @@ class VisionDataProviderPerformanceTest {
             }
         };
 
-        VisionDataProvider24 vdp = new VisionDataProvider24(logger, layout, poseEstimator, f);
+        VisionDataProvider24 vdp = new VisionDataProvider24(
+                logger, layout, poseEstimator,
+                f);
 
         // camera sees the tag straight ahead in the center of the frame,
         // but rotated pi/4 to the left. this is ignored anyway.
@@ -70,7 +73,7 @@ class VisionDataProviderPerformanceTest {
 
         // run forever so i can use the profiler
         while (true)
-            vdp.estimateRobotPose(cameraSerialNumber, blips, Alliance.Red);
+            vdp.estimateRobotPose(cameraSerialNumber, blips, Timer.getFPGATimestamp(), Alliance.Red);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package org.team100.frc2024;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
@@ -27,7 +28,10 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
+import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
+import org.team100.lib.localization.FireControl;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
+import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -76,8 +80,10 @@ public class RobotContainerParkingLot implements Glassy {
      * 
      * The reason to put it here rather than commenting it out is so that it doesn't
      * rot.
+     * 
+     * @throws IOException
      */
-    RobotContainerParkingLot(TimedRobot100 robot) {
+    RobotContainerParkingLot(TimedRobot100 robot) throws IOException {
         Telemetry telemetry = Telemetry.get();
         final FieldLogger fieldLogger = telemetry.fieldLogger(true, true);
         final RootLogger monitorLogger = telemetry.namedRootLogger("MONITOR", false, false);
@@ -100,18 +106,27 @@ public class RobotContainerParkingLot implements Glassy {
                 swerveKinodynamics,
                 m_modules,
                 asyncFactory);
-        SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
+        final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 m_gyro.getYawNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
+        final FireControl fireControl = new FireControl() {
+        };
+        final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
+        final VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
+                driveLogger,
+                m_layout,
+                poseEstimator,
+                fireControl);
         SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
                 driveLogger,
                 m_gyro,
                 poseEstimator,
-                swerveLocal);
+                swerveLocal,
+                visionDataProvider);
 
         // joel 2/22/24 removing for SVR, put back after that.
         // these should be fields

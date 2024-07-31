@@ -173,7 +173,7 @@ public class RobotContainer implements Glassy {
                 m_layout,
                 poseEstimator,
                 fireControl);
-        visionDataProvider.enable();
+
         final SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
 
         m_drive = new SwerveDriveSubsystem(
@@ -181,11 +181,11 @@ public class RobotContainer implements Glassy {
                 driveLogger,
                 gyro,
                 poseEstimator,
-                swerveLocal);
+                swerveLocal,
+                visionDataProvider);
 
         final NotePosition24ArrayListener noteListener = new NotePosition24ArrayListener(
                 () -> m_drive.getState().pose());
-        noteListener.enable();
 
         m_cameraUpdater = new CameraUpdater(
                 () -> m_drive.getState().pose(),
