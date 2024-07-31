@@ -17,8 +17,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.HeadingInterface;
-import org.team100.lib.sensors.MockHeading;
+import org.team100.lib.sensors.Gyro;
+import org.team100.lib.sensors.MockGyro;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.TestLogger;
 
@@ -35,13 +35,13 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testModeSwitching() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        HeadingInterface heading = new MockHeading();
+        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                heading,
+                gyro,
                 rotationSupplier);
         Pose2d currentPose = GeometryUtil.kPoseZero;
         m_manualWithHeading.reset(currentPose);
@@ -65,13 +65,13 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testNotSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        HeadingInterface heading = new MockHeading();
+        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                heading,
+                gyro,
                 rotationSupplier);
 
         Pose2d currentPose = GeometryUtil.kPoseZero;
@@ -101,13 +101,13 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        HeadingInterface heading = new MockHeading();
+        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                heading,
+                gyro,
                 rotationSupplier);
 
         // facing +x
@@ -171,13 +171,13 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testSnapHeld() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        HeadingInterface heading = new MockHeading();
+        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                heading,
+                gyro,
                 rotationSupplier);
 
         // currently facing +x
@@ -233,14 +233,14 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testStickyHeading() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
-        MockHeading heading = new MockHeading();
+        MockGyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                heading,
+                gyro,
                 rotationSupplier);
 
         // driver rotates a bit
@@ -263,7 +263,7 @@ class ManualWithMinTimeHeadingTest {
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro indicates the correct speed
-        heading.rate = 2.828;
+        gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         assertNull(m_manualWithHeading.m_goal);
         assertNull(m_manualWithHeading.m_thetaSetpoint);
@@ -275,7 +275,7 @@ class ManualWithMinTimeHeadingTest {
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro rate is still full speed.
-        heading.rate = 2.828;
+        gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // goal is the current state but at rest
         assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
@@ -289,14 +289,14 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testStickyHeading2() {
         Experiments.instance.testOverride(Experiment.StickyHeading, true);
-        MockHeading heading = new MockHeading();
+        MockGyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), kDelta);
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                heading,
+                gyro,
                 rotationSupplier);
 
         // driver rotates a bit
@@ -319,7 +319,7 @@ class ManualWithMinTimeHeadingTest {
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro indicates the correct speed
-        heading.rate = 2.828;
+        gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         assertNull(m_manualWithHeading.m_goal);
         assertNull(m_manualWithHeading.m_thetaSetpoint);
@@ -331,7 +331,7 @@ class ManualWithMinTimeHeadingTest {
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro rate is still full speed.
-        heading.rate = 2.828;
+        gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // velocity carries forward
         assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);

@@ -11,7 +11,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
@@ -32,7 +32,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     private static final double kDtSec = 0.02;
     private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final HeadingInterface m_heading;
+    private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
@@ -47,7 +47,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      * 
      * @param parent
      * @param swerveKinodynamics
-     * @param heading
+     * @param gyro
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
      * @param thetaController
@@ -56,10 +56,10 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     public ManualWithMinTimeHeading(
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
-            HeadingInterface heading,
+            Gyro gyro,
             Supplier<Rotation2d> desiredRotation) {
         m_swerveKinodynamics = swerveKinodynamics;
-        m_heading = heading;
+        m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_logger = parent.child(this);
         m_latch = new HeadingLatch();
@@ -81,11 +81,11 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     public void reset(Pose2d currentPose) {
         m_goal = null;
         m_latch.unlatch();
-        updateSetpoint(currentPose.getRotation().getRadians(), getHeadingRateNWURad_S());
+        updateSetpoint(currentPose.getRotation().getRadians(), getYawRateNWURad_S());
     }
 
-    private double getHeadingRateNWURad_S() {
-        return m_heading.getHeadingRateNWU();
+    private double getYawRateNWURad_S() {
+        return m_gyro.getYawRateNWU();
     }
 
     /** Call this to keep the setpoint in sync with the manual rotation. */
@@ -121,10 +121,10 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         Rotation2d currentRotation = currentPose.getRotation();
-        double headingMeasurement = state.theta().x();
+        double yawMeasurement = state.theta().x();
         // not sure which is better
-        double headingRate = state.theta().v();
-        // double headingRate = getHeadingRateNWURad_S();
+        double yawRate = state.theta().v();
+        // double yawRate = getYawRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
         m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
@@ -139,7 +139,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
 
         // take the short path
         m_goal = new Rotation2d(
-                Math100.getMinDistance(headingMeasurement, m_goal.getRadians()));
+                Math100.getMinDistance(yawMeasurement, m_goal.getRadians()));
 
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
@@ -159,7 +159,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
         // the omega goal in snap mode is always zero.
         State100 goalState = new State100(
-                Math100.getMinDistance(headingMeasurement, m_goal.getRadians()), 0);
+                Math100.getMinDistance(yawMeasurement, m_goal.getRadians()), 0);
 
         m_thetaSetpoint = m_controller.calculate(kDtSec, state.theta(), goalState);
 
@@ -175,10 +175,10 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_logger.logString(Level.TRACE, "mode", () -> "snap");
         m_logger.logDouble(Level.TRACE, "goal/theta", () -> m_goal.getRadians());
         m_logger.logState100(Level.TRACE, "setpoint/theta", () -> m_thetaSetpoint);
-        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> headingRate);
-        m_logger.logDouble(Level.TRACE, "error/theta", () -> m_thetaSetpoint.x() - headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "error/omega", () -> m_thetaSetpoint.v() - headingRate);
+        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> yawMeasurement);
+        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> yawRate);
+        m_logger.logDouble(Level.TRACE, "error/theta", () -> m_thetaSetpoint.x() - yawMeasurement);
+        m_logger.logDouble(Level.TRACE, "error/omega", () -> m_thetaSetpoint.v() - yawRate);
         m_logger.logDouble(Level.TRACE, "goal_error/theta", () -> m_thetaSetpoint.x() - goalState.x());
         m_logger.logDouble(Level.TRACE, "goal_error/omega", () -> m_thetaSetpoint.v() - goalState.v());
         m_logger.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);

@@ -1,0 +1,4 @@
+.gradle
+*.swp
+build/
+__pycache__

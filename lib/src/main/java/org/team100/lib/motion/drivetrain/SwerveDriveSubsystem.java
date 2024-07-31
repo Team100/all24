@@ -1,47 +1,51 @@
 package org.team100.lib.motion.drivetrain;
 
-import org.team100.lib.commands.Subsystem100;
 import org.team100.lib.config.DriverSkill;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
+import org.team100.lib.localization.VisionData;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.ExpiringMemoizingSupplier;
+import org.team100.lib.util.CotemporalCache;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * There are four mutually exclusive drive methods.
  * We depend on CommandScheduler to enforce the mutex.
  */
-public class SwerveDriveSubsystem extends Subsystem100 {
+public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     private final SupplierLogger m_fieldLogger;
     private final SupplierLogger m_logger;
-    private final HeadingInterface m_heading;
+    private final Gyro m_gyro;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
-    private final ExpiringMemoizingSupplier<SwerveState> m_stateSupplier;
+    private final VisionData m_cameras;
+    private final CotemporalCache<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
             SupplierLogger fieldLogger,
             SupplierLogger parent,
-            HeadingInterface heading,
+            Gyro gyro,
             SwerveDrivePoseEstimator100 poseEstimator,
-            SwerveLocal swerveLocal) {
+            SwerveLocal swerveLocal,
+            VisionData cameras) {
         m_fieldLogger = fieldLogger;
         m_logger = parent.child(this);
-        m_heading = heading;
+        m_gyro = gyro;
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
-        // state update at 100 hz.
-        m_stateSupplier = new ExpiringMemoizingSupplier<>(this::update, 10000);
+        m_cameras = cameras;
+        m_stateSupplier = new CotemporalCache<>(this::update);
         stop();
     }
 
@@ -71,8 +75,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 v.x(),
                 v.y(),
                 v.theta(),
-                m_stateSupplier.get().pose().getRotation());
-        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
+                getState().pose().getRotation());
+        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_gyro.getYawRateNWU(), kDtSec);
     }
 
     /**
@@ -88,8 +92,8 @@ public class SwerveDriveSubsystem extends Subsystem100 {
                 twist.x(),
                 twist.y(),
                 twist.theta(),
-                m_stateSupplier.get().pose().getRotation());
-        return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_heading.getHeadingRateNWU(), kDtSec);
+                getState().pose().getRotation());
+        return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_gyro.getYawRateNWU(), kDtSec);
     }
 
     /**
@@ -106,11 +110,11 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
         m_logger.logEnum(Level.TRACE, "skill level", () -> driverSkillLevel);
         speeds = speeds.times(driverSkillLevel.scale());
-        m_swerveLocal.setChassisSpeeds(speeds, m_heading.getHeadingRateNWU(), kDtSec);
+        m_swerveLocal.setChassisSpeeds(speeds, m_gyro.getYawRateNWU(), kDtSec);
     }
 
     public void setChassisSpeedsNormally(ChassisSpeeds speeds, double kDtSec) {
-        m_swerveLocal.setChassisSpeedsNormally(speeds, m_heading.getHeadingRateNWU(), kDtSec);
+        m_swerveLocal.setChassisSpeedsNormally(speeds, m_gyro.getYawRateNWU(), kDtSec);
     }
 
     /** Does not desaturate. */
@@ -137,18 +141,19 @@ public class SwerveDriveSubsystem extends Subsystem100 {
         m_swerveLocal.stop();
     }
 
+    /** The effect won't be seen until the next cycle. */
     public void resetTranslation(Translation2d translation) {
-        m_poseEstimator.resetPosition(
-                m_heading.getHeadingNWU(),
+        m_poseEstimator.reset(
+                m_gyro.getYawNWU(),
                 m_swerveLocal.positions(),
-                new Pose2d(translation, m_heading.getHeadingNWU()),
+                new Pose2d(translation, m_gyro.getYawNWU()),
                 Timer.getFPGATimestamp());
         m_stateSupplier.reset();
     }
 
     public void resetPose(Pose2d robotPose) {
-        m_poseEstimator.resetPosition(
-                m_heading.getHeadingNWU(),
+        m_poseEstimator.reset(
+                m_gyro.getYawNWU(),
                 m_swerveLocal.positions(),
                 robotPose,
                 Timer.getFPGATimestamp());
@@ -169,6 +174,7 @@ public class SwerveDriveSubsystem extends Subsystem100 {
      * acceleration. This is rate-limited and cached.
      */
     public SwerveState getState() {
+        // return m_poseEstimator.get(Timer.getFPGATimestamp());
         return m_stateSupplier.get();
     }
 
@@ -179,30 +185,30 @@ public class SwerveDriveSubsystem extends Subsystem100 {
     ///////////////////////////////////////////////////////////////
 
     /**
-     * Updates odometry.
-     * 
      * Periodic() should not do actuation. Let commands do that.
      */
     @Override
-    public void periodic100(double dt) {
-        m_logger.logSwerveState(Level.COMP, "state", m_stateSupplier::get);
-        m_logger.logDouble(Level.TRACE, "Tur Deg", () -> m_stateSupplier.get().pose().getRotation().getDegrees());
+    public void periodic() {
+        // m_poseEstimator.periodic();
+        m_stateSupplier.reset();
+        m_logger.logSwerveState(Level.COMP, "state", this::getState);
+        m_logger.logDouble(Level.TRACE, "Tur Deg", () -> getState().pose().getRotation().getDegrees());
         m_logger.logDoubleArray(Level.COMP, "pose array",
                 () -> new double[] {
-                        m_stateSupplier.get().pose().getX(),
-                        m_stateSupplier.get().pose().getY(),
-                        m_stateSupplier.get().pose().getRotation().getRadians()
+                        getState().pose().getX(),
+                        getState().pose().getY(),
+                        getState().pose().getRotation().getRadians()
                 });
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
         m_fieldLogger.logDoubleArray(Level.COMP, "robot", () -> new double[] {
-                m_stateSupplier.get().pose().getX(),
-                m_stateSupplier.get().pose().getY(),
-                m_stateSupplier.get().pose().getRotation().getDegrees()
+                getState().pose().getX(),
+                getState().pose().getY(),
+                getState().pose().getRotation().getDegrees()
         });
-        m_logger.logDouble(Level.TRACE, "heading rate rad_s", m_heading::getHeadingRateNWU);
+        m_logger.logDouble(Level.TRACE, "heading rate rad_s", m_gyro::getYawRateNWU);
         m_swerveLocal.periodic();
     }
 
@@ -219,9 +225,12 @@ public class SwerveDriveSubsystem extends Subsystem100 {
 
     /** used by the supplier */
     private SwerveState update() {
-        return m_poseEstimator.update(
-                Timer.getFPGATimestamp(),
-                m_heading.getHeadingNWU(),
+        double now = Timer.getFPGATimestamp();
+        m_poseEstimator.put(
+                now,
+                m_gyro.getYawNWU(),
                 m_swerveLocal.positions());
+        m_cameras.update();
+        return m_poseEstimator.get(now);
     }
 }

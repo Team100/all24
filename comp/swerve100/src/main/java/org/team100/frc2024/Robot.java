@@ -52,6 +52,8 @@ public class Robot extends TimedRobot100 implements Glassy {
 
         m_robotContainer.onInit();
 
+        NetworkTableInstance.getDefault().startServer();
+
         // DataLogManager.start();
 
         // This reduces the allocated heap size, not just the used heap size, which

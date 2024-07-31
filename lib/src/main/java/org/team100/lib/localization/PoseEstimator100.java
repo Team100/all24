@@ -1,42 +1,26 @@
 package org.team100.lib.localization;
 
-import java.util.Optional;
+import org.team100.lib.motion.drivetrain.SwerveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 
+/**
+ * This interface exists in order to make fakes for testing, and to indicate the
+ * part of the pose estimator used by the vision updater.
+ */
 public interface PoseEstimator100 {
     /**
-     * Adds a vision measurement to the Kalman Filter. This will correct the
-     * odometry pose estimate while still accounting for measurement noise.
-     *
-     * This method can be called as infrequently as you want, as long as you are
-     * calling update() periodically.
-     *
-     * @param visionRobotPoseMeters pose as measured by the camera.
-     * @param timestampSeconds      The timestamp of the vision measurement in
-     *                              seconds, same epoch as updateWithTime().
-     *
-     * 
-     * @param stateSigma            standard deviations of the state. Increase
-     *                              these numbers to trust the state less, i.e.
-     *                              allow it to change faster on update.
-     * @param visionSigma           Standard deviations of the vision
-     *                              measurements. Increase these numbers to trust
-     *                              global measurements from vision less. This
-     *                              matrix is in the form [x, y, theta]ᵀ, with
-     *                              units in meters and radians.
+     * Put a new state estimate based on the supplied pose. If not current,
+     * subsequent wheel updates are replayed.
      */
-
-    void addVisionMeasurement(
-            Pose2d measurement,
+    void put(
             double timestampS,
+            Pose2d measurement,
             double[] stateSigma,
             double[] visionSigma);
 
     /**
-     * This is for vision calculations, so that we use the high-accuracy gyro
-     * measurement for the correct time in the past.
+     * Sample the state estimate buffer.
      */
-    Optional<Rotation2d> getSampledRotation(double timestampS);
+    SwerveState get(double timestampS);
 }

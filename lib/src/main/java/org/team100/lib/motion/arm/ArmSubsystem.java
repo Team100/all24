@@ -3,7 +3,7 @@ package org.team100.lib.motion.arm;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
-import org.team100.lib.commands.Subsystem100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.telemetry.SupplierLogger;
@@ -12,11 +12,12 @@ import org.team100.lib.visualization.ArmVisualization;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * Arm mechanism with two joints.
  */
-public class ArmSubsystem extends Subsystem100 {
+public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
 
@@ -110,7 +111,7 @@ public class ArmSubsystem extends Subsystem100 {
     }
 
     @Override
-    public void periodic100(double dt) {
+    public void periodic() {
         m_viz.viz();
     }
 }

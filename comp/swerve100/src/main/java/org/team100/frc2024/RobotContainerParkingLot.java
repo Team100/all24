@@ -1,5 +1,6 @@
 package org.team100.frc2024;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
@@ -27,15 +28,18 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
+import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
+import org.team100.lib.localization.FireControl;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
+import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.sensors.HeadingFactory;
-import org.team100.lib.sensors.HeadingInterface;
+import org.team100.lib.sensors.GyroFactory;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Monitor;
@@ -66,7 +70,7 @@ public class RobotContainerParkingLot implements Glassy {
     private static final double kDriveStatorLimit = 120;
 
     private final SwerveModuleCollection m_modules;
-    final HeadingInterface m_heading;
+    final Gyro m_gyro;
     final SwerveDriveSubsystem m_drive;
     final DriverControl driverControl;
     final OperatorControl operatorControl;
@@ -76,8 +80,10 @@ public class RobotContainerParkingLot implements Glassy {
      * 
      * The reason to put it here rather than commenting it out is so that it doesn't
      * rot.
+     * 
+     * @throws IOException
      */
-    RobotContainerParkingLot(TimedRobot100 robot) {
+    RobotContainerParkingLot(TimedRobot100 robot) throws IOException {
         Telemetry telemetry = Telemetry.get();
         final FieldLogger fieldLogger = telemetry.fieldLogger(true, true);
         final RootLogger monitorLogger = telemetry.namedRootLogger("MONITOR", false, false);
@@ -95,23 +101,32 @@ public class RobotContainerParkingLot implements Glassy {
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
-        m_heading = HeadingFactory.get(
+        m_gyro = GyroFactory.get(
                 driveLogger,
                 swerveKinodynamics,
                 m_modules,
                 asyncFactory);
-        SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
-                m_heading.getHeadingNWU(),
+        final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
+                m_gyro.getYawNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
+        final FireControl fireControl = new FireControl() {
+        };
+        final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
+        final VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
+                driveLogger,
+                m_layout,
+                poseEstimator,
+                fireControl);
         SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
                 driveLogger,
-                m_heading,
+                m_gyro,
                 poseEstimator,
-                swerveLocal);
+                swerveLocal,
+                visionDataProvider);
 
         // joel 2/22/24 removing for SVR, put back after that.
         // these should be fields
