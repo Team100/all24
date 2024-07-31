@@ -83,13 +83,6 @@ public class DataLogLogger extends PrimitiveLogger {
                 StringLogEntry.class).append(val);
     }
 
-    @Override
-    public void logStringArray(String key, String[] val) {
-        pub(key,
-                k -> new StringArrayLogEntry(m_log, k),
-                StringArrayLogEntry.class).append(val);
-    }
-
     ///////////////////////////////////////////////////////////
 
     private <T extends DataLogEntry> T pub(String key, Function<String, DataLogEntry> fn, Class<T> entryClass) {

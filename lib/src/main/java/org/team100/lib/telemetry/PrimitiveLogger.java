@@ -22,7 +22,4 @@ public abstract class PrimitiveLogger {
     abstract void logLong(String key, long val);
 
     abstract void logString(String key, String val);
-
-    abstract void logStringArray(String key, String[] val);
-
 }

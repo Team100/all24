@@ -38,8 +38,4 @@ public class TestLogger extends PrimitiveLogger {
     @Override
     public void logString(String key, String val) {
     }
-
-    @Override
-    public void logStringArray(String key, String[] val) {
-    }
 }

@@ -202,17 +202,6 @@ public class SupplierLogger {
             m_primitiveLoggerB.logString(key, val);
     }
 
-    public void logStringArray(Level level, String leaf, Supplier<String[]> vals) {
-        if (!allow(level))
-            return;
-        String key = append(m_root, leaf);
-        String[] val = vals.get();
-        if (enabledA())
-            m_primitiveLoggerA.logStringArray(key, val);
-        if (enabledB())
-            m_primitiveLoggerB.logStringArray(key, val);
-    }
-
     public void logOptionalDouble(Level level, String leaf, Supplier<OptionalDouble> vals) {
         if (!allow(level))
             return;

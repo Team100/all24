@@ -71,10 +71,4 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
         throw new UnsupportedOperationException("Unimplemented method 'logString'");
     }
 
-    @Override
-    void logStringArray(String key, String[] val) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'logStringArray'");
-    }
-
 }

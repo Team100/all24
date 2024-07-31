@@ -115,16 +115,6 @@ public class NTLogger extends PrimitiveLogger {
         }, StringPublisher.class).set(val);
     }
 
-    @Override
-    public void logStringArray(String key, String[] val) {
-        pub(key, k -> {
-            StringArrayTopic t = inst.getStringArrayTopic(k);
-            StringArrayPublisher p = t.publish();
-            t.setRetained(true);
-            return p;
-        }, StringArrayPublisher.class).set(val);
-    }
-
     private <T extends Publisher> T pub(String key, Function<String, Publisher> fn, Class<T> pubClass) {
         Publisher publisher = m_publishers.computeIfAbsent(valid(key), fn);
         if (!pubClass.isInstance(publisher))
