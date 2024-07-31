@@ -4,6 +4,7 @@ import org.team100.alliance.Alliance;
 import org.team100.alliance.Blue;
 import org.team100.alliance.Red;
 import org.team100.field.Scorekeeper;
+import org.team100.lib.telemetry.FieldLogger;
 import org.team100.sim.ForceViz;
 import org.team100.sim.SimWorld;
 
@@ -18,9 +19,9 @@ public class RobotContainer {
     private final Alliance m_red;
     private final ForceViz m_viz;
 
-    public RobotContainer(SimWorld world) {
+    public RobotContainer(FieldLogger fieldLogger, SimWorld world) {
         m_world = world;
-        m_viz = new ForceViz();
+        m_viz = new ForceViz(fieldLogger);
         m_blue = new Blue(m_world, m_viz);
         m_red = new Red(m_world, m_viz);
         SmartDashboard.putData(CommandScheduler.getInstance());
