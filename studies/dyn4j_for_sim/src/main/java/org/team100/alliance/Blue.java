@@ -40,15 +40,12 @@ public class Blue implements Alliance {
         if (kRealPlayer) {
             player = new RobotAssembly(
                     x -> SelectorPilot.autonSelector(
-
                             new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
                                     new Pose2d(3.0, 7.5, new Rotation2d(-2.75)), false,
                                     8, 7, 6),
-                            new ManualPilot(x.getDrive())
-                            
-                            ),
-
-                    new Player(world, false),
+                            new ManualPilot(x.getDrive())),
+                    new Player(world, 1, false),
+                    viz,
                     false);
             // use the pilot assembly with manual control, to test the buttons.
             // player = new PilotAssembly(x -> new ManualPilot(), playerBody, kSpeaker);
