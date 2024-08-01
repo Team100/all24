@@ -51,13 +51,6 @@ public class DataLogLogger extends PrimitiveLogger {
     }
 
     @Override
-    public void logFloat(String key, float val) {
-        pub(key,
-                k -> new FloatLogEntry(m_log, k),
-                FloatLogEntry.class).append(val);
-    }
-
-    @Override
     public void logDoubleArray(String key, double[] val) {
         pub(key,
                 k -> new DoubleArrayLogEntry(m_log, k),
@@ -81,13 +74,6 @@ public class DataLogLogger extends PrimitiveLogger {
         pub(key,
                 k -> new StringLogEntry(m_log, k),
                 StringLogEntry.class).append(val);
-    }
-
-    @Override
-    public void logStringArray(String key, String[] val) {
-        pub(key,
-                k -> new StringArrayLogEntry(m_log, k),
-                StringArrayLogEntry.class).append(val);
     }
 
     ///////////////////////////////////////////////////////////

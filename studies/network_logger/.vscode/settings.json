@@ -25,5 +25,8 @@
       }
     },
   ],
-  "java.test.defaultConfig": "WPIlibUnitTests"
+  "java.test.defaultConfig": "WPIlibUnitTests",
+  "workbench.colorTheme": "Default Light Modern",
+  "editor.minimap.enabled": false,
+  "editor.inlayHints.enabled": "off"
 }

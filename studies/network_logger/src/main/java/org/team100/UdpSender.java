@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 public class UdpSender {
@@ -14,7 +15,10 @@ public class UdpSender {
         BOOLEAN(1),
         DOUBLE(2),
         INT(3),
-        FLOAT(4);
+        FLOAT(4),
+        DOUBLE_ARRAY(5),
+        LONG(6),
+        STRING(7);
 
         public final byte id;
 
@@ -37,24 +41,61 @@ public class UdpSender {
         // 1k seems like enough!
         m_bytes = new byte[1000];
         m_bb = ByteBuffer.wrap(m_bytes);
+        // this is the default, but just to make it clear...
+        m_bb.order(ByteOrder.BIG_ENDIAN);
     }
 
-    public void sendBoolean(String key, boolean val) throws IOException {
+    void send(DatagramPacket p) {
+        try {
+            m_socket.send(p);
+        } catch (IOException e) {
+        }
+    }
+
+    public void sendBoolean(String key, boolean val) {
         int len = encodeBoolean(m_bb, key, val);
         DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        m_socket.send(p);
+        send(p);
     }
 
-    public void sendDouble(String key, double val) throws IOException {
+    public void sendDouble(String key, double val) {
         int len = encodeDouble(m_bb, key, val);
         DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        m_socket.send(p);
+        send(p);
     }
 
-    public void sendInt(String key, int val) throws IOException {
+    public void sendInt(String key, int val) {
         int len = encodeInt(m_bb, key, val);
         DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        m_socket.send(p);
+        send(p);
+    }
+
+    public void sendFloat(String key, float val) {
+        int len = encodeFloat(m_bb, key, val);
+        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
+        send(p);
+    }
+
+    public void sendDoubleArray(String key, double[] val) {
+        int len = encodeDoubleArray(m_bb, key, val);
+        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
+        send(p);
+    }
+
+    public void sendLong(String key, long val) {
+        int len = encodeLong(m_bb, key, val);
+        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
+        send(p);
+    }
+
+    public void sendString(String key, String val) {
+        int len = encodeString(m_bb, key, val);
+        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
+        send(p);
+    }
+
+    public void close() {
+        m_socket.close();
     }
 
     static int encodeKey(ByteBuffer buf, String key) {
@@ -88,12 +129,41 @@ public class UdpSender {
         buf.putInt(val); // 4 for int
         return keyFieldLen + 5;
     }
-    
+
     static int encodeFloat(ByteBuffer buf, String key, float val) {
         buf.rewind();
         int keyFieldLen = encodeKey(buf, key);
         buf.put(Types.FLOAT.id); // 1
         buf.putFloat(val); // 4 for float
         return keyFieldLen + 5;
+    }
+
+    static int encodeDoubleArray(ByteBuffer buf, String key, double[] val) {
+        buf.rewind();
+        int keyFieldLen = encodeKey(buf, key);
+        buf.put(Types.DOUBLE_ARRAY.id); // 1
+        buf.putInt(val.length); // 4 for int
+        for (double v : val) {
+            buf.putDouble(v); // 8 for double
+        }
+        return keyFieldLen + val.length * 8 + 5;
+    }
+
+    static int encodeLong(ByteBuffer buf, String key, long val) {
+        buf.rewind();
+        int keyFieldLen = encodeKey(buf, key);
+        buf.put(Types.LONG.id); // 1
+        buf.putLong(val); // 8 for long
+        return keyFieldLen + 9;
+    }
+
+    static int encodeString(ByteBuffer buf, String key, String val) {
+        buf.rewind();
+        int keyFieldLen = encodeKey(buf, key);
+        buf.put(Types.STRING.id); // 1
+        byte[] bytes = val.getBytes(StandardCharsets.US_ASCII);
+        buf.putInt(bytes.length); // 4 for int
+        buf.put(bytes);
+        return keyFieldLen + bytes.length + 5;
     }
 }

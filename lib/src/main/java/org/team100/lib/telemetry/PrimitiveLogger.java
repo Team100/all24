@@ -13,8 +13,6 @@ public abstract class PrimitiveLogger {
 
     abstract void logInt(String key, int val);
 
-    abstract void logFloat(String key, float val);
-
     abstract void logDoubleArray(String key, double[] val);
 
     abstract void logDoubleObjArray(String key, Double[] val);
@@ -22,7 +20,4 @@ public abstract class PrimitiveLogger {
     abstract void logLong(String key, long val);
 
     abstract void logString(String key, String val);
-
-    abstract void logStringArray(String key, String[] val);
-
 }
