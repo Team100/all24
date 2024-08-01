@@ -14,7 +14,7 @@ import org.team100.field.FieldMap;
 import org.team100.field.Score;
 import org.team100.field.Scorekeeper;
 import org.team100.field.StagedNote;
-import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -42,9 +42,8 @@ public class SimWorld {
     // the "amp" wall is mostly the grating which is actually slightly shorter
     private static final double ampHeight = 1.207;
     static final double allianceWallHeightM = 1.983;
-    private static final String kField = "field";
-    private static final Telemetry t = Telemetry.get();
 
+    private final FieldLogger m_fieldLogger;
     private final Score m_blue;
     private final Score m_red;
     private final World<Body100> world;
@@ -52,7 +51,8 @@ public class SimWorld {
     // this is a copy of the obstacle translations since we use this all the time.
     private final List<Translation2d> obstacles;
 
-    public SimWorld(Score blueScore, Score redScore) {
+    public SimWorld(FieldLogger fieldLogger, Score blueScore, Score redScore) {
+        m_fieldLogger = fieldLogger;
         m_blue = blueScore;
         m_red = redScore;
         world = new World<>();
@@ -73,9 +73,6 @@ public class SimWorld {
                 obstacles.add(new Translation2d(translation.x, translation.y));
             }
         }
-
-        // need the .type for rendering the field2d in sim.
-        t.log(Level.INFO, "field", ".type", "Field2d");
     }
 
     public void addBody(Body100 body) {
@@ -146,11 +143,15 @@ public class SimWorld {
                     }
                 }
             }
-            t.log(Level.DEBUG, kField, type.getSimpleName(),
-                    poses.toArray(new Double[0]));
+            m_fieldLogger.logDoubleObjArray(
+                    Level.DEBUG,
+                    type.getSimpleName(),
+                    () -> poses.toArray(new Double[0]));
         }
-        t.log(Level.DEBUG, kField, "Force",
-                forces.toArray(new Double[0]));
+        m_fieldLogger.logDoubleObjArray(
+                Level.DEBUG,
+                "Force",
+                () -> forces.toArray(new Double[0]));
     }
 
     /** Speakers and amp pockets are sensors. */

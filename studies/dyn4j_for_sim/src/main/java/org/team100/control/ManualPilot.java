@@ -23,25 +23,22 @@ public class ManualPilot implements Pilot {
     private static final double kSubwooferRepulsion = 5;
     private static final double kObstacleRepulsion = 10;
 
-    boolean m_debug = true
-    ;
+    boolean m_debug = true;
 
     public ManualPilot(DriveSubsystem drive) {
         m_drive = drive;
     }
-    
+
     @Override
     public FieldRelativeVelocity driveVelocity() {
 
-        FieldRelativeVelocity v =  new FieldRelativeVelocity(
+        FieldRelativeVelocity v = new FieldRelativeVelocity(
                 -m_controller.getRightY() * Kinodynamics.kMaxVelocity, // axis 5
                 -m_controller.getRightX() * Kinodynamics.kMaxVelocity, // axis 4
                 -m_controller.getLeftX() * Kinodynamics.kMaxOmega); // axis 0
 
         return apply(v);
 
-
-        
     }
 
     public FieldRelativeVelocity apply(FieldRelativeVelocity desired) {
@@ -63,8 +60,6 @@ public class ManualPilot implements Pilot {
                 if (m_debug)
                     System.out.printf(" obstacleRepulsion (%5.2f, %5.2f)", force.getX(), force.getY());
                 FieldRelativeVelocity repel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
-                if (m_debug)
-                    ForceViz.put("tactics", pose, repel);
                 v = v.plus(repel);
             }
         }

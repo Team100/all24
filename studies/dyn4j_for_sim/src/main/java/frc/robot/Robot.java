@@ -3,6 +3,8 @@ package frc.robot;
 import org.team100.field.Score;
 import org.team100.field.ScoreDisplay;
 import org.team100.field.SimulatedFMS;
+import org.team100.lib.telemetry.FieldLogger;
+import org.team100.lib.telemetry.Telemetry;
 import org.team100.robot.RobotContainer;
 import org.team100.sim.SimWorld;
 
@@ -16,10 +18,13 @@ public class Robot extends TimedRobot {
     private final ScoreDisplay m_display;
 
     public Robot() {
+        final Telemetry telemetry = Telemetry.get();
+        final FieldLogger logger = telemetry.fieldLogger(true, false);
+
         Score blueScore = new Score();
         Score redScore = new Score();
-        SimWorld world = new SimWorld(blueScore, redScore);
-        m_robotContainer = new RobotContainer(world);
+        SimWorld world = new SimWorld(logger, blueScore, redScore);
+        m_robotContainer = new RobotContainer(logger, world);
         m_fms = new SimulatedFMS();
         m_display = new ScoreDisplay(
                 world.getScorekeeper(),

@@ -14,6 +14,7 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/ROOT/field": "Field2d",
       "/SmartDashboard/AutoNoteDetection": "String Chooser",
       "/SmartDashboard/AvoidVisionJitter": "String Chooser",
       "/SmartDashboard/DriveSteerCouplingCompensation": "String Chooser",
@@ -148,6 +149,12 @@
   },
   "NetworkTables": {
     "retained": {
+      "ROOT": {
+        "field": {
+          "open": true
+        },
+        "open": true
+      },
       "field": {
         "double[]##v_/field/ball": {
           "open": true
@@ -169,8 +176,5 @@
   },
   "NetworkTables Info": {
     "visible": true
-  },
-  "NetworkTables View": {
-    "visible": false
   }
 }
