@@ -1,19 +1,21 @@
 package org.team100.frc2024.shooter;
 
-import org.team100.frc2024.shooter.indexer.IndexerSubsystem;
-import org.team100.frc2024.shooter.pivot.GravityServo;
 import org.team100.frc2024.shooter.drumShooter.DrumShooter;
-import org.team100.lib.commands.Subsystem100;
+import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.motion.components.GravityServo;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
-public class PivotShooter extends Subsystem100{
+import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class PivotShooter extends SubsystemBase implements Glassy{
     
     private final DrumShooter m_shooter;
     private final SupplierLogger m_logger;
     private final GravityServo m_pivot;
-    private final IndexerSubsystem m_indexerSubsystem;
+    private final Servo m_indexerSubsystem;
 
     private boolean atVelocity;
 
@@ -23,7 +25,7 @@ public class PivotShooter extends Subsystem100{
             SupplierLogger parent,
             ShooterCollection shooterCollection) {
         m_logger = parent.child(this);
-        m_indexerSubsystem = new IndexerSubsystem(m_logger, shooterCollection.getIndexer(), shooterCollection.getIndexAccelM_S2(),shooterCollection.getIndexerDiameterM()*Math.PI/4,0.1);
+        m_indexerSubsystem = shooterCollection.getIndexer();
         LinearVelocityServo[] shooter = shooterCollection.getShooters();
         m_shooter = new DrumShooter(m_logger, shooter[0], shooter[1]);
         m_pivot = shooterCollection.getPivot();
@@ -33,13 +35,8 @@ public class PivotShooter extends Subsystem100{
         m_pivot.setPosition(goalRad);
     }
 
-    public void setAngleMoving(double goalRad_S, double goalRad_S2) {
-        m_pivot.setPosition(goalRad_S, goalRad_S2);
-    }
-
     public void setAngleVelocity(double goalRad_S2) {
-        double goalPercent = goalRad_S2 / (Math.PI*2*39);
-        m_pivot.setVelocity(goalPercent);
+        m_pivot.setVelocity(goalRad_S2);
     }
 
     public void spinUpShooter() {
@@ -52,13 +49,13 @@ public class PivotShooter extends Subsystem100{
 
     public void shootOne() {
         if (atVelocity) {
-            m_indexerSubsystem.indexOne();
+            m_indexerSubsystem.setAngle(m_indexerSubsystem.get()*360 + 90);
         }
     }
 
     public void shootAll() {
         if (atVelocity) {
-            m_indexerSubsystem.index();
+            m_indexerSubsystem.setSpeed(1);
         }
     }
 
@@ -67,7 +64,7 @@ public class PivotShooter extends Subsystem100{
     }
 
     @Override
-    public void periodic100(double dt) {
+    public void periodic() {
         atVelocity = m_shooter.atVeloctity();
         m_logger.logBoolean(Level.TRACE, "At velocity", () -> atVelocity);
     }

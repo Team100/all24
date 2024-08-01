@@ -1,12 +1,13 @@
 package org.team100.frc2024.drivetrain;
 
-import org.team100.lib.commands.Subsystem100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class TankDriveSubsystem extends Subsystem100 {
+public class TankDriveSubsystem extends SubsystemBase implements Glassy{
     private final SupplierLogger m_logger;
     private final TankModuleCollection m_modules;
 
@@ -23,7 +24,7 @@ public class TankDriveSubsystem extends Subsystem100 {
     }
 
     @Override
-    public void periodic100(double dt) {
+    public void periodic() {
       m_logger.logOptionalDouble(Level.TRACE, "Left Drive Velocity M_S",() -> m_modules.getSpeeds()[0]);
       m_logger.logOptionalDouble(Level.TRACE, "Right Drive Velocity M_S",() -> m_modules.getSpeeds()[1]);
 

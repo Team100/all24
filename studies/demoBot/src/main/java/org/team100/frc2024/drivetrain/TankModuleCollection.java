@@ -33,10 +33,10 @@ public class TankModuleCollection {
         switch (Identity.instance) {
             case CAMERA_DOLLY:
                 Util.println("************** Custom Tank Module Modules, using in built encoders? **************");
-                LinearVelocityServo leftMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550VelocityMechanism(
-                        kLeft, collectionLogger, currentLimit, 0, 5, MotorPhase.FORWARD, 0.1));
-                LinearVelocityServo rightMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550VelocityMechanism(
-                        kRight, collectionLogger, currentLimit, 0, 5, MotorPhase.FORWARD, 0.1));
+                LinearVelocityServo leftMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550LinearMechanism(
+                        kLeft, collectionLogger, currentLimit, 0, Math.pow(5.2307692308, 2), MotorPhase.FORWARD, 0.098425));
+                LinearVelocityServo rightMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550LinearMechanism(
+                        kRight, collectionLogger, currentLimit, 0, Math.pow(5.2307692308, 2), MotorPhase.FORWARD, 0.098425));
                 return new TankModuleCollection(leftMotor, rightMotor);
             case BLANK:
             default:

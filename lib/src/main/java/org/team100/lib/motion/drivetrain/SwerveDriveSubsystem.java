@@ -174,7 +174,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      * acceleration. This is rate-limited and cached.
      */
     public SwerveState getState() {
-        // return m_poseEstimator.get(Timer.getFPGATimestamp());
         return m_stateSupplier.get();
     }
 
