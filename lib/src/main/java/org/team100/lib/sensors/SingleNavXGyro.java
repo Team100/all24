@@ -170,7 +170,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private float getYawNEDDeg() {
         float yawDeg = m_ahrs.getYaw() * m_yawScaleFactor;
-        m_logger.logFloat(Level.TRACE, "Yaw NED (deg)", () -> yawDeg);
+        m_logger.logDouble(Level.TRACE, "Yaw NED (deg)", () -> yawDeg);
         return yawDeg;
     }
 
@@ -179,7 +179,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private float getPitchDeg() {
         float pitchDeg = m_ahrs.getPitch();
-        m_logger.logFloat(Level.TRACE, "Pitch (deg)", () -> pitchDeg);
+        m_logger.logDouble(Level.TRACE, "Pitch (deg)", () -> pitchDeg);
         return pitchDeg;
     }
 
@@ -188,7 +188,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private float getRollDeg() {
         float rollDeg = m_ahrs.getRoll();
-        m_logger.logFloat(Level.TRACE, "Roll (deg)", () -> rollDeg);
+        m_logger.logDouble(Level.TRACE, "Roll (deg)", () -> rollDeg);
         return rollDeg;
     }
 
@@ -202,7 +202,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private float getYawRateNEDDeg_s() {
         final float rateDeg_S = getRateDeg_S() * m_yawRateScaleFactor;
-        m_logger.logFloat(Level.TRACE, "Rate NED (deg_s)", () -> rateDeg_S);
+        m_logger.logDouble(Level.TRACE, "Rate NED (deg_s)", () -> rateDeg_S);
         return rateDeg_S;
     }
 
@@ -232,7 +232,7 @@ public class SingleNavXGyro implements Gyro {
         } else {
             m_logger.logBoolean(Level.COMP, "Connected", () -> false);
         }
-        m_logger.logFloat(Level.TRACE, "Yaw (deg)", m_ahrs::getYaw);
+        m_logger.logDouble(Level.TRACE, "Yaw (deg)", m_ahrs::getYaw);
         // note we don't actually use any of the measurements below. maybe remove them?
         m_logger.logDouble(Level.TRACE, "Angle (deg)", m_ahrs::getAngle);
         m_logger.logDouble(Level.TRACE, "Angle Mod 360 (deg)", () -> m_ahrs.getAngle() % 360);

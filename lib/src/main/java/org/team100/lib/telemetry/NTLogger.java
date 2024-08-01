@@ -71,16 +71,6 @@ public class NTLogger extends PrimitiveLogger {
     }
 
     @Override
-    public void logFloat(String key, float val) {
-        pub(key, k -> {
-            FloatTopic t = inst.getFloatTopic(k);
-            FloatPublisher p = t.publish();
-            t.setRetained(true);
-            return p;
-        }, FloatPublisher.class).set(val);
-    }
-
-    @Override
     public void logDoubleArray(String key, double[] val) {
         pub(key, k -> {
             DoubleArrayTopic t = inst.getDoubleArrayTopic(k);

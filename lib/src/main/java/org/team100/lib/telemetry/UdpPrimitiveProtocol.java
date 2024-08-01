@@ -8,10 +8,9 @@ public class UdpPrimitiveProtocol {
         BOOLEAN(1),
         DOUBLE(2),
         INT(3),
-        FLOAT(4),
-        DOUBLE_ARRAY(5),
-        LONG(6),
-        STRING(7);
+        DOUBLE_ARRAY(4),
+        LONG(5),
+        STRING(6);
 
         public final byte id;
 
@@ -49,14 +48,6 @@ public class UdpPrimitiveProtocol {
         int keyFieldLen = encodeKey(buf, key);
         buf.put(Types.INT.id); // 1
         buf.putInt(val); // 4 for int
-        return keyFieldLen + 5;
-    }
-
-    static int encodeFloat(ByteBuffer buf, String key, float val) {
-        buf.rewind();
-        int keyFieldLen = encodeKey(buf, key);
-        buf.put(Types.FLOAT.id); // 1
-        buf.putFloat(val); // 4 for float
         return keyFieldLen + 5;
     }
 

@@ -17,14 +17,13 @@ class UdpPrimitiveLoggerTest {
                 () -> false,
                 null);
         for (int i = 0; i < 100; ++i) {
-            logger.logBoolean(Level.COMP, "key", () -> true);
-            logger.logDouble(Level.COMP, "key", () -> 100.0);
-            logger.logInt(Level.COMP, "key", () -> 100);
-            logger.logFloat(Level.COMP, "key", () -> (float) 100.0);
-            logger.logDoubleArray(Level.COMP, "key", () -> new double[] { 1.0, 2.0 });
-            logger.logDoubleObjArray(Level.COMP, "key", () -> new Double[] { 1.0, 2.0 });
-            logger.logLong(Level.COMP, "key", () -> (long) 100);
-            logger.logString(Level.COMP, "key", () -> "value");
+            logger.logBoolean(Level.COMP, "boolkey", () -> true);
+            logger.logDouble(Level.COMP, "doublekey", () -> 100.0);
+            logger.logInt(Level.COMP, "intkey", () -> 100);
+            logger.logDoubleArray(Level.COMP, "doublearraykey", () -> new double[] { 1.0, 2.0 });
+            logger.logDoubleObjArray(Level.COMP, "doubleobjarraykey", () -> new Double[] { 1.0, 2.0 });
+            logger.logLong(Level.COMP, "longkey", () -> (long) 100);
+            logger.logString(Level.COMP, "stringkey", () -> "value");
         }
     }
 

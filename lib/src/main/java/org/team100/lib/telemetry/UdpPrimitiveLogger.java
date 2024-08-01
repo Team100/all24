@@ -67,13 +67,6 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
     }
 
     @Override
-    void logFloat(String key, float val) {
-        int len = UdpPrimitiveProtocol.encodeFloat(m_bb, key, val);
-        DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);
-        send(p);
-    }
-
-    @Override
     void logDoubleArray(String key, double[] val) {
         int len = UdpPrimitiveProtocol.encodeDoubleArray(m_bb, key, val);
         DatagramPacket p = new DatagramPacket(m_bytes, len, m_addr, kPort);

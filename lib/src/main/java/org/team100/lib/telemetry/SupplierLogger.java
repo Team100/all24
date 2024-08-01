@@ -147,17 +147,6 @@ public class SupplierLogger {
             m_primitiveLoggerB.logInt(key, val);
     }
 
-    public void logFloat(Level level, String leaf, FloatSupplier vals) {
-        if (!allow(level))
-            return;
-        String key = append(m_root, leaf);
-        float val = vals.getAsFloat();
-        if (enabledA())
-            m_primitiveLoggerA.logFloat(key, val);
-        if (enabledB())
-            m_primitiveLoggerB.logFloat(key, val);
-    }
-
     public void logDoubleArray(Level level, String leaf, Supplier<double[]> vals) {
         if (!allow(level))
             return;
