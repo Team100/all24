@@ -20,10 +20,6 @@ public class TestLogger extends PrimitiveLogger {
     }
 
     @Override
-    public void logFloat(String key, float val) {
-    }
-
-    @Override
     public void logDoubleArray(String key, double[] val) {
     }
 
@@ -37,9 +33,5 @@ public class TestLogger extends PrimitiveLogger {
 
     @Override
     public void logString(String key, String val) {
-    }
-
-    @Override
-    public void logStringArray(String key, String[] val) {
     }
 }
