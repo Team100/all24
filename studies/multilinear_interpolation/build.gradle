@@ -73,6 +73,8 @@ dependencies {
     implementation 'com.github.haifengl:smile-core:3.1.1'
     implementation 'com.github.haifengl:smile-plot:3.1.1'
 
+    implementation 'org.jfree:jfreechart:1.5.5'
+
 }
 
 test {
