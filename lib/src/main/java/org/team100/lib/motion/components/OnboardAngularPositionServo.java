@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.Timer;
  * OnboardPositionServo.
  */
 public class OnboardAngularPositionServo implements AngularPositionServo {
-    private static final double kDtSec = 0.02;
     private static final double kFeedbackDeadbandRad_S = 0.01;
 
     private final SupplierLogger m_logger;
@@ -235,8 +234,12 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         m_logger.logState100(Level.TRACE, "setpoint", () -> m_setpointRad);
         m_logger.logState100(Level.TRACE, "goal", () -> m_goal);
     }
-
     ////////////////////////////////////////////////
+
+    @Override
+    public void setVelocity(double goalVelocityRad_S, double feedForwardTorqueNm) {
+        m_mechanism.setVelocity(feedForwardTorqueNm, accel(goalVelocityRad_S), feedForwardTorqueNm);
+    }
 
     /**
      * there will be some jitter in dt, which will result in a small amount of

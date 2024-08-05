@@ -9,6 +9,7 @@ import org.team100.lib.dashboard.Glassy;
  */
 public interface BareMotor extends Glassy {
 
+    
     /**
      * Some motors allow torque limiting through current limiting.
      */

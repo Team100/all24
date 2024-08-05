@@ -152,8 +152,8 @@ class CameraData:
             fy = 1680
             cx = 728
             cy = 544
-            k1 = 0
-            k2 = 0
+            k1 = -9.34267276897509
+            k2 = -180.15213212010667
         else:
             print("UNKNOWN CAMERA MODEL")
             sys.exit()

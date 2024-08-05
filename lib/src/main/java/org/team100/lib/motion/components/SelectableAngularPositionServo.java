@@ -140,4 +140,13 @@ public class SelectableAngularPositionServo implements AngularPositionServo {
         }
     }
 
+    @Override
+    public void setVelocity(double goalVelocityRad_S, double feedForwardTorqueNm) {
+        if (m_selector.getAsBoolean()) {
+            m_whenTrue.setVelocity(goalVelocityRad_S, feedForwardTorqueNm);
+        } else {
+            m_whenFalse.setVelocity(goalVelocityRad_S, feedForwardTorqueNm);
+        }
+    }
+
 }

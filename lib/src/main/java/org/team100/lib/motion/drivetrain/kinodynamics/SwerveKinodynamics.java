@@ -203,10 +203,9 @@ public class SwerveKinodynamics implements Glassy {
     }
 
     private void setAngleAccel() {
-        // this assumes the robot is a uniform rectangular cuboid.
         double accel = Math.max(m_MaxDriveAccelerationM_S2, m_MaxDriveDecelerationM_S2);
         m_maxAngleAccelRad_S2 = 12 * accel * m_radius
-                / (m_fronttrack * m_fronttrack + m_wheelbase * m_wheelbase);
+                / (m_fronttrack * m_backtrack + m_wheelbase * m_wheelbase);
     }
 
     private void setSteeringProfile() {

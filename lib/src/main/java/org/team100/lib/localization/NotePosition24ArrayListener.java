@@ -46,18 +46,6 @@ public class NotePosition24ArrayListener {
 
     private double latestTime = 0;
 
-    /**
-     * Time between events in reality and their appearance here; the average
-     * end-to-end latency of the camera, detection code, network tables, and rio
-     * looping.
-     * 
-     * Note this latency varies a little bit, depending on the relative timing of
-     * the camera frame and the rio loop.
-     * 
-     * TODO: use the correct timing instead of this average.
-     */
-    private static final double kTotalLatencySeconds = 0.075;
-
     public NotePosition24ArrayListener(Supplier<Pose2d> poseSupplier) {
         m_poseSupplier = poseSupplier;
 
