@@ -20,11 +20,11 @@ this becomes a linear system with constant $\Phi$ and $F$:
 $$ \Phi W = F $$
 
 
-that can be solved for $W$, e.g. with LU decomposition.
+that can be solved for $W$, e.g. with LU or QR decomposition.
 
 In our case, we're working on $\R^4\rightarrow\R^2$.
 The domain is the image frame $(u, v)$, the apparent tag size in pixels, $d$,
-and the known tag height, $Z$.
+and the known tag altitude, $Z$.
 The range is the cartesian relative position, $(X, Y)$.
 
 It might be better to cast the dependent variables in polar coordinates given the
