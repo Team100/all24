@@ -4,20 +4,40 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
+import edu.wpi.first.math.jni.EigenJNI;
+
 public class RBFInterpolator {
 
     public static final DoubleUnaryOperator GAUSSIAN = r -> Math.exp(-1.0 * Math.pow(r, 2));
 
     /**
+     * Solves $\Phi W = F$
      * 
-     * @param x   known independent variables
-     * @param y   known dependent variables at those points
+     * @param x   known independent variables, one row per observation, one column
+     *            per variable
+     * @param y   known dependent variables at those points, one row per
+     *            observation, one column per variable.
      * @param rbf radial basis function
      */
     public RBFInterpolator(double[][] x, double[][] y, DoubleUnaryOperator rbf) {
 
+        int xRows = x.length;
+        int xCols = x[0].length;
         double[] xRowMajor = rowMajor(x);
+
+        int yRows = y.length;
+        int yCols = y[0].length;
         double[] yRowMajor = rowMajor(y);
+
+        double[][] phi = phi(x, rbf);
+        int phiRows = xRows;
+        int phiCols = xRows;
+        double[] phiRowMajor = rowMajor(phi);
+
+        int wRows = yRows;
+        int wCols = yCols;
+        double[] wRowMajor = new double[yRowMajor.length];
+        EigenJNI.solveFullPivHouseholderQr(phiRowMajor, phiRows, phiCols, yRowMajor, yRows, yCols, wRowMajor);
 
         for (double xx : xRowMajor) {
             System.out.println(xx);
@@ -28,6 +48,7 @@ public class RBFInterpolator {
 
     }
 
+    /** Returns basis function evaluated for each pair in x. */
     static double[][] phi(double[][] x, DoubleUnaryOperator rbf) {
         double[][] phi = new double[x.length][x.length];
         for (int i = 0; i < x.length; ++i) {
@@ -38,7 +59,7 @@ public class RBFInterpolator {
         return phi;
     }
 
-    /** Euclidean distance from a to b. */
+    /** Returns Euclidean distance from a to b. */
     static double r(double[] a, double[] b) {
         if (a.length != b.length)
             throw new IllegalArgumentException();
@@ -49,10 +70,23 @@ public class RBFInterpolator {
         return Math.sqrt(ss);
     }
 
-    private double[] rowMajor(double[][] x) {
+    /** Converts 2d array to 1d row-major array. */
+    static double[] rowMajor(double[][] x) {
         return Stream.of(x)
                 .flatMapToDouble(DoubleStream::of)
                 .toArray();
+    }
+
+    static double[][] twoD(double[] x, int rows, int cols) {
+        if (x.length != rows * cols)
+            throw new IllegalArgumentException();
+        double[][] result = new double[rows][cols];
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                result[row][col] = x[row * cols + col];
+            }
+        }
+        return result;
     }
 
 }

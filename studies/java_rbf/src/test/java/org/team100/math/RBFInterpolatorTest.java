@@ -2,7 +2,6 @@ package org.team100.math;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
@@ -29,7 +28,7 @@ class RBFInterpolatorTest {
         // dst has same dimensions as B
         double[] dst = new double[4];
         EigenJNI.solveFullPivHouseholderQr(A, Arows, Acols, B, Brows, Bcols, dst);
-        assertEquals("[1.0, 0.0, 0.0, 1.0]", Arrays.toString(dst));
+        assertEquals("[1.00, 0.00, 0.00, 1.00]", toString(dst));
     }
 
     /**
@@ -54,7 +53,7 @@ class RBFInterpolatorTest {
             assertEquals(2, phi.length);
             assertEquals(2, phi[0].length);
             // zero on the diagonal, 1 off the diagonal
-            assertEquals("[[0.00,1.00],[1.00,0.00]]", toString(phi));
+            assertEquals("[[0.00, 1.00], [1.00, 0.00]]", toString(phi));
         }
 
         {
@@ -64,7 +63,7 @@ class RBFInterpolatorTest {
             assertEquals(3, phi.length);
             assertEquals(3, phi[0].length);
             // zero on the diagonal, 1 off the diagonal
-            assertEquals("[[0.00,1.00,2.00],[1.00,0.00,1.00],[2.00,1.00,0.00]]", toString(phi));
+            assertEquals("[[0.00, 1.00, 2.00], [1.00, 0.00, 1.00], [2.00, 1.00, 0.00]]", toString(phi));
         }
     }
 
@@ -85,7 +84,7 @@ class RBFInterpolatorTest {
             assertEquals(2, phi.length);
             assertEquals(2, phi[0].length);
             // zero on the diagonal, 1 off the diagonal
-            assertEquals("[[1.00,0.37],[0.37,1.00]]", toString(phi));
+            assertEquals("[[1.00, 0.37], [0.37, 1.00]]", toString(phi));
         }
 
         {
@@ -95,18 +94,8 @@ class RBFInterpolatorTest {
             assertEquals(3, phi.length);
             assertEquals(3, phi[0].length);
             // zero on the diagonal, 1 off the diagonal
-            assertEquals("[[1.00,0.37,0.02],[0.37,1.00,0.37],[0.02,0.37,1.00]]", toString(phi));
+            assertEquals("[[1.00, 0.37, 0.02], [0.37, 1.00, 0.37], [0.02, 0.37, 1.00]]", toString(phi));
         }
-    }
-
-    private String toString(double[][] x) {
-        StringJoiner b = new StringJoiner(",", "[", "]");
-        for (double[] row : x) {
-            StringJoiner rowJoiner = new StringJoiner(",", "[", "]");
-            DoubleStream.of(row).forEach(cell -> rowJoiner.add(String.format("%.2f", cell)));
-            b.add(rowJoiner.toString());
-        }
-        return b.toString();
     }
 
     @Test
@@ -126,6 +115,20 @@ class RBFInterpolatorTest {
     }
 
     @Test
+    void testRowMajor() {
+        double[][] x = { { 1, 2 }, { 3, 4 } };
+        double[] xRowMajor = RBFInterpolator.rowMajor(x);
+        assertEquals("[1.00, 2.00, 3.00, 4.00]", toString(xRowMajor));
+    }
+
+    @Test
+    void testTwoD() {
+        double[] xRowMajor = { 1, 2, 3, 4 };
+        double[][] x = RBFInterpolator.twoD(xRowMajor, 2, 2);
+        assertEquals("[[1.00, 2.00], [3.00, 4.00]]", toString(x));
+    }
+
+    @Test
     void testSimple() {
         // the known independent variables
         double[][] x = { { 1.0, 2.0 }, { 3.0, 4.0 } };
@@ -134,6 +137,20 @@ class RBFInterpolatorTest {
         DoubleUnaryOperator rbf = RBFInterpolator.GAUSSIAN;
         RBFInterpolator interp = new RBFInterpolator(x, y, rbf);
 
+    }
+
+    private String toString(double[][] x) {
+        StringJoiner sj = new StringJoiner(", ", "[", "]");
+        for (double[] row : x) {
+            sj.add(toString(row));
+        }
+        return sj.toString();
+    }
+
+    private String toString(double[] row) {
+        StringJoiner sj = new StringJoiner(", ", "[", "]");
+        DoubleStream.of(row).forEach(cell -> sj.add(String.format("%.2f", cell)));
+        return sj.toString();
     }
 
 }
