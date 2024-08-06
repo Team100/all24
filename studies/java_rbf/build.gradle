@@ -3,6 +3,12 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2024.3.1"
 }
 
+
+wpi.maven.useLocal = false
+wpi.maven.useDevelopment = true
+wpi.versions.wpilibVersion = '2025.+'
+wpi.versions.wpimathVersion = '2025.+'
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
