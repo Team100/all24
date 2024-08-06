@@ -9,6 +9,17 @@ import edu.wpi.first.math.jni.EigenJNI;
 public class RBFInterpolator {
 
     public static final DoubleUnaryOperator GAUSSIAN = r -> Math.exp(-1.0 * Math.pow(r, 2));
+    /**
+     * Training independent vars, i.e. points where rbf is evaluated later. One row
+     * per observation, one column per input dimension.
+     */
+    final double[][] m_x;
+    /**
+     * The weights learned below. One row per observation, one column per output
+     * dimension
+     */
+    final double[][] m_w;
+    final DoubleUnaryOperator m_rbf;
 
     /**
      * Solves $\Phi W = F$
@@ -20,6 +31,10 @@ public class RBFInterpolator {
      * @param rbf radial basis function
      */
     public RBFInterpolator(double[][] x, double[][] y, DoubleUnaryOperator rbf) {
+        if (x.length != y.length)
+            throw new IllegalArgumentException();
+        m_x = x;
+        m_rbf = rbf;
 
         int xRows = x.length;
         int xCols = x[0].length;
@@ -38,14 +53,30 @@ public class RBFInterpolator {
         int wCols = yCols;
         double[] wRowMajor = new double[yRowMajor.length];
         EigenJNI.solveFullPivHouseholderQr(phiRowMajor, phiRows, phiCols, yRowMajor, yRows, yCols, wRowMajor);
+        m_w = twoD(wRowMajor, wRows, wCols);
+    }
 
-        for (double xx : xRowMajor) {
-            System.out.println(xx);
+    /**
+     * Interpolate for one location.
+     * 
+     * for this we evaluate the rbfs using each of the known positions and probe
+     * position,
+     * (remember the rbf is a scalar function based on the distance to each known
+     * position)
+     * and then multiply by the weights we learned in the constructor
+     */
+    public double[] get(double[] p) {
+        if (p.length != m_x[0].length)
+            throw new IllegalArgumentException();
+        double[] phiVec = phiVec(p, m_x, m_rbf);
+        double[] result = new double[m_w[0].length];
+        for (int i = 0; i < result.length; ++i) {
+            result[i] = 0.0;
+            for (int j = 0; j < phiVec.length; ++j) {
+                result[i] += phiVec[j] * m_w[j][i];
+            }
         }
-        for (double yy : yRowMajor) {
-            System.out.println(yy);
-        }
-
+        return result;
     }
 
     /** Returns basis function evaluated for each pair in x. */
@@ -57,6 +88,21 @@ public class RBFInterpolator {
             }
         }
         return phi;
+    }
+
+    /**
+     * 
+     * @param p   point we want
+     * @param x   known points
+     * @param rbf
+     * @return
+     */
+    static double[] phiVec(double[] p, double[][] x, DoubleUnaryOperator rbf) {
+        double[] result = new double[x.length];
+        for (int i = 0; i < x.length; ++i) {
+            result[i] = rbf.applyAsDouble(r(p, x[i]));
+        }
+        return result;
     }
 
     /** Returns Euclidean distance from a to b. */
