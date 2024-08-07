@@ -6,7 +6,7 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
-import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.Num;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.jni.EigenJNI;
@@ -16,19 +16,23 @@ import edu.wpi.first.math.jni.EigenJNI;
  * @param Y dependent dimensionality
  */
 public class RBFInterpolatingMap<X extends Num, Y extends Num> {
+    public static final DoubleUnaryOperator GAUSSIAN = r -> Math.exp(-1.0 * Math.pow(r, 2));
+
     /** Radial basis function */
     final DoubleUnaryOperator m_rbf;
     /** Independent variable, X dimensionality */
     final List<Vector<X>> m_x;
     /** Dependent variable, Y dimensionality */
     final List<Vector<Y>> m_y;
+    final Nat<Y> m_instance;
     /** Weights learned from the lists above */
     double[][] m_w;
 
-    public RBFInterpolatingMap(DoubleUnaryOperator rbf) {
+    public RBFInterpolatingMap(DoubleUnaryOperator rbf, Nat<Y> instance) {
         m_rbf = rbf;
         m_x = new ArrayList<>();
         m_y = new ArrayList<>();
+        m_instance = instance;
     }
 
     public void put(Vector<X> x, Vector<Y> y) {
@@ -37,19 +41,33 @@ public class RBFInterpolatingMap<X extends Num, Y extends Num> {
         m_w = null;
     }
 
-    public Vector<Y> get(Vector<X> x) {
+    public Vector<Y> get(Vector<X> p) {
         // if not up to date, calculate the weights
+        if (m_w == null)
+            calculateWeights();
+        if (p.getNumRows() != m_x.get(0).getNumRows())
+            throw new IllegalArgumentException();
+        double[] phiVec = phiVec(p, m_x, m_rbf);
+        Vector<Y> result = new Vector<>(m_instance);
+        for (int i = 0; i < result.getNumRows(); ++i) {
+            double cell = 0.0;
+            for (int j = 0; j < phiVec.length; ++j) {
+                cell += phiVec[j] * m_w[j][i];
+            }
+            result.set(i, 0, cell);
+        }
+        return result;
 
     }
 
     void calculateWeights() {
 
-        int xRows = x.length;
-        int xCols = x[0].length;
+        int xRows = m_x.size();
+        int xCols = m_x.get(0).getNumRows();
         double[] xRowMajor = rowMajor(m_x);
 
-        int yRows = y.length;
-        int yCols = y[0].length;
+        int yRows = m_y.size();
+        int yCols = m_y.get(0).getNumRows();
         double[] yRowMajor = rowMajor(m_y);
 
         double[][] phi = phi(m_x, m_rbf);
@@ -65,25 +83,41 @@ public class RBFInterpolatingMap<X extends Num, Y extends Num> {
     }
 
     /** Returns basis function evaluated for each pair in x. */
-    static double[][] phi(double[][] x, DoubleUnaryOperator rbf) {
-        double[][] phi = new double[x.length][x.length];
-        for (int i = 0; i < x.length; ++i) {
-            for (int j = 0; j < x.length; ++j) {
-                phi[i][j] = rbf.applyAsDouble(r(x[i], x[j]));
+    static <T extends Num> double[][] phi(List<Vector<T>> x, DoubleUnaryOperator rbf) {
+        double[][] phi = new double[x.size()][x.size()];
+        for (int i = 0; i < x.size(); ++i) {
+            for (int j = 0; j < x.size(); ++j) {
+                phi[i][j] = rbf.applyAsDouble(r(x.get(i), x.get(j)));
             }
         }
         return phi;
     }
 
+    static <T extends Num> double[] phiVec(Vector<T> p, List<Vector<T>> x, DoubleUnaryOperator rbf) {
+        double[] result = new double[x.size()];
+        for (int i = 0; i < x.size(); ++i) {
+            result[i] = rbf.applyAsDouble(r(p, x.get(i)));
+        }
+        return result;
+    }
+
+
     /** Returns Euclidean distance from a to b. */
-    static double r(double[] a, double[] b) {
-        if (a.length != b.length)
+    static <T extends Num> double r(Vector<T> a, Vector<T> b) {
+        if (a.getNumRows() != b.getNumRows())
             throw new IllegalArgumentException();
         double ss = 0.0;
-        for (int i = 0; i < a.length; ++i) {
-            ss += Math.pow(a[i] - b[i], 2);
+        for (int i = 0; i < a.getNumRows(); ++i) {
+            ss += Math.pow(a.get(i) - b.get(i), 2);
         }
         return Math.sqrt(ss);
+    }
+
+    /** Converts 2d array to 1d row-major array. */
+    static double[] rowMajor(double[][] x) {
+        return Stream.of(x)
+                .flatMapToDouble(DoubleStream::of)
+                .toArray();
     }
 
     /** Converts 2d array to 1d row-major array. */
