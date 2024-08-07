@@ -9,6 +9,7 @@ import edu.wpi.first.math.jni.EigenJNI;
 public class RBFInterpolator {
 
     public static final DoubleUnaryOperator GAUSSIAN = r -> Math.exp(-1.0 * Math.pow(r, 2));
+
     /**
      * Training independent vars, i.e. points where rbf is evaluated later. One row
      * per observation, one column per input dimension.

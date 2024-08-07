@@ -253,11 +253,26 @@ class RBFInterpolatorTest {
             System.out.printf("et %d n %d etEach (ns) %5.3f\n", et, n, etEach);
         }
 
+        // this is just the interpolation work without the printing
         {
             long ms = System.nanoTime();
             for (double px = -2; px < 2; px += 0.2) {
                 for (double py = -2; py < 2; py += 0.2) {
                     interp.get(new double[] { px, py });
+                }
+            }
+            long ms1 = System.nanoTime();
+            long et = ms1 - ms;
+            double etEach = (double) et / n;
+            System.out.printf("et %d n %d etEach (ns) %5.3f\n", et, n, etEach);
+        }
+        // how long does just the phi part take?
+        // it seems to take most of the time.
+        {
+            long ms = System.nanoTime();
+            for (double px = -2; px < 2; px += 0.2) {
+                for (double py = -2; py < 2; py += 0.2) {
+                    RBFInterpolator.phiVec(new double[] { px, py }, interp.m_x, interp.m_rbf);
                 }
             }
             long ms1 = System.nanoTime();
