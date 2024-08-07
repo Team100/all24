@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import edu.wpi.first.math.jni.EigenJNI;
 
 public class RBFInterpolator {
-
     public static final DoubleUnaryOperator GAUSSIAN = r -> Math.exp(-1.0 * Math.pow(r, 2));
 
     /**
@@ -38,8 +37,6 @@ public class RBFInterpolator {
         m_rbf = rbf;
 
         int xRows = x.length;
-        int xCols = x[0].length;
-        double[] xRowMajor = rowMajor(x);
 
         int yRows = y.length;
         int yCols = y[0].length;
@@ -72,7 +69,6 @@ public class RBFInterpolator {
         double[] phiVec = phiVec(p, m_x, m_rbf);
         double[] result = new double[m_w[0].length];
         for (int i = 0; i < result.length; ++i) {
-            result[i] = 0.0;
             for (int j = 0; j < phiVec.length; ++j) {
                 result[i] += phiVec[j] * m_w[j][i];
             }

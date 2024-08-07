@@ -59,15 +59,10 @@ public class RBFInterpolatingMap<X extends Num, Y extends Num> {
             result.set(i, 0, cell);
         }
         return result;
-
     }
 
     void calculateWeights() {
-
         int xRows = m_x.size();
-        int xCols = m_x.get(0).getNumRows();
-        double[] xRowMajor = rowMajor(m_x);
-
         int yRows = m_y.size();
         int yCols = m_y.get(0).getNumRows();
         double[] yRowMajor = rowMajor(m_y);
