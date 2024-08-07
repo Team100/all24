@@ -234,13 +234,36 @@ class RBFInterpolatorTest {
 
         // look at the whole thing, beyond the training data to see Runge's phenomenon.
         // the error is zero within the convex hull of the training set. :)
-        for (double px = -2; px < 2; px += 0.2) {
-            for (double py = -2; py < 2; py += 0.2) {
-                double pf = fn.applyAsDouble(px, py);
-                double s = interp.get(new double[] { px, py })[0];
-                double err = pf - s;
-                System.out.printf("%5.3f %5.3f %5.3f %5.3f %5.3f \n", px, py, pf, s, err);
+        {
+            long ms = System.nanoTime();
+            for (double px = -2; px < 2; px += 0.2) {
+                for (double py = -2; py < 2; py += 0.2) {
+                    double pf = fn.applyAsDouble(px, py);
+                    double s = interp.get(new double[] { px, py })[0];
+                    double err = pf - s;
+                    System.out.printf("%5.3f %5.3f %5.3f %5.3f %5.3f \n", px, py, pf, s, err);
+                }
             }
+            long ms1 = System.nanoTime();
+            long et = ms1 - ms;
+            double etEach = (double) et / n;
+            // printing seems to take about 100 us
+            // calculating fn takes 10 us
+            // the interpolation itself takes about 12 us
+            System.out.printf("et %d n %d etEach (ns) %5.3f\n", et, n, etEach);
+        }
+
+        {
+            long ms = System.nanoTime();
+            for (double px = -2; px < 2; px += 0.2) {
+                for (double py = -2; py < 2; py += 0.2) {
+                    interp.get(new double[] { px, py });
+                }
+            }
+            long ms1 = System.nanoTime();
+            long et = ms1 - ms;
+            double etEach = (double) et / n;
+            System.out.printf("et %d n %d etEach (ns) %5.3f\n", et, n, etEach);
         }
     }
 

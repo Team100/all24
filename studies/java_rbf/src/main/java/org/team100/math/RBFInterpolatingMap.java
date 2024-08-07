@@ -45,6 +45,8 @@ public class RBFInterpolatingMap<X extends Num, Y extends Num> {
         // if not up to date, calculate the weights
         if (m_w == null)
             calculateWeights();
+        if (m_x.isEmpty())
+            return new Vector<>(m_instance);
         if (p.getNumRows() != m_x.get(0).getNumRows())
             throw new IllegalArgumentException();
         double[] phiVec = phiVec(p, m_x, m_rbf);
@@ -100,7 +102,6 @@ public class RBFInterpolatingMap<X extends Num, Y extends Num> {
         }
         return result;
     }
-
 
     /** Returns Euclidean distance from a to b. */
     static <T extends Num> double r(Vector<T> a, Vector<T> b) {
