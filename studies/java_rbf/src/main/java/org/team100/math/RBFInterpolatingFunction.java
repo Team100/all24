@@ -9,7 +9,12 @@ import java.util.stream.Stream;
 import edu.wpi.first.math.jni.EigenJNI;
 
 public class RBFInterpolatingFunction<T, U> implements Function<T, U> {
+    // prevent division by zero
+    private static final double kMinVariance = 0.01;
     public static final DoubleUnaryOperator GAUSSIAN = r -> Math.exp(-1.0 * Math.pow(r, 2));
+
+    record Stats(double mean, double stddev) {
+    }
 
     abstract static class Adapter<V> {
         abstract int size();
@@ -18,8 +23,29 @@ public class RBFInterpolatingFunction<T, U> implements Function<T, U> {
 
         abstract V fromArray(double[] src);
 
-        /** Converts 2d array to 1d row-major array. */
-        double[] rowMajor(List<V> x) {
+        Stats[] stats(List<V> x) {
+            double[] sum = new double[size()];
+            double[] sq_sum = new double[size()];
+            for (V v : x) {
+                double[] a = toArray(v);
+                for (int i = 0; i < size(); ++i) {
+                    sum[i] += a[i];
+                    sq_sum[i] += a[i] * a[i];
+                }
+            }
+            Stats[] stats = new Stats[size()];
+            for (int i = 0; i < size(); ++i) {
+                double mean = sum[i] / x.size();
+                double variance = sq_sum[i] / x.size() - mean * mean;
+                variance = Math.max(variance, kMinVariance);
+                double stddev = Math.sqrt(variance);
+                stats[i] = new Stats(mean, stddev);
+            }
+            return stats;
+        }
+
+        /** Converts 2d array to a normalized 1d row-major array. */
+        double[] rowMajor(List<V> x, Stats[] stats) {
             if (x.isEmpty())
                 return new double[0];
             final int rows = x.size();
@@ -27,16 +53,26 @@ public class RBFInterpolatingFunction<T, U> implements Function<T, U> {
             final double[] result = new double[rows * cols];
             for (int row = 0; row < rows; ++row) {
                 final double[] rowdata = toArray(x.get(row));
+                for (int col = 0; col < size(); ++col) {
+                    rowdata[col] = rowdata[col] - stats[col].mean;
+                    rowdata[col] = rowdata[col] / stats[col].stddev;
+                }
                 System.arraycopy(rowdata, 0, result, row * cols, cols);
             }
             return result;
         }
 
-        /** Distance metric in the space of V. */
-        double r(V a, V b) {
+        /** Distance metric in the normalized space of V. */
+        double r(V a, V b, Stats[] stats) {
             double ss = 0.0;
             final double[] adata = toArray(a);
             final double[] bdata = toArray(b);
+            for (int col = 0; col < size(); ++col) {
+                adata[col] = adata[col] - stats[col].mean;
+                adata[col] = adata[col] / stats[col].stddev;
+                bdata[col] = bdata[col] - stats[col].mean;
+                bdata[col] = bdata[col] / stats[col].stddev;
+            }
             for (int i = 0; i < size(); ++i) {
                 ss += Math.pow(adata[i] - bdata[i], 2);
             }
@@ -48,6 +84,8 @@ public class RBFInterpolatingFunction<T, U> implements Function<T, U> {
     final List<U> m_y;
     final Adapter<T> m_xadapter;
     final Adapter<U> m_yadapter;
+    final Stats[] m_xstats;
+    final Stats[] m_ystats;
     final DoubleUnaryOperator m_rbf;
     final double[][] m_w;
 
@@ -71,9 +109,14 @@ public class RBFInterpolatingFunction<T, U> implements Function<T, U> {
         int xRows = m_x.size();
         int yRows = m_y.size();
         int yCols = yadapter.size();
-        double[] yRowMajor = yadapter.rowMajor(m_y);
 
-        double[][] phi = phi(m_x, m_xadapter, m_rbf);
+        m_xstats = xadapter.stats(x);
+        m_ystats = yadapter.stats(y);
+
+        // yRowMajor is normalized
+        double[] yRowMajor = yadapter.rowMajor(m_y, m_ystats);
+
+        double[][] phi = phi(m_x, m_xadapter, m_xstats, m_rbf);
         int phiRows = xRows;
         int phiCols = xRows;
         double[] phiRowMajor = rowMajor(phi);
@@ -87,31 +130,45 @@ public class RBFInterpolatingFunction<T, U> implements Function<T, U> {
 
     @Override
     public U apply(T t) {
-        double[] phiVec = phiVec(t, m_x, m_xadapter, m_rbf);
+        double[] phiVec = phiVec(t, m_x, m_xadapter, m_xstats, m_rbf);
         double[] result = new double[m_yadapter.size()];
         for (int i = 0; i < m_yadapter.size(); ++i) {
             for (int j = 0; j < phiVec.length; ++j) {
                 result[i] += phiVec[j] * m_w[j][i];
             }
         }
+        // result here is normalized
+        for (int i = 0; i < result.length; ++i) {
+            result[i] = result[i] * m_ystats[i].stddev;
+            result[i] = result[i] + m_ystats[i].mean;
+        }
+        // now result is denormalized
         return m_yadapter.fromArray(result);
     }
 
     /** Returns basis function evaluated for each pair in x. */
-    static <T> double[][] phi(List<T> x, Adapter<T> xadapter, DoubleUnaryOperator rbf) {
+    static <T> double[][] phi(List<T> x, Adapter<T> xadapter, Stats[] xstats, DoubleUnaryOperator rbf) {
+        if (xadapter.size() != xstats.length)
+            throw new IllegalArgumentException();
         double[][] phi = new double[x.size()][x.size()];
         for (int i = 0; i < x.size(); ++i) {
             for (int j = 0; j < x.size(); ++j) {
-                phi[i][j] = rbf.applyAsDouble(xadapter.r(x.get(i), x.get(j)));
+                // r is normalized
+                double r = xadapter.r(x.get(i), x.get(j), xstats);
+                phi[i][j] = rbf.applyAsDouble(r);
             }
         }
         return phi;
     }
 
-    static <T> double[] phiVec(T p, List<T> x, Adapter<T> xadapter, DoubleUnaryOperator rbf) {
+    static <T> double[] phiVec(T p, List<T> x, Adapter<T> xadapter, Stats[] xstats, DoubleUnaryOperator rbf) {
+        if (xadapter.size() != xstats.length)
+            throw new IllegalArgumentException();
         double[] result = new double[x.size()];
         for (int i = 0; i < x.size(); ++i) {
-            result[i] = rbf.applyAsDouble(xadapter.r(p, x.get(i)));
+            // r is normalized
+            double r = xadapter.r(p, x.get(i), xstats);
+            result[i] = rbf.applyAsDouble(r);
         }
         return result;
     }

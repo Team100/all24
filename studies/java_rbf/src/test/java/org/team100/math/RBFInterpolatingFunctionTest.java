@@ -10,6 +10,7 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
 
 import org.junit.jupiter.api.Test;
+import org.team100.math.RBFInterpolatingFunction.Stats;
 
 /** Duplicates RBFInterpolatingMapTest */
 class RBFInterpolatingFunctionTest {
@@ -100,7 +101,9 @@ class RBFInterpolatingFunctionTest {
             List<MyPair> x = List.of(
                     new MyPair(1, 0));
             MyPairAdapter xadapter = new MyPairAdapter();
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, identity);
+            // these are like 'identity' stats
+            Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1) };
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, identity);
             // matrix size is equal to the number of points
             assertEquals(1, phi.length);
             assertEquals(1, phi[0].length);
@@ -112,7 +115,9 @@ class RBFInterpolatingFunctionTest {
                     new MyPair(0, 0),
                     new MyPair(1, 0));
             MyPairAdapter xadapter = new MyPairAdapter();
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, identity);
+            // these are like 'identity' stats
+            Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1) };
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, identity);
             // matrix size is equal to the number of points
             assertEquals(2, phi.length);
             assertEquals(2, phi[0].length);
@@ -126,7 +131,8 @@ class RBFInterpolatingFunctionTest {
                     new MyScalar(1),
                     new MyScalar(2));
             MyScalarAdapter xadapter = new MyScalarAdapter();
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, identity);
+            Stats[] stats = new Stats[] { new Stats(0, 1) };
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, identity);
             // matrix size is equal to the number of points
             assertEquals(3, phi.length);
             assertEquals(3, phi[0].length);
@@ -141,7 +147,8 @@ class RBFInterpolatingFunctionTest {
             List<MyPair> x = List.of(
                     new MyPair(1, 0));
             MyPairAdapter xadapter = new MyPairAdapter();
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, RBFInterpolatingFunction.GAUSSIAN);
+            Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1) };
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN);
             // matrix size is equal to the number of points
             assertEquals(1, phi.length);
             assertEquals(1, phi[0].length);
@@ -152,7 +159,8 @@ class RBFInterpolatingFunctionTest {
                     new MyPair(0, 0),
                     new MyPair(1, 0));
             MyPairAdapter xadapter = new MyPairAdapter();
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, RBFInterpolatingFunction.GAUSSIAN);
+            Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1) };
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN);
             // matrix size is equal to the number of points
             assertEquals(2, phi.length);
             assertEquals(2, phi[0].length);
@@ -165,8 +173,8 @@ class RBFInterpolatingFunctionTest {
                     new MyScalar(1),
                     new MyScalar(2));
             MyScalarAdapter xadapter = new MyScalarAdapter();
-
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, RBFInterpolatingFunction.GAUSSIAN);
+            Stats[] stats = new Stats[] { new Stats(0, 1), };
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN);
             // matrix size is equal to the number of points
             assertEquals(3, phi.length);
             assertEquals(3, phi[0].length);
@@ -182,7 +190,8 @@ class RBFInterpolatingFunctionTest {
                 new MyPair(0.0, 1.0),
                 new MyPair(2.0, 3.0));
         MyPairAdapter xadapter = new MyPairAdapter();
-        double[] phiVec = RBFInterpolatingFunction.phiVec(p, x, xadapter, r -> r);
+        Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1) };
+        double[] phiVec = RBFInterpolatingFunction.phiVec(p, x, xadapter, stats, r -> r);
         assertEquals("[1.41, 1.41]", toString(phiVec));
     }
 
@@ -192,14 +201,16 @@ class RBFInterpolatingFunctionTest {
             MyPair a = new MyPair(1, 0);
             MyPair b = new MyPair(0, 1);
             MyPairAdapter xadapter = new MyPairAdapter();
-            double r = xadapter.r(a, b);
+            Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1) };
+            double r = xadapter.r(a, b, stats);
             assertEquals(Math.sqrt(2), r, kDelta);
         }
         {
             MyTriple a = new MyTriple(0, 0, 0);
             MyTriple b = new MyTriple(1, 1, 1);
             MyTripleAdapter xadapter = new MyTripleAdapter();
-            double r = xadapter.r(a, b);
+            Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1), new Stats(0, 1) };
+            double r = xadapter.r(a, b, stats);
             assertEquals(Math.sqrt(3), r, kDelta);
         }
     }
@@ -233,7 +244,7 @@ class RBFInterpolatingFunctionTest {
                 RBFInterpolatingFunction.GAUSSIAN);
 
         // since the gaussian evaluates to 1 at r=0, the weight should be 11
-        assertEquals("[[11.00]]", toString(interp.m_w));
+        assertEquals("[[0.00]]", toString(interp.m_w));
         // if we give it exactly x0, we should get back y0.
         MyScalar s = interp.apply(new MyScalar(1.0));
         assertEquals("[11.00]", s.toString());
@@ -254,12 +265,19 @@ class RBFInterpolatingFunctionTest {
         MyScalarAdapter yadapter = new MyScalarAdapter();
         RBFInterpolatingFunction<MyScalar, MyScalar> interp = new RBFInterpolatingFunction<>(
                 x, y, xadapter, yadapter, RBFInterpolatingFunction.GAUSSIAN);
-
+        assertEquals(1, interp.m_xstats.length);
+        assertEquals(1.5, interp.m_xstats[0].mean(), kDelta);
+        assertEquals(0.5, interp.m_xstats[0].stddev(), kDelta);
+        assertEquals(1, interp.m_ystats.length);
+        assertEquals(10.0, interp.m_ystats[0].mean(), kDelta);
+        assertEquals(1.0, interp.m_ystats[0].stddev(), kDelta);
         // ???
-        assertEquals("[[8.89], [5.73]]", toString(interp.m_w));
+        assertEquals("[[1.02], [-1.02]]", toString(interp.m_w));
 
         MyScalar p = new MyScalar(1.0);
-        double[] phiVec = RBFInterpolatingFunction.phiVec(p, interp.m_x, xadapter, interp.m_rbf);
+        Stats[] stats = new Stats[] { new Stats(0, 1) };
+
+        double[] phiVec = RBFInterpolatingFunction.phiVec(p, interp.m_x, xadapter, stats, interp.m_rbf);
         // rbf evaluated for r=0 and r=1
         assertEquals("[1.00, 0.37]", toString(phiVec));
 
@@ -293,16 +311,35 @@ class RBFInterpolatingFunctionTest {
                 x, y, xadapter, yadapter,
                 RBFInterpolatingFunction.GAUSSIAN);
 
-        assertEquals("[[5.00, -3.00]]", toString(interp.m_w));
+        assertEquals(2, interp.m_xstats.length);
+        assertEquals(1.0, interp.m_xstats[0].mean(), kDelta);
+        // this is the minimum
+        assertEquals(0.1, interp.m_xstats[0].stddev(), kDelta);
+        assertEquals(2.0, interp.m_xstats[1].mean(), kDelta);
+        // this is the minimum
+        assertEquals(0.1, interp.m_xstats[1].stddev(), kDelta);
+        assertEquals(2, interp.m_ystats.length);
+        assertEquals(5.0, interp.m_ystats[0].mean(), kDelta);
+        assertEquals(0.1, interp.m_ystats[0].stddev(), kDelta);
+        assertEquals(-3.0, interp.m_ystats[1].mean(), kDelta);
+        assertEquals(0.1, interp.m_ystats[1].stddev(), kDelta);
+
+        // weight is always zero if there's just one normalized example
+        assertEquals("[[0.00, 0.00]]", toString(interp.m_w));
         // if we give it exactly x0, we should get back y0.
+        // (thanks to the stats offsets from zero)
         MyPair s = interp.apply(new MyPair(1.0, 2.0));
         assertEquals("[5.00, -3.00]", s.toString());
     }
 
     @Test
     void testSimple() {
-        List<MyTriple> x = List.of(new MyTriple(1.0, 2.0, 3.0), new MyTriple(4.0, 5.0, 6.0));
-        List<MyPair> y = List.of(new MyPair(11.0, 12.0), new MyPair(13.0, 14.0));
+        List<MyTriple> x = List.of(
+                new MyTriple(1.0, 2.0, 3.0),
+                new MyTriple(4.0, 5.0, 6.0));
+        List<MyPair> y = List.of(
+                new MyPair(11.0, 12.0),
+                new MyPair(13.0, 14.0));
         MyTripleAdapter xadapter = new MyTripleAdapter();
         MyPairAdapter yadapter = new MyPairAdapter();
         RBFInterpolatingFunction<MyTriple, MyPair> interp = new RBFInterpolatingFunction<>(
@@ -343,6 +380,11 @@ class RBFInterpolatingFunctionTest {
         RBFInterpolatingFunction<MyPair, MyScalar> interp = new RBFInterpolatingFunction<>(
                 x, y, xadapter, yadapter,
                 RBFInterpolatingFunction.GAUSSIAN);
+
+        assertEquals(1, interp.m_ystats.length, kDelta);
+        assertEquals(-0.1, interp.m_ystats[0].mean(), kDelta);
+        assertEquals(0.815475, interp.m_ystats[0].stddev(), kDelta);
+
         // verify a few points
         verify(fn, interp, 0, 0);
         verify(fn, interp, 0.1, 0.1);
@@ -382,6 +424,39 @@ class RBFInterpolatingFunctionTest {
             long et = ms1 - ms;
             double etEach = (double) et / n;
             System.out.printf("et %d n %d etEach (ns) %5.3f\n", et, n, etEach);
+        }
+    }
+
+    @Test
+    void testNormalization() {
+        {
+            List<MyPair> y = List.of(
+                    new MyPair(11.0, 12.0),
+                    new MyPair(13.0, 14.0));
+            MyPairAdapter yadapter = new MyPairAdapter();
+            // to normalize you need to take two passes through the data. once to get the
+            // statistics, and once to normalize.
+            RBFInterpolatingFunction.Stats[] stats = yadapter.stats(y);
+            assertEquals(2, stats.length);
+            assertEquals(12, stats[0].mean(), kDelta);
+            assertEquals(1, stats[0].stddev(), kDelta);
+            assertEquals(13, stats[1].mean(), kDelta);
+            assertEquals(1, stats[1].stddev(), kDelta);
+        }
+        {
+            // a problematic case to normalize
+            List<MyPair> y = List.of(new MyPair(0.0, 0.0));
+            MyPairAdapter yadapter = new MyPairAdapter();
+            // to normalize you need to take two passes through the data. once to get the
+            // statistics, and once to normalize.
+            RBFInterpolatingFunction.Stats[] stats = yadapter.stats(y);
+            assertEquals(2, stats.length);
+            assertEquals(0, stats[0].mean(), kDelta);
+            // this is the minimum
+            assertEquals(0.1, stats[0].stddev(), kDelta);
+            assertEquals(0, stats[1].mean(), kDelta);
+            // this is the minimum
+            assertEquals(0.1, stats[1].stddev(), kDelta);
         }
     }
 

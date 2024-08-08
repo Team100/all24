@@ -66,6 +66,12 @@ class LocalizationTest {
     static uvdZAdapter xAdapter = new uvdZAdapter();
     static XYAdapter yAdapter = new XYAdapter();
 
+    /**
+     * This test shows that we need to normalize the model. Some of the input
+     * dimensions cover hundreds of units, others cover less than one, but the
+     * "radius" in the radial basis function treats all these dimensions the same,
+     * with its simple Euclidean norm.
+     */
     @Test
     void testUvdZXY() throws IOException {
 
@@ -97,8 +103,8 @@ class LocalizationTest {
 
             double err = Math.hypot(errX, errY);
             errSum += err;
-            System.out.printf("X %6.3f predictedX %6.3f Y %6.3f predictedY %6.3f\n",
-                    XY_test.get(i).X, predictedXY.X, XY_test.get(i).Y, predictedXY.Y);
+            System.out.printf("X %6.3f predictedX %6.3f errX %6.3f Y %6.3f predictedY %6.3f errY %6.3f\n",
+                    XY_test.get(i).X, predictedXY.X, errX, XY_test.get(i).Y, predictedXY.Y, errY);
         }
         double mae = errSum / XY_test.size();
         System.out.printf("mae %5.3f\n", mae);
@@ -127,7 +133,6 @@ class LocalizationTest {
         for (int i = 0; i < uvdZXY.length; ++i) {
             double[] src = uvdZXY[i];
             uvdZ e = new uvdZ(src[0], src[1], src[2], src[3]);
-            System.out.println(e);
             result.add(e);
         }
         return result;
@@ -138,7 +143,6 @@ class LocalizationTest {
         for (int i = 0; i < uvdZXY.length; ++i) {
             double[] src = uvdZXY[i];
             XY e = new XY(src[4], src[5]);
-            System.out.println(e);
             result.add(e);
         }
         return result;
