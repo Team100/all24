@@ -11,7 +11,11 @@ import edu.wpi.first.math.jni.EigenJNI;
 public class RBFInterpolatingFunction<T, U> implements Function<T, U> {
     // prevent division by zero
     private static final double kMinVariance = 0.01;
-    public static final DoubleUnaryOperator GAUSSIAN = r -> Math.exp(-1.0 * Math.pow(r, 2));
+
+    /** Produces a gaussian scaled to 1 at 0. */
+    public static DoubleUnaryOperator GAUSSIAN(double variance) {
+        return r -> Math.exp(-1.0 * Math.pow(r, 2) / variance) / variance;
+    }
 
     record Stats(double mean, double stddev) {
     }

@@ -148,7 +148,7 @@ class RBFInterpolatingFunctionTest {
                     new MyPair(1, 0));
             MyPairAdapter xadapter = new MyPairAdapter();
             Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1) };
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN);
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN(1.0));
             // matrix size is equal to the number of points
             assertEquals(1, phi.length);
             assertEquals(1, phi[0].length);
@@ -160,7 +160,7 @@ class RBFInterpolatingFunctionTest {
                     new MyPair(1, 0));
             MyPairAdapter xadapter = new MyPairAdapter();
             Stats[] stats = new Stats[] { new Stats(0, 1), new Stats(0, 1) };
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN);
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN(1.0));
             // matrix size is equal to the number of points
             assertEquals(2, phi.length);
             assertEquals(2, phi[0].length);
@@ -174,7 +174,7 @@ class RBFInterpolatingFunctionTest {
                     new MyScalar(2));
             MyScalarAdapter xadapter = new MyScalarAdapter();
             Stats[] stats = new Stats[] { new Stats(0, 1), };
-            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN);
+            double[][] phi = RBFInterpolatingFunction.phi(x, xadapter, stats, RBFInterpolatingFunction.GAUSSIAN(1.0));
             // matrix size is equal to the number of points
             assertEquals(3, phi.length);
             assertEquals(3, phi[0].length);
@@ -241,7 +241,7 @@ class RBFInterpolatingFunctionTest {
 
         RBFInterpolatingFunction<MyScalar, MyScalar> interp = new RBFInterpolatingFunction<>(
                 x, y, xadapter, yadapter,
-                RBFInterpolatingFunction.GAUSSIAN);
+                RBFInterpolatingFunction.GAUSSIAN(1.0));
 
         // since the gaussian evaluates to 1 at r=0, the weight should be 11
         assertEquals("[[0.00]]", toString(interp.m_w));
@@ -264,7 +264,7 @@ class RBFInterpolatingFunctionTest {
         MyScalarAdapter xadapter = new MyScalarAdapter();
         MyScalarAdapter yadapter = new MyScalarAdapter();
         RBFInterpolatingFunction<MyScalar, MyScalar> interp = new RBFInterpolatingFunction<>(
-                x, y, xadapter, yadapter, RBFInterpolatingFunction.GAUSSIAN);
+                x, y, xadapter, yadapter, RBFInterpolatingFunction.GAUSSIAN(1.0));
         assertEquals(1, interp.m_xstats.length);
         assertEquals(1.5, interp.m_xstats[0].mean(), kDelta);
         assertEquals(0.5, interp.m_xstats[0].stddev(), kDelta);
@@ -309,7 +309,7 @@ class RBFInterpolatingFunctionTest {
         MyPairAdapter yadapter = new MyPairAdapter();
         RBFInterpolatingFunction<MyPair, MyPair> interp = new RBFInterpolatingFunction<>(
                 x, y, xadapter, yadapter,
-                RBFInterpolatingFunction.GAUSSIAN);
+                RBFInterpolatingFunction.GAUSSIAN(1.0));
 
         assertEquals(2, interp.m_xstats.length);
         assertEquals(1.0, interp.m_xstats[0].mean(), kDelta);
@@ -344,7 +344,7 @@ class RBFInterpolatingFunctionTest {
         MyPairAdapter yadapter = new MyPairAdapter();
         RBFInterpolatingFunction<MyTriple, MyPair> interp = new RBFInterpolatingFunction<>(
                 x, y, xadapter, yadapter,
-                RBFInterpolatingFunction.GAUSSIAN);
+                RBFInterpolatingFunction.GAUSSIAN(1.0));
         // the known independent variables, 2 examples in R^3
         // the known values for f, 2 examples in R^2
 
@@ -379,7 +379,7 @@ class RBFInterpolatingFunctionTest {
 
         RBFInterpolatingFunction<MyPair, MyScalar> interp = new RBFInterpolatingFunction<>(
                 x, y, xadapter, yadapter,
-                RBFInterpolatingFunction.GAUSSIAN);
+                RBFInterpolatingFunction.GAUSSIAN(1.0));
 
         assertEquals(1, interp.m_ystats.length, kDelta);
         assertEquals(-0.1, interp.m_ystats[0].mean(), kDelta);

@@ -94,7 +94,7 @@ class LocalizationTest {
                     XY_train,
                     xAdapter,
                     yAdapter,
-                    r -> Math.exp(-1.0 * Math.pow(r, 2) / variance) / variance);
+                    RBFInterpolatingFunction.GAUSSIAN(variance));
 
             double errSum = 0;
             for (int i = 0; i < XY_test.size(); ++i) {
@@ -136,7 +136,7 @@ class LocalizationTest {
                 XY_train,
                 xAdapter,
                 yAdapter,
-                r -> Math.exp(-1.0 * Math.pow(r, 2) / variance) / variance);
+                RBFInterpolatingFunction.GAUSSIAN(variance));
 
         double errSum = 0;
         for (int i = 0; i < XY_test.size(); ++i) {
