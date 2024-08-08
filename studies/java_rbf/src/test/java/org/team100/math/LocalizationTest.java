@@ -87,12 +87,56 @@ class LocalizationTest {
         List<XY> XY_train = getXY(uvdZXY_train);
         List<XY> XY_test = getXY(uvdZXY_test);
 
+        for (double vari = 1; vari < 10; vari *= 1.05) {
+            final double variance = vari;
+            RBFInterpolatingFunction<uvdZ, XY> rbf = new RBFInterpolatingFunction<>(
+                    uvdZ_train,
+                    XY_train,
+                    xAdapter,
+                    yAdapter,
+                    r -> Math.exp(-1.0 * Math.pow(r, 2) / variance) / variance);
+
+            double errSum = 0;
+            for (int i = 0; i < XY_test.size(); ++i) {
+                XY predictedXY = rbf.apply(uvdZ_test.get(i));
+
+                double errX = predictedXY.X - XY_test.get(i).X;
+                double errY = predictedXY.Y - XY_test.get(i).Y;
+
+                double err = Math.hypot(errX, errY);
+                errSum += err;
+                // System.out.printf("X %6.3f predictedX %6.3f errX %6.3f Y %6.3f predictedY
+                // %6.3f errY %6.3f\n",
+                // XY_test.get(i).X, predictedXY.X, errX, XY_test.get(i).Y, predictedXY.Y,
+                // errY);
+            }
+            double mae = errSum / XY_test.size();
+            System.out.printf("variance %5.3f mae %5.3f\n", variance, mae);
+        }
+    }
+
+    @Test
+    void testUvdZXYBestVariance() throws IOException {
+
+        System.out.println("PATH " + Paths.get(".").toAbsolutePath().normalize().toString());
+
+        double[][] uvdZXY_train = readfile("../../../uvdZXY_train.csv");
+        double[][] uvdZXY_test = readfile("../../../uvdZXY_test.csv");
+
+        // independent variables
+        List<uvdZ> uvdZ_train = getuvdZ(uvdZXY_train);
+        List<uvdZ> uvdZ_test = getuvdZ(uvdZXY_test);
+        // dependent variables
+        List<XY> XY_train = getXY(uvdZXY_train);
+        List<XY> XY_test = getXY(uvdZXY_test);
+
+        final double variance = 3.0;
         RBFInterpolatingFunction<uvdZ, XY> rbf = new RBFInterpolatingFunction<>(
                 uvdZ_train,
                 XY_train,
                 xAdapter,
                 yAdapter,
-                RBFInterpolatingFunction.GAUSSIAN);
+                r -> Math.exp(-1.0 * Math.pow(r, 2) / variance) / variance);
 
         double errSum = 0;
         for (int i = 0; i < XY_test.size(); ++i) {
@@ -104,10 +148,11 @@ class LocalizationTest {
             double err = Math.hypot(errX, errY);
             errSum += err;
             System.out.printf("X %6.3f predictedX %6.3f errX %6.3f Y %6.3f predictedY %6.3f errY %6.3f\n",
-                    XY_test.get(i).X, predictedXY.X, errX, XY_test.get(i).Y, predictedXY.Y, errY);
+                    XY_test.get(i).X, predictedXY.X, errX, XY_test.get(i).Y, predictedXY.Y,
+                    errY);
         }
         double mae = errSum / XY_test.size();
-        System.out.printf("mae %5.3f\n", mae);
+        System.out.printf("variance %5.3f mae %5.3f\n", variance, mae);
 
     }
 
