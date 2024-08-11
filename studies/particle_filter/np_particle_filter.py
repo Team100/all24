@@ -10,125 +10,74 @@ import random
 import bisect
 import time
 
-UPDATE_EVERY = 0
-DRAW_EVERY = 2
-PARTICLE_COUNT = 5000
+PARTICLE_COUNT = 1000
 ROBOT_HAS_COMPASS = False
 ROBOT_SPEED = 0.1
+WIDTH = 5
+HEIGHT = 5
+
+BEACONS = [(0.5, 0.5), (0.5, 4.5)]
 
 
-maze_data = (
-    (2, 0, 0, 0, 0),
-    (0, 0, 0, 0, 0),
-    (0, 0, 0, 0, 0),
-    (0, 0, 0, 0, 0),
-    (2, 0, 0, 0, 0),
-)
+def weight_to_color(weight):
+    red = weight
+    blue = 1 - weight
+    return (red, 0, blue)
 
 
-class World(object):
-    def __init__(self):
-        self.maze = maze_data
-        self.turtle = Turtle()
-        self.turtle.screen.tracer(50000, delay=0)
-        self.turtle.screen.register_shape("dot", ((-3, -3), (-3, 3), (3, 3), (3, -3)))
-        self.turtle.screen.register_shape("tri", ((-3, -2), (0, 3), (3, -2), (0, 0)))
-        self.turtle.speed(0)
-        self.turtle.screen.title("particle filter demo")
+def distance(x1, y1, x2, y2):
+    return math.hypot((x1 - x2), (y1 - y2))
 
-        self.width = len(self.maze[0])
-        self.height = len(self.maze)
-        self.turtle.screen.setworldcoordinates(0, 0, self.width, self.height)
-        self.update_cnt = 0
-        self.one_px = float(self.turtle.screen.window_width()) / float(self.width) / 2
 
-        self.beacons = []
-        for y, line in enumerate(self.maze):
-            for x, block in enumerate(line):
-                if block:
-                    nb_y = self.height - y - 1
-                    if block == 2:
-                        self.beacons.extend(((x + 0.5, nb_y + 0.5),))
+def all_beacon_distance(x, y):
+    d = []
+    for c_x, c_y in BEACONS:
+        d.append(distance(c_x, c_y, x, y))
+    return d
 
-    def draw(self):
-        self.turtle.up()
-        self.turtle.color("#00ffff")
-        for x, y in self.beacons:
-            self.turtle.setposition(x, y)
-            self.turtle.dot(10)
-        self.turtle.screen.update()
+def init(turtle):
+    turtle.screen.mode("standard")
+    turtle.screen.tracer(50000, delay=0)
+    turtle.screen.register_shape("dot", ((-3, -3), (-3, 3), (3, 3), (3, -3)))
+    turtle.screen.register_shape("tri", ((-3, -2), (0, 3), (3, -2), (0, 0)))
+    turtle.speed(0)
+    turtle.screen.title("particle filter demo")
+    turtle.screen.setworldcoordinates(0, 0, WIDTH, HEIGHT)
 
-    def weight_to_color(self, weight):
-        red = weight
-        blue = 1 - weight
-        return (red, 0, blue)
 
-    def in_bounds(self, x, y):
-        if x < 0 or y < 0 or x > self.width or y > self.height:
-            return False
-        return True
+def draw(turtle):
+    turtle.up()
+    turtle.color("#00ffff")
+    for x, y in BEACONS:
+        turtle.setposition(x, y)
+        turtle.dot(10)
+    turtle.screen.update()
 
-    def show_mean(self, x, y, confident=False):
-        if confident:
-            self.turtle.color("#00AA00")
-        else:
-            self.turtle.color("#cccccc")
-        self.turtle.setposition(x, y)
-        self.turtle.shape("circle")
-        self.turtle.stamp()
 
-    def show_particles(self, particles):
-        self.update_cnt += 1
-        if UPDATE_EVERY > 0 and self.update_cnt % UPDATE_EVERY != 1:
-            return
+def show_mean(turtle, x, y):
+    turtle.color("#000000")
+    turtle.setposition(x, y)
+    turtle.shape("circle")
+    turtle.stamp()
 
-        self.turtle.clearstamps()
-        self.turtle.shape("tri")
 
-        draw_cnt = 0
-        px = {}
-        for p in particles:
-            draw_cnt += 1
-            if DRAW_EVERY == 0 or draw_cnt % DRAW_EVERY == 1:
-                # Keep track of which positions already have something
-                # drawn to speed up display rendering
-                scaled_x = int(p.x * self.one_px)
-                scaled_y = int(p.y * self.one_px)
-                scaled_xy = scaled_x * 10000 + scaled_y
-                if scaled_xy not in px:
-                    px[scaled_xy] = 1
-                    self.turtle.setposition(p.x, p.y)
-                    self.turtle.setheading(p.h)
-                    self.turtle.color(self.weight_to_color(p.w))
-                    self.turtle.stamp()
 
-    def show_robot(self, robot):
-        self.turtle.color("green")
-        self.turtle.shape("turtle")
-        self.turtle.setposition(robot.x, robot.y)
-        self.turtle.setheading(robot.h)
-        self.turtle.stamp()
-        self.turtle.screen.update()
+def show_particles(turtle, particles):
+    turtle.clearstamps()
+    turtle.shape("tri")
+    for p in particles:
+        turtle.setposition(p.x, p.y)
+        turtle.setheading(p.h)
+        turtle.color(weight_to_color(p.w))
+        turtle.stamp()
 
-    def random_place(self):
-        x = random.uniform(0, self.width)
-        y = random.uniform(0, self.height)
-        return x, y
-
-    def random_free_place(self):
-        while True:
-            x, y = self.random_place()
-            if self.in_bounds(x, y):
-                return x, y
-
-    def distance(self, x1, y1, x2, y2):
-        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
-
-    def all_beacon_distance(self, x, y):
-        d = []
-        for c_x, c_y in self.beacons:
-            d.append(self.distance(c_x, c_y, x, y))
-        return d
+def show_robot(turtle, robot):
+    turtle.color("green")
+    turtle.shape("classic")
+    turtle.setposition(robot.x, robot.y)
+    turtle.setheading(robot.h)
+    turtle.stamp()
+    turtle.screen.update()
 
 
 def w_gauss(a, b):
@@ -139,28 +88,15 @@ def w_gauss(a, b):
     return g
 
 
-def compute_mean_point(world, particles):
-
+def compute_mean_point(particles):
     m_x, m_y, m_count = 0, 0, 0
     for p in particles:
         m_count += p.w
         m_x += p.x * p.w
         m_y += p.y * p.w
-
-    if m_count == 0:
-        return -1, -1, False
-
     m_x /= m_count
     m_y /= m_count
-
-    # Now compute how good that mean is -- check how many particles
-    # actually are in the immediate vicinity
-    m_count = 0
-    for p in particles:
-        if world.distance(p.x, p.y, m_x, m_y) < 1:
-            m_count += 1
-
-    return m_x, m_y, m_count > PARTICLE_COUNT * 0.95
+    return m_x, m_y
 
 
 class WeightedDistribution:
@@ -188,37 +124,31 @@ class Particle:
         self.y = y
         self.h = heading
         self.w = 1
-    
+
     def move(self, speed):
         r = math.radians(self.h)
-        dx = math.sin(r) * speed
-        dy = math.cos(r) * speed
-        self.x += dx
-        self.y += dy
-        return True
+        self.x += math.cos(r) * speed
+        self.y += math.sin(r) * speed
 
 
-class Robot():
+class Robot:
     def __init__(self):
-        self.x = 2
-        self.y = 2
-        self.h = random.uniform(0,360)
- 
-    def move(self, maze):
-        while True:
-            r = math.radians(self.h)
-            dx = math.sin(r) * ROBOT_SPEED
-            dy = math.cos(r) * ROBOT_SPEED
-            if maze.in_bounds(self.x + dx, self.y+ dy):
-                self.x += dx
-                self.y += dy
-                break
-            self.h = random.uniform(0, 360)
+        self.x = WIDTH / 4
+        self.y = HEIGHT / 2
+        self.h = 270
+
+    def move(self):
+        self.h += 5
+        r = math.radians(self.h)
+        self.x += math.cos(r) * ROBOT_SPEED
+        self.y += math.sin(r) * ROBOT_SPEED
 
 
-def create_random(count, maze):
+def create_random(count):
     return [
-        Particle(*maze.random_free_place(), random.uniform(0, 360))
+        Particle(
+            random.uniform(0, WIDTH), random.uniform(0, HEIGHT), random.uniform(0, 360)
+        )
         for _ in range(0, count)
     ]
 
@@ -230,12 +160,45 @@ def duplicate(p):
     return Particle(x, y, h)
 
 
+def resample(particles):
+    new_particles = []
+
+    nu = sum(p.w for p in particles)
+    if nu:
+        for p in particles:
+            p.w = p.w / nu
+
+    dist = WeightedDistribution(particles)
+
+    for _ in particles:
+        p = dist.pick()
+        if p is None:
+            new_particle = create_random(1)[0]
+        else:
+            new_particle = duplicate(p)
+        new_particles.append(new_particle)
+
+    particles = new_particles
+    return particles
+
+
+def reweight(particles, r_d):
+    for p in particles:
+        if p.x < 0 or p.y < 0 or p.x > WIDTH or p.y > HEIGHT:
+            p.w = 0
+        else:
+            p_d = all_beacon_distance(p.x, p.y)
+            p.w = w_gauss(r_d, p_d)
+
+
 def main():
 
-    world = World()
-    world.draw()
+    turtle = Turtle()
+    init(turtle)
+    draw(turtle)
 
-    particles = create_random(PARTICLE_COUNT, world)
+    particles = create_random(PARTICLE_COUNT)
+
     robbie = Robot()
 
     loop_counter = 0
@@ -245,22 +208,20 @@ def main():
         # time per iteration
         t0 = time.time_ns()
 
-        distances = world.all_beacon_distance(robbie.x, robbie.y)
+        distances = all_beacon_distance(robbie.x, robbie.y)
 
-        reweight(world, particles, distances)
+        reweight(particles, distances)
 
-        # ---------- Try to find current best estimate for display ----------
-        m_x, m_y, m_confident = compute_mean_point(world, particles)
+        m_x, m_y = compute_mean_point(particles)
 
-        world.show_particles(particles)
-        world.show_mean(m_x, m_y, m_confident)
-        world.show_robot(robbie)
+        show_particles(turtle, particles)
+        show_mean(turtle, m_x, m_y)
+        show_robot(turtle, robbie)
 
-        particles = resample(world, particles)
+        particles = resample(particles)
 
-        # ---------- Move things ----------
         old_heading = robbie.h
-        robbie.move(world)
+        robbie.move()
         d_h = robbie.h - old_heading
 
         # Move particles according to my belief of movement (this may
@@ -275,41 +236,6 @@ def main():
             loop_counter = 0
             print(f"duration (us): {duration//1000}")
             print(f"duration per particle (us): {duration//(1000*PARTICLE_COUNT)}")
-
-
-def reweight(world, particles, r_d):
-    for p in particles:
-        if world.in_bounds(p.x, p.y):
-            p_d = world.all_beacon_distance(p.x, p.y)
-            p.w = w_gauss(r_d, p_d)
-        else:
-            p.w = 0
-
-
-def resample(world, particles):
-    new_particles = []
-
-    # Normalise weights
-    nu = sum(p.w for p in particles)
-    if nu:
-        for p in particles:
-            p.w = p.w / nu
-
-        # create a weighted distribution, for fast picking
-    dist = WeightedDistribution(particles)
-
-    for _ in particles:
-        p = dist.pick()
-        if p is None:
-            # No pick b/c all totally improbable
-            new_particle = create_random(1, world)[0]
-        else:
-            # duplicate the chosen particle, with noise
-            new_particle = duplicate(p)
-        new_particles.append(new_particle)
-
-    particles = new_particles
-    return particles
 
 
 if __name__ == "__main__":
