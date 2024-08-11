@@ -29,11 +29,12 @@ def distance(x1, y1, x2, y2):
     return math.hypot((x1 - x2), (y1 - y2))
 
 
-def all_beacon_distance(x, y):
+def all_beacon_distance(x: float, y: float) -> list[float]:
     d = []
     for c_x, c_y in BEACONS:
         d.append(distance(c_x, c_y, x, y))
     return d
+
 
 def init(turtle):
     turtle.screen.mode("standard")
@@ -43,9 +44,6 @@ def init(turtle):
     turtle.speed(0)
     turtle.screen.title("particle filter demo")
     turtle.screen.setworldcoordinates(0, 0, WIDTH, HEIGHT)
-
-
-def draw(turtle):
     turtle.up()
     turtle.color("#00ffff")
     for x, y in BEACONS:
@@ -54,12 +52,12 @@ def draw(turtle):
     turtle.screen.update()
 
 
-def show_mean(turtle, x, y):
+def show_mean(turtle, particles):
+    x, y = compute_mean_point(particles)
     turtle.color("#000000")
     turtle.setposition(x, y)
     turtle.shape("circle")
     turtle.stamp()
-
 
 
 def show_particles(turtle, particles):
@@ -71,6 +69,7 @@ def show_particles(turtle, particles):
         turtle.color(weight_to_color(p.w))
         turtle.stamp()
 
+
 def show_robot(turtle, robot):
     turtle.color("green")
     turtle.shape("classic")
@@ -80,16 +79,18 @@ def show_robot(turtle, robot):
     turtle.screen.update()
 
 
-def w_gauss(a, b):
-    sqsum = 0
+def w_gauss(a:list[float], b:list[float]) -> float:
+    sqsum:float = 0.0
     for aa, bb in zip(a, b):
         sqsum += (aa - bb) * (aa - bb)
-    g = math.exp(-1.0 * (sqsum / (0.1)))
+    g:float = math.exp(-1.0 * (sqsum / (0.1)))
     return g
 
 
-def compute_mean_point(particles):
-    m_x, m_y, m_count = 0, 0, 0
+def compute_mean_point(particles) -> tuple[float, float]:
+    m_x = 0.0
+    m_y = 0.0
+    m_count = 0.0
     for p in particles:
         m_count += p.w
         m_x += p.x * p.w
@@ -182,20 +183,19 @@ def resample(particles):
     return particles
 
 
-def reweight(particles, r_d):
+def reweight(particles, robot_x: float, robot_y: float) -> None:
+    distances: list[float] = all_beacon_distance(robot_x, robot_y)
     for p in particles:
         if p.x < 0 or p.y < 0 or p.x > WIDTH or p.y > HEIGHT:
             p.w = 0
         else:
             p_d = all_beacon_distance(p.x, p.y)
-            p.w = w_gauss(r_d, p_d)
+            p.w = w_gauss(distances, p_d)
 
 
 def main():
-
     turtle = Turtle()
     init(turtle)
-    draw(turtle)
 
     particles = create_random(PARTICLE_COUNT)
 
@@ -205,18 +205,14 @@ def main():
 
     while True:
         loop_counter += 1
-        # time per iteration
         t0 = time.time_ns()
 
-        distances = all_beacon_distance(robbie.x, robbie.y)
+        reweight(particles, robbie.x, robbie.y)
 
-        reweight(particles, distances)
-
-        m_x, m_y = compute_mean_point(particles)
-
-        show_particles(turtle, particles)
-        show_mean(turtle, m_x, m_y)
-        show_robot(turtle, robbie)
+        if loop_counter % 10 == 0:
+            show_particles(turtle, particles)
+            show_mean(turtle, particles)
+            show_robot(turtle, robbie)
 
         particles = resample(particles)
 
@@ -232,8 +228,7 @@ def main():
 
         t1 = time.time_ns()
         duration = t1 - t0
-        if loop_counter > 100:
-            loop_counter = 0
+        if loop_counter % 2 == 0:
             print(f"duration (us): {duration//1000}")
             print(f"duration per particle (us): {duration//(1000*PARTICLE_COUNT)}")
 
