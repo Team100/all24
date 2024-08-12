@@ -10,17 +10,32 @@ import numpy as np
 import cupy as cp  # type:ignore
 from cupyx import jit  # type:ignore
 
-PARTICLE_COUNT = 100
+print(f"CuPy version {cp.__version__}")
+mempool = cp.get_default_memory_pool()
+mempool.free_all_blocks()
+print(f"mempool.used_bytes {mempool.used_bytes()}")
+
+
+PARTICLE_COUNT = 1000
+PARTICLES_TO_PLOT = 25
 ROBOT_HAS_COMPASS = False
 ROBOT_SPEED = 0.1
 WIDTH = 5
 HEIGHT = 5
+
+RESAMPLE = True
 
 
 # particle (x,y), Nx2
 particles_xy = cp.random.uniform(
     low=(0, 0), high=(WIDTH, HEIGHT), size=(PARTICLE_COUNT, 2)
 )
+
+particles_h = cp.zeros(PARTICLE_COUNT)
+
+# used temporarily by the resampler
+new_particles_xy = cp.zeros_like(particles_xy)
+indices = cp.zeros(PARTICLE_COUNT)
 
 # particle weights (w), Nx1
 particles_w = cp.zeros(PARTICLE_COUNT)
@@ -66,6 +81,8 @@ def show_robot(turtle, x, y, h):
 
 
 def weight_to_color(weight):
+    if np.isnan(weight):
+        weight = 0
     red = weight
     blue = 1 - weight
     return (red, 0, blue)
@@ -73,13 +90,12 @@ def weight_to_color(weight):
 
 def show_particles(turtle):
     # turtle.shape("tri")
-    turtle.shapesize(1)
+    turtle.shapesize(0.5)
     turtle.color("blue")
     turtle.shape("circle")
-    for i, p in enumerate(particles_xy):
+    for i, p in enumerate(particles_xy[:: PARTICLE_COUNT / PARTICLES_TO_PLOT]):
         turtle.setposition(p[0], p[1])
-        # turtle.setheading(p.h)
-        # print(particles_w[i])
+        turtle.setheading(particles_h[i])
         turtle.color(weight_to_color(particles_w[i].item()))
         turtle.stamp()
 
@@ -186,21 +202,30 @@ def compute_mean() -> tuple[float, float]:
     return xy[0], xy[1]
 
 
-def show_mean(turtle) -> None:
-    x, y = compute_mean()
+def show_mean(turtle, x, y) -> None:
     turtle.color("#000000")
     turtle.setposition(x, y)
     turtle.shape("circle")
     turtle.stamp()
 
-def resample():
+
+def resample() -> None:
+    global particles_xy
+    global new_particles_xy
+    global indices
+
+    indices = cp.random.choice(PARTICLE_COUNT, size=PARTICLE_COUNT, p=particles_w)
+    new_particles_xy = cp.take(particles_xy, indices, axis=0)
+    xynoise = cp.random.uniform(
+        low=(-0.1, -0.1), high=(0.1, 0.1), size=(PARTICLE_COUNT, 2)
+    )
+    particles_xy = new_particles_xy + xynoise
 
 
 def main():
     turtle = Turtle()
     init(turtle)
-
-    # particles = create_random(PARTICLE_COUNT)
+    print(f"mempool.used_bytes {mempool.used_bytes()}")
 
     robot_xy[0, 0] = WIDTH / 4
     robot_xy[0, 1] = HEIGHT / 2
@@ -213,15 +238,17 @@ def main():
         t0 = time.time_ns()
 
         reweight()
-        time.sleep(0.1)
+        # time.sleep(0.1)
+        x, y = compute_mean()
 
         if loop_counter % 5 == 0:
             turtle.clearstamps()
             show_particles(turtle)
-            show_mean(turtle)
+            show_mean(turtle, x, y)
             show_robot(turtle, robot_xy[0, 0], robot_xy[0, 1], robot_h)
 
-        # particles = resample(particles)
+        if RESAMPLE:
+            resample()
 
         old_heading = robot_h
 
@@ -232,13 +259,18 @@ def main():
 
         d_h = robot_h - old_heading
 
-        # Move particles according to my belief of movement (this may
-        # be different than the real movement, but it's all I got)
-        # for p in particles:
-        #     p.h += d_h
-        #     r = math.radians(p.h)
-        #     p.x += math.cos(r) * ROBOT_SPEED
-        #     p.y += math.sin(r) * ROBOT_SPEED
+        if RESAMPLE:
+
+            # just mirror the robot heading for now
+            global particles_h
+            global particles_xy
+
+            particles_h = cp.ones((PARTICLE_COUNT, 1)) * robot_h
+            r = cp.deg2rad(particles_h)
+            dx = cp.cos(r) * ROBOT_SPEED
+            dy = cp.sin(r) * ROBOT_SPEED
+            d = cp.hstack((dx, dy))
+            particles_xy += d
 
         t1 = time.time_ns()
         duration = t1 - t0
