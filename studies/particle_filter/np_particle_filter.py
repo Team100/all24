@@ -15,7 +15,6 @@ ROBOT_HAS_COMPASS = False
 ROBOT_SPEED = 0.1
 WIDTH = 5
 HEIGHT = 5
-
 BEACONS = [(0.5, 0.5), (0.5, 4.5)]
 
 
@@ -70,20 +69,20 @@ def show_particles(turtle, particles):
         turtle.stamp()
 
 
-def show_robot(turtle, robot):
+def show_robot(turtle, x, y, h):
     turtle.color("green")
     turtle.shape("classic")
-    turtle.setposition(robot.x, robot.y)
-    turtle.setheading(robot.h)
+    turtle.setposition(x, y)
+    turtle.setheading(h)
     turtle.stamp()
     turtle.screen.update()
 
 
-def w_gauss(a:list[float], b:list[float]) -> float:
-    sqsum:float = 0.0
+def w_gauss(a: list[float], b: list[float]) -> float:
+    sqsum: float = 0.0
     for aa, bb in zip(a, b):
         sqsum += (aa - bb) * (aa - bb)
-    g:float = math.exp(-1.0 * (sqsum / (0.1)))
+    g: float = math.exp(-1.0 * (sqsum / (0.1)))
     return g
 
 
@@ -100,49 +99,12 @@ def compute_mean_point(particles) -> tuple[float, float]:
     return m_x, m_y
 
 
-class WeightedDistribution:
-    def __init__(self, state):
-        accum = 0.0
-        self.state = [p for p in state if p.w > 0]
-        self.distribution = []
-        for x in self.state:
-            accum += x.w
-            self.distribution.append(accum)
-
-    def pick(self):
-        try:
-            return self.state[
-                bisect.bisect_left(self.distribution, random.uniform(0, 1))
-            ]
-        except IndexError:
-            # Happens when all particles are improbable w=0
-            return None
-
-
 class Particle:
     def __init__(self, x, y, heading):
         self.x = x
         self.y = y
         self.h = heading
         self.w = 1
-
-    def move(self, speed):
-        r = math.radians(self.h)
-        self.x += math.cos(r) * speed
-        self.y += math.sin(r) * speed
-
-
-class Robot:
-    def __init__(self):
-        self.x = WIDTH / 4
-        self.y = HEIGHT / 2
-        self.h = 270
-
-    def move(self):
-        self.h += 5
-        r = math.radians(self.h)
-        self.x += math.cos(r) * ROBOT_SPEED
-        self.y += math.sin(r) * ROBOT_SPEED
 
 
 def create_random(count):
@@ -169,14 +131,21 @@ def resample(particles):
         for p in particles:
             p.w = p.w / nu
 
-    dist = WeightedDistribution(particles)
+    accum = 0.0
+    state = [p for p in particles if p.w > 0]
+    distribution = []
+    for x in state:
+        accum += x.w
+        distribution.append(accum)
 
     for _ in particles:
-        p = dist.pick()
-        if p is None:
-            new_particle = create_random(1)[0]
-        else:
+        try:
+            p = state[bisect.bisect_left(distribution, random.uniform(0, 1))]
             new_particle = duplicate(p)
+        except IndexError:
+            # Happens when all particles are improbable w=0
+            new_particle = create_random(1)[0]
+
         new_particles.append(new_particle)
 
     particles = new_particles
@@ -199,7 +168,9 @@ def main():
 
     particles = create_random(PARTICLE_COUNT)
 
-    robbie = Robot()
+    robot_x = WIDTH / 4
+    robot_y = HEIGHT / 2
+    robot_h = 270
 
     loop_counter = 0
 
@@ -207,24 +178,31 @@ def main():
         loop_counter += 1
         t0 = time.time_ns()
 
-        reweight(particles, robbie.x, robbie.y)
+        reweight(particles, robot_x, robot_y)
 
-        if loop_counter % 10 == 0:
+        if loop_counter % 5 == 0:
             show_particles(turtle, particles)
             show_mean(turtle, particles)
-            show_robot(turtle, robbie)
+            show_robot(turtle, robot_x, robot_y, robot_h)
 
         particles = resample(particles)
 
-        old_heading = robbie.h
-        robbie.move()
-        d_h = robbie.h - old_heading
+        old_heading = robot_h
+
+        robot_h += 5
+        r = math.radians(robot_h)
+        robot_x += math.cos(r) * ROBOT_SPEED
+        robot_y += math.sin(r) * ROBOT_SPEED
+
+        d_h = robot_h - old_heading
 
         # Move particles according to my belief of movement (this may
         # be different than the real movement, but it's all I got)
         for p in particles:
-            p.h += d_h  # in case robot changed heading, swirl particle heading too
-            p.move(ROBOT_SPEED)
+            p.h += d_h
+            r = math.radians(p.h)
+            p.x += math.cos(r) * ROBOT_SPEED
+            p.y += math.sin(r) * ROBOT_SPEED
 
         t1 = time.time_ns()
         duration = t1 - t0
