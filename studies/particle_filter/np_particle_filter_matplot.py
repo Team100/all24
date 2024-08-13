@@ -9,8 +9,8 @@ import random
 import bisect
 import time
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib.animation import FuncAnimation
+from matplotlib import pyplot as plt  # type:ignore
+from matplotlib.animation import FuncAnimation  # type:ignore
 
 PARTICLE_COUNT = 1000
 ROBOT_HAS_COMPASS = False
@@ -18,12 +18,6 @@ ROBOT_SPEED = 0.1
 WIDTH = 5
 HEIGHT = 5
 BEACONS = np.array([[0.5, 0.5], [0.5, 4.5]])
-
-
-def weight_to_color(weight):
-    red = weight
-    blue = 1 - weight
-    return (red, 0, blue)
 
 
 def distance(x1, y1, x2, y2):
@@ -137,8 +131,6 @@ def main():
     robot_y = HEIGHT / 2
     robot_h = 270
 
-    loop_counter = 0
-
     def init():
         particle_points.set_offsets(([], []))
         robot_points.set_offsets(([], []))
@@ -151,18 +143,16 @@ def main():
 
     def animate(i):
 
-        nonlocal loop_counter
         nonlocal particles
         nonlocal robot_x
         nonlocal robot_y
         nonlocal robot_h
 
-        loop_counter += 1
         t0 = time.time_ns()
 
         reweight(particles, robot_x, robot_y)
 
-        if loop_counter % 5 == 0:
+        if i % 5 == 0:
             x, y = compute_mean_point(particles)
             mean_points.set_offsets(np.column_stack([[x], [y]]))
             p_x = [p.x for p in particles]
@@ -191,7 +181,7 @@ def main():
 
         t1 = time.time_ns()
         duration = t1 - t0
-        if loop_counter % 2 == 0:
+        if i % 2 == 0:
             print(f"duration (us): {duration//1000}")
             print(f"duration per particle (us): {duration//(1000*PARTICLE_COUNT)}")
 
@@ -202,7 +192,7 @@ def main():
         )
 
     anim = FuncAnimation(
-        fig, animate, init_func=init, frames=200, interval=20, blit=True
+        fig, animate, init_func=init, frames=200, interval=0, blit=True
     )
 
     plt.show()
