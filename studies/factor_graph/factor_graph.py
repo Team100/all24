@@ -1,14 +1,15 @@
-import numpy as np
-import gtsam
-from gtsam.symbol_shorthand import X, L
-from plot_utils import plot_result, MultivariateNormalParameters
+# pylint: disable=invalid-name,too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
 
-"""Based on the example https://github.com/borglab/gtsam/blob/develop/python/gtsam/examples/PlanarSLAMExample.py"""
+import numpy as np
+import gtsam  # type:ignore
+from gtsam.symbol_shorthand import X, L  # type:ignore
+from plot_utils import plot_result, MultivariateNormalParameters  # type:ignore
 
 
 def incremental_factorgraph_example():
     # Create an ISAM2 object.
-    # You can balance computation time vs accuracy by changing the parameters to ISAM2 in the ISAM2Params struct
+    # You can balance computation time vs accuracy by changing
+    # the parameters to ISAM2 in the ISAM2Params struct
     # (see https://github.com/borglab/gtsam/blob/develop/gtsam/nonlinear/ISAM2Params.h).
     # The parameters are here set to default.
     isam_params = gtsam.ISAM2Params()
@@ -52,11 +53,19 @@ def incremental_factorgraph_example():
         # Extract the marginal distributions for each variable
         X_marginals = []
         for var in pose_variables:
-            X_marginals.append(MultivariateNormalParameters(result.atPose2(var), isam.marginalCovariance(var)))
+            X_marginals.append(
+                MultivariateNormalParameters(
+                    result.atPose2(var), isam.marginalCovariance(var)
+                )
+            )
 
         L_marginals = []
         for var in landmark_variables:
-            L_marginals.append(MultivariateNormalParameters(result.atPoint2(var), isam.marginalCovariance(var)))
+            L_marginals.append(
+                MultivariateNormalParameters(
+                    result.atPoint2(var), isam.marginalCovariance(var)
+                )
+            )
 
         return X_marginals, L_marginals
 
@@ -79,7 +88,15 @@ def incremental_factorgraph_example():
 
         # Add the landmark observation.
         measurement_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05, 0.1]))
-        graph.add(gtsam.BearingRangeFactor2D(X1, L1, gtsam.Rot2.fromDegrees(45), np.sqrt(4.0 + 4.0), measurement_noise))
+        graph.add(
+            gtsam.BearingRangeFactor2D(
+                X1,
+                L1,
+                gtsam.Rot2.fromDegrees(45),
+                np.sqrt(4.0 + 4.0),
+                measurement_noise,
+            )
+        )
 
         # Set initial estimates only for the new variables.
         initial_estimate = gtsam.Values()
@@ -91,7 +108,8 @@ def incremental_factorgraph_example():
     step2_add_landmark_observation()
 
     # ISAM2 performs only one iteration of the iterative nonlinear solver per update() call.
-    # We can use "free time" until the next update from the sensors to perform additional iterations.
+    # We can use "free time" until the next update from the sensors
+    # to perform additional iterations.
     for _ in range(5):
         isam.update()
 
@@ -116,7 +134,9 @@ def incremental_factorgraph_example():
 
         # Add an odometry measurement.
         odometry_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
-        graph.add(gtsam.BetweenFactorPose2(X1, X2, gtsam.Pose2(2.0, 0.0, 0.0), odometry_noise))
+        graph.add(
+            gtsam.BetweenFactorPose2(X1, X2, gtsam.Pose2(2.0, 0.0, 0.0), odometry_noise)
+        )
 
         # Set initial estimates only for the new variables.
         initial_estimate = gtsam.Values()
@@ -149,7 +169,11 @@ def incremental_factorgraph_example():
 
         # Add the landmark observation.
         measurement_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05, 0.1]))
-        graph.add(gtsam.BearingRangeFactor2D(X2, L1, gtsam.Rot2.fromDegrees(90), 2.0, measurement_noise))
+        graph.add(
+            gtsam.BearingRangeFactor2D(
+                X2, L1, gtsam.Rot2.fromDegrees(90), 2.0, measurement_noise
+            )
+        )
 
         # Update ISAM2 with the new factor graph.
         # There are no new variables this update, so no new initial values.
@@ -184,11 +208,17 @@ def incremental_factorgraph_example():
 
         # Add the odometry measurement.
         odometry_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
-        graph.add(gtsam.BetweenFactorPose2(X2, X3, gtsam.Pose2(2.0, 0.0, 0.0), odometry_noise))
+        graph.add(
+            gtsam.BetweenFactorPose2(X2, X3, gtsam.Pose2(2.0, 0.0, 0.0), odometry_noise)
+        )
 
         # Add the landmark observation.
         measurement_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05, 0.1]))
-        graph.add(gtsam.BearingRangeFactor2D(X3, L2, gtsam.Rot2.fromDegrees(90), 2.0, measurement_noise))
+        graph.add(
+            gtsam.BearingRangeFactor2D(
+                X3, L2, gtsam.Rot2.fromDegrees(90), 2.0, measurement_noise
+            )
+        )
 
         # Set initial estimates only for the new variables.
         initial_estimate = gtsam.Values()

@@ -1,6 +1,8 @@
-from matplotlib import pyplot as plt
+# pylint: disable=too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
+
 import numpy as np
-from matplotlib.animation import FuncAnimation
+from matplotlib import pyplot as plt  # type:ignore
+from matplotlib.animation import FuncAnimation  # type:ignore
 
 # initializing a figure in
 # which the graph will be plotted
