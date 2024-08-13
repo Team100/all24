@@ -3,8 +3,9 @@
 
 import math
 from turtle import Turtle
-import random
-import bisect
+
+# import random
+# import bisect
 import time
 import numpy as np
 import cupy as cp  # type:ignore
@@ -16,35 +17,38 @@ mempool.free_all_blocks()
 print(f"mempool.used_bytes {mempool.used_bytes()}")
 
 
-PARTICLE_COUNT = 1000
-PARTICLES_TO_PLOT = 25
+PARTICLE_COUNT = 20000
+PARTICLES_TO_PLOT = 100
 ROBOT_HAS_COMPASS = False
-ROBOT_SPEED = 0.1
+ROBOT_SPEED = 0.05
+HEADING_RATE = 2.5
 WIDTH = 5
 HEIGHT = 5
+PLOT_EVERY_N = 3
+
 
 RESAMPLE = True
 
 
-# particle (x,y), Nx2
-particles_xy = cp.random.uniform(
-    low=(0, 0), high=(WIDTH, HEIGHT), size=(PARTICLE_COUNT, 2)
+# particle (x,y,h,w), Nx4
+particles_xyhw = cp.random.uniform(
+    low=(0, 0, 0, 0), high=(WIDTH, HEIGHT, 0, 0), size=(PARTICLE_COUNT, 4)
 )
 
-particles_h = cp.zeros(PARTICLE_COUNT)
+# particles_h = cp.zeros(PARTICLE_COUNT)
 
 # used temporarily by the resampler
-new_particles_xy = cp.zeros_like(particles_xy)
+new_particles_xyhw = cp.zeros_like(particles_xyhw)
 indices = cp.zeros(PARTICLE_COUNT)
 
 # particle weights (w), Nx1
-particles_w = cp.zeros(PARTICLE_COUNT)
+# particles_w = cp.zeros(PARTICLE_COUNT)
 
 # beacon (x,y), Mx2
 beacon_xy = cp.array([[0.5, 0.5], [0.5, 4.5]])
 
 # particle-to-beacon distances (d), NxM
-distances = cp.zeros((particles_xy.shape[0], beacon_xy.shape[0]))
+distances = cp.zeros((particles_xyhw.shape[0], beacon_xy.shape[0]))
 
 # TODO: use this
 # this is 2d so i can use it as a list-of-one beacon
@@ -57,26 +61,14 @@ def init(turtle):
     turtle.screen.mode("standard")
     turtle.resizemode("user")
     turtle.screen.tracer(50000, delay=0)
-    turtle.screen.register_shape("dot", ((-3, -3), (-3, 3), (3, 3), (3, -3)))
-    turtle.screen.register_shape("tri", ((-3, -2), (0, 3), (3, -2), (0, 0)))
     turtle.speed(0)
     turtle.screen.title("particle filter demo")
     turtle.screen.setworldcoordinates(0, 0, WIDTH, HEIGHT)
     turtle.up()
-    turtle.color("#00ffff")
+    turtle.color("gray")
     for x, y in beacon_xy:
         turtle.setposition(x, y)
-        turtle.dot(10)
-    turtle.screen.update()
-
-
-def show_robot(turtle, x, y, h):
-    turtle.color("green")
-    turtle.shape("classic")
-    turtle.shapesize(1)
-    turtle.setposition(x, y)
-    turtle.setheading(h)
-    turtle.stamp()
+        turtle.dot(40)
     turtle.screen.update()
 
 
@@ -88,21 +80,37 @@ def weight_to_color(weight):
     return (red, 0, blue)
 
 
+def show_robot(turtle, x, y, h):
+    turtle.shape("classic")
+    turtle.pen(pencolor="green", fillcolor="white", outline=5)
+    turtle.shapesize(2)
+    turtle.setposition(x, y)
+    turtle.setheading(h)
+    turtle.stamp()
+
+
 def show_particles(turtle):
-    # turtle.shape("tri")
-    turtle.shapesize(0.5)
-    turtle.color("blue")
-    turtle.shape("circle")
-    for i, p in enumerate(particles_xy[:: PARTICLE_COUNT / PARTICLES_TO_PLOT]):
+    turtle.shape("square")
+    turtle.pen(outline=1)
+    turtle.shapesize(1)
+    for p in particles_xyhw[:: PARTICLE_COUNT / PARTICLES_TO_PLOT]:
         turtle.setposition(p[0], p[1])
-        turtle.setheading(particles_h[i])
-        turtle.color(weight_to_color(particles_w[i].item()))
+        turtle.setheading(p[2])
+        turtle.color(weight_to_color(p[3].item()), (1, 1, 1))
         turtle.stamp()
+
+
+def show_mean(turtle, x, y) -> None:
+    turtle.pen(pencolor="black", fillcolor="white", outline=5)
+    turtle.shapesize(2)
+    turtle.setposition(x, y)
+    turtle.shape("triangle")
+    turtle.stamp()
 
 
 @jit.rawkernel()
 def distance_kernel(
-    particles: cp.ndarray,  # Nx2
+    particles: cp.ndarray,  # Nx4 (x, y, h, w)
     beacons: cp.ndarray,  # Mx2
     dist: cp.ndarray,  # NxM
     size: np.int32,  # this is N
@@ -125,9 +133,7 @@ def distance_kernel(
 
 
 @jit.rawkernel()
-def zero_out_of_bounds(
-    particles: cp.ndarray, weights: cp.ndarray, size: np.int32
-) -> None:
+def zero_out_of_bounds(particles: cp.ndarray, size: np.int32) -> None:
     # pylint:disable=no-member
     tid = jit.blockIdx.x * jit.blockDim.x + jit.threadIdx.x
     ntid = jit.gridDim.x * jit.blockDim.x
@@ -135,14 +141,14 @@ def zero_out_of_bounds(
         p_x = particles[i, 0]
         p_y = particles[i, 1]
         if p_x < 0 or p_y < 0 or p_x > WIDTH or p_y > HEIGHT:
-            weights[i] = 0
+            particles[i, 3] = 0
 
 
 @jit.rawkernel()
 def weigh_similar(
     particle_distances: cp.ndarray,
     robot_dist: cp.ndarray,
-    weights: cp.ndarray,
+    particles: cp.ndarray,
     size: np.int32,
 ) -> None:
     # pylint:disable=no-member
@@ -157,14 +163,15 @@ def weigh_similar(
             r_d = robot_dist[0, j]
             diff_d = p_d - r_d
             sqsum += diff_d * diff_d
-        weights[i] = cp.exp(-1.0 * sqsum / 0.1)
+        # weights[i] = cp.exp(-1.0 * sqsum / 0.1)
+        particles[i, 3] = cp.exp(-1.0 * sqsum / 0.1)
 
 
 # populate the particle-to-beacon distance array.
 def all_beacon_distance() -> None:
     # pylint:disable=no-value-for-parameter
     distance_kernel(
-        (128,), (1024,), (particles_xy, beacon_xy, distances, PARTICLE_COUNT)
+        (128,), (1024,), (particles_xyhw, beacon_xy, distances, PARTICLE_COUNT)
     )
 
 
@@ -176,50 +183,39 @@ def robot_beacon_distance() -> None:
     )
 
 
-def normalize(weights) -> cp.ndarray:
-    wsum = cp.sum(weights)
-    return weights / wsum
+def normalize(particles) -> None:
+    wsum = cp.sum(particles[:, 3])
+    particles[:, 3] /= wsum
 
 
 def reweight() -> None:
-    # pylint:disable=no-value-for-parameter
+    # pylint:disable=no-value-for-parameter,too-many-function-args
     # populate distances
     all_beacon_distance()
     # populate robot_distances
     robot_beacon_distance()
 
-    global particles_w
-
     weigh_similar(
-        (128,), (1024,), (distances, robot_distances, particles_w, PARTICLE_COUNT)
+        (128,), (1024,), (distances, robot_distances, particles_xyhw, PARTICLE_COUNT)
     )
-    zero_out_of_bounds((128,), (1024,), (particles_xy, particles_w, PARTICLE_COUNT))
-    particles_w = normalize(particles_w)
+    zero_out_of_bounds((128,), (1024,), (particles_xyhw, PARTICLE_COUNT))
+    normalize(particles_xyhw)
 
 
 def compute_mean() -> tuple[float, float]:
-    xy = cp.average(particles_xy, axis=0, weights=particles_w)
+    xy = cp.average(particles_xyhw, axis=0, weights=particles_xyhw[:, 3])
     return xy[0], xy[1]
 
 
-def show_mean(turtle, x, y) -> None:
-    turtle.color("#000000")
-    turtle.setposition(x, y)
-    turtle.shape("circle")
-    turtle.stamp()
-
-
 def resample() -> None:
-    global particles_xy
-    global new_particles_xy
-    global indices
+    global particles_xyhw
 
-    indices = cp.random.choice(PARTICLE_COUNT, size=PARTICLE_COUNT, p=particles_w)
-    new_particles_xy = cp.take(particles_xy, indices, axis=0)
-    xynoise = cp.random.uniform(
-        low=(-0.1, -0.1), high=(0.1, 0.1), size=(PARTICLE_COUNT, 2)
-    )
-    particles_xy = new_particles_xy + xynoise
+    selector = cp.random.uniform(size=PARTICLE_COUNT)
+    cumweights = cp.cumsum(particles_xyhw[:, 3])
+    keys = cp.searchsorted(cumweights, selector)
+    particles_xyhw = particles_xyhw[keys]
+    particles_xyhw[:, 0] += cp.random.uniform(-0.1, 0.1, size=PARTICLE_COUNT)
+    particles_xyhw[:, 1] += cp.random.uniform(-0.1, 0.1, size=PARTICLE_COUNT)
 
 
 def main():
@@ -241,18 +237,19 @@ def main():
         # time.sleep(0.1)
         x, y = compute_mean()
 
-        if loop_counter % 5 == 0:
+        if loop_counter % PLOT_EVERY_N == 0:
             turtle.clearstamps()
             show_particles(turtle)
             show_mean(turtle, x, y)
             show_robot(turtle, robot_xy[0, 0], robot_xy[0, 1], robot_h)
+            turtle.screen.update()
 
         if RESAMPLE:
             resample()
 
         old_heading = robot_h
 
-        robot_h += 5
+        robot_h += HEADING_RATE
         r = math.radians(robot_h)
         robot_xy[0, 0] += math.cos(r) * ROBOT_SPEED
         robot_xy[0, 1] += math.sin(r) * ROBOT_SPEED
@@ -262,15 +259,14 @@ def main():
         if RESAMPLE:
 
             # just mirror the robot heading for now
-            global particles_h
-            global particles_xy
 
-            particles_h = cp.ones((PARTICLE_COUNT, 1)) * robot_h
-            r = cp.deg2rad(particles_h)
+            particles_xyhw[:, 2] = cp.ones(PARTICLE_COUNT) * robot_h
+            r = cp.deg2rad(particles_xyhw[:, 2])
             dx = cp.cos(r) * ROBOT_SPEED
             dy = cp.sin(r) * ROBOT_SPEED
             d = cp.hstack((dx, dy))
-            particles_xy += d
+            particles_xyhw[:, 0] += dx
+            particles_xyhw[:, 1] += dy
 
         t1 = time.time_ns()
         duration = t1 - t0
