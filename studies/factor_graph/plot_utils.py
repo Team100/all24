@@ -15,8 +15,8 @@ def plot_result(poses, landmarks):
 
     plt.figure(figsize=(10,10))
     ax = plt.axes()
-    ax.set_xlim(-1,5)
-    ax.set_ylim(-1,5)
+    ax.set_xlim(-1,6)
+    ax.set_ylim(-1,6)
 
     num_draws = 1000
 
