@@ -14,11 +14,11 @@ prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01]))
 
 L1 = L(1)
 l1_x = np.array([0.5, 0.5])
-L1prior = gtsam.PriorFactorPoint2(L1, gtsam.Point2(*l1_x), prior_noise)
+
 
 L2 = L(2)
 l2_x = np.array([0.5, 4.5])
-L2prior = gtsam.PriorFactorPoint2(L2, gtsam.Point2(*l2_x), prior_noise)
+
 
 isam = gtsam.ISAM2(gtsam.ISAM2Params())
 pose_variables: list[X] = []
@@ -70,97 +70,128 @@ def plot_variables():
 landmark_variables.append(L1)
 landmark_variables.append(L2)
 graph = gtsam.NonlinearFactorGraph()
-graph.add(L1prior)
-graph.add(L2prior)
+graph.add(gtsam.PriorFactorPoint2(L1, gtsam.Point2(*l1_x), prior_noise))
+graph.add(gtsam.PriorFactorPoint2(L2, gtsam.Point2(*l2_x), prior_noise))
 initial_estimate = gtsam.Values()
-L1point = gtsam.Point2(*l1_x)
-L2point = gtsam.Point2(*l2_x)
-initial_estimate.insert(L1, L1point)
-initial_estimate.insert(L2, L2point)
+initial_estimate.insert(L1, gtsam.Point2(*l1_x))
+initial_estimate.insert(L2, gtsam.Point2(*l2_x))
+isam.update(graph, initial_estimate)
+plot_variables()
+
+################################
+
+# initialize the robot position
+x_i = 0
+graph = gtsam.NonlinearFactorGraph()
+robot_X = X(x_i)
+pose_variables.append(robot_X)
+initial_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([5.1, 5.1, 0.1]))
+graph.add(gtsam.PriorFactorPose2(robot_X, gtsam.Pose2(*robot_x, 0), initial_noise))
+initial_estimate = gtsam.Values()
+initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0))
 isam.update(graph, initial_estimate)
 plot_variables()
 
 ##################################
 
-x_i = 1
+# add a target sight, without changing the robot position
 graph = gtsam.NonlinearFactorGraph()
-X1 = X(x_i)
-pose_variables.append(X1)
-
-initial_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([5.1, 5.1, 0.1]))
-graph.add(gtsam.PriorFactorPose2(X1, gtsam.Pose2(*robot_x, 0), initial_noise))
-
 X1toL1a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
 X1toL1r = np.hypot(*(l1_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(X1, L1, X1toL1a, X1toL1r, v))
+graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X1toL1a, X1toL1r, v))
+isam.update(graph, gtsam.Values())
+plot_variables()
+
+##################################
+
+# add another target sight, without changing the robot position
+graph = gtsam.NonlinearFactorGraph()
 X1toL2a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
 X1toL2r = np.hypot(*(l2_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(X1, L2, X1toL2a, X1toL2r, v))
-
-initial_estimate = gtsam.Values()
-initial_estimate.insert(X1, gtsam.Pose2(*robot_x, 0))
-
-isam.update(graph, initial_estimate)
+graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X1toL2a, X1toL2r, v))
+isam.update(graph, gtsam.Values())
 plot_variables()
 
 #################################
 
-x_i += 1
-
-graph = gtsam.NonlinearFactorGraph()
-X2 = X(x_i)
-pose_variables.append(X2)
-
+# move the robot
 prev_robot_x = robot_x
 robot_x = np.array([2, 0])
 robot_delta = robot_x - prev_robot_x
-
+x_i += 1
+prev_robot_X = robot_X
+robot_X = X(x_i)
+pose_variables.append(robot_X)
+graph = gtsam.NonlinearFactorGraph()
 X1toX2 = gtsam.Pose2(*robot_delta, 0.0)
-graph.add(gtsam.BetweenFactorPose2(X1, X2, X1toX2, odometry_noise))
-
-X2toL1 = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
-X2toL1r = np.hypot(*(l1_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(X2, L1, X2toL1, X2toL1r, v))
-X2toL2a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
-X2toL2r = np.hypot(*(l2_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(X2, L2, X2toL2a, X2toL2r, v))
-
-
+graph.add(gtsam.BetweenFactorPose2(prev_robot_X, robot_X, X1toX2, odometry_noise))
 initial_estimate = gtsam.Values()
-initial_estimate.insert(X2, gtsam.Pose2(*robot_x, 0))
-
+initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0))
 isam.update(graph, initial_estimate)
 plot_variables()
 
 #########################################
 
-t0 = time.time_ns()
-x_i += 1
+# add target sight
 graph = gtsam.NonlinearFactorGraph()
-X3 = X(x_i)
-pose_variables.append(X3)
+X2toL1 = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
+X2toL1r = np.hypot(*(l1_x - robot_x))
+graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X2toL1, X2toL1r, v))
+isam.update(graph, gtsam.Values())
+plot_variables()
 
+#########################################
+
+# add target sight
+graph = gtsam.NonlinearFactorGraph()
+X2toL2a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
+X2toL2r = np.hypot(*(l2_x - robot_x))
+graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X2toL2a, X2toL2r, v))
+isam.update(graph, gtsam.Values())
+plot_variables()
+
+################################
+
+# move the robot
 prev_robot_x = robot_x
 robot_x = np.array([4, 0])
 robot_delta = robot_x - prev_robot_x
-
+x_i += 1
+prev_robot_X = robot_X
+robot_X = X(x_i)
+pose_variables.append(robot_X)
+graph = gtsam.NonlinearFactorGraph()
 X2toX3 = gtsam.Pose2(*robot_delta, 0.0)
-graph.add(gtsam.BetweenFactorPose2(X2, X3, X2toX3, odometry_noise))
+graph.add(gtsam.BetweenFactorPose2(prev_robot_X, robot_X, X2toX3, odometry_noise))
+initial_estimate = gtsam.Values()
+initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0.0))
+isam.update(graph, initial_estimate)
+plot_variables()
 
+##############################
+
+# add target sight
+graph = gtsam.NonlinearFactorGraph()
 X3toL1angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
 X3toL1range = np.hypot(*(l1_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(X3, L1, X3toL1angle, X3toL1range, v))
+graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X3toL1angle, X3toL1range, v))
+isam.update(graph, gtsam.Values())
+plot_variables()
 
+##############################
+
+# add target sight
+graph = gtsam.NonlinearFactorGraph()
 X3toL2angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
 X3toL2range = np.hypot(*(l2_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(X3, L2, X3toL2angle, X3toL2range, v))
+graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X3toL2angle, X3toL2range, v))
+isam.update(graph, gtsam.Values())
+plot_variables()
 
+##############################
 
-initial_estimate = gtsam.Values()
-initial_estimate.insert(X3, gtsam.Pose2(*robot_x, 0.0))
-
-isam.update(graph, initial_estimate)
+# todo: add timing
+t0 = time.time_ns()
 t1 = time.time_ns()
 duration = t1-t0
 print(f"duration ns {duration}")
-plot_variables()
