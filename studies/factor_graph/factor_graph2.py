@@ -4,7 +4,7 @@ import numpy as np
 import gtsam  # type:ignore
 from gtsam.symbol_shorthand import X, L  # type:ignore
 from plot_utils import plot_result, MultivariateNormalParameters  # type:ignore
-
+import time
 
 # for a real field the apriltag "landmarks" are fixed
 # for this experiment say the landmarks are ([[0.5, 0.5], [0.5, 4.5]])
@@ -106,6 +106,7 @@ plot_variables()
 #################################
 
 x_i += 1
+
 graph = gtsam.NonlinearFactorGraph()
 X2 = X(x_i)
 pose_variables.append(X2)
@@ -133,6 +134,7 @@ plot_variables()
 
 #########################################
 
+t0 = time.time_ns()
 x_i += 1
 graph = gtsam.NonlinearFactorGraph()
 X3 = X(x_i)
@@ -158,4 +160,7 @@ initial_estimate = gtsam.Values()
 initial_estimate.insert(X3, gtsam.Pose2(*robot_x, 0.0))
 
 isam.update(graph, initial_estimate)
+t1 = time.time_ns()
+duration = t1-t0
+print(f"duration ns {duration}")
 plot_variables()
