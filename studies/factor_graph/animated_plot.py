@@ -12,7 +12,6 @@ fig = plt.figure()
 axis = plt.axes(xlim=(0, 4), ylim=(-2, 2))
 
 # initializing a line variable
-# (line,) = axis.plot([], [], lw=3)
 points = axis.scatter([], [])
 
 
@@ -34,6 +33,7 @@ def animate(i):
     return (points,)
 
 
-anim = FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=True)
+# NOTE: blit=True messes up the axes
+anim = FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=False)
 
 plt.show()

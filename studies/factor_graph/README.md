@@ -12,6 +12,10 @@ https://github.com/borglab/gtsam/blob/develop/python/gtsam/examples/PlanarSLAMEx
 which is licensed here
 https://github.com/borglab/gtsam/blob/develop/LICENSE.BSD
 
+There's good stuff about matplotlib performance here
+
+https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
+
 # Dependencies
 
 ```
