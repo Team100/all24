@@ -5,8 +5,13 @@ import gtsam  # type:ignore
 from gtsam.symbol_shorthand import X, L  # type:ignore
 from plot_utils import plot_result, MultivariateNormalParameters  # type:ignore
 
+isam = gtsam.ISAM2(gtsam.ISAM2Params())
 
-def extract_pose_marginals(isam, variables, result) -> list:
+pose_variables = []
+landmark_variables = []
+
+
+def extract_pose_marginals(variables, result) -> list:
     pose_marginals = []
     for var in variables:
         pose_marginals.append(
@@ -17,7 +22,7 @@ def extract_pose_marginals(isam, variables, result) -> list:
     return pose_marginals
 
 
-def extract_landmark_marginals(isam, variables, result) -> list:
+def extract_landmark_marginals(variables, result) -> list:
     landmark_marginals = []
     for var in variables:
         landmark_marginals.append(
@@ -28,7 +33,7 @@ def extract_landmark_marginals(isam, variables, result) -> list:
     return landmark_marginals
 
 
-def step1_initialize(isam, pose_variables):
+def step1_initialize():
     graph = gtsam.NonlinearFactorGraph()
     X1 = X(1)
     pose_variables.append(X1)
@@ -39,7 +44,7 @@ def step1_initialize(isam, pose_variables):
     isam.update(graph, initial_estimate)
 
 
-def step2_add_landmark_observation(isam, landmark_variables):
+def step2_add_landmark_observation():
     graph = gtsam.NonlinearFactorGraph()
     X1 = X(1)
     L1 = L(1)
@@ -59,7 +64,7 @@ def step2_add_landmark_observation(isam, landmark_variables):
     isam.update(graph, initial_estimate)
 
 
-def step3_add_pose_from_odometry(isam, pose_variables):
+def step3_add_pose_from_odometry():
     graph = gtsam.NonlinearFactorGraph()
     X1 = X(1)
     X2 = X(2)
@@ -73,7 +78,7 @@ def step3_add_pose_from_odometry(isam, pose_variables):
     isam.update(graph, initial_estimate)
 
 
-def step4_add_new_landmark_observation(isam):
+def step4_add_new_landmark_observation():
     graph = gtsam.NonlinearFactorGraph()
     X2 = X(2)
     L1 = L(1)
@@ -87,9 +92,7 @@ def step4_add_new_landmark_observation(isam):
     isam.update(graph, gtsam.Values())
 
 
-def step5_add_odometry_and_landmark_observations(
-    isam, pose_variables, landmark_variables
-):
+def step5_add_odometry_and_landmark_observations():
     graph = gtsam.NonlinearFactorGraph()
 
     X2 = X(2)
@@ -120,62 +123,57 @@ def step5_add_odometry_and_landmark_observations(
 
 
 def main():
-    isam = gtsam.ISAM2(gtsam.ISAM2Params())
 
-    pose_variables = []
-    landmark_variables = []
 
-    step1_initialize(isam, pose_variables)
+    step1_initialize()
 
     result = isam.calculateEstimate()
-    pose_marginals = extract_pose_marginals(isam, pose_variables, result)
-    landmark_marginals = extract_landmark_marginals(isam, landmark_variables, result)
+    pose_marginals = extract_pose_marginals(pose_variables, result)
+    landmark_marginals = extract_landmark_marginals(landmark_variables, result)
 
     plot_result(pose_marginals, landmark_marginals)
 
-    step2_add_landmark_observation(isam, landmark_variables)
+    step2_add_landmark_observation()
 
     for _ in range(5):
         isam.update()
 
     result = isam.calculateEstimate()
-    pose_marginals = extract_pose_marginals(isam, pose_variables, result)
-    landmark_marginals = extract_landmark_marginals(isam, landmark_variables, result)
+    pose_marginals = extract_pose_marginals(pose_variables, result)
+    landmark_marginals = extract_landmark_marginals(landmark_variables, result)
 
     plot_result(pose_marginals, landmark_marginals)
 
-    step3_add_pose_from_odometry(isam, pose_variables)
+    step3_add_pose_from_odometry()
 
     for _ in range(5):
         isam.update()
 
     result = isam.calculateEstimate()
-    pose_marginals = extract_pose_marginals(isam, pose_variables, result)
-    landmark_marginals = extract_landmark_marginals(isam, landmark_variables, result)
+    pose_marginals = extract_pose_marginals(pose_variables, result)
+    landmark_marginals = extract_landmark_marginals(landmark_variables, result)
 
     plot_result(pose_marginals, landmark_marginals)
 
-    step4_add_new_landmark_observation(isam)
+    step4_add_new_landmark_observation()
 
     for _ in range(5):
         isam.update()
 
     result = isam.calculateEstimate()
-    pose_marginals = extract_pose_marginals(isam, pose_variables, result)
-    landmark_marginals = extract_landmark_marginals(isam, landmark_variables, result)
+    pose_marginals = extract_pose_marginals(pose_variables, result)
+    landmark_marginals = extract_landmark_marginals(landmark_variables, result)
 
     plot_result(pose_marginals, landmark_marginals)
 
-    step5_add_odometry_and_landmark_observations(
-        isam, pose_variables, landmark_variables
-    )
+    step5_add_odometry_and_landmark_observations()
 
     for _ in range(5):
         isam.update()
 
     result = isam.calculateEstimate()
-    pose_marginals = extract_pose_marginals(isam, pose_variables, result)
-    landmark_marginals = extract_landmark_marginals(isam, landmark_variables, result)
+    pose_marginals = extract_pose_marginals(pose_variables, result)
+    landmark_marginals = extract_landmark_marginals(landmark_variables, result)
     plot_result(pose_marginals, landmark_marginals)
 
 
