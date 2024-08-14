@@ -3,7 +3,7 @@
 import numpy as np
 import gtsam  # type:ignore
 from gtsam.symbol_shorthand import X, L  # type:ignore
-from plot_utils import plot_result, MultivariateNormalParameters  # type:ignore
+from plot_utils import plot_variables 
 import time
 
 # for a real field the apriltag "landmarks" are fixed
@@ -32,36 +32,7 @@ prev_robot_x = np.array([0, 0])
 robot_x = np.array([0, 0])
 
 
-def extract_pose_marginals(variables, result) -> list:
-    pose_marginals = []
-    for var in variables:
-        pose_marginals.append(
-            MultivariateNormalParameters(
-                result.atPose2(var), isam.marginalCovariance(var)
-            )
-        )
-    return pose_marginals
 
-
-def extract_landmark_marginals(variables, result) -> list:
-    landmark_marginals = []
-    for var in variables:
-        landmark_marginals.append(
-            MultivariateNormalParameters(
-                result.atPoint2(var), isam.marginalCovariance(var)
-            )
-        )
-    return landmark_marginals
-
-
-def plot_variables():
-    # it takes a lot of iterations to get over bad initial estimates
-    for _ in range(5):
-        isam.update()
-    result = isam.calculateEstimate()
-    pose_marginals = extract_pose_marginals(pose_variables, result)
-    landmark_marginals = extract_landmark_marginals(landmark_variables, result)
-    plot_result(pose_marginals, landmark_marginals)
 
 
 ###############################
@@ -76,7 +47,7 @@ initial_estimate = gtsam.Values()
 initial_estimate.insert(L1, gtsam.Point2(*l1_x))
 initial_estimate.insert(L2, gtsam.Point2(*l2_x))
 isam.update(graph, initial_estimate)
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 ################################
 
@@ -90,7 +61,7 @@ graph.add(gtsam.PriorFactorPose2(robot_X, gtsam.Pose2(*robot_x, 0), initial_nois
 initial_estimate = gtsam.Values()
 initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0))
 isam.update(graph, initial_estimate)
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 ##################################
 
@@ -100,7 +71,7 @@ X1toL1a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
 X1toL1r = np.hypot(*(l1_x - robot_x))
 graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X1toL1a, X1toL1r, v))
 isam.update(graph, gtsam.Values())
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 ##################################
 
@@ -110,7 +81,7 @@ X1toL2a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
 X1toL2r = np.hypot(*(l2_x - robot_x))
 graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X1toL2a, X1toL2r, v))
 isam.update(graph, gtsam.Values())
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 #################################
 
@@ -128,7 +99,7 @@ graph.add(gtsam.BetweenFactorPose2(prev_robot_X, robot_X, X1toX2, odometry_noise
 initial_estimate = gtsam.Values()
 initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0))
 isam.update(graph, initial_estimate)
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 #########################################
 
@@ -138,7 +109,7 @@ X2toL1 = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
 X2toL1r = np.hypot(*(l1_x - robot_x))
 graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X2toL1, X2toL1r, v))
 isam.update(graph, gtsam.Values())
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 #########################################
 
@@ -148,7 +119,7 @@ X2toL2a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
 X2toL2r = np.hypot(*(l2_x - robot_x))
 graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X2toL2a, X2toL2r, v))
 isam.update(graph, gtsam.Values())
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 ################################
 
@@ -166,7 +137,7 @@ graph.add(gtsam.BetweenFactorPose2(prev_robot_X, robot_X, X2toX3, odometry_noise
 initial_estimate = gtsam.Values()
 initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0.0))
 isam.update(graph, initial_estimate)
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 ##############################
 
@@ -176,7 +147,7 @@ X3toL1angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
 X3toL1range = np.hypot(*(l1_x - robot_x))
 graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X3toL1angle, X3toL1range, v))
 isam.update(graph, gtsam.Values())
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 ##############################
 
@@ -186,7 +157,7 @@ X3toL2angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
 X3toL2range = np.hypot(*(l2_x - robot_x))
 graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X3toL2angle, X3toL2range, v))
 isam.update(graph, gtsam.Values())
-plot_variables()
+plot_variables(isam, pose_variables, landmark_variables)
 
 ##############################
 

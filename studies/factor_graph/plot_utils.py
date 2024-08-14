@@ -172,3 +172,35 @@ def plot_ellipse(
 class MultivariateNormalParameters:
     mean: Any
     covariance: np.ndarray
+
+def extract_pose_marginals(isam, variables, result) -> list:
+    pose_marginals = []
+    for var in variables:
+        pose_marginals.append(
+            MultivariateNormalParameters(
+                result.atPose2(var), isam.marginalCovariance(var)
+            )
+        )
+    return pose_marginals
+
+
+def extract_landmark_marginals(isam, variables, result) -> list:
+    landmark_marginals = []
+    for var in variables:
+        landmark_marginals.append(
+            MultivariateNormalParameters(
+                result.atPoint2(var), isam.marginalCovariance(var)
+            )
+        )
+    return landmark_marginals
+
+
+def plot_variables(isam, poses, landmarks):
+    # it takes a lot of iterations to get over bad initial estimates
+    for _ in range(5):
+        isam.update()
+    result = isam.calculateEstimate()
+    pose_marginals = extract_pose_marginals(isam, poses, result)
+    landmark_marginals = extract_landmark_marginals(isam, landmarks, result)
+    plot_result(pose_marginals, landmark_marginals)
+    
