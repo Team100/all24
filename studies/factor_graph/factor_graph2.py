@@ -118,15 +118,14 @@ def main() -> None:
     landmarks: list[Landmark] = [
         Landmark(1, 0.5, 0.5),
         Landmark(2, 0.5, 4.5),
-        Landmark(3, 4.5, 4.5),
-        Landmark(4, 4.5, 0.5),
+        # Landmark(3, 4.5, 4.5),
+        # Landmark(4, 4.5, 0.5),
     ]
 
     # isam = gtsam.ISAM2(gtsam.ISAM2Params())
 
-    # this is an attempt to run a sliding window
-    # but it fails.
-    lag = 100
+    # a small window seems to help
+    lag = 40
     isam = gtsam_unstable.IncrementalFixedLagSmoother(lag)
     # isam = gtsam_unstable.BatchFixedLagSmoother(lag)
     # print(dir(isam))
@@ -156,8 +155,7 @@ def main() -> None:
         prev_robot_X = robot_X
         robot_X = X(x_i)
         pose_variables.append(robot_X)
-        # if len(pose_variables) > 5:
-        # pose_variables.pop(0)
+
 
         t0 = time.time_ns()
         add_odometry(isam, x_i, robot_x, robot_X, robot_delta, prev_robot_X)
@@ -169,12 +167,15 @@ def main() -> None:
         pose_variables = [pv for pv in pose_variables if result.exists(pv)]
 
         t1 = time.time_ns()
+        # print(f"timestamps: {isam.timestamps().size()}")
         if x_i % 50 == 0:
             print(f"i {x_i} duration (ns) {t1-t0}")
 
         p.plot_variables(result, pose_variables, landmark_variables)
+        time.sleep(0.1)
+
         # pause occasionally
-        # if x_i % 50 == 0:
+        # if x_i % 500 == 0:
         #     print("pausing so you can see it more clearly...")
         #     time.sleep(PAUSE_TIME)
 
