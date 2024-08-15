@@ -16,6 +16,14 @@ There's good stuff about matplotlib performance here
 
 https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
 
+Note, you can run `isam.update()` as much as you want to get it to
+make better estimates.
+
+```
+# for _ in range(5):
+#     isam.update()
+```
+
 # Dependencies
 
 ```

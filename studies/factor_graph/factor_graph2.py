@@ -1,184 +1,150 @@
 # pylint: disable=invalid-name,too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
 
+import math
 import time
 import numpy as np
 import gtsam  # type:ignore
+import gtsam_unstable  # type:ignore
 from gtsam.symbol_shorthand import X, L  # type:ignore
+from landmark import Landmark
 from plot_utils import Plot
 
-FRAME_TIME = 0.1
-
-# for a real field the apriltag "landmarks" are fixed
-# for this experiment say the landmarks are ([[0.5, 0.5], [0.5, 4.5]])
-# and for now they are both visible all the time
-
-prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05, 0.05]))
-
-L1 = L(1)
-l1_x = np.array([0.5, 0.5])
+PAUSE_TIME = 1.0
+ANGLE_SCALE = 0.1
+LINEAR_SCALE = 0.2
 
 
-L2 = L(2)
-l2_x = np.array([0.5, 4.5])
+def initialize_landmarks(isam, landmarks, landmark_variables) -> None:
+    # landmark position is known to within a couple of inches.
+    prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05, 0.05]))
+    graph = gtsam.NonlinearFactorGraph()
+    initial_estimate = gtsam.Values()
+    new_timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    for l in landmarks:
+        landmark_variables.append(l.symbol)
+        # this is a constant, it's rendered wrong by the plotter
+        # and doesn't seem to help performance anyway
+        # graph.add(gtsam.NonlinearEqualityPoint2(l.symbol, gtsam.Point2(*l.x)))
+        # this allows some variation in the cameras
+        graph.add(gtsam.PriorFactorPoint2(l.symbol, gtsam.Point2(*l.x), prior_noise))
+        initial_estimate.insert(l.symbol, gtsam.Point2(*l.x))
+        new_timestamps.insert((l.symbol, 0))
+    isam.update(graph, initial_estimate, new_timestamps)
 
 
-isam = gtsam.ISAM2(gtsam.ISAM2Params())
-pose_variables: list[X] = []
-landmark_variables: list[L] = []
-odometry_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
-# measurement noise
-v = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05, 0.1]))
+def initialize_robot(isam, pose_variables, robot_x, x_i) -> X:
+    graph = gtsam.NonlinearFactorGraph()
+    robot_X = X(x_i)
+    pose_variables.append(robot_X)
+    initial_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([5.1, 5.1, 0.1]))
+    graph.add(gtsam.PriorFactorPose2(robot_X, gtsam.Pose2(*robot_x, 0), initial_noise))
+    initial_estimate = gtsam.Values()
+    initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0))
+    new_timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    new_timestamps.insert((robot_X, 0))
+    isam.update(graph, initial_estimate, new_timestamps)
+    return robot_X
 
-# x, y
-prev_robot_x = np.array([0, 0])
-robot_x = np.array([0, 0])
 
-# initialize the plotter
+def add_odometry(isam, x_i, robot_x, robot_X, robot_delta, prev_robot_X) -> None:
+    # for this demo there's more noise
+    odometry_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
+    # wheel measurements are accurate to within a few millimeters
+    # TODO: make noise dependent on speed
+    # odometry_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.005, 0.005, 0.005]))
+    graph = gtsam.NonlinearFactorGraph()
+    # TODO: rotation
+    twist = gtsam.Pose2(*robot_delta, 0.0)
+    graph.add(gtsam.BetweenFactorPose2(prev_robot_X, robot_X, twist, odometry_noise))
+    initial_estimate = gtsam.Values()
+    initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0.0))
+    new_timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    new_timestamps.insert((robot_X, x_i))
+    isam.update(graph, initial_estimate, new_timestamps)
 
-p = Plot(isam)
 
-###############################
+def add_target_sights(isam, x_i, landmarks, robot_x, robot_X) -> None:
+    graph = gtsam.NonlinearFactorGraph()
+    initial_estimate = gtsam.Values()
+    new_timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    for l in landmarks:
+        l_angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l.x - robot_x))))
+        l_range = np.hypot(*(l.x - robot_x))
+        # accuracy is proportional to distance
+        # TODO: camera pixels instead of bearing range
+        v = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05 * l_range, 0.3 * l_range]))
+        graph.add(gtsam.BearingRangeFactor2D(robot_X, l.symbol, l_angle, l_range, v))
+        # initial_estimate.insert(l.symbol, gtsam.Point2(*l.x))
+        new_timestamps.insert((l.symbol, x_i))
+    isam.update(graph, initial_estimate, new_timestamps)
 
-# start with just the landmarks
-landmark_variables.append(L1)
-landmark_variables.append(L2)
-graph = gtsam.NonlinearFactorGraph()
-graph.add(gtsam.PriorFactorPoint2(L1, gtsam.Point2(*l1_x), prior_noise))
-graph.add(gtsam.PriorFactorPoint2(L2, gtsam.Point2(*l2_x), prior_noise))
-initial_estimate = gtsam.Values()
-initial_estimate.insert(L1, gtsam.Point2(*l1_x))
-initial_estimate.insert(L2, gtsam.Point2(*l2_x))
-isam.update(graph, initial_estimate)
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
 
-################################
+def forward_and_left(x_i):
+    angle = ANGLE_SCALE * x_i - math.pi / 2
+    return np.array([LINEAR_SCALE * math.cos(angle), LINEAR_SCALE * math.sin(angle)])
 
-# initialize the robot position
-x_i = 0
-graph = gtsam.NonlinearFactorGraph()
-robot_X = X(x_i)
-pose_variables.append(robot_X)
-initial_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([5.1, 5.1, 0.1]))
-graph.add(gtsam.PriorFactorPose2(robot_X, gtsam.Pose2(*robot_x, 0), initial_noise))
-initial_estimate = gtsam.Values()
-initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0))
-isam.update(graph, initial_estimate)
-# it takes a lot of iterations to get over bad initial estimates
-# it's ok to update more to fix that.
-# for _ in range(5):
-#     isam.update()
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
 
-##################################
+def main() -> None:
 
-# add a target sight, without changing the robot position
-graph = gtsam.NonlinearFactorGraph()
-X1toL1a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
-X1toL1r = np.hypot(*(l1_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X1toL1a, X1toL1r, v))
-isam.update(graph, gtsam.Values())
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
+    landmarks: list[Landmark] = [
+        Landmark(1, 0.5, 0.5),
+        Landmark(2, 0.5, 4.5),
+    ]
 
-##################################
+    # isam = gtsam.ISAM2(gtsam.ISAM2Params())
 
-# add another target sight, without changing the robot position
-graph = gtsam.NonlinearFactorGraph()
-X1toL2a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
-X1toL2r = np.hypot(*(l2_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X1toL2a, X1toL2r, v))
-isam.update(graph, gtsam.Values())
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
+    # this is an attempt to run a sliding window
+    # but it fails.
+    lag = 5.0
+    isam = gtsam_unstable.IncrementalFixedLagSmoother(lag)
 
-#################################
+    # these are for plotting
+    pose_variables: list[X] = []
+    landmark_variables: list[L] = []
 
-# move the robot
-prev_robot_x = robot_x
-robot_x = np.array([2, 0])
-robot_delta = robot_x - prev_robot_x
-x_i += 1
-prev_robot_X = robot_X
-robot_X = X(x_i)
-pose_variables.append(robot_X)
-graph = gtsam.NonlinearFactorGraph()
-X1toX2 = gtsam.Pose2(*robot_delta, 0.0)
-graph.add(gtsam.BetweenFactorPose2(prev_robot_X, robot_X, X1toX2, odometry_noise))
-initial_estimate = gtsam.Values()
-initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0))
-isam.update(graph, initial_estimate)
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
+    # x, y
+    robot_x = np.array([1, 2.5])
+    prev_robot_x = robot_x
 
-#########################################
+    p = Plot(isam)
 
-# add target sight
-graph = gtsam.NonlinearFactorGraph()
-X2toL1 = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
-X2toL1r = np.hypot(*(l1_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X2toL1, X2toL1r, v))
-isam.update(graph, gtsam.Values())
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
+    initialize_landmarks(isam, landmarks, landmark_variables)
+    robot_X = initialize_robot(isam, pose_variables, robot_x, 0)
 
-#########################################
+    for x_i in range(1, 1000):
+        print(x_i)
+        # trim the pose variables so the plot looks better
+        # pose_variables = pose_variables[-5:]
+        # move the robot
+        robot_delta = forward_and_left(x_i)
+        robot_x = prev_robot_x + robot_delta
+        prev_robot_x = robot_x
 
-# add target sight
-graph = gtsam.NonlinearFactorGraph()
-X2toL2a = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
-X2toL2r = np.hypot(*(l2_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X2toL2a, X2toL2r, v))
-isam.update(graph, gtsam.Values())
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
+        prev_robot_X = robot_X
+        robot_X = X(x_i)
+        pose_variables.append(robot_X)
+        # if len(pose_variables) > 5:
+            # pose_variables.pop(0)
 
-################################
+        t0 = time.time_ns()
+        add_odometry(isam, x_i, robot_x, robot_X, robot_delta, prev_robot_X)
+        # this is the line that fails
+        isam.calculateEstimate()
+        add_target_sights(isam, x_i, landmarks, robot_x, robot_X)
+        # check existence and remove dead keys
+        result = isam.calculateEstimate()
+        pose_variables = [pv for pv in pose_variables if result.exists(pv)]
 
-# move the robot
-prev_robot_x = robot_x
-robot_x = np.array([4, 0])
-robot_delta = robot_x - prev_robot_x
-x_i += 1
-prev_robot_X = robot_X
-robot_X = X(x_i)
-pose_variables.append(robot_X)
-graph = gtsam.NonlinearFactorGraph()
-X2toX3 = gtsam.Pose2(*robot_delta, 0.0)
-graph.add(gtsam.BetweenFactorPose2(prev_robot_X, robot_X, X2toX3, odometry_noise))
-initial_estimate = gtsam.Values()
-initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0.0))
-isam.update(graph, initial_estimate)
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
+        t1 = time.time_ns()
+        if x_i % 5 == 0:
+            print(f"i {x_i} duration (ns) {t1-t0}")
 
-##############################
+        p.plot_variables(result, pose_variables, landmark_variables)
+        # pause occasionally
+        if x_i % 50 == 0:
+            print("pausing so you can see it more clearly...")
+            time.sleep(PAUSE_TIME)
 
-# add target sight
-graph = gtsam.NonlinearFactorGraph()
-X3toL1angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l1_x - robot_x))))
-X3toL1range = np.hypot(*(l1_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(robot_X, L1, X3toL1angle, X3toL1range, v))
-isam.update(graph, gtsam.Values())
-p.plot_variables(pose_variables, landmark_variables)
-time.sleep(FRAME_TIME)
 
-##############################
-
-# add target sight
-graph = gtsam.NonlinearFactorGraph()
-X3toL2angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l2_x - robot_x))))
-X3toL2range = np.hypot(*(l2_x - robot_x))
-graph.add(gtsam.BearingRangeFactor2D(robot_X, L2, X3toL2angle, X3toL2range, v))
-isam.update(graph, gtsam.Values())
-p.plot_variables(pose_variables, landmark_variables)
-p.wait()
-
-##############################
-
-# todo: add timing
-t0 = time.time_ns()
-t1 = time.time_ns()
-duration = t1 - t0
-print(f"duration ns {duration}")
+if __name__ == "__main__":
+    main()
