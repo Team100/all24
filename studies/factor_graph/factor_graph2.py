@@ -72,7 +72,7 @@ def add_odometry(isam, x_i, robot_x, robot_X, robot_delta, prev_robot_X) -> None
         print("caught ValueError in isam.update() in add_odometry()")
 
 
-def add_target_sights(isam, x_i, landmarks, robot_x, robot_X) -> None:
+def add_target_sights(isam, x_i, landmarks, robot_x, robot_X, landmark_variables) -> None:
     graph = gtsam.NonlinearFactorGraph()
     # graph.add(
     #     gtsam.PriorFactorPose2(
@@ -88,17 +88,32 @@ def add_target_sights(isam, x_i, landmarks, robot_x, robot_X) -> None:
     # new_timestamps.insert((robot_X, x_i*2.0+0.2))
     # print("CA ", x_i)
 
-    for l in landmarks:
+    for i, l in enumerate(landmarks):
+        prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05, 0.05]))
+        # this is a constant, it's rendered wrong by the plotter
+        # and doesn't seem to help performance anyway
+        # graph.add(gtsam.NonlinearEqualityPoint2(l.symbol, gtsam.Point2(*l.x)))
+        # this allows some variation in the cameras
+        # graph.add(gtsam.PriorFactorPoint2(l.symbol, gtsam.Point2(*l.x), prior_noise))
+
+        # add new landmarks every time
+        symbol = L(x_i*1000 + i)
+        landmark_variables.append(symbol)
+        graph.add(gtsam.PriorFactorPoint2(symbol, l.x, prior_noise))
+        initial_estimate.insert(symbol, gtsam.Point2(*l.x))
+        new_timestamps.insert((symbol, x_i*2.0))
+
+
         l_angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l.x - robot_x))))
         l_range = np.hypot(*(l.x - robot_x))
         # accuracy is proportional to distance
         # TODO: camera pixels instead of bearing range
         v = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05 * l_range, 0.3 * l_range]))
-        graph.add(gtsam.BearingRangeFactor2D(robot_X, l.symbol, l_angle, l_range, v))
+        graph.add(gtsam.BearingRangeFactor2D(robot_X, symbol, l_angle, l_range, v))
         # v = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.3 * l_range]))
         # graph.add(gtsam.BearingFactor2D(robot_X, l.symbol, l_angle, v))
         # initial_estimate.insert(l.symbol, gtsam.Point2(*l.x))
-        new_timestamps.insert((l.symbol, x_i*2.0))
+        # new_timestamps.insert((symbol, x_i*2.0))
     # print("CB ", x_i)
     try:
         isam.update(graph, initial_estimate, new_timestamps)
@@ -125,7 +140,7 @@ def main() -> None:
     # isam = gtsam.ISAM2(gtsam.ISAM2Params())
 
     # a small window seems to help
-    lag = 40
+    lag = 80
     isam = gtsam_unstable.IncrementalFixedLagSmoother(lag)
     # isam = gtsam_unstable.BatchFixedLagSmoother(lag)
     # print(dir(isam))
@@ -140,7 +155,7 @@ def main() -> None:
 
     p = Plot(isam)
 
-    initialize_landmarks(isam, landmarks, landmark_variables)
+    # initialize_landmarks(isam, landmarks, landmark_variables)
     robot_X = initialize_robot(isam, pose_variables, robot_x, 0)
 
     for x_i in range(10, 10000,10):
@@ -159,12 +174,13 @@ def main() -> None:
 
         t0 = time.time_ns()
         add_odometry(isam, x_i, robot_x, robot_X, robot_delta, prev_robot_X)
-        add_target_sights(isam, x_i, landmarks, robot_x, robot_X)
+        add_target_sights(isam, x_i, landmarks, robot_x, robot_X, landmark_variables)
         try:
             result = isam.calculateEstimate()
         except IndexError:
             print("caught IndexError in isam.calculateEstimate() in main()")
         pose_variables = [pv for pv in pose_variables if result.exists(pv)]
+        landmark_variables = [lv for lv in landmark_variables if result.exists(lv)]
 
         t1 = time.time_ns()
         # print(f"timestamps: {isam.timestamps().size()}")
@@ -172,7 +188,7 @@ def main() -> None:
             print(f"i {x_i} duration (ns) {t1-t0}")
 
         p.plot_variables(result, pose_variables, landmark_variables)
-        time.sleep(0.1)
+        # time.sleep(0.1)
 
         # pause occasionally
         # if x_i % 500 == 0:
