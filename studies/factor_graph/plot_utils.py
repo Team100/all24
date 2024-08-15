@@ -87,7 +87,11 @@ class Plot:
 
     def landmark_point(self, result, var):
         mean = result.atPoint2(var)  # 1x2
-        covariance = self.isam.getISAM2().marginalCovariance(var)  # 2x2
+        try:
+            covariance = self.isam.getISAM2().marginalCovariance(var)  # 2x2
+        except IndexError:
+            print("caught indexerror on covariance request for key ", var)
+            return np.empty((0,2))
         return self.rng.multivariate_normal(mean, covariance, NUM_DRAWS)
 
     def pose_point(self, result, var):
@@ -96,7 +100,12 @@ class Plot:
         # i.e. the "twist", so that's how we apply it
         # the getISAM2 thing is because the python wrapper doesn't do it
         # for the fixed lag smoother
-        covariance = self.isam.getISAM2().marginalCovariance(var)  # 3x3
+        try:
+            covariance = self.isam.getISAM2().marginalCovariance(var)  # 3x3
+        except IndexError:
+            print("caught indexerror on covariance request for key ", var)
+            return np.empty((0,2))
+        # print(covariance)
 
         random_points = self.rng.multivariate_normal(np.zeros(3), covariance, NUM_DRAWS)
         random_translations = np.zeros([NUM_DRAWS, 2])
