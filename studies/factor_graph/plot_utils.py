@@ -5,6 +5,8 @@ import gtsam  # type:ignore
 import matplotlib.pyplot as plt  # type:ignore
 import numpy as np
 from gtsam.symbol_shorthand import X, L  # type:ignore
+from landmark import Landmark
+
 
 NUM_DRAWS = 1000
 
@@ -49,7 +51,7 @@ class Plot:
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
-    def plot_variables(self, result, poses: list[X], landmarks: list[L]) -> None:
+    def plot_variables(self, result, poses: list[X], landmarks: list[Landmark]) -> None:
         self.ax.draw_artist(self.ax.patch)
 
         if len(poses) > 0:
@@ -69,11 +71,11 @@ class Plot:
 
         if len(landmarks) > 0:
             landmark_mean_translations = np.array(
-                [result.atPoint2(var) for var in landmarks]
+                [result.atPoint2(var.symbol) for var in landmarks]
             )
 
             landmark_point_translations = np.vstack(
-                [self.landmark_point(result, var) for var in landmarks]
+                [self.landmark_point(result, var.symbol) for var in landmarks]
             )
 
             self.landmark_mean_scatter.set_offsets(landmark_mean_translations)
@@ -87,11 +89,7 @@ class Plot:
 
     def landmark_point(self, result, var):
         mean = result.atPoint2(var)  # 1x2
-        try:
-            covariance = self.isam.getISAM2().marginalCovariance(var)  # 2x2
-        except IndexError:
-            print("caught indexerror on covariance request for key ", var)
-            return np.empty((0,2))
+        covariance = self.isam.getISAM2().marginalCovariance(var)  # 2x2
         return self.rng.multivariate_normal(mean, covariance, NUM_DRAWS)
 
     def pose_point(self, result, var):
@@ -100,11 +98,7 @@ class Plot:
         # i.e. the "twist", so that's how we apply it
         # the getISAM2 thing is because the python wrapper doesn't do it
         # for the fixed lag smoother
-        try:
-            covariance = self.isam.getISAM2().marginalCovariance(var)  # 3x3
-        except IndexError:
-            print("caught indexerror on covariance request for key ", var)
-            return np.empty((0,2))
+        covariance = self.isam.getISAM2().marginalCovariance(var)  # 3x3
         # print(covariance)
 
         random_points = self.rng.multivariate_normal(np.zeros(3), covariance, NUM_DRAWS)
