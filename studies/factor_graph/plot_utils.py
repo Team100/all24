@@ -4,7 +4,7 @@
 import gtsam  # type:ignore
 import matplotlib.pyplot as plt  # type:ignore
 import numpy as np
-from gtsam.symbol_shorthand import X, L  # type:ignore
+from gtsam.symbol_shorthand import X  # type:ignore
 from landmark import Landmark
 
 
