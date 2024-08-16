@@ -65,7 +65,7 @@ def main() -> None:
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)
     pose_variables: list[X] = [X(0)]
-    for x_i in range(1, 100):
+    for x_i in range(1, 500):
         robot_delta = forward_and_left(x_i)
         robot_x = prev_robot_x + robot_delta
         prev_robot_x = robot_x
