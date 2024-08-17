@@ -25,7 +25,7 @@ NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 #
 # this is cut-and-paste from the example in that doc.
 #
-def custom_between_factor(expectation:gtsam.Pose2):
+def custom_between_factor(expectation: gtsam.Pose2):
     def error_func(
         this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
     ) -> np.ndarray:
@@ -51,16 +51,23 @@ def custom_between_factor(expectation:gtsam.Pose2):
 
 
 # limit motion to the "field" boundary.
-# for now this is X>0
 def custom_boundary_constraint():
     def error_func(
         this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
     ) -> np.ndarray:
-        key0 = this.keys()[0] # there's just one
+        key0 = this.keys()[0]  # there's just one
         gT1 = v.atPose2(key0)
-        error =  max(0, gT1.x() - 4.5)
+
+        if gT1.x() <= 4.5:
+            # constraint is not active.
+            if H is not None:
+                H[0] = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+            return np.array([0, 0.0, 0.0])
+
+        # constraint is active
+        error = gT1.x() - 4.5
         if H is not None:
-            H[0] = np.array([[1, 0, 0],[0,0,0],[0,0,0]])
+            H[0] = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
         return np.array([error, 0.0, 0.0])
 
     return error_func
@@ -106,10 +113,21 @@ def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -
         timestamps.insert((l.symbol, x_i))
 
     # also add boundary factor
+    #
+    # Constrained.MixedSignal says there is some (low) uncertainty about the
+    # actually constrained dimension (x), but doesn't say anything about the others.
+    #
+    # Constrained.All means that the error produced by our custom factor is not scaled by sigma at all.
+    # see NoiseModel.cpp.  it produces weird output with lots of x variance.
+    #
+    # the Unit noise model seems very soft, not useful.
+    # the NOISE3 model seems inappropriate for a boundary.
     graph.add(
         gtsam.CustomFactor(
-            gtsam.noiseModel.Constrained.All(3),
-            # gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 100, 100])),
+            gtsam.noiseModel.Constrained.MixedSigmas(1.0, np.array([0.02, 0.0, 0.0])),
+            # gtsam.noiseModel.Constrained.All(3),
+            # gtsam.noiseModel.Unit.Create(3),
+            # NOISE3,
             gtsam.KeyVector([X(x_i)]),
             custom_boundary_constraint(),
         )
@@ -124,7 +142,7 @@ def forward_and_left(x_i):
 
 def main() -> None:
     landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
-    isam = gtsam_unstable.IncrementalFixedLagSmoother(20)
+    isam = gtsam_unstable.IncrementalFixedLagSmoother(10)
     p = Plot(isam)
     robot_x = np.array([1, 2.5])
     prev_robot_x = robot_x
