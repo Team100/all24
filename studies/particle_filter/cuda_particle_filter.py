@@ -2,14 +2,12 @@
 
 
 import math
-from turtle import Turtle
-
-# import random
-# import bisect
 import time
 import numpy as np
 import cupy as cp  # type:ignore
 from cupyx import jit  # type:ignore
+from matplotlib import pyplot as plt  # type:ignore
+from matplotlib.animation import FuncAnimation  # type:ignore
 
 print(f"CuPy version {cp.__version__}")
 mempool = cp.get_default_memory_pool()
@@ -50,62 +48,10 @@ beacon_xy = cp.array([[0.5, 0.5], [0.5, 4.5]])
 # particle-to-beacon distances (d), NxM
 distances = cp.zeros((particles_xyhw.shape[0], beacon_xy.shape[0]))
 
-# TODO: use this
 # this is 2d so i can use it as a list-of-one beacon
 robot_xy = cp.array([[WIDTH / 4, HEIGHT / 2]])
 # robot-to-beacon distances (d), 1xM
 robot_distances = cp.zeros((1, beacon_xy.shape[0]))
-
-
-def init(turtle):
-    turtle.screen.mode("standard")
-    turtle.resizemode("user")
-    turtle.screen.tracer(50000, delay=0)
-    turtle.speed(0)
-    turtle.screen.title("particle filter demo")
-    turtle.screen.setworldcoordinates(0, 0, WIDTH, HEIGHT)
-    turtle.up()
-    turtle.color("gray")
-    for x, y in beacon_xy:
-        turtle.setposition(x, y)
-        turtle.dot(40)
-    turtle.screen.update()
-
-
-def weight_to_color(weight):
-    if np.isnan(weight):
-        weight = 0
-    red = weight
-    blue = 1 - weight
-    return (red, 0, blue)
-
-
-def show_robot(turtle, x, y, h):
-    turtle.shape("classic")
-    turtle.pen(pencolor="green", fillcolor="white", outline=5)
-    turtle.shapesize(2)
-    turtle.setposition(x, y)
-    turtle.setheading(h)
-    turtle.stamp()
-
-
-def show_particles(turtle):
-    turtle.shape("square")
-    turtle.pen(outline=1)
-    turtle.shapesize(1)
-    for p in particles_xyhw[:: PARTICLE_COUNT / PARTICLES_TO_PLOT]:
-        turtle.setposition(p[0], p[1])
-        turtle.setheading(p[2])
-        turtle.color(weight_to_color(p[3].item()), (1, 1, 1))
-        turtle.stamp()
-
-
-def show_mean(turtle, x, y) -> None:
-    turtle.pen(pencolor="black", fillcolor="white", outline=5)
-    turtle.shapesize(2)
-    turtle.setposition(x, y)
-    turtle.shape("triangle")
-    turtle.stamp()
 
 
 @jit.rawkernel()
@@ -219,30 +165,47 @@ def resample() -> None:
 
 
 def main():
-    turtle = Turtle()
-    init(turtle)
+
+    fig = plt.figure()
+    axis = plt.axes(xlim=(-1, 6), ylim=(-1, 6))
+    particle_points = axis.scatter([], [], marker=".", s=1)
+    robot_points = axis.scatter([], [], marker="o")
+    mean_points = axis.scatter([], [], s=100, facecolors="none", edgecolors="black")
+
+    axis.scatter(beacon_xy.get()[:, 0], beacon_xy.get()[:, 1])
+
+    # turtle = Turtle()
+    # init(turtle)
     print(f"mempool.used_bytes {mempool.used_bytes()}")
 
     robot_xy[0, 0] = WIDTH / 4
     robot_xy[0, 1] = HEIGHT / 2
     robot_h = 270
 
-    loop_counter = 0
+    def init():
+        particle_points.set_offsets(([], []))
+        # robot_points.set_offsets(([], []))
+        mean_points.set_offsets(([], []))
+        return (
+            particle_points,
+            robot_points,
+            mean_points,
+        )
 
-    while True:
-        loop_counter += 1
+    def animate(i):
+        nonlocal robot_h
+
         t0 = time.time_ns()
 
         reweight()
         # time.sleep(0.1)
         x, y = compute_mean()
 
-        if loop_counter % PLOT_EVERY_N == 0:
-            turtle.clearstamps()
-            show_particles(turtle)
-            show_mean(turtle, x, y)
-            show_robot(turtle, robot_xy[0, 0], robot_xy[0, 1], robot_h)
-            turtle.screen.update()
+        if i % PLOT_EVERY_N == 0:
+            pxy = particles_xyhw[:: PARTICLE_COUNT / PARTICLES_TO_PLOT, 0:2]
+            particle_points.set_offsets(pxy.get())
+            mean_points.set_offsets(np.column_stack([[x.get()], [y.get()]]))
+            robot_points.set_offsets(robot_xy[0].get())
 
         if RESAMPLE:
             resample()
@@ -264,15 +227,26 @@ def main():
             r = cp.deg2rad(particles_xyhw[:, 2])
             dx = cp.cos(r) * ROBOT_SPEED
             dy = cp.sin(r) * ROBOT_SPEED
-            d = cp.hstack((dx, dy))
             particles_xyhw[:, 0] += dx
             particles_xyhw[:, 1] += dy
 
         t1 = time.time_ns()
         duration = t1 - t0
-        if loop_counter % 2 == 0:
+        if i % 2 == 0:
             print(f"duration (us): {duration//1000}")
             print(f"duration per particle (us): {duration//(1000*PARTICLE_COUNT)}")
+
+        return (
+            particle_points,
+            robot_points,
+            mean_points,
+        )
+
+    anim = FuncAnimation(
+        fig, animate, init_func=init, frames=200, interval=0, blit=True
+    )
+
+    plt.show()
 
 
 if __name__ == "__main__":
