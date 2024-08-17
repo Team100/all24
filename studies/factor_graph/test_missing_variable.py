@@ -48,9 +48,10 @@ class TestMissingVariable(unittest.TestCase):
         #
         # Set this to true to cause the failure
         #
-        PLEASE_FAIL = True
+        PLEASE_FAIL = False
 
         def odo(i):
+            print(i)
             _graph = gtsam.NonlinearFactorGraph()
             _values = gtsam.Values()
             _timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
@@ -70,9 +71,12 @@ class TestMissingVariable(unittest.TestCase):
                 _values = gtsam.Values()
                 _timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
 
-            # landmark sight for time i
-            _graph.add(gtsam.BearingRangeFactor2D(X(i), L(0), ROT_180, i, NOISE2))
-            _timestamps.insert((L(0), i))
+            if i > 5:
+                # lagged landmark sight
+                j = i - 4
+                _graph.add(gtsam.BearingRangeFactor2D(X(j), L(0), ROT_180, j, NOISE2))
+                _timestamps.insert((L(0), j))
+
             isam.update(_graph, _values, _timestamps)
 
             ###############################
