@@ -3,9 +3,9 @@
 import math
 import time
 import numpy as np
-import gtsam  # type:ignore
+import gtsam
 import gtsam_unstable  # type:ignore
-from gtsam.symbol_shorthand import X  # type:ignore
+from gtsam.symbol_shorthand import X
 from landmark import Landmark
 from plot_utils import Plot
 
@@ -14,8 +14,56 @@ ANGLE_SCALE = 0.1
 LINEAR_SCALE = 0.2
 
 # noise is really high to make the animation more interesting
-NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.2, 0.2]))
-NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.5, 0.5, 0.5]))
+NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
+NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
+
+
+# the BoundingConstraint is not available in python, I think because it
+# relies on subclasses implementing the "value()" method.
+# so use the Custom Factor idea.
+# https://github.com/borglab/gtsam/blob/develop/python/CustomFactors.md
+#
+# this is cut-and-paste from the example in that doc.
+#
+def custom_between_factor(expectation:gtsam.Pose2):
+    def error_func(
+        this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
+    ) -> np.ndarray:
+        """
+        Error function that mimics a BetweenFactor
+        :param this: reference to the current CustomFactor being evaluated
+        :param v: Values object
+        :param H: list of references to the Jacobian arrays
+        :return: the non-linear error
+        """
+        key0 = this.keys()[0]
+        key1 = this.keys()[1]
+        gT1, gT2 = v.atPose2(key0), v.atPose2(key1)
+        error = expectation.localCoordinates(gT1.between(gT2))
+
+        if H is not None:
+            result = gT1.between(gT2)
+            H[0] = -result.inverse().AdjointMap()
+            H[1] = np.eye(3)
+        return error
+
+    return error_func
+
+
+# limit motion to the "field" boundary.
+# for now this is X>0
+def custom_boundary_constraint():
+    def error_func(
+        this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
+    ) -> np.ndarray:
+        key0 = this.keys()[0] # there's just one
+        gT1 = v.atPose2(key0)
+        error =  max(0, gT1.x() - 4.5)
+        if H is not None:
+            H[0] = np.array([[1, 0, 0],[0,0,0],[0,0,0]])
+        return np.array([error, 0.0, 0.0])
+
+    return error_func
 
 
 def initialize(isam, landmarks, robot_x) -> None:
@@ -39,7 +87,14 @@ def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -
     values = gtsam.Values()
     timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
     twist = gtsam.Pose2(*robot_delta, 0.0)
-    graph.add(gtsam.BetweenFactorPose2(X(x_i - 1), X(x_i), twist, NOISE3))
+    # graph.add(gtsam.BetweenFactorPose2(X(x_i - 1), X(x_i), twist, NOISE3))
+    graph.add(
+        gtsam.CustomFactor(
+            NOISE3,
+            gtsam.KeyVector([X(x_i - 1), X(x_i)]),
+            custom_between_factor(twist),
+        )
+    )
     values.insert(X(x_i), gtsam.Pose2(*robot_x, 0.0))
     timestamps.insert((X(x_i), x_i))
     for l in landmarks:
@@ -49,6 +104,16 @@ def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -
             gtsam.BearingRangeFactor2D(X(x_i), l.symbol, l_angle, l_range, NOISE2)
         )
         timestamps.insert((l.symbol, x_i))
+
+    # also add boundary factor
+    graph.add(
+        gtsam.CustomFactor(
+            gtsam.noiseModel.Constrained.All(3),
+            # gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 100, 100])),
+            gtsam.KeyVector([X(x_i)]),
+            custom_boundary_constraint(),
+        )
+    )
     isam.update(graph, values, timestamps)
 
 
@@ -59,13 +124,13 @@ def forward_and_left(x_i):
 
 def main() -> None:
     landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
-    isam = gtsam_unstable.IncrementalFixedLagSmoother(6)
+    isam = gtsam_unstable.IncrementalFixedLagSmoother(20)
     p = Plot(isam)
     robot_x = np.array([1, 2.5])
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)
     pose_variables: list[X] = [X(0)]
-    for x_i in range(1, 500):
+    for x_i in range(1, 200):
         robot_delta = forward_and_left(x_i)
         robot_x = prev_robot_x + robot_delta
         prev_robot_x = robot_x

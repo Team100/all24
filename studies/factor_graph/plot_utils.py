@@ -99,7 +99,6 @@ class Plot:
         # the getISAM2 thing is because the python wrapper doesn't do it
         # for the fixed lag smoother
         covariance = self.isam.getISAM2().marginalCovariance(var)  # 3x3
-        # print(covariance)
 
         random_points = self.rng.multivariate_normal(np.zeros(3), covariance, NUM_DRAWS)
         random_translations = np.zeros([NUM_DRAWS, 2])
