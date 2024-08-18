@@ -143,8 +143,8 @@ def forward_and_left(x_i):
 def main() -> None:
     landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
     isam = gtsam_unstable.IncrementalFixedLagSmoother(10)
-    p0 = Plot(isam, "p0")
-    p1 = Plot(isam, "p1")
+    p0 = Plot(isam, "p0", 0)
+    p1 = Plot(isam, "p1", 1)
     robot_x = np.array([1, 2.5])
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)

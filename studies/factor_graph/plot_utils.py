@@ -13,13 +13,13 @@ NUM_DRAWS = 1000
 
 class Plot:
 
-    def __init__(self, isam, name) -> None:
+    def __init__(self, isam, name, window_position) -> None:
         self.isam = isam
         self.rng = np.random.default_rng(0)
-        self.fig = plt.figure(name, figsize=(10, 10))
+        self.fig = plt.figure(name, figsize=(6, 6))
+        self.fig.canvas.manager.window.move(700 * window_position + 50, 50)
         self.ax = plt.axes(xlim=(-1, 6), ylim=(-1, 6))
         self.ax.set_aspect("equal", adjustable="box")
-
         self.pose_mean_scatter = self.ax.scatter(
             [], [], marker="+", s=200, color="black", linewidths=0.5, zorder=20
         )
