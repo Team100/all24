@@ -33,3 +33,12 @@ gtsam
 numpy
 shapely
 ```
+
+for vision simulation
+
+```
+pip install opencv-python
+apt install python3-matplotlib
+apt install libcairo2-dev
+apt install python3-pyqt5
+```
