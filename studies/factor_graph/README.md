@@ -34,6 +34,14 @@ numpy
 shapely
 ```
 
+the apt package, python3-gtsam, appears to be the current 4.2 version, but it seems not to include gtsam_unstable.
+
+the launchpad PPA appears to be stale, 4.0 from 2020, and has no version for ubuntu 24.
+
+the pypi wheel says it only works with python 3.11, and ubuntu 24 uses python 3.12.
+
+building from source fails
+
 for vision simulation
 
 ```
@@ -42,3 +50,12 @@ apt install python3-matplotlib
 apt install libcairo2-dev
 apt install python3-pyqt5
 ```
+
+
+```
+clone gtsam
+apt install cmake
+apt install libboost-all-dev
+```
+
+(skip TBB for now, come back to it if more cores need to be used)

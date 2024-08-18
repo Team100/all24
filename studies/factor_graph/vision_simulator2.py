@@ -10,6 +10,8 @@ import cv2
 import gtsam
 import gtsam_unstable  # type:ignore
 from gtsam.symbol_shorthand import L, X
+import matplotlib
+matplotlib.use('Qt5Cairo', force=True)
 import matplotlib.pyplot as plt  # type:ignore
 import numpy as np
 import numpy.typing as npt
