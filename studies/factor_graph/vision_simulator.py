@@ -1,0 +1,153 @@
+"""
+Drive around and show projected vision data
+"""
+
+# pylint: disable=invalid-name,too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
+
+import math
+
+import cv2
+import matplotlib.pyplot as plt  # type:ignore
+import numpy as np
+import numpy.typing as npt
+
+
+class Viewer:
+    # x offset is the usual "robot-relative" (positive left)
+    def __init__(self, name, window_position, x_offset) -> None:
+        # same as pi v2 camera
+        width = 832
+        height = 616
+        fx = 660
+        fy = 660
+        cx = width // 2
+        cy = height // 2
+        self.camera_matrix = np.array(
+            [
+                [fx, 0, cx],
+                [0, fy, cy],
+                [0, 0, 1],
+            ],
+            np.float32,
+        )
+        # no distortion
+        # self.dist_coeffs = np.array([0, 0, 0, 0, 0], np.float32)
+        # lots of distortion (more than the pi v2 camera)
+        self.dist_coeffs = np.array([0.2, 0.1, 0, 0, 0], np.float32)
+
+        self.fig = plt.figure(name, figsize=(6, 6))
+        self.fig.canvas.manager.window.move(700 * window_position, 0)
+        self.ax = plt.axes(xlim=(0, width), ylim=(0, height))
+        self.ax.invert_yaxis()
+        self.ax.set_aspect("equal", adjustable="box")
+        self.scatter = self.ax.scatter(
+            [], [], marker="+", s=200, color="black", linewidths=0.5, zorder=20
+        )
+
+        # Define the 3D point in the world coordinate system
+        # note this is Z-forward, offset to camera height
+        # tag center
+        # offset is positive-left; camera is positive-right
+        # but also world-in-camera so leave the sign alone
+        x = x_offset  # centered
+        y = -2  # up
+        z = 4  # medium-distance
+        tag_size = 0.1651  # real tag size
+
+        self.points_3d = np.array(
+            [
+                [x - tag_size / 2, y - tag_size / 2, z],
+                [x - tag_size / 2, y + tag_size / 2, z],
+                [x + tag_size / 2, y + tag_size / 2, z],
+                [x + tag_size / 2, y - tag_size / 2, z],
+            ],
+            np.float32,
+        )
+
+        # camera offsets
+        # camera tilt up, so world tilt down
+        self.rvec = np.array([[-0.43], [0], [0]], np.float32)
+        # identity
+        self.rmat = cv2.Rodrigues(self.rvec)[0]
+        self.tvec = np.array([[0], [0], [0]], np.float32)
+
+        self.fig.canvas.draw()
+        plt.show(block=False)
+        self.fig.canvas.update()
+        self.fig.canvas.flush_events()
+
+    # pose is (3,1)
+    def draw(self, pose) -> npt.NDArray:
+        # camera is Z-forward
+        # also tvec is "world in camera frame" so inverted
+        net_tvec = self.tvec + np.array([[pose[1]], [0], [-pose[0]]], dtype=np.float32)
+        # the polarity here is probably wrong
+        # pose[2] is positive-left, rvec Y is positive-right, but also
+        # rvec is "world in camera frame" so pose-left is world-right
+        robot_rvec = np.array([0, pose[2], 0], dtype=np.float32)
+        robot_rmat = cv2.Rodrigues(robot_rvec)[0]
+        net_rmat = np.dot(robot_rmat, self.rmat)
+        net_rvec = cv2.Rodrigues(net_rmat)[0]
+
+        points_2d, _ = cv2.projectPoints(
+            self.points_3d,
+            # self.rvec,
+            net_rvec,
+            net_tvec,
+            self.camera_matrix,
+            self.dist_coeffs,
+        )
+        self.ax.draw_artist(self.ax.patch)
+        draw_points = np.squeeze(points_2d)
+        self.scatter.set_offsets(draw_points)
+        self.ax.draw_artist(self.scatter)
+        self.fig.canvas.update()
+        self.fig.canvas.flush_events()
+        return draw_points
+
+
+def main() -> None:
+    N = 1500
+    # these are facing parallel
+    v0 = Viewer("left eye", 0, 1)
+    v1 = Viewer("right eye", 1, -1)
+
+    print("dolly (X), initially forward")
+    for i in np.linspace(0, 2 * math.pi, N):
+        X = math.sin(i) * 2
+        Y = 0.0
+        theta = 0.0
+        pose = np.array([X, Y, theta], dtype=np.float32)
+        v0.draw(pose)
+        v1.draw(pose)
+
+    print("truck (Y), initially left")
+    for i in np.linspace(0, 2 * math.pi, N):
+        X = 0
+        Y = math.sin(i) * 2
+        theta = 0
+        pose = np.array([X, Y, theta], dtype=np.float32)
+        v0.draw(pose)
+        v1.draw(pose)
+
+    print("pan (theta), initially left")
+    for i in np.linspace(0, 2 * math.pi, N):
+        X = 0.0
+        Y = 0.0
+        theta = math.sin(i) * 0.3
+        pose = np.array([X, Y, theta], dtype=np.float32)
+        v0.draw(pose)
+        v1.draw(pose)
+
+    print("drive in an XY circle")
+    for i in np.linspace(0, 2 * math.pi, N):
+        X = math.cos(i) * 2
+        Y = math.sin(i) * 2
+        theta = 0
+        pose = np.array([X, Y, theta], dtype=np.float32)
+        v0.draw(pose)
+        v1.draw(pose)
+
+
+if __name__ == "__main__":
+    main()

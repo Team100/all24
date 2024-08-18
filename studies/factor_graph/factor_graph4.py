@@ -143,7 +143,8 @@ def forward_and_left(x_i):
 def main() -> None:
     landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
     isam = gtsam_unstable.IncrementalFixedLagSmoother(10)
-    p = Plot(isam)
+    p0 = Plot(isam, "p0")
+    p1 = Plot(isam, "p1")
     robot_x = np.array([1, 2.5])
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)
@@ -161,7 +162,8 @@ def main() -> None:
         t1 = time.time_ns()
         if x_i % 5 == 0:
             print(f"i {x_i} duration (ns) {t1-t0}")
-        p.plot_variables(result, pose_variables, landmarks)
+        p0.plot_variables(result, pose_variables, landmarks)
+        p1.plot_variables(result, pose_variables, landmarks)
 
 
 if __name__ == "__main__":

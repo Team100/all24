@@ -13,10 +13,10 @@ NUM_DRAWS = 1000
 
 class Plot:
 
-    def __init__(self, isam) -> None:
+    def __init__(self, isam, name) -> None:
         self.isam = isam
         self.rng = np.random.default_rng(0)
-        self.fig = plt.figure("click to close this window", figsize=(10, 10))
+        self.fig = plt.figure(name, figsize=(10, 10))
         self.ax = plt.axes(xlim=(-1, 6), ylim=(-1, 6))
         self.ax.set_aspect("equal", adjustable="box")
 
