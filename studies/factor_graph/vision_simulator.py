@@ -13,11 +13,33 @@ import numpy.typing as npt
 
 
 class Viewer:
+    def __init__(self, name, window_position, width, height) -> None:
+        self.fig = plt.figure(name, figsize=(6, 6))
+        self.fig.canvas.manager.window.move(700 * window_position, 0)
+        self.ax = plt.axes(xlim=(0, width), ylim=(0, height))
+        self.ax.invert_yaxis()
+        self.ax.set_aspect("equal", adjustable="box")
+        self.scatter = self.ax.scatter(
+            [], [], marker="+", s=50, color="orangered", linewidths=1, zorder=20
+        )
+        self.fig.canvas.draw()
+        plt.show(block=False)
+        self.fig.canvas.update()
+        self.fig.canvas.flush_events()
+
+    def draw(self, draw_points) -> npt.NDArray:
+        self.ax.draw_artist(self.ax.patch)
+        self.scatter.set_offsets(draw_points)
+        self.ax.draw_artist(self.scatter)
+        self.fig.canvas.update()
+        self.fig.canvas.flush_events()
+        return draw_points
+
+
+class Projector:
     # x offset is the usual "robot-relative" (positive left)
-    def __init__(self, name, window_position, x_offset) -> None:
+    def __init__(self, width, height, x_offset) -> None:
         # same as pi v2 camera
-        width = 832
-        height = 616
         fx = 660
         fy = 660
         cx = width // 2
@@ -34,15 +56,6 @@ class Viewer:
         # self.dist_coeffs = np.array([0, 0, 0, 0, 0], np.float32)
         # lots of distortion (more than the pi v2 camera)
         self.dist_coeffs = np.array([0.2, 0.1, 0, 0, 0], np.float32)
-
-        self.fig = plt.figure(name, figsize=(6, 6))
-        self.fig.canvas.manager.window.move(700 * window_position, 0)
-        self.ax = plt.axes(xlim=(0, width), ylim=(0, height))
-        self.ax.invert_yaxis()
-        self.ax.set_aspect("equal", adjustable="box")
-        self.scatter = self.ax.scatter(
-            [], [], marker="+", s=200, color="black", linewidths=0.5, zorder=20
-        )
 
         # Define the 3D point in the world coordinate system
         # note this is Z-forward, offset to camera height
@@ -63,7 +76,6 @@ class Viewer:
             ],
             np.float32,
         )
-
         # camera offsets
         # camera tilt up, so world tilt down
         self.rvec = np.array([[-0.43], [0], [0]], np.float32)
@@ -71,13 +83,8 @@ class Viewer:
         self.rmat = cv2.Rodrigues(self.rvec)[0]
         self.tvec = np.array([[0], [0], [0]], np.float32)
 
-        self.fig.canvas.draw()
-        plt.show(block=False)
-        self.fig.canvas.update()
-        self.fig.canvas.flush_events()
-
     # pose is (3,1)
-    def draw(self, pose) -> npt.NDArray:
+    def project(self, pose) -> npt.NDArray:
         # camera is Z-forward
         # also tvec is "world in camera frame" so inverted
         net_tvec = self.tvec + np.array([[pose[1]], [0], [-pose[0]]], dtype=np.float32)
@@ -91,26 +98,25 @@ class Viewer:
 
         points_2d, _ = cv2.projectPoints(
             self.points_3d,
-            # self.rvec,
             net_rvec,
             net_tvec,
             self.camera_matrix,
             self.dist_coeffs,
         )
-        self.ax.draw_artist(self.ax.patch)
-        draw_points = np.squeeze(points_2d)
-        self.scatter.set_offsets(draw_points)
-        self.ax.draw_artist(self.scatter)
-        self.fig.canvas.update()
-        self.fig.canvas.flush_events()
-        return draw_points
+
+        return np.squeeze(points_2d)
 
 
 def main() -> None:
     N = 1500
+    width = 832
+    height = 616
+
     # these are facing parallel
-    v0 = Viewer("left eye", 0, 1)
-    v1 = Viewer("right eye", 1, -1)
+    p0 = Projector(width, height, 0.5)
+    v0 = Viewer("left eye", 0, width, height)
+    p1 = Projector(width, height, -0.5)
+    v1 = Viewer("right eye", 1, width, height)
 
     print("dolly (X), initially forward")
     for i in np.linspace(0, 2 * math.pi, N):
@@ -118,8 +124,10 @@ def main() -> None:
         Y = 0.0
         theta = 0.0
         pose = np.array([X, Y, theta], dtype=np.float32)
-        v0.draw(pose)
-        v1.draw(pose)
+        j0 = p0.project(pose)
+        v0.draw(j0)
+        j1 = p1.project(pose)
+        v1.draw(j1)
 
     print("truck (Y), initially left")
     for i in np.linspace(0, 2 * math.pi, N):
@@ -127,17 +135,21 @@ def main() -> None:
         Y = math.sin(i) * 2
         theta = 0
         pose = np.array([X, Y, theta], dtype=np.float32)
-        v0.draw(pose)
-        v1.draw(pose)
+        j0 = p0.project(pose)
+        v0.draw(j0)
+        j1 = p1.project(pose)
+        v1.draw(j1)
 
     print("pan (theta), initially left")
     for i in np.linspace(0, 2 * math.pi, N):
         X = 0.0
         Y = 0.0
-        theta = math.sin(i) * 0.3
+        theta = math.sin(i) * math.pi/6
         pose = np.array([X, Y, theta], dtype=np.float32)
-        v0.draw(pose)
-        v1.draw(pose)
+        j0 = p0.project(pose)
+        v0.draw(j0)
+        j1 = p1.project(pose)
+        v1.draw(j1)
 
     print("drive in an XY circle")
     for i in np.linspace(0, 2 * math.pi, N):
@@ -145,8 +157,10 @@ def main() -> None:
         Y = math.sin(i) * 2
         theta = 0
         pose = np.array([X, Y, theta], dtype=np.float32)
-        v0.draw(pose)
-        v1.draw(pose)
+        j0 = p0.project(pose)
+        v0.draw(j0)
+        j1 = p1.project(pose)
+        v1.draw(j1)
 
 
 if __name__ == "__main__":
