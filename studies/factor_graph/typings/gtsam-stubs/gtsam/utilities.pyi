@@ -1,0 +1,66 @@
+"""
+utilities submodule
+"""
+from __future__ import annotations
+import gtsam.gtsam
+import numpy
+import typing
+__all__ = ['allPose2s', 'allPose3s', 'createKeyList', 'createKeySet', 'createKeyVector', 'extractPoint2', 'extractPoint3', 'extractPose2', 'extractPose3', 'extractVectors', 'insertBackprojections', 'insertProjectionFactors', 'localToWorld', 'perturbPoint2', 'perturbPoint3', 'perturbPose2', 'reprojectionErrors']
+def allPose2s(values: gtsam.gtsam.Values) -> gtsam.gtsam.Values:
+    ...
+def allPose3s(values: gtsam.gtsam.Values) -> gtsam.gtsam.Values:
+    ...
+@typing.overload
+def createKeyList(I: numpy.ndarray[numpy.float64[m, 1]]) -> gtsam.gtsam.KeyList:
+    ...
+@typing.overload
+def createKeyList(s: str, I: numpy.ndarray[numpy.float64[m, 1]]) -> gtsam.gtsam.KeyList:
+    ...
+@typing.overload
+def createKeySet(I: numpy.ndarray[numpy.float64[m, 1]]) -> gtsam.gtsam.KeySet:
+    ...
+@typing.overload
+def createKeySet(s: str, I: numpy.ndarray[numpy.float64[m, 1]]) -> gtsam.gtsam.KeySet:
+    ...
+@typing.overload
+def createKeyVector(I: numpy.ndarray[numpy.float64[m, 1]]) -> list[int]:
+    ...
+@typing.overload
+def createKeyVector(s: str, I: numpy.ndarray[numpy.float64[m, 1]]) -> list[int]:
+    ...
+def extractPoint2(values: gtsam.gtsam.Values) -> numpy.ndarray[numpy.float64[m, n]]:
+    ...
+def extractPoint3(values: gtsam.gtsam.Values) -> numpy.ndarray[numpy.float64[m, n]]:
+    ...
+def extractPose2(values: gtsam.gtsam.Values) -> numpy.ndarray[numpy.float64[m, n]]:
+    ...
+def extractPose3(values: gtsam.gtsam.Values) -> numpy.ndarray[numpy.float64[m, n]]:
+    ...
+def extractVectors(values: gtsam.gtsam.Values, c: str) -> numpy.ndarray[numpy.float64[m, n]]:
+    ...
+def insertBackprojections(values: gtsam.gtsam.Values, c: gtsam.gtsam.PinholeCameraCal3_S2, J: numpy.ndarray[numpy.float64[m, 1]], Z: numpy.ndarray[numpy.float64[m, n]], depth: float) -> None:
+    ...
+def insertProjectionFactors(*args, **kwargs):
+    """
+    insertProjectionFactors(graph: gtsam.gtsam.NonlinearFactorGraph, i: int, J: numpy.ndarray[numpy.float64[m, 1]], Z: numpy.ndarray[numpy.float64[m, n]], model: gtsam.gtsam.noiseModel.Base, K: gtsam.gtsam.Cal3_S2, body_P_sensor: gtsam.gtsam.Pose3 = R: [
+    	1, 0, 0;
+    	0, 1, 0;
+    	0, 0, 1
+    ]
+    t: 0 0 0
+    ) -> None
+    """
+@typing.overload
+def localToWorld(local: gtsam.gtsam.Values, base: gtsam.gtsam.Pose2) -> gtsam.gtsam.Values:
+    ...
+@typing.overload
+def localToWorld(local: gtsam.gtsam.Values, base: gtsam.gtsam.Pose2, keys: list[int]) -> gtsam.gtsam.Values:
+    ...
+def perturbPoint2(values: gtsam.gtsam.Values, sigma: float, seed: int = 42) -> None:
+    ...
+def perturbPoint3(values: gtsam.gtsam.Values, sigma: float, seed: int = 42) -> None:
+    ...
+def perturbPose2(values: gtsam.gtsam.Values, sigmaT: float, sigmaR: float, seed: int = 42) -> None:
+    ...
+def reprojectionErrors(graph: gtsam.gtsam.NonlinearFactorGraph, values: gtsam.gtsam.Values) -> numpy.ndarray[numpy.float64[m, n]]:
+    ...
