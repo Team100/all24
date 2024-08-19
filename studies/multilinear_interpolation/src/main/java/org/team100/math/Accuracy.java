@@ -15,7 +15,10 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.MatOfPoint3f;
 import org.opencv.core.Point3;
 
+import smile.interpolation.KrigingInterpolation;
 import smile.interpolation.RBFInterpolation;
+import smile.interpolation.variogram.GaussianVariogram;
+import smile.interpolation.variogram.PowerVariogram;
 import smile.math.rbf.GaussianRadialBasis;
 
 // see accuracy.ipynb
@@ -44,6 +47,7 @@ public class Accuracy {
     }
 
     public static void main(String[] args) throws IOException {
+
         System.out.println("hello");
         double[][] uvdZXY_train = readfile("uvdZXY_train.csv");
         double[][] uvdZXY_test = readfile("uvdZXY_test.csv");
@@ -57,14 +61,23 @@ public class Accuracy {
         double[] Y_train = getY(uvdZXY_train);
         double[] Y_test = getY(uvdZXY_test);
 
-        RBFInterpolation rbfX = new RBFInterpolation(
+        // for (double scale = 5; scale < 20; scale *= 1.05) {
+
+        // RBFInterpolation rbfX = new RBFInterpolation(
+        // uvdZ_train,
+        // X_train,
+        // new GaussianRadialBasis(scale));
+        // RBFInterpolation rbfY = new RBFInterpolation(
+        // uvdZ_train,
+        // Y_train,
+        // new GaussianRadialBasis(scale));
+
+        KrigingInterpolation rbfX = new KrigingInterpolation(
                 uvdZ_train,
-                X_train,
-                new GaussianRadialBasis(15));
-        RBFInterpolation rbfY = new RBFInterpolation(
+                X_train);
+        KrigingInterpolation rbfY = new KrigingInterpolation(
                 uvdZ_train,
-                Y_train,
-                new GaussianRadialBasis(15));
+                Y_train);
 
         double errSum = 0;
         for (int i = 0; i < X_test.length; ++i) {
@@ -77,10 +90,12 @@ public class Accuracy {
             double err = Math.hypot(errX, errY);
             errSum += err;
             System.out.printf("X %6.3f predictedX %6.3f Y %6.3f predictedY %6.3f\n",
-                    X_test[i], predictedX, Y_test[i], predictedY);
+            X_test[i], predictedX, Y_test[i], predictedY);
         }
         double mae = errSum / X_test.length;
+        // System.out.printf("scale %5.3f mae %5.3f\n", scale, mae);
         System.out.printf("mae %5.3f\n", mae);
+        // }
 
     }
 
