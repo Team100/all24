@@ -8,17 +8,19 @@ import math
 
 import cv2
 import matplotlib
-matplotlib.use('Qt5Cairo', force=True)
+matplotlib.use('Qt5Agg', force=True)
 import matplotlib.pyplot as plt  # type:ignore
 import numpy as np
 import numpy.typing as npt
 
 
 class Viewer:
-    def __init__(self, name, window_position, width, height) -> None:
-        self.fig = plt.figure(name, figsize=(6, 6))
-        self.fig.canvas.manager.window.move(700 * window_position, 0)
-        self.ax = plt.axes(xlim=(0, width), ylim=(0, height))
+    def __init__(self, name, fig, ax, width, height) -> None:
+        self.fig = fig
+        self.ax = ax
+        self.ax.set_title(name)
+        self.ax.set_xlim(0, width)
+        self.ax.set_ylim(0, height)
         self.ax.invert_yaxis()
         self.ax.set_aspect("equal", adjustable="box")
         self.scatter = self.ax.scatter(
@@ -114,11 +116,13 @@ def main() -> None:
     width = 832
     height = 616
 
+    fig, ax = plt.subplots(1,2,figsize=(12,5))
     # these are facing parallel
     p0 = Projector(width, height, 0.5)
-    v0 = Viewer("left eye", 0, width, height)
+    v0 = Viewer("left eye", fig, ax[0], width, height)
     p1 = Projector(width, height, -0.5)
-    v1 = Viewer("right eye", 1, width, height)
+    v1 = Viewer("right eye", fig, ax[1], width, height)
+    fig.tight_layout(pad=50, w_pad=50, h_pad=50)
 
     print("dolly (X), initially forward")
     for i in np.linspace(0, 2 * math.pi, N):

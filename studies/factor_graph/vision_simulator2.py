@@ -23,10 +23,12 @@ NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
 
 class Viewer:
-    def __init__(self, name, window_position, width, height) -> None:
-        self.fig = plt.figure(name, figsize=(6, 6))
-        self.fig.canvas.manager.window.move(700 * window_position + 50, 50)
-        self.ax = plt.axes(xlim=(0, width), ylim=(0, height))
+    def __init__(self, name, fig, ax, width, height) -> None:
+        self.fig = fig
+        self.ax = ax
+        self.ax.set_title(name)
+        self.ax.set_xlim(0, width)
+        self.ax.set_ylim(0, height)
         self.ax.invert_yaxis()
         self.ax.set_aspect("equal", adjustable="box")
         self.scatter = self.ax.scatter(
@@ -120,7 +122,7 @@ class Projector:
 def initialize(isam, x, y) -> None:
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
-    timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
     
     graph.add(gtsam.PriorFactorPoint2(L(0), [4,0], NOISE2))
     values.insert(L(0), gtsam.Point2(4,0))
@@ -137,13 +139,14 @@ def main() -> None:
     width = 832
     height = 616
 
+    fig, ax = plt.subplots(1,3,figsize=(18,5))
     # these are facing parallel
     p0 = Projector(width, height, 0.5)
-    v0 = Viewer("left eye", 0, width, height)
+    v0 = Viewer("left eye", fig, ax[0], width, height)
     p1 = Projector(width, height, -0.5)
-    v1 = Viewer("right eye", 1, width, height)
+    v1 = Viewer("right eye", fig, ax[1], width, height)
     isam = gtsam_unstable.IncrementalFixedLagSmoother(10)
-    x0 = Plot(isam, "x0", 2)
+    x0 = Plot(isam, "x0", fig, ax[2])
     initialize(isam, 0, 0)
     pose_variables: list[X] = [X(0)]
     landmarks: list[Landmark] = [Landmark(0, 4, 0)]

@@ -2,24 +2,38 @@
 
 
 import gtsam  # type:ignore
+import matplotlib
+matplotlib.use('Qt5Agg', force=True)
 import matplotlib.pyplot as plt  # type:ignore
 import numpy as np
 from gtsam.symbol_shorthand import X  # type:ignore
 from landmark import Landmark
 
 
-NUM_DRAWS = 1000
+NUM_DRAWS = 100
 
 
 class Plot:
 
-    def __init__(self, isam, name, window_position) -> None:
+    @staticmethod
+    def fig(name):
+        return plt.figure(name, figsize=(6, 6))
+        
+    @staticmethod
+    def subplots(x, y, sx, sy):
+        return plt.subplots(x, y, figsize=(sx, sy))
+
+
+    def __init__(self, isam, name, fig, ax) -> None:
         self.isam = isam
         self.rng = np.random.default_rng(0)
-        self.fig = plt.figure(name, figsize=(6, 6))
-        self.fig.canvas.manager.window.move(700 * window_position + 50, 50)
-        self.ax = plt.axes(xlim=(-1, 6), ylim=(-1, 6))
+        self.fig = fig
+        self.ax = ax
+        self.ax.set_title(name)
+        self.ax.set_xlim(-1, 6)
+        self.ax.set_ylim(-1, 6)
         self.ax.set_aspect("equal", adjustable="box")
+        plt.tight_layout()
         self.pose_mean_scatter = self.ax.scatter(
             [], [], marker="+", s=200, color="black", linewidths=0.5, zorder=20
         )

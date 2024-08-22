@@ -76,7 +76,7 @@ def custom_boundary_constraint():
 def initialize(isam, landmarks, robot_x) -> None:
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
-    timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
 
     for l in landmarks:
         graph.add(gtsam.PriorFactorPoint2(l.symbol, l.x, NOISE2))
@@ -92,7 +92,7 @@ def initialize(isam, landmarks, robot_x) -> None:
 def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -> None:
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
-    timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
     twist = gtsam.Pose2(*robot_delta, 0.0)
     # graph.add(gtsam.BetweenFactorPose2(X(x_i - 1), X(x_i), twist, NOISE3))
     graph.add(
@@ -143,8 +143,10 @@ def forward_and_left(x_i):
 def main() -> None:
     landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
     isam = gtsam_unstable.IncrementalFixedLagSmoother(10)
-    p0 = Plot(isam, "p0", 0)
-    p1 = Plot(isam, "p1", 1)
+    fig, ax = Plot.subplots(1,2, 12, 6)
+    p0 = Plot(isam, "p0", fig, ax[0])
+    p1 = Plot(isam, "p1", fig, ax[1])
+    fig.tight_layout()
     robot_x = np.array([1, 2.5])
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)
@@ -162,6 +164,7 @@ def main() -> None:
         t1 = time.time_ns()
         if x_i % 5 == 0:
             print(f"i {x_i} duration (ns) {t1-t0}")
+            # print([result.atPose2(var).translation() for var in pose_variables])
         p0.plot_variables(result, pose_variables, landmarks)
         p1.plot_variables(result, pose_variables, landmarks)
 

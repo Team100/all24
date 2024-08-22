@@ -19,7 +19,7 @@ def initialize_landmarks(isam, landmarks, landmark_variables) -> None:
     prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.05, 0.05]))
     graph = gtsam.NonlinearFactorGraph()
     initial_estimate = gtsam.Values()
-    new_timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    new_timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
     for l in landmarks:
         landmark_variables.append(l.symbol)
         # this is a constant, it's rendered wrong by the plotter
@@ -42,7 +42,7 @@ def initialize_robot(isam, pose_variables, robot_x, x_i) -> X:
     graph.add(gtsam.PriorFactorPose2(robot_X, gtsam.Pose2(*robot_x, 0), initial_noise))
     initial_estimate = gtsam.Values()
     initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0))
-    new_timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    new_timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
     new_timestamps.insert((robot_X, 0.1))
     isam.update(graph, initial_estimate, new_timestamps)
     return robot_X
@@ -61,7 +61,7 @@ def add_odometry(isam, x_i, robot_x, robot_X, robot_delta, prev_robot_X) -> None
     graph.add(gtsam.BetweenFactorPose2(prev_robot_X, robot_X, twist, odometry_noise))
     initial_estimate = gtsam.Values()
     initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0.0))
-    new_timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    new_timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
     new_timestamps.insert((robot_X, x_i*2.0+0.1))
     # print("D ", x_i)
     try:
@@ -82,7 +82,7 @@ def add_target_sights(isam, x_i, landmarks, robot_x, robot_X, landmark_variables
     #     )
     # )
     initial_estimate = gtsam.Values()
-    new_timestamps = gtsam_unstable.FixedLagSmootherKeyTimestampMap()
+    new_timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
     # make sure the robot is in there
     # initial_estimate.insert(robot_X, gtsam.Pose2(*robot_x, 0.0))
     # new_timestamps.insert((robot_X, x_i*2.0+0.2))
@@ -98,7 +98,7 @@ def add_target_sights(isam, x_i, landmarks, robot_x, robot_X, landmark_variables
 
         # add new landmarks every time
         symbol = L(x_i*1000 + i)
-        landmark_variables.append(symbol)
+        landmark_variables.append(Landmark(x_i*1000 + i, *l.x))
         graph.add(gtsam.PriorFactorPoint2(symbol, l.x, prior_noise))
         initial_estimate.insert(symbol, gtsam.Point2(*l.x))
         new_timestamps.insert((symbol, x_i*2.0))
@@ -153,7 +153,9 @@ def main() -> None:
     robot_x = np.array([1, 2.5])
     prev_robot_x = robot_x
 
-    p = Plot(isam)
+
+    fig, ax = Plot.subplots(1, 1, 6, 6)
+    p = Plot(isam, "p0", fig, ax)
 
     # initialize_landmarks(isam, landmarks, landmark_variables)
     robot_X = initialize_robot(isam, pose_variables, robot_x, 0)
@@ -180,7 +182,7 @@ def main() -> None:
         except IndexError:
             print("caught IndexError in isam.calculateEstimate() in main()")
         pose_variables = [pv for pv in pose_variables if result.exists(pv)]
-        landmark_variables = [lv for lv in landmark_variables if result.exists(lv)]
+        landmark_variables = [lv for lv in landmark_variables if result.exists(lv.symbol)]
 
         t1 = time.time_ns()
         # print(f"timestamps: {isam.timestamps().size()}")
