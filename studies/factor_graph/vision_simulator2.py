@@ -139,7 +139,7 @@ def main() -> None:
     width = 832
     height = 616
 
-    fig, ax = plt.subplots(1,3,figsize=(18,5))
+    fig, ax = plt.subplots(1,3,figsize=(15,4))
     # these are facing parallel
     p0 = Projector(width, height, 0.5)
     v0 = Viewer("left eye", fig, ax[0], width, height)
@@ -147,6 +147,7 @@ def main() -> None:
     v1 = Viewer("right eye", fig, ax[1], width, height)
     isam = gtsam_unstable.IncrementalFixedLagSmoother(10)
     x0 = Plot(isam, "x0", fig, ax[2])
+    fig.tight_layout(pad=20, w_pad=0, h_pad=0)
     initialize(isam, 0, 0)
     pose_variables: list[X] = [X(0)]
     landmarks: list[Landmark] = [Landmark(0, 4, 0)]

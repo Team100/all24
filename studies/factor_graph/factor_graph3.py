@@ -62,6 +62,7 @@ def main() -> None:
     isam = gtsam_unstable.IncrementalFixedLagSmoother(6)
     fig, ax = Plot.subplots(1, 1, 6, 6)
     p = Plot(isam, "p0", fig, ax)
+    fig.tight_layout()
     robot_x = np.array([1, 2.5])
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)

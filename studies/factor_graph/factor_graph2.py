@@ -156,6 +156,7 @@ def main() -> None:
 
     fig, ax = Plot.subplots(1, 1, 6, 6)
     p = Plot(isam, "p0", fig, ax)
+    fig.tight_layout()
 
     # initialize_landmarks(isam, landmarks, landmark_variables)
     robot_X = initialize_robot(isam, pose_variables, robot_x, 0)

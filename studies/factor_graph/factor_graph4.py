@@ -89,6 +89,10 @@ def initialize(isam, landmarks, robot_x) -> None:
     isam.update(graph, values, timestamps)
 
 
+class MyCustomFactor(gtsam.CustomFactor):
+    """ vacuous subclass"""
+    # this seems not to work, it is returned as the parent class
+    
 def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -> None:
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
@@ -96,7 +100,8 @@ def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -
     twist = gtsam.Pose2(*robot_delta, 0.0)
     # graph.add(gtsam.BetweenFactorPose2(X(x_i - 1), X(x_i), twist, NOISE3))
     graph.add(
-        gtsam.CustomFactor(
+        # gtsam.CustomFactor(
+        MyCustomFactor(
             NOISE3,
             gtsam.KeyVector([X(x_i - 1), X(x_i)]),
             custom_between_factor(twist),
@@ -123,7 +128,8 @@ def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -
     # the Unit noise model seems very soft, not useful.
     # the NOISE3 model seems inappropriate for a boundary.
     graph.add(
-        gtsam.CustomFactor(
+        # gtsam.CustomFactor(
+        MyCustomFactor(
             gtsam.noiseModel.Constrained.MixedSigmas(1.0, np.array([0.02, 0.0, 0.0])),
             # gtsam.noiseModel.Constrained.All(3),
             # gtsam.noiseModel.Unit.Create(3),
@@ -165,6 +171,17 @@ def main() -> None:
         if x_i % 5 == 0:
             print(f"i {x_i} duration (ns) {t1-t0}")
             # print([result.atPose2(var).translation() for var in pose_variables])
+        factors = isam.getFactors()
+        factor_count = factors.size()
+        for f in range(factor_count):
+            if factors.at(f) is None:
+                continue
+            # print(f"{f} {factors.at(f).printKeys()}")
+            # print(f"{f} {dir(factors.at(f))}")
+            print(f"{f} {type(factors.at(f))}")
+            print(f"{f} {factors.at(f).keys()}")
+            # print(dir(result))
+            # print(dir(isam))
         p0.plot_variables(result, pose_variables, landmarks)
         p1.plot_variables(result, pose_variables, landmarks)
 

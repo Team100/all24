@@ -122,7 +122,7 @@ def main() -> None:
     v0 = Viewer("left eye", fig, ax[0], width, height)
     p1 = Projector(width, height, -0.5)
     v1 = Viewer("right eye", fig, ax[1], width, height)
-    fig.tight_layout(pad=50, w_pad=50, h_pad=50)
+    fig.tight_layout(pad=20, w_pad=0, h_pad=0)
 
     print("dolly (X), initially forward")
     for i in np.linspace(0, 2 * math.pi, N):
