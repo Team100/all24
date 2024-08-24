@@ -16,6 +16,37 @@ from landmark import Landmark
 
 NUM_DRAWS = 100
 TAG_SCALE = 0.1
+POSE = 0.1
+
+landmark_mark = np.array(
+    [
+        [-TAG_SCALE, -TAG_SCALE],
+        [TAG_SCALE, -TAG_SCALE],
+        [TAG_SCALE, TAG_SCALE],
+        [-TAG_SCALE, TAG_SCALE],
+    ]
+)
+pose_mark = np.array(
+    [
+        [-POSE, POSE],
+        [-POSE / 2, 0],
+        [-POSE, -POSE],
+        [POSE, 0],
+    ]
+)
+
+
+def rot(theta):
+    return np.array(
+        [
+            [np.cos(theta), np.sin(theta)],
+            [-np.sin(theta), np.cos(theta)],
+        ]
+    )
+
+
+def make_mark(mark, rot, c):
+    return mark.dot(rot) + c
 
 
 class Plot:
@@ -37,16 +68,22 @@ class Plot:
         self.ax.set_ylim(-1, 6)
         self.ax.set_aspect("equal", adjustable="box")
         plt.tight_layout()
-        self.pose_mean_scatter = self.ax.scatter(
+        # self.pose_mean_scatter = self.ax.scatter(
+        #     [],
+        #     [],
+        #     marker=MarkerStyle(">"),
+        #     s=200,
+        #     facecolors="none",
+        #     edgecolors="black",
+        #     linewidths=0.5,
+        #     zorder=20,
+        # )
+        self.pose_mean_poly = collections.PolyCollection(
             [],
-            [],
-            marker=MarkerStyle(">"),
-            s=200,
             facecolors="none",
             edgecolors="black",
-            linewidths=0.5,
-            zorder=20,
         )
+        self.ax.add_collection(self.pose_mean_poly)
         self.pose_point_scatter = self.ax.scatter(
             [],
             [],
@@ -88,19 +125,27 @@ class Plot:
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
-    def plot_variables(self, result, poses: list[X], landmarks: list[Landmark]) -> None:
+    def plot_variables(
+        self, result: gtsam.Values, poses: list[X], landmarks: list[Landmark]
+    ) -> None:
         # self.ax.draw_artist(self.ax.patch)
 
         if len(poses) > 0:
-            pose_mean_translations = np.array(
-                [result.atPose2(var).translation() for var in poses]
-            )
+            pose_mean_poses = np.array([result.atPose2(var) for var in poses])
+            # print(pose_mean_poses)
 
             pose_point_translations = np.vstack(
                 [self.pose_point(result, var) for var in poses]
             )
 
-            self.pose_mean_scatter.set_offsets(pose_mean_translations)
+            pose_mean_verts = [
+                make_mark(pose_mark, rot(c.theta()), c.translation())
+                for c in pose_mean_poses
+            ]
+            # print("VERTS ", pose_mean_verts)
+            self.pose_mean_poly.set_verts(pose_mean_verts)
+
+            # self.pose_mean_scatter.set_offsets(pose_mean_translations)
             self.pose_point_scatter.set_offsets(pose_point_translations)
 
             # self.ax.draw_artist(self.pose_point_scatter)
@@ -111,34 +156,18 @@ class Plot:
                 [result.atPoint2(var.symbol) for var in landmarks]
             )
 
-            landmark_point_translations = np.vstack(
-                [self.landmark_point(result, var.symbol) for var in landmarks]
-            )
-
-            # TODO: a real rotation from a real pose
-            theta = math.pi / 4
-            rot = np.array(
-                [
-                    [np.cos(theta), -np.sin(theta)],
-                    [np.sin(theta), np.cos(theta)],
-                ]
-            )
-            mark = np.array(
-                [
-                    [-TAG_SCALE, -TAG_SCALE],
-                    [TAG_SCALE, -TAG_SCALE],
-                    [TAG_SCALE, TAG_SCALE],
-                    [-TAG_SCALE, TAG_SCALE],
-                ]
-            )
-
             # manually set the polygon vertices instead of using a marker
             landmark_mean_verts = [
-                mark.dot(rot) + c for c in landmark_mean_translations
+                make_mark(landmark_mark, rot(math.pi / 4), c)
+                for c in landmark_mean_translations
             ]
             self.landmark_mean_poly.set_verts(landmark_mean_verts)
 
             # self.landmark_mean_scatter.set_offsets(landmark_mean_translations)
+
+            landmark_point_translations = np.vstack(
+                [self.landmark_point(result, var.symbol) for var in landmarks]
+            )
             self.landmark_point_scatter.set_offsets(landmark_point_translations)
 
             # self.ax.draw_artist(self.landmark_point_scatter)
@@ -153,16 +182,18 @@ class Plot:
         covariance = self.isam.getISAM2().marginalCovariance(var)  # 2x2
         return self.rng.multivariate_normal(mean, covariance, NUM_DRAWS)
 
-    def pose_point(self, result, var):
-        mean = result.atPose2(var)  # 1x3
+    def pose_point(self, result: gtsam.Values, var) -> np.ndarray:
+        mean: gtsam.Pose2 = result.atPose2(var)  # 1x3
         # this covariance is in the *tangent space* at the *mean*
         # i.e. the "twist", so that's how we apply it
         # the getISAM2 thing is because the python wrapper doesn't do it
         # for the fixed lag smoother
-        covariance = self.isam.getISAM2().marginalCovariance(var)  # 3x3
+        covariance: np.ndarray = self.isam.getISAM2().marginalCovariance(var)  # 3x3
 
-        random_points = self.rng.multivariate_normal(np.zeros(3), covariance, NUM_DRAWS)
-        random_translations = np.zeros([NUM_DRAWS, 2])
+        random_points: np.ndarray = self.rng.multivariate_normal(
+            np.zeros(3), covariance, NUM_DRAWS
+        )
+        random_translations: np.ndarray = np.zeros([NUM_DRAWS, 2])
         for i in range(0, NUM_DRAWS):
             random_translations[i, :] = mean.compose(
                 gtsam.Pose2.Expmap(random_points[i, :])
