@@ -3,8 +3,10 @@
 
 import gtsam  # type:ignore
 import matplotlib
-matplotlib.use('Qt5Agg', force=True)
+
+matplotlib.use("Qt5Agg", force=True)
 import matplotlib.pyplot as plt  # type:ignore
+from matplotlib.markers import MarkerStyle
 import numpy as np
 from gtsam.symbol_shorthand import X  # type:ignore
 from landmark import Landmark
@@ -14,15 +16,13 @@ NUM_DRAWS = 100
 
 
 class Plot:
-
     @staticmethod
     def fig(name):
         return plt.figure(name, figsize=(6, 6))
-        
+
     @staticmethod
     def subplots(x, y, sx, sy):
         return plt.subplots(x, y, figsize=(sx, sy))
-
 
     def __init__(self, isam, name, fig, ax) -> None:
         self.isam = isam
@@ -35,12 +35,19 @@ class Plot:
         self.ax.set_aspect("equal", adjustable="box")
         plt.tight_layout()
         self.pose_mean_scatter = self.ax.scatter(
-            [], [], marker="+", s=200, color="black", linewidths=0.5, zorder=20
+            [],
+            [],
+            marker=MarkerStyle(">"),
+            s=200,
+            facecolors="none",
+            edgecolors="black",
+            linewidths=0.5,
+            zorder=20,
         )
         self.pose_point_scatter = self.ax.scatter(
             [],
             [],
-            marker="x",
+            marker=MarkerStyle("x"),
             s=5,
             alpha=0.1,
             color="orange",
@@ -48,12 +55,19 @@ class Plot:
             zorder=1,
         )
         self.landmark_mean_scatter = self.ax.scatter(
-            [], [], marker="+", s=200, color="black", linewidths=0.5, zorder=20
+            [],
+            [],
+            marker=MarkerStyle("s"),
+            s=200,
+            facecolors="none",
+            edgecolors="black",
+            linewidths=0.5,
+            zorder=20,
         )
         self.landmark_point_scatter = self.ax.scatter(
             [],
             [],
-            marker="o",
+            marker=MarkerStyle("x"),
             s=5,
             alpha=0.1,
             color="royalblue",
