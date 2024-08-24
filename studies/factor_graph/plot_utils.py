@@ -1,6 +1,7 @@
 # pylint: disable=invalid-name,too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
 
 
+import math
 import gtsam  # type:ignore
 import matplotlib
 
@@ -114,15 +115,26 @@ class Plot:
                 [self.landmark_point(result, var.symbol) for var in landmarks]
             )
 
+            # TODO: a real rotation from a real pose
+            theta = math.pi / 4
+            rot = np.array(
+                [
+                    [np.cos(theta), -np.sin(theta)],
+                    [np.sin(theta), np.cos(theta)],
+                ]
+            )
+            mark = np.array(
+                [
+                    [-TAG_SCALE, -TAG_SCALE],
+                    [TAG_SCALE, -TAG_SCALE],
+                    [TAG_SCALE, TAG_SCALE],
+                    [-TAG_SCALE, TAG_SCALE],
+                ]
+            )
+
             # manually set the polygon vertices instead of using a marker
             landmark_mean_verts = [
-                [
-                    [x - TAG_SCALE, y - TAG_SCALE],
-                    [x + TAG_SCALE, y - TAG_SCALE],
-                    [x + TAG_SCALE, y + TAG_SCALE],
-                    [x - TAG_SCALE, y + TAG_SCALE],
-                ]
-                for x, y in landmark_mean_translations
+                mark.dot(rot) + c for c in landmark_mean_translations
             ]
             self.landmark_mean_poly.set_verts(landmark_mean_verts)
 
