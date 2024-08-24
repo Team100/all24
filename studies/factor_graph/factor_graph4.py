@@ -89,10 +89,6 @@ def initialize(isam, landmarks, robot_x) -> None:
     isam.update(graph, values, timestamps)
 
 
-class MyCustomFactor(gtsam.CustomFactor):
-    """ vacuous subclass"""
-    # this seems not to work, it is returned as the parent class
-    
 def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -> None:
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
@@ -100,8 +96,7 @@ def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -
     twist = gtsam.Pose2(*robot_delta, 0.0)
     # graph.add(gtsam.BetweenFactorPose2(X(x_i - 1), X(x_i), twist, NOISE3))
     graph.add(
-        # gtsam.CustomFactor(
-        MyCustomFactor(
+        gtsam.CustomFactor(
             NOISE3,
             gtsam.KeyVector([X(x_i - 1), X(x_i)]),
             custom_between_factor(twist),
@@ -128,8 +123,7 @@ def add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks) -
     # the Unit noise model seems very soft, not useful.
     # the NOISE3 model seems inappropriate for a boundary.
     graph.add(
-        # gtsam.CustomFactor(
-        MyCustomFactor(
+        gtsam.CustomFactor(
             gtsam.noiseModel.Constrained.MixedSigmas(1.0, np.array([0.02, 0.0, 0.0])),
             # gtsam.noiseModel.Constrained.All(3),
             # gtsam.noiseModel.Unit.Create(3),
@@ -149,13 +143,14 @@ def forward_and_left(x_i):
 def main() -> None:
     landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
     isam = gtsam_unstable.IncrementalFixedLagSmoother(10)
-    fig, ax = Plot.subplots(1,2, 12, 6)
+    fig, ax = Plot.subplots(1, 2, 12, 6)
     p0 = Plot(isam, "p0", fig, ax[0])
     p1 = Plot(isam, "p1", fig, ax[1])
     fig.tight_layout()
     robot_x = np.array([1, 2.5])
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)
+    # gtsam uses compile-time types so the only way to sort out which variable is which actual type is my keeping a little list.
     pose_variables: list[X] = [X(0)]
     for x_i in range(1, 200):
         robot_delta = forward_and_left(x_i)
@@ -170,18 +165,6 @@ def main() -> None:
         t1 = time.time_ns()
         if x_i % 5 == 0:
             print(f"i {x_i} duration (ns) {t1-t0}")
-            # print([result.atPose2(var).translation() for var in pose_variables])
-        factors = isam.getFactors()
-        factor_count = factors.size()
-        for f in range(factor_count):
-            if factors.at(f) is None:
-                continue
-            # print(f"{f} {factors.at(f).printKeys()}")
-            # print(f"{f} {dir(factors.at(f))}")
-            print(f"{f} {type(factors.at(f))}")
-            print(f"{f} {factors.at(f).keys()}")
-            # print(dir(result))
-            # print(dir(isam))
         p0.plot_variables(result, pose_variables, landmarks)
         p1.plot_variables(result, pose_variables, landmarks)
 
