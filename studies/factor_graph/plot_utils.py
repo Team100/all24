@@ -7,12 +7,14 @@ import matplotlib
 matplotlib.use("Qt5Agg", force=True)
 import matplotlib.pyplot as plt  # type:ignore
 from matplotlib.markers import MarkerStyle
+from matplotlib import collections
 import numpy as np
 from gtsam.symbol_shorthand import X  # type:ignore
 from landmark import Landmark
 
 
 NUM_DRAWS = 100
+TAG_SCALE = 0.1
 
 
 class Plot:
@@ -54,16 +56,22 @@ class Plot:
             linewidths=1,
             zorder=1,
         )
-        self.landmark_mean_scatter = self.ax.scatter(
+        # self.landmark_mean_scatter = self.ax.scatter(
+        #     [],
+        #     [],
+        #     marker=MarkerStyle("s"),
+        #     s=200,
+        #     facecolors="none",
+        #     edgecolors="black",
+        #     linewidths=0.5,
+        #     zorder=20,
+        # )
+        self.landmark_mean_poly = collections.PolyCollection(
             [],
-            [],
-            marker=MarkerStyle("s"),
-            s=200,
             facecolors="none",
             edgecolors="black",
-            linewidths=0.5,
-            zorder=20,
         )
+        self.ax.add_collection(self.landmark_mean_poly)
         self.landmark_point_scatter = self.ax.scatter(
             [],
             [],
@@ -80,7 +88,7 @@ class Plot:
         self.fig.canvas.flush_events()
 
     def plot_variables(self, result, poses: list[X], landmarks: list[Landmark]) -> None:
-        self.ax.draw_artist(self.ax.patch)
+        # self.ax.draw_artist(self.ax.patch)
 
         if len(poses) > 0:
             pose_mean_translations = np.array(
@@ -94,8 +102,8 @@ class Plot:
             self.pose_mean_scatter.set_offsets(pose_mean_translations)
             self.pose_point_scatter.set_offsets(pose_point_translations)
 
-            self.ax.draw_artist(self.pose_point_scatter)
-            self.ax.draw_artist(self.pose_mean_scatter)
+            # self.ax.draw_artist(self.pose_point_scatter)
+            # self.ax.draw_artist(self.pose_mean_scatter)
 
         if len(landmarks) > 0:
             landmark_mean_translations = np.array(
@@ -106,12 +114,25 @@ class Plot:
                 [self.landmark_point(result, var.symbol) for var in landmarks]
             )
 
-            self.landmark_mean_scatter.set_offsets(landmark_mean_translations)
+            # manually set the polygon vertices instead of using a marker
+            landmark_mean_verts = [
+                [
+                    [x - TAG_SCALE, y - TAG_SCALE],
+                    [x + TAG_SCALE, y - TAG_SCALE],
+                    [x + TAG_SCALE, y + TAG_SCALE],
+                    [x - TAG_SCALE, y + TAG_SCALE],
+                ]
+                for x, y in landmark_mean_translations
+            ]
+            self.landmark_mean_poly.set_verts(landmark_mean_verts)
+
+            # self.landmark_mean_scatter.set_offsets(landmark_mean_translations)
             self.landmark_point_scatter.set_offsets(landmark_point_translations)
 
-            self.ax.draw_artist(self.landmark_point_scatter)
-            self.ax.draw_artist(self.landmark_mean_scatter)
+            # self.ax.draw_artist(self.landmark_point_scatter)
+            # self.ax.draw_artist(self.landmark_mean_scatter)
 
+        self.ax.redraw_in_frame()
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
