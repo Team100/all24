@@ -125,8 +125,8 @@ def add_odometry_and_target_sights(
     # Constrained.MixedSignal says there is some (low) uncertainty about the
     # actually constrained dimension (x), but doesn't say anything about the others.
     #
-    # Constrained.All means that the error produced by our custom factor is not scaled by sigma at all.
-    # see NoiseModel.cpp.  it produces weird output with lots of x variance.
+    # Constrained.All means that the error produced by our custom factor is not scaled
+    # by sigma at all.  see NoiseModel.cpp.  it produces weird output with lots of x variance.
     #
     # the Unit noise model seems very soft, not useful.
     # the NOISE3 model seems inappropriate for a boundary.
@@ -146,7 +146,7 @@ def add_odometry_and_target_sights(
     isam.update(graph, values, timestamps)
 
 
-def forward_and_left(x_i: int) -> gtsam.Pose2:
+def forward_and_left() -> gtsam.Pose2:
     return gtsam.Pose2.Expmap([LINEAR_SCALE, 0, ANGLE_SCALE])
 
 
@@ -160,10 +160,11 @@ def main() -> None:
     robot_x: gtsam.Pose2 = gtsam.Pose2(1, 2.5, -math.pi / 2)
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)
-    # gtsam uses compile-time types so the only way to sort out which variable is which actual type is my keeping a little list.
+    # gtsam uses compile-time types so the only way to sort out which variable
+    # is which actual type is by keeping a little list.
     pose_variables: list[X] = [X(0)]
     for x_i in range(1, 200):
-        robot_delta: gtsam.Pose2 = forward_and_left(x_i)
+        robot_delta: gtsam.Pose2 = forward_and_left()
         robot_x = prev_robot_x.compose(robot_delta)
         prev_robot_x = robot_x
         t0 = time.time_ns()
