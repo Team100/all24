@@ -126,7 +126,8 @@ def add_odometry_and_target_sights(
         # l_range = np.hypot(*(l.x - robot_point))
         l_angle = robot_x.bearing(l.x)
         l_range = robot_x.range(l.x)
-        if IN_VIEW:
+        if (abs(l_angle.theta()) < 0.5 and l_range < 4):
+        # if IN_VIEW:
             graph.add(
                 gtsam.BearingRangeFactor2D(X(x_i), l.symbol, l_angle, l_range, NOISE2)
             )
