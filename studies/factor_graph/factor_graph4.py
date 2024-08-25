@@ -18,7 +18,6 @@ NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
 BOUNDARY = False
-IN_VIEW = True
 
 
 # the BoundingConstraint is not available in python, I think because it
@@ -86,8 +85,6 @@ def initialize(isam, landmarks: list[Landmark], robot_x: gtsam.Pose2) -> None:
         values.insert(l.symbol, gtsam.Point2(*l.x))
         timestamps.insert((l.symbol, 0))
 
-    # robot_pose = gtsam.Pose2(*robot_x)
-    # robot_pose = gtsam.Pose2.Expmap(robot_x)
     graph.add(gtsam.PriorFactorPose2(X(0), robot_x, NOISE3))
     values.insert(X(0), robot_x)
     timestamps.insert((X(0), 0))
@@ -104,8 +101,6 @@ def add_odometry_and_target_sights(
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
     timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
-    # twist = gtsam.Pose2(*robot_delta)
-    # graph.add(gtsam.BetweenFactorPose2(X(x_i - 1), X(x_i), twist, NOISE3))
     graph.add(
         gtsam.CustomFactor(
             NOISE3,
@@ -113,21 +108,13 @@ def add_odometry_and_target_sights(
             custom_between_factor(robot_delta),
         )
     )
-    # robot_pose = gtsam.Pose2(*robot_x)
-    # robot_pose = gtsam.Pose2.Expmap(robot_x)
-    # robot_point = robot_pose.translation()
-    # robot_point = gtsam.Pose2.Logmap(robot_x)[0:2]
-    # print("ROBOTX ", robot_x)
-    # print("POINT ", robot_point)
+
     values.insert(X(x_i), robot_x)
     timestamps.insert((X(x_i), x_i))
     for l in landmarks:
-        # l_angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l.x - robot_point))))
-        # l_range = np.hypot(*(l.x - robot_point))
         l_angle = robot_x.bearing(l.x)
         l_range = robot_x.range(l.x)
-        if (abs(l_angle.theta()) < 0.5 and l_range < 4):
-        # if IN_VIEW:
+        if abs(l_angle.theta()) < 0.5 and l_range < 4:
             graph.add(
                 gtsam.BearingRangeFactor2D(X(x_i), l.symbol, l_angle, l_range, NOISE2)
             )
@@ -160,25 +147,7 @@ def add_odometry_and_target_sights(
 
 
 def forward_and_left(x_i: int) -> gtsam.Pose2:
-    # course starts at -90 degrees (i.e. "down")
-    course = ANGLE_SCALE * x_i - math.pi / 2
-    # steering is always a little to the left (positive)
-    steer = ANGLE_SCALE
-    return gtsam.Pose2.Expmap([LINEAR_SCALE, 0, steer])
-    # return np.array(
-    #     [
-    #         LINEAR_SCALE,
-    #         0,
-    #         steer,
-    #     ]
-    # )
-    # return np.array(
-    #     [
-    #         LINEAR_SCALE * math.cos(course),
-    #         LINEAR_SCALE * math.sin(course),
-    #         steer,
-    #     ]
-    # )
+    return gtsam.Pose2.Expmap([LINEAR_SCALE, 0, ANGLE_SCALE])
 
 
 def main() -> None:
@@ -195,7 +164,6 @@ def main() -> None:
     pose_variables: list[X] = [X(0)]
     for x_i in range(1, 200):
         robot_delta: gtsam.Pose2 = forward_and_left(x_i)
-        # print("DELTA ", robot_delta)
         robot_x = prev_robot_x.compose(robot_delta)
         prev_robot_x = robot_x
         t0 = time.time_ns()

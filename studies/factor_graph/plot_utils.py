@@ -68,16 +68,6 @@ class Plot:
         self.ax.set_ylim(-1, 6)
         self.ax.set_aspect("equal", adjustable="box")
         plt.tight_layout()
-        # self.pose_mean_scatter = self.ax.scatter(
-        #     [],
-        #     [],
-        #     marker=MarkerStyle(">"),
-        #     s=200,
-        #     facecolors="none",
-        #     edgecolors="black",
-        #     linewidths=0.5,
-        #     zorder=20,
-        # )
         self.pose_mean_poly = collections.PolyCollection(
             [],
             facecolors="none",
@@ -94,16 +84,6 @@ class Plot:
             linewidths=1,
             zorder=1,
         )
-        # self.landmark_mean_scatter = self.ax.scatter(
-        #     [],
-        #     [],
-        #     marker=MarkerStyle("s"),
-        #     s=200,
-        #     facecolors="none",
-        #     edgecolors="black",
-        #     linewidths=0.5,
-        #     zorder=20,
-        # )
         self.landmark_mean_poly = collections.PolyCollection(
             [],
             facecolors="none",
@@ -132,20 +112,15 @@ class Plot:
 
         if len(poses) > 0:
             pose_mean_poses = np.array([result.atPose2(var) for var in poses])
-            # print(pose_mean_poses)
-
-            pose_point_translations = np.vstack(
-                [self.pose_point(result, var) for var in poses]
-            )
-
             pose_mean_verts = [
                 make_mark(pose_mark, rot(c.theta()), c.translation())
                 for c in pose_mean_poses
             ]
-            # print("VERTS ", pose_mean_verts)
             self.pose_mean_poly.set_verts(pose_mean_verts)
-
-            # self.pose_mean_scatter.set_offsets(pose_mean_translations)
+            
+            pose_point_translations = np.vstack(
+                [self.pose_point(result, var) for var in poses]
+            )
             self.pose_point_scatter.set_offsets(pose_point_translations)
 
             # poly is drawn on top of scatter
@@ -156,15 +131,11 @@ class Plot:
             landmark_mean_translations = np.array(
                 [result.atPoint2(var.symbol) for var in landmarks]
             )
-
-            # manually set the polygon vertices instead of using a marker
             landmark_mean_verts = [
                 make_mark(landmark_mark, rot(math.pi / 4), c)
                 for c in landmark_mean_translations
             ]
             self.landmark_mean_poly.set_verts(landmark_mean_verts)
-
-            # self.landmark_mean_scatter.set_offsets(landmark_mean_translations)
 
             landmark_point_translations = np.vstack(
                 [self.landmark_point(result, var.symbol) for var in landmarks]
@@ -174,7 +145,6 @@ class Plot:
             self.ax.draw_artist(self.landmark_point_scatter)
             self.ax.draw_artist(self.landmark_mean_poly)
 
-        # self.ax.redraw_in_frame()
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
