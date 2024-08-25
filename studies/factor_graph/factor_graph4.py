@@ -18,7 +18,7 @@ NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
 BOUNDARY = False
-IN_VIEW = False
+IN_VIEW = True
 
 
 # the BoundingConstraint is not available in python, I think because it
@@ -76,7 +76,7 @@ def custom_boundary_constraint():
     return error_func
 
 
-def initialize(isam, landmarks, robot_x: np.ndarray) -> None:
+def initialize(isam, landmarks: list[Landmark], robot_x: gtsam.Pose2) -> None:
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
     timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
@@ -87,9 +87,9 @@ def initialize(isam, landmarks, robot_x: np.ndarray) -> None:
         timestamps.insert((l.symbol, 0))
 
     # robot_pose = gtsam.Pose2(*robot_x)
-    robot_pose = gtsam.Pose2.Expmap(robot_x)
-    graph.add(gtsam.PriorFactorPose2(X(0), robot_pose, NOISE3))
-    values.insert(X(0), robot_pose)
+    # robot_pose = gtsam.Pose2.Expmap(robot_x)
+    graph.add(gtsam.PriorFactorPose2(X(0), robot_x, NOISE3))
+    values.insert(X(0), robot_x)
     timestamps.insert((X(0), 0))
     isam.update(graph, values, timestamps)
 
@@ -97,33 +97,35 @@ def initialize(isam, landmarks, robot_x: np.ndarray) -> None:
 def add_odometry_and_target_sights(
     isam,
     x_i: int,
-    robot_x: np.ndarray,
-    robot_delta: np.ndarray,
+    robot_x: gtsam.Pose2,
+    robot_delta: gtsam.Pose2,
     landmarks: list[Landmark],
 ) -> None:
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
     timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
-    twist = gtsam.Pose2(*robot_delta)
+    # twist = gtsam.Pose2(*robot_delta)
     # graph.add(gtsam.BetweenFactorPose2(X(x_i - 1), X(x_i), twist, NOISE3))
     graph.add(
         gtsam.CustomFactor(
             NOISE3,
             gtsam.KeyVector([X(x_i - 1), X(x_i)]),
-            custom_between_factor(twist),
+            custom_between_factor(robot_delta),
         )
     )
     # robot_pose = gtsam.Pose2(*robot_x)
-    robot_pose = gtsam.Pose2.Expmap(robot_x)
+    # robot_pose = gtsam.Pose2.Expmap(robot_x)
     # robot_point = robot_pose.translation()
-    robot_point = gtsam.Pose2.Logmap(robot_pose)[0:2]
-    print("ROBOTX ", robot_x)
-    print("POINT ", robot_point)
-    values.insert(X(x_i), robot_pose)
+    # robot_point = gtsam.Pose2.Logmap(robot_x)[0:2]
+    # print("ROBOTX ", robot_x)
+    # print("POINT ", robot_point)
+    values.insert(X(x_i), robot_x)
     timestamps.insert((X(x_i), x_i))
     for l in landmarks:
-        l_angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l.x - robot_point))))
-        l_range = np.hypot(*(l.x - robot_point))
+        # l_angle = gtsam.Rot2.fromAngle(np.arctan2(*np.flip((l.x - robot_point))))
+        # l_range = np.hypot(*(l.x - robot_point))
+        l_angle = robot_x.bearing(l.x)
+        l_range = robot_x.range(l.x)
         if IN_VIEW:
             graph.add(
                 gtsam.BearingRangeFactor2D(X(x_i), l.symbol, l_angle, l_range, NOISE2)
@@ -156,18 +158,19 @@ def add_odometry_and_target_sights(
     isam.update(graph, values, timestamps)
 
 
-def forward_and_left(x_i: int) -> np.ndarray:
+def forward_and_left(x_i: int) -> gtsam.Pose2:
     # course starts at -90 degrees (i.e. "down")
     course = ANGLE_SCALE * x_i - math.pi / 2
     # steering is always a little to the left (positive)
-    steer = ANGLE_SCALE * 2
-    return np.array(
-        [
-            LINEAR_SCALE,
-            0,
-            steer,
-        ]
-    )
+    steer = ANGLE_SCALE
+    return gtsam.Pose2.Expmap([LINEAR_SCALE, 0, steer])
+    # return np.array(
+    #     [
+    #         LINEAR_SCALE,
+    #         0,
+    #         steer,
+    #     ]
+    # )
     # return np.array(
     #     [
     #         LINEAR_SCALE * math.cos(course),
@@ -184,15 +187,15 @@ def main() -> None:
     p0 = Plot(isam, "p0", fig, ax[0])
     p1 = Plot(isam, "p1", fig, ax[1])
     fig.tight_layout()
-    robot_x = np.array([1, 2.5, -math.pi / 2])
+    robot_x: gtsam.Pose2 = gtsam.Pose2(1, 2.5, -math.pi / 2)
     prev_robot_x = robot_x
     initialize(isam, landmarks, robot_x)
     # gtsam uses compile-time types so the only way to sort out which variable is which actual type is my keeping a little list.
     pose_variables: list[X] = [X(0)]
     for x_i in range(1, 200):
-        robot_delta = forward_and_left(x_i)
+        robot_delta: gtsam.Pose2 = forward_and_left(x_i)
         # print("DELTA ", robot_delta)
-        robot_x = prev_robot_x + robot_delta
+        robot_x = prev_robot_x.compose(robot_delta)
         prev_robot_x = robot_x
         t0 = time.time_ns()
         # only one isam.update() is allowed per time step

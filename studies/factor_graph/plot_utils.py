@@ -14,7 +14,7 @@ from gtsam.symbol_shorthand import X  # type:ignore
 from landmark import Landmark
 
 
-NUM_DRAWS = 100
+NUM_DRAWS = 1000
 TAG_SCALE = 0.1
 POSE = 0.1
 
@@ -128,7 +128,7 @@ class Plot:
     def plot_variables(
         self, result: gtsam.Values, poses: list[X], landmarks: list[Landmark]
     ) -> None:
-        # self.ax.draw_artist(self.ax.patch)
+        self.ax.draw_artist(self.ax.patch)
 
         if len(poses) > 0:
             pose_mean_poses = np.array([result.atPose2(var) for var in poses])
@@ -148,8 +148,9 @@ class Plot:
             # self.pose_mean_scatter.set_offsets(pose_mean_translations)
             self.pose_point_scatter.set_offsets(pose_point_translations)
 
-            # self.ax.draw_artist(self.pose_point_scatter)
-            # self.ax.draw_artist(self.pose_mean_scatter)
+            # poly is drawn on top of scatter
+            self.ax.draw_artist(self.pose_point_scatter)
+            self.ax.draw_artist(self.pose_mean_poly)
 
         if len(landmarks) > 0:
             landmark_mean_translations = np.array(
@@ -170,10 +171,10 @@ class Plot:
             )
             self.landmark_point_scatter.set_offsets(landmark_point_translations)
 
-            # self.ax.draw_artist(self.landmark_point_scatter)
-            # self.ax.draw_artist(self.landmark_mean_scatter)
+            self.ax.draw_artist(self.landmark_point_scatter)
+            self.ax.draw_artist(self.landmark_mean_poly)
 
-        self.ax.redraw_in_frame()
+        # self.ax.redraw_in_frame()
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
