@@ -99,10 +99,31 @@ class Plot:
         )
         self.ax.add_collection(self.landmark_mean_poly)
 
+        self.sights = collections.PathCollection(
+            [],
+            edgecolors="green",
+        )
+        self.ax.add_collection(self.sights)
+
         self.fig.canvas.draw()
         plt.show(block=False)
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
+
+    @staticmethod
+    def make_lines(pose_mean_poses):
+        c: gtsam.Pose2
+        for c in pose_mean_poses:
+            for l in [[0.5, 0.5], [0.5, 4.5]]:
+                # TODO: make this somehow use the factors that exist
+                l_angle = c.bearing(l)
+                l_range = c.range(l)
+                if abs(l_angle.theta()) < 0.5 and l_range < 4:
+                    yield matplotlib.path.Path([l, c.translation()])
+        # paths = [
+        #     matplotlib.path.Path([[0.5, 0.5], c.translation()]) for c in pose_mean_poses
+        # ]
+        # return paths
 
     def plot_variables(
         self, result: gtsam.Values, poses: list[X], landmarks: list[Landmark]
@@ -121,6 +142,14 @@ class Plot:
                 [self.pose_point(result, var) for var in poses]
             )
             self.pose_point_scatter.set_offsets(pose_point_translations)
+
+            # also make the lines to the landmarks
+            # these won't be gtsam variables soon
+            # lines = [[[0.5, 0.5], c.translation().tolist()] for c in pose_mean_poses]
+            # lines = [[(0,0),(1,1)]]
+            # paths = [matplotlib.path.Path([[1,2],[3,4]])]
+            paths = list(self.make_lines(pose_mean_poses))
+            self.sights.set_paths(paths)
 
         if len(landmarks) > 0:
             landmark_mean_translations = np.array(
