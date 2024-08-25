@@ -59,3 +59,47 @@ apt install libboost-all-dev
 ```
 
 (skip TBB for now, come back to it if more cores need to be used)
+
+# Building GTSAM
+
+This relies on pre-release GTSAM features, so you have to build it, and to do that, you need to make a few changes.
+
+First check it out.
+
+```
+git clone git@github.com:borglab/gtsam.git
+cd gtsam
+```
+
+Then edit cmake/HandleGeneralOptions.cmake.
+
+* Since it's not necessary, turn GTSAM_WITH_TBB off.
+* Since we use Python, turn GTSAM_BUILD_PYTHON on.
+
+Then edit cmake/HandleGlobalBuildFlags.cmake
+
+add this line to the bottom.  it works around an error that i think is unrelated to gtsam per se
+it seems related to type_traits and the boost::serialization.
+
+```
+add_compile_options("-fpermissive")
+```
+
+Finally, edit python/CMakeLists.txt.  add "--break-system-packages" to the line that invokes ```pip install```.
+
+These changes are also included in the branch called ```team100_install```
+
+Then follow the normal instructions:
+
+```
+mkdir build
+cd build
+cmake ..
+make -j6 check
+make install
+cd ../python
+cmake ..
+make -j6 python-install
+```
+
+instead of "6" above, use whatever your number of cores is.
