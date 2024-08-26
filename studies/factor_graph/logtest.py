@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name,too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
+
 # try to understand what logexp does.
 
 import math

@@ -183,6 +183,7 @@ class Plot:
         # for the fixed lag smoother
         covariance: np.ndarray = self.isam.getISAM2().marginalCovariance(var)  # 3x3
 
+        # print(covariance)
         random_points: np.ndarray = RNG.multivariate_normal(
             np.zeros(3), covariance, NUM_DRAWS
         )
