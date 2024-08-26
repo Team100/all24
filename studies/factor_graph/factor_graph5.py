@@ -17,7 +17,7 @@ NOISE1 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.01]))
 NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.5, 0.5]))
 NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
-INCREMENTAL = True
+INCREMENTAL = False
 
 # this is cut-and-paste from here to figure out custom factors.
 # https://github.com/borglab/gtsam/blob/develop/python/CustomFactors.md
@@ -143,12 +143,9 @@ def add_odometry_and_target_sights(
 def forward_and_left() -> gtsam.Pose2:
     return gtsam.Pose2.Expmap([LINEAR_SCALE, 0, ANGLE_SCALE])
 
-
-def main() -> None:
-    print("DEBUG? ", gtsam.isDebugVersion())
-
-
+def make_smoother() -> gtsam.FixedLagSmoother:
     if INCREMENTAL:
+        # use incremental (faster, quite sensitive to initial values)
         optimization_params = gtsam.ISAM2GaussNewtonParams()
         optimization_params.setWildfireThreshold(0.001) # the default is 0.001
         optimization_params = gtsam.ISAM2DoglegParams()
@@ -161,21 +158,31 @@ def main() -> None:
         isam_params.evaluateNonlinearError = False
         isam_params.cacheLinearizedFactors = True
         print(isam_params)
-        isam = gtsam_unstable.IncrementalFixedLagSmoother(10, isam_params)
+        return gtsam_unstable.IncrementalFixedLagSmoother(10, isam_params)
 
-    else:
-        lm_params = gtsam.LevenbergMarquardtParams.LegacyDefaults()
-        print(lm_params)
-        isam = gtsam.BatchFixedLagSmoother(10, lm_params)
 
-    #######################3
-    # initialize plots
-    landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
+    # use batch (2.5x slower, very insensitive to initial values)
+    lm_params = gtsam.LevenbergMarquardtParams.LegacyDefaults()
+    print(lm_params)
+    return gtsam.BatchFixedLagSmoother(10, lm_params)
 
+def make_plots(isam) -> tuple[Plot, Plot]:
     fig, ax = Plot.subplots(1, 2, 12, 6)
     p0 = Plot(isam, "p0", fig, ax[0])
     p1 = Plot(isam, "p1", fig, ax[1])
     fig.tight_layout()
+    return p0,p1
+
+def main() -> None:
+    print("DEBUG? ", gtsam.isDebugVersion())
+    isam = make_smoother()
+
+    #######################
+    # initialize plots
+    landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
+
+    p0, p1 = make_plots(isam)
+
     robot_x: gtsam.Pose2 = gtsam.Pose2(1, 2.5, -math.pi / 2)
     prev_robot_x = robot_x
     latest_robot_pose_estimate = robot_x
@@ -195,12 +202,12 @@ def main() -> None:
         result: gtsam.Values = isam.calculateEstimate()
         t1 = time.time_ns()
         # print(dir(result))
-        # factors: gtsam.NonlinearFactorGraph = isam.getFactors()
+        factors: gtsam.NonlinearFactorGraph = isam.getFactors()
         # for f_i in range(factors.size()):
         #     if  factors.exists(f_i):
         #         print(type(factors.at(f_i)))
         #         print(factors.at(f_i))
-        # print(factors)
+        print(factors)
         pose_variables.append(X(x_i))
         latest_robot_pose_estimate = result.atPose2(X(x_i))
         pose_variables = [pv for pv in pose_variables if result.exists(pv)]
