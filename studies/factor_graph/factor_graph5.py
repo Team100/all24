@@ -17,8 +17,6 @@ NOISE1 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.01]))
 NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
-BOUNDARY = True
-
 
 # this is cut-and-paste from here to figure out custom factors.
 # https://github.com/borglab/gtsam/blob/develop/python/CustomFactors.md
@@ -96,6 +94,14 @@ def add_odometry_and_target_sights(
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
     timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
+
+    # new value for this time
+    # TODO: the initial value here should not be this ground-truth value,
+    # it should be the previous mean plus the delta.
+    values.insert(X(x_i), robot_x)
+    timestamps.insert((X(x_i), x_i))
+
+    # odometry
     graph.add(
         gtsam.CustomFactor(
             NOISE3,
@@ -103,9 +109,14 @@ def add_odometry_and_target_sights(
             custom_between_factor(robot_delta),
         )
     )
-
-    values.insert(X(x_i), robot_x)
-    timestamps.insert((X(x_i), x_i))
+    # boundary
+    graph.add(
+        gtsam.CustomFactor(
+            NOISE1,
+            gtsam.KeyVector([X(x_i)]),
+            custom_boundary_constraint(),
+        )
+    )
     for l in landmarks:
         l_angle = robot_x.bearing(l.x)
         l_range = robot_x.range(l.x)
@@ -115,20 +126,12 @@ def add_odometry_and_target_sights(
             )
         timestamps.insert((l.symbol, x_i))
 
-    # also add boundary factor
-    if BOUNDARY:
-        graph.add(
-            gtsam.CustomFactor(
-                NOISE1,
-                gtsam.KeyVector([X(x_i)]),
-                custom_boundary_constraint(),
-            )
-        )
+
     isam.update(graph, values, timestamps)
     # this is the list of factors i just added, in order.
     # one for
     new_factors: list[int] = isam.getISAM2Result().getNewFactorsIndices()
-    # print("ODO/SIGHT ", new_factors)
+    print("ODO/SIGHT ", new_factors)
 
 
 def forward_and_left() -> gtsam.Pose2:
@@ -154,20 +157,20 @@ def main() -> None:
         robot_delta: gtsam.Pose2 = forward_and_left()
         robot_x = prev_robot_x.compose(robot_delta)
         prev_robot_x = robot_x
-        t0 = time.time_ns()
         # only one isam.update() is allowed per time step
         add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks)
+        t0 = time.time_ns()
         result: gtsam.Values = isam.calculateEstimate()
+        t1 = time.time_ns()
         # print(dir(result))
         factors: gtsam.NonlinearFactorGraph = isam.getFactors()
         # for f_i in range(factors.size()):
         #     if  factors.exists(f_i):
         #         print(type(factors.at(f_i)))
         #         print(factors.at(f_i))
-        # print(factors)
+        print(factors)
         pose_variables.append(X(x_i))
         pose_variables = [pv for pv in pose_variables if result.exists(pv)]
-        t1 = time.time_ns()
         if x_i % 5 == 0:
             print(f"i {x_i} duration (ns) {t1-t0}")
         p0.plot_variables(result, pose_variables, landmarks)
