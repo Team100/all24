@@ -7,16 +7,17 @@ import gtsam
 import gtsam_unstable  # type:ignore
 from gtsam.symbol_shorthand import X
 from landmark import Landmark
-from plot_utils import Plot
+from plot_utils2 import Plot
 
 PAUSE_TIME = 1.0
 ANGLE_SCALE = 0.1
 LINEAR_SCALE = 0.2
 
 NOISE1 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.01]))
-NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
+NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.5, 0.5]))
 NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
+INCREMENTAL = True
 
 # this is cut-and-paste from here to figure out custom factors.
 # https://github.com/borglab/gtsam/blob/develop/python/CustomFactors.md
@@ -80,13 +81,14 @@ def initialize(isam, landmarks: list[Landmark], robot_x: gtsam.Pose2) -> None:
     values.insert(X(0), robot_x)
     timestamps.insert((X(0), 0))
     isam.update(graph, values, timestamps)
-    new_factors: list[int] = isam.getISAM2Result().getNewFactorsIndices()
-    print("INIT ", new_factors)
+    # new_factors: list[int] = isam.getISAM2Result().getNewFactorsIndices()
+    # print("INIT ", new_factors)
 
 
 def add_odometry_and_target_sights(
     isam,
     x_i: int,
+    latest_robot_pose_estimate: gtsam.Pose2,
     robot_x: gtsam.Pose2,
     robot_delta: gtsam.Pose2,
     landmarks: list[Landmark],
@@ -96,9 +98,13 @@ def add_odometry_and_target_sights(
     timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
 
     # new value for this time
-    # TODO: the initial value here should not be this ground-truth value,
-    # it should be the previous mean plus the delta.
-    values.insert(X(x_i), robot_x)
+    # use the last-solved estimate as the initial guess for the new state
+    # the rationale is that it's not that far away.
+    values.insert(X(x_i), latest_robot_pose_estimate.compose(robot_delta))
+    # this seems like cheating
+    # values.insert(X(x_i), robot_x)
+    # how about zero?  the batch smoother actually mostly works ok with this, but not all the time.
+    # values.insert(X(x_i), gtsam.Pose2())
     timestamps.insert((X(x_i), x_i))
 
     # odometry
@@ -130,8 +136,8 @@ def add_odometry_and_target_sights(
     isam.update(graph, values, timestamps)
     # this is the list of factors i just added, in order.
     # one for
-    new_factors: list[int] = isam.getISAM2Result().getNewFactorsIndices()
-    print("ODO/SIGHT ", new_factors)
+    # new_factors: list[int] = isam.getISAM2Result().getNewFactorsIndices()
+    # print("ODO/SIGHT ", new_factors)
 
 
 def forward_and_left() -> gtsam.Pose2:
@@ -141,35 +147,62 @@ def forward_and_left() -> gtsam.Pose2:
 def main() -> None:
     print("DEBUG? ", gtsam.isDebugVersion())
 
+
+    if INCREMENTAL:
+        optimization_params = gtsam.ISAM2GaussNewtonParams()
+        optimization_params.setWildfireThreshold(0.001) # the default is 0.001
+        optimization_params = gtsam.ISAM2DoglegParams()
+        print(optimization_params)
+        isam_params = gtsam.ISAM2Params()
+        isam_params.setOptimizationParams(optimization_params)
+        # relinearizing less makes the path more consistent as new factors are added
+        # relinearizing more makes it more jittery
+        isam_params.relinearizeSkip = 1
+        isam_params.evaluateNonlinearError = False
+        isam_params.cacheLinearizedFactors = True
+        print(isam_params)
+        isam = gtsam_unstable.IncrementalFixedLagSmoother(10, isam_params)
+
+    else:
+        lm_params = gtsam.LevenbergMarquardtParams.LegacyDefaults()
+        print(lm_params)
+        isam = gtsam.BatchFixedLagSmoother(10, lm_params)
+
+    #######################3
+    # initialize plots
     landmarks: list[Landmark] = [Landmark(0, 0.5, 0.5), Landmark(1, 0.5, 4.5)]
-    isam = gtsam_unstable.IncrementalFixedLagSmoother(10)
+
     fig, ax = Plot.subplots(1, 2, 12, 6)
     p0 = Plot(isam, "p0", fig, ax[0])
     p1 = Plot(isam, "p1", fig, ax[1])
     fig.tight_layout()
     robot_x: gtsam.Pose2 = gtsam.Pose2(1, 2.5, -math.pi / 2)
     prev_robot_x = robot_x
+    latest_robot_pose_estimate = robot_x
     initialize(isam, landmarks, robot_x)
     # gtsam uses compile-time types so the only way to sort out which variable
     # is which actual type is by keeping a little list.
     pose_variables: list[X] = [X(0)]
-    for x_i in range(1, 200):
+    for x_i in range(1, 500):
+        # time.sleep(0.1)
         robot_delta: gtsam.Pose2 = forward_and_left()
+        # robot_x = latest_robot_pose_estimate.compose(robot_delta)
         robot_x = prev_robot_x.compose(robot_delta)
         prev_robot_x = robot_x
         # only one isam.update() is allowed per time step
-        add_odometry_and_target_sights(isam, x_i, robot_x, robot_delta, landmarks)
         t0 = time.time_ns()
+        add_odometry_and_target_sights(isam, x_i, latest_robot_pose_estimate, robot_x, robot_delta, landmarks)
         result: gtsam.Values = isam.calculateEstimate()
         t1 = time.time_ns()
         # print(dir(result))
-        factors: gtsam.NonlinearFactorGraph = isam.getFactors()
+        # factors: gtsam.NonlinearFactorGraph = isam.getFactors()
         # for f_i in range(factors.size()):
         #     if  factors.exists(f_i):
         #         print(type(factors.at(f_i)))
         #         print(factors.at(f_i))
-        print(factors)
+        # print(factors)
         pose_variables.append(X(x_i))
+        latest_robot_pose_estimate = result.atPose2(X(x_i))
         pose_variables = [pv for pv in pose_variables if result.exists(pv)]
         if x_i % 5 == 0:
             print(f"i {x_i} duration (ns) {t1-t0}")
