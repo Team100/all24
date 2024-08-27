@@ -21,57 +21,6 @@ NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 INCREMENTAL = True
 
 
-
-
-
-# this is cut-and-paste from here to figure out custom factors.
-# https://github.com/borglab/gtsam/blob/develop/python/CustomFactors.md
-#
-def custom_between_factor(expectation: gtsam.Pose2):
-    def error_func(
-        this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
-    ) -> np.ndarray:
-        key0 = this.keys()[0]
-        key1 = this.keys()[1]
-        gT1, gT2 = v.atPose2(key0), v.atPose2(key1)
-        error = expectation.localCoordinates(gT1.between(gT2))
-
-        if H is not None:
-            result = gT1.between(gT2)
-            H[0] = -result.inverse().AdjointMap()
-            H[1] = np.eye(3)
-        return error
-
-    return error_func
-
-
-# limit motion to the "field" boundary.
-# (can't use BoundingConstraint because it needs a subclass to implement value())
-# this is a 1d constraint on a 3d state (pose2) so it has a 1d noise model and 1x3 jacobian
-# see https://gtsam.org/tutorials/intro.html
-def custom_boundary_constraint():
-    def error_func(
-        this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
-    ) -> np.ndarray:
-        boundary_x = 4.5
-        # there's just one key, because we use it with a length-1 keyvector.
-        key0 = this.keys()[0]
-        gT1 = v.atPose2(key0)
-
-        if gT1.x() <= boundary_x:
-            # constraint is not active.
-            if H is not None:
-                H[0] = np.array([[0, 0, 0]])
-            return np.array([0])
-
-        # constraint is active
-        if H is not None:
-            H[0] = np.array([[gT1.rotation().c(), -gT1.rotation().s(), 0]])
-        return np.array([gT1.x() - boundary_x])
-
-    return error_func
-
-
 def initialize(isam, landmarks: list[Landmark], robot_x: gtsam.Pose2) -> None:
     graph = gtsam.NonlinearFactorGraph()
     values = gtsam.Values()
@@ -100,34 +49,37 @@ def add_odometry_and_target_sights(
     values = gtsam.Values()
     timestamps = gtsam.FixedLagSmootherKeyTimestampMap()
 
-    # new value for this time
-    # use the last-solved estimate as the initial guess for the new state
-    # the rationale is that it's not that far away.
-    values.insert(X(x_i), latest_robot_pose_estimate.compose(robot_delta))
-    # this seems like cheating
-    # values.insert(X(x_i), robot_x)
-    # how about zero?  the batch smoother actually mostly works ok with this, but not all the time.
-    # values.insert(X(x_i), gtsam.Pose2())
-    timestamps.insert((X(x_i), x_i))
+    new_robot_variable(x_i, latest_robot_pose_estimate, robot_delta, values, timestamps)
+    add_odometry_factor(x_i, robot_delta, graph)
+    add_boundary_factor(x_i, graph)
+    add_vision_factors(x_i, robot_x, landmarks, graph, timestamps)
 
-    # odometry
-    graph.add(
-        gtsam.CustomFactor(
-            CustomFactorType.BETWEEN.value,
-            NOISE3,
-            gtsam.KeyVector([X(x_i - 1), X(x_i)]),
-            custom_between_factor(robot_delta),
-        )
-    )
-    # boundary
-    graph.add(
-        gtsam.CustomFactor(
-            CustomFactorType.BOUNDARY.value,
-            NOISE1,
-            gtsam.KeyVector([X(x_i)]),
-            custom_boundary_constraint(),
-        )
-    )
+    isam.update(graph, values, timestamps)
+
+
+def add_vision_factors(
+    x_i: int,
+    robot_x: gtsam.Pose2,
+    landmarks: list[Landmark],
+    graph: gtsam.NonlinearFactorGraph,
+    timestamps: gtsam.FixedLagSmootherKeyTimestampMap,
+):
+    # separate range and bearing to make it simpler for now, using the implementation from 2010 as
+    # a guide.
+    # https://github.com/borglab/gtsam/blob/76d478c0e0a2b486dd4e2aaebd8cd887df457f89/gtsam/slam/BearingFactor.h
+    # TODO: replace range and bearing with actual camera factors.
+    # def bearing_error_func(
+    #     this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
+    # ) -> np.ndarray:
+    #     gT1: gtsam.Pose2 = v.atPose2(this.keys()[0])
+    #     gT2: gtsam.Point2 = v.atPoint2(this.keys()[1])
+    #     hx:gtsam.Rot2 = gT1.bearing()
+
+    #     if H is not None:
+    #         H[0] = np.eye(3)
+    #         H[1] = np.eye(3)
+
+
     for l in landmarks:
         l_angle = robot_x.bearing(l.x)
         l_range = robot_x.range(l.x)
@@ -135,9 +87,87 @@ def add_odometry_and_target_sights(
             graph.add(
                 gtsam.BearingRangeFactor2D(X(x_i), l.symbol, l_angle, l_range, NOISE2)
             )
+        # graph.add(
+        #     gtsam.CustomFactor(
+        #         CustomFactorType.BEARING,
+        #         NOISE2,
+        #         gtsam.KeyVector([X(x_i), l.symbol]),
+        #         bearing_error_func,
+        #     )
+        # )
         timestamps.insert((l.symbol, x_i))
 
-    isam.update(graph, values, timestamps)
+
+def add_boundary_factor(x_i: int, graph: gtsam.NonlinearFactorGraph):
+    # limit motion to the "field" boundary.
+    # (can't use BoundingConstraint because it needs a subclass to implement value())
+    # this is a 1d constraint on a 3d state (pose2) so it has a 1d noise model and 1x3 jacobian
+    # see https://gtsam.org/tutorials/intro.html
+    def error_func(
+        this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
+    ) -> np.ndarray:
+        boundary_x = 4.5
+        # there's just one key, because we use it with a length-1 keyvector.
+        gT1 = v.atPose2(this.keys()[0])
+
+        if gT1.x() <= boundary_x:
+            # constraint is not active.
+            if H is not None:
+                H[0] = np.array([[0, 0, 0]])
+            return np.array([0])
+
+        # constraint is active
+        if H is not None:
+            H[0] = np.array([[gT1.rotation().c(), -gT1.rotation().s(), 0]])
+        return np.array([gT1.x() - boundary_x])
+
+    graph.add(
+        gtsam.CustomFactor(
+            CustomFactorType.BOUNDARY.value,
+            NOISE1,
+            gtsam.KeyVector([X(x_i)]),
+            error_func,
+        )
+    )
+
+
+def add_odometry_factor(
+    x_i: int, robot_delta: gtsam.Pose2, graph: gtsam.NonlinearFactorGraph
+):
+    # to figure out custom factors.
+    # https://github.com/borglab/gtsam/blob/develop/python/CustomFactors.md
+    def error_func(
+        this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
+    ) -> np.ndarray:
+        gT1 = v.atPose2(this.keys()[0])
+        gT2 = v.atPose2(this.keys()[1])
+        odo = gT1.between(gT2)
+        error = robot_delta.localCoordinates(odo)
+        if H is not None:
+            H[0] = -odo.inverse().AdjointMap()
+            H[1] = np.eye(3)
+        return error
+
+    graph.add(
+        gtsam.CustomFactor(
+            CustomFactorType.BETWEEN.value,
+            NOISE3,
+            gtsam.KeyVector([X(x_i - 1), X(x_i)]),
+            error_func,
+        )
+    )
+
+
+def new_robot_variable(
+    x_i, latest_robot_pose_estimate, robot_delta, values, timestamps
+):
+    # add a new value representing the robot pose, for this timestamp
+    # use the last-solved estimate, extended with odometry, as the initial guess for the new state
+    # the incremental smoother is very sensitive to this initial value
+    values.insert(X(x_i), latest_robot_pose_estimate.compose(robot_delta))
+    # if you're using the batch smoother, the initial value almost doesn't matter:
+    # values.insert(X(x_i), gtsam.Pose2())
+    timestamps.insert((X(x_i), x_i))
 
 
 def forward_and_left() -> gtsam.Pose2:
