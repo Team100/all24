@@ -2,6 +2,7 @@
 
 
 import math
+from typing import Iterator
 import gtsam  # type:ignore
 import matplotlib  # type:ignore
 
@@ -21,7 +22,7 @@ POSE = 0.1
 RNG = np.random.default_rng(0)
 
 
-landmark_mark = np.array(
+LANDMARK_MARK = np.array(
     [
         [-TAG_SCALE, -TAG_SCALE],
         [TAG_SCALE, -TAG_SCALE],
@@ -29,7 +30,8 @@ landmark_mark = np.array(
         [-TAG_SCALE, TAG_SCALE],
     ]
 )
-pose_mark = np.array(
+
+POSE_MARK = np.array(
     [
         [-POSE, POSE],
         [-POSE / 2, 0],
@@ -48,8 +50,8 @@ def rot(theta):
     )
 
 
-def make_mark(mark, rot_matrix, c):
-    return mark.dot(rot_matrix) + c
+def make_mark(mark, scale, rot_matrix, c):
+    return (mark * scale).dot(rot_matrix) + c
 
 
 class Plot:
@@ -72,14 +74,13 @@ class Plot:
         # the order the collections are added to the axis
         # is the order they are drawn below, so put the
         # mean after the distribution.
-        self.pose_point_scatter = self.ax.scatter(
+        self.pose_point_poly = collections.PolyCollection(
             [],
-            [],
-            marker=MarkerStyle("x"),
-            s=5,
+            facecolors="none",
+            edgecolors="orange",
             alpha=0.5,
-            color="orange",
         )
+        self.ax.add_collection(self.pose_point_poly)
         self.pose_mean_poly = collections.PolyCollection(
             [],
             facecolors="none",
@@ -129,18 +130,22 @@ class Plot:
         self.ax.draw_artist(self.ax.patch)
 
         if len(poses) > 0:
-            pose_mean_poses = np.array([result.atPose2(var) for var in poses])
+            pose_mean_poses: list[gtsam.Pose2] = [result.atPose2(var) for var in poses]
             pose_mean_verts = [
-                make_mark(pose_mark, rot(c.theta()), c.translation())
+                make_mark(POSE_MARK, 1.0, rot(c.theta()), c.translation())
                 for c in pose_mean_poses
             ]
             self.pose_mean_poly.set_verts(pose_mean_verts)
 
             try:
-                pose_point_translations = np.vstack(
-                    [self.pose_point(result, var) for var in poses]
+                pose_point_poses: list[gtsam.Pose2] = list(
+                    self.pose_samples(result, poses)
                 )
-                self.pose_point_scatter.set_offsets(pose_point_translations)
+                pose_point_verts = [
+                    make_mark(POSE_MARK, 0.5, rot(c.theta()), c.translation())
+                    for c in pose_point_poses
+                ]
+                self.pose_point_poly.set_verts(pose_point_verts)
             except AttributeError:
                 pass  # no marginal covariance
 
@@ -149,7 +154,7 @@ class Plot:
                 [result.atPoint2(var.symbol) for var in landmarks]
             )
             landmark_mean_verts = [
-                make_mark(landmark_mark, rot(math.pi / 4), c)
+                make_mark(LANDMARK_MARK, 1.0, rot(math.pi / 4), c)
                 for c in landmark_mean_translations
             ]
             self.landmark_mean_poly.set_verts(landmark_mean_verts)
@@ -162,38 +167,40 @@ class Plot:
             except AttributeError:
                 pass  # batch smoother has no marginal covariance method.
 
+        self.plot_factors(result, factors)
+
+        self.ax.redraw_in_frame()
+        self.fig.canvas.update()
+        self.fig.canvas.flush_events()
+
+    def plot_factors(
+        self,
+        result: gtsam.Values,
+        factors: gtsam.NonlinearFactorGraph,
+    ) -> None:
         paths = []
         odometry_paths = []
         # if *any* of the factors are over the boundary...
         boundary = False
         for f_i in range(factors.size()):
-            if factors.exists(f_i):
-                factor = factors.at(f_i)
-                if isinstance(factor, gtsam.CustomFactor):
-                    factor_type = CustomFactorType(factor.getKey())
-                    match factor_type:
-                        case CustomFactorType.BETWEEN:
-                            # paint the path as a straight line
-                            odometry_paths.append(
-                                matplotlib.path.Path(
-                                    [
-                                        result.atPose2(factor.keys()[0]).translation(),
-                                        result.atPose2(factor.keys()[1]).translation(),
-                                    ]
-                                )
-                            )
-                        case CustomFactorType.BOUNDARY:
-                            pose = result.atPose2(factor.keys()[0])
-                            if pose.x() > 4.5:
-                                boundary = True
-                        case _:
-                            print("wtf")
+            if not factors.exists(f_i):
+                # the list is not dense
+                continue
+            factor = factors.at(f_i)
+            if isinstance(factor, gtsam.CustomFactor):
+                factor_type = CustomFactorType(factor.getKey())
+                match factor_type:
+                    case CustomFactorType.BETWEEN:
+                        self.odometry_path(result, odometry_paths, factor)
+                    case CustomFactorType.BOUNDARY:
+                        pose = result.atPose2(factor.keys()[0])
+                        if pose.x() > 4.5:
+                            boundary = True
+                    case _:
+                        print("wtf")
 
-                if isinstance(factor, gtsam.BearingRangeFactor2D):
-                    # for now, a sighting is a point2 and a pose2, see sam.i
-                    pose = result.atPose2(factor.keys()[0])
-                    point = result.atPoint2(factor.keys()[1])
-                    paths.append(matplotlib.path.Path([point, pose.translation()]))
+            if isinstance(factor, gtsam.BearingRangeFactor2D):
+                self.bearing_range_path(result, paths, factor)
 
         if boundary:
             self.vline.set_color("red")
@@ -205,30 +212,46 @@ class Plot:
         self.sights.set_paths(paths)
         self.odometry.set_paths(odometry_paths)
 
-        self.ax.redraw_in_frame()
-        self.fig.canvas.update()
-        self.fig.canvas.flush_events()
+    def odometry_path(self, result, odometry_paths, factor):
+        # paint the path as a straight line
+        odometry_paths.append(
+            matplotlib.path.Path(
+                [
+                    result.atPose2(factor.keys()[0]).translation(),
+                    result.atPose2(factor.keys()[1]).translation(),
+                ]
+            )
+        )
+
+    def bearing_range_path(self, result, paths, factor):
+        # for now, a sighting is a point2 and a pose2, see sam.i
+        paths.append(
+            matplotlib.path.Path(
+                [
+                    result.atPose2(factor.keys()[0]).translation(),
+                    result.atPoint2(factor.keys()[1]),
+                ]
+            )
+        )
 
     def landmark_point(self, result, var):
         mean = result.atPoint2(var)  # 1x2
         covariance = self.isam.getISAM2().marginalCovariance(var)  # 2x2
         return RNG.multivariate_normal(mean, covariance, NUM_DRAWS)
 
-    def pose_point(self, result: gtsam.Values, var) -> np.ndarray:
-        mean: gtsam.Pose2 = result.atPose2(var)  # 1x3
-        # this covariance is in the *tangent space* at the *mean*
-        # i.e. the "twist", so that's how we apply it
-        # the getISAM2 thing is because the python wrapper doesn't do it
-        # for the fixed lag smoother
-        covariance: np.ndarray = self.isam.getISAM2().marginalCovariance(var)  # 3x3
-
-        # print(covariance)
-        random_points: np.ndarray = RNG.multivariate_normal(
-            np.zeros(3), covariance, NUM_DRAWS
-        )
-        random_translations: np.ndarray = np.zeros([NUM_DRAWS, 2])
-        for i in range(0, NUM_DRAWS):
-            random_translations[i, :] = mean.compose(
-                gtsam.Pose2.Expmap(random_points[i, :])
-            ).translation()
-        return random_translations
+    def pose_samples(
+        self, result: gtsam.Values, poses: list[X]
+    ) -> Iterator[gtsam.Pose2]:
+        for var in poses:
+            mean: gtsam.Pose2 = result.atPose2(var)  # 1x3
+            # this covariance is in the *tangent space* at the *mean*
+            # i.e. the "twist", so that's how we apply it
+            covariance: np.ndarray = self.isam.getISAM2().marginalCovariance(var)  # 3x3
+            # it is much faster to call the RNG once for N draws than to do it in the loop
+            random_points: np.ndarray = RNG.multivariate_normal(
+                np.zeros(3), covariance, NUM_DRAWS
+            )
+            # random_poses: list = [None] * NUM_DRAWS
+            for i in range(0, NUM_DRAWS):
+                yield mean.compose(gtsam.Pose2.Expmap(random_points[i, :]))
+            # return random_poses
