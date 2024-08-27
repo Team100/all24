@@ -164,6 +164,8 @@ class Plot:
 
         paths = []
         odometry_paths = []
+        # if *any* of the factors are over the boundary...
+        boundary = False
         for f_i in range(factors.size()):
             if factors.exists(f_i):
                 factor = factors.at(f_i)
@@ -183,11 +185,7 @@ class Plot:
                         case CustomFactorType.BOUNDARY:
                             pose = result.atPose2(factor.keys()[0])
                             if pose.x() > 4.5:
-                                self.vline.set_color("red")
-                                self.vline.set_alpha(1.0)
-                            else:
-                                self.vline.set_color("blue")
-                                self.vline.set_alpha(0.2)
+                                boundary = True
                         case _:
                             print("wtf")
 
@@ -196,6 +194,13 @@ class Plot:
                     pose = result.atPose2(factor.keys()[0])
                     point = result.atPoint2(factor.keys()[1])
                     paths.append(matplotlib.path.Path([point, pose.translation()]))
+
+        if boundary:
+            self.vline.set_color("red")
+            self.vline.set_alpha(0.5)
+        else:
+            self.vline.set_color("blue")
+            self.vline.set_alpha(0.2)
 
         self.sights.set_paths(paths)
         self.odometry.set_paths(odometry_paths)
