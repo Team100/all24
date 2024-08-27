@@ -12,6 +12,7 @@ from matplotlib import collections
 import numpy as np
 from gtsam.symbol_shorthand import X  # type:ignore
 from landmark import Landmark
+from custom_factor_type import CustomFactorType
 
 
 NUM_DRAWS = 50
@@ -66,6 +67,8 @@ class Plot:
         self.ax.set_aspect("equal", adjustable="box")
         plt.tight_layout()
 
+        self.vline = self.ax.axvline(4.5, 0, 1, lw=10, alpha=0.2, color="blue")
+
         # the order the collections are added to the axis
         # is the order they are drawn below, so put the
         # mean after the distribution.
@@ -105,28 +108,23 @@ class Plot:
         )
         self.ax.add_collection(self.sights)
 
+        self.odometry = collections.PathCollection(
+            [],
+            edgecolors="red",
+        )
+        self.ax.add_collection(self.odometry)
+
         self.fig.canvas.draw()
         plt.show(block=False)
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
-    @staticmethod
-    def make_lines(pose_mean_poses):
-        c: gtsam.Pose2
-        for c in pose_mean_poses:
-            for l in [[0.5, 0.5], [0.5, 4.5]]:
-                # TODO: make this somehow use the factors that exist
-                l_angle = c.bearing(l)
-                l_range = c.range(l)
-                if abs(l_angle.theta()) < 0.5 and l_range < 4:
-                    yield matplotlib.path.Path([l, c.translation()])
-        # paths = [
-        #     matplotlib.path.Path([[0.5, 0.5], c.translation()]) for c in pose_mean_poses
-        # ]
-        # return paths
-
-    def plot_variables(
-        self, result: gtsam.Values, poses: list[X], landmarks: list[Landmark]
+    def plot_variables_and_factors(
+        self,
+        result: gtsam.Values,
+        poses: list[X],
+        landmarks: list[Landmark],
+        factors: gtsam.NonlinearFactorGraph,
     ) -> None:
         self.ax.draw_artist(self.ax.patch)
 
@@ -144,15 +142,7 @@ class Plot:
                 )
                 self.pose_point_scatter.set_offsets(pose_point_translations)
             except AttributeError:
-                pass # no marginal covariance
-
-            # also make the lines to the landmarks
-            # these won't be gtsam variables soon
-            # lines = [[[0.5, 0.5], c.translation().tolist()] for c in pose_mean_poses]
-            # lines = [[(0,0),(1,1)]]
-            # paths = [matplotlib.path.Path([[1,2],[3,4]])]
-            paths = list(self.make_lines(pose_mean_poses))
-            self.sights.set_paths(paths)
+                pass  # no marginal covariance
 
         if len(landmarks) > 0:
             landmark_mean_translations = np.array(
@@ -170,7 +160,45 @@ class Plot:
                 )
                 self.landmark_point_scatter.set_offsets(landmark_point_translations)
             except AttributeError:
-                pass # batch smoother has no marginal covariance method.
+                pass  # batch smoother has no marginal covariance method.
+
+        paths = []
+        odometry_paths = []
+        for f_i in range(factors.size()):
+            if factors.exists(f_i):
+                factor = factors.at(f_i)
+                if isinstance(factor, gtsam.CustomFactor):
+                    factor_type = CustomFactorType(factor.getKey())
+                    match factor_type:
+                        case CustomFactorType.BETWEEN:
+                            # paint the path as a straight line
+                            odometry_paths.append(
+                                matplotlib.path.Path(
+                                    [
+                                        result.atPose2(factor.keys()[0]).translation(),
+                                        result.atPose2(factor.keys()[1]).translation(),
+                                    ]
+                                )
+                            )
+                        case CustomFactorType.BOUNDARY:
+                            pose = result.atPose2(factor.keys()[0])
+                            if pose.x() > 4.5:
+                                self.vline.set_color("red")
+                                self.vline.set_alpha(1.0)
+                            else:
+                                self.vline.set_color("blue")
+                                self.vline.set_alpha(0.2)
+                        case _:
+                            print("wtf")
+
+                if isinstance(factor, gtsam.BearingRangeFactor2D):
+                    # for now, a sighting is a point2 and a pose2, see sam.i
+                    pose = result.atPose2(factor.keys()[0])
+                    point = result.atPoint2(factor.keys()[1])
+                    paths.append(matplotlib.path.Path([point, pose.translation()]))
+
+        self.sights.set_paths(paths)
+        self.odometry.set_paths(odometry_paths)
 
         self.ax.redraw_in_frame()
         self.fig.canvas.update()

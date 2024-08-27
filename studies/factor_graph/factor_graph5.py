@@ -8,6 +8,7 @@ import gtsam_unstable  # type:ignore
 from gtsam.symbol_shorthand import X
 from landmark import Landmark
 from plot_utils2 import Plot
+from custom_factor_type import CustomFactorType
 
 PAUSE_TIME = 1.0
 ANGLE_SCALE = 0.1
@@ -17,7 +18,11 @@ NOISE1 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.01]))
 NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.5, 0.5]))
 NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
-INCREMENTAL = False
+INCREMENTAL = True
+
+
+
+
 
 # this is cut-and-paste from here to figure out custom factors.
 # https://github.com/borglab/gtsam/blob/develop/python/CustomFactors.md
@@ -81,8 +86,6 @@ def initialize(isam, landmarks: list[Landmark], robot_x: gtsam.Pose2) -> None:
     values.insert(X(0), robot_x)
     timestamps.insert((X(0), 0))
     isam.update(graph, values, timestamps)
-    # new_factors: list[int] = isam.getISAM2Result().getNewFactorsIndices()
-    # print("INIT ", new_factors)
 
 
 def add_odometry_and_target_sights(
@@ -110,6 +113,7 @@ def add_odometry_and_target_sights(
     # odometry
     graph.add(
         gtsam.CustomFactor(
+            CustomFactorType.BETWEEN.value,
             NOISE3,
             gtsam.KeyVector([X(x_i - 1), X(x_i)]),
             custom_between_factor(robot_delta),
@@ -118,6 +122,7 @@ def add_odometry_and_target_sights(
     # boundary
     graph.add(
         gtsam.CustomFactor(
+            CustomFactorType.BOUNDARY.value,
             NOISE1,
             gtsam.KeyVector([X(x_i)]),
             custom_boundary_constraint(),
@@ -132,22 +137,18 @@ def add_odometry_and_target_sights(
             )
         timestamps.insert((l.symbol, x_i))
 
-
     isam.update(graph, values, timestamps)
-    # this is the list of factors i just added, in order.
-    # one for
-    # new_factors: list[int] = isam.getISAM2Result().getNewFactorsIndices()
-    # print("ODO/SIGHT ", new_factors)
 
 
 def forward_and_left() -> gtsam.Pose2:
     return gtsam.Pose2.Expmap([LINEAR_SCALE, 0, ANGLE_SCALE])
 
+
 def make_smoother() -> gtsam.FixedLagSmoother:
     if INCREMENTAL:
         # use incremental (faster, quite sensitive to initial values)
         optimization_params = gtsam.ISAM2GaussNewtonParams()
-        optimization_params.setWildfireThreshold(0.001) # the default is 0.001
+        optimization_params.setWildfireThreshold(0.001)  # the default is 0.001
         optimization_params = gtsam.ISAM2DoglegParams()
         print(optimization_params)
         isam_params = gtsam.ISAM2Params()
@@ -160,18 +161,19 @@ def make_smoother() -> gtsam.FixedLagSmoother:
         print(isam_params)
         return gtsam_unstable.IncrementalFixedLagSmoother(10, isam_params)
 
-
     # use batch (2.5x slower, very insensitive to initial values)
     lm_params = gtsam.LevenbergMarquardtParams.LegacyDefaults()
     print(lm_params)
     return gtsam.BatchFixedLagSmoother(10, lm_params)
+
 
 def make_plots(isam) -> tuple[Plot, Plot]:
     fig, ax = Plot.subplots(1, 2, 12, 6)
     p0 = Plot(isam, "p0", fig, ax[0])
     p1 = Plot(isam, "p1", fig, ax[1])
     fig.tight_layout()
-    return p0,p1
+    return p0, p1
+
 
 def main() -> None:
     print("DEBUG? ", gtsam.isDebugVersion())
@@ -198,23 +200,20 @@ def main() -> None:
         prev_robot_x = robot_x
         # only one isam.update() is allowed per time step
         t0 = time.time_ns()
-        add_odometry_and_target_sights(isam, x_i, latest_robot_pose_estimate, robot_x, robot_delta, landmarks)
+        add_odometry_and_target_sights(
+            isam, x_i, latest_robot_pose_estimate, robot_x, robot_delta, landmarks
+        )
         result: gtsam.Values = isam.calculateEstimate()
         t1 = time.time_ns()
         # print(dir(result))
         factors: gtsam.NonlinearFactorGraph = isam.getFactors()
-        # for f_i in range(factors.size()):
-        #     if  factors.exists(f_i):
-        #         print(type(factors.at(f_i)))
-        #         print(factors.at(f_i))
-        print(factors)
         pose_variables.append(X(x_i))
         latest_robot_pose_estimate = result.atPose2(X(x_i))
         pose_variables = [pv for pv in pose_variables if result.exists(pv)]
         if x_i % 5 == 0:
             print(f"i {x_i} duration (ns) {t1-t0}")
-        p0.plot_variables(result, pose_variables, landmarks)
-        p1.plot_variables(result, pose_variables, landmarks)
+        p0.plot_variables_and_factors(result, pose_variables, landmarks, factors)
+        p1.plot_variables_and_factors(result, pose_variables, landmarks, factors)
 
 
 if __name__ == "__main__":
