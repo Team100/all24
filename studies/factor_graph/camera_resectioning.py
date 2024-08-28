@@ -2,8 +2,10 @@
 """
 This is a 1:1 transcription of CameraResectioning.cpp.
 """
+import time
 import numpy as np
 from gtsam import Cal3_S2, CustomFactor, LevenbergMarquardtOptimizer, KeyVector
+from gtsam import LevenbergMarquardtParams
 from gtsam import NonlinearFactor, NonlinearFactorGraph
 from gtsam import PinholeCameraCal3_S2, Point2, Point3, Pose3, Rot3, Values
 from gtsam.noiseModel import Base as SharedNoiseModel, Diagonal
@@ -29,14 +31,14 @@ def resectioning_factor(
         Dpoint = np.zeros((2, 3), order="F")
         Dcal = np.zeros((2, 5), order="F")
 
-        q = pose.transformTo(P)
-        print("pose ", pose)
-        print("P ", P)
-        print("q ", q)
+        # q = pose.transformTo(P)
+        # print("pose ", pose)
+        # print("P ", P)
+        # print("q ", q)
 
         result = camera.project(P, Dpose, Dpoint, Dcal) - p
         H[0] = Dpose
-        print("Dpose ", Dpose)
+        # print("Dpose ", Dpose)
         return result
 
     return CustomFactor(model, KeyVector([key]), error_func)
@@ -89,9 +91,16 @@ def main() -> None:
     initial.insert(X(1), Pose3(Rot3(1, 0, 0, 0, -1, 0, 0, 0, -1), Point3(0, 0, 5)))
 
     # 4. Optimize the graph using Levenberg-Marquardt
-    result: Values = LevenbergMarquardtOptimizer(graph, initial).optimize()
-    result.print("Final result:\n")
+    params = LevenbergMarquardtParams()
+    # Dellaert suggested using a high initial lambda
+    # to get around the chirality exception
+    params.setlambdaInitial(1e6)
 
+    t0 = time.time_ns()
+    result: Values = LevenbergMarquardtOptimizer(graph, initial, params).optimize()
+    t1 = time.time_ns()
+    result.print("Final result:\n")
+    print("duration ms ", (t1-t0)/1000000)
 
 if __name__ == "__main__":
     main()
