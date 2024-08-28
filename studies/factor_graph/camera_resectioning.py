@@ -20,14 +20,23 @@ def resectioning_factor(
 
     def error_func(this: CustomFactor, v: Values, H: list[np.ndarray]) -> np.ndarray:
         pose = v.atPose3(this.keys()[0])
+        print("pose pose ", pose)
         camera = PinholeCameraCal3_S2(pose, calib)
+        print("camera pose ", camera.pose())
         if H is None:
             return camera.project(P) - p
         Dpose = np.zeros((2, 6), order="F")
         Dpoint = np.zeros((2, 3), order="F")
         Dcal = np.zeros((2, 5), order="F")
+
+        q = pose.transformTo(P)
+        print("pose ", pose)
+        print("P ", P)
+        print("q ", q)
+
         result = camera.project(P, Dpose, Dpoint, Dcal) - p
         H[0] = Dpose
+        print("Dpose ", Dpose)
         return result
 
     return CustomFactor(model, KeyVector([key]), error_func)
@@ -73,8 +82,11 @@ def main() -> None:
     )
 
     # 3. Create an initial estimate for the camera pose
+    # note: the optimizer will traverse negative-z (chirality-violating) territory
+    # on the way to the correct solution, so turn off the cmake option
+    # GTSAM_THROW_CHEIRALITY_EXCEPTION to prevent an exception from being thrown.
     initial: Values = Values()
-    initial.insert(X(1), Pose3(Rot3(1, 0, 0, 0, -1, 0, 0, 0, -1), Point3(0, 0, 1)))
+    initial.insert(X(1), Pose3(Rot3(1, 0, 0, 0, -1, 0, 0, 0, -1), Point3(0, 0, 5)))
 
     # 4. Optimize the graph using Levenberg-Marquardt
     result: Values = LevenbergMarquardtOptimizer(graph, initial).optimize()
