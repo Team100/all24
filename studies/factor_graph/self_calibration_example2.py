@@ -1,15 +1,20 @@
 # pylint: disable=unused-import,consider-using-from-import,invalid-name,no-name-in-module,no-member,missing-function-docstring,too-many-locals
 """
 Transcription of SelfCalibrationExample.cpp
+
+This version adds distortion to the camera.
 """
 import math
 
-from gtsam import Cal3_S2
+# from gtsam import Cal3_S2 # intrinsic only
+from gtsam import Cal3DS2 # includes distortion
 from gtsam.noiseModel import Diagonal, Isotropic
 
 # SFM-specific factors
-from gtsam import GeneralSFMFactor2Cal3_S2  # does calibration !
-from gtsam import PinholeCameraCal3_S2
+# from gtsam import GeneralSFMFactor2Cal3_S2  # does calibration !
+from gtsam import GeneralSFMFactor2Cal3DS2  # does calibration !
+# from gtsam import PinholeCameraCal3_S2
+from gtsam import PinholeCameraCal3DS2
 
 # Camera observations of landmarks (i.e. pixel coordinates) will be stored as Point2 (x, y).
 from gtsam import Point2
@@ -72,17 +77,18 @@ def main() -> None:
     graph.addPriorPose3(X(0), poses[0], poseNoise)
 
     # Simulated measurements from each camera pose, adding them to the factor graph
-    Kcal = Cal3_S2(50.0, 50.0, 0.0, 50.0, 50.0)
+    # Kcal = Cal3_S2(50.0, 50.0, 0.0, 50.0, 50.0)
+    Kcal = Cal3DS2(50.0, 50.0, 0.0, 50.0, 50.0, -0.2, 0.1, 0.0, 0.0)
     measurementNoise = Isotropic.Sigma(2, 1.0)
     for i, pose in enumerate(poses):
         for j, point in enumerate(points):
-            camera = PinholeCameraCal3_S2(pose, Kcal)
+            camera = PinholeCameraCal3DS2(pose, Kcal)
             measurement: Point2 = camera.project(point)
             # The only real difference with the Visual SLAM example is that here we
             # use a different factor type, that also calculates the Jacobian with
             # respect to calibration
             graph.add(
-                GeneralSFMFactor2Cal3_S2(
+                GeneralSFMFactor2Cal3DS2(
                     measurement,
                     measurementNoise,
                     X(i),
@@ -96,13 +102,13 @@ def main() -> None:
     graph.addPriorPoint3(L(0), points[0], pointNoise)  # add directly to graph
 
     # Add a prior on the calibration.
-    calNoise = Diagonal.Sigmas([500, 500, 0.1, 100, 100])
-    graph.addPriorCal3_S2(K(0), Kcal, calNoise)
+    calNoise = Diagonal.Sigmas([500, 500, 0.1, 100, 100, 10, 10, 0.1, 0.1])
+    graph.addPriorCal3DS2(K(0), Kcal, calNoise)
 
     # Create the initial estimate to the solution
     # now including an estimate on the camera calibration parameters
     initialEstimate = Values()
-    initialEstimate.insert(K(0), Cal3_S2(60.0, 60.0, 0.0, 45.0, 45.0))
+    initialEstimate.insert(K(0), Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0))
     for i, pose in enumerate(poses):
         initialEstimate.insert(
             X(i),
