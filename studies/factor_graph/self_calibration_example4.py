@@ -2,7 +2,7 @@
 """
 Transcription of SelfCalibrationExample.cpp
 
-This version uses a custom factor instead of GeneralSFMFactor2Cal3DS2.
+This version makes the landmarks constants instead of optimizer variables.
 """
 import math
 import time
@@ -69,19 +69,19 @@ def General_SFM_Factor2_Cal3DS2(
     measured: Point2,
     model: SharedNoiseModel,
     poseKey: int,
-    landmarkKey: int,
+    point: Point3,
     calibKey: int,
 ) -> NonlinearFactor:
     """
-    Custom factor that does the same thing as GeneralSFMFactor2<Cal3DS2>
+    Custom factor that's similar to GeneralSFMFactor2<Cal3DS2> but with a fixed landmark.
     """
 
     def error_func(this: CustomFactor, v: Values, H: list[np.ndarray]) -> np.ndarray:
         pose3: Pose3 = v.atPose3(this.keys()[0])
-        point: Point3 = v.atPoint3(this.keys()[1])
-        calib: Cal3DS2 = v.atCal3DS2(this.keys()[2])
+        calib: Cal3DS2 = v.atCal3DS2(this.keys()[1])
 
         H1_pose = np.zeros((2, 6), order="F")
+        # TODO: null?
         H2_landmark = np.zeros((2, 3), order="F")
         H3_calib = np.zeros((2, 9), order="F")
 
@@ -90,12 +90,11 @@ def General_SFM_Factor2_Cal3DS2(
 
         if H is not None:
             H[0] = H1_pose
-            H[1] = H2_landmark
-            H[2] = H3_calib
+            H[1] = H3_calib
 
         return result
 
-    return CustomFactor(model, KeyVector([poseKey, landmarkKey, calibKey]), error_func)
+    return CustomFactor(model, KeyVector([poseKey, calibKey]), error_func)
 
 
 def main() -> None:
@@ -127,14 +126,10 @@ def main() -> None:
                     measurement,
                     measurementNoise,
                     X(i),
-                    L(j),
+                    point,
                     K(0),
                 )
             )
-
-    # Add a prior on the position of the first landmark.
-    pointNoise = Isotropic.Sigma(3, 0.1)
-    graph.addPriorPoint3(L(0), points[0], pointNoise)  # add directly to graph
 
     # Add a prior on the calibration.
     calNoise = Diagonal.Sigmas([500, 500, 0.1, 100, 100, 10, 10, 0.1, 0.1])
@@ -153,8 +148,6 @@ def main() -> None:
                 Pose3(Rot3.Rodrigues(-0.1, 0.2, 0.25), Point3(0.05, -0.10, 0.20))
             ),
         )
-    for j, point in enumerate(points):
-        initialEstimate.insert(L(j), point + Point3(-0.25, 0.20, 0.15))
 
     # Optimize the graph and print results
     t0 = time.time_ns()
