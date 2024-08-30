@@ -151,6 +151,7 @@ def main() -> None:
     t1 = time.time_ns()
     result.print("Final results:\n")
     print("duration ms ", (t1-t0)/1e6)
+    print("DOT\n", graph.dot(result))
 
 if __name__ == "__main__":
     main()
