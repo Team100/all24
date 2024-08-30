@@ -31,7 +31,7 @@ public class CollectionUtil {
             motorPhase,
             currentLimit,
             Feedforward100.makeNeo550(),
-            new PIDConstants(1));
+            new PIDConstants(.00000001));
         return getMechanismNoEncoder(
                 parent,
                 motor,
@@ -79,7 +79,7 @@ public class CollectionUtil {
          wheelDiameterM));
     }
 
-    public static LinearVelocityServo simulatedDriveServo(SupplierLogger parent) {
+    public static OutboardLinearVelocityServo simulatedDriveServo(SupplierLogger parent) {
         return new OutboardLinearVelocityServo(
                 parent,
                 simulatedLinearMechanism(parent));

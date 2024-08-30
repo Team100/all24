@@ -28,6 +28,7 @@ class Identity(Enum):
     LEFTAMP = "100000004e0a1fb9"
     GAME_PIECE = "1000000013c9c96c"
     DEV = "10000000a7c673d9" # rpi4 used for development
+    DEV2 = "06ece53b019a5c2e"
     FLIPPED = "flipme"  # example for per-identity config
     UNKNOWN = "unknown"
 
@@ -35,6 +36,28 @@ class Identity(Enum):
     def _missing_(cls, value: object) -> Any:
         return Identity.UNKNOWN
 
+    @staticmethod
+    def getNumCameras(identity: 'Identity') -> int: 
+        match identity:
+            case Identity.RIGHTAMP:
+                return 1
+            case Identity.LEFTAMP:
+                return 1
+            case Identity.SHOOTER:
+                return 1
+            case Identity.GAME_PIECE:
+                return 1
+            case Identity.DEV:
+                return 0
+            case Identity.DEV2:
+                return 1
+            case Identity.FLIPPED:
+                return 0  # Changed from None to 0
+            case Identity.UNKNOWN:
+                return 0  # Changed from None to 0
+            case _:
+                raise ValueError(f"Unknown identity: {identity}")
+ 
     @staticmethod
     def get() -> "Identity":
         serial = _SERIAL

@@ -152,8 +152,8 @@ class CameraData:
             fy = 1680
             cx = 728
             cy = 544
-            k1 = -9.34267276897509
-            k2 = -180.15213212010667
+            k1 = 0
+            k2 = 0
         else:
             print("UNKNOWN CAMERA MODEL")
             sys.exit()
@@ -188,6 +188,10 @@ class TagFinder:
         self.initialize_nt(camList)
         self.blips = []
         self.at_detector = robotpy_apriltag.AprilTagDetector()
+        
+        config = self.at_detector.Config()
+        config.numThreads = 4
+        self.at_detector.setConfig(config)
         self.at_detector.addFamily("tag36h11")
 
     def analyze(self, request, camera):

@@ -61,15 +61,6 @@ public class Robot extends TimedRobot100 implements Glassy {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
-        // t.log(Level.TRACE, "Voltage", m_pdh.getVoltage());
-        // t.log(Level.TRACE, "Total Current", m_pdh.getTotalCurrent());
-
-        // for(int channel = 0; channel < 20; channel++){
-        // t.log(Level.TRACE, "Channel " + String.valueOf(channel),
-        // m_pdh.getCurrent(channel));
-
-        // }
-
         m_logger.logDouble(Level.TRACE, "DriverStation MatchTime", DriverStation::getMatchTime);
         m_logger.logBoolean(Level.TRACE, "DriverStation AutonomousEnabled", DriverStation::isAutonomousEnabled);
         m_logger.logBoolean(Level.TRACE, "DriverStation TeleopEnabled", DriverStation::isTeleopEnabled);

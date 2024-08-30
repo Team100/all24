@@ -4,7 +4,6 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class TankDriveSubsystem extends SubsystemBase implements Glassy{
@@ -37,45 +36,14 @@ public class TankDriveSubsystem extends SubsystemBase implements Glassy{
      * 
      */
     public void set(double translationSpeed, double rotSpeed) {
-        Rotation2d rot = new Rotation2d(rotSpeed, translationSpeed);
-        double power = Math.hypot(translationSpeed, rotSpeed);
-        double angle = rot.getRadians();
-        if (angle >= 0 && angle < Math.PI/2) {  
-            wheelDrive(((Math.PI/4)-angle)/(Math.PI/4), 2, power, angle); 
-          } else if (angle >= Math.PI && angle < 3*Math.PI/2) {
-            wheelDrive((angle-(5*Math.PI/4))/(Math.PI/4), 2, power, angle);
-          } else if (angle >= Math.PI/2 && angle < Math.PI) {
-            wheelDrive(((3*Math.PI/4)-angle)/(Math.PI/4), 1, power, angle);
-          } else if (angle >= (3*Math.PI/2) && angle < 2*Math.PI) {
-            wheelDrive((angle-(7*Math.PI/4))/(Math.PI/4), 1, power, angle);
-          }
+      double invertedRot = rotSpeed * -1.0;
+        double leftSpeed = translationSpeed + invertedRot;
+        double rightSpeed = translationSpeed - invertedRot;
+        setRawModules(leftSpeed * 0.5, rightSpeed* 0.5);
     }
 
     public void setRawModules(double... states) {
         m_modules.setDrive(states);
-    }
-
-    private void wheelDrive(double angle, int motor, double power, double realangle) {
-        if(motor == 2) {
-            int neg;
-            if (realangle <= Math.PI) {
-            neg = 1;
-            } else {
-              neg = -1;
-            }
-            setRawModules(neg*power*100,power*(angle*100));
-          } else {
-            int neg;
-            if (realangle >= Math.PI) {
-            neg = 1;
-            } else {
-              neg = -1;
-            }
-            setRawModules(neg*power*100,power*(angle*100));
-          }
-              if (realangle == Math.PI) {
-            setRawModules(-power*100,-power*100);
-        }
     }
 
     public void stop() {

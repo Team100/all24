@@ -57,7 +57,7 @@ public class DriveManually extends Command100 {
             "Manual",
                 new TankDriver() {
                     public void apply(DriverControl.Velocity t, double dt) {
-                        m_drive.set(t.x(), t.y());
+                        m_drive.set(t.x(), t.theta());
                     }
         });
     }

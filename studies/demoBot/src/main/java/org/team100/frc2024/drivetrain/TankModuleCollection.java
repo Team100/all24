@@ -3,7 +3,6 @@ package org.team100.frc2024.drivetrain;
 import java.util.OptionalDouble;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.telemetry.SupplierLogger;
@@ -15,10 +14,10 @@ public class TankModuleCollection {
     private static final String kLeft = "Left";
     private static final String kRight = "Right";
 
-    private final LinearVelocityServo m_rightDrive;
-    private final LinearVelocityServo m_leftDrive;
+    private final OutboardLinearVelocityServo m_rightDrive;
+    private final OutboardLinearVelocityServo m_leftDrive;
 
-    private TankModuleCollection(LinearVelocityServo leftDrive, LinearVelocityServo rightDrive) {
+    private TankModuleCollection(OutboardLinearVelocityServo leftDrive, OutboardLinearVelocityServo rightDrive) {
         m_leftDrive = leftDrive;
         m_rightDrive = rightDrive;
     }
@@ -31,19 +30,21 @@ public class TankModuleCollection {
             int currentLimit) {
         SupplierLogger collectionLogger = parent.child(kSwerveModules);
         switch (Identity.instance) {
+            case FRC_100_ea4:
             case CAMERA_DOLLY:
+            //TODO I am not sure if these wheel diameters are correct
                 Util.println("************** Custom Tank Module Modules, using in built encoders? **************");
-                LinearVelocityServo leftMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550LinearMechanism(
-                        kLeft, collectionLogger, currentLimit, 0, Math.pow(5.2307692308, 2), MotorPhase.FORWARD, 0.098425));
-                LinearVelocityServo rightMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550LinearMechanism(
-                        kRight, collectionLogger, currentLimit, 0, Math.pow(5.2307692308, 2), MotorPhase.FORWARD, 0.098425));
+                OutboardLinearVelocityServo rightMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550LinearMechanism(
+                        kRight, collectionLogger, currentLimit, 3, Math.pow(5.2307692308, 2), MotorPhase.REVERSE, 0.098425));
+                OutboardLinearVelocityServo leftMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550LinearMechanism(
+                        kLeft, collectionLogger, currentLimit, 2, Math.pow(5.2307692308, 2), MotorPhase.FORWARD, 0.098425));
                 return new TankModuleCollection(leftMotor, rightMotor);
             case BLANK:
+            Util.println("************** SIMULATED MODULES **************");
             default:
-                Util.println("************** SIMULATED MODULES **************");
                 return new TankModuleCollection(
-                    CollectionUtil.simulatedDriveServo(parent.child(kLeft)),
-                    CollectionUtil.simulatedDriveServo(parent.child(kRight)));
+                    CollectionUtil.simulatedDriveServo(collectionLogger.child(kLeft)),
+                    CollectionUtil.simulatedDriveServo(collectionLogger.child(kRight)));
         }
     }
 
