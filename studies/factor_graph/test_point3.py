@@ -85,6 +85,28 @@ class TestPoint3(unittest.TestCase):
         assert_allclose(numericalDerivative21Point3Point3Point3(f, omega, theta), H[0])
         assert_allclose(numericalDerivative22Point3Point3Point3(f, omega, theta), H[1])
 
+    def test_cross2(self):
+        p: Point3 = Point3(1, 0.2, 0.3)
+        q: Point3 = p + Point3(0.5, 0.2, -3.0)
+        r: Point3 = p + Point3(0.8, 0, 0)
+        assert_allclose(Point3(0, 0, 0), np.cross(p, p))
+        assert_allclose(Point3(-0.66, 3.15, 0.1), np.cross(p, q))
+        assert_allclose(Point3(0, 0.24, -0.16), np.cross(p, r))
+
+        # Use numerical derivatives to calculate the expected Jacobians
+        H = [np.zeros((3, 3)), np.zeros((3, 3))]
+
+        def f(p: Point3, q: Point3):
+            return cross(p, q)
+
+        cross(p, q, H)
+        assert_allclose(numericalDerivative21Point3Point3Point3(f, p, q), H[0])
+        assert_allclose(numericalDerivative22Point3Point3Point3(f, p, q), H[1])
+
+        cross(p, r, H)
+        assert_allclose(numericalDerivative21Point3Point3Point3(f, p, r), H[0])
+        assert_allclose(numericalDerivative22Point3Point3Point3(f, p, r), H[1])
+
 
 if __name__ == "__main__":
     unittest.main()
