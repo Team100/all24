@@ -8,7 +8,7 @@
 from typing import Callable
 import numpy as np
 
-from gtsam import Point2
+from gtsam import Point2, Point3
 
 
 def VectorLocal(a, b):
@@ -37,20 +37,52 @@ def numericalGradientVector2(
         g[j] = (hxplus - hxmin) * factor
     return g
 
+
+def numericalDerivative21DoublePoint3Point3(
+    h: Callable[[Point3, Point3], float], x1: Point3, x2: Point3, delta=1e-5
+) -> np.array:
+    return numericalDerivative11DoublePoint3(lambda x: h(x, x2), x1, delta)
+
+
+def numericalDerivative22DoublePoint3Point3(
+    h: Callable[[Point3, Point3], float], x1: Point3, x2: Point3, delta=1e-5
+) -> np.array:
+    return numericalDerivative11DoublePoint3(lambda x: h(x1, x), x2, delta)
+
+
 def numericalDerivative21DoublePoint2Point2(
-        h:Callable[[Point2, Point2], float], x1: Point2, x2: Point2, delta=1e-5 
+    h: Callable[[Point2, Point2], float], x1: Point2, x2: Point2, delta=1e-5
 ) -> np.array:
-    return numericalDerivative11DoublePoint2(
-        lambda x: h(x, x2), x1, delta
-    )
-    
+    return numericalDerivative11DoublePoint2(lambda x: h(x, x2), x1, delta)
+
+
 def numericalDerivative22DoublePoint2Point2(
-        h:Callable[[Point2, Point2], float], x1: Point2, x2: Point2, delta=1e-5 
+    h: Callable[[Point2, Point2], float], x1: Point2, x2: Point2, delta=1e-5
 ) -> np.array:
-    return numericalDerivative11DoublePoint2(
-        lambda x: h(x1, x), x2, delta
-    )
-    
+    return numericalDerivative11DoublePoint2(lambda x: h(x1, x), x2, delta)
+
+
+def numericalDerivative11DoublePoint3(
+    h: Callable[[Point3], float], x: Point3, delta=1e-5
+) -> np.array:
+    """Always produces a 2d array."""
+    N = 3  # for now
+    hx = h(x)
+    m: int = 1
+
+    dx = np.zeros(N)
+
+    H = np.zeros((m, N))
+    factor: float = 1.0 / (2.0 * delta)
+    for j in range(N):
+        dx[j] = delta
+        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dx[j] = -delta
+        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dx[j] = 0
+        H[:, j] = (dy1 - dy2) * factor
+    return H
+
 
 def numericalDerivative11DoublePoint2(
     h: Callable[[Point2], float], x: Point2, delta=1e-5
@@ -71,7 +103,7 @@ def numericalDerivative11DoublePoint2(
         dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
-    return H    
+    return H
 
 
 def numericalDerivative11VectorDouble(

@@ -1,5 +1,5 @@
 # really to test numeric differentation
-# see testPoint.cpp
+# see testPoint2.cpp
 
 import math
 
