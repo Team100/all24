@@ -8,6 +8,8 @@
 from typing import Callable
 import numpy as np
 
+from gtsam import Point2
+
 
 def VectorLocal(a, b):
     """See VectorSpace.h, TangentVector.Local is difference."""
@@ -36,10 +38,32 @@ def numericalGradientVector2(
     return g
 
 
+def numericalDerivative11DoublePoint2(
+    h: Callable[[Point2], float], x: Point2, delta=1e-5
+) -> np.array:
+    """Always produces a 2d array."""
+    N = 2  # for now
+    hx = h(x)
+    m: int = 1
+
+    dx = np.zeros(N)
+
+    H = np.zeros((m, N))
+    factor: float = 1.0 / (2.0 * delta)
+    for j in range(N):
+        dx[j] = delta
+        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dx[j] = -delta
+        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dx[j] = 0
+        H[:, j] = (dy1 - dy2) * factor
+    return H    
+
+
 def numericalDerivative11VectorDouble(
     h: Callable[[float], np.array], x: float, delta=1e-5
 ) -> np.array:
-    N =1  # for now
+    N = 1  # for now
     print(x)
     print(type(x))
     hx = h(x)
