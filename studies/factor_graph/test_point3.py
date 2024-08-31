@@ -10,6 +10,8 @@ from numpy.testing import assert_allclose
 
 from numerical_derivative import numericalDerivative21DoublePoint3Point3
 from numerical_derivative import numericalDerivative22DoublePoint3Point3
+from numerical_derivative import numericalDerivative21Point3Point3Point3
+from numerical_derivative import numericalDerivative22Point3Point3Point3
 
 
 def dot(p: Point3, q: Point3, H: list[np.array] = None) -> float:
@@ -18,6 +20,18 @@ def dot(p: Point3, q: Point3, H: list[np.array] = None) -> float:
         H[0] = np.array([[q[0], q[1], q[2]]])
         H[1] = np.array([[p[0], p[1], p[2]]])
     return np.dot(p, q)
+
+
+def cross(p: Point3, q: Point3, H: list[np.array] = None) -> Point3:
+    """OptionalJacobian<3, 3> H1, H2"""
+    if H is not None:
+        H[0] = skewSymmetric(q[0] * -1, q[1] * -1, q[2] * -1)
+        H[1] = skewSymmetric(p[0], p[1], p[2])
+    return np.cross(p, q)
+
+
+def skewSymmetric(wx: float, wy: float, wz: float) -> np.array:
+    return np.array([[0.0, -wz, +wy], [+wz, 0.0, -wx], [-wy, +wx, 0.0]])
 
 
 class TestPoint3(unittest.TestCase):
@@ -57,6 +71,19 @@ class TestPoint3(unittest.TestCase):
         self.assertAlmostEqual(1.07, d)
         assert_allclose(numericalDerivative21DoublePoint3Point3(f, p, t), H[0], 1e-9)
         assert_allclose(numericalDerivative22DoublePoint3Point3(f, p, t), H[1], 1e-9)
+
+    def test_cross(self):
+        H = [np.zeros((3, 3)), np.zeros((3, 3))]
+
+        def f(p: Point3, q: Point3) -> Point3:
+            return cross(p, q)
+
+        omega = Point3(0, 1, 0)
+        theta = Point3(4, 6, 8)
+
+        cross(omega, theta, H)
+        assert_allclose(numericalDerivative21Point3Point3Point3(f, omega, theta), H[0])
+        assert_allclose(numericalDerivative22Point3Point3Point3(f, omega, theta), H[1])
 
 
 if __name__ == "__main__":
