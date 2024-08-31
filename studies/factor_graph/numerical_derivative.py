@@ -37,6 +37,20 @@ def numericalGradientVector2(
         g[j] = (hxplus - hxmin) * factor
     return g
 
+def numericalDerivative21DoublePoint2Point2(
+        h:Callable[[Point2, Point2], float], x1: Point2, x2: Point2, delta=1e-5 
+) -> np.array:
+    return numericalDerivative11DoublePoint2(
+        lambda x: h(x, x2), x1, delta
+    )
+    
+def numericalDerivative22DoublePoint2Point2(
+        h:Callable[[Point2, Point2], float], x1: Point2, x2: Point2, delta=1e-5 
+) -> np.array:
+    return numericalDerivative11DoublePoint2(
+        lambda x: h(x1, x), x2, delta
+    )
+    
 
 def numericalDerivative11DoublePoint2(
     h: Callable[[Point2], float], x: Point2, delta=1e-5
@@ -64,8 +78,6 @@ def numericalDerivative11VectorDouble(
     h: Callable[[float], np.array], x: float, delta=1e-5
 ) -> np.array:
     N = 1  # for now
-    print(x)
-    print(type(x))
     hx = h(x)
     m: int = np.shape(hx)[0]
 
