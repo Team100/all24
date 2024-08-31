@@ -30,9 +30,7 @@ public class TankModuleCollection {
             int currentLimit) {
         SupplierLogger collectionLogger = parent.child(kSwerveModules);
         switch (Identity.instance) {
-            case FRC_100_ea4:
-            case CAMERA_DOLLY:
-            //TODO I am not sure if these wheel diameters are correct
+            case DEMO_BOT:
                 Util.println("************** Custom Tank Module Modules, using in built encoders? **************");
                 OutboardLinearVelocityServo rightMotor = new OutboardLinearVelocityServo(collectionLogger, CollectionUtil.getNEO550LinearMechanism(
                         kRight, collectionLogger, currentLimit, 3, Math.pow(5.2307692308, 2), MotorPhase.REVERSE, 0.098425));

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class TankDriveSubsystem extends SubsystemBase implements Glassy{
     private final SupplierLogger m_logger;
     private final TankModuleCollection m_modules;
+    private final double kMaxSpeedM_S = 0.5;
 
     public TankDriveSubsystem(
             SupplierLogger parent,
@@ -36,10 +37,10 @@ public class TankDriveSubsystem extends SubsystemBase implements Glassy{
      * 
      */
     public void set(double translationSpeed, double rotSpeed) {
-      double invertedRot = rotSpeed * -1.0;
+        double invertedRot = rotSpeed * -1.0;
         double leftSpeed = translationSpeed + invertedRot;
         double rightSpeed = translationSpeed - invertedRot;
-        setRawModules(leftSpeed * 0.5, rightSpeed* 0.5);
+        setRawModules(leftSpeed * kMaxSpeedM_S, rightSpeed* kMaxSpeedM_S);
     }
 
     public void setRawModules(double... states) {

@@ -35,7 +35,7 @@ public class ShooterCollection {
             SupplierLogger collectionLogger = parent.child(kShooter);
             double shooterWheelDiameterM = .33;
             switch (Identity.instance) {
-                case CAMERA_DOLLY:
+                case DEMO_BOT:
                 //TODO get the real diameter, gearRatios, and canIDs, and Indexer accel
                 LinearVelocityServo leftDrum = CollectionUtil.getNEO550VelocityServo(kLeft, collectionLogger,currentLimit,4,5.2307692308,MotorPhase.FORWARD, shooterWheelDiameterM);
                 LinearVelocityServo rightDrum = CollectionUtil.getNEO550VelocityServo(kRight, collectionLogger,currentLimit,5,5.2307692308,MotorPhase.REVERSE, shooterWheelDiameterM);
