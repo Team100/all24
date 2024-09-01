@@ -6,7 +6,7 @@ import math
 
 import unittest
 import numpy as np
-from gtsam import Point2, Pose2, Rot2  # really np.array
+from gtsam import Point2, Pose2, Rot2
 from numpy.testing import assert_almost_equal
 
 from numerical_derivative import numericalDerivative11Point2Pose2
