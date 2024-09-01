@@ -104,8 +104,8 @@ class TestPose2(unittest.TestCase):
         expectedH2 = np.array([[0.0, 1.0], [-1.0, 0.0]])
 
         # actual
-        actualH1 = np.zeros((2, 3))
-        actualH2 = np.zeros((2, 2))
+        actualH1 = np.zeros((2, 3), order='F')
+        actualH2 = np.zeros((2, 2), order='F')
         actual: Point2 = pose.transformTo(point, actualH1, actualH2)
         assert_allclose(expected, actual)
 
@@ -120,8 +120,8 @@ class TestPose2(unittest.TestCase):
     def test_transformFrom(self):
         pose = Pose2(1.0, 0.0, math.pi / 2.0)
         pt = Point2(2.0, 1.0)
-        H1 = np.zeros((3, 3))
-        H2 = np.zeros((3, 3))
+        H1 = np.zeros((3, 3), order='F')
+        H2 = np.zeros((3, 3), order='F')
         actual: Point2 = pose.transformFrom(pt, H1, H2)
 
         expected = Point2(0.0, 2.0)
@@ -236,7 +236,7 @@ class TestPose2(unittest.TestCase):
     def test_translation(self):
         pose = Pose2(3.5, -8.2, 4.2)
 
-        actualH = [np.zeros((2, 3))]
+        actualH = np.zeros((2, 3), order="F")
         assert_allclose(np.array([3.5, -8.2]), pose.translation(actualH))
 
         def f(T: Pose2) -> Point2:
@@ -248,7 +248,7 @@ class TestPose2(unittest.TestCase):
     def test_rotation(self):
         pose = Pose2(3.5, -8.2, 4.2)
 
-        actualH = np.zeros((4, 3))
+        actualH = np.zeros((4, 3), order='F')
         assert_allclose(Rot2(4.2), pose.rotation(actualH))
 
         def f(T: Pose2) -> Rot2:

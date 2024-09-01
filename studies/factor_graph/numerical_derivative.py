@@ -248,9 +248,9 @@ def numericalDerivative11DoublePoint3(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy1 = VectorLocal(hx, h(Point3.Retract(x, dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy2 = VectorLocal(hx, h(Point3.Retract(x, dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -270,9 +270,9 @@ def numericalDerivative11Point2Pose2(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy1 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy2 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
