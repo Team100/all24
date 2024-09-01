@@ -1,4 +1,4 @@
-# pylint: disable=C0103,C0114,C0115,C0116,E0611,R0913
+# pylint: disable=C0103,C0114,C0115,C0116,E0611,R0904,R0913
 # really to test numeric differentation
 # see testPose2.cpp
 
