@@ -36,13 +36,13 @@ def f6(x1: float, x2: float, x3: float, x4: float, x5: float, x6: float) -> np.a
 
 class TestNumericalDerivative(unittest.TestCase):
 
-    def test_numericalGradient(self):
+    def test_numericalGradient(self) -> None:
         x = np.array([1.0, 1.1])
         expected = np.array([math.cos(x[0]), -math.sin(x[1])])
         actual: gtsam.Vector = numericalGradientVector2(f, x)
         assert_allclose(expected, actual, atol=1e-5)
 
-    def test_numeriDerivative61(self):
+    def test_numeriDerivative61(self) -> None:
         x1 = 1
         x2 = 2
         x3 = 3

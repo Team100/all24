@@ -1,3 +1,4 @@
+# pylint: disable=C0103,C0114,C0116,E0611,R0913
 # really to test numeric differentation
 # see testPoint.cpp
 
@@ -81,7 +82,7 @@ def distance3(p1: Point3,   q: Point3, H: list[np.array] = None) -> float:
 
 
 class TestPoint3(unittest.TestCase):
-    def test_dot(self):
+    def test_dot(self) -> None:
         origin = Point3(0, 0, 0)
         ones = Point3(1, 1, 1)
 
@@ -118,7 +119,7 @@ class TestPoint3(unittest.TestCase):
         assert_allclose(numericalDerivative21DoublePoint3Point3(f, p, t), H[0], 1e-9)
         assert_allclose(numericalDerivative22DoublePoint3Point3(f, p, t), H[1], 1e-9)
 
-    def test_cross(self):
+    def test_cross(self) -> None:
         H = [np.zeros((3, 3)), np.zeros((3, 3))]
 
         def f(p: Point3, q: Point3) -> Point3:
@@ -131,7 +132,7 @@ class TestPoint3(unittest.TestCase):
         assert_allclose(numericalDerivative21Point3Point3Point3(f, omega, theta), H[0])
         assert_allclose(numericalDerivative22Point3Point3Point3(f, omega, theta), H[1])
 
-    def test_cross2(self):
+    def test_cross2(self) -> None:
         p: Point3 = Point3(1, 0.2, 0.3)
         q: Point3 = p + Point3(0.5, 0.2, -3.0)
         r: Point3 = p + Point3(0.8, 0, 0)
@@ -154,7 +155,7 @@ class TestPoint3(unittest.TestCase):
         assert_allclose(numericalDerivative22Point3Point3Point3(f, p, r), H[1])
 
 
-    def test_normalize(self):
+    def test_normalize(self) -> None:
         actualH = [np.zeros((3,3))]
         point = Point3(1, -2, 3) # arbitrary point
         expected = Point3(point / math.sqrt(14.0))
@@ -165,7 +166,7 @@ class TestPoint3(unittest.TestCase):
         assert_allclose(expectedH, actualH[0])
 
 
-    def test_norm(self):
+    def test_norm(self) -> None:
         actualH = [np.zeros((3,3))]
         point = Point3(3,4,5) # arbitrary point
         expected:float = math.sqrt(50);
@@ -174,7 +175,7 @@ class TestPoint3(unittest.TestCase):
         assert_allclose(expectedH, actualH[0])
 
 
-    def test_distance(self):
+    def test_distance(self) -> None:
         P = Point3(1., 12.8, -32.)
         Q = Point3(52.7, 4.9, -13.3)
         H = [np.zeros((3,3)), np.zeros((3,3))]

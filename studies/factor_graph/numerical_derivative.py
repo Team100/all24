@@ -160,9 +160,9 @@ def numericalDerivative11Rot2Pose2(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy1 = hx.localCoordinates(h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy2 = hx.localCoordinates(h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -172,7 +172,7 @@ def numericalDerivative11Rot2Point2(
     h: Callable[[Point2], Rot2], x: Point2, delta=1e-5
 ) -> np.array:
     """Always produces a 2d array."""
-    N = 3  # for now
+    N = 2  # for now
     hx = h(x)
     m: int = 1
 
@@ -182,9 +182,9 @@ def numericalDerivative11Rot2Point2(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy1 = hx.localCoordinates(h(VectorRetract(x, dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy2 = hx.localCoordinates(h(VectorRetract(x, dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -195,8 +195,8 @@ def numericalDerivative11Pose2Vector3(
 ) -> np.array:
     """Always produces a 2d array."""
     N = 3  # for now
-    hx = h(x)
-    m: int = 1
+    hx: Pose2 = h(x)
+    m: int = 3
 
     dx = np.zeros(N)
 
@@ -204,9 +204,9 @@ def numericalDerivative11Pose2Vector3(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy1 = hx.localCoordinates(h(VectorRetract(x, dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy2 = hx.localCoordinates(h(VectorRetract(x, dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -218,7 +218,7 @@ def numericalDerivative11Vector3Pose2(
     """Always produces a 2d array."""
     N = 3  # for now
     hx = h(x)
-    m: int = 1
+    m: int = 3
 
     dx = np.zeros(N)
 
@@ -226,9 +226,9 @@ def numericalDerivative11Vector3Pose2(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy1 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy2 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -248,9 +248,9 @@ def numericalDerivative11DoublePoint3(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(Point3.Retract(x, dx)))
+        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(Point3.Retract(x, dx)))
+        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -314,9 +314,9 @@ def numericalDerivative11Pose2Pose2(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy1 = hx.localCoordinates(h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy2 = hx.localCoordinates(h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -370,7 +370,7 @@ def numericalDerivative11DoublePose2(
     h: Callable[[Pose2], float], x: Pose2, delta=1e-5
 ) -> np.array:
     """Always produces a 2d array."""
-    N = 2  # for now
+    N = 3  # for now
     hx = h(x)
     m: int = 1
 
@@ -380,9 +380,9 @@ def numericalDerivative11DoublePose2(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy1 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
+        dy2 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H

@@ -1,3 +1,4 @@
+# pylint: disable=C0103,C0114,C0116,E0611,R0913
 # really to test numeric differentation
 # see testPoint2.cpp
 
@@ -60,7 +61,7 @@ def distance2(p: Point2, q: Point2, H: list[np.array] = None) -> float:
 
 
 class TestPoint2(unittest.TestCase):
-    def test_norm(self):
+    def test_norm(self) -> None:
         p0 = Point2(math.cos(5.0), math.sin(5.0))
         self.assertAlmostEqual(1, np.linalg.norm(p0))
         p1 = Point2(4, 5)
@@ -85,7 +86,7 @@ class TestPoint2(unittest.TestCase):
         expectedH: np.array = np.array([[x2[0] / actual, x2[1] / actual]])
         assert_allclose(expectedH, actualH[0])
 
-    def test_distance(self):
+    def test_distance(self) -> None:
         # establish distance is indeed 1
         self.assertAlmostEqual(1, distance2(x1, l1))
 
