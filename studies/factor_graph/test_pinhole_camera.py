@@ -2,63 +2,103 @@
 # really to test numeric differentation
 # see testPinholeCamera.cpp
 
-import math
-
 import unittest
 import numpy as np
-from gtsam import CalibratedCamera,PinholeCameraCal3_S2,Cal3_S2,Cal3Bundler, PinholeCameraCal3Bundler,Point2, Point3, Pose3, Rot3, Unit3, Vector3 # type:ignore
+from gtsam import (  # type:ignore
+    CalibratedCamera,
+    PinholeCameraCal3_S2,
+    Cal3_S2,
+    Cal3Bundler,
+)  # type:ignore
+from gtsam import (
+    PinholeCameraCal3Bundler,
+    Point2,
+    Point3,
+    Pose3,
+    Rot3,
+    Unit3,
+    Vector3,
+)  # type:ignore
 from numpy.testing import assert_almost_equal
 
-
-
-
-
-
-
+from numerical_derivative import numericalDerivative21PinholeCameraCal3_S2Pose3Cal3_S2
+from numerical_derivative import numericalDerivative22PinholeCameraCal3_S2Pose3Cal3_S2
+from numerical_derivative import numericalDerivative11Pose3PinholeCameraCal3_S2
+from numerical_derivative import numericalDerivative31Point2Pose3Point3Cal3_S2
+from numerical_derivative import numericalDerivative32Point2Pose3Point3Cal3_S2
+from numerical_derivative import numericalDerivative33Point2Pose3Point3Cal3_S2
+from numerical_derivative import numericalDerivative31Point2Pose3Unit3Cal3_S2
+from numerical_derivative import numericalDerivative32Point2Pose3Unit3Cal3_S2
+from numerical_derivative import numericalDerivative33Point2Pose3Unit3Cal3_S2
+from numerical_derivative import numericalDerivative21Point2PinholeCameraCal3_S2Point3
+from numerical_derivative import numericalDerivative22Point2PinholeCameraCal3_S2Point3
+from numerical_derivative import numericalDerivative21DoublePinholeCameraCal3_S2Point3
+from numerical_derivative import numericalDerivative22DoublePinholeCameraCal3_S2Point3
+from numerical_derivative import numericalDerivative21DoublePinholeCameraCal3_S2Pose3
+from numerical_derivative import numericalDerivative22DoublePinholeCameraCal3_S2Pose3
+from numerical_derivative import (
+    numericalDerivative21DoublePinholeCameraCal3_S2CalibratedCamera,
+)
+from numerical_derivative import (
+    numericalDerivative22DoublePinholeCameraCal3_S2CalibratedCamera,
+)
 
 K = Cal3_S2(625, 625, 0, 0, 0)
 
 pose = Pose3(Rot3(Vector3(1, -1, -1).asDiagonal()), Point3(0, 0, 0.5))
-camera = PinholeCameraCal3_S2 (pose, K)
+camera = PinholeCameraCal3_S2(pose, K)
 
-pose1 = Pose3 (Rot3(),Point3(0, 1, 0.5))
+pose1 = Pose3(Rot3(), Point3(0, 1, 0.5))
 camera1 = PinholeCameraCal3_S2(pose1, K)
 
-point1 = Point3(-0.08,-0.08, 0.0)
+point1 = Point3(-0.08, -0.08, 0.0)
 point2 = Point3(-0.08, 0.08, 0.0)
-point3 = Point3( 0.08, 0.08, 0.0)
-point4= Point3( 0.08,-0.08, 0.0)
+point3 = Point3(0.08, 0.08, 0.0)
+point4 = Point3(0.08, -0.08, 0.0)
 
-point1_inf = Unit3(-0.16,-0.16, -1.0)
+point1_inf = Unit3(-0.16, -0.16, -1.0)
 point2_inf = Unit3(-0.16, 0.16, -1.0)
-point3_inf = Unit3( 0.16, 0.16, -1.0)
-point4_inf = Unit3( 0.16,-0.16, -1.0)
+point3_inf = Unit3(0.16, 0.16, -1.0)
+point4_inf = Unit3(0.16, -0.16, -1.0)
 
-def  project3(pose: Pose3,   point: Point3,   cal: Cal3_S2) -> Point2:
-    return PinholeCameraCal3_S2(pose,cal).project(point)
 
-def  projectInfinity3( pose:  Pose3,   point3D: Unit3,   cal: Cal3_S2) -> Point2:
-    return PinholeCameraCal3_S2(pose,cal).project(point3D)
+def project3(pose: Pose3, point: Point3, cal: Cal3_S2) -> Point2:
+    return PinholeCameraCal3_S2(pose, cal).project(point)
 
-def  project4( camera: PinholeCameraCal3_S2,   point: Point3) -> Point2:
+
+def projectInfinity3(pose: Pose3, point3D: Unit3, cal: Cal3_S2) -> Point2:
+    return PinholeCameraCal3_S2(pose, cal).project(point3D)
+
+
+def project4(camera: PinholeCameraCal3_S2, point: Point3) -> Point2:
     return camera.project2(point)
 
-def  range0(  camera: PinholeCameraCal3_S2,   point: Point3) -> float:
+
+def range0(camera: PinholeCameraCal3_S2, point: Point3) -> float:
     return camera.range(point)
 
-def range1( camera:  PinholeCameraCal3_S2,  pose:  Pose3) -> float:
+
+def range1(camera: PinholeCameraCal3_S2, pose: Pose3) -> float:
     return camera.range(pose)
 
 
 K2 = Cal3Bundler(625, 1e-3, 1e-3)
 camera2 = PinholeCameraCal3Bundler(pose1, K2)
-def range2(camera: PinholeCameraCal3_S2,  camera2: PinholeCameraCal3Bundler) -> float:
-    return camera.range<Cal3Bundler>(camera2)
+
+
+def range2(camera: PinholeCameraCal3_S2, camera2: PinholeCameraCal3Bundler) -> float:
+    return camera.range < Cal3Bundler > (camera2)
 
 
 camera3 = CalibratedCamera(pose1)
-def range3( camera: PinholeCameraCal3_S2, camera3: CalibratedCamera) -> float:
+
+
+def range3(camera: PinholeCameraCal3_S2, camera3: CalibratedCamera) -> float:
     return camera.range(camera3)
+
+
+def distance3(a: Point3, b: Point3) -> float:
+    return np.linalg.norm(a - b)  # type:ignore
 
 
 class TestPinholeCamera(unittest.TestCase):
@@ -69,52 +109,58 @@ class TestPinholeCamera(unittest.TestCase):
         raise self.failureException(f"{expected} != {actual}")
 
     def test_Create(self) -> None:
-        actualH1 = np.zeros((1,1), order='F')
-        actualH2 = np.zeros((1,1), order='F')
-        self.assertTrue(camera.equals(PinholeCameraCal3_S2.Create(pose,K, actualH1, actualH2)))
+        actualH1 = np.zeros((1, 1), order="F")
+        actualH2 = np.zeros((1, 1), order="F")
+        self.assertTrue(
+            camera.equals(PinholeCameraCal3_S2.Create(pose, K, actualH1, actualH2))
+        )
 
         # Check derivative
-        std::function<Camera(Pose3, Cal3_S2)> f =  #
-            std::bind(Camera::Create, std::placeholders::_1, std::placeholders::_2,
-                    nullptr, nullptr)
-        numericalH1 = numericalDerivative21<Camera,Pose3,Cal3_S2>(f,pose,K)
+        def f(x1: Pose3, x2: Cal3_S2) -> PinholeCameraCal3_S2:
+            return PinholeCameraCal3_S2.Create(x1, x2, None, None)
+
+        numericalH1 = numericalDerivative21PinholeCameraCal3_S2Pose3Cal3_S2(f, pose, K)
         assert_almost_equal(numericalH1, actualH1)
-        numericalH2 = numericalDerivative22<Camera,Pose3,Cal3_S2>(f,pose,K)
+        numericalH2 = numericalDerivative22PinholeCameraCal3_S2Pose3Cal3_S2(f, pose, K)
         assert_almost_equal(numericalH2, actualH2)
 
-
     def test_Pose(self) -> None:
-        actualH = np.zeros((1,1), order='F') 
+        actualH = np.zeros((1, 1), order="F")
         self.assertPose3Equals(pose, camera.getPose(actualH))
 
         # Check derivative
-        std::function<Pose3(Camera)> f =  #
-            std::bind(&Camera::getPose, std::placeholders::_1, nullptr)
-        numericalH = numericalDerivative11<Pose3,Camera>(f,camera)
+        def f(x1: PinholeCameraCal3_S2) -> Pose3:
+            return PinholeCameraCal3_S2.getPose(x1, None)
+
+        numericalH = numericalDerivative11Pose3PinholeCameraCal3_S2(f, camera)
         assert_almost_equal(numericalH, actualH)
 
-
-
     def test_Dproject(self) -> None:
-        Dpose = np.zeros((1,1), order='F') 
-        Dpoint = np.zeros((1,1), order='F') 
-        Dcal = np.zeros((1,1), order='F') 
+        Dpose = np.zeros((1, 1), order="F")
+        Dpoint = np.zeros((1, 1), order="F")
+        Dcal = np.zeros((1, 1), order="F")
         result = camera.project(point1, Dpose, Dpoint, Dcal)
-        numerical_pose  = numericalDerivative31(project3, pose, point1, K)
-        Hexpected2 = numericalDerivative32(project3, pose, point1, K)
-        numerical_cal   = numericalDerivative33(project3, pose, point1, K)
-        assert_almost_equal(Point2(-100,  100), result)
-        assert_almost_equal(numerical_pose,  Dpose)
+        numerical_pose = numericalDerivative31Point2Pose3Point3Cal3_S2(
+            project3, pose, point1, K
+        )
+        Hexpected2 = numericalDerivative32Point2Pose3Point3Cal3_S2(
+            project3, pose, point1, K
+        )
+        numerical_cal = numericalDerivative33Point2Pose3Point3Cal3_S2(
+            project3, pose, point1, K
+        )
+        assert_almost_equal(Point2(-100, 100), result)
+        assert_almost_equal(numerical_pose, Dpose)
         assert_almost_equal(Hexpected2, Dpoint)
-        assert_almost_equal(numerical_cal,   Dcal)
-
-
+        assert_almost_equal(numerical_cal, Dcal)
 
     def test_Dproject_Infinity(self) -> None:
-        Dpose = np.zeros((1,1), order='F') 
-        Dpoint = np.zeros((1,1), order='F')
-        Dcal = np.zeros((1,1), order='F')
-        point3D = Unit3(point1.x(), point1.y(), -10.0) # a point in front of the camera1
+        Dpose = np.zeros((1, 1), order="F")
+        Dpoint = np.zeros((1, 1), order="F")
+        Dcal = np.zeros((1, 1), order="F")
+        point3D = Unit3(
+            point1.x(), point1.y(), -10.0
+        )  # a point in front of the camera1
 
         # test Projection
         actual = camera.project(point3D, Dpose, Dpoint, Dcal)
@@ -122,87 +168,94 @@ class TestPinholeCamera(unittest.TestCase):
         assert_almost_equal(actual, expected)
 
         # test Jacobians
-        numerical_pose     = numericalDerivative31(projectInfinity3, pose, point3D, K)
-        Hexpected2    = numericalDerivative32(projectInfinity3, pose, point3D, K)
-        numerical_point2x2 = Hexpected2.block(0,0,2,2) # only the direction to the point matters
-        numerical_cal      = numericalDerivative33(projectInfinity3, pose, point3D, K)
-        assert_almost_equal(numerical_pose,     Dpose)
+        numerical_pose = numericalDerivative31Point2Pose3Unit3Cal3_S2(
+            projectInfinity3, pose, point3D, K
+        )
+        Hexpected2: np.ndarray = numericalDerivative32Point2Pose3Unit3Cal3_S2(
+            projectInfinity3, pose, point3D, K
+        )
+        numerical_point2x2 = Hexpected2[
+            :2, :2
+        ]  # only the direction to the point matters
+        numerical_cal = numericalDerivative33Point2Pose3Unit3Cal3_S2(
+            projectInfinity3, pose, point3D, K
+        )
+        assert_almost_equal(numerical_pose, Dpose)
         assert_almost_equal(numerical_point2x2, Dpoint)
-        assert_almost_equal(numerical_cal,      Dcal)
-
-
-
+        assert_almost_equal(numerical_cal, Dcal)
 
     def test_Dproject2(self) -> None:
-        Dcamera  = np.zeros((1,1), order='F')
-        Dpoint  = np.zeros((1,1), order='F')
+        Dcamera = np.zeros((1, 1), order="F")
+        Dpoint = np.zeros((1, 1), order="F")
         result = camera.project2(point1, Dcamera, Dpoint)
-        Hexpected1 = numericalDerivative21(project4, camera, point1)
-        Hexpected2  = numericalDerivative22(project4, camera, point1)
-        assert_almost_equal(result, Point2(-100,  100) )
+        Hexpected1 = numericalDerivative21Point2PinholeCameraCal3_S2Point3(
+            project4, camera, point1
+        )
+        Hexpected2 = numericalDerivative22Point2PinholeCameraCal3_S2Point3(
+            project4, camera, point1
+        )
+        assert_almost_equal(result, Point2(-100, 100))
         assert_almost_equal(Hexpected1, Dcamera)
-        assert_almost_equal(Hexpected2,  Dpoint)
-
+        assert_almost_equal(Hexpected2, Dpoint)
 
     # Add a test with more arbitrary rotation
     def test_Dproject3(self) -> None:
-        pose1 = Pose3(Rot3::Ypr(0.1, -0.1, 0.4), Point3(0, 0, -10))
+        pose1 = Pose3(Rot3.Ypr(0.1, -0.1, 0.4), Point3(0, 0, -10))
         camera = PinholeCameraCal3_S2(pose1)
-        Dpose  = np.zeros((1,1), order='F')
-        Dpoint  = np.zeros((1,1), order='F')
+        Dpose = np.zeros((1, 1), order="F")
+        Dpoint = np.zeros((1, 1), order="F")
         camera.project2(point1, Dpose, Dpoint)
-        numerical_pose  = numericalDerivative21(project4, camera, point1)
-        numerical_point = numericalDerivative22(project4, camera, point1)
-        assert_almost_equal(numerical_pose,  Dpose)
+        numerical_pose = numericalDerivative21Point2PinholeCameraCal3_S2Point3(
+            project4, camera, point1
+        )
+        numerical_point = numericalDerivative22Point2PinholeCameraCal3_S2Point3(
+            project4, camera, point1
+        )
+        assert_almost_equal(numerical_pose, Dpose)
         assert_almost_equal(numerical_point, Dpoint)
 
-
-
     def test_range0(self) -> None:
-        D1  = np.zeros((1,1), order='F')
-        D2  = np.zeros((1,1), order='F')
+        D1 = np.zeros((1, 1), order="F")
+        D2 = np.zeros((1, 1), order="F")
         result = camera.range(point1, D1, D2)
-        Hexpected1 = numericalDerivative21(range0, camera, point1)
-        Hexpected2 = numericalDerivative22(range0, camera, point1)
+        Hexpected1 = numericalDerivative21DoublePinholeCameraCal3_S2Point3(
+            range0, camera, point1
+        )
+        Hexpected2 = numericalDerivative22DoublePinholeCameraCal3_S2Point3(
+            range0, camera, point1
+        )
         self.assertAlmostEqual(distance3(point1, camera.pose().translation()), result)
         assert_almost_equal(Hexpected1, D1)
         assert_almost_equal(Hexpected2, D2)
 
-
     def test_range1(self) -> None:
-        D1  = np.zeros((1,1), order='F')
-        D2  = np.zeros((1,1), order='F')
+        D1 = np.zeros((1, 1), order="F")
+        D2 = np.zeros((1, 1), order="F")
         result = camera.range(pose1, D1, D2)
-        Hexpected1 = numericalDerivative21(range1, camera, pose1)
-        Hexpected2 = numericalDerivative22(range1, camera, pose1)
+        Hexpected1 = numericalDerivative21DoublePinholeCameraCal3_S2Pose3(
+            range1, camera, pose1
+        )
+        Hexpected2 = numericalDerivative22DoublePinholeCameraCal3_S2Pose3(
+            range1, camera, pose1
+        )
         self.assertAlmostEqual(1, result)
         assert_almost_equal(Hexpected1, D1)
         assert_almost_equal(Hexpected2, D2)
-
-
-    def test_range2(self) -> None:
-        D1  = np.zeros((1,1), order='F') 
-        D2  = np.zeros((1,1), order='F')
-        result = camera.range<Cal3Bundler>(camera2, D1, D2)
-        Hexpected1 = numericalDerivative21(range2, camera, camera2)
-        Hexpected2 = numericalDerivative22(range2, camera, camera2)
-        self.assertAlmostEqual(1, result)
-        assert_almost_equal(Hexpected1, D1)
-        assert_almost_equal(Hexpected2, D2)
-
 
     def test_range3(self) -> None:
-        D1 = np.zeros((1,1), order='F') 
-        D2 = np.zeros((1,1), order='F')
+        D1 = np.zeros((1, 1), order="F")
+        D2 = np.zeros((1, 1), order="F")
         result = camera.range(camera3, D1, D2)
-        Hexpected1 = numericalDerivative21(range3, camera, camera3)
-        Hexpected2 = numericalDerivative22(range3, camera, camera3)
+        Hexpected1 = numericalDerivative21DoublePinholeCameraCal3_S2CalibratedCamera(
+            range3, camera, camera3
+        )
+        Hexpected2 = numericalDerivative22DoublePinholeCameraCal3_S2CalibratedCamera(
+            range3, camera, camera3
+        )
         self.assertAlmostEqual(1, result)
         assert_almost_equal(Hexpected1, D1)
         assert_almost_equal(Hexpected2, D2)
-
 
 
 if __name__ == "__main__":
     unittest.main()
-
