@@ -9,12 +9,15 @@ import random
 import bisect
 import time
 import numpy as np
+import matplotlib
+matplotlib.use('Qt5Cairo', force=True)
 from matplotlib import pyplot as plt  # type:ignore
 from matplotlib.animation import FuncAnimation  # type:ignore
 
 PARTICLE_COUNT = 1000
 ROBOT_HAS_COMPASS = False
-ROBOT_SPEED = 0.1
+ROBOT_SPEED = 0.05
+TURN_RATE = 1.4
 WIDTH = 5
 HEIGHT = 5
 BEACONS = np.array([[0.5, 0.5], [0.5, 4.5]])
@@ -132,9 +135,9 @@ def main():
     robot_h = 270
 
     def init():
-        particle_points.set_offsets(([], []))
-        robot_points.set_offsets(([], []))
-        mean_points.set_offsets(([], []))
+        # particle_points.set_offsets(([], []))
+        # robot_points.set_offsets(([], []))
+        # mean_points.set_offsets(([], []))
         return (
             particle_points,
             robot_points,
@@ -164,7 +167,7 @@ def main():
 
         old_heading = robot_h
 
-        robot_h += 5
+        robot_h += TURN_RATE
         r = math.radians(robot_h)
         robot_x += math.cos(r) * ROBOT_SPEED
         robot_y += math.sin(r) * ROBOT_SPEED
@@ -181,7 +184,7 @@ def main():
 
         t1 = time.time_ns()
         duration = t1 - t0
-        if i % 2 == 0:
+        if i % 10 == 0:
             print(f"duration (us): {duration//1000}")
             print(f"duration per particle (us): {duration//(1000*PARTICLE_COUNT)}")
 
@@ -192,7 +195,7 @@ def main():
         )
 
     anim = FuncAnimation(
-        fig, animate, init_func=init, frames=200, interval=0, blit=True
+        fig, animate, init_func=init, frames=200, interval=0
     )
 
     plt.show()
