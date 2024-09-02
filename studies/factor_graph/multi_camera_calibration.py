@@ -7,6 +7,8 @@
 # so the measurement factor is quaternary (though one of
 # the edges leads to the constant landmarks)
 
+# this version is actually just one camera, to make sure the numeric derivatives work.
+
 import numpy as np
 
 from gtsam import Cal3DS2  # includes distortion
@@ -23,6 +25,9 @@ from gtsam.noiseModel import Base as SharedNoiseModel
 from gtsam.symbol_shorthand import X  # robot pose
 from gtsam.symbol_shorthand import K  # camera calibration
 
+from numerical_derivative import numericalDerivative21Point2Pose3Cal3DS2
+from numerical_derivative import numericalDerivative22Point2Pose3Cal3DS2
+
 CAMERA_NOISE = Isotropic.Sigma(2, 1.0)
 LANDMARK_GROUND_TRUTH: list[Point3] = [
     Point3(10.0, 10.0, 0.0),
@@ -37,12 +42,8 @@ ROBOT_GROUND_TRUTH = [
 ]
 
 
-
 # measurements (camera signal) from ground-truth
-def make_measurements(
-    pose: Pose3,
-    landmark: Point3
-) -> Point2:
+def make_measurements(pose: Pose3, landmark: Point3) -> Point2:
     Kcal = Cal3DS2(50.0, 50.0, 0.0, 50.0, 50.0, -0.2, 0.1, 0.0, 0.0)
     camera = PinholeCameraCal3DS2(pose, Kcal)
     return camera.project(landmark)
@@ -55,28 +56,23 @@ def VisionFactor(
     landmark: Point3,
     calibKey: int,
 ) -> NonlinearFactor:
+    def h(pose3: Pose3, calib: Cal3DS2) -> Point2:
+        camera = PinholeCameraCal3DS2(pose3, calib)
+        return camera.project(landmark)
+
     def error_func(this: CustomFactor, v: Values, H: list[np.ndarray]) -> np.ndarray:
         pose3: Pose3 = v.atPose3(this.keys()[0])
         calib: Cal3DS2 = v.atCal3DS2(this.keys()[1])
-
-        H1_pose = np.zeros((2, 6), order="F")
-        H2_landmark = np.zeros((2, 3), order="F")
-        H3_calib = np.zeros((2, 9), order="F")
-
-        camera = PinholeCameraCal3DS2(pose3, calib)
-        result = camera.project(landmark, H1_pose, H2_landmark, H3_calib) - measured
-
+        result = h(pose3, calib) - measured
         if H is not None:
-            H[0] = H1_pose
-            H[1] = H3_calib
-
+            H[0] = numericalDerivative21Point2Pose3Cal3DS2(h, pose3, calib)
+            H[1] =  numericalDerivative22Point2Pose3Cal3DS2(h, pose3, calib)
         return result
-
+    
     return CustomFactor(model, KeyVector([poseKey, calibKey]), error_func)
 
 
 def main() -> None:
-
     graph = NonlinearFactorGraph()
 
     # initial robot prior
