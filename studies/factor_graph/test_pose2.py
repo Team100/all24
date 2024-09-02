@@ -6,7 +6,7 @@ import math
 
 import unittest
 import numpy as np
-from gtsam import Point2, Pose2, Rot2
+from gtsam import Point2, Pose2, Rot2  # type:ignore
 from numpy.testing import assert_almost_equal
 
 from numerical_derivative import numericalDerivative11Point2Pose2
@@ -249,7 +249,7 @@ class TestPose2(unittest.TestCase):
         self.assertPose2Equals(pose_expected, pose_actual_fcn)
 
     def test_inverse(self) -> None:
-        origin = Point2(0, 0)
+        # origin = Point2(0, 0)
         t = Point2(1, 2)
         gTl = Pose2(math.pi / 2.0, t)  # robot at (1,2) looking towards y
 
