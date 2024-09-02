@@ -1,4 +1,6 @@
 # pylint: disable=unused-import,consider-using-from-import,invalid-name,no-name-in-module,no-member,missing-function-docstring,too-many-locals
+# mypy: disable-error-code="import-untyped"
+
 """
 Transcription of SelfCalibrationExample.cpp
 
@@ -56,7 +58,6 @@ def createPoses(
     poses.append(init)
     for i in range(1, steps):
         poses.append(poses[i - 1].compose(delta))
-    # print("POSES ", poses)
     return poses
 
 
