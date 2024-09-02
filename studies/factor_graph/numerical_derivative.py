@@ -8,7 +8,7 @@
 from typing import Callable
 import numpy as np
 
-from gtsam import Cal3_S2, CalibratedCamera, PinholeCameraCal3_S2  # type:ignore
+from gtsam import Cal3_S2, Cal3DS2, CalibratedCamera, PinholeCameraCal3_S2  # type:ignore
 from gtsam import Point2, Point3, Pose2, Rot2, Pose3, Rot3, Unit3  # type:ignore
 
 
@@ -37,6 +37,48 @@ def numericalGradientVector2(
         d[j] = 0
         g[j] = (hxplus - hxmin) * factor
     return g
+
+
+def numericalDerivative21Point2Cal3DS2Point2(
+    h: Callable[[Cal3DS2, Point2], Point2],
+    x1: Cal3DS2,
+    x2: Point2,
+    delta=1e-5,
+) -> np.array:
+    return numericalDerivative11Point2Cal3DS2(
+        lambda x: h(x, x2), x1, delta
+    )
+
+def numericalDerivative22Point2Cal3DS2Point2(
+    h: Callable[[Cal3DS2, Point2], Point2],
+    x1: Cal3DS2,
+    x2: Point2,
+    delta=1e-5,
+) -> np.array:
+    return numericalDerivative11Point2Point2(
+        lambda x: h(x1, x), x2, delta
+    )
+
+def numericalDerivative11Point2Cal3DS2(
+    h: Callable[[Cal3DS2], Point2], x: Cal3DS2, delta=1e-5
+) -> np.array:
+    N = 9
+    hx = h(x)
+    m: int = 2
+
+    dx = np.zeros(N)
+
+    H = np.zeros((m, N))
+    factor: float = 1.0 / (2.0 * delta)
+    for j in range(N):
+        dx[j] = delta
+        dy1 = VectorLocal(hx, h(x.retract(dx)))
+        dx[j] = -delta
+        dy2 = VectorLocal(hx, h(x.retract(dx)))
+        dx[j] = 0
+        H[:, j] = (dy1 - dy2) * factor
+    return H
+
 
 
 def numericalDerivative21DoublePinholeCameraCal3_S2CalibratedCamera(

@@ -4,20 +4,8 @@
 
 import unittest
 import numpy as np
-from gtsam import (  # type:ignore
-    CalibratedCamera,
-    PinholeCameraCal3_S2,
-    Cal3_S2,
-    Cal3Bundler,
-)  # type:ignore
-from gtsam import (
-    PinholeCameraCal3Bundler,
-    Point2,
-    Point3,
-    Pose3,
-    Rot3,
-    Unit3,
-)  # type:ignore
+from gtsam import PinholeCameraCal3_S2, Cal3_S2  # type:ignore
+from gtsam import Point2, Point3, Pose3, Rot3, Unit3  # type:ignore
 from numpy.testing import assert_almost_equal
 
 from numerical_derivative import numericalDerivative21PinholeCameraCal3_S2Pose3Cal3_S2
@@ -35,16 +23,11 @@ from numerical_derivative import numericalDerivative21DoublePinholeCameraCal3_S2
 from numerical_derivative import numericalDerivative22DoublePinholeCameraCal3_S2Point3
 from numerical_derivative import numericalDerivative21DoublePinholeCameraCal3_S2Pose3
 from numerical_derivative import numericalDerivative22DoublePinholeCameraCal3_S2Pose3
-from numerical_derivative import (
-    numericalDerivative21DoublePinholeCameraCal3_S2CalibratedCamera,
-)
-from numerical_derivative import (
-    numericalDerivative22DoublePinholeCameraCal3_S2CalibratedCamera,
-)
+
 
 K = Cal3_S2(625, 625, 0, 0, 0)
 
-pose = Pose3(Rot3(np.array([[1, 0, 0],[0, -1, 0],[0, 0, -1]])), Point3(0, 0, 0.5))
+pose = Pose3(Rot3(np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]])), Point3(0, 0, 0.5))
 camera = PinholeCameraCal3_S2(pose, K)
 
 pose1 = Pose3(Rot3(), Point3(0, 1, 0.5))
@@ -81,10 +64,6 @@ def range1(camera: PinholeCameraCal3_S2, pose: Pose3) -> float:
     return camera.range(pose)
 
 
-def range2(camera: PinholeCameraCal3_S2, camera2: PinholeCameraCal3Bundler) -> float:
-    return camera.range < Cal3Bundler > (camera2)
-
-
 def distance3(a: Point3, b: Point3) -> float:
     return np.linalg.norm(a - b)  # type:ignore
 
@@ -100,12 +79,16 @@ class TestPinholeCamera(unittest.TestCase):
         actualH1 = np.zeros((11, 6), order="F")
         actualH2 = np.zeros((11, 5), order="F")
         self.assertTrue(
-            camera.equals(PinholeCameraCal3_S2.Create(pose, K, actualH1, actualH2), 1e-9)
+            camera.equals(
+                PinholeCameraCal3_S2.Create(pose, K, actualH1, actualH2), 1e-9
+            )
         )
 
         # Check derivative
         def f(x1: Pose3, x2: Cal3_S2) -> PinholeCameraCal3_S2:
-            return PinholeCameraCal3_S2.Create(x1, x2, np.zeros((11,6), order='F'), np.zeros((11,5), order='F'))
+            return PinholeCameraCal3_S2.Create(
+                x1, x2, np.zeros((11, 6), order="F"), np.zeros((11, 5), order="F")
+            )
 
         numericalH1 = numericalDerivative21PinholeCameraCal3_S2Pose3Cal3_S2(f, pose, K)
         assert_almost_equal(numericalH1, actualH1)
@@ -118,7 +101,7 @@ class TestPinholeCamera(unittest.TestCase):
 
         # Check derivative
         def f(x1: PinholeCameraCal3_S2) -> Pose3:
-            return PinholeCameraCal3_S2.getPose(x1, np.zeros((6,11), order='F'))
+            return PinholeCameraCal3_S2.getPose(x1, np.zeros((6, 11), order="F"))
 
         numericalH = numericalDerivative11Pose3PinholeCameraCal3_S2(f, camera)
         assert_almost_equal(numericalH, actualH)
@@ -229,8 +212,6 @@ class TestPinholeCamera(unittest.TestCase):
         self.assertAlmostEqual(1, result)
         assert_almost_equal(Hexpected1, D1)
         assert_almost_equal(Hexpected2, D2)
-
-
 
 
 if __name__ == "__main__":
