@@ -123,8 +123,7 @@ def numericalDerivative22DoublePinholeCameraCal3_S2Point3(
 def numericalDerivative11DoublePinholeCameraCal3_S2(
     h: Callable[[PinholeCameraCal3_S2], float], x: PinholeCameraCal3_S2, delta=1e-5
 ) -> np.array:
-    """Always produces a 2d array."""
-    N = 3  # for now
+    N = 11
     hx = h(x)
     m: int = 1
 
@@ -165,7 +164,7 @@ def numericalDerivative22Point2PinholeCameraCal3_S2Point3(
 def numericalDerivative11Point2PinholeCameraCal3_S2(
     h: Callable[[PinholeCameraCal3_S2], Point2], x: PinholeCameraCal3_S2, delta=1e-5
 ) -> np.array:
-    N = 6
+    N = 11
     hx = h(x)
     m: int = 2
 
@@ -175,9 +174,9 @@ def numericalDerivative11Point2PinholeCameraCal3_S2(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = hx.localCoordinates(h(x.retract(dx)))
+        dy1 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = hx.localCoordinates(h(x.retract(dx)))
+        dy2 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -206,11 +205,11 @@ def numericalDerivative32Point2Pose3Unit3Cal3_S2(
 def numericalDerivative33Point2Pose3Unit3Cal3_S2(
     h: Callable[[Pose3, Unit3, Cal3_S2], Point2],
     x1: Pose3,
-    x2: np.Unit3,
+    x2: Unit3,
     x3: Cal3_S2,
     delta=1e-5,
 ) -> np.array:
-    return numericalDerivative11Point2Cal3_S2(lambda x: h(x1, x, x3), x2, delta)
+    return numericalDerivative11Point2Cal3_S2(lambda x: h(x1, x2, x), x3, delta)
 
 
 def numericalDerivative11Point2Unit3(
@@ -226,9 +225,9 @@ def numericalDerivative11Point2Unit3(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = hx.localCoordinates(h(x.retract(dx)))
+        dy1 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = hx.localCoordinates(h(x.retract(dx)))
+        dy2 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -257,11 +256,11 @@ def numericalDerivative32Point2Pose3Point3Cal3_S2(
 def numericalDerivative33Point2Pose3Point3Cal3_S2(
     h: Callable[[Pose3, Point3, Cal3_S2], Point2],
     x1: Pose3,
-    x2: np.Point3,
+    x2: Point3,
     x3: Cal3_S2,
     delta=1e-5,
 ) -> np.array:
-    return numericalDerivative11Point2Cal3_S2(lambda x: h(x1, x, x3), x2, delta)
+    return numericalDerivative11Point2Cal3_S2(lambda x: h(x1, x2, x), x3, delta)
 
 
 def numericalDerivative11Point2Pose3(
@@ -277,9 +276,9 @@ def numericalDerivative11Point2Pose3(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = hx.localCoordinates(h(x.retract(dx)))
+        dy1 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = hx.localCoordinates(h(x.retract(dx)))
+        dy2 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -288,7 +287,7 @@ def numericalDerivative11Point2Pose3(
 def numericalDerivative11Point2Point3(
     h: Callable[[Point3], Point2], x: Point3, delta=1e-5
 ) -> np.array:
-    N = 6
+    N = 3
     hx = h(x)
     m: int = 2
 
@@ -298,9 +297,9 @@ def numericalDerivative11Point2Point3(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = hx.localCoordinates(h(x.retract(dx)))
+        dy1 = VectorLocal(hx, h(VectorRetract(x, dx)))
         dx[j] = -delta
-        dy2 = hx.localCoordinates(h(x.retract(dx)))
+        dy2 = VectorLocal(hx, h(VectorRetract(x, dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -309,7 +308,7 @@ def numericalDerivative11Point2Point3(
 def numericalDerivative11Point2Cal3_S2(
     h: Callable[[Cal3_S2], Point2], x: Cal3_S2, delta=1e-5
 ) -> np.array:
-    N = 6
+    N = 5
     hx = h(x)
     m: int = 2
 
@@ -319,9 +318,9 @@ def numericalDerivative11Point2Cal3_S2(
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = hx.localCoordinates(h(x.retract(dx)))
+        dy1 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = -delta
-        dy2 = hx.localCoordinates(h(x.retract(dx)))
+        dy2 = VectorLocal(hx, h(x.retract(dx)))
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -330,9 +329,9 @@ def numericalDerivative11Point2Cal3_S2(
 def numericalDerivative11Pose3PinholeCameraCal3_S2(
     h: Callable[[PinholeCameraCal3_S2], Pose3], x: PinholeCameraCal3_S2, delta=1e-5
 ) -> np.array:
-    N = 6
+    N = 11
     hx = h(x)
-    m: int = 2
+    m: int = 6
 
     dx = np.zeros(N)
 
@@ -373,7 +372,7 @@ def numericalDerivative11PinholeCameraCal3_S2Pose3(
 ) -> np.array:
     N = 6
     hx = h(x)
-    m: int = 2
+    m: int = 11
 
     dx = np.zeros(N)
 
@@ -392,9 +391,9 @@ def numericalDerivative11PinholeCameraCal3_S2Pose3(
 def numericalDerivative11PinholeCameraCal3_S2Cal3_S2(
     h: Callable[[Cal3_S2], PinholeCameraCal3_S2], x: Cal3_S2, delta=1e-5
 ) -> np.array:
-    N = 3
+    N = 5
     hx = h(x)
-    m: int = 2
+    m: int = 11
 
     dx = np.zeros(N)
 
