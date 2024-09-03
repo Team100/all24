@@ -39,6 +39,35 @@ def numericalGradientVector2(
     return g
 
 
+def numericalDerivative31Point2Pose3Pose3Cal3DS2(
+    h: Callable[[Pose3, Pose3, Cal3_S2], Point2],
+    x1: Pose3,
+    x2: Pose3,
+    x3: Cal3_S2,
+    delta=1e-5,
+) -> np.array:
+    return numericalDerivative11Point2Pose3(lambda x: h(x, x2, x3), x1, delta)
+
+def numericalDerivative32Point2Pose3Pose3Cal3DS2(
+    h: Callable[[Pose3, Pose3, Cal3_S2], Point2],
+    x1: Pose3,
+    x2: Pose3,
+    x3: Cal3_S2,
+    delta=1e-5,
+) -> np.array:
+    return numericalDerivative11Point2Pose3(lambda x: h(x1, x, x3), x2, delta)
+
+def numericalDerivative33Point2Pose3Pose3Cal3DS2(
+    h: Callable[[Pose3, Pose3, Cal3_S2], Point2],
+    x1: Pose3,
+    x2: Pose3,
+    x3: Cal3_S2,
+    delta=1e-5,
+) -> np.array:
+    return numericalDerivative11Point2Cal3DS2(lambda x: h(x1, x2, x), x3, delta)
+
+
+
 def numericalDerivative21Point2Pose3Cal3DS2(
     h: Callable[[Pose3, Cal3DS2], Point2],
     x1: Pose3,
