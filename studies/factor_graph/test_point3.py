@@ -10,10 +10,8 @@ from gtsam import Point3  # really np.array
 from numpy.testing import assert_allclose
 
 from numerical_derivative import numericalDerivative11
-from numerical_derivative import numericalDerivative21DoublePoint3Point3
-from numerical_derivative import numericalDerivative22DoublePoint3Point3
-from numerical_derivative import numericalDerivative21Point3Point3Point3
-from numerical_derivative import numericalDerivative22Point3Point3Point3
+from numerical_derivative import numericalDerivative21
+from numerical_derivative import numericalDerivative22
 
 
 def norm_proxy(point: Point3) -> float:
@@ -105,18 +103,18 @@ class TestPoint3(unittest.TestCase):
 
         d = dot(p, q, H)
         self.assertAlmostEqual(0.77, d)
-        assert_allclose(numericalDerivative21DoublePoint3Point3(f, p, q), H[0], 1e-9)
-        assert_allclose(numericalDerivative22DoublePoint3Point3(f, p, q), H[1], 1e-9)
+        assert_allclose(numericalDerivative21(f, p, q, 1, 3), H[0], 1e-9)
+        assert_allclose(numericalDerivative22(f, p, q, 1, 3), H[1], 1e-9)
 
         d = dot(p, r, H)
         self.assertAlmostEqual(1.93, d)
-        assert_allclose(numericalDerivative21DoublePoint3Point3(f, p, r), H[0], 1e-9)
-        assert_allclose(numericalDerivative22DoublePoint3Point3(f, p, r), H[1], 1e-9)
+        assert_allclose(numericalDerivative21(f, p, r, 1, 3), H[0], 1e-9)
+        assert_allclose(numericalDerivative22(f, p, r, 1, 3), H[1], 1e-9)
 
         d = dot(p, t, H)
         self.assertAlmostEqual(1.07, d)
-        assert_allclose(numericalDerivative21DoublePoint3Point3(f, p, t), H[0], 1e-9)
-        assert_allclose(numericalDerivative22DoublePoint3Point3(f, p, t), H[1], 1e-9)
+        assert_allclose(numericalDerivative21(f, p, t, 1, 3), H[0], 1e-9)
+        assert_allclose(numericalDerivative22(f, p, t, 1, 3), H[1], 1e-9)
 
     def test_cross(self) -> None:
         H = [np.zeros((3, 3)), np.zeros((3, 3))]
@@ -128,8 +126,8 @@ class TestPoint3(unittest.TestCase):
         theta = Point3(4, 6, 8)
 
         cross(omega, theta, H)
-        assert_allclose(numericalDerivative21Point3Point3Point3(f, omega, theta), H[0])
-        assert_allclose(numericalDerivative22Point3Point3Point3(f, omega, theta), H[1])
+        assert_allclose(numericalDerivative21(f, omega, theta, 3, 3), H[0])
+        assert_allclose(numericalDerivative22(f, omega, theta, 3, 3), H[1])
 
     def test_cross2(self) -> None:
         p: Point3 = Point3(1, 0.2, 0.3)
@@ -146,12 +144,12 @@ class TestPoint3(unittest.TestCase):
             return cross(p, q)
 
         cross(p, q, H)
-        assert_allclose(numericalDerivative21Point3Point3Point3(f, p, q), H[0])
-        assert_allclose(numericalDerivative22Point3Point3Point3(f, p, q), H[1])
+        assert_allclose(numericalDerivative21(f, p, q, 3, 3), H[0])
+        assert_allclose(numericalDerivative22(f, p, q, 3, 3), H[1])
 
         cross(p, r, H)
-        assert_allclose(numericalDerivative21Point3Point3Point3(f, p, r), H[0])
-        assert_allclose(numericalDerivative22Point3Point3Point3(f, p, r), H[1])
+        assert_allclose(numericalDerivative21(f, p, r, 3, 3), H[0])
+        assert_allclose(numericalDerivative22(f, p, r, 3, 3), H[1])
 
 
     def test_normalize(self) -> None:
@@ -180,8 +178,8 @@ class TestPoint3(unittest.TestCase):
         H = [np.zeros((3,3)), np.zeros((3,3))]
         d: float = distance3(P, Q, H)
         expectedDistance:float = 55.5426863;
-        numH1 = numericalDerivative21DoublePoint3Point3(testFunc, P, Q);
-        numH2 = numericalDerivative22DoublePoint3Point3(testFunc, P, Q);
+        numH1 = numericalDerivative21(testFunc, P, Q, 1, 3);
+        numH2 = numericalDerivative22(testFunc, P, Q, 1, 3);
         self.assertAlmostEqual(expectedDistance, d)
         assert_allclose(numH1, H[0])
         assert_allclose(numH2, H[1])

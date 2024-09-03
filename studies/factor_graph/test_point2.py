@@ -10,8 +10,8 @@ from gtsam import Point2  # really np.array
 from numpy.testing import assert_allclose
 
 from numerical_derivative import numericalDerivative11
-from numerical_derivative import numericalDerivative21DoublePoint2Point2
-from numerical_derivative import numericalDerivative22DoublePoint2Point2
+from numerical_derivative import numericalDerivative21
+from numerical_derivative import numericalDerivative22
 
 x1 = Point2(0, 0)
 x2 = Point2(1, 1)
@@ -101,8 +101,8 @@ class TestPoint2(unittest.TestCase):
         self.assertAlmostEqual(math.sqrt(2.0), actual23)
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21DoublePoint2Point2(distance_proxy, x2, l3)
-        expectedH2 = numericalDerivative22DoublePoint2Point2(distance_proxy, x2, l3)
+        expectedH1 = numericalDerivative21(distance_proxy, x2, l3, 1, 2)
+        expectedH2 = numericalDerivative22(distance_proxy, x2, l3, 1, 2)
         assert_allclose(expectedH1, actualH[0])
         assert_allclose(expectedH2, actualH[1])
 
@@ -111,8 +111,8 @@ class TestPoint2(unittest.TestCase):
         self.assertAlmostEqual(2, actual34)
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21DoublePoint2Point2(distance_proxy, x3, l4)
-        expectedH2 = numericalDerivative22DoublePoint2Point2(distance_proxy, x3, l4)
+        expectedH1 = numericalDerivative21(distance_proxy, x3, l4, 1, 2)
+        expectedH2 = numericalDerivative22(distance_proxy, x3, l4, 1, 2)
         assert_allclose(expectedH1, actualH[0])
         assert_allclose(expectedH2, actualH[1])
 

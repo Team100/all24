@@ -9,16 +9,10 @@ import numpy as np
 from gtsam import Point3, Pose3, Rot3, Unit3  # type:ignore
 from numpy.testing import assert_almost_equal
 
-from numerical_derivative import numericalDerivative21Vector6Pose3Vector6
-from numerical_derivative import numericalDerivative22Vector6Pose3Vector6
 from numerical_derivative import numericalDerivative22Pose3Pose3Pose3
 from numerical_derivative import numericalDerivative11
 from numerical_derivative import numericalDerivative21
 from numerical_derivative import numericalDerivative22
-from numerical_derivative import numericalDerivative21Vector6Vector6Vector6
-from numerical_derivative import numericalDerivative22Vector6Vector6Vector6
-from numerical_derivative import numericalDerivative21Pose3Rot3Point3
-from numerical_derivative import numericalDerivative22Pose3Rot3Point3
 from numerical_derivative import numericalDerivative31Pose3Pose3Pose3Double
 from numerical_derivative import numericalDerivative32Pose3Pose3Pose3Double
 
@@ -132,20 +126,20 @@ class TestPose3(unittest.TestCase):
             return T.Adjoint(xi)
 
         T.Adjoint(xi, actualH1, actualH2)
-        expectedH1 = numericalDerivative21Vector6Pose3Vector6(Adjoint_proxy, T, xi)
-        expectedH2 = numericalDerivative22Vector6Pose3Vector6(Adjoint_proxy, T, xi)
+        expectedH1 = numericalDerivative21(Adjoint_proxy, T, xi, 6, 6)
+        expectedH2 = numericalDerivative22(Adjoint_proxy, T, xi, 6, 6)
         assert_almost_equal(expectedH1, actualH1)
         assert_almost_equal(expectedH2, actualH2)
 
         T2.Adjoint(xi, actualH1, actualH2)
-        expectedH1 = numericalDerivative21Vector6Pose3Vector6(Adjoint_proxy, T2, xi)
-        expectedH2 = numericalDerivative22Vector6Pose3Vector6(Adjoint_proxy, T2, xi)
+        expectedH1 = numericalDerivative21(Adjoint_proxy, T2, xi, 6, 6)
+        expectedH2 = numericalDerivative22(Adjoint_proxy, T2, xi, 6, 6)
         assert_almost_equal(expectedH1, actualH1)
         assert_almost_equal(expectedH2, actualH2)
 
         T3.Adjoint(xi, actualH1, actualH2)
-        expectedH1 = numericalDerivative21Vector6Pose3Vector6(Adjoint_proxy, T3, xi)
-        expectedH2 = numericalDerivative22Vector6Pose3Vector6(Adjoint_proxy, T3, xi)
+        expectedH1 = numericalDerivative21(Adjoint_proxy, T3, xi, 6, 6)
+        expectedH2 = numericalDerivative22(Adjoint_proxy, T3, xi, 6, 6)
         assert_almost_equal(expectedH1, actualH1)
         assert_almost_equal(expectedH2, actualH2)
 
@@ -172,31 +166,31 @@ class TestPose3(unittest.TestCase):
             return T.AdjointTranspose(xi)
 
         T.AdjointTranspose(xi, actualH1, actualH2)
-        expectedH1 = numericalDerivative21Vector6Pose3Vector6(
-            AdjointTranspose_proxy, T, xi
+        expectedH1 = numericalDerivative21(
+            AdjointTranspose_proxy, T, xi, 6, 6
         )
-        expectedH2 = numericalDerivative22Vector6Pose3Vector6(
-            AdjointTranspose_proxy, T, xi
+        expectedH2 = numericalDerivative22(
+            AdjointTranspose_proxy, T, xi, 6, 6
         )
         assert_almost_equal(expectedH1, actualH1, 8)
         assert_almost_equal(expectedH2, actualH2)
 
         T2.AdjointTranspose(xi, actualH1, actualH2)
-        expectedH1 = numericalDerivative21Vector6Pose3Vector6(
-            AdjointTranspose_proxy, T2, xi
+        expectedH1 = numericalDerivative21(
+            AdjointTranspose_proxy, T2, xi, 6, 6
         )
-        expectedH2 = numericalDerivative22Vector6Pose3Vector6(
-            AdjointTranspose_proxy, T2, xi
+        expectedH2 = numericalDerivative22(
+            AdjointTranspose_proxy, T2, xi, 6, 6
         )
         assert_almost_equal(expectedH1, actualH1, 8)
         assert_almost_equal(expectedH2, actualH2)
 
         T3.AdjointTranspose(xi, actualH1, actualH2)
-        expectedH1 = numericalDerivative21Vector6Pose3Vector6(
-            AdjointTranspose_proxy, T3, xi
+        expectedH1 = numericalDerivative21(
+            AdjointTranspose_proxy, T3, xi, 6, 6
         )
-        expectedH2 = numericalDerivative22Vector6Pose3Vector6(
-            AdjointTranspose_proxy, T3, xi
+        expectedH2 = numericalDerivative22(
+            AdjointTranspose_proxy, T3, xi, 6, 6
         )
         assert_almost_equal(expectedH1, actualH1, 8)
         assert_almost_equal(expectedH2, actualH2)
@@ -588,11 +582,11 @@ class TestPose3(unittest.TestCase):
         actualH2 = np.zeros((6, 6), order="F")
         actual: np.ndarray = Pose3.adjoint(screwPose3.xi, v, actualH1, actualH2)
 
-        numericalH1 = numericalDerivative21Vector6Vector6Vector6(
-            testDerivAdjoint, screwPose3.xi, v, 1e-5
+        numericalH1 = numericalDerivative21(
+            testDerivAdjoint, screwPose3.xi, v, 6, 6
         )
-        numericalH2 = numericalDerivative22Vector6Vector6Vector6(
-            testDerivAdjoint, screwPose3.xi, v, 1e-5
+        numericalH2 = numericalDerivative22(
+            testDerivAdjoint, screwPose3.xi, v, 6, 6
         )
 
         assert_almost_equal(expected, actual, 5)
@@ -608,11 +602,11 @@ class TestPose3(unittest.TestCase):
         actualH2 = np.zeros((6, 6), order="F")
         actual: np.ndarray = Pose3.adjointTranspose(xi, v, actualH1, actualH2)
 
-        numericalH1 = numericalDerivative21Vector6Vector6Vector6(
-            testDerivAdjointTranspose, xi, v, 1e-5
+        numericalH1 = numericalDerivative21(
+            testDerivAdjointTranspose, xi, v, 6, 6
         )
-        numericalH2 = numericalDerivative22Vector6Vector6Vector6(
-            testDerivAdjointTranspose, xi, v, 1e-5
+        numericalH2 = numericalDerivative22(
+            testDerivAdjointTranspose, xi, v, 6, 6
         )
 
         assert_almost_equal(expected, actual, 5)
@@ -715,10 +709,10 @@ class TestPose3(unittest.TestCase):
             return Pose3.Create(R, t)
 
         assert_almost_equal(
-            numericalDerivative21Pose3Rot3Point3(create, R, P2), actualH1, 9
+            numericalDerivative21(create, R, P2, 6, 3), actualH1, 9
         )
         assert_almost_equal(
-            numericalDerivative22Pose3Rot3Point3(create, R, P2), actualH2, 9
+            numericalDerivative22(create, R, P2, 6, 3), actualH2, 9
         )
 
     def test_ExpmapChainRule(self) -> None:
