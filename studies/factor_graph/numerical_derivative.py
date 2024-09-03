@@ -1,4 +1,5 @@
 # pylint: disable=C0103,C0114,C0116,E0611,R0913
+# mypy: disable-error-code="import-untyped"
 # see numericalDerivative.h
 
 # i couldn't figure out how to make the wrapper work
@@ -13,8 +14,8 @@ from gtsam import (
     Cal3DS2,
     CalibratedCamera,
     PinholeCameraCal3_S2,
-)  # type:ignore
-from gtsam import Point2, Point3, Pose2, Rot2, Pose3, Rot3, Unit3  # type:ignore
+)
+from gtsam import Point2, Point3, Pose2, Rot2, Pose3, Rot3, Unit3
 
 
 def local(a, b):
@@ -36,12 +37,8 @@ X = TypeVar("X")
 def numericalDerivative11(
     h: Callable[[X], Y], x: X, m: int, N: int, delta=1e-5
 ) -> np.ndarray:
-    # N = 6
     hx = h(x)
-    # m: int = 2
-
     dx = np.zeros(N)
-
     H = np.zeros((m, N))
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
@@ -53,24 +50,19 @@ def numericalDerivative11(
         H[:, j] = (dy1 - dy2) * factor
     return H
 
+X1 = TypeVar("X1")
+X2 = TypeVar("X2")
 
-def numericalDerivative21Point2Cal3DS2Point2(
-    h: Callable[[Cal3DS2, Point2], Point2],
-    x1: Cal3DS2,
-    x2: Point2,
-    delta=1e-5,
+def numericalDerivative21(
+        h: Callable[[X1, X2], Y], x1: X1, x2: X2, m: int, N: int, delta=1e-5
 ) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 2, 9, delta)
-    # return numericalDerivative11Point2Cal3DS2(lambda x: h(x, x2), x1, delta)
+    return numericalDerivative11(lambda x: h(x, x2), x1, m, N, delta)
 
-
-def numericalDerivative22Point2Cal3DS2Point2(
-    h: Callable[[Cal3DS2, Point2], Point2],
-    x1: Cal3DS2,
-    x2: Point2,
-    delta=1e-5,
+def numericalDerivative22(
+        h: Callable[[X1, X2], Y], x1: X1, x2: X2, m: int, N: int, delta=1e-5
 ) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 2, 2, delta)
+    return numericalDerivative11(lambda x: h(x1, x), x2, m, N, delta)
+
 
 
 def numericalDerivative31Point2Pose3Pose3Cal3DS2(
@@ -103,94 +95,6 @@ def numericalDerivative33Point2Pose3Pose3Cal3DS2(
     return numericalDerivative11(lambda x: h(x1, x2, x), x3, 2, 9, delta)
 
 
-def numericalDerivative21Point2Pose3Cal3DS2(
-    h: Callable[[Pose3, Cal3DS2], Point2],
-    x1: Pose3,
-    x2: Cal3DS2,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 2, 6, delta)
-
-
-def numericalDerivative22Point2Pose3Cal3DS2(
-    h: Callable[[Pose3, Cal3DS2], Point2],
-    x1: Pose3,
-    x2: Cal3DS2,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 2, 9, delta)
-
-
-def numericalDerivative21DoublePinholeCameraCal3_S2CalibratedCamera(
-    h: Callable[[PinholeCameraCal3_S2, CalibratedCamera], float],
-    x1: PinholeCameraCal3_S2,
-    x2: CalibratedCamera,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 1, 11, delta)
-
-
-def numericalDerivative22DoublePinholeCameraCal3_S2CalibratedCamera(
-    h: Callable[[PinholeCameraCal3_S2, CalibratedCamera], float],
-    x1: PinholeCameraCal3_S2,
-    x2: CalibratedCamera,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 2, 6, delta)
-
-
-def numericalDerivative21DoublePinholeCameraCal3_S2Pose3(
-    h: Callable[[PinholeCameraCal3_S2, Pose3], float],
-    x1: PinholeCameraCal3_S2,
-    x2: Pose3,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 1, 11, delta)
-
-
-def numericalDerivative22DoublePinholeCameraCal3_S2Pose3(
-    h: Callable[[PinholeCameraCal3_S2, Pose3], float],
-    x1: PinholeCameraCal3_S2,
-    x2: Pose3,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 1, 6, delta)
-
-
-def numericalDerivative21DoublePinholeCameraCal3_S2Point3(
-    h: Callable[[PinholeCameraCal3_S2, Point3], float],
-    x1: PinholeCameraCal3_S2,
-    x2: Point3,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 1, 11, delta)
-
-
-def numericalDerivative22DoublePinholeCameraCal3_S2Point3(
-    h: Callable[[PinholeCameraCal3_S2, Point3], float],
-    x1: PinholeCameraCal3_S2,
-    x2: Point3,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 1, 3, delta)
-
-
-def numericalDerivative21Point2PinholeCameraCal3_S2Point3(
-    h: Callable[[PinholeCameraCal3_S2, Point3], Point2],
-    x1: PinholeCameraCal3_S2,
-    x2: Point3,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 2, 11, delta)
-
-
-def numericalDerivative22Point2PinholeCameraCal3_S2Point3(
-    h: Callable[[PinholeCameraCal3_S2, Point3], Point2],
-    x1: PinholeCameraCal3_S2,
-    x2: Point3,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 2, 3, delta)
 
 
 def numericalDerivative31Point2Pose3Unit3Cal3_S2(
@@ -253,76 +157,8 @@ def numericalDerivative33Point2Pose3Point3Cal3_S2(
     return numericalDerivative11(lambda x: h(x1, x2, x), x3, 2, 5, delta)
 
 
-def numericalDerivative21PinholeCameraCal3_S2Pose3Cal3_S2(
-    h: Callable[[Pose3, Cal3_S2], PinholeCameraCal3_S2],
-    x1: Pose3,
-    x2: Cal3_S2,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 11, 6, delta)
 
 
-def numericalDerivative22PinholeCameraCal3_S2Pose3Cal3_S2(
-    h: Callable[[Pose3, Cal3_S2], PinholeCameraCal3_S2],
-    x1: Pose3,
-    x2: Cal3_S2,
-    delta=1e-5,
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 11, 5, delta)
-
-
-def numericalDerivative21Unit3Pose3Point3(
-    h: Callable[[Pose3, Point3], Unit3], x1: Pose3, x2: Point3, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 2, 6, delta)
-
-
-def numericalDerivative22Unit3Pose3Point3(
-    h: Callable[[Pose3, Point3], Unit3], x1: Pose3, x2: Point3, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 2, 3, delta)
-
-
-def numericalDerivative21DoublePose3Pose3(
-    h: Callable[[Pose3, Pose3], float], x1: Pose3, x2: Pose3, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 1, 6, delta)
-
-
-def numericalDerivative22DoublePose3Pose3(
-    h: Callable[[Pose3, Pose3], float], x1: Pose3, x2: Pose3, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 1, 6, delta)
-
-
-def numericalDerivative21DoublePose3Point3(
-    h: Callable[[Pose3, Point3], float], x1: Pose3, x2: Point3, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 1, 6, delta)
-
-
-def numericalDerivative22DoublePose3Point3(
-    h: Callable[[Pose3, Point3], float], x1: Pose3, x2: Point3, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 1, 3, delta)
-
-
-def numericalDerivative21Point3Pose3Point3(
-    h: Callable[[Pose3, Point3], Point3], x1: Pose3, x2: Point3, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 3, 6, delta)
-
-
-def numericalDerivative22Point3Pose3Point3(
-    h: Callable[[Pose3, Point3], Point3], x1: Pose3, x2: Point3, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x1, x), x2, 3, 3, delta)
-
-
-def numericalDerivative21Pose3Pose3Pose3(
-    h: Callable[[Pose3, Pose3], Pose3], x1: Pose3, x2: np.array, delta=1e-5
-) -> np.array:
-    return numericalDerivative11(lambda x: h(x, x2), x1, 6, 6, delta)
 
 
 def numericalDerivative22Pose3Pose3Pose3(

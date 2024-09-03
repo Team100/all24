@@ -25,8 +25,8 @@ from gtsam.noiseModel import Base as SharedNoiseModel
 from gtsam.symbol_shorthand import X  # robot pose
 from gtsam.symbol_shorthand import K  # camera calibration
 
-from numerical_derivative import numericalDerivative21Point2Pose3Cal3DS2
-from numerical_derivative import numericalDerivative22Point2Pose3Cal3DS2
+from numerical_derivative import numericalDerivative21
+from numerical_derivative import numericalDerivative22
 
 CAMERA_NOISE = Isotropic.Sigma(2, 1.0)
 LANDMARK_GROUND_TRUTH: list[Point3] = [
@@ -65,8 +65,8 @@ def VisionFactor(
         calib: Cal3DS2 = v.atCal3DS2(this.keys()[1])
         result = h(pose3, calib) - measured
         if H is not None:
-            H[0] = numericalDerivative21Point2Pose3Cal3DS2(h, pose3, calib)
-            H[1] = numericalDerivative22Point2Pose3Cal3DS2(h, pose3, calib)
+            H[0] = numericalDerivative21(h, pose3, calib, 2, 6)
+            H[1] = numericalDerivative22(h, pose3, calib, 2, 9)
         return result
 
     return CustomFactor(model, KeyVector([poseKey, calibKey]), error_func)

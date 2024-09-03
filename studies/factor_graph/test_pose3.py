@@ -11,17 +11,10 @@ from numpy.testing import assert_almost_equal
 
 from numerical_derivative import numericalDerivative21Vector6Pose3Vector6
 from numerical_derivative import numericalDerivative22Vector6Pose3Vector6
-from numerical_derivative import numericalDerivative21Pose3Pose3Pose3
 from numerical_derivative import numericalDerivative22Pose3Pose3Pose3
 from numerical_derivative import numericalDerivative11
-from numerical_derivative import numericalDerivative21Point3Pose3Point3
-from numerical_derivative import numericalDerivative22Point3Pose3Point3
-from numerical_derivative import numericalDerivative21DoublePose3Point3
-from numerical_derivative import numericalDerivative22DoublePose3Point3
-from numerical_derivative import numericalDerivative21DoublePose3Pose3
-from numerical_derivative import numericalDerivative22DoublePose3Pose3
-from numerical_derivative import numericalDerivative21Unit3Pose3Point3
-from numerical_derivative import numericalDerivative22Unit3Pose3Point3
+from numerical_derivative import numericalDerivative21
+from numerical_derivative import numericalDerivative22
 from numerical_derivative import numericalDerivative21Vector6Vector6Vector6
 from numerical_derivative import numericalDerivative22Vector6Vector6Vector6
 from numerical_derivative import numericalDerivative21Pose3Rot3Point3
@@ -240,7 +233,7 @@ class TestPose3(unittest.TestCase):
         actualDcompose2 = np.zeros((6, 6), order="F")
         T2.compose(T2, actualDcompose1, actualDcompose2)
 
-        numericalH1 = numericalDerivative21Pose3Pose3Pose3(Pose3.compose, T2, T2)
+        numericalH1 = numericalDerivative21(Pose3.compose, T2, T2, 6, 6)
         assert_almost_equal(numericalH1, actualDcompose1, 3)
         assert_almost_equal(T2.inverse().AdjointMap(), actualDcompose1, 3)
 
@@ -258,7 +251,7 @@ class TestPose3(unittest.TestCase):
         actualDcompose2 = np.zeros((6, 6), order="F")
         T1.compose(T2, actualDcompose1, actualDcompose2)
 
-        numericalH1 = numericalDerivative21Pose3Pose3Pose3(Pose3.compose, T1, T2)
+        numericalH1 = numericalDerivative21(Pose3.compose, T1, T2, 6, 6)
         assert_almost_equal(numericalH1, actualDcompose1, 3)
         assert_almost_equal(T2.inverse().AdjointMap(), actualDcompose1, 3)
 
@@ -290,8 +283,8 @@ class TestPose3(unittest.TestCase):
         actualDtransform_from1 = np.zeros((3, 6), order="F")
         Hpoint = np.zeros((3, 3), order="F")
         T.transformFrom(P, actualDtransform_from1, Hpoint)
-        numerical: np.ndarray = numericalDerivative21Point3Pose3Point3(
-            transformFrom_, T, P
+        numerical: np.ndarray = numericalDerivative21(
+            transformFrom_, T, P, 3, 6
         )
         assert_almost_equal(numerical, actualDtransform_from1, 8)
 
@@ -300,7 +293,7 @@ class TestPose3(unittest.TestCase):
         actualDtransform_from1 = np.zeros((3, 6), order="F")
         Hpoint = np.zeros((3, 3), order="F")
         origin.transformFrom(P, actualDtransform_from1, Hpoint)
-        numerical = numericalDerivative21Point3Pose3Point3(transformFrom_, origin, P)
+        numerical = numericalDerivative21(transformFrom_, origin, P, 3, 6)
         assert_almost_equal(numerical, actualDtransform_from1, 8)
 
     def test_Dtransform_from1_c(self) -> None:
@@ -309,8 +302,8 @@ class TestPose3(unittest.TestCase):
         actualDtransform_from1 = np.zeros((3, 6), order="F")
         Hpoint = np.zeros((3, 3), order="F")
         T0.transformFrom(P, actualDtransform_from1, Hpoint)
-        numerical: np.ndarray = numericalDerivative21Point3Pose3Point3(
-            transformFrom_, T0, P
+        numerical: np.ndarray = numericalDerivative21(
+            transformFrom_, T0, P, 3, 6
         )
         assert_almost_equal(numerical, actualDtransform_from1, 8)
 
@@ -321,36 +314,36 @@ class TestPose3(unittest.TestCase):
         actualDtransform_from1 = np.zeros((3, 6), order="F")
         Hpoint = np.zeros((3, 3), order="F")
         T0.transformFrom(P, actualDtransform_from1, Hpoint)
-        numerical = numericalDerivative21Point3Pose3Point3(transformFrom_, T0, P)
+        numerical = numericalDerivative21(transformFrom_, T0, P, 3, 6)
         assert_almost_equal(numerical, actualDtransform_from1, 8)
 
     def test_Dtransform_from2(self) -> None:
         Hself = np.zeros((3, 6), order="F")
         actualDtransform_from2 = np.zeros((3, 3), order="F")
         T.transformFrom(P, Hself, actualDtransform_from2)
-        numerical = numericalDerivative22Point3Pose3Point3(transformFrom_, T, P)
+        numerical = numericalDerivative22(transformFrom_, T, P, 3, 3)
         assert_almost_equal(numerical, actualDtransform_from2, 8)
 
     def test_Dtransform_to1(self) -> None:
         computed = np.zeros((3, 6), order="F")
         Hpoint = np.zeros((3, 3), order="F")
         T.transformTo(P, computed, Hpoint)
-        numerical = numericalDerivative21Point3Pose3Point3(transform_to_, T, P)
+        numerical = numericalDerivative21(transform_to_, T, P, 3, 6)
         assert_almost_equal(numerical, computed, 8)
 
     def test_Dtransform_to2(self) -> None:
         Hself = np.zeros((3, 6), order="F")
         computed = np.zeros((3, 3), order="F")
         T.transformTo(P, Hself, computed)
-        numerical = numericalDerivative22Point3Pose3Point3(transform_to_, T, P)
+        numerical = numericalDerivative22(transform_to_, T, P, 3, 3)
         assert_almost_equal(numerical, computed, 8)
 
     def test_transform_to_with_derivatives(self) -> None:
         actH1 = np.zeros((3, 6), order="F")
         actH2 = np.zeros((3, 3), order="F")
         T.transformTo(P, actH1, actH2)
-        expH1 = numericalDerivative21Point3Pose3Point3(transform_to_, T, P)
-        expH2 = numericalDerivative22Point3Pose3Point3(transform_to_, T, P)
+        expH1 = numericalDerivative21(transform_to_, T, P, 3, 6)
+        expH2 = numericalDerivative22(transform_to_, T, P, 3, 3)
         assert_almost_equal(expH1, actH1, 8)
         assert_almost_equal(expH2, actH2, 8)
 
@@ -358,8 +351,8 @@ class TestPose3(unittest.TestCase):
         actH1 = np.zeros((3, 6), order="F")
         actH2 = np.zeros((3, 3), order="F")
         T.transformFrom(P, actH1, actH2)
-        expH1 = numericalDerivative21Point3Pose3Point3(transformFrom_, T, P)
-        expH2 = numericalDerivative22Point3Pose3Point3(transformFrom_, T, P)
+        expH1 = numericalDerivative21(transformFrom_, T, P, 3, 6)
+        expH2 = numericalDerivative22(transformFrom_, T, P, 3, 3)
         assert_almost_equal(expH1, actH1, 8)
         assert_almost_equal(expH2, actH2, 8)
 
@@ -372,8 +365,8 @@ class TestPose3(unittest.TestCase):
         H2 = np.zeros((6, 6), order="F")
         T2.transformPoseFrom(T2, H1, H2)
 
-        numericalH1: np.ndarray = numericalDerivative21Pose3Pose3Pose3(
-            transformPoseFrom_, T2, T2
+        numericalH1: np.ndarray = numericalDerivative21(
+            transformPoseFrom_, T2, T2, 6, 6
         )
         assert_almost_equal(numericalH1, H1, 3)
         assert_almost_equal(T2.inverse().AdjointMap(), H1, 3)
@@ -389,7 +382,7 @@ class TestPose3(unittest.TestCase):
         res: Pose3 = T.transformPoseTo(T2, actH1, actH2)
         self.assertPose3Equals(res, T.inverse().compose(T2))
 
-        expH1 = numericalDerivative21Pose3Pose3Pose3(transformPoseTo_, T, T2)
+        expH1 = numericalDerivative21(transformPoseTo_, T, T2, 6, 6)
         expH2 = numericalDerivative22Pose3Pose3Pose3(transformPoseTo_, T, T2)
         assert_almost_equal(expH1, actH1, 8)
         assert_almost_equal(expH2, actH2, 8)
@@ -400,7 +393,7 @@ class TestPose3(unittest.TestCase):
         res: Pose3 = T.transformPoseTo(T3, actH1, actH2)
         self.assertPose3Equals(res, T.inverse().compose(T3))
 
-        expH1 = numericalDerivative21Pose3Pose3Pose3(transformPoseTo_, T, T3)
+        expH1 = numericalDerivative21(transformPoseTo_, T, T3, 6, 6)
         expH2 = numericalDerivative22Pose3Pose3Pose3(transformPoseTo_, T, T3)
         assert_almost_equal(expH1, actH1, 8)
         assert_almost_equal(expH2, actH2, 8)
@@ -412,8 +405,8 @@ class TestPose3(unittest.TestCase):
         actual: Pose3 = T2.between(T3, actualDBetween1, actualDBetween2)
         self.assertPose3Equals(expected, actual)
 
-        numericalH1: np.ndarray = numericalDerivative21Pose3Pose3Pose3(
-            Pose3.between, T2, T3
+        numericalH1: np.ndarray = numericalDerivative21(
+            Pose3.between, T2, T3, 6, 6
         )
         assert_almost_equal(numericalH1, actualDBetween1, 3)
 
@@ -437,8 +430,8 @@ class TestPose3(unittest.TestCase):
         self.assertAlmostEqual(math.sqrt(2.0), actual23, 9)
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21DoublePose3Point3(range_proxy, x2, l3)
-        expectedH2 = numericalDerivative22DoublePose3Point3(range_proxy, x2, l3)
+        expectedH1 = numericalDerivative21(range_proxy, x2, l3, 1, 6)
+        expectedH2 = numericalDerivative22(range_proxy, x2, l3, 1, 3)
         assert_almost_equal(expectedH1, actualH1)
         assert_almost_equal(expectedH2, actualH2)
 
@@ -447,8 +440,8 @@ class TestPose3(unittest.TestCase):
         self.assertAlmostEqual(5, actual34, 9)
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21DoublePose3Point3(range_proxy, x3, l4)
-        expectedH2 = numericalDerivative22DoublePose3Point3(range_proxy, x3, l4)
+        expectedH1 = numericalDerivative21(range_proxy, x3, l4, 1, 6)
+        expectedH2 = numericalDerivative22(range_proxy, x3, l4, 1, 3)
         assert_almost_equal(expectedH1, actualH1)
         assert_almost_equal(expectedH2, actualH2)
 
@@ -467,8 +460,8 @@ class TestPose3(unittest.TestCase):
         self.assertAlmostEqual(math.sqrt(2.0), actual23, 9)
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21DoublePose3Pose3(range_pose_proxy, x2, xl3)
-        expectedH2 = numericalDerivative22DoublePose3Pose3(range_pose_proxy, x2, xl3)
+        expectedH1 = numericalDerivative21(range_pose_proxy, x2, xl3, 1, 6)
+        expectedH2 = numericalDerivative22(range_pose_proxy, x2, xl3, 1, 6)
         assert_almost_equal(expectedH1, actualH1)
         assert_almost_equal(expectedH2, actualH2)
 
@@ -477,8 +470,8 @@ class TestPose3(unittest.TestCase):
         self.assertAlmostEqual(5, actual34, 9)
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21DoublePose3Pose3(range_pose_proxy, x3, xl4)
-        expectedH2 = numericalDerivative22DoublePose3Pose3(range_pose_proxy, x3, xl4)
+        expectedH1 = numericalDerivative21(range_pose_proxy, x3, xl4, 1, 6)
+        expectedH2 = numericalDerivative22(range_pose_proxy, x3, xl4, 1, 6)
         assert_almost_equal(expectedH1, actualH1)
         assert_almost_equal(expectedH2, actualH2)
 
@@ -490,8 +483,8 @@ class TestPose3(unittest.TestCase):
         )
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21Unit3Pose3Point3(bearing_proxy, x1, l1)
-        expectedH2 = numericalDerivative22Unit3Pose3Point3(bearing_proxy, x1, l1)
+        expectedH1 = numericalDerivative21(bearing_proxy, x1, l1, 2, 6)
+        expectedH2 = numericalDerivative22(bearing_proxy, x1, l1, 2, 3)
         assert_almost_equal(expectedH1, actualH1, 5)
         assert_almost_equal(expectedH2, actualH2, 5)
 
@@ -503,8 +496,8 @@ class TestPose3(unittest.TestCase):
         )
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21Unit3Pose3Point3(bearing_proxy, x2, l4)
-        expectedH2 = numericalDerivative22Unit3Pose3Point3(bearing_proxy, x2, l4)
+        expectedH1 = numericalDerivative21(bearing_proxy, x2, l4, 2, 6)
+        expectedH2 = numericalDerivative22(bearing_proxy, x2, l4, 2, 3)
         assert_almost_equal(expectedH1, actualH1, 5)
         assert_almost_equal(expectedH2, actualH2, 5)
 
@@ -516,14 +509,14 @@ class TestPose3(unittest.TestCase):
         )
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21Unit3Pose3Point3(bearing_proxy, xl1, l2)
+        expectedH1 = numericalDerivative21(bearing_proxy, xl1, l2, 2, 6)
 
         # Since the second pose is treated as a point, the value calculated by
         # numericalDerivative22 only depends on the position of the pose. Here, we
         # calculate the Jacobian w.r.t. the second pose's position, and then augment
         # that with zeroes in the block that is w.r.t. the second pose's
         # orientation.
-        H2block = numericalDerivative22Unit3Pose3Point3(bearing_proxy, xl1, l2)
+        H2block = numericalDerivative22(bearing_proxy, xl1, l2, 2, 3)
         expectedH2 = np.zeros((2, 6), order="F")
         expectedH2[:, 3:6] = H2block
 
