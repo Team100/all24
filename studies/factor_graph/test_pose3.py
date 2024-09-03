@@ -11,8 +11,6 @@ from numpy.testing import assert_almost_equal
 
 from numerical_derivative import numericalDerivative21Vector6Pose3Vector6
 from numerical_derivative import numericalDerivative22Vector6Pose3Vector6
-from numerical_derivative import numericalDerivative11Point3Pose3
-from numerical_derivative import numericalDerivative11Rot3Pose3
 from numerical_derivative import numericalDerivative21Pose3Pose3Pose3
 from numerical_derivative import numericalDerivative22Pose3Pose3Pose3
 from numerical_derivative import numericalDerivative11
@@ -24,7 +22,6 @@ from numerical_derivative import numericalDerivative21DoublePose3Pose3
 from numerical_derivative import numericalDerivative22DoublePose3Pose3
 from numerical_derivative import numericalDerivative21Unit3Pose3Point3
 from numerical_derivative import numericalDerivative22Unit3Pose3Point3
-from numerical_derivative import numericalDerivative11Pose3Double
 from numerical_derivative import numericalDerivative21Vector6Vector6Vector6
 from numerical_derivative import numericalDerivative22Vector6Vector6Vector6
 from numerical_derivative import numericalDerivative21Pose3Rot3Point3
@@ -219,7 +216,7 @@ class TestPose3(unittest.TestCase):
         def f(T: Pose3) -> Point3:
             return T.translation()
 
-        numericalH = numericalDerivative11Point3Pose3(f, T)
+        numericalH = numericalDerivative11(f, T, 3, 6)
         assert_almost_equal(numericalH, actualH, 6)
 
     # Check rotation and its pushforward
@@ -230,7 +227,7 @@ class TestPose3(unittest.TestCase):
         def f(T: Pose3) -> Pose3:
             return T.rotation()
 
-        numericalH = numericalDerivative11Rot3Pose3(f, T)
+        numericalH = numericalDerivative11(f, T, 3, 6)
         assert_almost_equal(numericalH, actualH, 6)
 
     # Check compose and its pushforward
@@ -566,7 +563,7 @@ class TestPose3(unittest.TestCase):
             return Pose3.Expmap(xi(t[0]))
 
         for t in np.linspace(-2.0, 2.0, 15):
-            expected:np.ndarray = numericalDerivative11Pose3Double(T, np.array([t]))
+            expected:np.ndarray = numericalDerivative11(T, np.array([t]), 6, 1)
             # TODO: ravel here seems weird
             expected = expected.ravel()
             actual = Pose3.ExpmapDerivative(xi(t)).dot(xi_dot(t))

@@ -9,12 +9,8 @@ import numpy as np
 from gtsam import Point2, Pose2, Rot2  # type:ignore
 from numpy.testing import assert_almost_equal
 
-from numerical_derivative import numericalDerivative11Point2Pose2
-from numerical_derivative import numericalDerivative11Pose2Pose2
 from numerical_derivative import numericalDerivative21Point2Pose2Point2
 from numerical_derivative import numericalDerivative22Point2Pose2Point2
-from numerical_derivative import numericalDerivative11Pose2Vector3
-from numerical_derivative import numericalDerivative11Vector3Pose2
 from numerical_derivative import numericalDerivative21Pose2Pose2Pose2
 from numerical_derivative import numericalDerivative22Pose2Pose2Pose2
 from numerical_derivative import numericalDerivative21Rot2Pose2Point2
@@ -78,14 +74,14 @@ class TestPose2(unittest.TestCase):
         actualH = np.zeros((3, 3), order="F")
         w = np.array([0.1, 0.27, -0.3])
         Pose2.Expmap(w, actualH)
-        expectedH = numericalDerivative11Pose2Vector3(Pose2.Expmap, w, 1e-2)
+        expectedH = numericalDerivative11(Pose2.Expmap, w, 3, 3, 1e-2)
         assert_almost_equal(expectedH, actualH, 5)
 
     def test_ExpmapDerivative2(self) -> None:
         actualH = np.zeros((3, 3), order="F")
         w0 = np.array([0.1, 0.27, 0.0])  # alpha = 0
         Pose2.Expmap(w0, actualH)
-        expectedH = numericalDerivative11Pose2Vector3(Pose2.Expmap, w0, 1e-2)
+        expectedH = numericalDerivative11(Pose2.Expmap, w0, 3, 3, 1e-2)
         assert_almost_equal(expectedH, actualH, 5)
 
     def test_LogmapDerivative1(self) -> None:
@@ -93,7 +89,7 @@ class TestPose2(unittest.TestCase):
         w = np.array([0.1, 0.27, -0.3])
         p: Pose2 = Pose2.Expmap(w)
         assert_almost_equal(w, Pose2.Logmap(p, actualH), 5)
-        expectedH = numericalDerivative11Vector3Pose2(Pose2.Logmap, p, 1e-2)
+        expectedH = numericalDerivative11(Pose2.Logmap, p, 3, 3, 1e-2)
         assert_almost_equal(expectedH, actualH, 5)
 
     def test_LogmapDerivative2(self) -> None:
@@ -101,7 +97,7 @@ class TestPose2(unittest.TestCase):
         w0 = np.array([0.1, 0.27, 0.0])  # alpha = 0
         p: Pose2 = Pose2.Expmap(w0)
         assert_almost_equal(w0, Pose2.Logmap(p, actualH), 5)
-        expectedH = numericalDerivative11Vector3Pose2(Pose2.Logmap, p, 1e-2)
+        expectedH = numericalDerivative11(Pose2.Logmap, p, 3, 3, 1e-2)
         assert_almost_equal(expectedH, actualH, 5)
 
     def test_transformTo(self) -> None:
@@ -264,7 +260,7 @@ class TestPose2(unittest.TestCase):
         assert_almost_equal(l, lTg.transformFrom(g), 5)
 
         # Check derivative
-        numericalH = numericalDerivative11Pose2Pose2(Pose2.inverse, lTg)
+        numericalH = numericalDerivative11(Pose2.inverse, lTg, 3, 3)
         actualDinverse = np.zeros((3, 3), order="F")
         lTg.inverse(actualDinverse)
         assert_almost_equal(numericalH, actualDinverse, 5)
@@ -278,7 +274,7 @@ class TestPose2(unittest.TestCase):
         def f(T: Pose2) -> Point2:
             return T.translation()
 
-        numericalH = numericalDerivative11Point2Pose2(f, pose)
+        numericalH = numericalDerivative11(f, pose, 2, 3)
         assert_almost_equal(numericalH, actualH, 6)
 
     def test_rotation(self) -> None:

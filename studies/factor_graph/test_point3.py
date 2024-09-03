@@ -9,8 +9,7 @@ import numpy as np
 from gtsam import Point3  # really np.array
 from numpy.testing import assert_allclose
 
-from numerical_derivative import numericalDerivative11DoublePoint3
-from numerical_derivative import numericalDerivative11Point3Point3
+from numerical_derivative import numericalDerivative11
 from numerical_derivative import numericalDerivative21DoublePoint3Point3
 from numerical_derivative import numericalDerivative22DoublePoint3Point3
 from numerical_derivative import numericalDerivative21Point3Point3Point3
@@ -162,7 +161,7 @@ class TestPoint3(unittest.TestCase):
         assert_allclose(expected, normalize(point, actualH))
         def fn(p: Point3) ->Point3:
             return normalize(p)
-        expectedH = numericalDerivative11Point3Point3(fn, point);
+        expectedH = numericalDerivative11(fn, point, 3, 3);
         assert_allclose(expectedH, actualH[0])
 
 
@@ -171,7 +170,7 @@ class TestPoint3(unittest.TestCase):
         point = Point3(3,4,5) # arbitrary point
         expected:float = math.sqrt(50);
         self.assertAlmostEqual(expected, norm3(point, actualH))
-        expectedH = numericalDerivative11DoublePoint3(norm_proxy, point);
+        expectedH = numericalDerivative11(norm_proxy, point, 1, 3);
         assert_allclose(expectedH, actualH[0])
 
 

@@ -9,7 +9,7 @@ import numpy as np
 from gtsam import Point2  # really np.array
 from numpy.testing import assert_allclose
 
-from numerical_derivative import numericalDerivative11DoublePoint2
+from numerical_derivative import numericalDerivative11
 from numerical_derivative import numericalDerivative21DoublePoint2Point2
 from numerical_derivative import numericalDerivative22DoublePoint2Point2
 
@@ -79,7 +79,7 @@ class TestPoint2(unittest.TestCase):
 
         actual: float = norm2(x2, actualH)
         self.assertAlmostEqual(math.sqrt(2.0), actual)
-        expectedH: np.array = numericalDerivative11DoublePoint2(norm_proxy, x2)
+        expectedH: np.array = numericalDerivative11(norm_proxy, x2, 1, 2)
         assert_allclose(expectedH, actualH[0])
 
         # analytical
