@@ -7,16 +7,19 @@
 # so the measurement factor is quaternary (though one of
 # the edges leads to the constant landmarks)
 
-# this version has two cameras.
+# this version uses pose2 for the robot instead of pose3.
 
+# as it is, it's quite sensitive to the choice of prior,
+# which i think means that it needs more values and more factors.
+
+import time
 from typing import Callable
 
 import numpy as np
 
 from gtsam import Cal3DS2  # includes distortion
 from gtsam import PinholeCameraCal3DS2
-from gtsam import Point2
-from gtsam import Point3, Pose3, Rot3
+from gtsam import Point2, Point3, Pose3, Rot3, Pose2, Rot2
 
 from gtsam import CustomFactor, NonlinearFactor, KeyVector
 from gtsam import NonlinearFactorGraph, DoglegOptimizer, Values
@@ -32,42 +35,63 @@ from numerical_derivative import numericalDerivative31
 from numerical_derivative import numericalDerivative32
 from numerical_derivative import numericalDerivative33
 
+# camera "zero" is facing +z; this turns it to face +x
+CAM_COORD = Pose3(Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])), Point3(0, 0, 0))
 CAMERA_NOISE = Isotropic.Sigma(2, 1.0)
+# a grid of landmarks on the y axis, x-forward, z-up,
 LANDMARK_GROUND_TRUTH: list[Point3] = [
-    Point3(-10.0, 10.0, 0.0),
-    Point3(-5.0, 0.0, 0.0),
-    Point3(0.0, 10.0, 10.0),
-    Point3(5.0, 0.0, 0.0),
-    Point3(10.0, 10.0, 0.0),
+    Point3(0.0, -1.0, 0.0),
+    Point3(0.0, 0.0, 0.0),
+    Point3(0.0, 1.0, 0.0),
+    Point3(0.0, -1.0, 1.0),
+    Point3(0.0, 0.0, 1.0),
+    Point3(0.0, 1.0, 1.0),
 ]
+# Robot poses are all on the ground, so use Pose2
+# this is in x-forward z-up coordinates now,
+# so the scan is in Y
 ROBOT_GROUND_TRUTH = [
-    Pose3(Rot3.Identity(), Point3(-10, 0, -30)),
-    Pose3(Rot3.Identity(), Point3(-8, 0, -30)),
-    # more poses doesn't seem to make it more accurate ... ?
-    Pose3(Rot3.Identity(), Point3(-6, 0, -30)),
-    Pose3(Rot3.Identity(), Point3(-4, 0, -30)),
-    Pose3(Rot3.Identity(), Point3(-2, 0, -30)),
-    Pose3(Rot3.Identity(), Point3(0, 0, -30)),
+    Pose2(Rot2.fromDegrees(0), Point2(-10, -2)),
+    Pose2(Rot2.fromDegrees(0), Point2(-10, -1)),
+    Pose2(Rot2.fromDegrees(0), Point2(-10, -0)),
+    Pose2(Rot2.fromDegrees(0), Point2(-10, 1)),
+    Pose2(Rot2.fromDegrees(0), Point2(-10, 2)),
 ]
+# these offsets are x-forward z-up
+# note: if offsets are parallel to the robot path then
+# the system is underdetermined, so give these some yaw.
 OFFSET_GROUND_TRUTH = [
-    Pose3(Rot3.Yaw(0.1), Point3(-0.5, 0, 0)),
-    Pose3(Rot3.Yaw(-0.1), Point3(0.5, 0, 0)),
+    Pose3(Rot3.Yaw(0.5), Point3(0, 0.5, 0)),  # left
+    Pose3(Rot3.Yaw(0), Point3(0, 0, 0)),  # center
+    Pose3(Rot3.Yaw(-0.5), Point3(0, -0.5, 0)),  # right
 ]
 
 
 def h_fn(landmark: Point3) -> Callable[[Pose3, Pose3, Cal3DS2], Point2]:
-    def h(pose3: Pose3, offset: Pose3, calib: Cal3DS2) -> Point2:
-        camera = PinholeCameraCal3DS2(pose3.compose(offset), calib)
+    def h(robot_pose: Pose3, camera_offset: Pose3, calib: Cal3DS2) -> Point2:
+        """robot_pose and camera_offset are x-forward, z-up"""
+        offset_pose = robot_pose.compose(camera_offset)
+        # print("offset pose ", offset_pose)
+        camera_pose = offset_pose.compose(CAM_COORD)
+        # camera constructor expects z-forward y-down
+        # print("camera pose ", camera_pose)
+        # print("landmark ", landmark)
+        camera = PinholeCameraCal3DS2(camera_pose, calib)
         return camera.project(landmark)
 
     return h
 
 
 # measurements (camera signal) from ground-truth
-def make_measurements(pose: Pose3, offset: Pose3, landmark: Point3) -> Point2:
+def make_measurements(gt_pose: Pose2, offset: Pose3, landmark: Point3) -> Point2:
     # ground truth calibration
     Kcal = Cal3DS2(50.0, 50.0, 0.0, 50.0, 50.0, -0.2, 0.1, 0.0, 0.0)
-    return h_fn(landmark)(pose, offset, Kcal)
+    # makes a pose3 with x,y,yaw, x-forward, z-up
+    # print("robot pose2 ", gt_pose)
+    robot_pose = Pose3(gt_pose)
+    # print("robot pose3 ", robot_pose)
+    # print("landmark ", landmark)
+    return h_fn(landmark)(robot_pose, offset, Kcal)
 
 
 def VisionFactor(
@@ -97,38 +121,43 @@ def main() -> None:
     graph = NonlinearFactorGraph()
 
     # initial robot prior
+    ground_truth_x0 = ROBOT_GROUND_TRUTH[0]
+    # the error in the prior makes a big difference.
+    prior_error = Pose3(Rot3.Yaw(0.01), Point3(0.01, 0.01, 0))
+    # the prior noise seems not to matter much
+    prior_noise = Diagonal.Sigmas([1, 1, 1, 3, 3, 3])
     graph.addPriorPose3(
         X(0),
-        Pose3(Rot3.Identity(), Point3(-10, 0, -30)),
-        Diagonal.Sigmas([0.1, 0.1, 0.1, 0.3, 0.3, 0.3]),
+        Pose3(ground_truth_x0).compose(prior_error),
+        prior_noise,
     )
 
     # camera calibration prior
     graph.addPriorCal3DS2(
         K(0),
-        Cal3DS2(50.0, 50.0, 0.0, 50.0, 50.0, -0.2, 0.1, 0.0, 0.0),
-        Diagonal.Sigmas([500, 500, 0.1, 100, 100, 10, 10, 0.1, 0.1]),
+        # note the prior is not close
+        Cal3DS2(60.0, 60.0, 0.0, 60.0, 60.0, 0, 0, 0.0, 0.0),
+        # note we're saying that there are really no p1 or p2 terms.
+        Diagonal.Sigmas([500, 500, 0.1, 100, 100, 10, 10, 0.001, 0.001]),
     )
 
     # camera offset priors
-    graph.addPriorPose3(
-        C(0),
-        Pose3(Rot3.Identity(), Point3(-0.5, 0, 0)),
-        Diagonal.Sigmas([0.1, 0.1, 0.1, 0.3, 0.3, 0.3]),
-    )
-    graph.addPriorPose3(
-        C(1),
-        Pose3(Rot3.Identity(), Point3(0.5, 0, 0)),
-        Diagonal.Sigmas([0.1, 0.1, 0.1, 0.3, 0.3, 0.3]),
-    )
+    for i, ground_truth_c in enumerate(OFFSET_GROUND_TRUTH):
+        graph.addPriorPose3(
+            C(i),
+            ground_truth_c.compose(prior_error),
+            prior_noise,
+        )
 
     # sightings from each robot pose
+    gt_robot_pose: Pose2
     for i, gt_robot_pose in enumerate(ROBOT_GROUND_TRUTH):
         for gt_landmark in LANDMARK_GROUND_TRUTH:
             for j, gt_offset in enumerate(OFFSET_GROUND_TRUTH):
                 camera_measurement = make_measurements(
                     gt_robot_pose, gt_offset, gt_landmark
                 )
+                # print("pixels ", camera_measurement)
                 graph.add(
                     VisionFactor(
                         camera_measurement,
@@ -141,31 +170,29 @@ def main() -> None:
                 )
 
     initialEstimate = Values()
-    # initial calibration
+    # initial calibration, not close
     initialEstimate.insert(
         K(0), Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0)
     )
 
+    # initial pose error: values are not close to the correct values
+    initial_error = Pose3(Rot3.Rodrigues(-0.1, 0.2, 0.25), Point3(0.5, -0.5, 0.50))
+
     # initial robot poses
-    for i, pose in enumerate(ROBOT_GROUND_TRUTH):
-        initialEstimate.insert(
-            X(i),
-            pose.compose(
-                Pose3(Rot3.Rodrigues(-0.1, 0.2, 0.25), Point3(0.05, -0.10, 0.20))
-            ),
-        )
+    for i, gt_pose in enumerate(ROBOT_GROUND_TRUTH):
+        pose = Pose3(gt_pose)
+        initialEstimate.insert(X(i), pose.compose(initial_error))
 
     # initial camera offsets
     for i, pose in enumerate(OFFSET_GROUND_TRUTH):
-        initialEstimate.insert(
-            C(i),
-            pose.compose(
-                Pose3(Rot3.Rodrigues(-0.1, 0.2, 0.25), Point3(0.05, -0.10, 0.20))
-            ),
-        )
+        initialEstimate.insert(C(i), pose.compose(initial_error))
 
+    t0 = time.time_ns()
     result: Values = DoglegOptimizer(graph, initialEstimate).optimize()
+    t1 = time.time_ns()
     result.print("Final results:\n")
+    print("duration ms ", (t1 - t0) / 1000000)
+
     # print("DOT\n", graph.dot(result))
 
 

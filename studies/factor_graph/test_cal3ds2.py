@@ -1,10 +1,11 @@
 # pylint: disable=C0103,C0114,C0115,C0116,E0611,R0904,R0913,W0621
+# mypy: disable-error-code="import-untyped"
 # really to test numeric differentation
 # see testCal3DS2.cpp
 
 import unittest
 import numpy as np
-from gtsam import Cal3DS2, Point2  # type:ignore
+from gtsam import Cal3DS2, Point2
 from numpy.testing import assert_almost_equal
 
 from numerical_derivative import numericalDerivative21
