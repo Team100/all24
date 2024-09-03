@@ -8,9 +8,9 @@ from gtsam import PinholeCameraCal3_S2, Cal3_S2  # type:ignore
 from gtsam import Point2, Point3, Pose3, Rot3, Unit3  # type:ignore
 from numpy.testing import assert_almost_equal
 
+from numerical_derivative import numericalDerivative11
 from numerical_derivative import numericalDerivative21PinholeCameraCal3_S2Pose3Cal3_S2
 from numerical_derivative import numericalDerivative22PinholeCameraCal3_S2Pose3Cal3_S2
-from numerical_derivative import numericalDerivative11Pose3PinholeCameraCal3_S2
 from numerical_derivative import numericalDerivative31Point2Pose3Point3Cal3_S2
 from numerical_derivative import numericalDerivative32Point2Pose3Point3Cal3_S2
 from numerical_derivative import numericalDerivative33Point2Pose3Point3Cal3_S2
@@ -103,7 +103,7 @@ class TestPinholeCamera(unittest.TestCase):
         def f(x1: PinholeCameraCal3_S2) -> Pose3:
             return PinholeCameraCal3_S2.getPose(x1, np.zeros((6, 11), order="F"))
 
-        numericalH = numericalDerivative11Pose3PinholeCameraCal3_S2(f, camera)
+        numericalH = numericalDerivative11(f, camera, 6, 11)
         assert_almost_equal(numericalH, actualH)
 
     def test_Dproject(self) -> None:

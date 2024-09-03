@@ -15,7 +15,7 @@ from numerical_derivative import numericalDerivative11Point3Pose3
 from numerical_derivative import numericalDerivative11Rot3Pose3
 from numerical_derivative import numericalDerivative21Pose3Pose3Pose3
 from numerical_derivative import numericalDerivative22Pose3Pose3Pose3
-from numerical_derivative import numericalDerivative11Pose3Pose3
+from numerical_derivative import numericalDerivative11
 from numerical_derivative import numericalDerivative21Point3Pose3Point3
 from numerical_derivative import numericalDerivative22Point3Pose3Point3
 from numerical_derivative import numericalDerivative21DoublePose3Point3
@@ -24,9 +24,7 @@ from numerical_derivative import numericalDerivative21DoublePose3Pose3
 from numerical_derivative import numericalDerivative22DoublePose3Pose3
 from numerical_derivative import numericalDerivative21Unit3Pose3Point3
 from numerical_derivative import numericalDerivative22Unit3Pose3Point3
-from numerical_derivative import numericalDerivative11Pose3Vector6
 from numerical_derivative import numericalDerivative11Pose3Double
-from numerical_derivative import numericalDerivative11Vector6Pose3
 from numerical_derivative import numericalDerivative21Vector6Vector6Vector6
 from numerical_derivative import numericalDerivative22Vector6Vector6Vector6
 from numerical_derivative import numericalDerivative21Pose3Rot3Point3
@@ -276,7 +274,7 @@ class TestPose3(unittest.TestCase):
         expected: np.ndarray = np.linalg.inv(T.matrix())
         assert_almost_equal(actual, expected, 8)
 
-        numericalH: np.ndarray = numericalDerivative11Pose3Pose3(Pose3.inverse, T)
+        numericalH: np.ndarray = numericalDerivative11(Pose3.inverse, T, 6, 6)
         assert_almost_equal(numericalH, actualDinverse, 3)
         assert_almost_equal(-T.AdjointMap(), actualDinverse, 3)
 
@@ -285,7 +283,7 @@ class TestPose3(unittest.TestCase):
         t = Point3(3.5, -8.2, 4.2)
         T = Pose3(R, t)
 
-        numericalH = numericalDerivative11Pose3Pose3(Pose3.inverse, T)
+        numericalH = numericalDerivative11(Pose3.inverse, T, 6, 6)
         actualDinverse = np.zeros((6, 6), order="F")
         T.inverse(actualDinverse)
         assert_almost_equal(numericalH, actualDinverse, 3)
@@ -539,7 +537,7 @@ class TestPose3(unittest.TestCase):
         actualH = np.zeros((6, 6), order="F")
         w = np.array([0.1, 0.2, 0.3, 4.0, 5.0, 6.0])
         Pose3.Expmap(w, actualH)
-        expectedH = numericalDerivative11Pose3Vector6(Pose3.Expmap, w)
+        expectedH = numericalDerivative11(Pose3.Expmap, w, 6, 6)
         assert_almost_equal(expectedH, actualH)
 
     def test_ExpmapDerivative2(self) -> None:
@@ -589,7 +587,7 @@ class TestPose3(unittest.TestCase):
         w = np.array([0.1, 0.2, 0.3, 4.0, 5.0, 6.0])
         p: Pose3 = Pose3.Expmap(w)
         assert_almost_equal(w, Pose3.Logmap(p, actualH), 5)
-        expectedH = numericalDerivative11Vector6Pose3(Pose3.Logmap, p)
+        expectedH = numericalDerivative11(Pose3.Logmap, p, 6, 6)
         assert_almost_equal(expectedH, actualH)
 
     def test_adjoint(self) -> None:
@@ -750,12 +748,12 @@ class TestPose3(unittest.TestCase):
             return Pose3.Expmap(M.dot(omega))
 
         # Test the derivatives at zero
-        expected = numericalDerivative11Pose3Vector6(g, np.zeros((6)))
+        expected = numericalDerivative11(g, np.zeros((6)), 6, 6)
         assert_almost_equal(expected, M, 5)  # Pose3.ExpmapDerivative(Z_6x1) is identity
 
         # Test the derivatives at another value
         delta = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
-        expected2 = numericalDerivative11Pose3Vector6(g, delta)
+        expected2 = numericalDerivative11(g, delta, 6, 6)
         analytic = Pose3.ExpmapDerivative(M.dot(delta)).dot(M)
         assert_almost_equal(expected2, analytic, 5)  # note tolerance
 

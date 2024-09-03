@@ -19,7 +19,7 @@ from numerical_derivative import numericalDerivative21Pose2Pose2Pose2
 from numerical_derivative import numericalDerivative22Pose2Pose2Pose2
 from numerical_derivative import numericalDerivative21Rot2Pose2Point2
 from numerical_derivative import numericalDerivative22Rot2Pose2Point2
-from numerical_derivative import numericalDerivative11Rot2Pose2
+from numerical_derivative import numericalDerivative11
 from numerical_derivative import numericalDerivative21DoublePose2Point2
 from numerical_derivative import numericalDerivative22DoublePose2Point2
 from numerical_derivative import numericalDerivative21Rot2Pose2Pose2
@@ -290,7 +290,7 @@ class TestPose2(unittest.TestCase):
         def f(T: Pose2) -> Rot2:
             return T.rotation()
 
-        numericalH = numericalDerivative11Rot2Pose2(f, pose)
+        numericalH = numericalDerivative11(f, pose, 1, 3)
         assert_almost_equal(numericalH, actualH, 6)
 
     def test_between(self) -> None:
