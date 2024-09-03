@@ -34,7 +34,7 @@ class FeedforwardTest {
     @Test
     void test100() {
         // behaves the same as the naive model above, ignoring friction.
-        Feedforward100 ff100 = new Feedforward100(1, 1, 0, 0, 0);
+        Feedforward100 ff100 = Feedforward100.makeTest2();
         assertEquals(1, ff100.velocityFFVolts(1),kDelta);
         assertEquals(1, ff100.accelFFVolts(1),kDelta);
     }

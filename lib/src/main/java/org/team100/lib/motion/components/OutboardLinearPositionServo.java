@@ -9,7 +9,7 @@ import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
- * Position control using duty cycle feature of linear mechanism
+ * Position control using the feedback controller in the motor controller hardware
  */
 public class OutboardLinearPositionServo implements LinearPositionServo {
     private final SupplierLogger m_logger;

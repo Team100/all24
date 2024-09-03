@@ -16,7 +16,6 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Because the 2025 angular encoder classes do not wind up, this is a version of
@@ -48,9 +47,6 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpointRad = new State100(0, 0);
-    // for calculating acceleration
-    private double m_previousSetpoint = 0;
-    private double m_prevTime;
 
     /**
      * Don't forget to set a profile.
@@ -80,7 +76,6 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     @Override
     public void reset() {
         m_controller.reset();
-        m_prevTime = Timer.getFPGATimestamp();
         OptionalDouble position = getPosition();
         OptionalDouble velocity = getVelocity();
         if (position.isEmpty() || velocity.isEmpty()) {
@@ -235,25 +230,4 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         m_logger.logState100(Level.TRACE, "goal", () -> m_goal);
     }
     ////////////////////////////////////////////////
-
-    @Override
-    public void setVelocity(double goalVelocityRad_S, double feedForwardTorqueNm) {
-        m_mechanism.setVelocity(feedForwardTorqueNm, accel(goalVelocityRad_S), feedForwardTorqueNm);
-    }
-
-    /**
-     * there will be some jitter in dt, which will result in a small amount of
-     * jitter in acceleration, and since this is a trailing difference there will be
-     * a tiny bit of delay, compared to the actual profile. If this is
-     * a problem, rewrite the profile class to expose the acceleration state and use
-     * that instead.
-     */
-    private double accel(double setpoint) {
-        double now = Timer.getFPGATimestamp();
-        double dt = now - m_prevTime;
-        m_prevTime = now;
-        double accel = (setpoint - m_previousSetpoint) / dt;
-        m_previousSetpoint = setpoint;
-        return accel;
-    }
 }

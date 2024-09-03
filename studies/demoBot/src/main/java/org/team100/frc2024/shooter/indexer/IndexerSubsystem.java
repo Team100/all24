@@ -8,19 +8,6 @@ import org.team100.lib.motion.components.OutboardLinearPositionServo;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.SupplierLogger;
 
-/**
- * Direct-drive roller indexer.
- * 
- * Typical free speed of 6k rpm => 100 turn/sec
- * diameter of 0.05m => 0.15 m/turn
- * therefore top speed is around 15 m/s.
- * 
- * Positive direction should be the direction the indexer should go
- * 
- * This system has low intertia but a lot of friction,
- * and it's fragile. we want to eject as fast as possible
- * though, so try a high accel limit.
- */
 public class IndexerSubsystem implements Glassy {
 
     private final double kIndexerVelocityM_S;

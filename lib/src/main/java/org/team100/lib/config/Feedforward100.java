@@ -35,7 +35,7 @@ public class Feedforward100 {
     private final double kDS;
     private final double staticFrictionSpeedLimit;
 
-    public Feedforward100(double kV, double kA, double kSS, double kDS, double staticFrictionSpeedLimit) {
+    private Feedforward100(double kV, double kA, double kSS, double kDS, double staticFrictionSpeedLimit) {
         this.kV = kV;
         this.kA = kA;
         this.kSS = kSS;
@@ -112,8 +112,11 @@ public class Feedforward100 {
         return kDS * direction;
     }
 
-    public static Feedforward100 makeTest() {
+    public static Feedforward100 makeTest1() {
         return new Feedforward100(0.3, 0.000, 0.000, 0.100, 3.5);
     }
 
+    public static Feedforward100 makeTest2() {
+        return new Feedforward100(1, 1, 0, 0, 0);
+    }
 }

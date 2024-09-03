@@ -45,8 +45,6 @@ public interface AngularPositionServo extends Glassy {
      */
     void setPositionWithVelocity(double goalRad, double goalVelocityRad_S, double feedForwardTorqueNm);
 
-    void setVelocity(double goalVelocityRad_S, double feedForwardTorqueNm);
-
     /**
      * @return Current position measurement, radians.
      */

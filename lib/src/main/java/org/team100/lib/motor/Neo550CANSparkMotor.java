@@ -8,9 +8,9 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 /**
- * Neo motor.
+ * Neo550 motor.
  * 
- * @see https://www.revrobotics.com/rev-21-1650/
+ * @see https://www.revrobotics.com/rev-21-1651/
  */
 public class Neo550CANSparkMotor extends CANSparkMotor {
     public Neo550CANSparkMotor(
@@ -31,6 +31,6 @@ public class Neo550CANSparkMotor extends CANSparkMotor {
 
     @Override
     public double kTNm_amp() {
-        return 0.009;
+        return 0.3944;
     }
 }

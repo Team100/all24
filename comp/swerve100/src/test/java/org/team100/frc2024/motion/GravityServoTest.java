@@ -3,12 +3,14 @@ package org.team100.frc2024.motion;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.motion.components.GravityServoInterface;
 import org.team100.frc2024.Timeless2024;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OutboardGravityServo;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.telemetry.SupplierLogger;
@@ -46,7 +48,7 @@ class GravityServoTest implements Timeless2024 {
         servo.setProfile(profile);
         servo.reset();
 
-        GravityServoInterface g = new GravityServo2(
+        GravityServoInterface g = new OutboardGravityServo(
                 servo, 5.0, 0.0);
         g.setProfile(profile);
         // start at zero

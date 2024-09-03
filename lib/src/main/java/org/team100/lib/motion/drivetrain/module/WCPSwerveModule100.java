@@ -1,7 +1,5 @@
 package org.team100.lib.motion.drivetrain.module;
 
-import java.util.Optional;
-
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.encoder.AS5048RotaryPositionSensor;
@@ -226,7 +224,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         AngularPositionServo servo = new OutboardAngularPositionServo(
                 parent,
                 mech,
-                Optional.of(combinedEncoder));
+                combinedEncoder);
         servo.setProfile(profile);
         return servo;
     }

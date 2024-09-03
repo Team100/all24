@@ -2,8 +2,6 @@ package org.team100.lib.motion.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.MockIncrementalBareEncoder;
@@ -72,7 +70,7 @@ class AnglePositionServoTest {
         AngularPositionServo servo = new OutboardAngularPositionServo(
                 logger,
                 mech,
-                Optional.of(combinedEncoder));
+                combinedEncoder);
         servo.setProfile(profile);
         servo.reset();
         // it moves slowly

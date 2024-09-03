@@ -16,33 +16,22 @@ public interface LinearPositionServo extends Glassy {
      */
     void reset();
 
+     /**
+     * This is movement and force on the output.
+     * 
+     * @param goalM             meters
+     * @param feedForwardTorque used for gravity compensation
+     */
+    void setPosition(double goalM, double feedForwardTorqueNm);
+
     /**
      * This is movement and force on the output.
      * 
-     * @param goalM
-     */
-     /**
-     * The angle measure here *does not* wind up, so 0 and 2pi are the same.
-     * 
-     * The measurements here are output measurements, e.g. shaft radians, not motor
-     * radians.
-     * 
-     * @param goalRad           radians
+     * @param goalM           meters
+     * @param goalVelocityM_S m/s
      * @param feedForwardTorque used for gravity compensation
      */
-    void setPosition(double goalRad, double feedForwardTorqueNm);
-
-    /**
-     * The angle measure here *does not* wind up, so 0 and 2pi are the same.
-     * 
-     * The measurements here are output measurements, e.g. shaft radians, not motor
-     * radians.
-     * 
-     * @param goalRad           radians
-     * @param goalVelocityRad_S rad/s
-     * @param feedForwardTorque used for gravity compensation
-     */
-    void setPositionWithVelocity(double goalRad, double goalVelocityRad_S, double feedForwardTorqueNm);
+    void setPositionWithVelocity(double goalM, double goalVelocityM_S, double feedForwardTorqueNm);
 
 
     OptionalDouble getPosition();

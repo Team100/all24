@@ -2,8 +2,6 @@ package org.team100.frc2024.motion.shooter;
 
 import java.util.OptionalDouble;
 
-import org.team100.frc2024.motion.GravityServo2;
-import org.team100.frc2024.motion.GravityServoInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -18,8 +16,10 @@ import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.components.GravityServoInterface;
 import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.components.OnboardAngularPositionServo;
+import org.team100.lib.motion.components.OutboardGravityServo;
 import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.CANSparkMotor;
@@ -156,7 +156,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         pivotLogger, pivotMech, encoder,
                         10, // TODO: remove this
                         pivotController);
-                pivotServo = new GravityServo2(pivotAngleServo,
+                pivotServo = new OutboardGravityServo(pivotAngleServo,
                         5.0, // TODO: tune this
                         0.0);
                 pivotServo.setProfile(profile);
@@ -199,7 +199,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         pivotLogger, simMech, simEncoder,
                         10, // TODO: remove this
                         pivotController);
-                pivotServo = new GravityServo2(simPivotAngleServo,
+                pivotServo = new OutboardGravityServo(simPivotAngleServo,
                         5.0, // TODO: tune this
                         0.0);
 
