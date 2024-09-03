@@ -1,9 +1,10 @@
-# pylint: disable=C0103,C0114,C0116,E0611,R0913
+# pylint: disable=C0103,C0114,C0115,C0116,E0611,R0913
+# mypy: disable-error-code="import-untyped"
 # really to test numeric differentation
 # see testPoint2.cpp
 
 import math
-
+from typing import Optional
 import unittest
 import numpy as np
 from gtsam import Point2  # really np.array
@@ -23,14 +24,14 @@ l4 = Point2(1, 3)
 
 
 def norm_proxy(point: Point2) -> float:
-    return np.linalg.norm(point)
+    return np.linalg.norm(point) #type:ignore
 
 
 def distance_proxy(location: Point2, point: Point2) -> float:
     return distance2(location, point)
 
 
-def norm2(p: Point2, H: list[np.array] = None) -> float:
+def norm2(p: Point2, H: Optional[list[np.array]] = None) -> float:
     """
     p: Point2, which is really just np.array
     H: OptionalJacobian<1,2>, really np.array[] always 2d
@@ -44,7 +45,7 @@ def norm2(p: Point2, H: list[np.array] = None) -> float:
     return r
 
 
-def distance2(p: Point2, q: Point2, H: list[np.array] = None) -> float:
+def distance2(p: Point2, q: Point2, H: Optional[list[np.array]] = None) -> float:
     """
     H1: OptionalJacobian<1, 2>
     H2: OptionalJacobian<1, 2>
@@ -57,33 +58,33 @@ def distance2(p: Point2, q: Point2, H: list[np.array] = None) -> float:
         H[1] = hz[0]
         return r
     else:
-        return np.linalg.norm(d)
+        return np.linalg.norm(d) #type:ignore
 
 
 class TestPoint2(unittest.TestCase):
     def test_norm(self) -> None:
         p0 = Point2(math.cos(5.0), math.sin(5.0))
-        self.assertAlmostEqual(1, np.linalg.norm(p0))
+        self.assertAlmostEqual(1, np.linalg.norm(p0)) #type:ignore
         p1 = Point2(4, 5)
         p2 = Point2(1, 1)
         self.assertAlmostEqual(5, distance2(p1, p2))
-        self.assertAlmostEqual(5, np.linalg.norm((p2 - p1)))
+        self.assertAlmostEqual(5, np.linalg.norm((p2 - p1))) #type:ignore
 
-        actualH: list[np.array] = [np.zeros((1, 2))]
+        actualH = [np.zeros((1, 2))]
 
         # exception, for (0,0) derivative is [Inf,Inf] but we return [1,1]
-        actual: float = norm2(x1, actualH)
+        actual = norm2(x1, actualH)
         self.assertAlmostEqual(0, actual)
-        expectedH: np.array = np.array([[1.0, 1.0]])
+        expectedH = np.array([[1.0, 1.0]])
         assert_allclose(expectedH, actualH[0])
 
-        actual: float = norm2(x2, actualH)
+        actual = norm2(x2, actualH)
         self.assertAlmostEqual(math.sqrt(2.0), actual)
-        expectedH: np.array = numericalDerivative11(norm_proxy, x2, 1, 2)
+        expectedH = numericalDerivative11(norm_proxy, x2)
         assert_allclose(expectedH, actualH[0])
 
         # analytical
-        expectedH: np.array = np.array([[x2[0] / actual, x2[1] / actual]])
+        expectedH = np.array([[x2[0] / actual, x2[1] / actual]])
         assert_allclose(expectedH, actualH[0])
 
     def test_distance(self) -> None:
@@ -101,8 +102,8 @@ class TestPoint2(unittest.TestCase):
         self.assertAlmostEqual(math.sqrt(2.0), actual23)
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21(distance_proxy, x2, l3, 1, 2)
-        expectedH2 = numericalDerivative22(distance_proxy, x2, l3, 1, 2)
+        expectedH1 = numericalDerivative21(distance_proxy, x2, l3)
+        expectedH2 = numericalDerivative22(distance_proxy, x2, l3)
         assert_allclose(expectedH1, actualH[0])
         assert_allclose(expectedH2, actualH[1])
 
@@ -111,8 +112,8 @@ class TestPoint2(unittest.TestCase):
         self.assertAlmostEqual(2, actual34)
 
         # Check numerical derivatives
-        expectedH1 = numericalDerivative21(distance_proxy, x3, l4, 1, 2)
-        expectedH2 = numericalDerivative22(distance_proxy, x3, l4, 1, 2)
+        expectedH1 = numericalDerivative21(distance_proxy, x3, l4)
+        expectedH2 = numericalDerivative22(distance_proxy, x3, l4)
         assert_allclose(expectedH1, actualH[0])
         assert_allclose(expectedH2, actualH[1])
 

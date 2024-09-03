@@ -41,6 +41,11 @@ LANDMARK_GROUND_TRUTH: list[Point3] = [
 ROBOT_GROUND_TRUTH = [
     Pose3(Rot3.Identity(), Point3(-10, 0, -30)),
     Pose3(Rot3.Identity(), Point3(-8, 0, -30)),
+    # more poses doesn't seem to make it more accurate ... ?
+    Pose3(Rot3.Identity(), Point3(-6, 0, -30)),
+    Pose3(Rot3.Identity(), Point3(-4, 0, -30)),
+    Pose3(Rot3.Identity(), Point3(-2, 0, -30)),
+    Pose3(Rot3.Identity(), Point3(0, 0, -30)),
 ]
 OFFSET_GROUND_TRUTH = [
     Pose3(Rot3.Yaw(0.1), Point3(-0.5, 0, 0)),
@@ -72,9 +77,9 @@ def VisionFactor(
         calib: Cal3DS2 = v.atCal3DS2(this.keys()[2])
         result = h(pose3, offset, calib) - measured
         if H is not None:
-            H[0] = numericalDerivative31(h, pose3, offset, calib, 2, 6)
-            H[1] = numericalDerivative32(h, pose3, offset, calib, 2, 6)
-            H[2] = numericalDerivative33(h, pose3, offset, calib, 2, 9)
+            H[0] = numericalDerivative31(h, pose3, offset, calib)
+            H[1] = numericalDerivative32(h, pose3, offset, calib)
+            H[2] = numericalDerivative33(h, pose3, offset, calib)
         return result
 
     return CustomFactor(model, KeyVector([poseKey, offsetKey, calibKey]), error_func)
