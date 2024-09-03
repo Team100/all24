@@ -9,14 +9,11 @@ from gtsam import Point2, Point3, Pose3, Rot3, Unit3  # type:ignore
 from numpy.testing import assert_almost_equal
 
 from numerical_derivative import numericalDerivative11
-from numerical_derivative import numericalDerivative31Point2Pose3Point3Cal3_S2
-from numerical_derivative import numericalDerivative32Point2Pose3Point3Cal3_S2
-from numerical_derivative import numericalDerivative33Point2Pose3Point3Cal3_S2
-from numerical_derivative import numericalDerivative31Point2Pose3Unit3Cal3_S2
-from numerical_derivative import numericalDerivative32Point2Pose3Unit3Cal3_S2
-from numerical_derivative import numericalDerivative33Point2Pose3Unit3Cal3_S2
 from numerical_derivative import numericalDerivative21
 from numerical_derivative import numericalDerivative22
+from numerical_derivative import numericalDerivative31
+from numerical_derivative import numericalDerivative32
+from numerical_derivative import numericalDerivative33
 
 
 K = Cal3_S2(625, 625, 0, 0, 0)
@@ -105,15 +102,9 @@ class TestPinholeCamera(unittest.TestCase):
         Dpoint = np.zeros((2, 3), order="F")
         Dcal = np.zeros((2, 5), order="F")
         result = camera.project(point1, Dpose, Dpoint, Dcal)
-        numerical_pose = numericalDerivative31Point2Pose3Point3Cal3_S2(
-            project3, pose, point1, K
-        )
-        Hexpected2 = numericalDerivative32Point2Pose3Point3Cal3_S2(
-            project3, pose, point1, K
-        )
-        numerical_cal = numericalDerivative33Point2Pose3Point3Cal3_S2(
-            project3, pose, point1, K
-        )
+        numerical_pose = numericalDerivative31(project3, pose, point1, K, 2, 6)
+        Hexpected2 = numericalDerivative32(project3, pose, point1, K, 2, 3)
+        numerical_cal = numericalDerivative33(project3, pose, point1, K, 2, 5)
         assert_almost_equal(Point2(-100, 100), result)
         assert_almost_equal(numerical_pose, Dpose)
         assert_almost_equal(Hexpected2, Dpoint)
@@ -133,18 +124,14 @@ class TestPinholeCamera(unittest.TestCase):
         assert_almost_equal(actual, expected)
 
         # test Jacobians
-        numerical_pose = numericalDerivative31Point2Pose3Unit3Cal3_S2(
-            projectInfinity3, pose, point3D, K
-        )
-        Hexpected2: np.ndarray = numericalDerivative32Point2Pose3Unit3Cal3_S2(
-            projectInfinity3, pose, point3D, K
+        numerical_pose = numericalDerivative31(projectInfinity3, pose, point3D, K, 2, 6)
+        Hexpected2: np.ndarray = numericalDerivative32(
+            projectInfinity3, pose, point3D, K, 2, 6
         )
         numerical_point2x2 = Hexpected2[
             :2, :2
         ]  # only the direction to the point matters
-        numerical_cal = numericalDerivative33Point2Pose3Unit3Cal3_S2(
-            projectInfinity3, pose, point3D, K
-        )
+        numerical_cal = numericalDerivative33(projectInfinity3, pose, point3D, K, 2, 5)
         assert_almost_equal(numerical_pose, Dpose)
         assert_almost_equal(numerical_point2x2, Dpoint)
         assert_almost_equal(numerical_cal, Dcal)
@@ -153,12 +140,8 @@ class TestPinholeCamera(unittest.TestCase):
         Dcamera = np.zeros((2, 11), order="F")
         Dpoint = np.zeros((2, 3), order="F")
         result = camera.project2(point1, Dcamera, Dpoint)
-        Hexpected1 = numericalDerivative21(
-            project4, camera, point1, 2, 11
-        )
-        Hexpected2 = numericalDerivative22(
-            project4, camera, point1, 2, 3
-        )
+        Hexpected1 = numericalDerivative21(project4, camera, point1, 2, 11)
+        Hexpected2 = numericalDerivative22(project4, camera, point1, 2, 3)
         assert_almost_equal(result, Point2(-100, 100))
         assert_almost_equal(Hexpected1, Dcamera)
         assert_almost_equal(Hexpected2, Dpoint)
@@ -170,12 +153,8 @@ class TestPinholeCamera(unittest.TestCase):
         Dpose = np.zeros((2, 11), order="F")
         Dpoint = np.zeros((2, 3), order="F")
         camera.project2(point1, Dpose, Dpoint)
-        numerical_pose = numericalDerivative21(
-            project4, camera, point1, 2, 11
-        )
-        numerical_point = numericalDerivative22(
-            project4, camera, point1, 2, 3
-        )
+        numerical_pose = numericalDerivative21(project4, camera, point1, 2, 11)
+        numerical_point = numericalDerivative22(project4, camera, point1, 2, 3)
         assert_almost_equal(numerical_pose, Dpose)
         assert_almost_equal(numerical_point, Dpoint)
 
@@ -183,12 +162,8 @@ class TestPinholeCamera(unittest.TestCase):
         D1 = np.zeros((1, 11), order="F")
         D2 = np.zeros((1, 3), order="F")
         result = camera.range(point1, D1, D2)
-        Hexpected1 = numericalDerivative21(
-            range0, camera, point1, 1, 11
-        )
-        Hexpected2 = numericalDerivative22(
-            range0, camera, point1, 1, 3
-        )
+        Hexpected1 = numericalDerivative21(range0, camera, point1, 1, 11)
+        Hexpected2 = numericalDerivative22(range0, camera, point1, 1, 3)
         self.assertAlmostEqual(distance3(point1, camera.pose().translation()), result)
         assert_almost_equal(Hexpected1, D1)
         assert_almost_equal(Hexpected2, D2)
@@ -197,12 +172,8 @@ class TestPinholeCamera(unittest.TestCase):
         D1 = np.zeros((1, 11), order="F")
         D2 = np.zeros((1, 6), order="F")
         result = camera.range(pose1, D1, D2)
-        Hexpected1 = numericalDerivative21(
-            range1, camera, pose1, 1, 11
-        )
-        Hexpected2 = numericalDerivative22(
-            range1, camera, pose1, 1, 6
-        )
+        Hexpected1 = numericalDerivative21(range1, camera, pose1, 1, 11)
+        Hexpected2 = numericalDerivative22(range1, camera, pose1, 1, 6)
         self.assertAlmostEqual(1, result)
         assert_almost_equal(Hexpected1, D1)
         assert_almost_equal(Hexpected2, D2)

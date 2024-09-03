@@ -9,12 +9,11 @@ import numpy as np
 from gtsam import Point3, Pose3, Rot3, Unit3  # type:ignore
 from numpy.testing import assert_almost_equal
 
-from numerical_derivative import numericalDerivative22Pose3Pose3Pose3
 from numerical_derivative import numericalDerivative11
 from numerical_derivative import numericalDerivative21
 from numerical_derivative import numericalDerivative22
-from numerical_derivative import numericalDerivative31Pose3Pose3Pose3Double
-from numerical_derivative import numericalDerivative32Pose3Pose3Pose3Double
+from numerical_derivative import numericalDerivative31
+from numerical_derivative import numericalDerivative32
 
 
 P = Point3(0.2, 0.7, -2)
@@ -231,7 +230,7 @@ class TestPose3(unittest.TestCase):
         assert_almost_equal(numericalH1, actualDcompose1, 3)
         assert_almost_equal(T2.inverse().AdjointMap(), actualDcompose1, 3)
 
-        numericalH2 = numericalDerivative22Pose3Pose3Pose3(Pose3.compose, T2, T2)
+        numericalH2 = numericalDerivative22(Pose3.compose, T2, T2, 6, 6)
         assert_almost_equal(numericalH2, actualDcompose2, 4)
 
     # Check compose and its pushforward, another case
@@ -249,7 +248,7 @@ class TestPose3(unittest.TestCase):
         assert_almost_equal(numericalH1, actualDcompose1, 3)
         assert_almost_equal(T2.inverse().AdjointMap(), actualDcompose1, 3)
 
-        numericalH2 = numericalDerivative22Pose3Pose3Pose3(Pose3.compose, T1, T2)
+        numericalH2 = numericalDerivative22(Pose3.compose, T1, T2, 6, 6)
         assert_almost_equal(numericalH2, actualDcompose2, 5)
 
     def test_inverse(self) -> None:
@@ -365,8 +364,8 @@ class TestPose3(unittest.TestCase):
         assert_almost_equal(numericalH1, H1, 3)
         assert_almost_equal(T2.inverse().AdjointMap(), H1, 3)
 
-        numericalH2: np.ndarray = numericalDerivative22Pose3Pose3Pose3(
-            transformPoseFrom_, T2, T2
+        numericalH2: np.ndarray = numericalDerivative22(
+            transformPoseFrom_, T2, T2, 6, 6
         )
         assert_almost_equal(numericalH2, H2, 4)
 
@@ -377,7 +376,7 @@ class TestPose3(unittest.TestCase):
         self.assertPose3Equals(res, T.inverse().compose(T2))
 
         expH1 = numericalDerivative21(transformPoseTo_, T, T2, 6, 6)
-        expH2 = numericalDerivative22Pose3Pose3Pose3(transformPoseTo_, T, T2)
+        expH2 = numericalDerivative22(transformPoseTo_, T, T2, 6, 6)
         assert_almost_equal(expH1, actH1, 8)
         assert_almost_equal(expH2, actH2, 8)
 
@@ -388,7 +387,7 @@ class TestPose3(unittest.TestCase):
         self.assertPose3Equals(res, T.inverse().compose(T3))
 
         expH1 = numericalDerivative21(transformPoseTo_, T, T3, 6, 6)
-        expH2 = numericalDerivative22Pose3Pose3Pose3(transformPoseTo_, T, T3)
+        expH2 = numericalDerivative22(transformPoseTo_, T, T3, 6, 6)
         assert_almost_equal(expH1, actH1, 8)
         assert_almost_equal(expH2, actH2, 8)
 
@@ -404,8 +403,8 @@ class TestPose3(unittest.TestCase):
         )
         assert_almost_equal(numericalH1, actualDBetween1, 3)
 
-        numericalH2: np.ndarray = numericalDerivative22Pose3Pose3Pose3(
-            Pose3.between, T2, T3
+        numericalH2: np.ndarray = numericalDerivative22(
+            Pose3.between, T2, T3, 6, 6
         )
         assert_almost_equal(numericalH2, actualDBetween2, 5)
 
@@ -628,13 +627,13 @@ class TestPose3(unittest.TestCase):
             X.slerp(t, Y, actualJacobianX, actualJacobianY),
         )
 
-        expectedJacobianX = numericalDerivative31Pose3Pose3Pose3Double(
-            testing_interpolate, X, Y, t
+        expectedJacobianX = numericalDerivative31(
+            testing_interpolate, X, Y, t, 6, 6
         )
         assert_almost_equal(expectedJacobianX, actualJacobianX, 6)
 
-        expectedJacobianY = numericalDerivative32Pose3Pose3Pose3Double(
-            testing_interpolate, X, Y, t
+        expectedJacobianY = numericalDerivative32(
+            testing_interpolate, X, Y, t, 6, 6
         )
         assert_almost_equal(expectedJacobianY, actualJacobianY, 6)
 
@@ -649,13 +648,13 @@ class TestPose3(unittest.TestCase):
             expectedPoseInterp, X.slerp(t, Y, actualJacobianX, actualJacobianY)
         )
 
-        expectedJacobianX = numericalDerivative31Pose3Pose3Pose3Double(
-            testing_interpolate, X, Y, t
+        expectedJacobianX = numericalDerivative31(
+            testing_interpolate, X, Y, t, 6, 6
         )
         assert_almost_equal(expectedJacobianX, actualJacobianX, 6)
 
-        expectedJacobianY = numericalDerivative32Pose3Pose3Pose3Double(
-            testing_interpolate, X, Y, t
+        expectedJacobianY = numericalDerivative32(
+            testing_interpolate, X, Y, t, 6, 6
         )
         assert_almost_equal(expectedJacobianY, actualJacobianY, 6)
 
@@ -670,13 +669,13 @@ class TestPose3(unittest.TestCase):
             expectedPoseInterp, X.slerp(t, Y, actualJacobianX, actualJacobianY)
         )
 
-        expectedJacobianX = numericalDerivative31Pose3Pose3Pose3Double(
-            testing_interpolate, X, Y, t
+        expectedJacobianX = numericalDerivative31(
+            testing_interpolate, X, Y, t, 6, 6
         )
         assert_almost_equal(expectedJacobianX, actualJacobianX, 6)
 
-        expectedJacobianY = numericalDerivative32Pose3Pose3Pose3Double(
-            testing_interpolate, X, Y, t
+        expectedJacobianY = numericalDerivative32(
+            testing_interpolate, X, Y, t, 6, 6
         )
         assert_almost_equal(expectedJacobianY, actualJacobianY, 6)
 
@@ -689,13 +688,13 @@ class TestPose3(unittest.TestCase):
         actualJacobianY = np.zeros((6, 6), order="F")
         X.slerp(t, Y, actualJacobianX, actualJacobianY)
 
-        expectedJacobianX = numericalDerivative31Pose3Pose3Pose3Double(
-            testing_interpolate, X, Y, t
+        expectedJacobianX = numericalDerivative31(
+            testing_interpolate, X, Y, t, 6, 6
         )
         assert_almost_equal(expectedJacobianX, actualJacobianX, 6)
 
-        expectedJacobianY = numericalDerivative32Pose3Pose3Pose3Double(
-            testing_interpolate, X, Y, t
+        expectedJacobianY = numericalDerivative32(
+            testing_interpolate, X, Y, t, 6, 6
         )
         assert_almost_equal(expectedJacobianY, actualJacobianY, 6)
 

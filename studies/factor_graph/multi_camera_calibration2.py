@@ -26,9 +26,9 @@ from gtsam.symbol_shorthand import C  # camera offset
 from gtsam.symbol_shorthand import K  # camera calibration
 from gtsam.symbol_shorthand import X  # robot pose
 
-from numerical_derivative import numericalDerivative31Point2Pose3Pose3Cal3DS2
-from numerical_derivative import numericalDerivative32Point2Pose3Pose3Cal3DS2
-from numerical_derivative import numericalDerivative33Point2Pose3Pose3Cal3DS2
+from numerical_derivative import numericalDerivative31
+from numerical_derivative import numericalDerivative32
+from numerical_derivative import numericalDerivative33
 
 CAMERA_NOISE = Isotropic.Sigma(2, 1.0)
 LANDMARK_GROUND_TRUTH: list[Point3] = [
@@ -72,9 +72,9 @@ def VisionFactor(
         calib: Cal3DS2 = v.atCal3DS2(this.keys()[2])
         result = h(pose3, offset, calib) - measured
         if H is not None:
-            H[0] = numericalDerivative31Point2Pose3Pose3Cal3DS2(h, pose3, offset, calib)
-            H[1] = numericalDerivative32Point2Pose3Pose3Cal3DS2(h, pose3, offset, calib)
-            H[2] = numericalDerivative33Point2Pose3Pose3Cal3DS2(h, pose3, offset, calib)
+            H[0] = numericalDerivative31(h, pose3, offset, calib, 2, 6)
+            H[1] = numericalDerivative32(h, pose3, offset, calib, 2, 6)
+            H[2] = numericalDerivative33(h, pose3, offset, calib, 2, 9)
         return result
 
     return CustomFactor(model, KeyVector([poseKey, offsetKey, calibKey]), error_func)
