@@ -1,4 +1,6 @@
 # pylint: disable=unused-import,consider-using-from-import,invalid-name,no-name-in-module,no-member,missing-function-docstring,too-many-locals
+# mypy: disable-error-code="import-untyped"
+
 """
 Transcription of SelfCalibrationExample.cpp
 
@@ -56,7 +58,6 @@ def createPoses(
     poses.append(init)
     for i in range(1, steps):
         poses.append(poses[i - 1].compose(delta))
-    # print("POSES ", poses)
     return poses
 
 
@@ -151,7 +152,7 @@ def main() -> None:
     t1 = time.time_ns()
     result.print("Final results:\n")
     print("duration ms ", (t1-t0)/1e6)
-    print("DOT\n", graph.dot(result))
+    # print("DOT\n", graph.dot(result))
 
 if __name__ == "__main__":
     main()

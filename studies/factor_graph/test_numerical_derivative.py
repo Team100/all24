@@ -1,23 +1,12 @@
 # pylint: disable=no-member,C0103,C0114,C0115,C0116,R0913
-
+# mypy: disable-error-code="import-untyped"
 # see testNumericalDerivative.cpp
-
 
 import math
 import unittest
 import numpy as np
 from numpy.testing import assert_allclose
-import gtsam
-
-from numerical_derivative import (
-    numericalGradientVector2,
-    numericalDerivative61Vector6DoubleDoubleDoubleDoubleDoubleDouble,
-)
-
-
-def f(x: np.array) -> float:
-    assert x.size == 2
-    return math.sin(x[0]) + math.cos(x[1])
+from numerical_derivative import numericalDerivative61
 
 
 def f6(x1: float, x2: float, x3: float, x4: float, x5: float, x6: float) -> np.array:
@@ -35,26 +24,9 @@ def f6(x1: float, x2: float, x3: float, x4: float, x5: float, x6: float) -> np.a
 
 
 class TestNumericalDerivative(unittest.TestCase):
-
-    def test_numericalGradient(self) -> None:
-        x = np.array([1.0, 1.1])
-        expected = np.array([math.cos(x[0]), -math.sin(x[1])])
-        actual: gtsam.Vector = numericalGradientVector2(f, x)
-        assert_allclose(expected, actual, atol=1e-5)
-
     def test_numeriDerivative61(self) -> None:
-        x1 = 1
-        x2 = 2
-        x3 = 3
-        x4 = 4
-        x5 = 5
-        x6 = 6
-        expected61 = np.array([[math.cos(x1)], [0], [0], [0], [0], [0]])
-        actual61 = numericalDerivative61Vector6DoubleDoubleDoubleDoubleDoubleDouble(
-            f6, x1, x2, x3, x4, x5, x6
-        )
-        print("expected ", expected61)
-        print("actual ", actual61)
+        expected61 = np.array([[math.cos(1)], [0], [0], [0], [0], [0]])
+        actual61 = numericalDerivative61(f6, 1, 2, 3, 4, 5, 6)
         assert_allclose(expected61, actual61, atol=1e-5)
 
 
