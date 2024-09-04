@@ -22,6 +22,7 @@ from gtsam import Point2, Point3, Pose3, Rot3, Pose2, Rot2
 
 from gtsam import CustomFactor, NonlinearFactor, KeyVector
 from gtsam import NonlinearFactorGraph, DoglegOptimizer, Values
+from gtsam import Marginals
 
 from gtsam.noiseModel import Diagonal, Isotropic
 from gtsam.noiseModel import Base as SharedNoiseModel
@@ -34,6 +35,10 @@ from numerical_derivative import numericalDerivative11
 from numerical_derivative import numericalDerivative31
 from numerical_derivative import numericalDerivative32
 from numerical_derivative import numericalDerivative33
+
+from custom_factor_type import CustomFactorType
+from plot_utils2 import Plot
+
 
 # this is not a good model for the gyro behavior
 # TODO: add a real drifting gyro simulation
@@ -71,17 +76,18 @@ OFFSET_GROUND_TRUTH = [
 ]
 
 
-def gyro_h_fn() -> Callable[[Pose3], float]:
-    def h(robot_pose: Pose3) -> float:
-        return robot_pose.rotation().yaw()
+def gyro_h_fn() -> Callable[[Pose2], float]:
+    def h(robot_pose: Pose2) -> float:
+        return robot_pose.rotation().theta()
 
     return h
 
 
-def vision_h_fn(landmark: Point3) -> Callable[[Pose3, Pose3, Cal3DS2], Point2]:
-    def h(robot_pose: Pose3, camera_offset: Pose3, calib: Cal3DS2) -> Point2:
+def vision_h_fn(landmark: Point3) -> Callable[[Pose2, Pose3, Cal3DS2], Point2]:
+    def h(robot_pose: Pose2, camera_offset: Pose3, calib: Cal3DS2) -> Point2:
         """robot_pose and camera_offset are x-forward, z-up"""
-        offset_pose = robot_pose.compose(camera_offset)
+        # ctor a pose3 with x,y,yaw, x-forward, z-up
+        offset_pose = Pose3(robot_pose).compose(camera_offset)
         # print("offset pose ", offset_pose)
         camera_pose = offset_pose.compose(CAM_COORD)
         # camera constructor expects z-forward y-down
@@ -98,26 +104,23 @@ def GyroFactor(
     measured: float, model: SharedNoiseModel, poseKey: int
 ) -> NonlinearFactor:
     def error_func(this: CustomFactor, v: Values, H: list[np.ndarray]) -> np.ndarray:
-        pose3: Pose3 = v.atPose3(this.keys()[0])
+        pose2: Pose2 = v.atPose2(this.keys()[0])
         h = gyro_h_fn()
-        result = h(pose3) - measured
+        result = h(pose2) - measured
         if H is not None:
-            H[0] = numericalDerivative11(h, pose3)
+            H[0] = numericalDerivative11(h, pose2)
         return np.array([result])
 
-    return CustomFactor(model, KeyVector([poseKey]), error_func)
+    return CustomFactor(
+        CustomFactorType.UNARY.value, model, KeyVector([poseKey]), error_func
+    )
 
 
 # measurements (camera signal) from ground-truth
 def vision_measurements(gt_pose: Pose2, offset: Pose3, landmark: Point3) -> Point2:
     # ground truth calibration
     Kcal = Cal3DS2(50.0, 50.0, 0.0, 50.0, 50.0, -0.2, 0.1, 0.0, 0.0)
-    # makes a pose3 with x,y,yaw, x-forward, z-up
-    # print("robot pose2 ", gt_pose)
-    robot_pose = Pose3(gt_pose)
-    # print("robot pose3 ", robot_pose)
-    # print("landmark ", landmark)
-    return vision_h_fn(landmark)(robot_pose, offset, Kcal)
+    return vision_h_fn(landmark)(gt_pose, offset, Kcal)
 
 
 def VisionFactor(
@@ -129,18 +132,23 @@ def VisionFactor(
     calibKey: int,
 ) -> NonlinearFactor:
     def error_func(this: CustomFactor, v: Values, H: list[np.ndarray]) -> np.ndarray:
-        pose3: Pose3 = v.atPose3(this.keys()[0])
+        pose2: Pose2 = v.atPose2(this.keys()[0])
         offset: Pose3 = v.atPose3(this.keys()[1])
         calib: Cal3DS2 = v.atCal3DS2(this.keys()[2])
         h = vision_h_fn(landmark)
-        result = h(pose3, offset, calib) - measured
+        result = h(pose2, offset, calib) - measured
         if H is not None:
-            H[0] = numericalDerivative31(h, pose3, offset, calib)
-            H[1] = numericalDerivative32(h, pose3, offset, calib)
-            H[2] = numericalDerivative33(h, pose3, offset, calib)
+            H[0] = numericalDerivative31(h, pose2, offset, calib)
+            H[1] = numericalDerivative32(h, pose2, offset, calib)
+            H[2] = numericalDerivative33(h, pose2, offset, calib)
         return result
 
-    return CustomFactor(model, KeyVector([poseKey, offsetKey, calibKey]), error_func)
+    return CustomFactor(
+        CustomFactorType.OTHER.value,
+        model,
+        KeyVector([poseKey, offsetKey, calibKey]),
+        error_func,
+    )
 
 
 def main() -> None:
@@ -149,13 +157,12 @@ def main() -> None:
     # initial robot prior
     ground_truth_x0 = ROBOT_GROUND_TRUTH[0]
     # the error in the prior makes a big difference.
-    prior_error = Pose3(Rot3.Yaw(0.01), Point3(0.01, 0.01, 0))
+
     # the prior noise seems not to matter much
-    prior_noise = Diagonal.Sigmas([1, 1, 1, 3, 3, 3])
-    graph.addPriorPose3(
+    graph.addPriorPose2(
         X(0),
-        Pose3(ground_truth_x0).compose(prior_error),
-        prior_noise,
+        ground_truth_x0.compose(Pose2(Rot2.fromDegrees(5), Point2(0.01, 0.01))),
+        Diagonal.Sigmas([3, 3, 3]),
     )
 
     # camera calibration prior
@@ -171,21 +178,15 @@ def main() -> None:
     for i, ground_truth_c in enumerate(OFFSET_GROUND_TRUTH):
         graph.addPriorPose3(
             C(i),
-            ground_truth_c.compose(prior_error),
-            prior_noise,
+            ground_truth_c.compose(Pose3(Rot3.Yaw(0.01), Point3(0.01, 0.01, 0))),
+            Diagonal.Sigmas([1, 1, 1, 3, 3, 3]),
         )
 
     # sightings from each robot pose
     gt_robot_pose: Pose2
     for i, gt_robot_pose in enumerate(ROBOT_GROUND_TRUTH):
-        gyro_measurement = gyro_h_fn()(Pose3(gt_robot_pose))
-        graph.add(
-            GyroFactor(
-                gyro_measurement,
-                GYRO_NOISE,
-                X(i)
-            )
-        )
+        gyro_measurement = gyro_h_fn()(gt_robot_pose)
+        graph.add(GyroFactor(gyro_measurement, GYRO_NOISE, X(i)))
         for gt_landmark in LANDMARK_GROUND_TRUTH:
             for j, gt_offset in enumerate(OFFSET_GROUND_TRUTH):
                 camera_measurement = vision_measurements(
@@ -214,20 +215,38 @@ def main() -> None:
 
     # initial robot poses
     for i, gt_pose in enumerate(ROBOT_GROUND_TRUTH):
-        pose = Pose3(gt_pose)
-        initialEstimate.insert(X(i), pose.compose(initial_error))
+        initialEstimate.insert(
+            X(i), gt_pose.compose(Pose2(Rot2.fromDegrees(5), Point2(0.01, 0.01)))
+        )
 
     # initial camera offsets
     for i, pose in enumerate(OFFSET_GROUND_TRUTH):
         initialEstimate.insert(C(i), pose.compose(initial_error))
 
     t0 = time.time_ns()
-    result: Values = DoglegOptimizer(graph, initialEstimate).optimize()
+    optimizer = DoglegOptimizer(graph, initialEstimate)
+    result: Values = optimizer.optimize()
     t1 = time.time_ns()
     result.print("Final results:\n")
     print("duration ms ", (t1 - t0) / 1000000)
 
+    # what's the uncertainty in the result?
+    np.set_printoptions(precision=2, linewidth=150)
+    marginals = Marginals(graph, result)
+    print("K0\n", marginals.marginalCovariance(K(0)))
+    for i in range(len(ROBOT_GROUND_TRUTH)):
+        print(f"X{i}\n", marginals.marginalCovariance(X(i)))
+    for i in range(len(OFFSET_GROUND_TRUTH)):
+        print(f"C{i}\n", marginals.marginalCovariance(C(i)))
+
     # print("DOT\n", graph.dot(result))
+
+    fig, ax = Plot.subplots(1, 2, 12, 6)
+    p0 = Plot(optimizer, "p0", fig, ax[0])
+    p0.plot_variables_and_factors(
+        result, [X(i) for i in range(len(ROBOT_GROUND_TRUTH))], [], graph
+    )
+    p0.wait()
 
 
 if __name__ == "__main__":

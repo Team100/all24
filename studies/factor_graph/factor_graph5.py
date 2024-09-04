@@ -1,10 +1,11 @@
-# pylint: disable=invalid-name,too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
+# pylint: disable=C0103,C0114,C0115,C0116,E0611,E1101,R0904,R0913,W0621
+# mypy: disable-error-code="import-untyped"
 
 import math
 import time
 import numpy as np
 import gtsam
-import gtsam_unstable  # type:ignore
+import gtsam_unstable
 from gtsam.symbol_shorthand import X
 from landmark import Landmark
 from plot_utils2 import Plot
@@ -18,6 +19,7 @@ NOISE1 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.01]))
 NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.5, 0.5]))
 NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
+# the crash only happens in incremental mode
 INCREMENTAL = True
 
 
@@ -51,6 +53,7 @@ def add_odometry_and_target_sights(
 
     new_robot_variable(x_i, latest_robot_pose_estimate, robot_delta, values, timestamps)
     add_odometry_factor(x_i, robot_delta, graph)
+    # something about the boundary and the vision interact to make this crash
     add_boundary_factor(x_i, graph)
     add_vision_factors(x_i, robot_x, landmarks, graph, timestamps)
 
@@ -78,7 +81,6 @@ def add_vision_factors(
     #     if H is not None:
     #         H[0] = np.eye(3)
     #         H[1] = np.eye(3)
-
 
     for l in landmarks:
         l_angle = robot_x.bearing(l.x)
@@ -124,6 +126,9 @@ def add_boundary_factor(x_i: int, graph: gtsam.NonlinearFactorGraph):
     graph.add(
         gtsam.CustomFactor(
             CustomFactorType.BOUNDARY.value,
+            # this makes it fail a little while after it hits the boundary
+            # gtsam.noiseModel.Constrained.All(1),
+            # this makes it fail when it sees the vision target after the boundary
             NOISE1,
             gtsam.KeyVector([X(x_i)]),
             error_func,
@@ -164,7 +169,8 @@ def new_robot_variable(
     # add a new value representing the robot pose, for this timestamp
     # use the last-solved estimate, extended with odometry, as the initial guess for the new state
     # the incremental smoother is very sensitive to this initial value
-    values.insert(X(x_i), latest_robot_pose_estimate.compose(robot_delta))
+    new_estimate = latest_robot_pose_estimate.compose(robot_delta)
+    values.insert(X(x_i), new_estimate)
     # if you're using the batch smoother, the initial value almost doesn't matter:
     # values.insert(X(x_i), gtsam.Pose2())
     timestamps.insert((X(x_i), x_i))
@@ -179,9 +185,15 @@ def make_smoother() -> gtsam.FixedLagSmoother:
         # use incremental (faster, quite sensitive to initial values)
         optimization_params = gtsam.ISAM2GaussNewtonParams()
         optimization_params.setWildfireThreshold(0.001)  # the default is 0.001
-        optimization_params = gtsam.ISAM2DoglegParams()
+        # the crash is caused by the use of dogleg solver,
+        # see ISAM2.cpp:758; in the "in between" mode of the dogleg solver
+        # it takes the dot product of two diffrent-length vectors, i think because
+        # the incremental smoother creates this inconsistency somehow (all the time).
+        # it is harmless except for this in-between case.
+        # optimization_params = gtsam.ISAM2DoglegParams()
         print(optimization_params)
         isam_params = gtsam.ISAM2Params()
+        # the crash is cause by the optimization params.
         isam_params.setOptimizationParams(optimization_params)
         # relinearizing less makes the path more consistent as new factors are added
         # relinearizing more makes it more jittery
@@ -189,7 +201,9 @@ def make_smoother() -> gtsam.FixedLagSmoother:
         isam_params.evaluateNonlinearError = False
         isam_params.cacheLinearizedFactors = True
         print(isam_params)
+        # the crash is caused by these params somehow
         return gtsam_unstable.IncrementalFixedLagSmoother(10, isam_params)
+        # return gtsam_unstable.IncrementalFixedLagSmoother(10)
 
     # use batch (2.5x slower, very insensitive to initial values)
     lm_params = gtsam.LevenbergMarquardtParams.LegacyDefaults()
