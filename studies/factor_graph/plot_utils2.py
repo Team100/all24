@@ -12,7 +12,7 @@ from matplotlib.markers import MarkerStyle
 from matplotlib import collections
 import numpy as np
 from gtsam.symbol_shorthand import X
-from gtsam import Marginals
+from gtsam import Marginals, Point2
 
 from landmark import Landmark
 from custom_factor_type import CustomFactorType
@@ -68,7 +68,7 @@ class Plot:
         self.ax.set_title(name)
         # self.ax.set_xlim(-1, 6)
         # self.ax.set_ylim(-1, 6)
-        self.ax.set_xlim(-15, -5)
+        self.ax.set_xlim(-15, 2)
         self.ax.set_ylim(-5, 5)
         self.ax.set_aspect("equal", adjustable="box")
         plt.tight_layout()
@@ -121,6 +121,16 @@ class Plot:
 
         self.fig.canvas.draw()
         plt.show(block=False)
+        self.fig.canvas.update()
+        self.fig.canvas.flush_events()
+
+    # TODO: remove this
+    def plot_some_points(
+            self, points: list[Point2]
+    ) -> None:
+        print(points)
+        self.ax.scatter([p[0] for p in points], [p[1] for p in points])
+        self.fig.canvas.draw()
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
