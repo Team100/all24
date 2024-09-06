@@ -114,16 +114,22 @@ def initialize(isam) -> None:
     timestamps.insert((B(0), 0))
     isam.update(graph, values, timestamps)
 
+# kalibr example is ADIS16448 (imu_adis16448.yaml)
+# this is worse than the LSM6DSOX
+# white noise 0.005 rad/sqrt(hz)s
+# bias is 0.000004 rad*sqrt(hz)/s.
+# the LSM can be assumed to be lower
+# TODO: make an allen plot of it
 
 SAMPLE_RATE_HZ = 50.0
 TICK_S = 1 / SAMPLE_RATE_HZ
 SPEED_M_S = 0.1
 # these are in the canonical units
-GYRO_BIAS = 0.05  # bias in simulated omega measurement, rad*sqrt(hz)/s
-GYRO_NOISE = 0.05  # noise in simulated omega measurement, rad/sqrt(hz)s
+GYRO_BIAS = 0.005  # bias in simulated omega measurement, rad*sqrt(hz)/s
+GYRO_NOISE = 0.000004  # noise in simulated omega measurement, rad/sqrt(hz)s
 RNG = np.random.RandomState(0)
 
-N = 50
+N = 5000
 
 actual_thetas = [0]
 
@@ -158,15 +164,15 @@ def main() -> None:
 
         # bias is rad*sqrt(hz)/s so divide by hz to get rad/s
         gyro_bias_sigma = GYRO_BIAS / math.sqrt(SAMPLE_RATE_HZ)
-        # gyro_bias_rad_s += gyro_bias_sigma * RNG.standard_normal()
+        gyro_bias_rad_s += gyro_bias_sigma * RNG.standard_normal()
 
         # for now make gyro bias a (large)constant, to see if the model will learn it.
-        gyro_bias_rad_s = 0.01
+        # gyro_bias_rad_s = 0.01
         # noise is rad/sqrt(hz)*s so multiply by hz to get rad/s
         gyro_white_sigma = GYRO_NOISE * math.sqrt(SAMPLE_RATE_HZ)
         gyro_white_noise_rad_s = gyro_white_sigma * RNG.standard_normal()
         # for now no noise
-        gyro_white_noise_rad_s = 0.0
+        # gyro_white_noise_rad_s = 0.0
 
         # robot delta rotation rate is zero
         omega_gt = robot_delta.rotation().theta() / TICK_S
@@ -222,6 +228,7 @@ def main() -> None:
 
     plt.plot(actual_thetas, label='actual')
     plt.plot(theta, label='estimate')
+    plt.plot(b, label="bias")
     plt.legend()
     plt.ylabel("theta")
     plt.xlabel("tick")
