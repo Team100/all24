@@ -11,8 +11,11 @@ import math
 
 from typing import Callable
 
-import gtsam.noiseModel
 import numpy as np
+
+import matplotlib.pyplot as plt
+
+import gtsam.noiseModel
 import gtsam
 import gtsam_unstable
 
@@ -76,7 +79,7 @@ def GyroFactor(
     )
 
 
-def make_smoother() -> FixedLagSmoother:
+def make_smoother(N) -> FixedLagSmoother:
     optimization_params = ISAM2GaussNewtonParams()
     optimization_params.setWildfireThreshold(0.001)
     isam_params = gtsam.ISAM2Params()
@@ -86,7 +89,7 @@ def make_smoother() -> FixedLagSmoother:
     isam_params.relinearizeSkip = 1
     isam_params.evaluateNonlinearError = False
     isam_params.cacheLinearizedFactors = True
-    return gtsam_unstable.IncrementalFixedLagSmoother(20, isam_params)
+    return gtsam_unstable.IncrementalFixedLagSmoother(N, isam_params)
 
 
 def initialize(isam) -> None:
@@ -120,14 +123,17 @@ GYRO_BIAS = 0.05  # bias in simulated omega measurement, rad*sqrt(hz)/s
 GYRO_NOISE = 0.05  # noise in simulated omega measurement, rad/sqrt(hz)s
 RNG = np.random.RandomState(0)
 
+N = 50
+
+actual_thetas = [0]
 
 def main() -> None:
-    isam = make_smoother()
+    isam = make_smoother(N)
     initialize(isam)
 
     robot_gt = gtsam.Pose2(0, 0, 0)  # simulated robot pose
     gyro_bias_rad_s = 0.0  # random walk noise
-    for x_i in range(1, 50):
+    for x_i in range(1, N):
 
         graph = NonlinearFactorGraph()
         values = Values()
@@ -136,6 +142,7 @@ def main() -> None:
         # move in X, don't rotate
         robot_delta = gtsam.Pose2(SPEED_M_S * TICK_S, 0, 0)
         robot_gt = robot_gt.compose(robot_delta)
+        actual_thetas.append(robot_gt.rotation().theta())
         values.insert(X(x_i), robot_gt)
         timestamps.insert((X(x_i), x_i))
         graph.add(
@@ -162,8 +169,9 @@ def main() -> None:
         gyro_white_noise_rad_s = 0.0
 
         # robot delta rotation rate is zero
+        omega_gt = robot_delta.rotation().theta() / TICK_S
         measured_omega_rad_s = (
-            robot_delta.rotation().theta() / TICK_S
+            omega_gt
             + gyro_bias_rad_s
             + gyro_white_noise_rad_s
         )
@@ -183,6 +191,8 @@ def main() -> None:
             )
         )
 
+
+
         # the actual gyro measurement
 
         graph.add(
@@ -200,9 +210,23 @@ def main() -> None:
         isam.update(graph, values, timestamps)
 
         result = isam.calculateEstimate()
-        print(result)
-        print("measured omega rad/s ", measured_omega_rad_s)
-        print("gt pose ", robot_gt)
+
+    # end result
+    print(result)
+    print("measured omega rad/s ", measured_omega_rad_s)
+    print("gt pose ", robot_gt)
+
+    x = [result.atPose2(X(i)).translation()[0] for i in range(N)]
+    b = [result.atDouble(B(i)) for i in range(N)]
+    theta = [result.atPose2(X(i)).rotation().theta() for i in range(N)]
+
+    plt.plot(actual_thetas, label='actual')
+    plt.plot(theta, label='estimate')
+    plt.legend()
+    plt.ylabel("theta")
+    plt.xlabel("tick")
+    plt.tight_layout(pad=2)
+    plt.show()
 
 
 if __name__ == "__main__":
