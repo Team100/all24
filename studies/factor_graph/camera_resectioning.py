@@ -1,4 +1,6 @@
 # pylint: disable=consider-using-from-import,invalid-name,no-name-in-module,no-member,missing-function-docstring
+# mypy: disable-error-code="import-untyped"
+
 """
 This is a 1:1 transcription of CameraResectioning.cpp.
 """
