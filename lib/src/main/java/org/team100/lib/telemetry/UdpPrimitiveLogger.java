@@ -28,8 +28,9 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
     private final ByteBuffer m_bb;
 
     public UdpPrimitiveLogger() throws UnknownHostException, SocketException {
-        // m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 100 });
-        m_addr = InetAddress.getLocalHost();
+        // for testing
+        m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
+        // m_addr = InetAddress.getLocalHost();
         m_socket = new DatagramSocket();
         // 1k seems like enough!
         m_bytes = new byte[1000];
