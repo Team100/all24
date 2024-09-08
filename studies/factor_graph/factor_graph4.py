@@ -1,4 +1,5 @@
-# pylint: disable=invalid-name,too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
+# pylint: disable=C0103,C0114,C0115,C0116,E0611,E1101,R0904,R0913,W0621
+# mypy: disable-error-code="import-untyped"
 
 import math
 import time

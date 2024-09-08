@@ -21,7 +21,7 @@ X6 = TypeVar("X6")
 
 def local(a: Y, b: Y) -> np.ndarray:
     if type(a) is not type(b):
-        raise TypeError()
+        raise TypeError(f"a {type(a)} b {type(b)}")
     if isinstance(a, np.ndarray):
         return b - a
     if isinstance(a, (float, int)):

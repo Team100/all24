@@ -11,5 +11,6 @@
     "editor.minimap.enabled": false,
     "editor.inlayHints.enabled": "off",
     "workbench.colorTheme": "Default Light Modern",
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "python.analysis.typeCheckingMode": "off"
 }
