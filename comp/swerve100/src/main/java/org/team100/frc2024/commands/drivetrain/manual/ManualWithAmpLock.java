@@ -45,7 +45,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
      */
     private static final double kRotationSpeed = 0.5;
 
-    private final FieldLogger m_fieldLogger;
+    private final SupplierLogger m_fieldLogger;
     private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
@@ -58,7 +58,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
     private Translation2d m_ballV;
 
     public ManualWithAmpLock(
-            FieldLogger fieldLogger,
+            SupplierLogger fieldLogger,
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,

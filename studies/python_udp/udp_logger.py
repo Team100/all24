@@ -1,14 +1,29 @@
-""" Bridge UDP messages to network tables for dashboard and logging. """
+"""
+Bridge UDP messages to network tables for dashboard and logging.
 
-# TODO: maybe consolidate this into one file to make it easier to deploy,
-# or alternatively combine it with the other python stuff.
+This acts as the NT server, and writes a log file to a local USB.
+
+Using DataLogManager to combine these functions did not work, it stopped
+writing at about 8 kB.
+
+TODO: maybe consolidate this into one file to make it easier to deploy,
+or alternatively combine it with the other python stuff.
+"""
 
 import datetime
 import socket
 from typing import Any
 
 import ntcore
-import wpilib
+from wpiutil.log import (
+    DataLog,
+    BooleanLogEntry,
+    DoubleLogEntry,
+    IntegerLogEntry,
+    DoubleArrayLogEntry,
+    StringLogEntry,
+    RawLogEntry,
+)
 
 from udp_listener import decode
 from udp_primitive_protocol import Types
@@ -26,21 +41,26 @@ LOG_FILENAME = datetime.datetime.now(tz=datetime.timezone.utc).strftime(
 
 # We have to hang on to the publishers to keep them from disappearing.
 publishers = {}
+# The log file uses a "handle" for each column so we have to remember them.
+entries = {}
 
 
 def main() -> None:
     """Run forever"""
     print("starting...")
     inst = ntcore.NetworkTableInstance.getDefault()
-    inst.setServer("10.1.0.2")
-    inst.startClient4("log_mirror")
-    wpilib.DataLogManager.start(dir=LOG_DIR, filename=LOG_FILENAME)
+    inst.startServer()
+
+    log_file = DataLog(dir=LOG_DIR, filename=LOG_FILENAME)
+
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_socket.bind(("", 1995))
     while True:
         message, _ = server_socket.recvfrom(1024)
         (key, val_type, val) = decode(message)
         # print(f"key: {key} val_type: {val_type} actual type {type(val)} val: {val}")
+
+        # write to network tables and flush immediately
         if key not in publishers:
             t: Any
             match val_type:
@@ -56,14 +76,34 @@ def main() -> None:
                     t = inst.getStringTopic(key)
                 case _:
                     t = inst.getRawTopic(key)
-            p = t.publish()
+            p = t.publish(options=ntcore.PubSubOptions(keepDuplicates=True))
             t.setRetained(True)
             publishers[key] = p
         else:
-            p = publishers.get(key)
+            p = publishers[key]
         p.set(val)
-        # TODO: check to see if this flush is too costly.
         inst.flush()
+
+        # write to the USB without flushing
+        if key not in entries:
+            e: Any
+            match val_type:
+                case Types.BOOLEAN:
+                    e = BooleanLogEntry(log_file, key)
+                case Types.DOUBLE:
+                    e = DoubleLogEntry(log_file, key)
+                case Types.INT | Types.LONG:
+                    e = IntegerLogEntry(log_file, key)
+                case Types.DOUBLE_ARRAY:
+                    e = DoubleArrayLogEntry(log_file, key)
+                case Types.STRING:
+                    e = StringLogEntry(log_file, key)
+                case _:
+                    e = RawLogEntry(log_file, key)
+            entries[key] = e
+        else:
+            e = entries[key]
+        e.append(val)
 
 
 if __name__ == "__main__":

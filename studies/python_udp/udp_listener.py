@@ -8,7 +8,10 @@ from udp_primitive_protocol import Types
 
 
 def decode(message) -> tuple[str, Types, Any]:
-    """Decode a message into (key, type, value)."""
+    """
+    Decode a message into (key, type, value).
+    TODO: support network tables time-alignment.
+    """
     key_len = struct.unpack(">B", message[0:1])[0]
     key: str = message[1 : key_len + 1].decode("us-ascii")
     type_offset = key_len + 1

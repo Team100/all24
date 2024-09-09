@@ -61,7 +61,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     private Pose2d m_prevPose;
 
     public FieldManualWithNoteRotation(
-            FieldLogger fieldLogger,
+            SupplierLogger fieldLogger,
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,

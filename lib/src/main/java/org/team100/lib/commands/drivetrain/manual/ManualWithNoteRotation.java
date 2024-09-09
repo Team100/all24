@@ -62,7 +62,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private Pose2d m_prevPose;
 
     public ManualWithNoteRotation(
-            FieldLogger fieldLogger,
+            SupplierLogger fieldLogger,
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,

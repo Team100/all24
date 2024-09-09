@@ -1,8 +1,8 @@
 package org.team100.lib.telemetry;
 
-import com.ctre.phoenix6.SignalLogger;
+import org.team100.lib.util.Util;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
+import com.ctre.phoenix6.SignalLogger;
 
 /**
  * Simple logging wrapper.
@@ -16,6 +16,12 @@ import edu.wpi.first.networktables.NetworkTableInstance;
  * stops; this means you should see the latest values after disabling the robot.
  */
 public class Telemetry {
+    /**
+     * Using an experiment would be a pain.
+     * TODO: remove the complexity here after the UDP thing is validated.
+     */
+    private static final boolean USE_UDP_LOGGING = true;
+
     public enum Level {
         /**
          * Minimal, curated set of measurements for competition matches. Comp mode
@@ -53,9 +59,10 @@ public class Telemetry {
 
     private final LoadShedder m_loadShedder;
 
-    final NetworkTableInstance inst;
+    // private final NetworkTableInstance inst;
     final PrimitiveLogger ntLogger;
     final PrimitiveLogger usbLogger;
+    final PrimitiveLogger udpLogger;
 
     private Level m_level;
 
@@ -64,10 +71,17 @@ public class Telemetry {
      * Clients should use the static instance, not the constructor.
      */
     private Telemetry() {
-        inst = NetworkTableInstance.getDefault();
+        if (USE_UDP_LOGGING) {
+            Util.warn("=======================================");
+            Util.warn("Using UDP network logging!");
+            Util.warn("You must have a log listener connected!");
+            Util.warn("=======================================");
+        }
+        // inst = NetworkTableInstance.getDefault();
         m_loadShedder = new LoadShedder(kLoggingTimeBudgetS);
         ntLogger = new NTLogger();
         usbLogger = new DataLogLogger();
+        udpLogger = new UdpPrimitiveLogger();
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
         // DataLogManager.start();
@@ -91,15 +105,26 @@ public class Telemetry {
         return instance;
     }
 
-    public FieldLogger fieldLogger(boolean defaultEnabledNT, boolean defaultEnabledUSB) {
-        return new FieldLogger(this, defaultEnabledNT, defaultEnabledUSB);
+    public SupplierLogger fieldLogger(boolean defaultEnabledNT, boolean defaultEnabledUSB) {
+        if (USE_UDP_LOGGING) {
+            SupplierLogger logger = new NetworkLogger(this, "field");
+            logger.logString(Level.COMP, ".type", () -> "Field2d");
+            return logger;
+
+        } else {
+            return new FieldLogger(this, defaultEnabledNT, defaultEnabledUSB);
+        }
     }
 
-    public RootLogger namedRootLogger(
+    public SupplierLogger namedRootLogger(
             String str,
             boolean defaultEnabledNT,
             boolean defaultEnabledUSB) {
-        return new RootLogger(this, str, defaultEnabledNT, defaultEnabledUSB);
+        if (USE_UDP_LOGGING) {
+            return new NetworkLogger(this, str);
+        } else {
+            return new RootLogger(this, str, defaultEnabledNT, defaultEnabledUSB);
+        }
     }
 
 }
