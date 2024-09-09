@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Stream;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -28,6 +29,8 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class UdpPrimitiveLogger extends PrimitiveLogger {
     private static final double kFlushPeriod = 0.1;
+    /** how many handles to transmit per iteration */
+    private static final double kHandlesPeriodic = 10;
     private static final int kPort = 1995;
 
     /** nullable */
@@ -45,6 +48,11 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
     private final Map<String, Long> longQueue = new HashMap<>();
     private final Map<String, String> stringQueue = new HashMap<>();
 
+    // this eventually goes into two bytes, so not the full int size
+    // but casting to short everywhere is a pain
+    final Map<String, Integer> handles = new HashMap<>();
+    private Iterator<Map.Entry<String, Integer>> handleIterator;
+
     private double flushTime;
 
     public UdpPrimitiveLogger() {
@@ -56,6 +64,11 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
         // this is the default, but just to make it clear...
         m_bb.order(ByteOrder.BIG_ENDIAN);
         flushTime = 0;
+        handles.put("UNKNOWN", 0);
+    }
+
+    private int getHandle(String key) {
+        return handles.computeIfAbsent(key, x -> handles.size());
     }
 
     public void periodic() {
@@ -63,6 +76,20 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
         if (flushTime + kFlushPeriod < now) {
             flush();
             flushTime = now;
+        }
+        if (handleIterator == null)
+            handleIterator = handles.entrySet().iterator();
+        for (int i =0; i < kHandlesPeriodic; ++i) {
+            if (handleIterator.hasNext()) {
+                Map.Entry<String, Integer> entry = handleIterator.next();
+                String key = entry.getKey();
+                Integer handle = entry.getValue();
+                // TODO: better encoding, separate key space
+                logString(handle.toString(), key);
+            } else {
+                handleIterator = null;
+                break;
+            }
         }
     }
 
@@ -78,21 +105,29 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
 
     @Override
     void logBoolean(String key, boolean val) {
+        int handle = getHandle(key);
+        // TODO: use the handle instead of the key here
         booleanQueue.put(key, val);
     }
 
     @Override
     void logDouble(String key, double val) {
+        int handle = getHandle(key);
+        // TODO: use the handle instead of the key here
         doubleQueue.put(key, val);
     }
 
     @Override
     void logInt(String key, int val) {
+        int handle = getHandle(key);
+        // TODO: use the handle instead of the key here
         integerQueue.put(key, val);
     }
 
     @Override
     void logDoubleArray(String key, double[] val) {
+        int handle = getHandle(key);
+        // TODO: use the handle instead of the key here
         doubleArrayQueue.put(key, val);
     }
 
@@ -103,11 +138,15 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
 
     @Override
     void logLong(String key, long val) {
+        int handle = getHandle(key);
+        // TODO: use the handle instead of the key here
         longQueue.put(key, val);
     }
 
     @Override
     void logString(String key, String val) {
+        int handle = getHandle(key);
+        // TODO: use the handle instead of the key here
         stringQueue.put(key, val);
     }
 

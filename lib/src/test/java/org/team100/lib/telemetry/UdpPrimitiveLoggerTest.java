@@ -1,5 +1,7 @@
 package org.team100.lib.telemetry;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
@@ -27,6 +29,17 @@ class UdpPrimitiveLoggerTest {
             logger.logString(Level.COMP, "stringkey", () -> "value");
         }
         udpLogger.flush();
+        assertEquals(8, udpLogger.handles.size());
+        for (String k:udpLogger.handles.keySet()) {
+            System.out.println(k);
+        }
+        assertEquals(1, udpLogger.handles.get("/root/boolkey"));
+        assertEquals(2, udpLogger.handles.get("/root/doublekey"));
+        assertEquals(3, udpLogger.handles.get("/root/intkey"));
+        assertEquals(4, udpLogger.handles.get("/root/doublearraykey"));
+        assertEquals(5, udpLogger.handles.get("/root/doubleobjarraykey"));
+        assertEquals(6, udpLogger.handles.get("/root/longkey"));
+        assertEquals(7, udpLogger.handles.get("/root/stringkey"));
     }
 
 }

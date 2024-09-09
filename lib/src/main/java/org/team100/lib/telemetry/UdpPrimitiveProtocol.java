@@ -3,7 +3,25 @@ package org.team100.lib.telemetry;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+import org.team100.lib.util.Util;
+
 /**
+ * The log protocol is very simple:
+ * 
+ * One UDP packet per log entry.
+ * 
+ * First byte is key length (max 255)
+ * Next N bytes are ASCII-encoded key
+ * Next byte is value type, 1 to 6
+ * Next N bytes are the ByteBuffer-encoded value.
+ * 
+ * Double array type is slightly different: instead of a single ByteBuffer-encoded value there is:
+ *
+ * Four bytes (int) indicating the length of the array
+ * Next N bytes are values from the array, 8 bytes each
+ * 
+ * TODO: replace string key with a numeric handle
+ * 
  * TODO: add support for network tables timestamp alignment.
  */
 public class UdpPrimitiveProtocol {
@@ -25,8 +43,12 @@ public class UdpPrimitiveProtocol {
     static int encodeKey(ByteBuffer buf, String key) {
         byte[] strBytes = key.getBytes(StandardCharsets.US_ASCII);
         int strLen = strBytes.length;
+        if (strLen > 255) {
+            Util.warn("key too long: " + key);
+            strLen = 255;
+        }
         buf.put((byte) strLen); // 1
-        buf.put(strBytes); // strLen
+        buf.put(strBytes, 0, strLen); // strLen
         return strLen + 1;
     }
 
@@ -58,11 +80,16 @@ public class UdpPrimitiveProtocol {
         buf.rewind();
         int keyFieldLen = encodeKey(buf, key);
         buf.put(Types.DOUBLE_ARRAY.id); // 1
-        buf.putInt(val.length); // 4 for int
-        for (double v : val) {
-            buf.putDouble(v); // 8 for double
+        int length = val.length;
+        if (length > 100) {
+            length = 100;
+            Util.warn("array too long for key " + key);
         }
-        return keyFieldLen + val.length * 8 + 5;
+        buf.putInt(length); // 4 for int
+        for (int i = 0; i < length; ++i) {
+            buf.putDouble(val[i]); // 8 for double
+        }
+        return keyFieldLen + length * 8 + 5;
     }
 
     static int encodeLong(ByteBuffer buf, String key, long val) {
