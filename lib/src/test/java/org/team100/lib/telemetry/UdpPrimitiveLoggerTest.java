@@ -9,11 +9,12 @@ import org.team100.lib.telemetry.Telemetry.Level;
 class UdpPrimitiveLoggerTest {
     @Test
     void testSending() throws UnknownHostException, SocketException {
+        UdpPrimitiveLogger udpLogger = new UdpPrimitiveLogger();
         SupplierLogger logger = new SupplierLogger(
                 Telemetry.get(),
                 "root",
                 () -> true,
-                new UdpPrimitiveLogger(),
+                udpLogger,
                 () -> false,
                 null);
         for (int i = 0; i < 100; ++i) {
@@ -25,6 +26,7 @@ class UdpPrimitiveLoggerTest {
             logger.logLong(Level.COMP, "longkey", () -> (long) 100);
             logger.logString(Level.COMP, "stringkey", () -> "value");
         }
+        udpLogger.flush();
     }
 
 }

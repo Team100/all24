@@ -62,7 +62,7 @@ public class Telemetry {
     // private final NetworkTableInstance inst;
     final PrimitiveLogger ntLogger;
     final PrimitiveLogger usbLogger;
-    final PrimitiveLogger udpLogger;
+    final UdpPrimitiveLogger udpLogger;
 
     private Level m_level;
 
@@ -87,6 +87,10 @@ public class Telemetry {
         // DataLogManager.start();
         // turn off the CTRE log we never use
         SignalLogger.enableAutoLogging(false);
+    }
+
+    public void periodic() {
+        udpLogger.periodic();
     }
 
     public LoadShedder getLoadShedder() {
