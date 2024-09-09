@@ -3,6 +3,9 @@ package org.team100.lib.telemetry;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * TODO: add support for network tables timestamp alignment.
+ */
 public class UdpPrimitiveProtocol {
     private enum Types {
         BOOLEAN(1),

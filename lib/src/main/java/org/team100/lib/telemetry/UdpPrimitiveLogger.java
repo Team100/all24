@@ -16,21 +16,43 @@ import java.util.stream.Stream;
  * UDP is not formally reliable but on the robot LAN, for log data, it's good
  * enough.
  * 
- * The recipient IP is always 10.1.0.100.
+ * The recipient IP is always 10.1.0.100. (or 16 at the moment)
  */
 public class UdpPrimitiveLogger extends PrimitiveLogger {
     private static final int kPort = 1995;
 
+    /** nullable */
     private final InetAddress m_addr;
+    /** nullable */
     private final DatagramSocket m_socket;
     // hang on to the buffer to prevent GC churn
     private final byte[] m_bytes;
     private final ByteBuffer m_bb;
 
-    public UdpPrimitiveLogger() throws UnknownHostException, SocketException {
-        // m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 100 });
-        m_addr = InetAddress.getLocalHost();
-        m_socket = new DatagramSocket();
+    private static InetAddress makeAddr() {
+        try {
+            // 10.1.0.16 is the one that i happen to have
+            // TODO: make a dedicated log listener at 10.1.0.100.
+            return InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
+            // return InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static DatagramSocket makeSocket() {
+        try {
+            return new DatagramSocket();
+        } catch (SocketException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public UdpPrimitiveLogger() {
+        m_addr = makeAddr();
+        m_socket = makeSocket();
         // 1k seems like enough!
         m_bytes = new byte[1000];
         m_bb = ByteBuffer.wrap(m_bytes);
@@ -38,7 +60,9 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
         m_bb.order(ByteOrder.BIG_ENDIAN);
     }
 
-    void send(DatagramPacket p) {
+    private void send(DatagramPacket p) {
+        if (m_socket == null)
+            return;
         try {
             m_socket.send(p);
         } catch (IOException e) {
