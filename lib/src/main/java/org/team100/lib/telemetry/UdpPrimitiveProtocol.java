@@ -20,6 +20,10 @@ import org.team100.lib.util.Util;
  * Four bytes (int) indicating the length of the array
  * Next N bytes are values from the array, 8 bytes each
  * 
+ * String is also different:
+ * Four bytes (int) indicating the length of the string
+ * Next N bytes are ASCII-encoded string.
+ * 
  * TODO: replace string key with a numeric handle
  * 
  * TODO: add support for network tables timestamp alignment.

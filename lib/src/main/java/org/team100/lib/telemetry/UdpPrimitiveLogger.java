@@ -11,7 +11,6 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Stream;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -166,7 +165,10 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
 
     private static DatagramSocket makeSocket() {
         try {
-            return new DatagramSocket();
+            DatagramSocket datagramSocket = new DatagramSocket();
+            // big buffer does not help but doesn't hurt
+            datagramSocket.setSendBufferSize(10000000);
+            return datagramSocket;
         } catch (SocketException e) {
             e.printStackTrace();
             return null;
@@ -239,6 +241,7 @@ public class UdpPrimitiveLogger extends PrimitiveLogger {
         try {
             m_socket.send(p);
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

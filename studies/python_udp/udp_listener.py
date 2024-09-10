@@ -1,13 +1,15 @@
-""" Test to receive UDP packets. """
+# pylint: disable=C0103,C0114,C0115,C0116,E0611,R0904,R0913,W0603,W0621
 
 import socket
 import struct
+import time
+import threading
 from typing import Any
 
 from udp_primitive_protocol import Types
 
 
-def decode(message) -> tuple[str, Types, Any]:
+def decode(message: bytes) -> tuple[str, Types, Any]:
     """
     Decode a message into (key, type, value).
     TODO: support network tables time-alignment.
@@ -46,14 +48,46 @@ def decode(message) -> tuple[str, Types, Any]:
     return (key, val_type, val)
 
 
-def main() -> None:
-    """Run forever, for testing only."""
+# updated by main thread
+n = 0
+# updated by counter thread
+m = 0
+
+
+def stats() -> None:
+    global m
+    interval = 1.0
+    t0 = time.time()
+    while True:
+        d = time.time() - t0
+        dt = d % interval
+        time.sleep(interval - dt)
+        d = time.time() - t0
+        i = n - m
+        m = n
+        print(f"{d:.0f} {i:d}")
+
+
+def recv() -> None:
+    global n
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_socket.bind(("", 1995))
     while True:
-        message, _ = server_socket.recvfrom(1024)
+
+        # message, _ = server_socket.recvfrom(1024)
+        message: bytes = server_socket.recv(1500)
         (key, val_type, val) = decode(message)
-        print(f"key: {key} val_type: {val_type} val: {val}")
+        n += 1
+        # print(f"key: {key} val_type: {val_type} val: {val}")
+
+
+def main() -> None:
+    """For testing only."""
+    t1 = threading.Thread(target=recv)
+    t2 = threading.Thread(target=stats)
+    t1.start()
+    t2.start()
+    t1.join()  # will block forever because t1 never exits
 
 
 if __name__ == "__main__":
