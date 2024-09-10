@@ -1,4 +1,6 @@
 {
     "editor.minimap.enabled": false,
-    "workbench.colorTheme": "Default Light Modern"
+    "workbench.colorTheme": "Default Light Modern",
+    "intellicodeApiExamples.python.enabled": false,
+    "intellicodeApiExamples.typescript.enabled": false
 }
