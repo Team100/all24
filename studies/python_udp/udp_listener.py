@@ -14,12 +14,12 @@ def decode(message: bytes) -> tuple[str, Types, Any]:
     Decode a message into (key, type, value).
     TODO: support network tables time-alignment.
     """
-    key_len = struct.unpack(">B", message[0:1])[0]
+    key_len: int = struct.unpack(">B", message[0:1])[0]
     key: str = message[1 : key_len + 1].decode("us-ascii")
-    type_offset = key_len + 1
-    type_id = struct.unpack(">B", message[type_offset : type_offset + 1])[0]
+    type_offset: int = key_len + 1
+    type_id: int = struct.unpack(">B", message[type_offset : type_offset + 1])[0]
     val_type: Types = Types(type_id)
-    val_offset = type_offset + 1
+    val_offset: int = type_offset + 1
     val: Any
     match val_type:
         case Types.BOOLEAN:
