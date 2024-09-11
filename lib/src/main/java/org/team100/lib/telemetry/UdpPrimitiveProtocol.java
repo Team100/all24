@@ -44,7 +44,7 @@ public class UdpPrimitiveProtocol {
         }
     }
 
-    static int encodeKey(ByteBuffer buf, String key) {
+    private static int encodeKey(ByteBuffer buf, String key) {
         byte[] strBytes = key.getBytes(StandardCharsets.US_ASCII);
         int strLen = strBytes.length;
         if (strLen > 255) {
