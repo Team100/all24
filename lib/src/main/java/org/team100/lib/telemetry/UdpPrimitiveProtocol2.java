@@ -36,19 +36,22 @@ import org.team100.lib.util.Util;
  * Each packet is a list of sections.
  * 
  * Each section starts with a two-byte type code, followed by a list of payloads
- * for that type.
+ * for that type. Why two bytes? Because the type code is substituted for a data
+ * key to indicate a change in type, and data keys are 2 bytes. The minimum real
+ * key is 16, to leave some space for new type codes.
  * 
  * The payload can be either a chunk of labels, or a data payload.
  * 
- * A chunk of labels is an 2-byte offset followed by a string array.
+ * A chunk of labels is an 2-byte offset followed by a string array. There is no
+ * length field, because that would require laying out all the labels to see if
+ * they fit.
  * 
- * Data payloads are lists of key-value pairs, repeating until a type code
- * appears instead of a key.
+ * A data payload consists of key-value pairs. Sometimes the key is a type code,
+ * which indicates the start of a new section.
  * 
- * Data value format varies: generally it includes a length and some data.
- * Primitive arrays must have a length parameter since there is no way to
- * reserve a terminating value, so we use the same length-then-data pattern
- * everywhere. It makes decoding a bit easier too.
+ * The value format varies. For fixed-length array type (double[], string),
+ * there is
+ * a length field, because the length can be calculated easily.
  * 
  * The maximum packet length is 508 bytes, to maximize delivery, which means
  * that lists are never very long; list lengths can be one byte.
@@ -56,29 +59,39 @@ import org.team100.lib.util.Util;
  * Here's an example packet:
  * 
  * <pre>
- * TTNOOLAAAALAAAAATTLKKIIIIKKIIIITTLKKBTT
- * ^^                                      type = 7 (label)
- *   ^^                                    key of first label = 16
- *     ^                                   number of labels = 2
- *      ^                                  string length = 4
- *       ^^^^                              string in ascii
- *           ^                             string length = 5
- *            ^^^^^                        string in ascii
- *                 ^^                      type = 3 (int)
- *                   ^                     number of ints = 2
- *                    ^^                   key = 16 (the first label above)
- *                      ^^^^               int value = 1234 (4 bytes)
- *                          ^^             key = 17 (the second label above)
- *                            ^^^^         int value = 5678 (4 bytes)
- *                                ^^       type = 1 (boolean)
- *                                  ^      number of bools = 1
- *                                   ^^    key = 18 (an unseen label)
- *                                     ^   boolean value = true (1 byte)
- *                                      ^^ type = 0 (end of packet)
+ * TTOOLAAAALAAAAATTKKIIIIKKIIIITTKKBTT
+ * ^^                                   type = 7 (label)
+ *   ^^                                 key of first label = 16
+ *     ^                                string length = 4
+ *      ^^^^                            string in ascii
+ *          ^                           string length = 5
+ *           ^^^^^                      string in ascii
+ *                ^^                    type = 3 (int)
+ *                  ^^                  key = 16 (the first label above)
+ *                    ^^^^              int value = 1234 (4 bytes)
+ *                        ^^            key = 17 (the second label above)
+ *                          ^^^^        int value = 5678 (4 bytes)
+ *                              ^^      type = 1 (boolean)
+ *                                ^^    key = 18 (an unseen label)
+ *                                  ^   boolean value = true (1 byte)
+ *                                   ^^ type = 0 (end of packet)
  * </pre>
+ * 
+ * Note this is a stateful protocol within the scope of a single message,
+ * because of the "current type". This implies that the message itself is
+ * part of the state, so it is contained here. And because it would be
+ * confusing to reuse, each instance is intended to be used once.
+ * 
+ * <pre>
+ * new message -> set type X -> values of type X -> set type Y -> ...
+ * </pre>
+ * 
+ * It is an error to mix value types "set type" in between, so the API here
+ * makes it impossible to do so, inserting "set type" as needed. callers
+ * should keep same-type fields together to minimize these extra bytes.
  */
 public class UdpPrimitiveProtocol2 {
-    private enum Types {
+    enum Type {
         BOOLEAN(1),
         DOUBLE(2),
         INT(3),
@@ -89,156 +102,267 @@ public class UdpPrimitiveProtocol2 {
 
         public final byte id;
 
-        private Types(int typeId) {
+        private Type(int typeId) {
             id = (byte) typeId;
         }
     }
 
-    /**
-     * <pre>
-     * LKKKKKKKKKK
-     *  ^^^^^^^^^^ ascii-encoded key
-     * ^           key string length
-     * total length = key length + 1
-     * </pre>
-     */
-    private static int encodeKey(ByteBuffer buf, String key) {
-        byte[] strBytes = key.getBytes(StandardCharsets.US_ASCII);
-        int strLen = strBytes.length;
-        if (strLen > 255) {
-            Util.warn("key too long: " + key);
-            strLen = 255;
+    private Type m_currentType;
+    private final ByteBuffer m_buffer;
+
+    public UdpPrimitiveProtocol2() {
+        m_buffer = ByteBuffer.allocate(508);
+    }
+
+    /** for testing */
+    ByteBuffer buffer() {
+        return m_buffer;
+    }
+
+    /** @return true if the type is correct or a new type was written */
+    private boolean verifyType(Type type) {
+        if (m_currentType != type) {
+            int l = encodeType(m_buffer, type);
+            if (l == 0)
+                return false;
         }
-        buf.put((byte) strLen); // 1
-        buf.put(strBytes, 0, strLen); // strLen
-        return strLen + 1;
+        return true;
+
     }
 
     /**
-     * An int key is written as 2 bytes, unsigned.
+     * @return true if written
      */
-    static int encodeKey(ByteBuffer buf, int key) {
-        buf.putChar((char) key);
-        return 2;
+    public boolean putLong(int key, long val) {
+        if (verifyType(Type.LONG))
+            return encodeLong(m_buffer, key, val) != 0;
+        return false;
+    }
+
+    public boolean putString(int key, String val) {
+        if (verifyType(Type.STRING))
+            return encodeString(m_buffer, key, val) != 0;
+        return false;
+    }
+
+    public boolean putInt(int key, int val) {
+        if (verifyType(Type.INT))
+            return encodeInt(m_buffer, key, val) != 0;
+        return false;
+    }
+
+    public boolean putDouble(int key, double val) {
+        if (verifyType(Type.DOUBLE))
+            return encodeDouble(m_buffer, key, val) != 0;
+        return false;
+    }
+
+    public boolean putBoolean(int key, boolean val) {
+        if (verifyType(Type.BOOLEAN))
+            return encodeBoolean(m_buffer, key, val) != 0;
+        return false;
+    }
+
+    public boolean putDoubleArray(int key, double[] val) {
+        if (verifyType(Type.DOUBLE_ARRAY))
+            return encodeDoubleArray(m_buffer, key, val) != 0;
+        return false;
+    }
+
+    public boolean putLabelMap(int offset, List<String> val) {
+        return encodeLabelMap(m_buffer, offset, val) != 0;
     }
 
     /**
+     * Encode a type
+     * 
      * <pre>
-     * Bb
-     * ^  boolean type id
-     *  ^ boolean value
+     * TT
+     * ^^ value (2 bytes)
      * </pre>
      */
-    static int encodeBoolean(ByteBuffer buf, String key, boolean val) {
-        buf.rewind();
-        int keyFieldLen = encodeKey(buf, key);
-        buf.put(Types.BOOLEAN.id); // 1
-        buf.put(val ? (byte) 1 : (byte) 0); // 1 for bool
-        return keyFieldLen + 2;
-    }
-
-    /**
-     * <pre>
-     * Ddddddddd
-     * ^         double type id
-     *  ^^^^^^^^ double value
-     * </pre>
-     */
-    static int encodeDouble(ByteBuffer buf, String key, double val) {
-        buf.rewind();
-        int keyFieldLen = encodeKey(buf, key);
-        buf.put(Types.DOUBLE.id); // 1
-        buf.putDouble(val); // 8 for double
-        return keyFieldLen + 9;
-    }
-
-    /**
-     * <pre>
-     * Iiiii
-     * ^     int type id
-     *  ^^^^ int value
-     * </pre>
-     */
-    static int encodeInt(ByteBuffer buf, String key, int val) {
-        buf.rewind();
-        int keyFieldLen = encodeKey(buf, key);
-        buf.put(Types.INT.id); // 1
-        buf.putInt(val); // 4 for int
-        return keyFieldLen + 5;
-    }
-
-    /**
-     * <pre>
-     * Dlllldddddddddddddddd
-     * ^                     double array type id
-     *  ^^^^                 array length
-     *      ^^^^^^^^         double value 0
-     *              ^^^^^^^^ double value 1
-     * </pre>
-     */
-    static int encodeDoubleArray(ByteBuffer buf, String key, double[] val) {
-        buf.rewind();
-        int keyFieldLen = encodeKey(buf, key);
-        buf.put(Types.DOUBLE_ARRAY.id); // 1
-        int length = val.length;
-        if (length > 100) {
-            length = 100;
-            Util.warn("array too long for key " + key);
-        }
-        buf.putInt(length); // 4 for int
-        for (int i = 0; i < length; ++i) {
-            buf.putDouble(val[i]); // 8 for double
-        }
-        return keyFieldLen + length * 8 + 5;
-    }
-
-    /**
-     * <pre>
-     * Lllllllll
-     * ^         long type id
-     *  ^^^^^^^^ long value
-     * </pre>
-     */
-    static int encodeLong(ByteBuffer buf, String key, long val) {
-        buf.rewind();
-        int keyFieldLen = encodeKey(buf, key);
-        buf.put(Types.LONG.id); // 1
-        buf.putLong(val); // 8 for long
-        return keyFieldLen + 9;
-    }
-
-    /**
-     * <pre>
-     * Sllllssssssssssssss
-     * ^                   string type id
-     *  ^^^^               string length
-     *      ^^^^^^^^^^^^^^ string value
-     * </pre>
-     */
-    static int encodeString(ByteBuffer buf, int key, String val) {
-        int keyFieldLen = encodeKey(buf, key);
-        byte[] bytes = val.getBytes(StandardCharsets.US_ASCII);
-        if (bytes.length > 255)
-            throw new IllegalArgumentException();
-        buf.putInt(bytes.length); // 4 for int
-        buf.put(bytes);
-        return keyFieldLen + bytes.length + 4;
+    static int encodeType(ByteBuffer buf, Type val) {
+        final int totalLength = 2;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.putChar((char) val.id); // 2 bytes
+        return totalLength;
     }
 
     /**
      * encode a chunk of the label map.
+     * 
+     * <pre>
+     * OOSLAAALAAA
+     * ^^          offset
+     *   ^         size
+     *    ^        length
+     *     ^^^     string
+     *        ^    length
+     *         ^^^ string
+     * </pre>
      */
     static int encodeLabelMap(ByteBuffer buf, int offset, List<String> val) {
-        buf.rewind();
-        int keyFieldLen = encodeKey(buf, "foo");
-        buf.put(Types.STRING.id); // 1
-        buf.putInt(offset); // 4 for int
-        buf.putInt(val.size()); // 4 for int
-        for (String s : val) {
-            buf.putInt(s.length());
-            buf.put(s.getBytes(StandardCharsets.US_ASCII));
+        if (offset > 65535)
+            throw new IllegalArgumentException();
+        if (val.size() > 255) {
+            throw new IllegalArgumentException();
         }
 
-        return keyFieldLen + 0;
+        final int bufRemaining = buf.remaining();
+        int totalLength = 3;
+        byte[][] vals = new byte[val.size()][];
+        for (int i = 0; i < val.size(); ++i) {
+            String s = val.get(i);
+            byte[] bytes = s.getBytes(StandardCharsets.US_ASCII);
+            final int bytesLength = bytes.length;
+            if (bytesLength > 255)
+                throw new IllegalArgumentException();
+            totalLength += bytesLength + 1;
+            if (bufRemaining < totalLength)
+                return 0;
+            vals[i] = bytes;
+        }
+
+        buf.putChar((char) offset); // 2 bytes
+        buf.put((byte) val.size()); // 1 byte
+        for (byte[] b : vals) {
+            buf.put((byte) b.length); // 1 byte
+            buf.put(b);
+        }
+
+        return totalLength;
     }
+
+    /**
+     * <pre>
+     * KKldddddddddddddddd
+     * ^^                  key (2 bytes)
+     *   ^                 array length (1 byte)
+     *    ^^^^^^^^         double value 0
+     *            ^^^^^^^^ double value 1
+     * </pre>
+     */
+    static int encodeDoubleArray(ByteBuffer buf, int key, double[] val) {
+        if (val.length > 255) {
+            throw new IllegalArgumentException();
+        }
+        final int keyFieldLen = encodeKey(buf, key);
+        final int totalLength = keyFieldLen + val.length * 8 + 1;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.put((byte) val.length); // 1 byte
+        for (int i = 0; i < val.length; ++i) {
+            buf.putDouble(val[i]); // 8 bytes
+        }
+        return totalLength;
+    }
+
+    /**
+     * <pre>
+     * KKb
+     * ^^  key (2 bytes)
+     *   ^ boolean value (1 byte)
+     * </pre>
+     */
+    static int encodeBoolean(ByteBuffer buf, int key, boolean val) {
+        final int keyFieldLen = encodeKey(buf, key);
+        final int totalLength = keyFieldLen + 1;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.put(val ? (byte) 1 : (byte) 0); // 1 byte
+        return totalLength;
+    }
+
+    /**
+     * <pre>
+     * KKdddddddd
+     * ^^         key (2 bytes)
+     *   ^^^^^^^^ double value (8 bytes)
+     * </pre>
+     */
+    static int encodeDouble(ByteBuffer buf, int key, double val) {
+        final int keyFieldLen = encodeKey(buf, key);
+        final int totalLength = keyFieldLen + 8;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.putDouble(val); // 8 bytes
+        return totalLength;
+    }
+
+    /**
+     * <pre>
+     * KKiiii
+     * ^^     key (2 bytes)
+     *   ^^^^ int value (4 bytes)
+     * </pre>
+     */
+    static int encodeInt(ByteBuffer buf, int key, int val) {
+        final int keyFieldLen = encodeKey(buf, key);
+        final int totalLength = keyFieldLen + 4;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.putInt(val); // 4 bytes
+        return totalLength;
+    }
+
+    /**
+     * Note: try to avoid logging strings.
+     * 
+     * <pre>
+     * KKLSSSSSSSSSSSS
+     * ^^              key (2 bytes)
+     *   ^             string length (1 byte)
+     *    ^^^^^^^^^^^^ string value (255 bytes max)
+     * </pre>
+     */
+    static int encodeString(ByteBuffer buf, int key, String val) {
+        final byte[] bytes = val.getBytes(StandardCharsets.US_ASCII);
+        final int bytesLength = bytes.length;
+        if (bytesLength > 255)
+            throw new IllegalArgumentException();
+        final int keyFieldLen = encodeKey(buf, key);
+        final int totalLength = keyFieldLen + bytesLength + 1;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.put((byte) bytesLength); // 1 byte
+        buf.put(bytes);
+        return totalLength;
+    }
+
+    /**
+     * Note: try to avoid logging long ints, they're needlessly ... long.
+     * 
+     * <pre>
+     * KKllllllll
+     * ^^         key (2 bytes)
+     *   ^^^^^^^^ long value (8 bytes)
+     * </pre>
+     */
+    static int encodeLong(ByteBuffer buf, int key, long val) {
+        final int keyFieldLen = encodeKey(buf, key);
+        final int totalLength = keyFieldLen + 8;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.putLong(val); // 8 bytes
+        return totalLength;
+    }
+
+    /**
+     * An int key is written as 2 bytes, unsigned.
+     * 
+     * @return bytes written. zero means we didn't write anything, buffer is full.
+     */
+    static int encodeKey(ByteBuffer buf, int key) {
+        if (key < 16)
+            throw new IllegalArgumentException("key in type code range");
+        if (key > 65535)
+            throw new IllegalArgumentException("key too large");
+        final int totalLength = 2;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.putChar((char) key); // 2 bytes
+        return totalLength;
+    }
+
 }

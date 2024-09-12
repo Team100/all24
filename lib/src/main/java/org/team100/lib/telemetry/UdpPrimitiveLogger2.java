@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.function.Consumer;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -40,12 +41,12 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
     private final byte[] m_bytes;
     private final ByteBuffer m_bb;
     // lots of queues to avoid encoding values we're not going to send
-    private final Map<String, Boolean> booleanQueue = new HashMap<>();
-    private final Map<String, Double> doubleQueue = new HashMap<>();
-    private final Map<String, Integer> integerQueue = new HashMap<>();
-    private final Map<String, double[]> doubleArrayQueue = new HashMap<>();
-    private final Map<String, Long> longQueue = new HashMap<>();
-    private final Map<String, String> stringQueue = new HashMap<>();
+    private final Map<Integer, Boolean> booleanQueue = new HashMap<>();
+    private final Map<Integer, Double> doubleQueue = new HashMap<>();
+    private final Map<Integer, Integer> integerQueue = new HashMap<>();
+    private final Map<Integer, double[]> doubleArrayQueue = new HashMap<>();
+    private final Map<Integer, Long> longQueue = new HashMap<>();
+    private final Map<Integer, String> stringQueue = new HashMap<>();
 
     // this eventually goes into two bytes, so not the full int size
     // but casting to short everywhere is a pain
@@ -54,7 +55,14 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
 
     private double flushTime;
 
-    public UdpPrimitiveLogger2() {
+    // since the protocol is now stateful, representing the "current message,"
+    // we keep it here.
+    private UdpPrimitiveProtocol2 p;
+
+    private Consumer<DatagramPacket> m_packetSink;
+
+    public UdpPrimitiveLogger2(Consumer<DatagramPacket> packetSink) {
+        m_packetSink = packetSink;
         m_addr = makeAddr();
         m_socket = makeSocket();
         // 1k seems like enough!
@@ -66,8 +74,10 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
         handles.put("UNKNOWN", 0);
     }
 
-    private int getHandle(String key) {
-        return handles.computeIfAbsent(key, x -> handles.size());
+    // TODO: this should only be used once when the logger instance is made for the
+    // specific label, to avoid the map lookups.
+    private int getKey(String label) {
+        return handles.computeIfAbsent(label, x -> handles.size());
     }
 
     public void periodic() {
@@ -78,7 +88,7 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
         }
         if (handleIterator == null)
             handleIterator = handles.entrySet().iterator();
-        for (int i =0; i < kHandlesPeriodic; ++i) {
+        for (int i = 0; i < kHandlesPeriodic; ++i) {
             if (handleIterator.hasNext()) {
                 Map.Entry<String, Integer> entry = handleIterator.next();
                 String key = entry.getKey();
@@ -92,8 +102,9 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
         }
     }
 
-    /** Send queued packets */
+    /** Send at least one packet. */
     public void flush() {
+        p = new UdpPrimitiveProtocol2();
         flushBoolean();
         flushDouble();
         flushInteger();
@@ -103,49 +114,43 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
     }
 
     @Override
-    void logBoolean(String key, boolean val) {
-        int handle = getHandle(key);
-        // TODO: use the handle instead of the key here
+    void logBoolean(String label, boolean val) {
+        int key = getKey(label);
         booleanQueue.put(key, val);
     }
 
     @Override
-    void logDouble(String key, double val) {
-        int handle = getHandle(key);
-        // TODO: use the handle instead of the key here
+    void logDouble(String label, double val) {
+        int key = getKey(label);
         doubleQueue.put(key, val);
     }
 
     @Override
-    void logInt(String key, int val) {
-        int handle = getHandle(key);
-        // TODO: use the handle instead of the key here
+    void logInt(String label, int val) {
+        int key = getKey(label);
         integerQueue.put(key, val);
     }
 
     @Override
-    void logDoubleArray(String key, double[] val) {
-        int handle = getHandle(key);
-        // TODO: use the handle instead of the key here
+    void logDoubleArray(String label, double[] val) {
+        int key = getKey(label);
         doubleArrayQueue.put(key, val);
     }
 
     @Override
-    void logDoubleObjArray(String key, Double[] val) {
-        logDoubleArray(key, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
+    void logDoubleObjArray(String label, Double[] val) {
+        logDoubleArray(label, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
     }
 
     @Override
-    void logLong(String key, long val) {
-        int handle = getHandle(key);
-        // TODO: use the handle instead of the key here
+    void logLong(String label, long val) {
+        int key = getKey(label);
         longQueue.put(key, val);
     }
 
     @Override
-    void logString(String key, String val) {
-        int handle = getHandle(key);
-        // TODO: use the handle instead of the key here
+    void logString(String label, String val) {
+        int key = getKey(label);
         stringQueue.put(key, val);
     }
 
@@ -176,62 +181,78 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
     }
 
     private void flushBoolean() {
-        Iterator<Map.Entry<String, Boolean>> it = booleanQueue.entrySet().iterator();
+        Iterator<Map.Entry<Integer, Boolean>> it = booleanQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, Boolean> entry = it.next();
-            int len = UdpPrimitiveProtocol.encodeBoolean(m_bb, entry.getKey(), entry.getValue());
+            Map.Entry<Integer, Boolean> entry = it.next();
+            boolean written = p.putBoolean(entry.getKey(), entry.getValue());
+            if (!written) {
+                // time to send the packet
+                send(new DatagramPacket(m_bytes, p.buffer().position(), m_addr, kPort));
+            }
+            int len = UdpPrimitiveProtocol2.encodeBoolean(m_bb, entry.getKey(), entry.getValue());
             send(new DatagramPacket(m_bytes, len, m_addr, kPort));
             it.remove();
         }
     }
 
     private void flushDouble() {
-        Iterator<Map.Entry<String, Double>> it = doubleQueue.entrySet().iterator();
+        Iterator<Map.Entry<Integer, Double>> it = doubleQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, Double> entry = it.next();
-            int len = UdpPrimitiveProtocol.encodeDouble(m_bb, entry.getKey(), entry.getValue());
+            Map.Entry<Integer, Double> entry = it.next();
+            int len = UdpPrimitiveProtocol2.encodeDouble(m_bb, entry.getKey(), entry.getValue());
             send(new DatagramPacket(m_bytes, len, m_addr, kPort));
             it.remove();
         }
     }
 
     private void flushInteger() {
-        Iterator<Map.Entry<String, Integer>> it = integerQueue.entrySet().iterator();
+        Iterator<Map.Entry<Integer, Integer>> it = integerQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, Integer> entry = it.next();
-            int len = UdpPrimitiveProtocol.encodeInt(m_bb, entry.getKey(), entry.getValue());
+            Map.Entry<Integer, Integer> entry = it.next();
+            int len = UdpPrimitiveProtocol2.encodeInt(m_bb, entry.getKey(), entry.getValue());
             send(new DatagramPacket(m_bytes, len, m_addr, kPort));
             it.remove();
         }
     }
 
     private void flushDoubleArray() {
-        Iterator<Map.Entry<String, double[]>> it = doubleArrayQueue.entrySet().iterator();
+        Iterator<Map.Entry<Integer, double[]>> it = doubleArrayQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, double[]> entry = it.next();
-            int len = UdpPrimitiveProtocol.encodeDoubleArray(m_bb, entry.getKey(), entry.getValue());
+            Map.Entry<Integer, double[]> entry = it.next();
+            int len = UdpPrimitiveProtocol2.encodeDoubleArray(m_bb, entry.getKey(), entry.getValue());
             send(new DatagramPacket(m_bytes, len, m_addr, kPort));
             it.remove();
         }
     }
 
     private void flushLong() {
-        Iterator<Map.Entry<String, Long>> it = longQueue.entrySet().iterator();
+        Iterator<Map.Entry<Integer, Long>> it = longQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, Long> entry = it.next();
-            int len = UdpPrimitiveProtocol.encodeLong(m_bb, entry.getKey(), entry.getValue());
+            Map.Entry<Integer, Long> entry = it.next();
+            int len = UdpPrimitiveProtocol2.encodeLong(m_bb, entry.getKey(), entry.getValue());
             send(new DatagramPacket(m_bytes, len, m_addr, kPort));
             it.remove();
         }
     }
 
     private void flushString() {
-        Iterator<Map.Entry<String, String>> it = stringQueue.entrySet().iterator();
+        Iterator<Map.Entry<Integer, String>> it = stringQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, String> entry = it.next();
-            int len = UdpPrimitiveProtocol.encodeString(m_bb, entry.getKey(), entry.getValue());
+            Map.Entry<Integer, String> entry = it.next();
+            int len = UdpPrimitiveProtocol2.encodeString(m_bb, entry.getKey(), entry.getValue());
             send(new DatagramPacket(m_bytes, len, m_addr, kPort));
             it.remove();
+        }
+    }
+
+    private void send(DatagramPacket p) {
+        if (m_socket == null)
+            return;
+        try {
+            m_packetSink.accept(p);
+            // m_socket.send(p);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

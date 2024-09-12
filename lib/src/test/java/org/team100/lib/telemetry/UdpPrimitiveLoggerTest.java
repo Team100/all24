@@ -135,6 +135,8 @@ class UdpPrimitiveLoggerTest {
     /**
      * Socket.connect and then socket.send.
      * 
+     * for a byte array this seems like the best option
+     * 
      * 2.1 us per row (no listener)
      */
     @Test
@@ -159,6 +161,8 @@ class UdpPrimitiveLoggerTest {
     /**
      * Channel.connect and then channel.write (non-blocking)
      * 
+     * For a byte buffer this seems like the best option.
+     * 
      * 2.0 us per row (no listener)
      */
     @Test
@@ -167,6 +171,7 @@ class UdpPrimitiveLoggerTest {
         channel.configureBlocking(false);
         channel.setOption(StandardSocketOptions.SO_SNDBUF, 1000000000);
         InetAddress m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
+        // InetAddress m_addr = InetAddress.getLocalHost();
         InetSocketAddress sockAddr = new InetSocketAddress(m_addr, 1995);
         channel.connect(sockAddr);
         byte[] m_bytes = new byte[30];
@@ -194,6 +199,7 @@ class UdpPrimitiveLoggerTest {
         channel.configureBlocking(false);
         channel.setOption(StandardSocketOptions.SO_SNDBUF, 1000000000);
         InetAddress m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
+        // InetAddress m_addr = InetAddress.getLocalHost();
         InetSocketAddress sockAddr = new InetSocketAddress(m_addr, 1995);
         byte[] m_bytes = new byte[30];
         ByteBuffer m_bb = ByteBuffer.wrap(m_bytes);
