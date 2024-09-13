@@ -1,11 +1,10 @@
 package org.team100.lib.telemetry;
 
-import java.util.List;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.nio.ByteOrder;
-
-import org.team100.lib.util.Util;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Log protocol 2
@@ -179,23 +178,16 @@ public class UdpPrimitiveProtocol2 {
         return false;
     }
 
-    // public boolean putLabelMap(int offset, List<String> val) {
-    //     if (verifyType(Type.LABEL))
-    //         return encodeLabelMap(m_buffer, offset, val) != 0;
-    //     return false;
-    // }
-
-    public boolean putLabel(int offset, String label) {
+    /**
+     * @param offset start with this item
+     * @param length number of items to try to send
+     * @param val    the entire label list; this is not modified
+     * @return the number of items actually sent
+     */
+    public int putLabels(int offset, int length, List<String> val) {
         if (verifyType(Type.LABEL))
-            return encodeFirstLabel(m_buffer, offset, label) != 0;
-        return false;
-    }
-
-    public boolean addLabel(String label) {
-        // addLabel can only be called after putLabel.
-        if (m_currentType != Type.LABEL)
-            throw new IllegalArgumentException();
-        return encodeAddLabel(m_buffer, label) != 0;
+            return encodeLabels(m_buffer, offset, length, val);
+        return 0;
     }
 
     /**
@@ -215,105 +207,74 @@ public class UdpPrimitiveProtocol2 {
     }
 
     /**
-     * Encode the first label.
+     * encode a chunk of the label map.
      * 
+     * the label map is long, we have to chunk it.
+     * 
+     * the caller gives the entire list, and we report how many items were sent (not
+     * the bytes sent).
+     * 
+     * Note the "offset" here is not the same as the actual encoded label id.
+     *
      * <pre>
-     * OOLAAA
-     * ^^     offset
-     *   ^    length
-     *    ^^^ string
+     * OOSLAAALAAA
+     * ^^          offset
+     *   ^         number of labels actually sent
+     *    ^        length
+     *     ^^^     string
+     *        ^    length
+     *         ^^^ string
      * </pre>
+     * 
+     * @param buf    write into this buffer
+     * @param offset start with this item (0-based)
+     * @param length number of items to try to send
+     * @param val    the entire label list; this is not modified
+     * @return the number of items actually sent
+     * 
      */
-    static int encodeFirstLabel(ByteBuffer buf, int offset, String val) {
-        if (offset > 65535)
-            throw new IllegalArgumentException();
-        final byte[] bytes = val.getBytes(StandardCharsets.US_ASCII);
-        final int bytesLength = bytes.length;
-        if (bytesLength > 255)
-            throw new IllegalArgumentException();
-        final int totalLength = bytesLength + 3;
-        if (buf.remaining() < totalLength)
+    static int encodeLabels(ByteBuffer buf, int offset, int length, List<String> val) {
+        if (offset > (val.size() - 1))
+            throw new IllegalArgumentException("label offset too large");
+        if (length > (val.size() - offset))
+            throw new IllegalArgumentException("length too long");
+        if (val.size() > 255) {
+            throw new IllegalArgumentException("label list too long");
+        }
+
+        // how many items can we fit?
+        final int bufRemaining = buf.remaining();
+        int totalLength = 3;
+        List<byte[]> bytesList = new ArrayList<>();
+        for (int i = offset; i < offset + length; ++i) {
+            String s = val.get(i);
+            byte[] bytes = s.getBytes(StandardCharsets.US_ASCII);
+            final int bytesLength = bytes.length;
+            if (bytesLength > 255)
+                throw new IllegalArgumentException("label too long");
+            totalLength += bytesLength + 1;
+            if (totalLength > bufRemaining) // this one won't fit
+                break;
+            bytesList.add(bytes);
+        }
+
+        if (bytesList.isEmpty())
             return 0;
 
         buf.putChar((char) offset); // 2 bytes
-        buf.put((byte) bytesLength); // 1 byte
-        buf.put(bytes);
-        return totalLength;
+        buf.put((byte) bytesList.size()); // 1 byte
+        for (byte[] bytes : bytesList) {
+            buf.put((byte) bytes.length); // 1 byte
+            buf.put(bytes);
+        }
+
+        return bytesList.size();
     }
 
     /**
-     * Encode another label. Only OK after encodeFirstLabel.
+     * Note the maximum array length is not very long (approximately packet length
+     * divided by 8).
      * 
-     * <pre>
-     * LAAA
-     * ^    length
-     *  ^^^ string
-     * </pre>
-     */
-    static int encodeAddLabel(ByteBuffer buf, String val) {
-        final byte[] bytes = val.getBytes(StandardCharsets.US_ASCII);
-        final int bytesLength = bytes.length;
-        if (bytesLength > 255)
-            throw new IllegalArgumentException();
-        final int totalLength = bytesLength + 1;
-        if (buf.remaining() < totalLength)
-            return 0;
-        buf.put((byte) bytesLength); // 1 byte
-        buf.put(bytes);
-        return totalLength;
-    }
-
-    // /**
-    //  * encode a chunk of the label map.
-    //  * 
-    //  * The caller doesn't know how much of the label map will fit, and the only way
-    //  * to know is to pre-scan all the strings and then backtrack. yuck.
-    //  * 
-    //  * instead, add the offset and then add strings one at a time.
-    //  * 
-    //  * <pre>
-    //  * OOSLAAALAAA
-    //  * ^^          offset
-    //  *   ^         size
-    //  *    ^        length
-    //  *     ^^^     string
-    //  *        ^    length
-    //  *         ^^^ string
-    //  * </pre>
-    //  */
-    // static int encodeLabelMap(ByteBuffer buf, int offset, List<String> val) {
-    //     if (offset > 65535)
-    //         throw new IllegalArgumentException();
-    //     if (val.size() > 255) {
-    //         throw new IllegalArgumentException();
-    //     }
-
-    //     final int bufRemaining = buf.remaining();
-    //     int totalLength = 3;
-    //     byte[][] vals = new byte[val.size()][];
-    //     for (int i = 0; i < val.size(); ++i) {
-    //         String s = val.get(i);
-    //         byte[] bytes = s.getBytes(StandardCharsets.US_ASCII);
-    //         final int bytesLength = bytes.length;
-    //         if (bytesLength > 255)
-    //             throw new IllegalArgumentException();
-    //         totalLength += bytesLength + 1;
-    //         if (bufRemaining < totalLength)
-    //             return 0;
-    //         vals[i] = bytes;
-    //     }
-
-    //     buf.putChar((char) offset); // 2 bytes
-    //     buf.put((byte) val.size()); // 1 byte
-    //     for (byte[] b : vals) {
-    //         buf.put((byte) b.length); // 1 byte
-    //         buf.put(b);
-    //     }
-
-    //     return totalLength;
-    // }
-
-    /**
      * <pre>
      * KKldddddddddddddddd
      * ^^                  key (2 bytes)
