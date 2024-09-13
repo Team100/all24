@@ -122,7 +122,7 @@ public class RobotContainer implements Glassy {
         poller.setDefault(Level.TRACE);
 
         final Telemetry telemetry = Telemetry.get();
-        final FieldLogger fieldLogger = telemetry.fieldLogger(true, true);
+        final SupplierLogger fieldLogger = telemetry.fieldLogger(true, true);
 
         final boolean defaultEnabled = Identity.instance.equals(Identity.BLANK);
 

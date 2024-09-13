@@ -1,17 +1,19 @@
-# pylint: disable=wrong-import-position,invalid-name,too-many-statements,no-name-in-module,no-member,missing-class-docstring,missing-function-docstring,missing-module-docstring,too-few-public-methods,global-statement
-
+# pylint: disable=C0103,C0114,C0115,C0116,C0413,E1101,E0611,R0904,R0913,W0621
+# mypy: disable-error-code="import-untyped"
 
 import math
 from typing import Iterator
-import gtsam  # type:ignore
-import matplotlib  # type:ignore
+import gtsam
+import matplotlib
 
 matplotlib.use("Qt5Agg", force=True)
-import matplotlib.pyplot as plt  # type:ignore
-from matplotlib.markers import MarkerStyle  # type:ignore
+import matplotlib.pyplot as plt
+from matplotlib.markers import MarkerStyle
 from matplotlib import collections
 import numpy as np
-from gtsam.symbol_shorthand import X  # type:ignore
+from gtsam.symbol_shorthand import X
+from gtsam import Marginals, Point2
+
 from landmark import Landmark
 from custom_factor_type import CustomFactorType
 
@@ -64,8 +66,10 @@ class Plot:
         self.fig = fig
         self.ax = ax
         self.ax.set_title(name)
-        self.ax.set_xlim(-1, 6)
-        self.ax.set_ylim(-1, 6)
+        # self.ax.set_xlim(-1, 6)
+        # self.ax.set_ylim(-1, 6)
+        self.ax.set_xlim(-15, 2)
+        self.ax.set_ylim(-5, 5)
         self.ax.set_aspect("equal", adjustable="box")
         plt.tight_layout()
 
@@ -120,6 +124,16 @@ class Plot:
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
+    # TODO: remove this
+    def plot_some_points(
+            self, points: list[Point2]
+    ) -> None:
+        print(points)
+        self.ax.scatter([p[0] for p in points], [p[1] for p in points])
+        self.fig.canvas.draw()
+        self.fig.canvas.update()
+        self.fig.canvas.flush_events()
+
     def plot_variables_and_factors(
         self,
         result: gtsam.Values,
@@ -139,7 +153,7 @@ class Plot:
 
             try:
                 pose_point_poses: list[gtsam.Pose2] = list(
-                    self.pose_samples(result, poses)
+                    self.pose_samples(factors, result, poses)
                 )
                 pose_point_verts = [
                     make_mark(POSE_MARK, 0.5, rot(c.theta()), c.translation())
@@ -173,13 +187,16 @@ class Plot:
         self.fig.canvas.update()
         self.fig.canvas.flush_events()
 
+    def wait(self):
+        plt.waitforbuttonpress()
+
     def plot_factors(
         self,
         result: gtsam.Values,
         factors: gtsam.NonlinearFactorGraph,
     ) -> None:
-        paths = []
-        odometry_paths = []
+        paths: list[matplotlib.path.Path] = []
+        odometry_paths: list[matplotlib.path.Path] = []
         # if *any* of the factors are over the boundary...
         boundary = False
         for f_i in range(factors.size()):
@@ -197,7 +214,8 @@ class Plot:
                         if pose.x() > 4.5:
                             boundary = True
                     case _:
-                        print("wtf")
+                        pass
+                        # skip
 
             if isinstance(factor, gtsam.BearingRangeFactor2D):
                 self.bearing_range_path(result, paths, factor)
@@ -223,7 +241,7 @@ class Plot:
             )
         )
 
-    def bearing_range_path(self, result, paths, factor):
+    def bearing_range_path(self, result, paths: list[matplotlib.path.Path], factor):
         # for now, a sighting is a point2 and a pose2, see sam.i
         paths.append(
             matplotlib.path.Path(
@@ -240,13 +258,18 @@ class Plot:
         return RNG.multivariate_normal(mean, covariance, NUM_DRAWS)
 
     def pose_samples(
-        self, result: gtsam.Values, poses: list[X]
+        self, factors: gtsam.NonlinearFactorGraph, result: gtsam.Values, poses: list[X]
     ) -> Iterator[gtsam.Pose2]:
+        marginals = Marginals(factors, result)
         for var in poses:
             mean: gtsam.Pose2 = result.atPose2(var)  # 1x3
             # this covariance is in the *tangent space* at the *mean*
             # i.e. the "twist", so that's how we apply it
-            covariance: np.ndarray = self.isam.getISAM2().marginalCovariance(var)  # 3x3
+            # covariance2: np.ndarray = self.isam.getISAM2().marginalCovariance(var)  # 3x3
+            covariance = marginals.marginalCovariance(var)
+            # are these really the same?  they're not always identical
+            # but sometimes.  and always pretty close.
+            # print(np.trace(covariance), np.trace(covariance2))
             # it is much faster to call the RNG once for N draws than to do it in the loop
             random_points: np.ndarray = RNG.multivariate_normal(
                 np.zeros(3), covariance, NUM_DRAWS

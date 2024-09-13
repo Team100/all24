@@ -44,6 +44,7 @@ import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.RootLogger;
+import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -85,9 +86,9 @@ public class RobotContainerParkingLot implements Glassy {
      */
     RobotContainerParkingLot(TimedRobot100 robot) throws IOException {
         Telemetry telemetry = Telemetry.get();
-        final FieldLogger fieldLogger = telemetry.fieldLogger(true, true);
-        final RootLogger monitorLogger = telemetry.namedRootLogger("MONITOR", false, false);
-        final RootLogger driveLogger = telemetry.namedRootLogger("DRIVE", false, false);
+        final SupplierLogger fieldLogger = telemetry.fieldLogger(true, true);
+        final SupplierLogger monitorLogger = telemetry.namedRootLogger("MONITOR", false, false);
+        final SupplierLogger driveLogger = telemetry.namedRootLogger("DRIVE", false, false);
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
 
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
