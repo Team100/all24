@@ -3,6 +3,7 @@ package org.team100.lib.telemetry;
 import java.util.List;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.ByteOrder;
 
 import org.team100.lib.util.Util;
 
@@ -112,6 +113,15 @@ public class UdpPrimitiveProtocol2 {
 
     public UdpPrimitiveProtocol2() {
         m_buffer = ByteBuffer.allocate(508);
+        // this is the default, but just to make it clear...
+        m_buffer.order(ByteOrder.BIG_ENDIAN);
+    }
+
+    /** Return a buffer view of length equal to current position. */
+    ByteBuffer trim() {
+        ByteBuffer slice = m_buffer.slice(0, m_buffer.position());
+        System.out.println(slice.array().length);
+        return slice;
     }
 
     /** for testing */
@@ -169,8 +179,23 @@ public class UdpPrimitiveProtocol2 {
         return false;
     }
 
-    public boolean putLabelMap(int offset, List<String> val) {
-        return encodeLabelMap(m_buffer, offset, val) != 0;
+    // public boolean putLabelMap(int offset, List<String> val) {
+    //     if (verifyType(Type.LABEL))
+    //         return encodeLabelMap(m_buffer, offset, val) != 0;
+    //     return false;
+    // }
+
+    public boolean putLabel(int offset, String label) {
+        if (verifyType(Type.LABEL))
+            return encodeFirstLabel(m_buffer, offset, label) != 0;
+        return false;
+    }
+
+    public boolean addLabel(String label) {
+        // addLabel can only be called after putLabel.
+        if (m_currentType != Type.LABEL)
+            throw new IllegalArgumentException();
+        return encodeAddLabel(m_buffer, label) != 0;
     }
 
     /**
@@ -190,49 +215,103 @@ public class UdpPrimitiveProtocol2 {
     }
 
     /**
-     * encode a chunk of the label map.
+     * Encode the first label.
      * 
      * <pre>
-     * OOSLAAALAAA
-     * ^^          offset
-     *   ^         size
-     *    ^        length
-     *     ^^^     string
-     *        ^    length
-     *         ^^^ string
+     * OOLAAA
+     * ^^     offset
+     *   ^    length
+     *    ^^^ string
      * </pre>
      */
-    static int encodeLabelMap(ByteBuffer buf, int offset, List<String> val) {
+    static int encodeFirstLabel(ByteBuffer buf, int offset, String val) {
         if (offset > 65535)
             throw new IllegalArgumentException();
-        if (val.size() > 255) {
+        final byte[] bytes = val.getBytes(StandardCharsets.US_ASCII);
+        final int bytesLength = bytes.length;
+        if (bytesLength > 255)
             throw new IllegalArgumentException();
-        }
-
-        final int bufRemaining = buf.remaining();
-        int totalLength = 3;
-        byte[][] vals = new byte[val.size()][];
-        for (int i = 0; i < val.size(); ++i) {
-            String s = val.get(i);
-            byte[] bytes = s.getBytes(StandardCharsets.US_ASCII);
-            final int bytesLength = bytes.length;
-            if (bytesLength > 255)
-                throw new IllegalArgumentException();
-            totalLength += bytesLength + 1;
-            if (bufRemaining < totalLength)
-                return 0;
-            vals[i] = bytes;
-        }
+        final int totalLength = bytesLength + 3;
+        if (buf.remaining() < totalLength)
+            return 0;
 
         buf.putChar((char) offset); // 2 bytes
-        buf.put((byte) val.size()); // 1 byte
-        for (byte[] b : vals) {
-            buf.put((byte) b.length); // 1 byte
-            buf.put(b);
-        }
-
+        buf.put((byte) bytesLength); // 1 byte
+        buf.put(bytes);
         return totalLength;
     }
+
+    /**
+     * Encode another label. Only OK after encodeFirstLabel.
+     * 
+     * <pre>
+     * LAAA
+     * ^    length
+     *  ^^^ string
+     * </pre>
+     */
+    static int encodeAddLabel(ByteBuffer buf, String val) {
+        final byte[] bytes = val.getBytes(StandardCharsets.US_ASCII);
+        final int bytesLength = bytes.length;
+        if (bytesLength > 255)
+            throw new IllegalArgumentException();
+        final int totalLength = bytesLength + 1;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.put((byte) bytesLength); // 1 byte
+        buf.put(bytes);
+        return totalLength;
+    }
+
+    // /**
+    //  * encode a chunk of the label map.
+    //  * 
+    //  * The caller doesn't know how much of the label map will fit, and the only way
+    //  * to know is to pre-scan all the strings and then backtrack. yuck.
+    //  * 
+    //  * instead, add the offset and then add strings one at a time.
+    //  * 
+    //  * <pre>
+    //  * OOSLAAALAAA
+    //  * ^^          offset
+    //  *   ^         size
+    //  *    ^        length
+    //  *     ^^^     string
+    //  *        ^    length
+    //  *         ^^^ string
+    //  * </pre>
+    //  */
+    // static int encodeLabelMap(ByteBuffer buf, int offset, List<String> val) {
+    //     if (offset > 65535)
+    //         throw new IllegalArgumentException();
+    //     if (val.size() > 255) {
+    //         throw new IllegalArgumentException();
+    //     }
+
+    //     final int bufRemaining = buf.remaining();
+    //     int totalLength = 3;
+    //     byte[][] vals = new byte[val.size()][];
+    //     for (int i = 0; i < val.size(); ++i) {
+    //         String s = val.get(i);
+    //         byte[] bytes = s.getBytes(StandardCharsets.US_ASCII);
+    //         final int bytesLength = bytes.length;
+    //         if (bytesLength > 255)
+    //             throw new IllegalArgumentException();
+    //         totalLength += bytesLength + 1;
+    //         if (bufRemaining < totalLength)
+    //             return 0;
+    //         vals[i] = bytes;
+    //     }
+
+    //     buf.putChar((char) offset); // 2 bytes
+    //     buf.put((byte) val.size()); // 1 byte
+    //     for (byte[] b : vals) {
+    //         buf.put((byte) b.length); // 1 byte
+    //         buf.put(b);
+    //     }
+
+    //     return totalLength;
+    // }
 
     /**
      * <pre>

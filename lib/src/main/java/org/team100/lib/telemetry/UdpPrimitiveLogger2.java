@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Stream;
 import java.util.function.Consumer;
-
+import java.util.function.BooleanSupplier;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -28,18 +28,11 @@ import edu.wpi.first.wpilibj.Timer;
  * newest value wins.
  */
 public class UdpPrimitiveLogger2 extends PrimitiveLogger {
+    private static final int kMinKey = 15;
     private static final double kFlushPeriod = 0.1;
     /** how many handles to transmit per iteration */
     private static final double kHandlesPeriodic = 10;
-    private static final int kPort = 1995;
 
-    /** nullable */
-    private final InetAddress m_addr;
-    /** nullable */
-    private final DatagramSocket m_socket;
-    // hang on to the buffer to prevent GC churn
-    private final byte[] m_bytes;
-    private final ByteBuffer m_bb;
     // lots of queues to avoid encoding values we're not going to send
     private final Map<Integer, Boolean> booleanQueue = new HashMap<>();
     private final Map<Integer, Double> doubleQueue = new HashMap<>();
@@ -59,17 +52,11 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
     // we keep it here.
     private UdpPrimitiveProtocol2 p;
 
-    private Consumer<DatagramPacket> m_packetSink;
+    private Consumer<ByteBuffer> m_bufferSink;
 
-    public UdpPrimitiveLogger2(Consumer<DatagramPacket> packetSink) {
-        m_packetSink = packetSink;
-        m_addr = makeAddr();
-        m_socket = makeSocket();
-        // 1k seems like enough!
-        m_bytes = new byte[1000];
-        m_bb = ByteBuffer.wrap(m_bytes);
-        // this is the default, but just to make it clear...
-        m_bb.order(ByteOrder.BIG_ENDIAN);
+    public UdpPrimitiveLogger2(Consumer<ByteBuffer> bufferSink) {
+        m_bufferSink = bufferSink;
+
         flushTime = 0;
         handles.put("UNKNOWN", 0);
     }
@@ -77,15 +64,20 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
     // TODO: this should only be used once when the logger instance is made for the
     // specific label, to avoid the map lookups.
     private int getKey(String label) {
-        return handles.computeIfAbsent(label, x -> handles.size());
+        return handles.computeIfAbsent(label, x -> handles.size() + kMinKey);
     }
 
     public void periodic() {
         double now = Timer.getFPGATimestamp();
         if (flushTime + kFlushPeriod < now) {
             flush();
+            dumpLabels();
             flushTime = now;
         }
+
+    }
+
+    public void dumpLabels() {
         if (handleIterator == null)
             handleIterator = handles.entrySet().iterator();
         for (int i = 0; i < kHandlesPeriodic; ++i) {
@@ -105,12 +97,17 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
     /** Send at least one packet. */
     public void flush() {
         p = new UdpPrimitiveProtocol2();
+        // TODO: flush some key map now
+
         flushBoolean();
         flushDouble();
         flushInteger();
         flushDoubleArray();
         flushLong();
         flushString();
+        ByteBuffer trim = p.trim();
+        System.out.println(trim.array().length);
+        m_bufferSink.accept(trim);
     }
 
     @Override
@@ -156,114 +153,69 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
 
     ///////////////////////////////////////////
 
-    private static InetAddress makeAddr() {
-        try {
-            // 10.1.0.16 is the one that i happen to have
-            // TODO: make a dedicated log listener at 10.1.0.100.
-            // return InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
-            return InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            return null;
+    /** @param putter puts the value if there's room, returns false if not. */
+    private void putAndMaybeSend(BooleanSupplier putter) {
+        if (!putter.getAsBoolean()) {
+            // time to send the packet
+            m_bufferSink.accept(p.trim());
+            p = new UdpPrimitiveProtocol2();
+            if (!putter.getAsBoolean())
+                throw new IllegalStateException();
         }
-    }
 
-    private static DatagramSocket makeSocket() {
-        try {
-            DatagramSocket datagramSocket = new DatagramSocket();
-            // big buffer does not help but doesn't hurt
-            datagramSocket.setSendBufferSize(10000000);
-            return datagramSocket;
-        } catch (SocketException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private void flushBoolean() {
-        Iterator<Map.Entry<Integer, Boolean>> it = booleanQueue.entrySet().iterator();
+        final Iterator<Map.Entry<Integer, Boolean>> it = booleanQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, Boolean> entry = it.next();
-            boolean written = p.putBoolean(entry.getKey(), entry.getValue());
-            if (!written) {
-                // time to send the packet
-                send(new DatagramPacket(m_bytes, p.buffer().position(), m_addr, kPort));
-            }
-            int len = UdpPrimitiveProtocol2.encodeBoolean(m_bb, entry.getKey(), entry.getValue());
-            send(new DatagramPacket(m_bytes, len, m_addr, kPort));
+            final Map.Entry<Integer, Boolean> entry = it.next();
+            putAndMaybeSend(() -> p.putBoolean(entry.getKey(), entry.getValue()));
             it.remove();
         }
     }
 
     private void flushDouble() {
-        Iterator<Map.Entry<Integer, Double>> it = doubleQueue.entrySet().iterator();
+        final Iterator<Map.Entry<Integer, Double>> it = doubleQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, Double> entry = it.next();
-            int len = UdpPrimitiveProtocol2.encodeDouble(m_bb, entry.getKey(), entry.getValue());
-            send(new DatagramPacket(m_bytes, len, m_addr, kPort));
+            final Map.Entry<Integer, Double> entry = it.next();
+            putAndMaybeSend(() -> p.putDouble(entry.getKey(), entry.getValue()));
             it.remove();
         }
     }
 
     private void flushInteger() {
-        Iterator<Map.Entry<Integer, Integer>> it = integerQueue.entrySet().iterator();
+        final Iterator<Map.Entry<Integer, Integer>> it = integerQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, Integer> entry = it.next();
-            int len = UdpPrimitiveProtocol2.encodeInt(m_bb, entry.getKey(), entry.getValue());
-            send(new DatagramPacket(m_bytes, len, m_addr, kPort));
+            final Map.Entry<Integer, Integer> entry = it.next();
+            putAndMaybeSend(() -> p.putInt(entry.getKey(), entry.getValue()));
             it.remove();
         }
     }
 
     private void flushDoubleArray() {
-        Iterator<Map.Entry<Integer, double[]>> it = doubleArrayQueue.entrySet().iterator();
+        final Iterator<Map.Entry<Integer, double[]>> it = doubleArrayQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, double[]> entry = it.next();
-            int len = UdpPrimitiveProtocol2.encodeDoubleArray(m_bb, entry.getKey(), entry.getValue());
-            send(new DatagramPacket(m_bytes, len, m_addr, kPort));
+            final Map.Entry<Integer, double[]> entry = it.next();
+            putAndMaybeSend(() -> p.putDoubleArray(entry.getKey(), entry.getValue()));
             it.remove();
         }
     }
 
     private void flushLong() {
-        Iterator<Map.Entry<Integer, Long>> it = longQueue.entrySet().iterator();
+        final Iterator<Map.Entry<Integer, Long>> it = longQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, Long> entry = it.next();
-            int len = UdpPrimitiveProtocol2.encodeLong(m_bb, entry.getKey(), entry.getValue());
-            send(new DatagramPacket(m_bytes, len, m_addr, kPort));
+            final Map.Entry<Integer, Long> entry = it.next();
+            putAndMaybeSend(() -> p.putLong(entry.getKey(), entry.getValue()));
             it.remove();
         }
     }
 
     private void flushString() {
-        Iterator<Map.Entry<Integer, String>> it = stringQueue.entrySet().iterator();
+        final Iterator<Map.Entry<Integer, String>> it = stringQueue.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, String> entry = it.next();
-            int len = UdpPrimitiveProtocol2.encodeString(m_bb, entry.getKey(), entry.getValue());
-            send(new DatagramPacket(m_bytes, len, m_addr, kPort));
+            final Map.Entry<Integer, String> entry = it.next();
+            putAndMaybeSend(() -> p.putString(entry.getKey(), entry.getValue()));
             it.remove();
         }
     }
-
-    private void send(DatagramPacket p) {
-        if (m_socket == null)
-            return;
-        try {
-            m_packetSink.accept(p);
-            // m_socket.send(p);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void send(DatagramPacket p) {
-        if (m_socket == null)
-            return;
-        try {
-            m_socket.send(p);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

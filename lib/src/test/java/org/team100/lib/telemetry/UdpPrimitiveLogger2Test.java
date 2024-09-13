@@ -12,6 +12,7 @@ import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -207,5 +208,56 @@ class UdpPrimitiveLogger2Test {
         double t1 = Timer.getFPGATimestamp();
         System.out.printf("duration sec %5.3f\n", (t1 - t0));
         System.out.printf("duration per row us %5.3f\n", 1000000 * (t1 - t0) / N);
+    }
+
+    ByteBuffer bb;
+
+    @Test
+    void testStringToBuffer() {
+        Consumer<ByteBuffer> bufferSink = (x) -> bb = x;
+        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(bufferSink);
+        l.logString("label", "hello");
+        l.flush();
+        assertEquals(10, bb.remaining());
+        byte[] b = bb.array();
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 6, b[1]); // string type
+        assertEquals((byte) 0, b[2]); // key high byte
+        assertEquals((byte) 16, b[3]); // key low byte
+        assertEquals((byte) 5, b[4]); // length
+        assertEquals((byte) 104, b[5]); // "h"
+        assertEquals((byte) 101, b[6]);// "e"
+        assertEquals((byte) 108, b[7]);// "l"
+        assertEquals((byte) 108, b[8]);// "l"
+        assertEquals((byte) 111, b[9]);// "o"
+    }
+
+    @Test
+    void testMultiToBuffer() {
+        Consumer<ByteBuffer> bufferSink = (x) -> bb = x;
+        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(bufferSink);
+        l.logString("label", "hello");
+        l.logInt("foo", 1);
+        l.flush();
+        assertEquals(18, bb.remaining());
+        byte[] b = bb.array();
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 3, b[1]); // int type
+        assertEquals((byte) 0, b[2]); // key MSB
+        assertEquals((byte) 17, b[3]); // key LSB
+        assertEquals((byte) 0, b[4]); // int value
+        assertEquals((byte) 0, b[5]); // int value
+        assertEquals((byte) 0, b[6]); // int value
+        assertEquals((byte) 1, b[7]); // int value
+        assertEquals((byte) 0, b[8]);
+        assertEquals((byte) 6, b[9]); // string type
+        assertEquals((byte) 0, b[10]); // key high byte
+        assertEquals((byte) 16, b[11]); // key low byte
+        assertEquals((byte) 5, b[12]); // length
+        assertEquals((byte) 104, b[13]); // "h"
+        assertEquals((byte) 101, b[14]);// "e"
+        assertEquals((byte) 108, b[15]);// "l"
+        assertEquals((byte) 108, b[16]);// "l"
+        assertEquals((byte) 111, b[17]);// "o"
     }
 }

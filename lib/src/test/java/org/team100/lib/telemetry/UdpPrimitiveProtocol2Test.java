@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.List;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
@@ -288,26 +287,27 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeLabelMap(bb, 2, List.of("asdf", "qwerty"));
-        assertEquals(15, len); // key (2) length (1) data (2*8)
+        int len = UdpPrimitiveProtocol2.encodeFirstLabel(bb, 2, "asdf");
+        assertEquals(7, len); //
+        len = UdpPrimitiveProtocol2.encodeAddLabel(bb, "qwerty");
+        assertEquals(7, len); //
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // offset high byte
         assertEquals((byte) 2, b[3]); // offset low byte
-        assertEquals((byte) 2, b[4]); // size
-        assertEquals((byte) 4, b[5]); // length
-        assertEquals((byte) 97, b[6]); // a
-        assertEquals((byte) 115, b[7]); // s
-        assertEquals((byte) 100, b[8]); // d
-        assertEquals((byte) 102, b[9]); // f
-        assertEquals((byte) 6, b[10]); // length
-        assertEquals((byte) 113, b[11]); // q
-        assertEquals((byte) 119, b[12]); // w
-        assertEquals((byte) 101, b[13]); // e
-        assertEquals((byte) 114, b[14]); // r
-        assertEquals((byte) 116, b[15]); // t
-        assertEquals((byte) 121, b[16]); // y
-        assertEquals((byte) 0, b[17]); //
+        assertEquals((byte) 4, b[4]); // length
+        assertEquals((byte) 97, b[5]); // a
+        assertEquals((byte) 115, b[6]); // s
+        assertEquals((byte) 100, b[7]); // d
+        assertEquals((byte) 102, b[8]); // f
+        assertEquals((byte) 6, b[9]); // length
+        assertEquals((byte) 113, b[10]); // q
+        assertEquals((byte) 119, b[11]); // w
+        assertEquals((byte) 101, b[12]); // e
+        assertEquals((byte) 114, b[13]); // r
+        assertEquals((byte) 116, b[14]); // t
+        assertEquals((byte) 121, b[15]); // y
+        assertEquals((byte) 0, b[16]); //
     }
 
     @Test
@@ -315,7 +315,9 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[10];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeLabelMap(bb, 2, List.of("asdf", "qwerty"));
+        int len = UdpPrimitiveProtocol2.encodeFirstLabel(bb, 2, "asdf");
+        assertEquals(0, len);
+        len = UdpPrimitiveProtocol2.encodeAddLabel(bb, "qwerty");
         assertEquals(0, len);
     }
 
@@ -408,6 +410,7 @@ class UdpPrimitiveProtocol2Test {
             for (int i = 0; i < N; ++i) {
                 ByteBuffer b = ByteBuffer.allocateDirect(S);
                 b.put((byte) 1);
+
             }
             double t1 = Timer.getFPGATimestamp();
             System.out.printf("new buf duration (ms)  %5.1f\n", 1e3 * (t1 - t0));
