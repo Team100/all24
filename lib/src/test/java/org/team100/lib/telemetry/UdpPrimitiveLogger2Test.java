@@ -15,6 +15,7 @@ import java.nio.channels.DatagramChannel;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.telemetry.PrimitiveLogger2.StringLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -216,7 +217,8 @@ class UdpPrimitiveLogger2Test {
     void testStringToBuffer() {
         Consumer<ByteBuffer> bufferSink = (x) -> bb = x;
         UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(bufferSink);
-        l.logString("label", "hello");
+        StringLogger s = l.new UdpStringLogger("label");
+        s.log("hello");
         l.flush();
         assertEquals(10, bb.remaining());
         byte[] b = bb.array();
@@ -236,7 +238,8 @@ class UdpPrimitiveLogger2Test {
     void testMultiToBuffer() {
         Consumer<ByteBuffer> bufferSink = (x) -> bb = x;
         UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(bufferSink);
-        l.logString("label", "hello");
+        StringLogger s = l.new UdpStringLogger("label");
+        s.log("hello");
         l.logInt("foo", 1);
         l.flush();
         assertEquals(18, bb.remaining());

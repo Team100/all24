@@ -395,7 +395,7 @@ public class UdpPrimitiveProtocol2 {
      */
     static int encodeKey(ByteBuffer buf, int key) {
         if (key < 16)
-            throw new IllegalArgumentException("key in type code range");
+            throw new IllegalArgumentException("key in type code range: " + key);
         if (key > 65535)
             throw new IllegalArgumentException("key too large");
         final int totalLength = 2;

@@ -11,6 +11,8 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 import java.util.function.Consumer;
 import java.util.function.BooleanSupplier;
@@ -27,8 +29,8 @@ import edu.wpi.first.wpilibj.Timer;
  * This logger accepts inputs only one value per key per flush period; the
  * newest value wins.
  */
-public class UdpPrimitiveLogger2 extends PrimitiveLogger {
-    private static final int kMinKey = 15;
+public class UdpPrimitiveLogger2 extends PrimitiveLogger2 {
+    private static final int kMinKey = 16;
     private static final double kFlushPeriod = 0.1;
     /** how many handles to transmit per iteration */
     private static final double kHandlesPeriodic = 10;
@@ -41,9 +43,7 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
     private final Map<Integer, Long> longQueue = new HashMap<>();
     private final Map<Integer, String> stringQueue = new HashMap<>();
 
-    // this eventually goes into two bytes, so not the full int size
-    // but casting to short everywhere is a pain
-    final Map<String, Integer> handles = new HashMap<>();
+    final List<String> handles = new ArrayList<>();
     private Iterator<Map.Entry<String, Integer>> handleIterator;
 
     private double flushTime;
@@ -58,13 +58,16 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
         m_bufferSink = bufferSink;
 
         flushTime = 0;
-        handles.put("UNKNOWN", 0);
+        // handles.put("UNKNOWN", 0);
     }
 
-    // TODO: this should only be used once when the logger instance is made for the
-    // specific label, to avoid the map lookups.
-    private int getKey(String label) {
-        return handles.computeIfAbsent(label, x -> handles.size() + kMinKey);
+    /**
+     * Call this once when the specific logger class is instantiated.
+     */
+    private synchronized int getKey(String label) {
+        int key = handles.size() + kMinKey;
+        handles.add(label);
+        return key;
     }
 
     public void periodic() {
@@ -78,15 +81,15 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
     }
 
     public void dumpLabels() {
-        if (handleIterator == null)
-            handleIterator = handles.entrySet().iterator();
+        // if (handleIterator == null)
+        //     handleIterator = handles.entrySet().iterator();
         for (int i = 0; i < kHandlesPeriodic; ++i) {
             if (handleIterator.hasNext()) {
                 Map.Entry<String, Integer> entry = handleIterator.next();
                 String key = entry.getKey();
                 Integer handle = entry.getValue();
                 // TODO: better encoding, separate key space
-                logString(handle.toString(), key);
+                // logString(handle.toString(), key);
             } else {
                 handleIterator = null;
                 break;
@@ -110,10 +113,23 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
         m_bufferSink.accept(trim);
     }
 
+    class UdpBooleanLogger extends PrimitiveLogger2.BooleanLogger {
+        private final int m_key;
+
+        UdpBooleanLogger(int key) {
+            UdpPrimitiveLogger2.this.super();
+            m_key = key;
+        }
+
+        @Override
+        void log(boolean val) {
+            booleanQueue.put(m_key, val);
+        }
+    }
+
     @Override
-    void logBoolean(String label, boolean val) {
-        int key = getKey(label);
-        booleanQueue.put(key, val);
+    BooleanLogger booleanLogger(String label) {
+        return new UdpBooleanLogger(getKey(label));
     }
 
     @Override
@@ -145,11 +161,21 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger {
         longQueue.put(key, val);
     }
 
-    @Override
-    void logString(String label, String val) {
-        int key = getKey(label);
-        stringQueue.put(key, val);
+    class UdpStringLogger extends PrimitiveLogger2.StringLogger {
+        private final int m_key;
+
+        UdpStringLogger(String label) {
+            UdpPrimitiveLogger2.this.super();
+            m_key = getKey(label);
+        }
+
+        @Override
+        void log(String val) {
+            stringQueue.put(m_key, val);
+        }
     }
+
+
 
     ///////////////////////////////////////////
 
