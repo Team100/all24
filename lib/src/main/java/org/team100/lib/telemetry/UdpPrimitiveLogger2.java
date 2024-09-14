@@ -1,21 +1,15 @@
 package org.team100.lib.telemetry;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.stream.Stream;
-import java.util.function.Consumer;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -90,23 +84,21 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         if (labels.isEmpty())
             return;
         p = new UdpPrimitiveProtocol2();
-        int length = labels.size();
-        while (length > 0) {
-            int sent = p.putLabels(offset, length, labels);
-            if (sent == 0) {
-                // time to send the packet
-                m_bufferSink.accept(p.trim());
-                p = new UdpPrimitiveProtocol2();
-                sent = p.putLabels(offset, length, labels);
-                if (sent == 0)
-                    // still can't send any? there's something wrong.
-                    throw new IllegalArgumentException();
-            }
-            offset += sent;
-            if (offset > labels.size() - 1)
-                break;
-            length = labels.size() - offset;
+
+        int sent = p.putLabels(offset, labels);
+        if (sent == 0) {
+            // packet is full, so send it.
+            m_bufferSink.accept(p.trim());
+            p = new UdpPrimitiveProtocol2();
+            sent = p.putLabels(offset, labels);
+            if (sent == 0)
+                // still can't send any? there's something wrong.
+                throw new IllegalArgumentException();
         }
+        offset += sent;
+        if (offset > labels.size())
+            offset = 0;
+
         m_bufferSink.accept(p.trim());
     }
 
@@ -290,27 +282,32 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     @Override
     public DoubleLogger doubleLogger(String label) {
-        return new UdpDoubleLogger(label);    }
+        return new UdpDoubleLogger(label);
+    }
 
     @Override
     public IntLogger intLogger(String label) {
-        return new UdpIntLogger(label);    }
+        return new UdpIntLogger(label);
+    }
 
     @Override
     public DoubleArrayLogger doubleArrayLogger(String label) {
-        return new UdpDoubleArrayLogger(label);    }
+        return new UdpDoubleArrayLogger(label);
+    }
 
     @Override
     public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
-        return new UdpDoubleObjArrayLogger(label);    }
+        return new UdpDoubleObjArrayLogger(label);
+    }
 
     @Override
     public LongLogger longLogger(String label) {
-        return new UdpLongLogger(label);   }
+        return new UdpLongLogger(label);
+    }
 
     @Override
     public StringLogger stringLogger(String label) {
-        return new UdpStringLogger(label);    }
-
+        return new UdpStringLogger(label);
+    }
 
 }

@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -285,11 +284,11 @@ class UdpPrimitiveProtocol2Test {
 
     @Test
     void testLabelMap() {
-        byte[] b = new byte[24];
+        byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(2);
         List<String> labels = List.of("one", "two", "three", "four");
-        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 0, 2, labels);
+        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 0, labels);
         assertEquals(2, n); // both labels are consumed
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -313,7 +312,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(2);
         List<String> labels = List.of("one", "two", "three", "four");
-        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 2, 2, labels);
+        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 2, labels);
         assertEquals(2, n); // both labels are consumed
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -340,7 +339,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(2);
         List<String> labels = List.of("one", "two", "three", "four");
-        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 2, 2, labels);
+        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 2, labels);
         assertEquals(1, n); // just one label consumed
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -361,7 +360,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(8);
         List<String> labels = List.of("one", "two", "three", "four");
-        int len = UdpPrimitiveProtocol2.encodeLabels(bb, 2, 2, labels);
+        int len = UdpPrimitiveProtocol2.encodeLabels(bb, 2, labels);
         assertEquals(0, len);
     }
 

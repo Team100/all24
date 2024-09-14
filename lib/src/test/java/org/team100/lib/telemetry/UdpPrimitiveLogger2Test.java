@@ -2,17 +2,7 @@ package org.team100.lib.telemetry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.net.StandardSocketOptions;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.PrimitiveLogger2.IntLogger;

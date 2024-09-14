@@ -92,6 +92,7 @@ import java.util.List;
  */
 public class UdpPrimitiveProtocol2 {
     enum Type {
+        UNKNOWN(0),
         BOOLEAN(1),
         DOUBLE(2),
         INT(3),
@@ -111,6 +112,7 @@ public class UdpPrimitiveProtocol2 {
     private final ByteBuffer m_buffer;
 
     public UdpPrimitiveProtocol2() {
+        m_currentType = Type.UNKNOWN;
         m_buffer = ByteBuffer.allocate(508);
         // this is the default, but just to make it clear...
         m_buffer.order(ByteOrder.BIG_ENDIAN);
@@ -118,9 +120,7 @@ public class UdpPrimitiveProtocol2 {
 
     /** Return a buffer view of length equal to current position. */
     ByteBuffer trim() {
-        ByteBuffer slice = m_buffer.slice(0, m_buffer.position());
-        System.out.println(slice.array().length);
-        return slice;
+        return m_buffer.slice(0, m_buffer.position());
     }
 
     /** for testing */
@@ -131,8 +131,7 @@ public class UdpPrimitiveProtocol2 {
     /** @return true if the type is correct or a new type was written */
     private boolean verifyType(Type type) {
         if (m_currentType != type) {
-            int l = encodeType(m_buffer, type);
-            if (l == 0)
+            if (encodeType(m_buffer, type) == 0)
                 return false;
         }
         return true;
@@ -178,14 +177,15 @@ public class UdpPrimitiveProtocol2 {
     }
 
     /**
+     * Send a packet's worth of labels.
+     * 
      * @param offset start with this item
-     * @param length number of items to try to send
      * @param val    the entire label list; this is not modified
      * @return the number of items actually sent
      */
-    public int putLabels(int offset, int length, List<String> val) {
+    public int putLabels(int offset, List<String> val) {
         if (verifyType(Type.LABEL))
-            return encodeLabels(m_buffer, offset, length, val);
+            return encodeLabels(m_buffer, offset, val);
         return 0;
     }
 
@@ -206,7 +206,7 @@ public class UdpPrimitiveProtocol2 {
     }
 
     /**
-     * encode a chunk of the label map.
+     * encode a chunk of the label map, as much as will fit in the current packet.
      * 
      * the label map is long, we have to chunk it.
      * 
@@ -227,16 +227,12 @@ public class UdpPrimitiveProtocol2 {
      * 
      * @param buf    write into this buffer
      * @param offset start with this item (0-based)
-     * @param length number of items to try to send
      * @param val    the entire label list; this is not modified
      * @return the number of items actually sent
-     * 
      */
-    static int encodeLabels(ByteBuffer buf, int offset, int length, List<String> val) {
+    static int encodeLabels(ByteBuffer buf, int offset, List<String> val) {
         if (offset > (val.size() - 1))
             throw new IllegalArgumentException("label offset too large");
-        if (length > (val.size() - offset))
-            throw new IllegalArgumentException("length too long");
         if (val.size() > 255) {
             throw new IllegalArgumentException("label list too long");
         }
@@ -245,16 +241,16 @@ public class UdpPrimitiveProtocol2 {
         final int bufRemaining = buf.remaining();
         int totalLength = 3;
         List<byte[]> bytesList = new ArrayList<>();
-        for (int i = offset; i < offset + length; ++i) {
-            String s = val.get(i);
-            byte[] bytes = s.getBytes(StandardCharsets.US_ASCII);
-            final int bytesLength = bytes.length;
-            if (bytesLength > 255)
+        for (int i = offset; i < val.size(); ++i) {
+            byte[] bytes = val.get(i).getBytes(StandardCharsets.US_ASCII);
+            if (bytes.length > 255)
                 throw new IllegalArgumentException("label too long");
-            totalLength += bytesLength + 1;
+            totalLength += bytes.length + 1;
             if (totalLength > bufRemaining) // this one won't fit
                 break;
             bytesList.add(bytes);
+            if (bytesList.size() == 255) // one byte for length
+                break;
         }
 
         if (bytesList.isEmpty())
