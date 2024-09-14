@@ -17,6 +17,13 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.PrimitiveLogger2.IntLogger;
 import org.team100.lib.telemetry.PrimitiveLogger2.StringLogger;
+import org.team100.lib.telemetry.SupplierLogger2.BooleanSupplierLogger;
+import org.team100.lib.telemetry.SupplierLogger2.DoubleArraySupplierLogger;
+import org.team100.lib.telemetry.SupplierLogger2.DoubleObjArraySupplierLogger;
+import org.team100.lib.telemetry.SupplierLogger2.DoubleSupplierLogger;
+import org.team100.lib.telemetry.SupplierLogger2.IntSupplierLogger;
+import org.team100.lib.telemetry.SupplierLogger2.LongSupplierLogger;
+import org.team100.lib.telemetry.SupplierLogger2.StringSupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -29,34 +36,37 @@ class UdpPrimitiveLogger2Test {
     @Test
     void testSending() throws UnknownHostException, SocketException {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2((x) -> bb = x);
-        SupplierLogger logger = new SupplierLogger(
+        SupplierLogger2 logger = new SupplierLogger2(
                 Telemetry.get(),
                 "root",
-                () -> true,
-                udpLogger,
-                () -> false,
-                null);
+                udpLogger);
+        BooleanSupplierLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
+        DoubleSupplierLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
+        IntSupplierLogger intLogger = logger.intLogger(Level.COMP, "intkey");
+        DoubleArraySupplierLogger doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
+        DoubleObjArraySupplierLogger doubleObjArrayLogger = logger.doubleObjArrayLogger(Level.COMP,
+                "doubleobjarraykey");
+        LongSupplierLogger longLogger = logger.longLogger(Level.COMP, "longkey");
+        StringSupplierLogger stringLogger = logger.stringLogger(Level.COMP, "stringkey");
+
         for (int i = 0; i < 100; ++i) {
-            logger.logBoolean(Level.COMP, "boolkey", () -> true);
-            logger.logDouble(Level.COMP, "doublekey", () -> 100.0);
-            logger.logInt(Level.COMP, "intkey", () -> 100);
-            logger.logDoubleArray(Level.COMP, "doublearraykey", () -> new double[] { 1.0, 2.0 });
-            logger.logDoubleObjArray(Level.COMP, "doubleobjarraykey", () -> new Double[] { 1.0, 2.0 });
-            logger.logLong(Level.COMP, "longkey", () -> (long) 100);
-            logger.logString(Level.COMP, "stringkey", () -> "value");
+            booleanLogger.log(() -> true);
+            doubleLogger.log(() -> 100.0);
+            intLogger.log(() -> 100);
+            doubleArrayLogger.log(() -> new double[] { 1.0, 2.0 });
+            doubleObjArrayLogger.log(() -> new Double[] { 1.0, 2.0 });
+            longLogger.log(() -> (long) 100);
+            stringLogger.log(() -> "value");
         }
         udpLogger.flush();
-        assertEquals(8, udpLogger.handles.size());
-        for (String k : udpLogger.handles.keySet()) {
-            System.out.println(k);
-        }
-        assertEquals(1, udpLogger.handles.get("/root/boolkey"));
-        assertEquals(2, udpLogger.handles.get("/root/doublekey"));
-        assertEquals(3, udpLogger.handles.get("/root/intkey"));
-        assertEquals(4, udpLogger.handles.get("/root/doublearraykey"));
-        assertEquals(5, udpLogger.handles.get("/root/doubleobjarraykey"));
-        assertEquals(6, udpLogger.handles.get("/root/longkey"));
-        assertEquals(7, udpLogger.handles.get("/root/stringkey"));
+        assertEquals(8, udpLogger.labels.size());
+        assertEquals("/root/boolkey", udpLogger.labels.get(0));
+        assertEquals("/root/doublekey", udpLogger.labels.get(1));
+        assertEquals("/root/intkey", udpLogger.labels.get(2));
+        assertEquals("/root/doublearraykey", udpLogger.labels.get(3));
+        assertEquals("/root/doubleobjarraykey", udpLogger.labels.get(4));
+        assertEquals("/root/longkey", udpLogger.labels.get(5));
+        assertEquals("/root/stringkey", udpLogger.labels.get(6));
     }
 
     /**
@@ -84,19 +94,20 @@ class UdpPrimitiveLogger2Test {
     @Test
     void testAWholeLot() throws UnknownHostException, SocketException, InterruptedException {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2((x) -> bb = x);
-        SupplierLogger logger = new SupplierLogger(
+        SupplierLogger2 logger = new SupplierLogger2(
                 Telemetry.get(),
                 "root",
-                () -> true,
-                udpLogger,
-                () -> false,
-                null);
+                udpLogger);
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
         final double total_time = 2;
         final int keys = 5000;
         final double expected_keys_per_sec = keys / interval;
+        DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[keys];
+        for (int j = 0; j < keys; ++j) {
+            loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
+        }
         System.out.println("expected keys per second: " + expected_keys_per_sec);
         for (int i = 0; i < (total_time / interval); ++i) {
             double d = Timer.getFPGATimestamp() - t0;
@@ -106,7 +117,7 @@ class UdpPrimitiveLogger2Test {
             double t1 = Timer.getFPGATimestamp();
             for (int j = 0; j < keys; ++j) {
                 double val = Math.sin(j + 0.01 * i);
-                logger.logDouble(Level.COMP, "doublekey" + j, () -> val);
+                loggers[j].log(() -> val);
             }
             udpLogger.flush();
             double t2 = Timer.getFPGATimestamp();
@@ -118,7 +129,7 @@ class UdpPrimitiveLogger2Test {
     @Test
     void testStringToBuffer() {
         UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x);
-        StringLogger s = l.new UdpStringLogger("label");
+        StringLogger s = l.stringLogger("label");
         s.log("hello");
         l.flush();
         assertEquals(10, bb.remaining());
@@ -154,9 +165,9 @@ class UdpPrimitiveLogger2Test {
     @Test
     void testMultiToBuffer() {
         UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x);
-        StringLogger s = l.new UdpStringLogger("label");
+        StringLogger s = l.stringLogger("label");
         s.log("hello");
-        IntLogger i = l.new UdpIntLogger("foo");
+        IntLogger i = l.intLogger("foo");
         i.log(1);
         l.flush();
         assertEquals(18, bb.remaining());

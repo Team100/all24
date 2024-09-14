@@ -43,7 +43,9 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     private final Map<Integer, Long> longQueue = new HashMap<>();
     private final Map<Integer, String> stringQueue = new HashMap<>();
 
-    final List<String> handles = new ArrayList<>();
+    final List<String> labels = new ArrayList<>();
+    /** Current offset of label dumper */
+    int offset = 0;
 
     private double flushTime;
 
@@ -64,8 +66,8 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
      * Call this once when the specific logger class is instantiated.
      */
     private synchronized int getKey(String label) {
-        int key = handles.size() + kMinKey;
-        handles.add(label);
+        int key = labels.size() + kMinKey;
+        labels.add(label);
         return key;
     }
 
@@ -80,29 +82,30 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     }
 
     /**
-     * For now, just send them all.
+     * Send one packet of labels.
      * 
      * TODO: maintain offset and length as fields and send a little at a time.
      */
     public void dumpLabels() {
+        if (labels.isEmpty())
+            return;
         p = new UdpPrimitiveProtocol2();
-        int offset = 0;
-        int length = handles.size();
+        int length = labels.size();
         while (length > 0) {
-            int sent = p.putLabels(offset, length, handles);
+            int sent = p.putLabels(offset, length, labels);
             if (sent == 0) {
                 // time to send the packet
                 m_bufferSink.accept(p.trim());
                 p = new UdpPrimitiveProtocol2();
-                sent = p.putLabels(offset, length, handles);
+                sent = p.putLabels(offset, length, labels);
                 if (sent == 0)
                     // still can't send any? there's something wrong.
                     throw new IllegalArgumentException();
             }
             offset += sent;
-            if (offset > handles.size() - 1)
+            if (offset > labels.size() - 1)
                 break;
-            length = handles.size() - offset;
+            length = labels.size() - offset;
         }
         m_bufferSink.accept(p.trim());
     }
@@ -122,8 +125,8 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     public class UdpBooleanLogger implements PrimitiveLogger2.BooleanLogger {
         private final int m_key;
 
-        public UdpBooleanLogger(int key) {
-            m_key = key;
+        public UdpBooleanLogger(String label) {
+            m_key = getKey(label);
         }
 
         @Override
@@ -279,4 +282,35 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
             it.remove();
         }
     }
+
+    @Override
+    public BooleanLogger booleanLogger(String label) {
+        return new UdpBooleanLogger(label);
+    }
+
+    @Override
+    public DoubleLogger doubleLogger(String label) {
+        return new UdpDoubleLogger(label);    }
+
+    @Override
+    public IntLogger intLogger(String label) {
+        return new UdpIntLogger(label);    }
+
+    @Override
+    public DoubleArrayLogger doubleArrayLogger(String label) {
+        return new UdpDoubleArrayLogger(label);    }
+
+    @Override
+    public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
+        return new UdpDoubleObjArrayLogger(label);    }
+
+    @Override
+    public LongLogger longLogger(String label) {
+        return new UdpLongLogger(label);   }
+
+    @Override
+    public StringLogger stringLogger(String label) {
+        return new UdpStringLogger(label);    }
+
+
 }
