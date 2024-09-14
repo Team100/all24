@@ -44,7 +44,6 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     private final Map<Integer, String> stringQueue = new HashMap<>();
 
     final List<String> handles = new ArrayList<>();
-    private Iterator<Map.Entry<String, Integer>> handleIterator;
 
     private double flushTime;
 
@@ -80,37 +79,44 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     }
 
+    /**
+     * For now, just send them all.
+     * 
+     * TODO: maintain offset and length as fields and send a little at a time.
+     */
     public void dumpLabels() {
-        // if (handleIterator == null)
-        // handleIterator = handles.entrySet().iterator();
-        for (int i = 0; i < kHandlesPeriodic; ++i) {
-            if (handleIterator.hasNext()) {
-                Map.Entry<String, Integer> entry = handleIterator.next();
-                String key = entry.getKey();
-                Integer handle = entry.getValue();
-                // TODO: better encoding, separate key space
-                // logString(handle.toString(), key);
-            } else {
-                handleIterator = null;
-                break;
+        p = new UdpPrimitiveProtocol2();
+        int offset = 0;
+        int length = handles.size();
+        while (length > 0) {
+            int sent = p.putLabels(offset, length, handles);
+            if (sent == 0) {
+                // time to send the packet
+                m_bufferSink.accept(p.trim());
+                p = new UdpPrimitiveProtocol2();
+                sent = p.putLabels(offset, length, handles);
+                if (sent == 0)
+                    // still can't send any? there's something wrong.
+                    throw new IllegalArgumentException();
             }
+            offset += sent;
+            if (offset > handles.size() - 1)
+                break;
+            length = handles.size() - offset;
         }
+        m_bufferSink.accept(p.trim());
     }
 
     /** Send at least one packet. */
     public void flush() {
         p = new UdpPrimitiveProtocol2();
-        // TODO: flush some key map now
-
         flushBoolean();
         flushDouble();
         flushInteger();
         flushDoubleArray();
         flushLong();
         flushString();
-        ByteBuffer trim = p.trim();
-        System.out.println(trim.array().length);
-        m_bufferSink.accept(trim);
+        m_bufferSink.accept(p.trim());
     }
 
     public class UdpBooleanLogger implements PrimitiveLogger2.BooleanLogger {

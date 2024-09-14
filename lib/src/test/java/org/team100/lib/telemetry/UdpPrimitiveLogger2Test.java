@@ -22,10 +22,13 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.wpilibj.Timer;
 
 class UdpPrimitiveLogger2Test {
+
+    ByteBuffer bb;
+
     /** Send some examples. */
     @Test
     void testSending() throws UnknownHostException, SocketException {
-        UdpPrimitiveLogger udpLogger = new UdpPrimitiveLogger();
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2((x) -> bb = x);
         SupplierLogger logger = new SupplierLogger(
                 Telemetry.get(),
                 "root",
@@ -80,7 +83,7 @@ class UdpPrimitiveLogger2Test {
      */
     @Test
     void testAWholeLot() throws UnknownHostException, SocketException, InterruptedException {
-        UdpPrimitiveLogger udpLogger = new UdpPrimitiveLogger();
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2((x) -> bb = x);
         SupplierLogger logger = new SupplierLogger(
                 Telemetry.get(),
                 "root",
@@ -112,112 +115,9 @@ class UdpPrimitiveLogger2Test {
 
     }
 
-    /**
-     * Socket.send
-     * 
-     * 2.1 us per row (no listener)
-     */
-    @Test
-    void testSocket() throws IOException {
-        InetAddress m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
-        DatagramSocket m_socket = new DatagramSocket();
-        m_socket.setSendBufferSize(100000000);
-        byte[] m_bytes = new byte[30];
-        DatagramPacket p = new DatagramPacket(m_bytes, 30, m_addr, 1995);
-        double t0 = Timer.getFPGATimestamp();
-        int N = 1000000;
-        for (int i = 0; i < N; ++i) {
-            m_socket.send(p);
-        }
-        m_socket.close();
-        double t1 = Timer.getFPGATimestamp();
-        System.out.printf("duration sec %5.3f\n", (t1 - t0));
-        System.out.printf("duration per row us %5.3f\n", 1000000 * (t1 - t0) / N);
-    }
-
-    /**
-     * Socket.connect and then socket.send.
-     * 
-     * 2.1 us per row (no listener)
-     */
-    @Test
-    void testSocketWithConnect() throws IOException {
-        InetAddress m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
-        DatagramSocket m_socket = new DatagramSocket();
-        m_socket.setSendBufferSize(100000000);
-        m_socket.connect(m_addr, 1995);
-        byte[] m_bytes = new byte[30];
-        DatagramPacket p = new DatagramPacket(m_bytes, 30, m_addr, 1995);
-        double t0 = Timer.getFPGATimestamp();
-        int N = 1000000;
-        for (int i = 0; i < N; ++i) {
-            m_socket.send(p);
-        }
-        m_socket.close();
-        double t1 = Timer.getFPGATimestamp();
-        System.out.printf("duration sec %5.3f\n", (t1 - t0));
-        System.out.printf("duration per row us %5.3f\n", 1000000 * (t1 - t0) / N);
-    }
-
-    /**
-     * Channel.connect and then channel.write (non-blocking)
-     * 
-     * 2.0 us per row (no listener)
-     */
-    @Test
-    void testChannel() throws IOException {
-        DatagramChannel channel = DatagramChannel.open();
-        channel.configureBlocking(false);
-        channel.setOption(StandardSocketOptions.SO_SNDBUF, 1000000000);
-        InetAddress m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
-        InetSocketAddress sockAddr = new InetSocketAddress(m_addr, 1995);
-        channel.connect(sockAddr);
-        byte[] m_bytes = new byte[30];
-        ByteBuffer m_bb = ByteBuffer.wrap(m_bytes);
-        double t0 = Timer.getFPGATimestamp();
-        int N = 1000000;
-        for (int i = 0; i < N; ++i) {
-            m_bb.rewind();
-            channel.write(m_bb);
-        }
-        channel.close();
-        double t1 = Timer.getFPGATimestamp();
-        System.out.printf("duration sec %5.3f\n", (t1 - t0));
-        System.out.printf("duration per row us %5.3f\n", 1000000 * (t1 - t0) / N);
-    }
-
-    /**
-     * Channel.send (non-blocking)
-     * 
-     * 2.2 us per row (no listener)
-     */
-    @Test
-    void testChannelWithSendAndNotConnect() throws IOException {
-        DatagramChannel channel = DatagramChannel.open();
-        channel.configureBlocking(false);
-        channel.setOption(StandardSocketOptions.SO_SNDBUF, 1000000000);
-        InetAddress m_addr = InetAddress.getByAddress(new byte[] { 10, 1, 0, 16 });
-        InetSocketAddress sockAddr = new InetSocketAddress(m_addr, 1995);
-        byte[] m_bytes = new byte[30];
-        ByteBuffer m_bb = ByteBuffer.wrap(m_bytes);
-        double t0 = Timer.getFPGATimestamp();
-        int N = 1000000;
-        for (int i = 0; i < N; ++i) {
-            m_bb.rewind();
-            channel.send(m_bb, sockAddr);
-        }
-        channel.close();
-        double t1 = Timer.getFPGATimestamp();
-        System.out.printf("duration sec %5.3f\n", (t1 - t0));
-        System.out.printf("duration per row us %5.3f\n", 1000000 * (t1 - t0) / N);
-    }
-
-    ByteBuffer bb;
-
     @Test
     void testStringToBuffer() {
-        Consumer<ByteBuffer> bufferSink = (x) -> bb = x;
-        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(bufferSink);
+        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x);
         StringLogger s = l.new UdpStringLogger("label");
         s.log("hello");
         l.flush();
@@ -233,12 +133,27 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 108, b[7]);// "l"
         assertEquals((byte) 108, b[8]);// "l"
         assertEquals((byte) 111, b[9]);// "o"
+
+        // this should fill the buffer with the label
+        l.dumpLabels();
+        assertEquals(11, bb.remaining());
+        b = bb.array();
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 7, b[1]); // label type
+        assertEquals((byte) 0, b[2]); // offset
+        assertEquals((byte) 0, b[3]); // offset
+        assertEquals((byte) 1, b[4]); // number of labels
+        assertEquals((byte) 5, b[5]); // length
+        assertEquals((byte) 108, b[6]);// "l"
+        assertEquals((byte) 97, b[7]);// "a"
+        assertEquals((byte) 98, b[8]);// "b"
+        assertEquals((byte) 101, b[9]);// "e"
+        assertEquals((byte) 108, b[10]);// "l"
     }
 
     @Test
     void testMultiToBuffer() {
-        Consumer<ByteBuffer> bufferSink = (x) -> bb = x;
-        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(bufferSink);
+        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x);
         StringLogger s = l.new UdpStringLogger("label");
         s.log("hello");
         IntLogger i = l.new UdpIntLogger("foo");
@@ -264,5 +179,25 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 108, b[15]);// "l"
         assertEquals((byte) 108, b[16]);// "l"
         assertEquals((byte) 111, b[17]);// "o"
+
+        // this should fill the buffer with the label
+        l.dumpLabels();
+        assertEquals(15, bb.remaining());
+        b = bb.array();
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 7, b[1]); // label type
+        assertEquals((byte) 0, b[2]); // offset
+        assertEquals((byte) 0, b[3]); // offset
+        assertEquals((byte) 2, b[4]); // number of labels
+        assertEquals((byte) 5, b[5]); // length
+        assertEquals((byte) 108, b[6]);// "l"
+        assertEquals((byte) 97, b[7]);// "a"
+        assertEquals((byte) 98, b[8]);// "b"
+        assertEquals((byte) 101, b[9]);// "e"
+        assertEquals((byte) 108, b[10]);// "l"
+        assertEquals((byte) 3, b[11]);// length
+        assertEquals((byte) 102, b[12]);// "f"
+        assertEquals((byte) 111, b[13]);// "o"
+        assertEquals((byte) 111, b[14]);// "o"
     }
 }
