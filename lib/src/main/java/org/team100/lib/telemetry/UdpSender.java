@@ -25,8 +25,8 @@ public class UdpSender implements Consumer<ByteBuffer> {
             // big buffer does not help but doesn't hurt
             channel.setOption(StandardSocketOptions.SO_SNDBUF, 1000000);
 
-            InetAddress m_addr = InetAddress.getByAddress(ADDR);
-            // InetAddress m_addr = InetAddress.getLocalHost();
+            // InetAddress m_addr = InetAddress.getByAddress(ADDR);
+            InetAddress m_addr = InetAddress.getLocalHost();
 
             InetSocketAddress sockAddr = new InetSocketAddress(m_addr, kPort);
             // this will fail for localhost if there's no listener

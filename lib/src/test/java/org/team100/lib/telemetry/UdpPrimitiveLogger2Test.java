@@ -34,12 +34,9 @@ class UdpPrimitiveLogger2Test {
 
     /** Send some examples. */
     @Test
-    void testSending() throws UnknownHostException, SocketException {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2((x) -> bb = x);
-        SupplierLogger2 logger = new SupplierLogger2(
-                Telemetry.get(),
-                "root",
-                udpLogger);
+    void testSendingLocally() {
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x);
+        SupplierLogger2 logger = new SupplierLogger2(Telemetry.get(), "root", udpLogger);
         BooleanSupplierLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
         IntSupplierLogger intLogger = logger.intLogger(Level.COMP, "intkey");
@@ -59,7 +56,40 @@ class UdpPrimitiveLogger2Test {
             stringLogger.log(() -> "value");
         }
         udpLogger.flush();
-        assertEquals(8, udpLogger.labels.size());
+        assertEquals(7, udpLogger.labels.size());
+        assertEquals("/root/boolkey", udpLogger.labels.get(0));
+        assertEquals("/root/doublekey", udpLogger.labels.get(1));
+        assertEquals("/root/intkey", udpLogger.labels.get(2));
+        assertEquals("/root/doublearraykey", udpLogger.labels.get(3));
+        assertEquals("/root/doubleobjarraykey", udpLogger.labels.get(4));
+        assertEquals("/root/longkey", udpLogger.labels.get(5));
+        assertEquals("/root/stringkey", udpLogger.labels.get(6));
+    }
+
+    @Test
+    void testSendingViaUDP() {
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(new UdpSender());
+        SupplierLogger2 logger = new SupplierLogger2(Telemetry.get(), "root", udpLogger);
+        BooleanSupplierLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
+        DoubleSupplierLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
+        IntSupplierLogger intLogger = logger.intLogger(Level.COMP, "intkey");
+        DoubleArraySupplierLogger doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
+        DoubleObjArraySupplierLogger doubleObjArrayLogger = logger.doubleObjArrayLogger(Level.COMP,
+                "doubleobjarraykey");
+        LongSupplierLogger longLogger = logger.longLogger(Level.COMP, "longkey");
+        StringSupplierLogger stringLogger = logger.stringLogger(Level.COMP, "stringkey");
+
+        for (int i = 0; i < 100; ++i) {
+            booleanLogger.log(() -> true);
+            doubleLogger.log(() -> 100.0);
+            intLogger.log(() -> 100);
+            doubleArrayLogger.log(() -> new double[] { 1.0, 2.0 });
+            doubleObjArrayLogger.log(() -> new Double[] { 1.0, 2.0 });
+            longLogger.log(() -> (long) 100);
+            stringLogger.log(() -> "value");
+        }
+        udpLogger.flush();
+        assertEquals(7, udpLogger.labels.size());
         assertEquals("/root/boolkey", udpLogger.labels.get(0));
         assertEquals("/root/doublekey", udpLogger.labels.get(1));
         assertEquals("/root/intkey", udpLogger.labels.get(2));
@@ -92,8 +122,8 @@ class UdpPrimitiveLogger2Test {
      * @throws InterruptedException
      */
     @Test
-    void testAWholeLot() throws UnknownHostException, SocketException, InterruptedException {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2((x) -> bb = x);
+    void testAWholeLotLocally() throws InterruptedException {
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x);
         SupplierLogger2 logger = new SupplierLogger2(
                 Telemetry.get(),
                 "root",
@@ -113,7 +143,6 @@ class UdpPrimitiveLogger2Test {
             double d = Timer.getFPGATimestamp() - t0;
             double dt = interval - (d % interval);
             Thread.sleep((long) (dt * 1000) + 1);
-            d = Timer.getFPGATimestamp() - t0;
             double t1 = Timer.getFPGATimestamp();
             for (int j = 0; j < keys; ++j) {
                 double val = Math.sin(j + 0.01 * i);
@@ -123,7 +152,39 @@ class UdpPrimitiveLogger2Test {
             double t2 = Timer.getFPGATimestamp();
             System.out.printf("et %.3f\n", t2 - t1);
         }
+    }
 
+    @Test
+    void testAWholeLotViaUDP() throws InterruptedException {
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(new UdpSender());
+        SupplierLogger2 logger = new SupplierLogger2(
+                Telemetry.get(),
+                "root",
+                udpLogger);
+
+        double t0 = Timer.getFPGATimestamp();
+        final double interval = 0.02;
+        final double total_time = 2;
+        final int keys = 5000;
+        final double expected_keys_per_sec = keys / interval;
+        DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[keys];
+        for (int j = 0; j < keys; ++j) {
+            loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
+        }
+        System.out.println("expected keys per second: " + expected_keys_per_sec);
+        for (int i = 0; i < (total_time / interval); ++i) {
+            double d = Timer.getFPGATimestamp() - t0;
+            double dt = interval - (d % interval);
+            Thread.sleep((long) (dt * 1000) + 1);
+            double t1 = Timer.getFPGATimestamp();
+            for (int j = 0; j < keys; ++j) {
+                double val = Math.sin(j + 0.01 * i);
+                loggers[j].log(() -> val);
+            }
+            udpLogger.flush();
+            double t2 = Timer.getFPGATimestamp();
+            System.out.printf("et %.3f\n", t2 - t1);
+        }
     }
 
     @Test

@@ -12,6 +12,7 @@ class Types(Enum):
     DOUBLE_ARRAY = 4
     LONG = 5
     STRING = 6
+    LABEL = 7
     UNKNOWN = None
 
     @classmethod

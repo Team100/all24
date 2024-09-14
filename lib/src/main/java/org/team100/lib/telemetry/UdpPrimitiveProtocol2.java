@@ -136,7 +136,6 @@ public class UdpPrimitiveProtocol2 {
                 return false;
         }
         return true;
-
     }
 
     /**

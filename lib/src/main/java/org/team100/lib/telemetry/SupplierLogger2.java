@@ -19,7 +19,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.UdpPrimitiveLogger2.UdpBooleanLogger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 
@@ -46,7 +45,6 @@ public class SupplierLogger2 {
         m_telemetry = telemetry;
         m_root = root;
         m_primitiveLoggerA = primitiveLoggerA;
-
     }
 
     /**

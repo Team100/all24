@@ -13,9 +13,7 @@ def decode(message: bytes) -> tuple[str, Types, Any]:
     """
     Message format v2.
 
-    Each message is a list of 
-    Decode a message into (key, type, value).
-    TODO: support network tables time-alignment.
+    A message is a 
     """
     key_len: int = struct.unpack(">B", message[0:1])[0]
     key: str = message[1 : key_len + 1].decode("us-ascii")
@@ -45,6 +43,8 @@ def decode(message: bytes) -> tuple[str, Types, Any]:
             string_len = struct.unpack(">i", message[val_offset : val_offset + 4])[0]
             str_offset = val_offset + 4
             val = message[str_offset : str_offset + string_len].decode("us-ascii")
+        case Types.LABEL:
+            val = None
         case _:
             val = None
 
@@ -81,7 +81,7 @@ def recv() -> None:
         message: bytes = server_socket.recv(1500)
         (key, val_type, val) = decode(message)
         n += 1
-        # print(f"key: {key} val_type: {val_type} val: {val}")
+        print(f"key: {key} val_type: {val_type} val: {val}")
 
 
 def main() -> None:
