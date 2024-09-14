@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj.Timer;
  * This logger accepts inputs only one value per key per flush period; the
  * newest value wins.
  */
-public class UdpPrimitiveLogger2 extends PrimitiveLogger2 {
+public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     private static final int kMinKey = 16;
     private static final double kFlushPeriod = 0.1;
     /** how many handles to transmit per iteration */
@@ -82,7 +82,7 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger2 {
 
     public void dumpLabels() {
         // if (handleIterator == null)
-        //     handleIterator = handles.entrySet().iterator();
+        // handleIterator = handles.entrySet().iterator();
         for (int i = 0; i < kHandlesPeriodic; ++i) {
             if (handleIterator.hasNext()) {
                 Map.Entry<String, Integer> entry = handleIterator.next();
@@ -113,69 +113,98 @@ public class UdpPrimitiveLogger2 extends PrimitiveLogger2 {
         m_bufferSink.accept(trim);
     }
 
-    class UdpBooleanLogger extends PrimitiveLogger2.BooleanLogger {
+    public class UdpBooleanLogger implements PrimitiveLogger2.BooleanLogger {
         private final int m_key;
 
-        UdpBooleanLogger(int key) {
-            UdpPrimitiveLogger2.this.super();
+        public UdpBooleanLogger(int key) {
             m_key = key;
         }
 
         @Override
-        void log(boolean val) {
+        public void log(boolean val) {
             booleanQueue.put(m_key, val);
         }
     }
 
-    @Override
-    BooleanLogger booleanLogger(String label) {
-        return new UdpBooleanLogger(getKey(label));
-    }
-
-    @Override
-    void logDouble(String label, double val) {
-        int key = getKey(label);
-        doubleQueue.put(key, val);
-    }
-
-    @Override
-    void logInt(String label, int val) {
-        int key = getKey(label);
-        integerQueue.put(key, val);
-    }
-
-    @Override
-    void logDoubleArray(String label, double[] val) {
-        int key = getKey(label);
-        doubleArrayQueue.put(key, val);
-    }
-
-    @Override
-    void logDoubleObjArray(String label, Double[] val) {
-        logDoubleArray(label, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
-    }
-
-    @Override
-    void logLong(String label, long val) {
-        int key = getKey(label);
-        longQueue.put(key, val);
-    }
-
-    class UdpStringLogger extends PrimitiveLogger2.StringLogger {
+    public class UdpDoubleLogger implements PrimitiveLogger2.DoubleLogger {
         private final int m_key;
 
-        UdpStringLogger(String label) {
-            UdpPrimitiveLogger2.this.super();
+        public UdpDoubleLogger(String label) {
             m_key = getKey(label);
         }
 
         @Override
-        void log(String val) {
-            stringQueue.put(m_key, val);
+        public void log(double val) {
+            doubleQueue.put(m_key, val);
+        }
+
+    }
+
+    public class UdpIntLogger implements PrimitiveLogger2.IntLogger {
+        private final int m_key;
+
+        public UdpIntLogger(String label) {
+            m_key = getKey(label);
+        }
+
+        @Override
+        public void log(int val) {
+            integerQueue.put(m_key, val);
         }
     }
 
+    public class UdpDoubleArrayLogger implements PrimitiveLogger2.DoubleArrayLogger {
+        private final int m_key;
 
+        public UdpDoubleArrayLogger(String label) {
+            m_key = getKey(label);
+        }
+
+        @Override
+        public void log(double[] val) {
+            doubleArrayQueue.put(m_key, val);
+        }
+    }
+
+    public class UdpDoubleObjArrayLogger implements PrimitiveLogger2.DoubleObjArrayLogger {
+        private final int m_key;
+
+        public UdpDoubleObjArrayLogger(String label) {
+            m_key = getKey(label);
+        }
+
+        @Override
+        public void log(Double[] val) {
+            doubleArrayQueue.put(m_key, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
+        }
+    }
+
+    public class UdpLongLogger implements PrimitiveLogger2.LongLogger {
+        private final int m_key;
+
+        public UdpLongLogger(String label) {
+            m_key = getKey(label);
+        }
+
+        @Override
+        public void log(long val) {
+            longQueue.put(m_key, val);
+        }
+
+    }
+
+    public class UdpStringLogger implements PrimitiveLogger2.StringLogger {
+        private final int m_key;
+
+        public UdpStringLogger(String label) {
+            m_key = getKey(label);
+        }
+
+        @Override
+        public void log(String val) {
+            stringQueue.put(m_key, val);
+        }
+    }
 
     ///////////////////////////////////////////
 

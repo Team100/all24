@@ -5,26 +5,33 @@ package org.team100.lib.telemetry;
  * 
  * This is an abstract class so i can make these methods package-private.
  */
-public abstract class PrimitiveLogger2 {
+public interface PrimitiveLogger2 {
 
-    abstract class BooleanLogger {
-        abstract void log(boolean val);
+    interface BooleanLogger {
+        void log(boolean val);
     }
 
-    /** Call once per key. */
-    abstract BooleanLogger booleanLogger(String key);
+    interface DoubleLogger {
+        void log(double val);
+    }
 
-    abstract void logDouble(String key, double val);
+    interface IntLogger {
+        void log(int val);
+    }
 
-    abstract void logInt(String key, int val);
+    interface DoubleArrayLogger {
+        void log(double[] val);
+    }
 
-    abstract void logDoubleArray(String key, double[] val);
+    interface DoubleObjArrayLogger {
+        void log(Double[] val);
+    }
 
-    abstract void logDoubleObjArray(String key, Double[] val);
+    interface LongLogger {
+        void log(long val);
+    }
 
-    abstract void logLong(String key, long val);
-
-    abstract class StringLogger {
-        abstract void log(String val);
+    interface StringLogger {
+        void log(String val);
     }
 }
