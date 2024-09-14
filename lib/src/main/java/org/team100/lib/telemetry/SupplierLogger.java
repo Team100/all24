@@ -83,10 +83,10 @@ public class SupplierLogger {
     }
 
     private boolean allow(Level level) {
-        if (m_telemetry.getLoadShedder().expired()) {
-            // if we're out of time for logging, don't do it.
-            return false;
-        }
+        // if (m_telemetry.getLoadShedder().expired()) {
+        //     // if we're out of time for logging, don't do it.
+        //     return false;
+        // }
         if (m_telemetry.getLevel() == Level.COMP && level == Level.COMP) {
             // comp mode allows COMP level regardless of enablement.
             return true;
