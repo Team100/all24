@@ -1,8 +1,10 @@
 package org.team100.lib.telemetry;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.ByteBuffer;
+import java.util.HexFormat;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.PrimitiveLogger2.IntLogger;
@@ -15,6 +17,7 @@ import org.team100.lib.telemetry.SupplierLogger2.IntSupplierLogger;
 import org.team100.lib.telemetry.SupplierLogger2.LongSupplierLogger;
 import org.team100.lib.telemetry.SupplierLogger2.StringSupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
+import java.nio.charset.StandardCharsets;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -54,6 +57,61 @@ class UdpPrimitiveLogger2Test {
         assertEquals("/root/doubleobjarraykey", udpLogger.labels.get(4));
         assertEquals("/root/longkey", udpLogger.labels.get(5));
         assertEquals("/root/stringkey", udpLogger.labels.get(6));
+        HexFormat hex = HexFormat.of();
+        String expectedStr = "0001" // type = boolean
+                + "0010" // key = 16
+                + "01" // value = true
+                + "0002" // type = double
+                + "0011" // key = 17
+                + "4059000000000000" // value =
+                + "0003" // type = int
+                + "0012" // key = 18
+                + "00000064" // value
+                + "0004" // type = double array
+                + "0013"// key=19
+                + "02" // length = 2
+                + "3ff0000000000000" // value
+                + "4000000000000000"// value
+                + "0004" // type = double array
+                + "0014" // key = 20
+                + "02" // length = 2
+                + "3ff0000000000000" // value
+                + "4000000000000000"// value
+                + "0005" // type = long
+                + "0015" // key = 21
+                + "0000000000000064" // value
+                + "0006" // type = string
+                + "0016" // key = 22
+                + "05" // length = 5
+                + hex.formatHex("value".getBytes());
+        byte[] expectedBB = hex.parseHex(expectedStr);
+        byte[] actualBB = new byte[89];
+        bb.get(actualBB);
+        assertArrayEquals(expectedBB, actualBB);
+
+        udpLogger.dumpLabels();
+        expectedStr = "\00\07" // 2 type = label
+                + "\00\00" // 2 4 offset = 0
+                + "\07" // 1 5 number of labels
+                + "\15" // 1 6 length
+                + "/root/boolkey" // 13 19 label
+                + "\17" // 1 20 length
+                + "/root/doublekey" // 15 35 label
+                + "\14" // 1 36 length
+                + "/root/intkey" // 12 48 label
+                + "\24" // 1 49 length
+                + "/root/doublearraykey" // 20 69 label
+                + "\27" // 1 70 length
+                + "/root/doubleobjarraykey" // 23 93 label
+                + "\15" // 1 94 length
+                + "/root/longkey" // 13 107 label
+                + "\17" // 1 108 length
+                + "/root/stringkey"; // 15 123 label
+        expectedBB = expectedStr.getBytes(StandardCharsets.US_ASCII);
+        actualBB = new byte[123];
+        bb.get(actualBB);
+        assertArrayEquals(expectedBB, actualBB);
+
     }
 
     @Test
@@ -79,6 +137,7 @@ class UdpPrimitiveLogger2Test {
             stringLogger.log(() -> "value");
         }
         udpLogger.flush();
+        udpLogger.dumpLabels();
         assertEquals(7, udpLogger.labels.size());
         assertEquals("/root/boolkey", udpLogger.labels.get(0));
         assertEquals("/root/doublekey", udpLogger.labels.get(1));

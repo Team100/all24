@@ -4,64 +4,73 @@ import socket
 import struct
 import time
 import threading
-from typing import Any, Iterable
+from typing import Any, Iterator
 
 from udp_primitive_protocol import Types
 
 
-def decode(message: bytes) -> Iterable[tuple[int, Types, Any]]:
+def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
     """
+    returns (key, type, data)
     Message format v2.  See UdpPrimitiveProtocol2.java.
     """
-    offset = 0
-    while True:
-        # loop over sections
-        type_id: int = struct.unpack(">H", message[offset : offset + 2])[0]
-        offset += 2
-        val_type: Types = Types(type_id)
+    print(len(message))
+    print(message)
+    try:
+        offset = 0
         while True:
-            if offset > len(message):
-                return
-            # loop over key-value pairs
-            key: int = struct.unpack(">H", message[offset : offset + 2])[0]
+            # loop over sections
+            type_id: int = struct.unpack(">H", message[offset : offset + 2])[0]
             offset += 2
-            if key < 16:
-                # change types
-                val_type = Types(key)
-                continue
-            val: Any
-            match val_type:
-                case Types.BOOLEAN:
-                    val = struct.unpack(">?", message[offset : offset + 1])[0]
-                    offset += 1
-                case Types.DOUBLE:
-                    val = struct.unpack(">d", message[offset : offset + 8])[0]
-                    offset += 8
-                case Types.INT:
-                    val = struct.unpack(">i", message[offset : offset + 4])[0]
-                    offset += 4
-                case Types.DOUBLE_ARRAY:
-                    array_len = struct.unpack(">i", message[offset : offset + 4])[0]
-                    offset += 4
-                    val = []
-                    for _ in range(array_len):
-                        item = struct.unpack(">d", message[offset : offset + 8])[0]
+            val_type: Types = Types(type_id)
+            print("val type ", val_type)
+            while True:
+                if offset >= len(message):
+                    return
+                # loop over key-value pairs
+                key: int = struct.unpack(">H", message[offset : offset + 2])[0]
+                offset += 2
+                if key < 16:
+                    # change types
+                    val_type = Types(key)
+                    print("val type ", val_type)
+                    continue
+                val: Any
+                match val_type:
+                    case Types.BOOLEAN:
+                        val = struct.unpack(">?", message[offset : offset + 1])[0]
+                        offset += 1
+                    case Types.DOUBLE:
+                        val = struct.unpack(">d", message[offset : offset + 8])[0]
+                        offset += 8
+                    case Types.INT:
+                        val = struct.unpack(">i", message[offset : offset + 4])[0]
+                        offset += 4
+                    case Types.DOUBLE_ARRAY:
+                        array_len: int = struct.unpack(">B", message[offset : offset + 1])[0]
+                        offset += 1
+                        val = []
+                        for _ in range(array_len):
+                            item = struct.unpack(">d", message[offset : offset + 8])[0]
+                            offset += 8 
+                            val.append(item)
+                    case Types.LONG:
+                        val = struct.unpack(">q", message[offset : offset + 8])[0]
                         offset += 8 
-                        val.append(item)
-                case Types.LONG:
-                    val = struct.unpack(">q", message[offset : offset + 8])[0]
-                    offset += 8 
-                case Types.STRING:
-                    string_len = struct.unpack(">i", message[offset : offset + 4])[0]
-                    offset += 4
-                    val = message[offset : offset + string_len].decode("us-ascii")
-                    offset += string_len
-                case Types.LABEL:
-                    # TODO: add label map parser
-                    val = None
-                case _:
-                    val = None
-            yield (key, val_type, val)
+                    case Types.STRING:
+                        string_len: int = struct.unpack(">B", message[offset : offset + 1])[0]
+                        offset += 1
+                        val = message[offset : offset + string_len].decode("us-ascii")
+                        offset += string_len
+                    case Types.LABEL:
+                        # TODO: add label map parser
+                        val = None
+                    case _:
+                        val = None
+                yield (key, val_type, val)
+    except struct.error as err:
+        print(err)
+        return
 
 
 
@@ -93,9 +102,9 @@ def recv() -> None:
 
         # message, _ = server_socket.recvfrom(1024)
         message: bytes = server_socket.recv(1500)
-        (key, val_type, val) = decode(message)
-        n += 1
-        print(f"key: {key} val_type: {val_type} val: {val}")
+        for (key, val_type, val) in decode(message):
+            n += 1
+            print(f"key: {key} val_type: {val_type} val: {val}")
 
 
 def main() -> None:

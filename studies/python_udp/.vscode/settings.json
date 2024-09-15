@@ -2,5 +2,14 @@
     "editor.minimap.enabled": false,
     "workbench.colorTheme": "Default Light Modern",
     "intellicodeApiExamples.python.enabled": false,
-    "intellicodeApiExamples.typescript.enabled": false
+    "intellicodeApiExamples.typescript.enabled": false,
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        ".",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
 }
