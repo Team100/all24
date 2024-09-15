@@ -4,9 +4,30 @@ import socket
 import struct
 import time
 import threading
-from typing import Any, Iterator
+import traceback
+from typing import Any, Generator, Iterator
 
 from udp_primitive_protocol import Types
+
+MIN_KEY = 16
+
+
+def parse_label_map(
+    message: bytes, offset: int
+) -> Generator[tuple[int, Types, Any], None, int]:
+    """yields (key, Type.LABEL, label).
+    returns the new offset."""
+    label_offset: int = struct.unpack(">H", message[offset : offset + 2])[0]
+    offset += 2
+    array_len = struct.unpack(">B", message[offset : offset + 1])[0]
+    offset += 1
+    for i in range(array_len):
+        string_len = struct.unpack(">B", message[offset : offset + 1])[0]
+        offset += 1
+        val = message[offset : offset + string_len].decode("us-ascii")
+        offset += string_len
+        yield (MIN_KEY + label_offset + i, Types.LABEL, val)
+    return offset
 
 
 def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
@@ -14,16 +35,18 @@ def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
     returns (key, type, data)
     Message format v2.  See UdpPrimitiveProtocol2.java.
     """
-    print(len(message))
-    print(message)
     try:
         offset = 0
         while True:
+            if offset >= len(message):
+                return
             # loop over sections
             type_id: int = struct.unpack(">H", message[offset : offset + 2])[0]
             offset += 2
             val_type: Types = Types(type_id)
-            print("val type ", val_type)
+            if val_type == Types.LABEL:
+                offset = yield from parse_label_map(message, offset)
+                continue
             while True:
                 if offset >= len(message):
                     return
@@ -33,7 +56,9 @@ def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
                 if key < 16:
                     # change types
                     val_type = Types(key)
-                    print("val type ", val_type)
+                    if val_type == Types.LABEL:
+                        offset = yield from parse_label_map(message, offset)
+                        continue
                     continue
                 val: Any
                 match val_type:
@@ -47,31 +72,34 @@ def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
                         val = struct.unpack(">i", message[offset : offset + 4])[0]
                         offset += 4
                     case Types.DOUBLE_ARRAY:
-                        array_len: int = struct.unpack(">B", message[offset : offset + 1])[0]
+                        array_len: int = struct.unpack(
+                            ">B", message[offset : offset + 1]
+                        )[0]
                         offset += 1
                         val = []
                         for _ in range(array_len):
                             item = struct.unpack(">d", message[offset : offset + 8])[0]
-                            offset += 8 
+                            offset += 8
                             val.append(item)
                     case Types.LONG:
                         val = struct.unpack(">q", message[offset : offset + 8])[0]
-                        offset += 8 
+                        offset += 8
                     case Types.STRING:
-                        string_len: int = struct.unpack(">B", message[offset : offset + 1])[0]
+                        string_len: int = struct.unpack(
+                            ">B", message[offset : offset + 1]
+                        )[0]
                         offset += 1
                         val = message[offset : offset + string_len].decode("us-ascii")
                         offset += string_len
                     case Types.LABEL:
-                        # TODO: add label map parser
-                        val = None
+                        raise ValueError("label type shouldn't be here")
                     case _:
                         val = None
                 yield (key, val_type, val)
-    except struct.error as err:
-        print(err)
+    except struct.error:
+        print("ignoring invalid packet:\n", message)
+        traceback.print_exc()
         return
-
 
 
 # updated by main thread
@@ -102,7 +130,7 @@ def recv() -> None:
 
         # message, _ = server_socket.recvfrom(1024)
         message: bytes = server_socket.recv(1500)
-        for (key, val_type, val) in decode(message):
+        for key, val_type, val in decode(message):
             n += 1
             print(f"key: {key} val_type: {val_type} val: {val}")
 

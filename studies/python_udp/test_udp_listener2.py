@@ -66,8 +66,14 @@ class TestUdpListener2(unittest.TestCase):
             b"/root/stringkey"  # label
         )
         it = decode(message)
-        next_var = next(it, None)
-        self.assertIsNone(next_var)
+        self.assertEqual((16, Types.LABEL, "/root/boolkey"), next(it, None))
+        self.assertEqual((17, Types.LABEL, "/root/doublekey"), next(it, None))
+        self.assertEqual((18, Types.LABEL, "/root/intkey"), next(it, None))
+        self.assertEqual((19, Types.LABEL, "/root/doublearraykey"), next(it, None))
+        self.assertEqual((20, Types.LABEL, "/root/doubleobjarraykey"), next(it, None))
+        self.assertEqual((21, Types.LABEL, "/root/longkey"), next(it, None))
+        self.assertEqual((22, Types.LABEL, "/root/stringkey"), next(it, None))
+        self.assertIsNone(next(it, None))
 
 
 if __name__ == "__main__":
