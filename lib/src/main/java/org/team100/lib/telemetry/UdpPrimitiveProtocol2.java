@@ -232,10 +232,7 @@ public class UdpPrimitiveProtocol2 {
      */
     static int encodeLabels(ByteBuffer buf, int offset, List<String> val) {
         if (offset > (val.size() - 1))
-            throw new IllegalArgumentException("label offset too large");
-        if (val.size() > 255) {
-            throw new IllegalArgumentException("label list too long");
-        }
+            throw new IllegalArgumentException("label offset too large: " + offset);
 
         // how many items can we fit?
         final int bufRemaining = buf.remaining();
@@ -282,10 +279,11 @@ public class UdpPrimitiveProtocol2 {
         if (val.length > 255) {
             throw new IllegalArgumentException();
         }
-        final int keyFieldLen = encodeKey(buf, key);
+        final int keyFieldLen = 2;
         final int totalLength = keyFieldLen + val.length * 8 + 1;
         if (buf.remaining() < totalLength)
             return 0;
+        encodeKey(buf, key);
         buf.put((byte) val.length); // 1 byte
         for (int i = 0; i < val.length; ++i) {
             buf.putDouble(val[i]); // 8 bytes
@@ -301,10 +299,11 @@ public class UdpPrimitiveProtocol2 {
      * </pre>
      */
     static int encodeBoolean(ByteBuffer buf, int key, boolean val) {
-        final int keyFieldLen = encodeKey(buf, key);
+        final int keyFieldLen = 2;
         final int totalLength = keyFieldLen + 1;
         if (buf.remaining() < totalLength)
             return 0;
+        encodeKey(buf, key);
         buf.put(val ? (byte) 1 : (byte) 0); // 1 byte
         return totalLength;
     }
@@ -317,10 +316,11 @@ public class UdpPrimitiveProtocol2 {
      * </pre>
      */
     static int encodeDouble(ByteBuffer buf, int key, double val) {
-        final int keyFieldLen = encodeKey(buf, key);
+        final int keyFieldLen = 2;
         final int totalLength = keyFieldLen + 8;
         if (buf.remaining() < totalLength)
             return 0;
+        encodeKey(buf, key);
         buf.putDouble(val); // 8 bytes
         return totalLength;
     }
@@ -333,10 +333,11 @@ public class UdpPrimitiveProtocol2 {
      * </pre>
      */
     static int encodeInt(ByteBuffer buf, int key, int val) {
-        final int keyFieldLen = encodeKey(buf, key);
+        final int keyFieldLen = 2;
         final int totalLength = keyFieldLen + 4;
         if (buf.remaining() < totalLength)
             return 0;
+        encodeKey(buf, key);
         buf.putInt(val); // 4 bytes
         return totalLength;
     }
@@ -356,10 +357,11 @@ public class UdpPrimitiveProtocol2 {
         final int bytesLength = bytes.length;
         if (bytesLength > 255)
             throw new IllegalArgumentException();
-        final int keyFieldLen = encodeKey(buf, key);
+        final int keyFieldLen = 2;
         final int totalLength = keyFieldLen + bytesLength + 1;
         if (buf.remaining() < totalLength)
             return 0;
+        encodeKey(buf, key);
         buf.put((byte) bytesLength); // 1 byte
         buf.put(bytes);
         return totalLength;
@@ -375,10 +377,11 @@ public class UdpPrimitiveProtocol2 {
      * </pre>
      */
     static int encodeLong(ByteBuffer buf, int key, long val) {
-        final int keyFieldLen = encodeKey(buf, key);
+        final int keyFieldLen = 2;
         final int totalLength = keyFieldLen + 8;
         if (buf.remaining() < totalLength)
             return 0;
+        encodeKey(buf, key);
         buf.putLong(val); // 8 bytes
         return totalLength;
     }
@@ -388,16 +391,15 @@ public class UdpPrimitiveProtocol2 {
      * 
      * @return bytes written. zero means we didn't write anything, buffer is full.
      */
-    static int encodeKey(ByteBuffer buf, int key) {
+    static void encodeKey(ByteBuffer buf, int key) {
         if (key < 16)
             throw new IllegalArgumentException("key in type code range: " + key);
         if (key > 65535)
             throw new IllegalArgumentException("key too large");
         final int totalLength = 2;
         if (buf.remaining() < totalLength)
-            return 0;
+            return;
         buf.putChar((char) key); // 2 bytes
-        return totalLength;
     }
 
 }

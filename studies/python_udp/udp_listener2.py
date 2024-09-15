@@ -17,13 +17,19 @@ def parse_label_map(
 ) -> Generator[tuple[int, Types, Any], None, int]:
     """yields (key, Type.LABEL, label).
     returns the new offset."""
+    if offset + 3 >= len(message):
+        return offset
     label_offset: int = struct.unpack(">H", message[offset : offset + 2])[0]
     offset += 2
     array_len = struct.unpack(">B", message[offset : offset + 1])[0]
     offset += 1
     for i in range(array_len):
+        if offset + 1 >= len(message):
+            return offset
         string_len = struct.unpack(">B", message[offset : offset + 1])[0]
         offset += 1
+        if offset + string_len >= len(message):
+            return offset
         val = message[offset : offset + string_len].decode("us-ascii")
         offset += string_len
         yield (MIN_KEY + label_offset + i, Types.LABEL, val)
@@ -38,7 +44,7 @@ def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
     try:
         offset = 0
         while True:
-            if offset >= len(message):
+            if offset + 2 >= len(message):
                 return
             # loop over sections
             type_id: int = struct.unpack(">H", message[offset : offset + 2])[0]
@@ -48,7 +54,7 @@ def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
                 offset = yield from parse_label_map(message, offset)
                 continue
             while True:
-                if offset >= len(message):
+                if offset + 2 >= len(message):
                     return
                 # loop over key-value pairs
                 key: int = struct.unpack(">H", message[offset : offset + 2])[0]
@@ -56,54 +62,74 @@ def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
                 if key < 16:
                     # change types
                     val_type = Types(key)
+                    # label type works differently
                     if val_type == Types.LABEL:
                         offset = yield from parse_label_map(message, offset)
                         continue
                     continue
-                val: Any
-                match val_type:
-                    case Types.BOOLEAN:
-                        val = struct.unpack(">?", message[offset : offset + 1])[0]
-                        offset += 1
-                    case Types.DOUBLE:
-                        val = struct.unpack(">d", message[offset : offset + 8])[0]
-                        offset += 8
-                    case Types.INT:
-                        val = struct.unpack(">i", message[offset : offset + 4])[0]
-                        offset += 4
-                    case Types.DOUBLE_ARRAY:
-                        array_len: int = struct.unpack(
-                            ">B", message[offset : offset + 1]
-                        )[0]
-                        offset += 1
-                        val = []
-                        for _ in range(array_len):
-                            item = struct.unpack(">d", message[offset : offset + 8])[0]
-                            offset += 8
-                            val.append(item)
-                    case Types.LONG:
-                        val = struct.unpack(">q", message[offset : offset + 8])[0]
-                        offset += 8
-                    case Types.STRING:
-                        string_len: int = struct.unpack(
-                            ">B", message[offset : offset + 1]
-                        )[0]
-                        offset += 1
-                        val = message[offset : offset + string_len].decode("us-ascii")
-                        offset += string_len
-                    case Types.LABEL:
-                        raise ValueError("label type shouldn't be here")
-                    case _:
-                        val = None
-                yield (key, val_type, val)
+                offset = yield from parse_value(message, offset, key, val_type)
     except struct.error:
-        print("ignoring invalid packet:\n", message)
+        print("ignoring invalid packet for offset: ", offset, "\n", message)
         traceback.print_exc()
         return
 
 
+def parse_value(
+    message, offset, key, val_type
+) -> Generator[tuple[int, Types, Any], None, int]:
+    match val_type:
+        case Types.BOOLEAN:
+            if offset + 1 >= len(message):
+                return offset
+            val = struct.unpack(">?", message[offset : offset + 1])[0]
+            offset += 1
+        case Types.DOUBLE:
+            if offset + 8 >= len(message):
+                return offset
+            val = struct.unpack(">d", message[offset : offset + 8])[0]
+            offset += 8
+        case Types.INT:
+            if offset + 4 >= len(message):
+                return offset
+            val = struct.unpack(">i", message[offset : offset + 4])[0]
+            offset += 4
+        case Types.DOUBLE_ARRAY:
+            if offset + 1 >= len(message):
+                return offset
+            array_len: int = struct.unpack(">B", message[offset : offset + 1])[0]
+            offset += 1
+            val = []
+            for _ in range(array_len):
+                if offset + 8 >= len(message):
+                    return offset
+                item = struct.unpack(">d", message[offset : offset + 8])[0]
+                offset += 8
+                val.append(item)
+        case Types.LONG:
+            if offset + 8 >= len(message):
+                return offset
+            val = struct.unpack(">q", message[offset : offset + 8])[0]
+            offset += 8
+        case Types.STRING:
+            if offset + 1 >= len(message):
+                return offset
+            string_len: int = struct.unpack(">B", message[offset : offset + 1])[0]
+            offset += 1
+            if offset + string_len >= len(message):
+                return offset
+            val = message[offset : offset + string_len].decode("us-ascii")
+            offset += string_len
+        case Types.LABEL:
+            raise ValueError("label type shouldn't be here")
+        case _:
+            val = None
+    yield (key, val_type, val)
+    return offset
+
+
 # updated by main thread
 n = 0
+max_key = 0
 # updated by counter thread
 m = 0
 
@@ -119,11 +145,11 @@ def stats() -> None:
         d = time.time() - t0
         i = n - m
         m = n
-        print(f"{d:.0f} {i:d}")
+        print(f"{d:.0f} {i:d} {max_key}")
 
 
 def recv() -> None:
-    global n
+    global n, max_key
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_socket.bind(("", 1995))
     while True:
@@ -132,6 +158,7 @@ def recv() -> None:
         message: bytes = server_socket.recv(1500)
         for key, val_type, val in decode(message):
             n += 1
+            max_key = max(max_key, key)
             print(f"key: {key} val_type: {val_type} val: {val}")
 
 

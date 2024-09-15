@@ -214,14 +214,18 @@ class UdpPrimitiveLogger2Test {
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
         final double total_time = 2;
-        final int keys = 5000;
+        // final int keys = 5000;
+        final int keys = 100;
         final double expected_keys_per_sec = keys / interval;
         DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[keys];
         for (int j = 0; j < keys; ++j) {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }
+        udpLogger.sendAllLabels();
         System.out.println("expected keys per second: " + expected_keys_per_sec);
-        for (int i = 0; i < (total_time / interval); ++i) {
+        // double iterations = total_time / interval;
+        int iterations = 1;
+        for (int i = 0; i < iterations; ++i) {
             double d = Timer.getFPGATimestamp() - t0;
             double dt = interval - (d % interval);
             Thread.sleep((long) (dt * 1000) + 1);

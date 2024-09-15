@@ -33,8 +33,7 @@ class UdpPrimitiveProtocol2Test {
         bb.order(ByteOrder.BIG_ENDIAN);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeKey(bb, 16);
-        assertEquals(2, len);
+        UdpPrimitiveProtocol2.encodeKey(bb, 16);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // high byte
@@ -47,8 +46,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[12];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.order(ByteOrder.BIG_ENDIAN);
-        int len = UdpPrimitiveProtocol2.encodeKey(bb, 65535);
-        assertEquals(2, len);
+        UdpPrimitiveProtocol2.encodeKey(bb, 65535);
         assertEquals((byte) 0xFF, b[0]); // high byte
         assertEquals((byte) 0xFF, b[1]); // low byte
         assertEquals((byte) 0, b[2]);
@@ -68,12 +66,8 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[12];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.order(ByteOrder.BIG_ENDIAN);
-        // position at the last byte
         bb.position(11);
-        int len = UdpPrimitiveProtocol2.encodeKey(bb, 65535);
-        // return zero means we didn't write anything, buffer is full.
-        assertEquals(0, len);
-        // really didn't write anything
+        UdpPrimitiveProtocol2.encodeKey(bb, 65535);
         assertEquals((byte) 0, b[11]);
     }
 
@@ -199,6 +193,81 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[12]);
     }
 
+    // dangling key tests
+    // make sure we don't write a key with no value
+    // a packet of doubles is 2 bytes for type, then 10 bytes per key+double
+    // so the last one ends at 502 out of 508, leaving room for the key
+    // but not the value.
+
+    @Test
+    void testDanglingKeyBoolean() {
+        byte[] b = new byte[2]; // just room for the key
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]); // << make sure the key is not here
+    }
+
+    @Test
+    void testDanglingKeyDouble() {
+        byte[] b = new byte[5];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        UdpPrimitiveProtocol2.encodeDouble(bb, 16, 15);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]); // << make sure the key is not here
+        assertEquals((byte) 0, b[2]); //
+        assertEquals((byte) 0, b[3]); //
+        assertEquals((byte) 0, b[4]); //
+    }
+
+    @Test
+    void testDanglingKeyInt() {
+        byte[] b = new byte[5];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        UdpPrimitiveProtocol2.encodeInt(bb, 16, 1);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]); // << make sure the key is not here
+        assertEquals((byte) 0, b[2]); //
+        assertEquals((byte) 0, b[3]); //
+        assertEquals((byte) 0, b[4]); //
+    }
+
+    @Test
+    void testDanglingKeyDoubleArray() {
+        byte[] b = new byte[5];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[]{1.0});
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]); // << make sure the key is not here
+        assertEquals((byte) 0, b[2]); //
+        assertEquals((byte) 0, b[3]); //
+        assertEquals((byte) 0, b[4]); //
+    }
+
+    @Test
+    void testDanglingKeyLong() {
+        byte[] b = new byte[5];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        UdpPrimitiveProtocol2.encodeLong(bb, 16, 1);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]); // << make sure the key is not here
+        assertEquals((byte) 0, b[2]); //
+        assertEquals((byte) 0, b[3]); //
+        assertEquals((byte) 0, b[4]); //
+    }
+
+    @Test
+    void testDanglingKeyString() {
+        byte[] b = new byte[5];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]); // << make sure the key is not here
+        assertEquals((byte) 0, b[2]); //
+        assertEquals((byte) 0, b[3]); //
+        assertEquals((byte) 0, b[4]); //
+    }
+
     @Test
     void testDoubleOverflow() {
         byte[] b = new byte[10];
@@ -299,11 +368,11 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 111, b[6]); // o
         assertEquals((byte) 110, b[7]); // n
         assertEquals((byte) 101, b[8]); // e
-        assertEquals((byte) 3, b[9]); // length 
+        assertEquals((byte) 3, b[9]); // length
         assertEquals((byte) 116, b[10]); // t
         assertEquals((byte) 119, b[11]); // w
         assertEquals((byte) 111, b[12]); // o
-        assertEquals((byte) 0, b[13]); // 
+        assertEquals((byte) 0, b[13]); //
     }
 
     @Test

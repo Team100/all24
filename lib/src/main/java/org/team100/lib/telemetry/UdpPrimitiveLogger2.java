@@ -75,14 +75,19 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     }
 
+    public void sendAllLabels() {
+        while (dumpLabels())
+            ;
+    }
+
     /**
      * Send one packet of labels.
      * 
-     * TODO: maintain offset and length as fields and send a little at a time.
+     * return true if there are more labels to send
      */
-    public void dumpLabels() {
+    public boolean dumpLabels() {
         if (labels.isEmpty())
-            return;
+            return false;
         p = new UdpPrimitiveProtocol2();
 
         int sent = p.putLabels(offset, labels);
@@ -96,10 +101,11 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
                 throw new IllegalArgumentException();
         }
         offset += sent;
-        if (offset > labels.size())
+        if (offset > labels.size() - 1)
             offset = 0;
 
         m_bufferSink.accept(p.trim());
+        return offset != 0;
     }
 
     /** Send at least one packet. */
