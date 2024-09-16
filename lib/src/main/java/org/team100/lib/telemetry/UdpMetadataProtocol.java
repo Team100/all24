@@ -54,7 +54,7 @@ public class UdpMetadataProtocol {
 
     public UdpMetadataProtocol() {
         // m_buffer = ByteBuffer.allocate(508);
-        m_buffer = ByteBuffer.allocate(1500);
+        m_buffer = ByteBuffer.allocate(1472);
         // this is the default, but just to make it clear...
         m_buffer.order(ByteOrder.BIG_ENDIAN);
         m_buffer.putLong(timestamp); // timetstamp = 8 bytes
