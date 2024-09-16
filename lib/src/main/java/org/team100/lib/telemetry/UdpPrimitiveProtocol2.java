@@ -43,7 +43,8 @@ public class UdpPrimitiveProtocol2 {
     private final ByteBuffer m_buffer;
 
     public UdpPrimitiveProtocol2() {
-        m_buffer = ByteBuffer.allocate(508);
+        // m_buffer = ByteBuffer.allocate(508);
+        m_buffer = ByteBuffer.allocate(1500);
         // this is the default, but just to make it clear...
         m_buffer.order(ByteOrder.BIG_ENDIAN);
         m_buffer.putLong(UdpMetadataProtocol.timestamp); // timetstamp = 8 bytes

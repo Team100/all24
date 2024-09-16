@@ -3,12 +3,6 @@
 Bridge UDP messages to network tables for dashboard and logging.
 
 This acts as the NT server, and writes a log file to a local USB.
-
-Using DataLogManager to combine these functions did not work, it stopped
-writing at about 8 kB.
-
-TODO: maybe consolidate this into one file to make it easier to deploy,
-or alternatively combine it with the other python stuff.
 """
 
 import datetime
@@ -28,7 +22,7 @@ from wpiutil.log import (
     StringLogEntry,
 )
 
-from udp_listener2 import decode
+from udp_data_listener import decode
 from udp_meta_listener import meta_decode
 from udp_primitive_protocol import Types
 
@@ -114,42 +108,44 @@ def meta_reader() -> None:
             meta_rows += 1
             # print(f"META key: {key} val_type: {val_type} label: {label}")
             if PUB and key not in publishers:
-                t: Any
-                match val_type:
-                    case Types.BOOLEAN:
-                        t = inst.getBooleanTopic(label)
-                    case Types.DOUBLE:
-                        t = inst.getDoubleTopic(label)
-                    case Types.INT | Types.LONG:
-                        t = inst.getIntegerTopic(label)
-                    case Types.DOUBLE_ARRAY:
-                        t = inst.getDoubleArrayTopic(label)
-                    case Types.STRING:
-                        t = inst.getStringTopic(label)
-                    case _:
-                        print(f"skip unknown type {val_type} for key {key}")
-                        continue
-                p = t.publish(options=PubSubOptions(keepDuplicates=True))
-                t.setRetained(True)
-                # print(key)
-                publishers[key] = p
+                add_publisher(inst, key, val_type, label)
             if LOG and key not in entries:
-                e: Any
-                match val_type:
-                    case Types.BOOLEAN:
-                        e = BooleanLogEntry(log_file, label)
-                    case Types.DOUBLE:
-                        e = DoubleLogEntry(log_file, label)
-                    case Types.INT | Types.LONG:
-                        e = IntegerLogEntry(log_file, label)
-                    case Types.DOUBLE_ARRAY:
-                        e = DoubleArrayLogEntry(log_file, label)
-                    case Types.STRING:
-                        e = StringLogEntry(log_file, label)
-                    case _:
-                        print(f"skip unknown type {val_type} for key {key}")
-                        continue
-                entries[key] = e
+                add_entry(log_file, key, val_type, label)
+
+def add_publisher(inst, key, val_type, label) -> None:
+    t: Any
+    match val_type:
+        case Types.BOOLEAN:
+            t = inst.getBooleanTopic(label)
+        case Types.DOUBLE:
+            t = inst.getDoubleTopic(label)
+        case Types.INT | Types.LONG:
+            t = inst.getIntegerTopic(label)
+        case Types.DOUBLE_ARRAY:
+            t = inst.getDoubleArrayTopic(label)
+        case Types.STRING:
+            t = inst.getStringTopic(label)
+        case _:
+            print(f"skip unknown type {val_type} for key {key}")
+            return
+    p = t.publish(options=PubSubOptions(keepDuplicates=True))
+    t.setRetained(True)
+    publishers[key] = p
+
+def add_entry(log_file, key, val_type, label) -> None:
+    match val_type:
+        case Types.BOOLEAN:
+            entries[key] = BooleanLogEntry(log_file, label)
+        case Types.DOUBLE:
+            entries[key] = DoubleLogEntry(log_file, label)
+        case Types.INT | Types.LONG:
+            entries[key] = IntegerLogEntry(log_file, label)
+        case Types.DOUBLE_ARRAY:
+            entries[key] = DoubleArrayLogEntry(log_file, label)
+        case Types.STRING:
+            entries[key] = StringLogEntry(log_file, label)
+        case _:
+            print(f"skip unknown type {val_type} for key {key}")
 
 
 def main() -> None:

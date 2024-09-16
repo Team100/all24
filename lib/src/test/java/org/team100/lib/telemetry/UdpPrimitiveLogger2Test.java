@@ -237,14 +237,18 @@ class UdpPrimitiveLogger2Test {
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
-        final double total_time = 2;
+        final double total_time = 5;
         // on my desktop:
         // with shorter intervals, 600K keys per second is possible
         // at 50hz, 400K keys per second seems like the max
         // NT throttles at about 250k writes per second
         // glass can only grok a few thousand keys anyway
-        // final int keys = 20000;
-        final int keys = 5000;
+        // using full MTU packets (1500B) increases the 50hz throughput
+        // to about 600K keys per second.  and the short-interval
+        // peak throughput to about 800K keys/sec.
+        // the java load at this rate is low, 10% of one CPU.
+        final int keys = 20000;
+        // final int keys = 5000;
         // final int keys = 100;
         final double expected_keys_per_sec = keys / interval;
         DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[keys];

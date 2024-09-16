@@ -1,4 +1,7 @@
 # pylint: disable=C0103,C0114,C0115,C0116,E0611,R0904,R0913,W0603,W0621
+"""
+Listens for data updates via UDP.
+"""
 
 import socket
 import struct
