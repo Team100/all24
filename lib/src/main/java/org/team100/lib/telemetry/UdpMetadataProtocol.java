@@ -97,8 +97,6 @@ public class UdpMetadataProtocol {
      * @return true if written
      */
     static boolean add(ByteBuffer buf, int key, UdpType type, String label) {
-        if (key < 16)
-            throw new IllegalArgumentException("key in type code range: " + key);
         if (key > 65535)
             throw new IllegalArgumentException("key too large");
         byte[] bytes = label.getBytes(StandardCharsets.US_ASCII);

@@ -3,17 +3,6 @@ package org.team100.lib.telemetry;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HexFormat;
-
-import edu.wpi.first.wpilibj.RobotController;
-
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 /**
  * Log data protocol 2
@@ -28,6 +17,8 @@ import java.time.ZonedDateTime;
  * it's worth a few bytes to be simpler.
  * 
  * This protocol is very simple: input tuples, write them to a buffer.
+ * 
+ * The type is included here so that the parser knows how to parse the value.
  * 
  * <pre>
  * DDDDDDDDKKTIIIIKKTIIIIKKTB
@@ -114,34 +105,6 @@ public class UdpPrimitiveProtocol2 {
     }
 
     /**
-     * Note the maximum array length is not very long (approximately packet length
-     * divided by 8).
-     * 
-     * <pre>
-     * KKTldddddddddddddddd
-     * ^^                   key (2 bytes)
-     *   ^                  type (1 byte)
-     *    ^                 array length (1 byte)
-     *     ^^^^^^^^         double value 0
-     *             ^^^^^^^^ double value 1
-     * </pre>
-     */
-    static int encodeDoubleArray(ByteBuffer buf, int key, double[] val) {
-        if (val.length > 255)
-            throw new IllegalArgumentException();
-        final int totalLength = 4 + val.length * 8;
-        if (buf.remaining() < totalLength)
-            return 0;
-        encodeKey(buf, key); // 2 bytes
-        buf.put(UdpType.DOUBLE_ARRAY.id); // type = 1 byte
-        buf.put((byte) val.length); // 1 byte
-        for (int i = 0; i < val.length; ++i) {
-            buf.putDouble(val[i]); // 8 bytes
-        }
-        return totalLength;
-    }
-
-    /**
      * <pre>
      * KKTb
      * ^^   key (2 bytes)
@@ -175,6 +138,34 @@ public class UdpPrimitiveProtocol2 {
         encodeKey(buf, key); // 2 bytes
         buf.put(UdpType.DOUBLE.id); // type = 1 byte
         buf.putDouble(val); // 8 bytes
+        return totalLength;
+    }
+
+    /**
+     * Note the maximum array length is not very long (approximately packet length
+     * divided by 8).
+     * 
+     * <pre>
+     * KKTldddddddddddddddd
+     * ^^                   key (2 bytes)
+     *   ^                  type (1 byte)
+     *    ^                 array length (1 byte)
+     *     ^^^^^^^^         double value 0
+     *             ^^^^^^^^ double value 1
+     * </pre>
+     */
+    static int encodeDoubleArray(ByteBuffer buf, int key, double[] val) {
+        if (val.length > 255)
+            throw new IllegalArgumentException();
+        final int totalLength = 4 + val.length * 8;
+        if (buf.remaining() < totalLength)
+            return 0;
+        encodeKey(buf, key); // 2 bytes
+        buf.put(UdpType.DOUBLE_ARRAY.id); // type = 1 byte
+        buf.put((byte) val.length); // 1 byte
+        for (int i = 0; i < val.length; ++i) {
+            buf.putDouble(val[i]); // 8 bytes
+        }
         return totalLength;
     }
 
@@ -248,8 +239,6 @@ public class UdpPrimitiveProtocol2 {
      * @return bytes written. zero means we didn't write anything, buffer is full.
      */
     static void encodeKey(ByteBuffer buf, int key) {
-        if (key < 16)
-            throw new IllegalArgumentException("key in type code range: " + key);
         if (key > 65535)
             throw new IllegalArgumentException("key too large");
         final int totalLength = 2;

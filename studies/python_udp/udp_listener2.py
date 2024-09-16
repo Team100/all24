@@ -5,131 +5,60 @@ import struct
 import time
 import threading
 import traceback
-from typing import Any, Generator, Iterator
+from typing import Any, Generator
 
 from udp_primitive_protocol import Types
 
 DATA_PORT = 1995
-MIN_KEY = 16
 
-# TODO: handle timestamp from sender: open a new file when the timestamp changes, maybe use the timestamp as the filename.
-
-
-def parse_label_map(
-    message: bytes, offset: int
-) -> Generator[tuple[int, Types, Any], None, int]:
-    """yields (key, Type.LABEL, label).
-    returns the new offset."""
-    if offset + 3 > len(message):
-        return offset
-    label_offset: int = struct.unpack(">H", message[offset : offset + 2])[0]
-    offset += 2
-    array_len = struct.unpack(">B", message[offset : offset + 1])[0]
-    offset += 1
-    for i in range(array_len):
-        if offset + 1 > len(message):
-            return offset
-        string_len = struct.unpack(">B", message[offset : offset + 1])[0]
-        offset += 1
-        if offset + string_len > len(message):
-            return offset
-        val = message[offset : offset + string_len].decode("us-ascii")
-        offset += string_len
-        yield (MIN_KEY + label_offset + i, Types.LABEL, val)
-    return offset
+def parse(fmt, buf, offset) -> tuple[Any, int]:
+    return struct.unpack_from(fmt, buf, offset)[0], offset + struct.calcsize(fmt)
 
 
-def decode(message: bytes) -> Iterator[tuple[int, Types, Any]]:
+def parse_string(buf, offset, string_len) -> tuple[str, int]:
+    return buf[offset : offset + string_len].decode("us-ascii"), offset + string_len
+
+
+def decode(message: bytes) -> Generator[tuple[int, Types, Any], None, None]:
     """
-    returns (key, type, data)
+    format is (key (2), type (1), data (varies))
     Message format v2.  See UdpPrimitiveProtocol2.java.
     """
     try:
         offset = 0
-        while True:
-            if offset + 2 > len(message):
-                return
-            # loop over sections
-            type_id: int = struct.unpack(">H", message[offset : offset + 2])[0]
-            offset += 2
+        timestamp, offset = parse(">q", message, offset)
+        # TODO: new timestamp means new log file
+        while offset < len(message):
+            key, offset = parse(">H", message, offset)
+            type_id, offset = parse(">B", message, offset)
             val_type: Types = Types(type_id)
-            if val_type == Types.LABEL:
-                offset = yield from parse_label_map(message, offset)
-                continue
-            while True:
-                if offset + 2 > len(message):
-                    return
-                # loop over key-value pairs
-                key: int = struct.unpack(">H", message[offset : offset + 2])[0]
-                offset += 2
-                if key < 16:
-                    # change types
-                    val_type = Types(key)
-                    # label type works differently
-                    if val_type == Types.LABEL:
-                        offset = yield from parse_label_map(message, offset)
-                        continue
-                    continue
-                offset = yield from parse_value(message, offset, key, val_type)
+            match val_type:
+                case Types.BOOLEAN:
+                    val, offset = parse(">?", message, offset)
+                case Types.DOUBLE:
+                    val, offset = parse(">d", message, offset)
+                case Types.INT:
+                    val, offset = parse(">i", message, offset)
+                case Types.DOUBLE_ARRAY:
+                    array_len, offset = parse(">B", message, offset)
+                    val = []
+                    for _ in range(array_len):
+                        item, offset = parse(">d", message, offset)
+                        val.append(item)
+                case Types.LONG:
+                    val, offset = parse(">q", message, offset)
+                case Types.STRING:
+                    string_len, offset = parse(">B", message, offset)
+                    val, offset = parse_string(message, offset, string_len)
+                case _:
+                    print(f"weird key {key} at offset {offset}")
+                    val = None
+            yield (key, val_type, val)
+
     except struct.error:
-        print("ignoring invalid packet for offset: ", offset, "\n", message)
+        print("skipping fragment: ", message[offset:])
         traceback.print_exc()
         return
-
-
-def parse_value(
-    message, offset, key, val_type
-) -> Generator[tuple[int, Types, Any], None, int]:
-    val: Any
-    match val_type:
-        case Types.BOOLEAN:
-            if offset + 1 > len(message):
-                return offset
-            val = struct.unpack(">?", message[offset : offset + 1])[0]
-            offset += 1
-        case Types.DOUBLE:
-            if offset + 8 > len(message):
-                return offset
-            val = struct.unpack(">d", message[offset : offset + 8])[0]
-            offset += 8
-        case Types.INT:
-            if offset + 4 > len(message):
-                return offset
-            val = struct.unpack(">i", message[offset : offset + 4])[0]
-            offset += 4
-        case Types.DOUBLE_ARRAY:
-            if offset + 1 > len(message):
-                return offset
-            array_len: int = struct.unpack(">B", message[offset : offset + 1])[0]
-            offset += 1
-            val = []
-            for _ in range(array_len):
-                if offset + 8 > len(message):
-                    return offset
-                item = struct.unpack(">d", message[offset : offset + 8])[0]
-                offset += 8
-                val.append(item)
-        case Types.LONG:
-            if offset + 8 > len(message):
-                return offset
-            val = struct.unpack(">q", message[offset : offset + 8])[0]
-            offset += 8
-        case Types.STRING:
-            if offset + 1 > len(message):
-                return offset
-            string_len: int = struct.unpack(">B", message[offset : offset + 1])[0]
-            offset += 1
-            if offset + string_len > len(message):
-                return offset
-            val = message[offset : offset + string_len].decode("us-ascii")
-            offset += string_len
-        case Types.LABEL:
-            raise ValueError("label type shouldn't be here")
-        case _:
-            print(f"weird key {key} at offset {offset}")
-            val = None
-    yield (key, val_type, val)
-    return offset
 
 
 # updated by main thread

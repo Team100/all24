@@ -27,7 +27,6 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     record Metadata(int key, UdpType type, String label) {
     }
 
-    private static final int kMinKey = 16;
     private static final double kFlushPeriod = 0.1;
 
     // lots of queues to avoid encoding values we're not going to send
@@ -53,16 +52,14 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     public UdpPrimitiveLogger2(Consumer<ByteBuffer> bufferSink, Consumer<ByteBuffer> metadataSink) {
         m_bufferSink = bufferSink;
         m_metadataSink = metadataSink;
-
         flushTime = 0;
-        // handles.put("UNKNOWN", 0);
     }
 
     /**
      * Call this once when the specific logger class is instantiated.
      */
     private synchronized int getKey(UdpType type, String label) {
-        int key = metadata.size() + kMinKey;
+        int key = metadata.size();
         metadata.add(new Metadata(key, type, label));
         return key;
     }
@@ -74,7 +71,6 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
             dumpLabels();
             flushTime = now;
         }
-
     }
 
     public void sendAllLabels() {

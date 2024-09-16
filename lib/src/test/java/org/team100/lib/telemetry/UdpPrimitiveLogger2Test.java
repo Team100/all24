@@ -238,8 +238,14 @@ class UdpPrimitiveLogger2Test {
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
         final double total_time = 2;
-        // final int keys = 5000;
-        final int keys = 100;
+        // on my desktop:
+        // with shorter intervals, 600K keys per second is possible
+        // at 50hz, 400K keys per second seems like the max
+        // NT throttles at about 250k writes per second
+        // glass can only grok a few thousand keys anyway
+        // final int keys = 20000;
+        final int keys = 5000;
+        // final int keys = 100;
         final double expected_keys_per_sec = keys / interval;
         DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[keys];
         for (int j = 0; j < keys; ++j) {
@@ -247,8 +253,8 @@ class UdpPrimitiveLogger2Test {
         }
         udpLogger.sendAllLabels();
         System.out.println("expected keys per second: " + expected_keys_per_sec);
-        // double iterations = total_time / interval;
-        int iterations = 1;
+        double iterations = total_time / interval;
+        // int iterations = 1;
         for (int i = 0; i < iterations; ++i) {
             double d = Timer.getFPGATimestamp() - t0;
             double dt = interval - (d % interval);
@@ -260,7 +266,7 @@ class UdpPrimitiveLogger2Test {
             }
             udpLogger.flush();
             double t2 = Timer.getFPGATimestamp();
-            System.out.printf("et %.3f\n", t2 - t1);
+            // System.out.printf("et %.3f\n", t2 - t1);
         }
     }
 

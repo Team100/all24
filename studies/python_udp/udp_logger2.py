@@ -1,3 +1,4 @@
+# pylint: disable=C0103,C0114,C0115,C0116,E0601,E0611,R0904,R0913,W0603,W0621
 """
 Bridge UDP messages to network tables for dashboard and logging.
 
@@ -12,23 +13,27 @@ or alternatively combine it with the other python stuff.
 
 import datetime
 import socket
+import time
+import threading
 from typing import Any
 
-from ntcore import NetworkTableInstance, Publisher, PubSubOptions, Topic
+from ntcore import NetworkTableInstance, PubSubOptions
 
 from wpiutil.log import (
     DataLog,
-    DataLogEntry,
     BooleanLogEntry,
     DoubleLogEntry,
     IntegerLogEntry,
     DoubleArrayLogEntry,
     StringLogEntry,
-    RawLogEntry,
 )
 
 from udp_listener2 import decode
+from udp_meta_listener import meta_decode
 from udp_primitive_protocol import Types
+
+DATA_PORT = 1995
+META_PORT = 1996
 
 # write to network tables
 PUB = False
@@ -48,101 +53,113 @@ LOG_FILENAME = datetime.datetime.now(tz=datetime.timezone.utc).strftime(
 )
 
 # We have to hang on to the publishers to keep them from disappearing.
-publishers: dict[int, Publisher] = {}
+publishers: dict[int, Any] = {}
 # The log file uses a "handle" for each column so we have to remember them.
-entries: dict[int, DataLogEntry] = {}
+entries: dict[int, Any] = {}
+
+# updated by main thread
+data_rows = 0
+meta_rows = 0
+# updated by counter thread
+prev_data_rows = 0
+prev_meta_rows = 0
 
 
-def main() -> None:
-    """Run forever"""
-    print("starting...")
+def stats() -> None:
+    global prev_data_rows, prev_meta_rows
+    interval = 1.0
+    t0 = time.time()
+    while True:
+        d = time.time() - t0
+        dt = d % interval
+        time.sleep(interval - dt)
+        d = time.time() - t0
+        data_i = data_rows - prev_data_rows
+        meta_i = meta_rows - prev_meta_rows
+        prev_data_rows = data_rows
+        prev_meta_rows = meta_rows
+        print(f"sec: {d:.0f} data_rows: {data_i:d} meta_rows: {meta_i:d}")
 
+
+def data_reader() -> None:
+    global data_rows
+    data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    data_socket.bind(("", DATA_PORT))
+    while True:
+        message: bytes = data_socket.recv(1500)
+        for key, val_type, val in decode(message):
+            data_rows += 1
+            # print(f"key: {key} val_type: {val_type} val: {val}")
+            if PUB and key in publishers:
+                publishers[key].set(val)
+            if LOG and key in entries:
+                entries[key].append(val)
+
+
+def meta_reader() -> None:
+    global meta_rows
     if PUB:
         inst = NetworkTableInstance.getDefault()
         inst.startServer()
 
     if LOG:
-        log_file = DataLog(dir=LOG_DIR, filename=LOG_FILENAME)
+        # log_file = DataLog(dir=LOG_DIR, filename=LOG_FILENAME)
+        log_file = DataLog(period=0.1)
 
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_socket.bind(("", 1995))
+    meta_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    meta_socket.bind(("", META_PORT))
     while True:
-        message: bytes = server_socket.recv(1500)
-        key: int
-        val_type: Types
-        val: Any
-        for key, val_type, val in decode(message):
+        message: bytes = meta_socket.recv(1500)
+        for key, val_type, label in meta_decode(message):
+            meta_rows += 1
+            # print(f"META key: {key} val_type: {val_type} label: {label}")
+            if PUB and key not in publishers:
+                t: Any
+                match val_type:
+                    case Types.BOOLEAN:
+                        t = inst.getBooleanTopic(label)
+                    case Types.DOUBLE:
+                        t = inst.getDoubleTopic(label)
+                    case Types.INT | Types.LONG:
+                        t = inst.getIntegerTopic(label)
+                    case Types.DOUBLE_ARRAY:
+                        t = inst.getDoubleArrayTopic(label)
+                    case Types.STRING:
+                        t = inst.getStringTopic(label)
+                    case _:
+                        print(f"skip unknown type {val_type} for key {key}")
+                        continue
+                p = t.publish(options=PubSubOptions(keepDuplicates=True))
+                t.setRetained(True)
+                # print(key)
+                publishers[key] = p
+            if LOG and key not in entries:
+                e: Any
+                match val_type:
+                    case Types.BOOLEAN:
+                        e = BooleanLogEntry(log_file, label)
+                    case Types.DOUBLE:
+                        e = DoubleLogEntry(log_file, label)
+                    case Types.INT | Types.LONG:
+                        e = IntegerLogEntry(log_file, label)
+                    case Types.DOUBLE_ARRAY:
+                        e = DoubleArrayLogEntry(log_file, label)
+                    case Types.STRING:
+                        e = StringLogEntry(log_file, label)
+                    case _:
+                        print(f"skip unknown type {val_type} for key {key}")
+                        continue
+                entries[key] = e
 
-            # print(f"key: {key} val_type: {val_type} actual type {type(val)} val: {val}")
 
-            # label messages add to the list of publishers and log entries.
-            if val_type == Types.LABEL:
-                if PUB:
-                    if key not in publishers:
-                        t: Topic
-                        match val_type:
-                            case Types.BOOLEAN:
-                                t = inst.getBooleanTopic(key)
-                            case Types.DOUBLE:
-                                t = inst.getDoubleTopic(key)
-                            case Types.INT | Types.LONG:
-                                t = inst.getIntegerTopic(key)
-                            case Types.DOUBLE_ARRAY:
-                                t = inst.getDoubleArrayTopic(key)
-                            case Types.STRING:
-                                t = inst.getStringTopic(key)
-                            case _:
-                                t = inst.getRawTopic(key)
-                        p = t.publish(options=PubSubOptions(keepDuplicates=True))
-                        t.setRetained(True)
-                        publishers[key] = p     
-
-            # write to network tables and flush immediately
-            if PUB:
-                if key not in publishers:
-                    t: Any
-                    match val_type:
-                        case Types.BOOLEAN:
-                            t = inst.getBooleanTopic(key)
-                        case Types.DOUBLE:
-                            t = inst.getDoubleTopic(key)
-                        case Types.INT | Types.LONG:
-                            t = inst.getIntegerTopic(key)
-                        case Types.DOUBLE_ARRAY:
-                            t = inst.getDoubleArrayTopic(key)
-                        case Types.STRING:
-                            t = inst.getStringTopic(key)
-                        case _:
-                            t = inst.getRawTopic(key)
-                    p = t.publish(options=PubSubOptions(keepDuplicates=True))
-                    t.setRetained(True)
-                    publishers[key] = p
-                else:
-                    p = publishers[key]
-                p.set(val)
-                inst.flush()
-
-            # write to the USB without flushing
-            if LOG:
-                if key not in entries:
-                    e: Any
-                    match val_type:
-                        case Types.BOOLEAN:
-                            e = BooleanLogEntry(log_file, key)
-                        case Types.DOUBLE:
-                            e = DoubleLogEntry(log_file, key)
-                        case Types.INT | Types.LONG:
-                            e = IntegerLogEntry(log_file, key)
-                        case Types.DOUBLE_ARRAY:
-                            e = DoubleArrayLogEntry(log_file, key)
-                        case Types.STRING:
-                            e = StringLogEntry(log_file, key)
-                        case _:
-                            e = RawLogEntry(log_file, key)
-                    entries[key] = e
-                else:
-                    e = entries[key]
-                e.append(val)
+def main() -> None:
+    data_thread = threading.Thread(target=data_reader)
+    meta_thread = threading.Thread(target=meta_reader)
+    monitor = threading.Thread(target=stats)
+    data_thread.start()
+    meta_thread.start()
+    monitor.start()
+    data_thread.join()  # blocks forever
 
 
 if __name__ == "__main__":
