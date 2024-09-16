@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -80,18 +79,18 @@ class UdpPrimitiveProtocol2Test {
         // encoder doesn't start at the beginning
         bb.position(2);
         int len = UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
-        assertEquals(8, len);
+        assertEquals(9, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // key high byte
         assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 5, b[4]); // length
-        assertEquals((byte) 104, b[5]); // h
-        assertEquals((byte) 101, b[6]); // e
-        assertEquals((byte) 108, b[7]); // l
+        assertEquals((byte) 6, b[4]); // type
+        assertEquals((byte) 5, b[5]); // length
+        assertEquals((byte) 104, b[6]); // h
+        assertEquals((byte) 101, b[7]); // e
         assertEquals((byte) 108, b[8]); // l
-        assertEquals((byte) 111, b[9]); // o
-        assertEquals((byte) 0, b[10]);
+        assertEquals((byte) 108, b[9]); // l
+        assertEquals((byte) 111, b[10]); // o
         assertEquals((byte) 0, b[11]);
     }
 
@@ -113,20 +112,21 @@ class UdpPrimitiveProtocol2Test {
         // encoder doesn't start at the beginning
         bb.position(2);
         int len = UdpPrimitiveProtocol2.encodeLong(bb, 16, 15);
-        assertEquals(10, len);
+        assertEquals(11, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // key high byte
         assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 0, b[4]); // value MSB
-        assertEquals((byte) 0, b[5]); //
+        assertEquals((byte) 5, b[4]); // type
+        assertEquals((byte) 0, b[5]); // value MSB
         assertEquals((byte) 0, b[6]); //
         assertEquals((byte) 0, b[7]); //
         assertEquals((byte) 0, b[8]); //
         assertEquals((byte) 0, b[9]); //
         assertEquals((byte) 0, b[10]); //
-        assertEquals((byte) 15, b[11]); // value LSB
-        assertEquals((byte) 0, b[12]);
+        assertEquals((byte) 0, b[11]); //
+        assertEquals((byte) 15, b[12]); // value LSB
+        assertEquals((byte) 0, b[13]);
     }
 
     @Test
@@ -147,16 +147,17 @@ class UdpPrimitiveProtocol2Test {
         // encoder doesn't start at the beginning
         bb.position(2);
         int len = UdpPrimitiveProtocol2.encodeInt(bb, 16, 15);
-        assertEquals(6, len);
+        assertEquals(7, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // key high byte
         assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 0, b[4]); // value MSB
-        assertEquals((byte) 0, b[5]); //
+        assertEquals((byte) 3, b[4]); // type
+        assertEquals((byte) 0, b[5]); // value MSB
         assertEquals((byte) 0, b[6]); //
-        assertEquals((byte) 15, b[7]); // value LSB
-        assertEquals((byte) 0, b[8]);
+        assertEquals((byte) 0, b[7]); //
+        assertEquals((byte) 15, b[8]); // value LSB
+        assertEquals((byte) 0, b[9]);
     }
 
     @Test
@@ -177,20 +178,21 @@ class UdpPrimitiveProtocol2Test {
         // encoder doesn't start at the beginning
         bb.position(2);
         int len = UdpPrimitiveProtocol2.encodeDouble(bb, 16, 15);
-        assertEquals(10, len);
+        assertEquals(11, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // key high byte
         assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 64, b[4]); // value MSB
-        assertEquals((byte) 46, b[5]); //
-        assertEquals((byte) 0, b[6]); //
+        assertEquals((byte) 2, b[4]); // type
+        assertEquals((byte) 64, b[5]); // value MSB
+        assertEquals((byte) 46, b[6]); //
         assertEquals((byte) 0, b[7]); //
         assertEquals((byte) 0, b[8]); //
         assertEquals((byte) 0, b[9]); //
         assertEquals((byte) 0, b[10]); //
-        assertEquals((byte) 0, b[11]); // value LSB
-        assertEquals((byte) 0, b[12]);
+        assertEquals((byte) 0, b[11]); //
+        assertEquals((byte) 0, b[12]); // value LSB
+        assertEquals((byte) 0, b[13]);
     }
 
     // dangling key tests
@@ -286,13 +288,14 @@ class UdpPrimitiveProtocol2Test {
         // encoder doesn't start at the beginning
         bb.position(2);
         int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
-        assertEquals(3, len);
+        assertEquals(4, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // key high byte
         assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 1, b[4]); // value
-        assertEquals((byte) 0, b[5]); //
+        assertEquals((byte) 1, b[4]); // type
+        assertEquals((byte) 1, b[5]); // value
+        assertEquals((byte) 0, b[6]); //
     }
 
     @Test
@@ -313,29 +316,29 @@ class UdpPrimitiveProtocol2Test {
         // encoder doesn't start at the beginning
         bb.position(2);
         int len = UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
-        assertEquals(19, len); // key (2) length (1) data (2*8)
+        assertEquals(20, len); // key (2) length (1) data (2*8)
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // key high byte
         assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 2, b[4]); // length
-        assertEquals((byte) 63, b[5]); // val MSB
-        assertEquals((byte) -16, b[6]); //
-        assertEquals((byte) 0, b[7]); //
+        assertEquals((byte) 4, b[4]); // type
+        assertEquals((byte) 2, b[5]); // length
+        assertEquals((byte) 63, b[6]); // val MSB
+        assertEquals((byte) -16, b[7]); //
         assertEquals((byte) 0, b[8]); //
         assertEquals((byte) 0, b[9]); //
         assertEquals((byte) 0, b[10]); //
         assertEquals((byte) 0, b[11]); //
-        assertEquals((byte) 0, b[12]); // val LSB
-        assertEquals((byte) 64, b[13]); // val MSB
-        assertEquals((byte) 0, b[14]); //
+        assertEquals((byte) 0, b[12]); //
+        assertEquals((byte) 0, b[13]); // val LSB
+        assertEquals((byte) 64, b[14]); // val MSB
         assertEquals((byte) 0, b[15]); //
         assertEquals((byte) 0, b[16]); //
         assertEquals((byte) 0, b[17]); //
         assertEquals((byte) 0, b[18]); //
         assertEquals((byte) 0, b[19]); //
-        assertEquals((byte) 0, b[20]); // val LSB
-        assertEquals((byte) 0, b[21]); //
+        assertEquals((byte) 0, b[20]); //
+        assertEquals((byte) 0, b[21]); // val LSB
         assertEquals((byte) 0, b[22]); //
         assertEquals((byte) 0, b[23]); //
     }
@@ -452,35 +455,41 @@ class UdpPrimitiveProtocol2Test {
         UdpPrimitiveProtocol2 p = new UdpPrimitiveProtocol2();
         assertTrue(p.putString(16, "hello"));
         // 2 for type, 2 for key, 1 for length, string length 5 = 10 bytes
-        assertEquals(10, p.buffer().position());
+        assertEquals(17, p.buffer().position());
         assertTrue(p.putDouble(17, 1.0));
         // 2 for type, 2 for key, 8 for double, 12 bytes + 10 = position 22
-        assertEquals(22, p.buffer().position());
+        assertEquals(28, p.buffer().position());
         ByteBuffer bb = p.buffer();
         byte[] b = bb.array();
         assertEquals(508, b.length);
-        assertEquals((byte) 0, b[0]); // string type
-        assertEquals((byte) 6, b[1]); // string type
-        assertEquals((byte) 0, b[2]); // key MSB
-        assertEquals((byte) 16, b[3]); // key LSB
-        assertEquals((byte) 5, b[4]); // value length
-        assertEquals((byte) 104, b[5]); // "h"
-        assertEquals((byte) 101, b[6]);// "e"
-        assertEquals((byte) 108, b[7]);// "l"
-        assertEquals((byte) 108, b[8]);// "l"
-        assertEquals((byte) 111, b[9]);// "o"
-        assertEquals((byte) 0, b[10]); // double type
-        assertEquals((byte) 2, b[11]); // double type
-        assertEquals((byte) 0, b[12]); // key MSB
-        assertEquals((byte) 17, b[13]); // key LSB
-        assertEquals((byte) 63, b[14]);
-        assertEquals((byte) -16, b[15]);
-        assertEquals((byte) 0, b[16]);
-        assertEquals((byte) 0, b[17]);
-        assertEquals((byte) 0, b[18]);
-        assertEquals((byte) 0, b[19]);
-        assertEquals((byte) 0, b[20]);
-        assertEquals((byte) 0, b[21]);
+        assertEquals((byte) 0, b[0]); 
+        assertEquals((byte) 0, b[1]); 
+        assertEquals((byte) 0, b[2]); 
+        assertEquals((byte) 0, b[3]); 
+        assertEquals((byte) 0, b[4]); 
+        assertEquals((byte) 0, b[5]); 
+        assertEquals((byte) 0, b[6]); 
+        assertEquals((byte) 0, b[7]); // timestamp 
+        assertEquals((byte) 0, b[8]); // key MSB
+        assertEquals((byte) 16, b[9]); // key LSB
+        assertEquals((byte) 6, b[10]); // string type
+        assertEquals((byte) 5, b[11]); // value length
+        assertEquals((byte) 104, b[12]); // "h"
+        assertEquals((byte) 101, b[13]);// "e"
+        assertEquals((byte) 108, b[14]);// "l"
+        assertEquals((byte) 108, b[15]);// "l"
+        assertEquals((byte) 111, b[16]);// "o"
+        assertEquals((byte) 0, b[17]); // key MSB
+        assertEquals((byte) 17, b[18]); // key LSB
+        assertEquals((byte) 2, b[19]); // double type
+        assertEquals((byte) 63, b[20]);
+        assertEquals((byte) -16, b[21]);
+        assertEquals((byte) 0, b[22]);
+        assertEquals((byte) 0, b[23]);
+        assertEquals((byte) 0, b[24]);
+        assertEquals((byte) 0, b[25]);
+        assertEquals((byte) 0, b[26]);
+        assertEquals((byte) 0, b[27]);
     }
 
 }
