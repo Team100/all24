@@ -4,64 +4,60 @@ Listens for data updates via UDP.
 """
 
 import socket
-import struct
 import time
 import threading
-import traceback
 from typing import Any, Generator
 
+from udp_parser import parse, parse_boolean, parse_double, parse_string
 from udp_primitive_protocol import Types
 
 DATA_PORT = 1995
 
-def parse(fmt, buf, offset) -> tuple[Any, int]:
-    return struct.unpack_from(fmt, buf, offset)[0], offset + struct.calcsize(fmt)
 
-
-def parse_string(buf, offset, string_len) -> tuple[str, int]:
-    return buf[offset : offset + string_len].decode("us-ascii"), offset + string_len
-
-
-def decode(message: bytes) -> Generator[tuple[int, Types, Any], None, None]:
+def decode(
+    message: bytes, offset: int
+) -> Generator[tuple[int, Types, Any], None, None]:
     """
-    format is (key (2), type (1), data (varies))
-    Message format v2.  See UdpPrimitiveProtocol2.java.
+    message is (key (2), type (1), data (varies))
+    yields (key, type, data)
+    throws struct.error if parse fails
     """
-    try:
-        offset = 0
-        timestamp, offset = parse(">q", message, offset)
-        # TODO: new timestamp means new log file
-        while offset < len(message):
-            key, offset = parse(">H", message, offset)
-            type_id, offset = parse(">B", message, offset)
-            val_type: Types = Types(type_id)
-            match val_type:
-                case Types.BOOLEAN:
-                    val, offset = parse(">?", message, offset)
-                case Types.DOUBLE:
-                    val, offset = parse(">d", message, offset)
-                case Types.INT:
-                    val, offset = parse(">i", message, offset)
-                case Types.DOUBLE_ARRAY:
-                    array_len, offset = parse(">B", message, offset)
-                    val = []
-                    for _ in range(array_len):
-                        item, offset = parse(">d", message, offset)
-                        val.append(item)
-                case Types.LONG:
-                    val, offset = parse(">q", message, offset)
-                case Types.STRING:
-                    string_len, offset = parse(">B", message, offset)
-                    val, offset = parse_string(message, offset, string_len)
-                case _:
-                    print(f"weird key {key} at offset {offset}")
-                    val = None
-            yield (key, val_type, val)
+    while offset < len(message):
+        key, offset = parse(">H", message, offset)
+        type_id, offset = parse(">B", message, offset)
+        val_type: Types = Types(type_id)
+        match val_type:
+            case Types.BOOLEAN:
+                bool_val, offset = parse_boolean(message, offset)
+                yield (key, val_type, bool_val)
 
-    except struct.error:
-        print("skipping fragment: ", message[offset:])
-        traceback.print_exc()
-        return
+            case Types.DOUBLE:
+                double_val, offset = parse_double(message, offset)
+                yield (key, val_type, double_val)
+
+            case Types.INT:
+                int_val, offset = parse(">i", message, offset)
+                yield (key, val_type, int_val)
+
+            case Types.DOUBLE_ARRAY:
+                array_len, offset = parse(">B", message, offset)
+                array_val = []
+                for _ in range(array_len):
+                    item, offset = parse(">d", message, offset)
+                    array_val.append(item)
+                yield (key, val_type, array_val)
+
+            case Types.LONG:
+                long_val, offset = parse(">q", message, offset)
+                yield (key, val_type, long_val)
+
+            case Types.STRING:
+                string_len, offset = parse(">B", message, offset)
+                string_val, offset = parse_string(message, offset, string_len)
+                yield (key, val_type, string_val)
+
+            case _:
+                print(f"weird key {key} at offset {offset}")
 
 
 # updated by main thread

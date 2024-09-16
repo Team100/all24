@@ -4,46 +4,31 @@ Listens for metadata updates via UDP.
 """
 
 import socket
-import struct
 import time
 import threading
-import traceback
 from typing import Any, Generator
 
+from udp_parser import parse, parse_string
 from udp_primitive_protocol import Types
 
 META_PORT = 1996
 
 
-def parse(fmt, buf, offset) -> tuple[Any, int]:
-    return struct.unpack_from(fmt, buf, offset)[0], offset + struct.calcsize(fmt)
-
-
-def parse_string(buf, offset, string_len) -> tuple[str, int]:
-    return buf[offset : offset + string_len].decode("us-ascii"), offset + string_len
-
-
-def meta_decode(message: bytes) -> Generator[tuple[int, Types, Any], None, None]:
+def meta_decode(
+    message: bytes, offset: int
+) -> Generator[tuple[int, Types, Any], None, None]:
     """
-    message should be a list of (key (2), type (1), length (1), bytes (N))
+    message is a list of (key (2), type (1), length (1), bytes (N))
     yields (key, type, label)
+    throws struct.error if parse fails
     """
-    try:
-        offset = 0
-        timestamp, offset = parse(">q", message, offset)
-        # TODO: new timestamp means new log file
-        while offset < len(message):
-            key, offset = parse(">H", message, offset)
-            type_id, offset = parse(">B", message, offset)
-            val_type: Types = Types(type_id)
-            string_len, offset = parse(">B", message, offset)
-            val, offset = parse_string(message, offset, string_len)
-            yield (key, val_type, val)
-
-    except struct.error:
-        print("skipping fragment: ", message[offset:])
-        traceback.print_exc()
-        return
+    while offset < len(message):
+        key, offset = parse(">H", message, offset)
+        type_id, offset = parse(">B", message, offset)
+        val_type: Types = Types(type_id)
+        string_len, offset = parse(">B", message, offset)
+        label, offset = parse_string(message, offset, string_len)
+        yield (key, val_type, label)
 
 
 # updated by main thread

@@ -9,6 +9,8 @@ import datetime
 import socket
 import time
 import threading
+import traceback
+import struct
 from typing import Any
 
 from ntcore import NetworkTableInstance, PubSubOptions
@@ -24,10 +26,13 @@ from wpiutil.log import (
 
 from udp_data_listener import decode
 from udp_meta_listener import meta_decode
+from udp_parser import parse, parse_timestamp, parse_string
 from udp_primitive_protocol import Types
 
 DATA_PORT = 1995
 META_PORT = 1996
+MTU = 1500
+
 
 # write to network tables
 PUB = False
@@ -80,15 +85,23 @@ def data_reader() -> None:
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     data_socket.bind(("", DATA_PORT))
     while True:
-        message: bytes = data_socket.recv(1500)
-        for key, val_type, val in decode(message):
-            data_rows += 1
-            # print(f"key: {key} val_type: {val_type} val: {val}")
-            if PUB and key in publishers:
-                publishers[key].set(val)
-            if LOG and key in entries:
-                entries[key].append(val)
-
+        try:
+            message: bytes = data_socket.recv(MTU)
+            # message always starts with timestamp.
+            timestamp, offset = parse_timestamp(message, 0)
+            print(f"DATA timestamp {timestamp}")
+            # TODO: new timestamp means new log file
+            for key, val_type, val in decode(message, offset):
+                data_rows += 1
+                print(f"DATA key: {key} val_type: {val_type} val: {val}")
+                if PUB and key in publishers:
+                    publishers[key].set(val)
+                if LOG and key in entries:
+                    entries[key].append(val)
+        except struct.error:
+            print("parse fail for input: ", message)
+            traceback.print_exc()
+            return
 
 def meta_reader() -> None:
     global meta_rows
@@ -103,14 +116,23 @@ def meta_reader() -> None:
     meta_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     meta_socket.bind(("", META_PORT))
     while True:
-        message: bytes = meta_socket.recv(1500)
-        for key, val_type, label in meta_decode(message):
-            meta_rows += 1
-            # print(f"META key: {key} val_type: {val_type} label: {label}")
-            if PUB and key not in publishers:
-                add_publisher(inst, key, val_type, label)
-            if LOG and key not in entries:
-                add_entry(log_file, key, val_type, label)
+        try:
+            message: bytes = meta_socket.recv(MTU)
+            # message always starts with timestamp.
+            timestamp, offset = parse_timestamp(message, 0)
+            print(f"META timestamp {timestamp}")
+            # TODO: new timestamp means new log file
+            for key, val_type, label in meta_decode(message, offset):
+                meta_rows += 1
+                print(f"META key: {key} val_type: {val_type} label: {label}")
+                if PUB and key not in publishers:
+                    add_publisher(inst, key, val_type, label)
+                if LOG and key not in entries:
+                    add_entry(log_file, key, val_type, label)
+        except struct.error:
+            print("parse fail for input: ", message)
+            traceback.print_exc()
+            return
 
 def add_publisher(inst, key, val_type, label) -> None:
     t: Any
