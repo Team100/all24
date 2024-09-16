@@ -1,5 +1,6 @@
 # pylint: disable=C0103,C0114,C0115,C0116,E0611,R0904,R0913,W0603,W0621
 
+import struct
 import unittest
 from udp_data_listener import decode
 from udp_primitive_protocol import Types
@@ -8,19 +9,18 @@ from udp_primitive_protocol import Types
 class TestUdpListener2(unittest.TestCase):
     def test_nothing(self) -> None:
         message: bytes = b""
-        it = decode(message)
+        it = decode(message, 0)
         next_var = next(it, None)
         self.assertIsNone(next_var)
 
     def test_too_short(self) -> None:
         message: bytes = b"\x00\x00"
-        it = decode(message)
-        next_var = next(it, None)
-        self.assertIsNone(next_var)
+        it = decode(message, 0)
+        self.assertRaises(struct.error, lambda : next(it, None))
 
     def test_real_message(self) -> None:
         message: bytes = (
-            b"\x00\x00\x00\x00\x00\x00\x00\x00"
+            b"\x00\x00\x00\x00\x00\x00\x00\x00" # timestamp
             b"\x00\x10\x01"
             b"\x01"
             b"\x00\x11\x02"
@@ -36,7 +36,7 @@ class TestUdpListener2(unittest.TestCase):
             b"\x00\x16\x06"
             b"\x05value"
         )
-        it = decode(message)
+        it = decode(message, 8) # start after the timestamp
         self.assertEqual((16, Types.BOOLEAN, True), next(it, None))
         self.assertEqual((17, Types.DOUBLE, 100.0), next(it, None))
         self.assertEqual((18, Types.INT, 100), next(it, None))

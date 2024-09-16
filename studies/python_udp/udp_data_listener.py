@@ -8,10 +8,20 @@ import time
 import threading
 from typing import Any, Generator
 
-from udp_parser import parse, parse_boolean, parse_double, parse_string
+from udp_parser import (
+    parse_boolean,
+    parse_byte,
+    parse_double,
+    parse_double_array,
+    parse_int,
+    parse_short,
+    parse_string,
+    parse_long,
+)
 from udp_primitive_protocol import Types
 
 DATA_PORT = 1995
+MTU = 1500
 
 
 def decode(
@@ -23,8 +33,8 @@ def decode(
     throws struct.error if parse fails
     """
     while offset < len(message):
-        key, offset = parse(">H", message, offset)
-        type_id, offset = parse(">B", message, offset)
+        key, offset = parse_short(message, offset)
+        type_id, offset = parse_byte(message, offset)
         val_type: Types = Types(type_id)
         match val_type:
             case Types.BOOLEAN:
@@ -36,24 +46,19 @@ def decode(
                 yield (key, val_type, double_val)
 
             case Types.INT:
-                int_val, offset = parse(">i", message, offset)
+                int_val, offset = parse_int(message, offset)
                 yield (key, val_type, int_val)
 
             case Types.DOUBLE_ARRAY:
-                array_len, offset = parse(">B", message, offset)
-                array_val = []
-                for _ in range(array_len):
-                    item, offset = parse(">d", message, offset)
-                    array_val.append(item)
+                array_val, offset = parse_double_array(message, offset)
                 yield (key, val_type, array_val)
 
             case Types.LONG:
-                long_val, offset = parse(">q", message, offset)
+                long_val, offset = parse_long(message, offset)
                 yield (key, val_type, long_val)
 
             case Types.STRING:
-                string_len, offset = parse(">B", message, offset)
-                string_val, offset = parse_string(message, offset, string_len)
+                string_val, offset = parse_string(message, offset)
                 yield (key, val_type, string_val)
 
             case _:
@@ -78,7 +83,7 @@ def stats() -> None:
         d = time.time() - t0
         i = n - m
         m = n
-        print(f"{d:.0f} {i:d} {max_key}")
+        print(f"DATA {d:.0f} {i:d} {max_key}")
 
 
 def recv() -> None:
@@ -87,11 +92,13 @@ def recv() -> None:
     server_socket.bind(("", DATA_PORT))
     while True:
 
-        message: bytes = server_socket.recv(1500)
-        for key, val_type, val in decode(message):
+        message: bytes = server_socket.recv(MTU)
+        timestamp, offset = parse_long(message, 0)
+        print(f"DATA timestamp {timestamp}")
+        for key, val_type, val in decode(message, offset):
             n += 1
             max_key = max(max_key, key)
-            print(f"key: {key} val_type: {val_type} val: {val}")
+            print(f"DATA key: {key} val_type: {val_type} val: {val}")
 
 
 def main() -> None:

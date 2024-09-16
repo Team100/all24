@@ -26,7 +26,7 @@ from wpiutil.log import (
 
 from udp_data_listener import decode
 from udp_meta_listener import meta_decode
-from udp_parser import parse, parse_timestamp, parse_string
+from udp_parser import parse_long
 from udp_primitive_protocol import Types
 
 DATA_PORT = 1995
@@ -88,7 +88,7 @@ def data_reader() -> None:
         try:
             message: bytes = data_socket.recv(MTU)
             # message always starts with timestamp.
-            timestamp, offset = parse_timestamp(message, 0)
+            timestamp, offset = parse_long(message, 0)
             print(f"DATA timestamp {timestamp}")
             # TODO: new timestamp means new log file
             for key, val_type, val in decode(message, offset):
@@ -119,7 +119,7 @@ def meta_reader() -> None:
         try:
             message: bytes = meta_socket.recv(MTU)
             # message always starts with timestamp.
-            timestamp, offset = parse_timestamp(message, 0)
+            timestamp, offset = parse_long(message, 0)
             print(f"META timestamp {timestamp}")
             # TODO: new timestamp means new log file
             for key, val_type, label in meta_decode(message, offset):

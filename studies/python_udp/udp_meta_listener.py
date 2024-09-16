@@ -8,10 +8,11 @@ import time
 import threading
 from typing import Any, Generator
 
-from udp_parser import parse, parse_string
+from udp_parser import parse_byte, parse_short, parse_string, parse_long
 from udp_primitive_protocol import Types
 
 META_PORT = 1996
+MTU = 1500
 
 
 def meta_decode(
@@ -23,11 +24,10 @@ def meta_decode(
     throws struct.error if parse fails
     """
     while offset < len(message):
-        key, offset = parse(">H", message, offset)
-        type_id, offset = parse(">B", message, offset)
+        key, offset = parse_short(message, offset)
+        type_id, offset = parse_byte(message, offset)
         val_type: Types = Types(type_id)
-        string_len, offset = parse(">B", message, offset)
-        label, offset = parse_string(message, offset, string_len)
+        label, offset = parse_string(message, offset)
         yield (key, val_type, label)
 
 
@@ -57,10 +57,12 @@ def meta_recv() -> None:
     server_socket.bind(("", META_PORT))
     while True:
 
-        message: bytes = server_socket.recv(1500)
-        for key, val_type, val in meta_decode(message):
+        message: bytes = server_socket.recv(MTU)
+        timestamp, offset = parse_long(message, 0)
+        print(f"META timestamp {timestamp}")
+        for key, val_type, val in meta_decode(message, offset):
             n += 1
-            print(f"key: {key} val_type: {val_type} val: {val}")
+            print(f"META key: {key} val_type: {val_type} val: {val}")
 
 
 def main() -> None:

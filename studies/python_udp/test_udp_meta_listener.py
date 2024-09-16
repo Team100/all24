@@ -9,7 +9,7 @@ class TestUdpListener2(unittest.TestCase):
 
     def test_real_labels(self) -> None:
         message: bytes = (
-            b"\x00\x00\x00\x00\x00\x00\x00\x00"
+            b"\x00\x00\x00\x00\x00\x00\x00\x00" # timestamp
             b"\x00\x10\x01"
             b"\r"  # length
             b"/root/boolkey"  # label
@@ -32,7 +32,7 @@ class TestUdpListener2(unittest.TestCase):
             b"\x0f"  # length
             b"/root/stringkey"  # label
         )
-        it = meta_decode(message)
+        it = meta_decode(message, 8) # start after the timestamp
         self.assertEqual((16, Types.BOOLEAN, "/root/boolkey"), next(it, None))
         self.assertEqual((17, Types.DOUBLE, "/root/doublekey"), next(it, None))
         self.assertEqual((18, Types.INT, "/root/intkey"), next(it, None))
