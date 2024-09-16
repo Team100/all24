@@ -28,15 +28,15 @@ import edu.wpi.first.wpilibj.RobotController;
  * DDDDDDDDKKTLAAAAKKTLAAAAAKKTLAAA
  * ^^^^^^^^                          timestamp
  *         ^^                        key = 16
- *           ^                       type = 5 (int)
+ *           ^                       type = 3 (int)
  *            ^                      string length = 4
  *             ^^^^                  string in ascii for label 16
  *                 ^^                key = 17
- *                   ^               type = 5 (int) 
+ *                   ^               type = 3 (int) 
  *                    ^              string length = 5
  *                     ^^^^^         string in ascii for label 17
  *                          ^^       key = 18
- *                            ^      type = 3 (bool)
+ *                            ^      type = 1 (bool)
  *                             ^     string length = 3
  *                              ^^^  string in ascii for label 18
  * </pre>
