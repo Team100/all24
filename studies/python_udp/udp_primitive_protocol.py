@@ -6,13 +6,14 @@ from enum import Enum
 class Types(Enum):
     """Keep this in sync with the java enum."""
 
-    BOOLEAN = 1
-    DOUBLE = 2
-    INT = 3
-    DOUBLE_ARRAY = 4
-    LONG = 5
-    STRING = 6
-    LABEL = 7
+    LABEL_SECTION = 1
+    DATA_SECTION = 2
+    BOOLEAN = 3
+    DOUBLE = 4
+    INT = 5
+    DOUBLE_ARRAY = 6
+    LONG = 7
+    STRING = 8
     UNKNOWN = None
 
     @classmethod

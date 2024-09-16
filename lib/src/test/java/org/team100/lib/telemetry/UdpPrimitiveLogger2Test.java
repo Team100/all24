@@ -9,6 +9,7 @@ import java.util.HexFormat;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.PrimitiveLogger2.IntLogger;
 import org.team100.lib.telemetry.PrimitiveLogger2.StringLogger;
+import org.team100.lib.telemetry.PrimitiveLogger2.BooleanLogger;
 import org.team100.lib.telemetry.SupplierLogger2.BooleanSupplierLogger;
 import org.team100.lib.telemetry.SupplierLogger2.DoubleArraySupplierLogger;
 import org.team100.lib.telemetry.SupplierLogger2.DoubleObjArraySupplierLogger;
@@ -23,12 +24,13 @@ import edu.wpi.first.wpilibj.Timer;
 
 class UdpPrimitiveLogger2Test {
 
-    ByteBuffer bb;
+    ByteBuffer bb; // data
+    ByteBuffer mb; // metadata
 
     /** Send some examples. */
     @Test
     void testSendingLocally() {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x);
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
         SupplierLogger2 logger = new SupplierLogger2(Telemetry.get(), "root", udpLogger);
         BooleanSupplierLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
@@ -48,75 +50,95 @@ class UdpPrimitiveLogger2Test {
             longLogger.log(() -> (long) 100);
             stringLogger.log(() -> "value");
         }
+
         udpLogger.flush();
-        assertEquals(7, udpLogger.labels.size());
-        assertEquals("/root/boolkey", udpLogger.labels.get(0));
-        assertEquals("/root/doublekey", udpLogger.labels.get(1));
-        assertEquals("/root/intkey", udpLogger.labels.get(2));
-        assertEquals("/root/doublearraykey", udpLogger.labels.get(3));
-        assertEquals("/root/doubleobjarraykey", udpLogger.labels.get(4));
-        assertEquals("/root/longkey", udpLogger.labels.get(5));
-        assertEquals("/root/stringkey", udpLogger.labels.get(6));
+        assertEquals(90, bb.remaining());
+
         HexFormat hex = HexFormat.of();
-        String expectedStr = "0001" // type = boolean
+        String expectedStr = "0000000000000000" // timestamp
                 + "0010" // key = 16
+                + "01" // type = boolean
                 + "01" // value = true
-                + "0002" // type = double
                 + "0011" // key = 17
-                + "4059000000000000" // value =
-                + "0003" // type = int
+                + "02" // type = double
+                + "4059000000000000" // value
                 + "0012" // key = 18
+                + "03" // type = int
                 + "00000064" // value
-                + "0004" // type = double array
                 + "0013"// key=19
+                + "04" // type = double array
                 + "02" // length = 2
                 + "3ff0000000000000" // value
                 + "4000000000000000"// value
-                + "0004" // type = double array
                 + "0014" // key = 20
+                + "04" // type = double array
                 + "02" // length = 2
                 + "3ff0000000000000" // value
                 + "4000000000000000"// value
-                + "0005" // type = long
                 + "0015" // key = 21
+                + "05" // type = long
                 + "0000000000000064" // value
-                + "0006" // type = string
                 + "0016" // key = 22
+                + "06" // type = string
                 + "05" // length = 5
                 + hex.formatHex("value".getBytes());
         byte[] expectedBB = hex.parseHex(expectedStr);
-        byte[] actualBB = new byte[89];
+        byte[] actualBB = new byte[90];
         bb.get(actualBB);
         assertArrayEquals(expectedBB, actualBB);
 
+        assertEquals(7, udpLogger.metadata.size());
+        assertEquals("/root/boolkey", udpLogger.metadata.get(0).label());
+        assertEquals("/root/doublekey", udpLogger.metadata.get(1).label());
+        assertEquals("/root/intkey", udpLogger.metadata.get(2).label());
+        assertEquals("/root/doublearraykey", udpLogger.metadata.get(3).label());
+        assertEquals("/root/doubleobjarraykey", udpLogger.metadata.get(4).label());
+        assertEquals("/root/longkey", udpLogger.metadata.get(5).label());
+        assertEquals("/root/stringkey", udpLogger.metadata.get(6).label());
+
         udpLogger.dumpLabels();
-        expectedStr = "\00\07" // 2 type = label
-                + "\00\00" // 2 4 offset = 0
-                + "\07" // 1 5 number of labels
+        assertEquals(147, mb.remaining());
+
+        expectedStr = "\00\00\00\00\00\00\00\00" // timestamp
+                + "\00\20" // key
+                + "\01" // type
                 + "\15" // 1 6 length
                 + "/root/boolkey" // 13 19 label
+                + "\00\21" // key 
+                + "\02" // type 
                 + "\17" // 1 20 length
                 + "/root/doublekey" // 15 35 label
+                + "\00\22" // key 
+                + "\03" // type 
                 + "\14" // 1 36 length
                 + "/root/intkey" // 12 48 label
+                + "\00\23" // key 
+                + "\04" // type 
                 + "\24" // 1 49 length
                 + "/root/doublearraykey" // 20 69 label
+                + "\00\24" // key 
+                + "\04" // type 
                 + "\27" // 1 70 length
                 + "/root/doubleobjarraykey" // 23 93 label
+                + "\00\25" // key 
+                + "\05" // type 
                 + "\15" // 1 94 length
                 + "/root/longkey" // 13 107 label
+                + "\00\26" // key 
+                + "\06" // type 
                 + "\17" // 1 108 length
                 + "/root/stringkey"; // 15 123 label
         expectedBB = expectedStr.getBytes(StandardCharsets.US_ASCII);
-        actualBB = new byte[123];
-        bb.get(actualBB);
+        actualBB = new byte[147];
+        mb.get(actualBB);
         assertArrayEquals(expectedBB, actualBB);
-
     }
 
     @Test
     void testSendingViaUDP() {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(new UdpSender());
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
+                new UdpSender(UdpSender.kPort),
+                new UdpSender(UdpSender.kmetadataPort));
         SupplierLogger2 logger = new SupplierLogger2(Telemetry.get(), "root", udpLogger);
         BooleanSupplierLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
@@ -138,14 +160,14 @@ class UdpPrimitiveLogger2Test {
         }
         udpLogger.flush();
         udpLogger.dumpLabels();
-        assertEquals(7, udpLogger.labels.size());
-        assertEquals("/root/boolkey", udpLogger.labels.get(0));
-        assertEquals("/root/doublekey", udpLogger.labels.get(1));
-        assertEquals("/root/intkey", udpLogger.labels.get(2));
-        assertEquals("/root/doublearraykey", udpLogger.labels.get(3));
-        assertEquals("/root/doubleobjarraykey", udpLogger.labels.get(4));
-        assertEquals("/root/longkey", udpLogger.labels.get(5));
-        assertEquals("/root/stringkey", udpLogger.labels.get(6));
+        assertEquals(7, udpLogger.metadata.size());
+        assertEquals("/root/boolkey", udpLogger.metadata.get(0).label());
+        assertEquals("/root/doublekey", udpLogger.metadata.get(1).label());
+        assertEquals("/root/intkey", udpLogger.metadata.get(2).label());
+        assertEquals("/root/doublearraykey", udpLogger.metadata.get(3).label());
+        assertEquals("/root/doubleobjarraykey", udpLogger.metadata.get(4).label());
+        assertEquals("/root/longkey", udpLogger.metadata.get(5).label());
+        assertEquals("/root/stringkey", udpLogger.metadata.get(6).label());
     }
 
     /**
@@ -172,7 +194,7 @@ class UdpPrimitiveLogger2Test {
      */
     @Test
     void testAWholeLotLocally() throws InterruptedException {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x);
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
         SupplierLogger2 logger = new SupplierLogger2(
                 Telemetry.get(),
                 "root",
@@ -205,7 +227,9 @@ class UdpPrimitiveLogger2Test {
 
     @Test
     void testAWholeLotViaUDP() throws InterruptedException {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(new UdpSender());
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
+                new UdpSender(UdpSender.kPort),
+                new UdpSender(UdpSender.kmetadataPort));
         SupplierLogger2 logger = new SupplierLogger2(
                 Telemetry.get(),
                 "root",
@@ -242,87 +266,171 @@ class UdpPrimitiveLogger2Test {
 
     @Test
     void testStringToBuffer() {
-        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x);
+        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x, x -> mb = x);
         StringLogger s = l.stringLogger("label");
         s.log("hello");
         l.flush();
-        assertEquals(10, bb.remaining());
+        assertEquals(17, bb.remaining());
         byte[] b = bb.array();
         assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 6, b[1]); // string type
-        assertEquals((byte) 0, b[2]); // key high byte
-        assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 5, b[4]); // length
-        assertEquals((byte) 104, b[5]); // "h"
-        assertEquals((byte) 101, b[6]);// "e"
-        assertEquals((byte) 108, b[7]);// "l"
-        assertEquals((byte) 108, b[8]);// "l"
-        assertEquals((byte) 111, b[9]);// "o"
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]);
+        assertEquals((byte) 0, b[3]);
+        assertEquals((byte) 0, b[4]);
+        assertEquals((byte) 0, b[5]);
+        assertEquals((byte) 0, b[6]);
+        assertEquals((byte) 0, b[7]); // ... timestamp
+        assertEquals((byte) 0, b[8]); // key
+        assertEquals((byte) 16, b[9]); // key
+        assertEquals((byte) 6, b[10]); // type
+        assertEquals((byte) 5, b[11]); // length
+        assertEquals((byte) 104, b[12]); // "h"
+        assertEquals((byte) 101, b[13]);// "e"
+        assertEquals((byte) 108, b[14]);// "l"
+        assertEquals((byte) 108, b[15]);// "l"
+        assertEquals((byte) 111, b[16]);// "o"
 
         // this should fill the buffer with the label
         l.dumpLabels();
-        assertEquals(11, bb.remaining());
-        b = bb.array();
+        assertEquals(17, mb.remaining());
+        b = mb.array();
         assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 7, b[1]); // label type
-        assertEquals((byte) 0, b[2]); // offset
-        assertEquals((byte) 0, b[3]); // offset
-        assertEquals((byte) 1, b[4]); // number of labels
-        assertEquals((byte) 5, b[5]); // length
-        assertEquals((byte) 108, b[6]);// "l"
-        assertEquals((byte) 97, b[7]);// "a"
-        assertEquals((byte) 98, b[8]);// "b"
-        assertEquals((byte) 101, b[9]);// "e"
-        assertEquals((byte) 108, b[10]);// "l"
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]);
+        assertEquals((byte) 0, b[3]);
+        assertEquals((byte) 0, b[4]);
+        assertEquals((byte) 0, b[5]);
+        assertEquals((byte) 0, b[6]);
+        assertEquals((byte) 0, b[7]); // ... timestamp
+        assertEquals((byte) 0, b[8]); // key
+        assertEquals((byte) 16, b[9]); // key
+        assertEquals((byte) 6, b[10]); // type
+        assertEquals((byte) 5, b[11]); // length
+        assertEquals((byte) 108, b[12]);// "l"
+        assertEquals((byte) 97, b[13]);// "a"
+        assertEquals((byte) 98, b[14]);// "b"
+        assertEquals((byte) 101, b[15]);// "e"
+        assertEquals((byte) 108, b[16]);// "l"
+    }
+
+    @Test
+    void testBooleanToBuffer() {
+        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
+        BooleanLogger b16 = l.booleanLogger("b16");
+        BooleanLogger b17 = l.booleanLogger("b17");
+        b16.log(true); // overwritten
+        b16.log(false);
+        b17.log(true); // overwritten
+        b17.log(false);
+        l.flush();
+        assertEquals(16, bb.remaining());
+        byte[] b = bb.array();
+        assertEquals((byte) 0, b[0]); // timestamp ...
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]);
+        assertEquals((byte) 0, b[3]);
+        assertEquals((byte) 0, b[4]);
+        assertEquals((byte) 0, b[5]);
+        assertEquals((byte) 0, b[6]);
+        assertEquals((byte) 0, b[7]); // ... timestamp
+        assertEquals((byte) 0, b[8]); // key
+        assertEquals((byte) 16, b[9]); // key
+        assertEquals((byte) 1, b[10]); // type
+        assertEquals((byte) 0, b[11]); // value
+        assertEquals((byte) 0, b[12]); // key
+        assertEquals((byte) 17, b[13]); // key
+        assertEquals((byte) 1, b[14]); // type
+        assertEquals((byte) 0, b[15]); // value
+
+        // this should fill the buffer with the label
+        l.dumpLabels();
+        assertEquals(22, mb.remaining());
+        b = mb.array();
+        assertEquals((byte) 0, b[0]); // timestamp ...
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]);
+        assertEquals((byte) 0, b[3]);
+        assertEquals((byte) 0, b[5]);
+        assertEquals((byte) 0, b[6]);
+        assertEquals((byte) 0, b[7]); // ... timestamp
+        assertEquals((byte) 0, b[8]);// key
+        assertEquals((byte) 16, b[9]);// key
+        assertEquals((byte) 1, b[10]);// type
+        assertEquals((byte) 3, b[11]); // length
+        assertEquals((byte) 98, b[12]);// "b"
+        assertEquals((byte) 49, b[13]);// "1"
+        assertEquals((byte) 54, b[14]);// "6"
+        assertEquals((byte) 0, b[15]);// key
+        assertEquals((byte) 17, b[16]);// key
+        assertEquals((byte) 1, b[17]);// type
+        assertEquals((byte) 3, b[18]);// length
+        assertEquals((byte) 98, b[19]);// "b"
+        assertEquals((byte) 49, b[20]);// "1"
+        assertEquals((byte) 55, b[21]);// "7"
     }
 
     @Test
     void testMultiToBuffer() {
-        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x);
+        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x, x -> mb = x);
         StringLogger s = l.stringLogger("label");
         s.log("hello");
         IntLogger i = l.intLogger("foo");
         i.log(1);
         l.flush();
-        assertEquals(18, bb.remaining());
+        assertEquals(24, bb.remaining());
         byte[] b = bb.array();
         assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 3, b[1]); // int type
-        assertEquals((byte) 0, b[2]); // key MSB
-        assertEquals((byte) 17, b[3]); // key LSB
-        assertEquals((byte) 0, b[4]); // int value
-        assertEquals((byte) 0, b[5]); // int value
-        assertEquals((byte) 0, b[6]); // int value
-        assertEquals((byte) 1, b[7]); // int value
-        assertEquals((byte) 0, b[8]);
-        assertEquals((byte) 6, b[9]); // string type
-        assertEquals((byte) 0, b[10]); // key high byte
-        assertEquals((byte) 16, b[11]); // key low byte
-        assertEquals((byte) 5, b[12]); // length
-        assertEquals((byte) 104, b[13]); // "h"
-        assertEquals((byte) 101, b[14]);// "e"
-        assertEquals((byte) 108, b[15]);// "l"
-        assertEquals((byte) 108, b[16]);// "l"
-        assertEquals((byte) 111, b[17]);// "o"
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]);
+        assertEquals((byte) 0, b[3]);
+        assertEquals((byte) 0, b[4]);
+        assertEquals((byte) 0, b[5]);
+        assertEquals((byte) 0, b[6]);
+        assertEquals((byte) 0, b[7]); // ... timestamp
+        assertEquals((byte) 0, b[8]); // key MSB
+        assertEquals((byte) 17, b[9]); // key LSB
+        assertEquals((byte) 3, b[10]); // int type
+        assertEquals((byte) 0, b[11]); // int value
+        assertEquals((byte) 0, b[12]); // int value
+        assertEquals((byte) 0, b[13]); // int value
+        assertEquals((byte) 1, b[14]); // int value
+        assertEquals((byte) 0, b[15]); // key high byte
+        assertEquals((byte) 16, b[16]); // key low byte
+        assertEquals((byte) 6, b[17]); // string type
+        assertEquals((byte) 5, b[18]); // length
+        assertEquals((byte) 104, b[19]); // "h"
+        assertEquals((byte) 101, b[20]);// "e"
+        assertEquals((byte) 108, b[21]);// "l"
+        assertEquals((byte) 108, b[22]);// "l"
+        assertEquals((byte) 111, b[23]);// "o"
 
         // this should fill the buffer with the label
         l.dumpLabels();
-        assertEquals(15, bb.remaining());
-        b = bb.array();
+        assertEquals(24, mb.remaining());
+        b = mb.array();
         assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 7, b[1]); // label type
-        assertEquals((byte) 0, b[2]); // offset
-        assertEquals((byte) 0, b[3]); // offset
-        assertEquals((byte) 2, b[4]); // number of labels
-        assertEquals((byte) 5, b[5]); // length
-        assertEquals((byte) 108, b[6]);// "l"
-        assertEquals((byte) 97, b[7]);// "a"
-        assertEquals((byte) 98, b[8]);// "b"
-        assertEquals((byte) 101, b[9]);// "e"
-        assertEquals((byte) 108, b[10]);// "l"
-        assertEquals((byte) 3, b[11]);// length
-        assertEquals((byte) 102, b[12]);// "f"
-        assertEquals((byte) 111, b[13]);// "o"
-        assertEquals((byte) 111, b[14]);// "o"
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]);
+        assertEquals((byte) 0, b[3]);
+        assertEquals((byte) 0, b[4]);
+        assertEquals((byte) 0, b[5]);
+        assertEquals((byte) 0, b[6]);
+        assertEquals((byte) 0, b[7]); // ... timestamp
+        assertEquals((byte) 0, b[8]); //
+        assertEquals((byte) 16, b[9]); // key
+        assertEquals((byte) 6, b[10]); // type
+        assertEquals((byte) 5, b[11]);// length
+        assertEquals((byte) 108, b[12]);// "l"
+        assertEquals((byte) 97, b[13]);// "a"
+        assertEquals((byte) 98, b[14]);// "b"
+        assertEquals((byte) 101, b[15]);// "e"
+        assertEquals((byte) 108, b[16]);// "l"
+        assertEquals((byte) 0, b[17]); //
+        assertEquals((byte) 17, b[18]); // key
+        assertEquals((byte) 3, b[19]); // type
+        assertEquals((byte) 3, b[20]); // length
+        assertEquals((byte) 102, b[21]);// "f"
+        assertEquals((byte) 111, b[22]);// "o"
+        assertEquals((byte) 111, b[23]);// "o"
     }
 }

@@ -10,15 +10,16 @@ import java.util.function.Consumer;
 
 public class UdpSender implements Consumer<ByteBuffer> {
     private static final byte[] ADDR = new byte[] { 10, 1, 0, 16 };
-    private static final int kPort = 1995;
+    static final int kPort = 1995;
+    static final int kmetadataPort = 1996;
     /** nullable */
     private final DatagramChannel m_channel;
 
-    public UdpSender() {
-        m_channel = makeChannel();
+    public UdpSender(int port) {
+        m_channel = makeChannel(port);
     }
 
-    private static DatagramChannel makeChannel() {
+    private static DatagramChannel makeChannel(int port) {
         try {
             DatagramChannel channel = DatagramChannel.open();
             channel.configureBlocking(false);
@@ -28,7 +29,7 @@ public class UdpSender implements Consumer<ByteBuffer> {
             // InetAddress m_addr = InetAddress.getByAddress(ADDR);
             InetAddress m_addr = InetAddress.getLocalHost();
 
-            InetSocketAddress sockAddr = new InetSocketAddress(m_addr, kPort);
+            InetSocketAddress sockAddr = new InetSocketAddress(m_addr, port);
             // this will fail for localhost if there's no listener
             channel.connect(sockAddr);
             return channel;

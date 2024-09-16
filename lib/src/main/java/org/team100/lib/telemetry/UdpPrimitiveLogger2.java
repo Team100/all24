@@ -24,10 +24,11 @@ import edu.wpi.first.wpilibj.Timer;
  * newest value wins.
  */
 public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
+    record Metadata(int key, UdpType type, String label) {
+    }
+
     private static final int kMinKey = 16;
     private static final double kFlushPeriod = 0.1;
-    /** how many handles to transmit per iteration */
-    private static final double kHandlesPeriodic = 10;
 
     // lots of queues to avoid encoding values we're not going to send
     private final Map<Integer, Boolean> booleanQueue = new HashMap<>();
@@ -37,20 +38,21 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     private final Map<Integer, Long> longQueue = new HashMap<>();
     private final Map<Integer, String> stringQueue = new HashMap<>();
 
-    final List<String> labels = new ArrayList<>();
+    final List<Metadata> metadata = new ArrayList<>();
     /** Current offset of label dumper */
     int offset = 0;
 
     private double flushTime;
 
-    // since the protocol is now stateful, representing the "current message,"
-    // we keep it here.
     private UdpPrimitiveProtocol2 p;
+    private UdpMetadataProtocol m;
 
     private Consumer<ByteBuffer> m_bufferSink;
+    private Consumer<ByteBuffer> m_metadataSink;
 
-    public UdpPrimitiveLogger2(Consumer<ByteBuffer> bufferSink) {
+    public UdpPrimitiveLogger2(Consumer<ByteBuffer> bufferSink, Consumer<ByteBuffer> metadataSink) {
         m_bufferSink = bufferSink;
+        m_metadataSink = metadataSink;
 
         flushTime = 0;
         // handles.put("UNKNOWN", 0);
@@ -59,9 +61,9 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     /**
      * Call this once when the specific logger class is instantiated.
      */
-    private synchronized int getKey(String label) {
-        int key = labels.size() + kMinKey;
-        labels.add(label);
+    private synchronized int getKey(UdpType type, String label) {
+        int key = metadata.size() + kMinKey;
+        metadata.add(new Metadata(key, type, label));
         return key;
     }
 
@@ -86,26 +88,22 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
      * return true if there are more labels to send
      */
     public boolean dumpLabels() {
-        if (labels.isEmpty())
+        if (metadata.isEmpty())
             return false;
-        p = new UdpPrimitiveProtocol2();
-
-        int sent = p.putLabels(offset, labels);
-        if (sent == 0) {
-            // packet is full, so send it.
-            m_bufferSink.accept(p.trim());
-            p = new UdpPrimitiveProtocol2();
-            sent = p.putLabels(offset, labels);
-            if (sent == 0)
-                // still can't send any? there's something wrong.
-                throw new IllegalArgumentException();
+        m = new UdpMetadataProtocol();
+        for (int i = offset; i < metadata.size(); ++i) {
+            Metadata d = metadata.get(i);
+            if (!m.put(d.key, d.type, d.label)) {
+                // packet is full, so send it.
+                m_metadataSink.accept(m.trim());
+                offset = i;
+                return true;
+            }
         }
-        offset += sent;
-        if (offset > labels.size() - 1)
-            offset = 0;
-
-        m_bufferSink.accept(p.trim());
-        return offset != 0;
+        // added them all, send what we have.
+        m_metadataSink.accept(m.trim());
+        offset = 0;
+        return false;
     }
 
     /** Send at least one packet. */
@@ -124,7 +122,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         private final int m_key;
 
         public UdpBooleanLogger(String label) {
-            m_key = getKey(label);
+            m_key = getKey(UdpType.BOOLEAN, label);
         }
 
         @Override
@@ -137,7 +135,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         private final int m_key;
 
         public UdpDoubleLogger(String label) {
-            m_key = getKey(label);
+            m_key = getKey(UdpType.DOUBLE, label);
         }
 
         @Override
@@ -151,7 +149,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         private final int m_key;
 
         public UdpIntLogger(String label) {
-            m_key = getKey(label);
+            m_key = getKey(UdpType.INT, label);
         }
 
         @Override
@@ -164,7 +162,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         private final int m_key;
 
         public UdpDoubleArrayLogger(String label) {
-            m_key = getKey(label);
+            m_key = getKey(UdpType.DOUBLE_ARRAY, label);
         }
 
         @Override
@@ -177,7 +175,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         private final int m_key;
 
         public UdpDoubleObjArrayLogger(String label) {
-            m_key = getKey(label);
+            m_key = getKey(UdpType.DOUBLE_ARRAY, label);
         }
 
         @Override
@@ -190,7 +188,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         private final int m_key;
 
         public UdpLongLogger(String label) {
-            m_key = getKey(label);
+            m_key = getKey(UdpType.LONG, label);
         }
 
         @Override
@@ -204,7 +202,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         private final int m_key;
 
         public UdpStringLogger(String label) {
-            m_key = getKey(label);
+            m_key = getKey(UdpType.STRING, label);
         }
 
         @Override

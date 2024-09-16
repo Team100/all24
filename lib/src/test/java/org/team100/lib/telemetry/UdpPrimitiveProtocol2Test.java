@@ -349,90 +349,6 @@ class UdpPrimitiveProtocol2Test {
         assertEquals(0, len);
     }
 
-    //////////////////// LABEL MAP
-
-    @Test
-    void testLabelMap() {
-        byte[] b = new byte[16];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(2);
-        List<String> labels = List.of("one", "two", "three", "four");
-        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 0, labels);
-        assertEquals(2, n); // both labels are consumed
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]); // offset high byte
-        assertEquals((byte) 0, b[3]); // offset low byte
-        assertEquals((byte) 2, b[4]); // number of labels
-        assertEquals((byte) 3, b[5]); // length
-        assertEquals((byte) 111, b[6]); // o
-        assertEquals((byte) 110, b[7]); // n
-        assertEquals((byte) 101, b[8]); // e
-        assertEquals((byte) 3, b[9]); // length
-        assertEquals((byte) 116, b[10]); // t
-        assertEquals((byte) 119, b[11]); // w
-        assertEquals((byte) 111, b[12]); // o
-        assertEquals((byte) 0, b[13]); //
-    }
-
-    @Test
-    void testOffsetLabelMap() {
-        byte[] b = new byte[24];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(2);
-        List<String> labels = List.of("one", "two", "three", "four");
-        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 2, labels);
-        assertEquals(2, n); // both labels are consumed
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]); // offset high byte
-        assertEquals((byte) 2, b[3]); // offset low byte
-        assertEquals((byte) 2, b[4]); // number of labels
-        assertEquals((byte) 5, b[5]); // length
-        assertEquals((byte) 116, b[6]); // t
-        assertEquals((byte) 104, b[7]); // h
-        assertEquals((byte) 114, b[8]); // r
-        assertEquals((byte) 101, b[9]); // e
-        assertEquals((byte) 101, b[10]); // e
-        assertEquals((byte) 4, b[11]); // length
-        assertEquals((byte) 102, b[12]); // f
-        assertEquals((byte) 111, b[13]); // o
-        assertEquals((byte) 117, b[14]); // u
-        assertEquals((byte) 114, b[15]); // r
-        assertEquals((byte) 0, b[16]); //
-    }
-
-    @Test
-    void testFragmentedLabelMap() {
-        byte[] b = new byte[11];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(2);
-        List<String> labels = List.of("one", "two", "three", "four");
-        int n = UdpPrimitiveProtocol2.encodeLabels(bb, 2, labels);
-        assertEquals(1, n); // just one label consumed
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]); // offset high byte
-        assertEquals((byte) 2, b[3]); // offset low byte
-        assertEquals((byte) 1, b[4]); // number of labels
-        assertEquals((byte) 5, b[5]); // length
-        assertEquals((byte) 116, b[6]); // t
-        assertEquals((byte) 104, b[7]); // h
-        assertEquals((byte) 114, b[8]); // r
-        assertEquals((byte) 101, b[9]); // e
-        assertEquals((byte) 101, b[10]); // e
-    }
-
-    @Test
-    void testLabelMapOverflow() {
-        byte[] b = new byte[10];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(8);
-        List<String> labels = List.of("one", "two", "three", "four");
-        int len = UdpPrimitiveProtocol2.encodeLabels(bb, 2, labels);
-        assertEquals(0, len);
-    }
-
     /////////////////// TYPE
 
     @Test
@@ -441,7 +357,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeType(bb, UdpPrimitiveProtocol2.Type.INT);
+        int len = UdpPrimitiveProtocol2.encodeType(bb, UdpType.INT);
         assertEquals(2, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -454,7 +370,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[10];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(10); // off the end
-        int len = UdpPrimitiveProtocol2.encodeType(bb, UdpPrimitiveProtocol2.Type.INT);
+        int len = UdpPrimitiveProtocol2.encodeType(bb, UdpType.INT);
         assertEquals(0, len);
     }
 
