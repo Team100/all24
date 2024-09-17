@@ -2,20 +2,20 @@
 
 import struct
 import unittest
-from udp_data_listener import decode
+from udp_data_decoder import data_decode
 from udp_primitive_protocol import Types
 
 
 class TestUdpListener2(unittest.TestCase):
     def test_nothing(self) -> None:
         message: bytes = b""
-        it = decode(message, 0)
+        it = data_decode(message, 0)
         next_var = next(it, None)
         self.assertIsNone(next_var)
 
     def test_too_short(self) -> None:
         message: bytes = b"\x00\x00"
-        it = decode(message, 0)
+        it = data_decode(message, 0)
         self.assertRaises(struct.error, lambda : next(it, None))
 
     def test_real_message(self) -> None:
@@ -36,7 +36,7 @@ class TestUdpListener2(unittest.TestCase):
             b"\x00\x16\x06"
             b"\x05value"
         )
-        it = decode(message, 8) # start after the timestamp
+        it = data_decode(message, 8) # start after the timestamp
         self.assertEqual((16, Types.BOOLEAN, True), next(it, None))
         self.assertEqual((17, Types.DOUBLE, 100.0), next(it, None))
         self.assertEqual((18, Types.INT, 100), next(it, None))

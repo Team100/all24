@@ -1,7 +1,7 @@
 # pylint: disable=C0103,C0114,C0115,C0116,E0611,R0904,R0913,W0603,W0621
 
 import unittest
-from udp_meta_listener import meta_decode
+from udp_meta_decoder import meta_decode
 from udp_primitive_protocol import Types
 
 

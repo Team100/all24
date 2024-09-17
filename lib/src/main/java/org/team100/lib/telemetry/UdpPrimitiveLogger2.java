@@ -57,9 +57,11 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     /**
      * Call this once when the specific logger class is instantiated.
+     * 
+     * Minimum key is 1, so that zero is an "invalid key".
      */
     private synchronized int getKey(UdpType type, String label) {
-        int key = metadata.size();
+        int key = metadata.size() + 1;
         metadata.add(new Metadata(key, type, label));
         return key;
     }
