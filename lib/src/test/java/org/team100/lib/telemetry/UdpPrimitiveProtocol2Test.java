@@ -461,7 +461,7 @@ class UdpPrimitiveProtocol2Test {
         assertEquals(28, p.buffer().position());
         ByteBuffer bb = p.buffer();
         byte[] b = bb.array();
-        assertEquals(508, b.length);
+        assertEquals(1472, b.length);
         assertEquals((byte) 0, b[0]); 
         assertEquals((byte) 0, b[1]); 
         assertEquals((byte) 0, b[2]); 

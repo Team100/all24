@@ -56,29 +56,29 @@ class UdpPrimitiveLogger2Test {
 
         HexFormat hex = HexFormat.of();
         String expectedStr = "0000000000000000" // timestamp
-                + "0010" // key = 16
+                + "0001" // key
                 + "01" // type = boolean
                 + "01" // value = true
-                + "0011" // key = 17
+                + "0002" // key
                 + "02" // type = double
                 + "4059000000000000" // value
-                + "0012" // key = 18
+                + "0003" // key
                 + "03" // type = int
                 + "00000064" // value
-                + "0013"// key=19
+                + "0004"// key
                 + "04" // type = double array
                 + "02" // length = 2
                 + "3ff0000000000000" // value
                 + "4000000000000000"// value
-                + "0014" // key = 20
+                + "0005" // key
                 + "04" // type = double array
                 + "02" // length = 2
                 + "3ff0000000000000" // value
                 + "4000000000000000"// value
-                + "0015" // key = 21
+                + "0006" // key
                 + "05" // type = long
                 + "0000000000000064" // value
-                + "0016" // key = 22
+                + "0007" // key
                 + "06" // type = string
                 + "05" // length = 5
                 + hex.formatHex("value".getBytes());
@@ -100,31 +100,31 @@ class UdpPrimitiveLogger2Test {
         assertEquals(147, mb.remaining());
 
         expectedStr = "\00\00\00\00\00\00\00\00" // timestamp
-                + "\00\20" // key
+                + "\00\01" // key
                 + "\01" // type
                 + "\15" // 1 6 length
                 + "/root/boolkey" // 13 19 label
-                + "\00\21" // key 
+                + "\00\02" // key 
                 + "\02" // type 
                 + "\17" // 1 20 length
                 + "/root/doublekey" // 15 35 label
-                + "\00\22" // key 
+                + "\00\03" // key 
                 + "\03" // type 
                 + "\14" // 1 36 length
                 + "/root/intkey" // 12 48 label
-                + "\00\23" // key 
+                + "\00\04" // key 
                 + "\04" // type 
                 + "\24" // 1 49 length
                 + "/root/doublearraykey" // 20 69 label
-                + "\00\24" // key 
+                + "\00\05" // key 
                 + "\04" // type 
                 + "\27" // 1 70 length
                 + "/root/doubleobjarraykey" // 23 93 label
-                + "\00\25" // key 
+                + "\00\06" // key 
                 + "\05" // type 
                 + "\15" // 1 94 length
                 + "/root/longkey" // 13 107 label
-                + "\00\26" // key 
+                + "\00\07" // key 
                 + "\06" // type 
                 + "\17" // 1 108 length
                 + "/root/stringkey"; // 15 123 label
@@ -276,7 +276,7 @@ class UdpPrimitiveLogger2Test {
 
     @Test
     void testStringToBuffer() {
-        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x, x -> mb = x);
+        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
         StringLogger s = l.stringLogger("label");
         s.log("hello");
         l.flush();
@@ -291,7 +291,7 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 0, b[6]);
         assertEquals((byte) 0, b[7]); // ... timestamp
         assertEquals((byte) 0, b[8]); // key
-        assertEquals((byte) 16, b[9]); // key
+        assertEquals((byte) 1, b[9]); // key
         assertEquals((byte) 6, b[10]); // type
         assertEquals((byte) 5, b[11]); // length
         assertEquals((byte) 104, b[12]); // "h"
@@ -313,7 +313,7 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 0, b[6]);
         assertEquals((byte) 0, b[7]); // ... timestamp
         assertEquals((byte) 0, b[8]); // key
-        assertEquals((byte) 16, b[9]); // key
+        assertEquals((byte) 1, b[9]); // key
         assertEquals((byte) 6, b[10]); // type
         assertEquals((byte) 5, b[11]); // length
         assertEquals((byte) 108, b[12]);// "l"
@@ -344,11 +344,11 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 0, b[6]);
         assertEquals((byte) 0, b[7]); // ... timestamp
         assertEquals((byte) 0, b[8]); // key
-        assertEquals((byte) 16, b[9]); // key
+        assertEquals((byte) 1, b[9]); // key
         assertEquals((byte) 1, b[10]); // type
         assertEquals((byte) 0, b[11]); // value
         assertEquals((byte) 0, b[12]); // key
-        assertEquals((byte) 17, b[13]); // key
+        assertEquals((byte) 2, b[13]); // key
         assertEquals((byte) 1, b[14]); // type
         assertEquals((byte) 0, b[15]); // value
 
@@ -364,14 +364,14 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 0, b[6]);
         assertEquals((byte) 0, b[7]); // ... timestamp
         assertEquals((byte) 0, b[8]);// key
-        assertEquals((byte) 16, b[9]);// key
+        assertEquals((byte) 1, b[9]);// key
         assertEquals((byte) 1, b[10]);// type
         assertEquals((byte) 3, b[11]); // length
         assertEquals((byte) 98, b[12]);// "b"
         assertEquals((byte) 49, b[13]);// "1"
         assertEquals((byte) 54, b[14]);// "6"
         assertEquals((byte) 0, b[15]);// key
-        assertEquals((byte) 17, b[16]);// key
+        assertEquals((byte) 2, b[16]);// key
         assertEquals((byte) 1, b[17]);// type
         assertEquals((byte) 3, b[18]);// length
         assertEquals((byte) 98, b[19]);// "b"
@@ -398,14 +398,14 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 0, b[6]);
         assertEquals((byte) 0, b[7]); // ... timestamp
         assertEquals((byte) 0, b[8]); // key MSB
-        assertEquals((byte) 17, b[9]); // key LSB
+        assertEquals((byte) 2, b[9]); // key LSB
         assertEquals((byte) 3, b[10]); // int type
         assertEquals((byte) 0, b[11]); // int value
         assertEquals((byte) 0, b[12]); // int value
         assertEquals((byte) 0, b[13]); // int value
         assertEquals((byte) 1, b[14]); // int value
         assertEquals((byte) 0, b[15]); // key high byte
-        assertEquals((byte) 16, b[16]); // key low byte
+        assertEquals((byte) 1, b[16]); // key low byte
         assertEquals((byte) 6, b[17]); // string type
         assertEquals((byte) 5, b[18]); // length
         assertEquals((byte) 104, b[19]); // "h"
@@ -427,7 +427,7 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 0, b[6]);
         assertEquals((byte) 0, b[7]); // ... timestamp
         assertEquals((byte) 0, b[8]); //
-        assertEquals((byte) 16, b[9]); // key
+        assertEquals((byte) 1, b[9]); // key
         assertEquals((byte) 6, b[10]); // type
         assertEquals((byte) 5, b[11]);// length
         assertEquals((byte) 108, b[12]);// "l"
@@ -436,7 +436,7 @@ class UdpPrimitiveLogger2Test {
         assertEquals((byte) 101, b[15]);// "e"
         assertEquals((byte) 108, b[16]);// "l"
         assertEquals((byte) 0, b[17]); //
-        assertEquals((byte) 17, b[18]); // key
+        assertEquals((byte) 2, b[18]); // key
         assertEquals((byte) 3, b[19]); // type
         assertEquals((byte) 3, b[20]); // length
         assertEquals((byte) 102, b[21]);// "f"
