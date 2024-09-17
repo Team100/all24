@@ -24,8 +24,8 @@ from wpiutil.log import (
     StringLogEntry,
 )
 
-from udp_data_listener import decode
-from udp_meta_listener import meta_decode
+from udp_data_decoder import data_decode
+from udp_meta_decoder import meta_decode
 from udp_parser import parse_long
 from udp_primitive_protocol import Types
 
@@ -91,7 +91,7 @@ def data_reader() -> None:
             timestamp, offset = parse_long(message, 0)
             print(f"DATA timestamp {timestamp}")
             # TODO: new timestamp means new log file
-            for key, val_type, val in decode(message, offset):
+            for key, val_type, val in data_decode(message, offset):
                 data_rows += 1
                 print(f"DATA key: {key} val_type: {val_type} val: {val}")
                 if PUB and key in publishers:
