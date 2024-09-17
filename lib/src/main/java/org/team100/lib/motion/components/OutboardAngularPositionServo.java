@@ -70,16 +70,23 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         System.out.println(positionRad.getAsDouble());
         if (positionRad.isEmpty())
             return;
-        double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
+        // double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
 
-        // use the modulus closest to the measurement.
-        m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocity);
+        // // use the modulus closest to the measurement.
+        // m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocity);
 
-        m_setpoint = new State100(
-                MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad, m_setpoint.v()
-        );
+        // m_setpoint = new State100(
+        //         MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad, m_setpoint.v()
+        // );
 
-        // NOTE: fixed dt here
+        // // NOTE: fixed dt here
+        // m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
+
+        double measurementRad = positionRad.getAsDouble();
+        double anglulusRad = MathUtil.angleModulus(positionRad.getAsDouble());
+        m_goal = new State100(MathUtil.angleModulus(goalRad - anglulusRad) + measurementRad, goalVelocity);
+   
+        m_setpoint = new State100(measurementRad, m_setpoint.v());
         m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
