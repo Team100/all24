@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.ByteBuffer;
 import java.util.HexFormat;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.telemetry.PrimitiveLogger2.IntLogger;
@@ -104,28 +105,28 @@ class UdpPrimitiveLogger2Test {
                 + "\01" // type
                 + "\15" // 1 6 length
                 + "/root/boolkey" // 13 19 label
-                + "\00\02" // key 
-                + "\02" // type 
+                + "\00\02" // key
+                + "\02" // type
                 + "\17" // 1 20 length
                 + "/root/doublekey" // 15 35 label
-                + "\00\03" // key 
-                + "\03" // type 
+                + "\00\03" // key
+                + "\03" // type
                 + "\14" // 1 36 length
                 + "/root/intkey" // 12 48 label
-                + "\00\04" // key 
-                + "\04" // type 
+                + "\00\04" // key
+                + "\04" // type
                 + "\24" // 1 49 length
                 + "/root/doublearraykey" // 20 69 label
-                + "\00\05" // key 
-                + "\04" // type 
+                + "\00\05" // key
+                + "\04" // type
                 + "\27" // 1 70 length
                 + "/root/doubleobjarraykey" // 23 93 label
-                + "\00\06" // key 
-                + "\05" // type 
+                + "\00\06" // key
+                + "\05" // type
                 + "\15" // 1 94 length
                 + "/root/longkey" // 13 107 label
-                + "\00\07" // key 
-                + "\06" // type 
+                + "\00\07" // key
+                + "\06" // type
                 + "\17" // 1 108 length
                 + "/root/stringkey"; // 15 123 label
         expectedBB = expectedStr.getBytes(StandardCharsets.US_ASCII);
@@ -210,23 +211,32 @@ class UdpPrimitiveLogger2Test {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }
         System.out.println("expected keys per second: " + expected_keys_per_sec);
+        double t1 = Timer.getFPGATimestamp();
         for (int i = 0; i < (total_time / interval); ++i) {
             double d = Timer.getFPGATimestamp() - t0;
             double dt = interval - (d % interval);
             Thread.sleep((long) (dt * 1000) + 1);
-            double t1 = Timer.getFPGATimestamp();
             for (int j = 0; j < keys; ++j) {
-                double val = Math.sin(j + 0.01 * i);
+                final double val = (double) j;
                 loggers[j].log(() -> val);
             }
             udpLogger.flush();
-            double t2 = Timer.getFPGATimestamp();
-            System.out.printf("et %.3f\n", t2 - t1);
         }
+        double t2 = Timer.getFPGATimestamp();
+        System.out.printf("et %.3f\n", t2 - t1);
     }
 
+    /**
+     * This version flushes at 50hz.
+     * 
+     * The point is to see how many keys we can sustain.
+     * On my desktop, the sender can emit 3M keys/sec at 50hz, which
+     * is close to the maximum for the protocol (2-byte key).
+     * At that rate, the java sender takes about 20% of a CPU, and
+     * the python receiver pegs one CPU and is dropping packets.
+     */
     @Test
-    void testAWholeLotViaUDP() throws InterruptedException {
+    void testAWholeLotViaUDPAt50Hz() throws InterruptedException {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
@@ -238,40 +248,93 @@ class UdpPrimitiveLogger2Test {
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
         final double total_time = 5;
-        // on my desktop:
-        // with shorter intervals, 600K keys per second is possible
-        // at 50hz, 400K keys per second seems like the max
-        // NT throttles at about 250k writes per second
-        // glass can only grok a few thousand keys anyway
-        // using full MTU packets (1500B) increases the 50hz throughput
-        // to about 600K keys per second.  and the short-interval
-        // peak throughput to about 800K keys/sec.
-        // the java load at this rate is low, 10% of one CPU.
-        final int keys = 20000;
-        // final int keys = 5000;
-        // final int keys = 100;
-        final double expected_keys_per_sec = keys / interval;
-        DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[keys];
-        for (int j = 0; j < keys; ++j) {
+        final int KEYS = 60000;
+        final int ITERATIONS = (int) (total_time / interval);
+
+        DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[KEYS];
+        for (int j = 0; j < KEYS; ++j) {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }
+
         udpLogger.sendAllLabels();
-        System.out.println("expected keys per second: " + expected_keys_per_sec);
-        double iterations = total_time / interval;
-        // int iterations = 1;
-        for (int i = 0; i < iterations; ++i) {
+        double t1 = Timer.getFPGATimestamp();
+        for (int i = 0; i < ITERATIONS; ++i) {
             double d = Timer.getFPGATimestamp() - t0;
             double dt = interval - (d % interval);
             Thread.sleep((long) (dt * 1000) + 1);
-            double t1 = Timer.getFPGATimestamp();
-            for (int j = 0; j < keys; ++j) {
-                double val = Math.sin(j + 0.01 * i);
+            for (int j = 0; j < KEYS; ++j) {
+                final double val = (double) i;
                 loggers[j].log(() -> val);
             }
             udpLogger.flush();
-            double t2 = Timer.getFPGATimestamp();
-            // System.out.printf("et %.3f\n", t2 - t1);
         }
+        double t2 = Timer.getFPGATimestamp();
+        System.out.printf("duration sec %.3f\n", t2 - t1);
+        System.out.printf("duration per flush us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
+        System.out.printf("duration per key us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS * KEYS));
+        System.out.printf("keys per second %.0f\n", ITERATIONS * KEYS / (t2 - t1));
+    }
+
+    /**
+     * For performance testing, to count output packets.
+     */
+    class DummySender implements Consumer<ByteBuffer> {
+        private int m_counter = 0;
+
+        @Override
+        public void accept(ByteBuffer arg0) {
+            m_counter++;
+        }
+
+        public int getCounter() {
+            return m_counter;
+        }
+    }
+
+    /**
+     * This version just goes as fast as possible.
+     * 
+     * On my desktop, this pegs the java sender and the python receiver.
+     * The sender emits 33M keys/sec, and the python receiver gets between
+     * 300K and 800K keys/sec, so these are mostly being dropped.
+     */
+    @Test
+    void testAWholeLotViaUDP() throws InterruptedException {
+        // Use this to test queueing, encoding, etc without the network.
+        // DummySender dataSink = new DummySender();
+        UdpSender dataSink = new UdpSender(UdpSender.kPort);
+        UdpSender metadataSink = new UdpSender(UdpSender.kmetadataPort);
+        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
+                dataSink,
+                metadataSink);
+        SupplierLogger2 logger = new SupplierLogger2(
+                Telemetry.get(),
+                "root",
+                udpLogger);
+
+        final int KEYS = 20000;
+        final int ITERATIONS = 10000;
+
+        DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[KEYS];
+        for (int j = 0; j < KEYS; ++j) {
+            loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
+        }
+        udpLogger.sendAllLabels();
+
+        double t1 = Timer.getFPGATimestamp();
+        for (int i = 0; i < ITERATIONS; ++i) {
+            for (int j = 0; j < KEYS; ++j) {
+                final double val = (double) i;
+                loggers[j].log(() -> val);
+            }
+            udpLogger.flush();
+        }
+        double t2 = Timer.getFPGATimestamp();
+        System.out.printf("duration sec %.3f\n", t2 - t1);
+        System.out.printf("duration per flush us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
+        System.out.printf("duration per packet us %.3f\n", 1000000 * (t2 - t1) / (dataSink.getCounter()));
+        System.out.printf("duration per key us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS * KEYS));
+        System.out.printf("keys per second %.0f\n", ITERATIONS * KEYS / (t2 - t1));
     }
 
     @Test
@@ -333,8 +396,9 @@ class UdpPrimitiveLogger2Test {
         b17.log(true); // overwritten
         b17.log(false);
         l.flush();
-        assertEquals(16, bb.remaining());
-        byte[] b = bb.array();
+        byte[] b = new byte[16];
+        bb.rewind();
+        bb.get(b);
         assertEquals((byte) 0, b[0]); // timestamp ...
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]);
@@ -354,8 +418,9 @@ class UdpPrimitiveLogger2Test {
 
         // this should fill the buffer with the label
         l.dumpLabels();
-        assertEquals(22, mb.remaining());
-        b = mb.array();
+        b = new byte[22];
+        mb.rewind();
+        mb.get(b);
         assertEquals((byte) 0, b[0]); // timestamp ...
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]);
@@ -388,7 +453,10 @@ class UdpPrimitiveLogger2Test {
         i.log(1);
         l.flush();
         assertEquals(24, bb.remaining());
-        byte[] b = bb.array();
+        byte[] b = new byte[24];
+        bb.rewind();
+        bb.get(b);
+
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]);
@@ -417,7 +485,9 @@ class UdpPrimitiveLogger2Test {
         // this should fill the buffer with the label
         l.dumpLabels();
         assertEquals(24, mb.remaining());
-        b = mb.array();
+        b = new byte[24];
+        mb.rewind();
+        mb.get(b);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]);

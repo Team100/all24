@@ -67,6 +67,8 @@ public class SupplierLogger2 {
         return child(obj.getGlassName());
     }
 
+    // TODO remove this, allow everything all the time.
+    @Deprecated
     private boolean allow(Level level) {
         if (m_telemetry.getLoadShedder().expired()) {
             // if we're out of time for logging, don't do it.

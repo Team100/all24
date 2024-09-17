@@ -40,14 +40,21 @@ import java.nio.charset.StandardCharsets;
  * confusing to reuse, each instance is intended to be used once.
  */
 public class UdpPrimitiveProtocol2 {
+
     private final ByteBuffer m_buffer;
 
-    public UdpPrimitiveProtocol2() {
-        // m_buffer = ByteBuffer.allocate(508);
-        m_buffer = ByteBuffer.allocate(1472);
-        // this is the default, but just to make it clear...
+    public UdpPrimitiveProtocol2(int bufferSize) {
+        // m_buffer = ByteBuffer.allocate(bufferSize);
+        // direct buffer goes faster out the network
+        // TODO: make sure we reuse this buffer!
+        m_buffer = ByteBuffer.allocateDirect(bufferSize);
+        // big-endian is the default, but just to make it clear...
         m_buffer.order(ByteOrder.BIG_ENDIAN);
         m_buffer.putLong(UdpMetadataProtocol.timestamp); // timetstamp = 8 bytes
+    }
+
+    public UdpPrimitiveProtocol2() {
+        this(UdpSender.MTU);
     }
 
     /** Return a buffer view of length equal to current position. */
@@ -60,29 +67,38 @@ public class UdpPrimitiveProtocol2 {
         return m_buffer;
     }
 
-    /**
-     * @return true if written
-     */
+    /** Clear the underlying buffer and rewrite the timestamp into it. */
+    void clear() {
+        m_buffer.clear();
+        m_buffer.putLong(UdpMetadataProtocol.timestamp);
+    }
+
+    /** @return true if written */
     public boolean putLong(int key, long val) {
         return encodeLong(m_buffer, key, val) != 0;
     }
 
+    /** @return true if written */
     public boolean putString(int key, String val) {
         return encodeString(m_buffer, key, val) != 0;
     }
 
+    /** @return true if written */
     public boolean putInt(int key, int val) {
         return encodeInt(m_buffer, key, val) != 0;
     }
 
+    /** @return true if written */
     public boolean putDouble(int key, double val) {
         return encodeDouble(m_buffer, key, val) != 0;
     }
 
+    /** @return true if written */
     public boolean putBoolean(int key, boolean val) {
         return encodeBoolean(m_buffer, key, val) != 0;
     }
 
+    /** @return true if written */
     public boolean putDoubleArray(int key, double[] val) {
         return encodeDoubleArray(m_buffer, key, val) != 0;
     }
@@ -117,9 +133,8 @@ public class UdpPrimitiveProtocol2 {
         final int totalLength = 4;
         if (buf.remaining() < totalLength)
             return 0;
-        encodeKey(buf, key); // 2 bytes
+        buf.putChar((char) key); // 2 bytes
         buf.put(UdpType.BOOLEAN.id); // type = 1 byte
-        System.out.println("val " + val);
         buf.put(val ? (byte) 1 : (byte) 0); // 1 byte
         return totalLength;
     }
@@ -136,7 +151,7 @@ public class UdpPrimitiveProtocol2 {
         final int totalLength = 11;
         if (buf.remaining() < totalLength)
             return 0;
-        encodeKey(buf, key); // 2 bytes
+        buf.putChar((char) key); // 2 bytes
         buf.put(UdpType.DOUBLE.id); // type = 1 byte
         buf.putDouble(val); // 8 bytes
         return totalLength;
@@ -161,7 +176,7 @@ public class UdpPrimitiveProtocol2 {
         final int totalLength = 4 + val.length * 8;
         if (buf.remaining() < totalLength)
             return 0;
-        encodeKey(buf, key); // 2 bytes
+        buf.putChar((char) key); // 2 bytes
         buf.put(UdpType.DOUBLE_ARRAY.id); // type = 1 byte
         buf.put((byte) val.length); // 1 byte
         for (int i = 0; i < val.length; ++i) {
@@ -182,7 +197,7 @@ public class UdpPrimitiveProtocol2 {
         final int totalLength = 7;
         if (buf.remaining() < totalLength)
             return 0;
-        encodeKey(buf, key); // 2 bytes
+        buf.putChar((char) key); // 2 bytes
         buf.put(UdpType.INT.id); // type = 1 byte
         buf.putInt(val); // 4 bytes
         return totalLength;
@@ -207,7 +222,7 @@ public class UdpPrimitiveProtocol2 {
         final int totalLength = 4 + bytesLength;
         if (buf.remaining() < totalLength)
             return 0;
-        encodeKey(buf, key); // 2 bytes
+        buf.putChar((char) key); // 2 bytes
         buf.put(UdpType.STRING.id); // type = 1 byte
         buf.put((byte) bytesLength); // 1 byte
         buf.put(bytes);
@@ -228,24 +243,10 @@ public class UdpPrimitiveProtocol2 {
         final int totalLength = 11;
         if (buf.remaining() < totalLength)
             return 0;
-        encodeKey(buf, key); // 2 bytes
+        buf.putChar((char) key); // 2 bytes
         buf.put(UdpType.LONG.id); // type = 1 byte
         buf.putLong(val); // 8 bytes
         return totalLength;
-    }
-
-    /**
-     * An int key is written as 2 bytes, unsigned.
-     * 
-     * @return bytes written. zero means we didn't write anything, buffer is full.
-     */
-    static void encodeKey(ByteBuffer buf, int key) {
-        if (key > 65535)
-            throw new IllegalArgumentException("key too large");
-        final int totalLength = 2;
-        if (buf.remaining() < totalLength)
-            return;
-        buf.putChar((char) key); // 2 bytes
     }
 
 }

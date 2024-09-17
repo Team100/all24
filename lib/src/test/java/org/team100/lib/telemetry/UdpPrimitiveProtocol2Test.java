@@ -1,11 +1,9 @@
 package org.team100.lib.telemetry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
@@ -21,53 +19,6 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]);
         assertEquals((byte) 0, b[3]);
-    }
-
-    ////////////// KEY
-
-    @Test
-    void testKey() {
-        byte[] b = new byte[12];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.order(ByteOrder.BIG_ENDIAN);
-        // encoder doesn't start at the beginning
-        bb.position(2);
-        UdpPrimitiveProtocol2.encodeKey(bb, 16);
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]); // high byte
-        assertEquals((byte) 16, b[3]); // low byte
-        assertEquals((byte) 0, b[4]);
-    }
-
-    @Test
-    void testKeyMax() {
-        byte[] b = new byte[12];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.order(ByteOrder.BIG_ENDIAN);
-        UdpPrimitiveProtocol2.encodeKey(bb, 65535);
-        assertEquals((byte) 0xFF, b[0]); // high byte
-        assertEquals((byte) 0xFF, b[1]); // low byte
-        assertEquals((byte) 0, b[2]);
-    }
-
-    @Test
-    void testKeyBad() {
-        byte[] b = new byte[12];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.order(ByteOrder.BIG_ENDIAN);
-        assertThrows(IllegalArgumentException.class, //
-                () -> UdpPrimitiveProtocol2.encodeKey(bb, 1000000));
-    }
-
-    @Test
-    void testKeyBufferFull() {
-        byte[] b = new byte[12];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.order(ByteOrder.BIG_ENDIAN);
-        bb.position(11);
-        UdpPrimitiveProtocol2.encodeKey(bb, 65535);
-        assertEquals((byte) 0, b[11]);
     }
 
     ///////////////////// STRING
@@ -238,7 +189,7 @@ class UdpPrimitiveProtocol2Test {
     void testDanglingKeyDoubleArray() {
         byte[] b = new byte[5];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[]{1.0});
+        UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0 });
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]); // << make sure the key is not here
         assertEquals((byte) 0, b[2]); //
@@ -460,16 +411,17 @@ class UdpPrimitiveProtocol2Test {
         // 2 for type, 2 for key, 8 for double, 12 bytes + 10 = position 22
         assertEquals(28, p.buffer().position());
         ByteBuffer bb = p.buffer();
-        byte[] b = bb.array();
-        assertEquals(1472, b.length);
-        assertEquals((byte) 0, b[0]); 
-        assertEquals((byte) 0, b[1]); 
-        assertEquals((byte) 0, b[2]); 
-        assertEquals((byte) 0, b[3]); 
-        assertEquals((byte) 0, b[4]); 
-        assertEquals((byte) 0, b[5]); 
-        assertEquals((byte) 0, b[6]); 
-        assertEquals((byte) 0, b[7]); // timestamp 
+        byte[] b = new byte[28];
+        bb.rewind();
+        bb.get(b);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]);
+        assertEquals((byte) 0, b[3]);
+        assertEquals((byte) 0, b[4]);
+        assertEquals((byte) 0, b[5]);
+        assertEquals((byte) 0, b[6]);
+        assertEquals((byte) 0, b[7]); // timestamp
         assertEquals((byte) 0, b[8]); // key MSB
         assertEquals((byte) 16, b[9]); // key LSB
         assertEquals((byte) 6, b[10]); // string type
@@ -490,6 +442,87 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[25]);
         assertEquals((byte) 0, b[26]);
         assertEquals((byte) 0, b[27]);
+    }
+
+    /**
+     * Encoding itself is quite fast, 4 ns per key, about 1 ns
+     * per int on my machine, which is about as fast as it can go, I think.
+     */
+    @Test
+    void testEncodingPerformance() throws Exception {
+        final int ITERATIONS = 200000000;
+        final int BUFFER_SIZE = 10000000;
+
+        // huge buffer for this test; we're testing the encoding.
+        UdpPrimitiveProtocol2 p = new UdpPrimitiveProtocol2(BUFFER_SIZE);
+
+        {
+            p.clear();
+            double t1 = Timer.getFPGATimestamp();
+            for (int i = 0; i < ITERATIONS; ++i) {
+                if (!p.putBoolean(17, true))
+                    p.clear();
+            }
+            double t2 = Timer.getFPGATimestamp();
+            System.out.printf("boolean duration sec %.3f\n", t2 - t1);
+            System.out.printf("boolean duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
+        }
+
+        {
+            p.clear();
+            double t1 = Timer.getFPGATimestamp();
+            for (int i = 0; i < ITERATIONS; ++i) {
+                if (!p.putDouble(17, 1.0))
+                    p.clear();
+            }
+            double t2 = Timer.getFPGATimestamp();
+            System.out.printf("double duration sec %.3f\n", t2 - t1);
+            System.out.printf("double duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
+        }
+        {
+            p.clear();
+            double t1 = Timer.getFPGATimestamp();
+            for (int i = 0; i < ITERATIONS; ++i) {
+                if (!p.putInt(17, 1))
+                    p.clear();
+            }
+            double t2 = Timer.getFPGATimestamp();
+            System.out.printf("int duration sec %.3f\n", t2 - t1);
+            System.out.printf("int duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
+        }
+        {
+            p.clear();
+            double t1 = Timer.getFPGATimestamp();
+            for (int i = 0; i < ITERATIONS; ++i) {
+                if (!p.putDoubleArray(17, new double[] { 1.0 }))
+                    p.clear();
+            }
+            double t2 = Timer.getFPGATimestamp();
+            System.out.printf("double[] duration sec %.3f\n", t2 - t1);
+            System.out.printf("double[] duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
+        }
+        {
+            p.clear();
+            double t1 = Timer.getFPGATimestamp();
+            for (int i = 0; i < ITERATIONS; ++i) {
+                if (!p.putLong(17, 1))
+                    p.clear();
+            }
+            double t2 = Timer.getFPGATimestamp();
+            System.out.printf("long duration sec %.3f\n", t2 - t1);
+            System.out.printf("long duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
+        }
+        {
+            p.clear();
+            double t1 = Timer.getFPGATimestamp();
+            for (int i = 0; i < ITERATIONS; ++i) {
+                if (!p.putString(17, "asdf"))
+                    p.clear();
+            }
+            double t2 = Timer.getFPGATimestamp();
+            System.out.printf("string duration sec %.3f\n", t2 - t1);
+            System.out.printf("string duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
+        }
     }
 
 }

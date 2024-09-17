@@ -1,11 +1,9 @@
 package org.team100.lib.telemetry;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -25,33 +23,47 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     record Metadata(int key, UdpType type, String label) {
+        /** this is the only place we check the sizes. */
+        public Metadata {
+            if (key > 65535)
+                throw new IllegalArgumentException("too many keys");
+            byte[] bytes = label.getBytes(StandardCharsets.US_ASCII);
+            if (bytes.length > 255)
+                throw new IllegalArgumentException("label too long: " + label);
+        }
     }
 
     private static final double kFlushPeriod = 0.1;
 
-    // lots of queues to avoid encoding values we're not going to send
-    private final Map<Integer, Boolean> booleanQueue = new HashMap<>();
-    private final Map<Integer, Double> doubleQueue = new HashMap<>();
-    private final Map<Integer, Integer> integerQueue = new HashMap<>();
-    private final Map<Integer, double[]> doubleArrayQueue = new HashMap<>();
-    private final Map<Integer, Long> longQueue = new HashMap<>();
-    private final Map<Integer, String> stringQueue = new HashMap<>();
+    private final List<UdpBooleanLogger> booleanLoggers = new ArrayList<>();
+    private final List<UdpDoubleLogger> doubleLoggers = new ArrayList<>();
+    private final List<UdpIntLogger> integerLoggers = new ArrayList<>();
+    private final List<UdpDoubleArrayLogger> doubleArrayLoggers = new ArrayList<>();
+    private final List<UdpDoubleObjArrayLogger> doubleObjArrayLoggers = new ArrayList<>();
+    private final List<UdpLongLogger> longLoggers = new ArrayList<>();
+    private final List<UdpStringLogger> stringLoggers = new ArrayList<>();
 
     final List<Metadata> metadata = new ArrayList<>();
+
+    private final Consumer<ByteBuffer> m_bufferSink;
+    private final Consumer<ByteBuffer> m_metadataSink;
+
+    // keep the output buffers forever because allocating it is slow.
+    private final UdpPrimitiveProtocol2 m_dataProtocol;
+    private final UdpMetadataProtocol m_metadataProtocol;
+
     /** Current offset of label dumper */
     int offset = 0;
 
     private double flushTime;
 
-    private UdpPrimitiveProtocol2 p;
-    private UdpMetadataProtocol m;
-
-    private Consumer<ByteBuffer> m_bufferSink;
-    private Consumer<ByteBuffer> m_metadataSink;
-
-    public UdpPrimitiveLogger2(Consumer<ByteBuffer> bufferSink, Consumer<ByteBuffer> metadataSink) {
-        m_bufferSink = bufferSink;
+    public UdpPrimitiveLogger2(
+            Consumer<ByteBuffer> dataSink,
+            Consumer<ByteBuffer> metadataSink) {
+        m_bufferSink = dataSink;
         m_metadataSink = metadataSink;
+        m_dataProtocol = new UdpPrimitiveProtocol2();
+        m_metadataProtocol = new UdpMetadataProtocol();
         flushTime = 0;
     }
 
@@ -88,124 +100,153 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     public boolean dumpLabels() {
         if (metadata.isEmpty())
             return false;
-        m = new UdpMetadataProtocol();
+        m_metadataProtocol.clear();
         for (int i = offset; i < metadata.size(); ++i) {
             Metadata d = metadata.get(i);
-            if (!m.put(d.key, d.type, d.label)) {
+            if (!m_metadataProtocol.put(d.key, d.type, d.label)) {
                 // packet is full, so send it.
-                m_metadataSink.accept(m.trim());
+                m_metadataSink.accept(m_metadataProtocol.trim());
                 offset = i;
                 return true;
             }
         }
         // added them all, send what we have.
-        m_metadataSink.accept(m.trim());
+        m_metadataSink.accept(m_metadataProtocol.trim());
         offset = 0;
         return false;
     }
 
     /** Send at least one packet. */
     public void flush() {
-        p = new UdpPrimitiveProtocol2();
+        m_dataProtocol.clear();
         flushBoolean();
         flushDouble();
         flushInteger();
         flushDoubleArray();
+        flushDoubleObjArray();
         flushLong();
         flushString();
-        m_bufferSink.accept(p.trim());
+        m_bufferSink.accept(m_dataProtocol.trim());
     }
 
     public class UdpBooleanLogger implements PrimitiveLogger2.BooleanLogger {
         private final int m_key;
+        private boolean m_val;
+        private boolean m_dirty;
 
         public UdpBooleanLogger(String label) {
             m_key = getKey(UdpType.BOOLEAN, label);
+            booleanLoggers.add(this);
         }
 
         @Override
         public void log(boolean val) {
-            booleanQueue.put(m_key, val);
+            m_val = val;
+            m_dirty = true;
         }
     }
 
     public class UdpDoubleLogger implements PrimitiveLogger2.DoubleLogger {
         private final int m_key;
+        private double m_val;
+        private boolean m_dirty;
 
         public UdpDoubleLogger(String label) {
             m_key = getKey(UdpType.DOUBLE, label);
+            doubleLoggers.add(this);
         }
 
         @Override
         public void log(double val) {
-            doubleQueue.put(m_key, val);
+            m_val = val;
+            m_dirty = true;
         }
 
     }
 
     public class UdpIntLogger implements PrimitiveLogger2.IntLogger {
         private final int m_key;
+        private int m_val;
+        private boolean m_dirty;
 
         public UdpIntLogger(String label) {
             m_key = getKey(UdpType.INT, label);
+            integerLoggers.add(this);
         }
 
         @Override
         public void log(int val) {
-            integerQueue.put(m_key, val);
+            m_val = val;
+            m_dirty = true;
         }
     }
 
     public class UdpDoubleArrayLogger implements PrimitiveLogger2.DoubleArrayLogger {
         private final int m_key;
+        private double[] m_val;
+        private boolean m_dirty;
 
         public UdpDoubleArrayLogger(String label) {
             m_key = getKey(UdpType.DOUBLE_ARRAY, label);
+            doubleArrayLoggers.add(this);
         }
 
         @Override
         public void log(double[] val) {
-            doubleArrayQueue.put(m_key, val);
+            m_val = val;
+            m_dirty = true;
         }
     }
 
     public class UdpDoubleObjArrayLogger implements PrimitiveLogger2.DoubleObjArrayLogger {
         private final int m_key;
+        private double[] m_val;
+        private boolean m_dirty;
 
         public UdpDoubleObjArrayLogger(String label) {
             m_key = getKey(UdpType.DOUBLE_ARRAY, label);
+            doubleObjArrayLoggers.add(this);
         }
 
         @Override
         public void log(Double[] val) {
-            doubleArrayQueue.put(m_key, Stream.of(val).mapToDouble(Double::doubleValue).toArray());
+            m_val = Stream.of(val).mapToDouble(Double::doubleValue).toArray();
+            m_dirty = true;
         }
     }
 
     public class UdpLongLogger implements PrimitiveLogger2.LongLogger {
         private final int m_key;
+        private long m_val;
+        private boolean m_dirty;
 
         public UdpLongLogger(String label) {
             m_key = getKey(UdpType.LONG, label);
+            longLoggers.add(this);
         }
 
         @Override
         public void log(long val) {
-            longQueue.put(m_key, val);
+            m_val = val;
+            m_dirty = true;
         }
 
     }
 
     public class UdpStringLogger implements PrimitiveLogger2.StringLogger {
         private final int m_key;
+        private String m_val;
+        private boolean m_dirty;
 
         public UdpStringLogger(String label) {
             m_key = getKey(UdpType.STRING, label);
+            stringLoggers.add(this);
         }
 
         @Override
         public void log(String val) {
-            stringQueue.put(m_key, val);
+            m_val = val;
+            m_dirty = true;
         }
     }
 
@@ -215,8 +256,8 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     private void putAndMaybeSend(BooleanSupplier putter) {
         if (!putter.getAsBoolean()) {
             // time to send the packet
-            m_bufferSink.accept(p.trim());
-            p = new UdpPrimitiveProtocol2();
+            m_bufferSink.accept(m_dataProtocol.trim());
+            m_dataProtocol.clear();
             if (!putter.getAsBoolean())
                 throw new IllegalStateException();
         }
@@ -224,56 +265,65 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     }
 
     private void flushBoolean() {
-        final Iterator<Map.Entry<Integer, Boolean>> it = booleanQueue.entrySet().iterator();
-        while (it.hasNext()) {
-            final Map.Entry<Integer, Boolean> entry = it.next();
-            putAndMaybeSend(() -> p.putBoolean(entry.getKey(), entry.getValue()));
-            it.remove();
+        for (UdpBooleanLogger logger : booleanLoggers) {
+            if (logger.m_dirty) {
+                putAndMaybeSend(() -> m_dataProtocol.putBoolean(logger.m_key, logger.m_val));
+                logger.m_dirty = false;
+            }
         }
     }
 
     private void flushDouble() {
-        final Iterator<Map.Entry<Integer, Double>> it = doubleQueue.entrySet().iterator();
-        while (it.hasNext()) {
-            final Map.Entry<Integer, Double> entry = it.next();
-            putAndMaybeSend(() -> p.putDouble(entry.getKey(), entry.getValue()));
-            it.remove();
+        for (UdpDoubleLogger logger : doubleLoggers) {
+            if (logger.m_dirty) {
+                putAndMaybeSend(() -> m_dataProtocol.putDouble(logger.m_key, logger.m_val));
+                logger.m_dirty = false;
+            }
         }
     }
 
     private void flushInteger() {
-        final Iterator<Map.Entry<Integer, Integer>> it = integerQueue.entrySet().iterator();
-        while (it.hasNext()) {
-            final Map.Entry<Integer, Integer> entry = it.next();
-            putAndMaybeSend(() -> p.putInt(entry.getKey(), entry.getValue()));
-            it.remove();
+        for (UdpIntLogger logger : integerLoggers) {
+            if (logger.m_dirty) {
+                putAndMaybeSend(() -> m_dataProtocol.putInt(logger.m_key, logger.m_val));
+                logger.m_dirty = false;
+            }
         }
     }
 
     private void flushDoubleArray() {
-        final Iterator<Map.Entry<Integer, double[]>> it = doubleArrayQueue.entrySet().iterator();
-        while (it.hasNext()) {
-            final Map.Entry<Integer, double[]> entry = it.next();
-            putAndMaybeSend(() -> p.putDoubleArray(entry.getKey(), entry.getValue()));
-            it.remove();
+        for (UdpDoubleArrayLogger logger : doubleArrayLoggers) {
+            if (logger.m_dirty) {
+                putAndMaybeSend(() -> m_dataProtocol.putDoubleArray(logger.m_key, logger.m_val));
+                logger.m_dirty = false;
+            }
+        }
+    }
+
+    private void flushDoubleObjArray() {
+        for (UdpDoubleObjArrayLogger logger : doubleObjArrayLoggers) {
+            if (logger.m_dirty) {
+                putAndMaybeSend(() -> m_dataProtocol.putDoubleArray(logger.m_key, logger.m_val));
+                logger.m_dirty = false;
+            }
         }
     }
 
     private void flushLong() {
-        final Iterator<Map.Entry<Integer, Long>> it = longQueue.entrySet().iterator();
-        while (it.hasNext()) {
-            final Map.Entry<Integer, Long> entry = it.next();
-            putAndMaybeSend(() -> p.putLong(entry.getKey(), entry.getValue()));
-            it.remove();
+        for (UdpLongLogger logger : longLoggers) {
+            if (logger.m_dirty) {
+                putAndMaybeSend(() -> m_dataProtocol.putLong(logger.m_key, logger.m_val));
+                logger.m_dirty = false;
+            }
         }
     }
 
     private void flushString() {
-        final Iterator<Map.Entry<Integer, String>> it = stringQueue.entrySet().iterator();
-        while (it.hasNext()) {
-            final Map.Entry<Integer, String> entry = it.next();
-            putAndMaybeSend(() -> p.putString(entry.getKey(), entry.getValue()));
-            it.remove();
+        for (UdpStringLogger logger : stringLoggers) {
+            if (logger.m_dirty) {
+                putAndMaybeSend(() -> m_dataProtocol.putString(logger.m_key, logger.m_val));
+                logger.m_dirty = false;
+            }
         }
     }
 

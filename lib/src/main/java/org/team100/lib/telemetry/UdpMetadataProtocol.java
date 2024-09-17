@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * </pre>
  */
 public class UdpMetadataProtocol {
+
     /**
      * Epoch seconds timestamp is used as the version key for the label map.
      * It is provided by the driver station, so it is not available at startup,
@@ -52,12 +53,18 @@ public class UdpMetadataProtocol {
 
     private final ByteBuffer m_buffer;
 
-    public UdpMetadataProtocol() {
-        // m_buffer = ByteBuffer.allocate(508);
-        m_buffer = ByteBuffer.allocate(1472);
-        // this is the default, but just to make it clear...
+    public UdpMetadataProtocol(int bufferSize) {
+        // m_buffer = ByteBuffer.allocate(bufferSize);
+        // direct buffer goes faster out the network
+        // TODO: make sure we reuse this buffer!
+        m_buffer = ByteBuffer.allocateDirect(bufferSize);
+        // big-endian is the default, but just to make it clear...
         m_buffer.order(ByteOrder.BIG_ENDIAN);
         m_buffer.putLong(timestamp); // timetstamp = 8 bytes
+    }
+
+    public UdpMetadataProtocol() {
+        this(UdpSender.MTU);
     }
 
     /** Return a buffer view of length equal to current position. */
@@ -68,6 +75,12 @@ public class UdpMetadataProtocol {
     /** for testing */
     ByteBuffer buffer() {
         return m_buffer;
+    }
+
+    /** Clear the underlying buffer and rewrite the timestamp into it. */
+    void clear() {
+        m_buffer.clear();
+        m_buffer.putLong(UdpMetadataProtocol.timestamp);
     }
 
     /**
@@ -95,14 +108,13 @@ public class UdpMetadataProtocol {
      *     ^^^^ string in ascii for label 16
      * </pre>
      * 
+     * caller should check key and label sizes.
+     * TODO: use bytes for label to save a little time
+     * 
      * @return true if written
      */
     static boolean add(ByteBuffer buf, int key, UdpType type, String label) {
-        if (key > 65535)
-            throw new IllegalArgumentException("key too large");
         byte[] bytes = label.getBytes(StandardCharsets.US_ASCII);
-        if (bytes.length > 255)
-            throw new IllegalArgumentException("label too long");
         int n = bytes.length;
         if (4 + n > buf.remaining())
             return false;
