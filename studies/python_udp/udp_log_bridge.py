@@ -89,11 +89,11 @@ def data_reader() -> None:
             message: bytes = data_socket.recv(MTU)
             # message always starts with timestamp.
             timestamp, offset = parse_long(message, 0)
-            print(f"DATA timestamp {timestamp}")
+            # print(f"DATA timestamp {timestamp}")
             # TODO: new timestamp means new log file
             for key, val_type, val in data_decode(message, offset):
                 data_rows += 1
-                print(f"DATA key: {key} val_type: {val_type} val: {val}")
+                # print(f"DATA key: {key} val_type: {val_type} val: {val}")
                 if PUB and key in publishers:
                     publishers[key].set(val)
                 if LOG and key in entries:
@@ -120,11 +120,11 @@ def meta_reader() -> None:
             message: bytes = meta_socket.recv(MTU)
             # message always starts with timestamp.
             timestamp, offset = parse_long(message, 0)
-            print(f"META timestamp {timestamp}")
+            # print(f"META timestamp {timestamp}")
             # TODO: new timestamp means new log file
             for key, val_type, label in meta_decode(message, offset):
                 meta_rows += 1
-                print(f"META key: {key} val_type: {val_type} label: {label}")
+                # print(f"META key: {key} val_type: {val_type} label: {label}")
                 if PUB and key not in publishers:
                     add_publisher(inst, key, val_type, label)
                 if LOG and key not in entries:

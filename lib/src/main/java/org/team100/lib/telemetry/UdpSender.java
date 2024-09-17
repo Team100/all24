@@ -19,6 +19,13 @@ public class UdpSender implements Consumer<ByteBuffer> {
         m_channel = makeChannel(port);
     }
 
+    public static UdpSender data() {
+        return new UdpSender(kPort);
+    }
+    public static UdpSender meta() {
+        return new UdpSender(kmetadataPort);
+    }
+
     private static DatagramChannel makeChannel(int port) {
         try {
             DatagramChannel channel = DatagramChannel.open();

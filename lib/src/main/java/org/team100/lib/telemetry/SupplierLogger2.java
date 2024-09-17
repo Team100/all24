@@ -117,8 +117,8 @@ public class SupplierLogger2 {
         }
 
         public void log(DoubleSupplier vals) {
-            if (!allow(m_level))
-                return;
+            // if (!allow(m_level))
+            //     return;
             double val = vals.getAsDouble();
             m_primitiveLogger.log(val);
         }
