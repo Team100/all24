@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
@@ -523,6 +524,75 @@ class UdpPrimitiveProtocol2Test {
             System.out.printf("string duration sec %.3f\n", t2 - t1);
             System.out.printf("string duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
         }
+    }
+
+    @Test
+    void testDoubleEncodingPerformance() {
+        // this goes at 1.3 ns/row, with or without offset
+        final int ITERATIONS = 10000000;
+        final int N = 180;
+        ByteBuffer bb = ByteBuffer.allocateDirect(N * 8);
+        double t1 = Timer.getFPGATimestamp();
+        for (int i = 0; i < ITERATIONS; ++i) {
+            bb.clear();
+            for (int j = 0; j < N; ++j) {
+                bb.putDouble(j, j * 8);
+            }
+        }
+        double t2 = Timer.getFPGATimestamp();
+        System.out.printf("string duration sec %.3f\n", t2 - t1);
+        System.out.printf("string duration per row ns %.3f\n", 1e9 * (t2 - t1) / (ITERATIONS * N));
+    }
+
+    @Test
+    void testDoubleDecodingPerformance() {
+        // 1 ns/row, including the addition
+        final int ITERATIONS = 10000000;
+        final int N = 180;
+        ByteBuffer bb = ByteBuffer.allocateDirect(N * 8);
+        for (int i = 0; i < N; ++i) {
+            bb.putDouble(i);
+        }
+        double t1 = Timer.getFPGATimestamp();
+        double total = 0;
+        for (int i = 0; i < ITERATIONS; ++i) {
+            bb.rewind();
+            for (int j = 0; j < N; ++j) {
+                // some real work to prevent optimizing it all away
+                total += bb.getDouble();
+            }
+        }
+        double t2 = Timer.getFPGATimestamp();
+        System.out.printf("total %f\n", total);
+        System.out.printf("string duration sec %.3f\n", t2 - t1);
+        System.out.printf("string duration per row ns %.3f\n", 1e9 * (t2 - t1) / (ITERATIONS * N));
+    }
+
+    @Test
+    void testDoubleBulkDecodingPerformance() {
+        // 1 ns/row, including the addition
+        // bulk copying to a new double[] is >3ns, bad.
+        final int ITERATIONS = 10000000;
+        final int N = 180;
+        ByteBuffer bb = ByteBuffer.allocateDirect(N * 8);
+        for (int i = 0; i < N; ++i) {
+            bb.putDouble(i);
+        }
+        bb.rewind();
+        DoubleBuffer db = bb.asDoubleBuffer();
+        double t1 = Timer.getFPGATimestamp();
+        double total = 0;
+        for (int i = 0; i < ITERATIONS; ++i) {
+            db.rewind();
+            for (int j = 0; j < N; ++j) {
+                // some real work to prevent optimizing it all away
+                total += db.get();
+            }
+        }
+        System.out.printf("total %f\n", total);
+        double t2 = Timer.getFPGATimestamp();
+        System.out.printf("string duration sec %.3f\n", t2 - t1);
+        System.out.printf("string duration per row ns %.3f\n", 1e9 * (t2 - t1) / (ITERATIONS * N));
     }
 
 }

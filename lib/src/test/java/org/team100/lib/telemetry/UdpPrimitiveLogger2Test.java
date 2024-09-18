@@ -335,6 +335,7 @@ class UdpPrimitiveLogger2Test {
         System.out.printf("duration per packet us %.3f\n", 1000000 * (t2 - t1) / (dataSink.getCounter()));
         System.out.printf("duration per key us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS * KEYS));
         System.out.printf("keys per second %.0f\n", ITERATIONS * KEYS / (t2 - t1));
+        System.out.printf("packets per second %.0f\n", dataSink.getCounter() / (t2 - t1));
     }
 
     @Test

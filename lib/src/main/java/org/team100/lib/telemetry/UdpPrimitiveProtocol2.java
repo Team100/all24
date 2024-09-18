@@ -157,6 +157,10 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
+    static double decodeDouble(ByteBuffer buf, int offset) {
+        return buf.getDouble(offset);
+    }
+
     /**
      * Note the maximum array length is not very long (approximately packet length
      * divided by 8).
