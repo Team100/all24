@@ -57,15 +57,17 @@ publishers: dict[int, Any] = {}
 entries: dict[int, Any] = {}
 
 # updated by main thread
+data_packets = 0
 data_rows = 0
 meta_rows = 0
 # updated by counter thread
+prev_data_packets = 0
 prev_data_rows = 0
 prev_meta_rows = 0
 
 
 def stats() -> None:
-    global prev_data_rows, prev_meta_rows
+    global prev_data_rows, prev_meta_rows, prev_data_packets
     interval = 1.0
     t0 = time.time()
     while True:
@@ -73,20 +75,25 @@ def stats() -> None:
         dt = d % interval
         time.sleep(interval - dt)
         d = time.time() - t0
+        data_packet_i = data_packets - prev_data_packets
         data_i = data_rows - prev_data_rows
         meta_i = meta_rows - prev_meta_rows
+        prev_data_packets = data_packets
         prev_data_rows = data_rows
         prev_meta_rows = meta_rows
-        print(f"sec: {d:.0f} data_rows: {data_i:d} meta_rows: {meta_i:d}")
+        print(f"sec: {d:.0f} data packets: {data_packet_i:d} data_rows: {data_i:d} meta_rows: {meta_i:d}")
 
 
 def data_reader() -> None:
-    global data_rows
+    global data_rows, data_packets
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     data_socket.bind(("", DATA_PORT))
     while True:
         try:
             message: bytes = data_socket.recv(MTU)
+            data_packets += 1
+
+
             # message always starts with timestamp.
             timestamp, offset = parse_long(message, 0)
             # print(f"DATA timestamp {timestamp}")
@@ -98,6 +105,9 @@ def data_reader() -> None:
                     publishers[key].set(val)
                 if LOG and key in entries:
                     entries[key].append(val)
+
+
+                    
         except struct.error:
             print("parse fail for input: ", message)
             traceback.print_exc()
