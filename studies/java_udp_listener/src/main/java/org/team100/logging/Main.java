@@ -8,6 +8,7 @@ import org.opencv.core.Core;
 import edu.wpi.first.cscore.CameraServerCvJNI;
 import edu.wpi.first.cscore.CameraServerJNI;
 import edu.wpi.first.math.WPIMathJNI;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.util.CombinedRuntimeLoader;
 import edu.wpi.first.util.WPIUtilJNI;
@@ -17,19 +18,28 @@ public final class Main {
     private Main() {
     }
 
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws IOException, InterruptedException {
         // cribbed from StandaloneAppSamples
-        NetworkTablesJNI.Helper.setExtractOnStaticLoad(false);
-        WPIUtilJNI.Helper.setExtractOnStaticLoad(false);
-        WPIMathJNI.Helper.setExtractOnStaticLoad(false);
-        CameraServerJNI.Helper.setExtractOnStaticLoad(false);
-        CameraServerCvJNI.Helper.setExtractOnStaticLoad(false);
+        NetworkTablesJNI.Helper.setExtractOnStaticLoad(true);
+        WPIUtilJNI.Helper.setExtractOnStaticLoad(true);
+        WPIMathJNI.Helper.setExtractOnStaticLoad(true);
+        CameraServerJNI.Helper.setExtractOnStaticLoad(true);
+        CameraServerCvJNI.Helper.setExtractOnStaticLoad(true);
 
-        CombinedRuntimeLoader.loadLibraries(Main.class, "wpiutiljni", "wpimathjni", "ntcorejni",
-                Core.NATIVE_LIBRARY_NAME, "cscorejni");
+        // this doesn't work on the pi.
+        // CombinedRuntimeLoader.loadLibraries(Main.class, "wpiutiljni", "wpimathjni", "ntcorejni",
+        //         Core.NATIVE_LIBRARY_NAME, "cscorejni");
 
         System.out.println("HELLO");
         testDoubleEncodingPerformance();
+        var inst = NetworkTableInstance.getDefault();
+        inst.startServer();
+        var foo = inst.getDoubleTopic("foo");
+        for (int i = 0; i < 100; ++i) {
+            System.out.println(i);
+            foo.publish().set(1.0);
+            Thread.sleep(1000);
+        }
     }
 
     static void testDoubleEncodingPerformance() {
