@@ -3,6 +3,7 @@ package org.team100.lib.telemetry;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.function.BiConsumer;
 
 /**
  * Log data protocol 2
@@ -233,6 +234,10 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
+    static int decodeString(ByteBuffer buf, BiConsumer<Integer, String> consumer) {
+
+    }
+
     /**
      * Note: try to avoid logging long ints, they're needlessly ... long.
      * 
@@ -251,6 +256,10 @@ public class UdpPrimitiveProtocol2 {
         buf.put(UdpType.LONG.id); // type = 1 byte
         buf.putLong(val); // 8 bytes
         return totalLength;
+    }
+
+    static int decodeLong(ByteBuffer buf, BiConsumer<Integer, Long> consumer) {
+
     }
 
 }
