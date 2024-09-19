@@ -33,7 +33,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * TODO: force the theta axis to finish first, so that the approach is correct.
  */
 public class DriveWithProfileNote extends Command100 {
-    private final FieldLogger m_fieldLogger;
+    private final SupplierLogger m_fieldLogger;
     private final Intake m_intake;
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
@@ -50,7 +50,7 @@ public class DriveWithProfileNote extends Command100 {
     private int m_count;
 
     public DriveWithProfileNote(
-            FieldLogger fieldLogger,
+            SupplierLogger fieldLogger,
             SupplierLogger parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,

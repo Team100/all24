@@ -32,12 +32,13 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.trajectory.Trajectory.State;
-import edu.wpi.first.util.function.FloatSupplier;
 
 /**
  * Avoids touching the suppliers if not enabled.
  * 
  * Each primitive logger is independently selectable.
+ * 
+ * TODO: support network tables time-alignment.
  */
 public class SupplierLogger {
     private final Telemetry m_telemetry;

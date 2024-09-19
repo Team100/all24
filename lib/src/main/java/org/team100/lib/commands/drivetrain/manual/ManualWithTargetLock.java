@@ -60,7 +60,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     private Pose2d m_prevPose;
 
     public ManualWithTargetLock(
-            FieldLogger fieldLogger,
+            SupplierLogger fieldLogger,
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,

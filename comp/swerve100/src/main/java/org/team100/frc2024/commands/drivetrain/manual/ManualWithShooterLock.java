@@ -74,7 +74,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private boolean isAligned;
 
     public ManualWithShooterLock(
-            FieldLogger fieldLogger,
+            SupplierLogger fieldLogger,
             SupplierLogger parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
