@@ -66,4 +66,10 @@ public class DummyUdpConsumers implements UdpConsumersInterface {
             System.out.printf("META key: %d type: %s, value: %s\n", key, type.name(), val);
     }
 
+    @Override
+    public void flush() {
+        if (PRINT)
+            System.out.printf("udp consumer flushing");
+    }
+
 }

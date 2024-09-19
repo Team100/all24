@@ -1,7 +1,12 @@
 package org.team100.logging;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.team100.lib.telemetry.UdpType;
 
@@ -26,10 +31,14 @@ import edu.wpi.first.util.datalog.StringLogEntry;
  */
 public class UdpConsumers implements UdpConsumersInterface {
     // write to network tables
-    private static final boolean PUB = false;
+    private static final boolean PUB = true;
 
     // write to disk
     private static final boolean LOG = false;
+
+    // write the count periodically
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    AtomicInteger counter = new AtomicInteger(0);
 
     NetworkTableInstance inst;
     DataLog log_file;
@@ -46,6 +55,9 @@ public class UdpConsumers implements UdpConsumersInterface {
     Map<Integer, StringLogEntry> stringEntries = new ConcurrentHashMap<>();
 
     public UdpConsumers() {
+        scheduler.scheduleAtFixedRate(
+                () -> System.out.printf("counter %d\n", counter.getAndSet(0)),
+                0, 1, SECONDS);
         if (PUB) {
             inst = NetworkTableInstance.getDefault();
             inst.startServer();
@@ -58,6 +70,7 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptBoolean(int key, boolean val) {
+        counter.incrementAndGet();
         if (PUB) {
             BooleanPublisher pub = booleanPublishers.get(key);
             if (pub != null)
@@ -72,6 +85,7 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptDouble(int key, double val) {
+        counter.incrementAndGet();
         if (PUB) {
             DoublePublisher pub = doublePublishers.get(key);
             if (pub != null)
@@ -86,6 +100,7 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptInt(int key, int val) {
+        counter.incrementAndGet();
         if (PUB) {
             IntegerPublisher pub = intPublishers.get(key);
             if (pub != null)
@@ -100,6 +115,7 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptDoubleArray(int key, double[] val) {
+        counter.incrementAndGet();
         if (PUB) {
             DoubleArrayPublisher pub = doubleArrayPublishers.get(key);
             if (pub != null)
@@ -114,6 +130,7 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptString(int key, String val) {
+        counter.incrementAndGet();
         if (PUB) {
             StringPublisher pub = stringPublishers.get(key);
             if (pub != null)
@@ -128,6 +145,7 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptMeta(int key, UdpType type, String val) {
+        counter.incrementAndGet();
         if (PUB) {
             switch (type) {
                 case BOOLEAN -> {
@@ -192,5 +210,17 @@ public class UdpConsumers implements UdpConsumersInterface {
                 }
             }
         }
+    }
+
+    /**
+     * Network Tables has a compile-time 2MB output buffer, so it would be good to
+     * call flush() often enough to keep it from filling up (thus dropping values).
+     */
+    @Override
+    public void flush() {
+        if (PUB)
+            inst.flush();
+        if (LOG)
+            log_file.flush();
     }
 }

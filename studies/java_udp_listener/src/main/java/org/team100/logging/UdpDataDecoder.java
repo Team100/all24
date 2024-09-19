@@ -7,16 +7,18 @@ import org.team100.lib.telemetry.UdpPrimitiveProtocol2.ProtocolException;
 import org.team100.lib.telemetry.UdpType;
 
 public class UdpDataDecoder {
+    private static final int kFlushFrequency = 50;
     private final UdpConsumersInterface m_consumers;
-
-    
-    
+    private int flushCounter = 0;
 
     public UdpDataDecoder(UdpConsumersInterface consumers) {
         m_consumers = consumers;
     }
 
-    /** Starts at buf.position() */
+    /**
+     * Starts at buf.position()
+     * Flushes the consumers at the end.
+     */
     public void decode(ByteBuffer buf) throws ProtocolException {
         int key = UdpPrimitiveProtocol2.decodeKey(buf);
         UdpType type = UdpPrimitiveProtocol2.decodeType(buf);
@@ -46,6 +48,10 @@ public class UdpDataDecoder {
                 m_consumers.acceptString(key, v);
             }
             default -> System.out.println("unknown data decoder type");
+        }
+        if (flushCounter++ > kFlushFrequency) {
+            m_consumers.flush();
+            flushCounter = 0;
         }
     }
 }

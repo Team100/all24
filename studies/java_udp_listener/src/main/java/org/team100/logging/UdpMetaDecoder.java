@@ -7,7 +7,10 @@ import org.team100.lib.telemetry.UdpPrimitiveProtocol2.ProtocolException;
 import org.team100.lib.telemetry.UdpType;
 
 public class UdpMetaDecoder {
+    private static final int kFlushFrequency = 50;
+
     private final UdpConsumersInterface m_consumers;
+    private int flushCounter = 0;
 
     public UdpMetaDecoder(UdpConsumersInterface consumers) {
         m_consumers = consumers;
@@ -19,5 +22,9 @@ public class UdpMetaDecoder {
         UdpType type = UdpPrimitiveProtocol2.decodeType(buf);
         String v = UdpPrimitiveProtocol2.decodeString(buf);
         m_consumers.acceptMeta(key, type, v);
+        if (flushCounter++ > kFlushFrequency) {
+            m_consumers.flush();
+            flushCounter = 0;
+        }
     }
 }

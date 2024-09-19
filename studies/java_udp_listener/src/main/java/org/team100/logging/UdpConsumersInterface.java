@@ -16,4 +16,6 @@ public interface UdpConsumersInterface {
 
     void acceptMeta(int key, UdpType type, String val);
 
+    void flush();
+
 }

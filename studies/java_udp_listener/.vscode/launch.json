@@ -9,7 +9,8 @@
         "name": "UdpLogBridge",
         "request": "launch",
         "mainClass": "org.team100.logging.UdpLogBridge",
-        "projectName": "java_udp_listener"
+        "projectName": "java_udp_listener",
+        "vmArgs": "-Djava.library.path=build/jni/release"
     },
     {
         "type": "java",
