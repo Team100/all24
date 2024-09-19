@@ -34,7 +34,7 @@ public class UdpConsumers implements UdpConsumersInterface {
     private static final boolean PUB = true;
 
     // write to disk
-    private static final boolean LOG = false;
+    private static final boolean LOG = true;
 
     // write the count periodically
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
