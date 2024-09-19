@@ -16,7 +16,7 @@ public class SelectableAngularPositionServo implements AngularPositionServo {
             AngularPositionServo whenFalse,
             BooleanSupplier selector) {
         m_whenTrue = whenTrue;
-        m_whenFalse = whenFalse;
+        m_whenFalse = whenTrue;
         m_selector = selector;
     }
 
@@ -133,11 +133,13 @@ public class SelectableAngularPositionServo implements AngularPositionServo {
 
     @Override
     public void periodic() {
-        if (m_selector.getAsBoolean()) {
-            m_whenTrue.periodic();
-        } else {
-            m_whenFalse.periodic();
-        }
+        // if (m_selector.getAsBoolean()) {
+        //     m_whenTrue.periodic();
+        // } else {
+        //     m_whenFalse.periodic();
+        // }
+
+        m_whenTrue.periodic();
     }
 
 }

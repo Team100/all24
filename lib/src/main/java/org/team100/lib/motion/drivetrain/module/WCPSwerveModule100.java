@@ -77,7 +77,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         // TODO: revisit these constants
         PIDConstants drivePidConstants = new PIDConstants(.2); // .2
-        PIDConstants turningPidConstants = new PIDConstants(.32); // 5
+        PIDConstants turningPidConstants = new PIDConstants(1.5); // 5
         Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
         Feedforward100 driveFF = Feedforward100.makeWCPSwerveDriveFalcon6();
 
@@ -100,7 +100,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 kinodynamics,
                 drive,
                 motorPhase,
-                turningPidConstants,
+                turningPidConstants,    
                 turningFF);
 
         return new WCPSwerveModule100(name, driveServo, turningServo);
@@ -168,6 +168,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoder,
                 gearRatio,
                 profile);
+                
         turningServo.reset();
         return turningServo;
     }
@@ -205,7 +206,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         return new SelectableAngularPositionServo(
                 outboard,
-                onboard,
+                outboard,
                 () -> Experiments.instance.enabled(Experiment.OutboardSteering));
     }
 
@@ -218,6 +219,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         // into the secondary, so soften the response.
         final double primaryAuthority = 0.1;
         CombinedEncoder combinedEncoder = new CombinedEncoder(
+                parent,
                 turningEncoder,
                 primaryAuthority,
                 mech);
@@ -225,6 +227,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 parent,
                 mech,
                 combinedEncoder);
+
         servo.setProfile(profile);
         return servo;
     }
