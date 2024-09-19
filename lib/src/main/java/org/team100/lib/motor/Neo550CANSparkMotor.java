@@ -31,6 +31,6 @@ public class Neo550CANSparkMotor extends CANSparkMotor {
 
     @Override
     public double kTNm_amp() {
-        return 0.3944;
+        return 0.009;
     }
 }
