@@ -1,24 +1,16 @@
 package org.team100.lib.telemetry;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.ByteBuffer;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.telemetry.UdpPrimitiveProtocol2.ProtocolException;
 
 class UdpPrimitiveProtocol2Test {
-
-    int key;
-    UdpType type;
-    Boolean boolVal;
-    Double doubleVal;
-    Integer intVal;
-    double[] doubleArrayVal;
-    Long longVal;
-    String stringVal;
 
     //////////////////////////////
     //
@@ -26,7 +18,7 @@ class UdpPrimitiveProtocol2Test {
     //
 
     @Test
-    void testKey() {
+    void testKey() throws ProtocolException {
         byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
@@ -42,13 +34,14 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[6]); //
 
         bb.rewind();
-        int offset = UdpPrimitiveProtocol2.decodeKey(bb, 2, k -> key = k);
-        assertEquals(4, offset);
+        bb.position(2);
+        int key = UdpPrimitiveProtocol2.decodeKey(bb);
+        assertEquals(4, bb.position());
         assertEquals(16, key);
     }
 
     @Test
-    void testType() {
+    void testType() throws ProtocolException {
         byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
@@ -64,13 +57,14 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[6]); //
 
         bb.rewind();
-        int offset = UdpPrimitiveProtocol2.decodeType(bb, 4, t -> type = t);
-        assertEquals(5, offset);
+        bb.position(4);
+        UdpType type = UdpPrimitiveProtocol2.decodeType(bb);
+        assertEquals(5, bb.position());
         assertEquals(UdpType.BOOLEAN, type);
     }
 
     @Test
-    void testBoolean() {
+    void testBoolean() throws ProtocolException {
         byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
@@ -86,16 +80,14 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[6]); //
 
         bb.rewind();
-        BiConsumer<Integer, Boolean> consumer = (k, v) -> {
-            key = k;
-            boolVal = v;
-        };
-        int offset = UdpPrimitiveProtocol2.decodeBoolean(bb, 2, consumer);
-        assertEquals(-1, offset);
+        bb.position(5);
+        boolean v = UdpPrimitiveProtocol2.decodeBoolean(bb);
+        assertEquals(6, bb.position());
+        assertTrue(v);
     }
 
     @Test
-    void testDouble() {
+    void testDouble() throws ProtocolException {
         byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
@@ -118,14 +110,22 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[13]);
 
         bb.rewind();
-        int offset = UdpPrimitiveProtocol2.decodeDouble(bb, 5, v -> doubleVal = v);
-        assertEquals(13, offset);
-        assertEquals(15, doubleVal);
-
+        bb.position(5);
+        double v = UdpPrimitiveProtocol2.decodeDouble(bb);
+        assertEquals(13, bb.position());
+        assertEquals(15, v);
     }
 
     @Test
-    void testInt() {
+    void testDoubleBounds() {
+        byte[] b = new byte[5];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        assertThrows(UdpPrimitiveProtocol2.ProtocolException.class,
+                () -> UdpPrimitiveProtocol2.decodeDouble(bb));
+    }
+
+    @Test
+    void testInt() throws ProtocolException {
         byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
@@ -144,16 +144,14 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[9]);
 
         bb.rewind();
-        BiConsumer<Integer, Integer> consumer = (k, v) -> {
-            key = k;
-            intVal = v;
-        };
-        int offset = UdpPrimitiveProtocol2.decodeInt(bb, 2, consumer);
-        assertEquals(-1, offset);
+        bb.position(5);
+        int v = UdpPrimitiveProtocol2.decodeInt(bb);
+        assertEquals(9, bb.position());
+        assertEquals(15, v);
     }
 
     @Test
-    void testDoubleArray() {
+    void testDoubleArray() throws ProtocolException {
         byte[] b = new byte[24];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
@@ -186,16 +184,14 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[23]); //
 
         bb.rewind();
-        BiConsumer<Integer, double[]> consumer = (k, v) -> {
-            key = k;
-            doubleArrayVal = v;
-        };
-        int offset = UdpPrimitiveProtocol2.decodeDoubleArray(bb, 2, consumer);
-        assertEquals(-1, offset);
+        bb.position(5);
+        double[] v = UdpPrimitiveProtocol2.decodeDoubleArray(bb);
+        assertEquals(22, bb.position());
+        assertArrayEquals(new double[] { 1.0, 2.0 }, v);
     }
 
     @Test
-    void testLong() {
+    void testLong() throws ProtocolException {
         byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
@@ -218,17 +214,15 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[13]);
 
         bb.rewind();
-        BiConsumer<Integer, Long> consumer = (k, v) -> {
-            key = k;
-            longVal = v;
-        };
-        int offset = UdpPrimitiveProtocol2.decodeLong(bb, 2, consumer);
-        assertEquals(-1, offset);
+        bb.position(5);
+        long v = UdpPrimitiveProtocol2.decodeLong(bb);
+        assertEquals(13, bb.position());
+        assertEquals(15, v);
 
     }
 
     @Test
-    void testString() {
+    void testString() throws ProtocolException {
         byte[] b = new byte[12];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
@@ -249,12 +243,10 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[11]);
 
         bb.rewind();
-        BiConsumer<Integer, String> consumer = (k, v) -> {
-            key = k;
-            stringVal = v;
-        };
-        int offset = UdpPrimitiveProtocol2.decodeString(bb, 2, consumer);
-        assertEquals(-1, offset);
+        bb.position(5);
+        String v = UdpPrimitiveProtocol2.decodeString(bb);
+        assertEquals(11, bb.position());
+        assertEquals("hello", v);
     }
 
     ////////////////////////////////////////////

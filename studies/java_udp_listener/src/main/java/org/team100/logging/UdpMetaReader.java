@@ -6,16 +6,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 
+import org.team100.lib.telemetry.UdpPrimitiveProtocol2;
+import org.team100.lib.telemetry.UdpPrimitiveProtocol2.ProtocolException;
 import org.team100.lib.telemetry.UdpSender;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.util.datalog.DataLog;
-
 public class UdpMetaReader implements Runnable {
-    // write to network tables
-    private static final boolean PUB = false;
-    // write to disk
-    private static final boolean LOG = false;
+    private final UdpMetaDecoder m_decoder;
 
     /** nullable */
     private final DatagramChannel m_channel;
@@ -23,31 +19,30 @@ public class UdpMetaReader implements Runnable {
     /** TODO: maybe this should be the "protocol"'s buffer' */
     private final ByteBuffer m_buffer;
 
-    public UdpMetaReader() {
+    public UdpMetaReader(UdpMetaDecoder decoder) {
+        m_decoder = decoder;
         m_channel = makeChannel(UdpSender.kmetadataPort);
         m_buffer = ByteBuffer.allocateDirect(UdpSender.MTU);
         // big-endian is the default, but just to make it clear...
         m_buffer.order(ByteOrder.BIG_ENDIAN);
-
-        if (PUB) {
-            NetworkTableInstance inst = NetworkTableInstance.getDefault();
-            inst.startServer();
-        }
-        if (LOG) {
-            // log_file = DataLog(dir=LOG_DIR, filename=LOG_FILENAME)
-            DataLog log_file = new DataLog("", "", 0.1);
-        }
     }
 
     @Override
     public void run() {
+        System.out.println("meta reader running...");
         while (true) {
             try {
-                int bytesRead = m_channel.read(m_buffer);
-
-
-                
-            } catch (IOException e) {
+                m_buffer.clear();
+                m_channel.receive(m_buffer);
+                m_buffer.limit(m_buffer.position());
+                m_buffer.position(0);
+                // System.out.printf("read meta buffer position %d remaining %d\n", m_buffer.position(), m_buffer.remaining());
+                // packet starts with timestamp
+                long timestamp = UdpPrimitiveProtocol2.decodeLong(m_buffer);
+                while (m_buffer.remaining() > 0) {
+                    m_decoder.decode(m_buffer);
+                }
+            } catch (IOException | ProtocolException e) {
                 e.printStackTrace();
             }
         }
@@ -56,8 +51,9 @@ public class UdpMetaReader implements Runnable {
     private static DatagramChannel makeChannel(int port) {
         try {
             DatagramChannel channel = DatagramChannel.open();
+            channel.configureBlocking(true);
             InetSocketAddress sockAddr = new InetSocketAddress(port);
-            channel.connect(sockAddr);
+            channel.bind(sockAddr);
             return channel;
         } catch (IOException e) {
             e.printStackTrace();

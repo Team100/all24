@@ -6,6 +6,13 @@
   "configurations": [
     {
         "type": "java",
+        "name": "UdpLogBridge",
+        "request": "launch",
+        "mainClass": "org.team100.logging.UdpLogBridge",
+        "projectName": "java_udp_listener"
+    },
+    {
+        "type": "java",
         "name": "Main",
         "request": "launch",
         "mainClass": "org.team100.logging.Main",

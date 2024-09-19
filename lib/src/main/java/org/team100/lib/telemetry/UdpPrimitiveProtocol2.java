@@ -1,5 +1,6 @@
 package org.team100.lib.telemetry;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -38,12 +39,15 @@ import java.util.function.IntConsumer;
  *                          ^ boolean value = true (1 byte)
  * </pre>
  * 
- * Note this is a stateful protocol within the scope of a single message,
- * because of the "current type". This implies that the message itself is
- * part of the state, so it is contained here. And because it would be
- * confusing to reuse, each instance is intended to be used once.
+ * Decoders throw ProtocolException in case of bounds exceptions.
+ * 
+ * These operations used to use offsets but the only use cases are
+ * sequential, so i converted them all to relative.
  */
 public class UdpPrimitiveProtocol2 {
+    public static class ProtocolException extends Exception {
+
+    }
 
     private final ByteBuffer m_buffer;
 
@@ -108,17 +112,25 @@ public class UdpPrimitiveProtocol2 {
     }
 
     /** just the key */
-    public static int decodeKey(ByteBuffer buf, int offset, IntConsumer consumer) {
-        consumer.accept(buf.getChar(offset));
-        return offset + 2;
+    public static int decodeKey(ByteBuffer buf) throws ProtocolException {
+        try {
+            return buf.getChar();
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new ProtocolException();
+        }
     }
 
     /** just the type */
-    static int decodeType(ByteBuffer buf, int offset, Consumer<UdpType> consumer) {
-        byte t = buf.get(offset);
-        consumer.accept(UdpType.get(t));
-        return offset + 1;
+    public static UdpType decodeType(ByteBuffer buf) throws ProtocolException {
+        try {
+            return UdpType.get(buf.get());
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new ProtocolException();
+        }
     }
+
+    // TODO: use bool as return value for the encoders; i never use the offset
+    // number anyway.
 
     /**
      * <pre>
@@ -138,8 +150,12 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
-    static int decodeBoolean(ByteBuffer buf, int offset, BiConsumer<Integer, Boolean> consumer) {
-        return -2;
+    public static boolean decodeBoolean(ByteBuffer buf) throws ProtocolException {
+        try {
+            return buf.get() != 0;
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new ProtocolException();
+        }
     }
 
     /**
@@ -161,10 +177,38 @@ public class UdpPrimitiveProtocol2 {
     }
 
     /** just the double part */
-    static int decodeDouble(ByteBuffer buf, int offset, DoubleConsumer consumer) {
-        double val = buf.getDouble(offset);
-        consumer.accept(val);
-        return offset + 8;
+    public static double decodeDouble(ByteBuffer buf) throws ProtocolException {
+        try {
+            return buf.getDouble();
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new ProtocolException();
+        }
+    }
+
+    /**
+     * <pre>
+     * KKTiiii
+     * ^^      key (2 bytes)
+     *   ^     type (1 byte)
+     *    ^^^^ int value (4 bytes)
+     * </pre>
+     */
+    static int encodeInt(ByteBuffer buf, int key, int val) {
+        final int totalLength = 7;
+        if (buf.remaining() < totalLength)
+            return 0;
+        buf.putChar((char) key); // 2 bytes
+        buf.put(UdpType.INT.id); // type = 1 byte
+        buf.putInt(val); // 4 bytes
+        return totalLength;
+    }
+
+    public static int decodeInt(ByteBuffer buf) throws ProtocolException {
+        try {
+            return buf.getInt();
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new ProtocolException();
+        }
     }
 
     /**
@@ -195,32 +239,45 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
-    static int decodeDoubleArray(ByteBuffer buf, int offset, BiConsumer<Integer, double[]> consumer) {
-        return -2;
-
+    public static double[] decodeDoubleArray(ByteBuffer buf) throws ProtocolException {
+        try {
+            int length = buf.get();
+            double[] result = new double[length];
+            for (int i = 0; i < length; ++i) {
+                result[i] = buf.getDouble();
+            }
+            return result;
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new ProtocolException();
+        }
     }
 
     /**
+     * Note: try to avoid logging long ints, they're needlessly ... long.
+     * 
      * <pre>
-     * KKTiiii
-     * ^^      key (2 bytes)
-     *   ^     type (1 byte)
-     *    ^^^^ int value (4 bytes)
+     * KKTllllllll
+     * ^^          key (2 bytes)
+     *   ^         type (1 byte)
+     *    ^^^^^^^^ long value (8 bytes)
      * </pre>
      */
-    static int encodeInt(ByteBuffer buf, int key, int val) {
-        final int totalLength = 7;
+    static int encodeLong(ByteBuffer buf, int key, long val) {
+        final int totalLength = 11;
         if (buf.remaining() < totalLength)
             return 0;
         buf.putChar((char) key); // 2 bytes
-        buf.put(UdpType.INT.id); // type = 1 byte
-        buf.putInt(val); // 4 bytes
+        buf.put(UdpType.LONG.id); // type = 1 byte
+        buf.putLong(val); // 8 bytes
         return totalLength;
     }
 
-    static int decodeInt(ByteBuffer buf, int offset, BiConsumer<Integer, Integer> consumer) {
-        return -2;
-
+    public static long decodeLong(ByteBuffer buf) throws ProtocolException {
+        try {
+            return buf.getLong();
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new ProtocolException();
+        }
     }
 
     /**
@@ -249,37 +306,14 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
-    static int decodeString(ByteBuffer buf, int offset, BiConsumer<Integer, String> consumer) {
-        return -2;
-
-    }
-
-    /**
-     * Note: try to avoid logging long ints, they're needlessly ... long.
-     * 
-     * <pre>
-     * KKTllllllll
-     * ^^          key (2 bytes)
-     *   ^         type (1 byte)
-     *    ^^^^^^^^ long value (8 bytes)
-     * </pre>
-     */
-    static int encodeLong(ByteBuffer buf, int key, long val) {
-        final int totalLength = 11;
-        if (buf.remaining() < totalLength)
-            return 0;
-        buf.putChar((char) key); // 2 bytes
-        buf.put(UdpType.LONG.id); // type = 1 byte
-        buf.putLong(val); // 8 bytes
-        return totalLength;
-    }
-
-    static int decodeLong(ByteBuffer buf, int offset, BiConsumer<Integer, Long> consumer) {
-        return -2;
-    }
-
-    // TODO: public?  private?
-    public static int decodeLong(ByteBuffer buf, int offset, Consumer<Long> consumer) {
-        return -2;
+    public static String decodeString(ByteBuffer buf) throws ProtocolException {
+        try {
+            int length = buf.get();
+            byte[] bytes = new byte[length];
+            buf.get(bytes);
+            return new String(bytes, StandardCharsets.US_ASCII);
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new ProtocolException();
+        }
     }
 }

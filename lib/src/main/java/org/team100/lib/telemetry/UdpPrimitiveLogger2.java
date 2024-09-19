@@ -118,6 +118,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     /** Send at least one packet. */
     public void flush() {
+        System.out.println("flushing");
         m_dataProtocol.clear();
         flushBoolean();
         flushDouble();

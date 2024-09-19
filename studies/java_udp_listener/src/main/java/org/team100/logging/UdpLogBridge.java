@@ -3,8 +3,12 @@ package org.team100.logging;
 public class UdpLogBridge {
     public static void main(String[] args) {
         try {
-            UdpDataReader dataReader = new UdpDataReader();
-            UdpMetaReader metaReader = new UdpMetaReader();
+            //UdpConsumersInterface consumers = new UdpConsumers();
+            UdpConsumersInterface consumers = new DummyUdpConsumers();
+            UdpDataDecoder dataDecoder = new UdpDataDecoder(consumers);
+            UdpMetaDecoder metaDecoder = new UdpMetaDecoder(consumers);
+            UdpDataReader dataReader = new UdpDataReader(dataDecoder);
+            UdpMetaReader metaReader = new UdpMetaReader(metaDecoder);
             Thread dataReaderThread = new Thread(dataReader);
             dataReaderThread.start();
             Thread metaReaderThread = new Thread(metaReader);

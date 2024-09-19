@@ -24,6 +24,17 @@ class ByteBufferTest {
     }
 
     @Test
+    void testPosition() {
+        // is the position updated by get(offset)?
+        ByteBuffer bb = ByteBuffer.allocate(10);
+        assertEquals(0, bb.position());
+        byte b = bb.get(); // updates position
+        assertEquals(1, bb.position());
+        b = bb.get(2); // does not update position
+        assertEquals(1, bb.position());
+    }
+
+    @Test
     void testBufferPerformance() {
         final int N = 10000000;
         final int S = 500;

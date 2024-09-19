@@ -50,10 +50,10 @@ public class UdpSender implements Consumer<ByteBuffer> {
             // big buffer does not help but doesn't hurt
             channel.setOption(StandardSocketOptions.SO_SNDBUF, 1000000);
 
-            // InetAddress m_addr = InetAddress.getByAddress(ADDR);
+            InetAddress m_addr = InetAddress.getByAddress(ADDR);
 
-            // NOTE! don't use localhost in prod!  for testing!
-            InetAddress m_addr = InetAddress.getLocalHost();
+            // NOTE! don't use localhost in prod! for testing!
+            // InetAddress m_addr = InetAddress.getLocalHost();
 
             InetSocketAddress sockAddr = new InetSocketAddress(m_addr, port);
             // this will fail for localhost if there's no listener
@@ -67,11 +67,17 @@ public class UdpSender implements Consumer<ByteBuffer> {
 
     @Override
     public void accept(ByteBuffer bb) {
-        if (m_channel == null)
+        if (m_channel == null) {
+            System.out.println("no channel");
             return;
+        }
         try {
+            // should write bb.remaining() bytes.
+            // int bytesWritten = m_channel.write(bb);
             m_channel.write(bb);
-            m_counter++;
+            // m_counter++;
+            // System.out.println("counter " + m_counter);
+            // System.out.println("bytes " + bytesWritten);
         } catch (IOException e) {
             e.printStackTrace();
         }

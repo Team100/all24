@@ -345,7 +345,9 @@ class UdpPrimitiveLogger2Test {
         s.log("hello");
         l.flush();
         assertEquals(17, bb.remaining());
-        byte[] b = bb.array();
+        byte[] b = new byte[17];
+        bb.rewind();
+        bb.get(b);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]);
@@ -367,7 +369,11 @@ class UdpPrimitiveLogger2Test {
         // this should fill the buffer with the label
         l.dumpLabels();
         assertEquals(17, mb.remaining());
-        b = mb.array();
+
+        b = new byte[17];
+        mb.rewind();
+        mb.get(b);
+
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]);
