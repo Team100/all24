@@ -8,6 +8,8 @@ import org.team100.lib.motor.BareMotor;
 import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
+import edu.wpi.first.math.MathUtil;
+
 /**
  * Uses a motor and gears to produce rotational output, e.g. an arm joint.
  * 
@@ -45,6 +47,7 @@ public class RotaryMechanism implements Glassy {
             double outputRad_S,
             double outputAccelRad_S2,
             double outputTorqueNm) {
+                
         m_motor.setVelocity(
                 outputRad_S * m_gearRatio,
                 outputAccelRad_S2 * m_gearRatio,
@@ -94,10 +97,14 @@ public class RotaryMechanism implements Glassy {
         m_encoder.setEncoderPositionRad(motorPositionRad);
     }
 
+    public OptionalDouble getEncoderPosition() {
+        return m_encoder.getPositionRad();
+    }
+
     public void periodic() {
         // do some logging
-        m_logger.logOptionalDouble(Level.TRACE, "velocity (rad_s)", this::getVelocityRad_S);
-        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", this::getPositionRad);
+        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", ()->getVelocityRad_S().getAsDouble());
+        m_logger.logDouble(Level.TRACE, "position (rad)", ()->MathUtil.angleModulus(getPositionRad().getAsDouble()));
         m_motor.periodic();
         m_encoder.periodic();
     }
