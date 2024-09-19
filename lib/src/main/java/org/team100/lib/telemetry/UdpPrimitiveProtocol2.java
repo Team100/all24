@@ -4,6 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
 
 /**
  * Log data protocol 2
@@ -104,22 +107,17 @@ public class UdpPrimitiveProtocol2 {
         return encodeDoubleArray(m_buffer, key, val) != 0;
     }
 
-    /**
-     * Encode a type
-     * 
-     * <pre>
-     * TT
-     * ^^ value (2 bytes)
-     * </pre>
-     * 
-     * @return length (2) if written, 0 if not
-     */
-    static int encodeType(ByteBuffer buf, UdpType val) {
-        final int totalLength = 2;
-        if (buf.remaining() < totalLength)
-            return 0;
-        buf.putChar((char) val.id); // 2 bytes
-        return totalLength;
+    /** just the key */
+    static int decodeKey(ByteBuffer buf, int offset, IntConsumer consumer) {
+        consumer.accept(buf.getChar(offset));
+        return offset + 2;
+    }
+
+    /** just the type */
+    static int decodeType(ByteBuffer buf, int offset, Consumer<UdpType> consumer) {
+        byte t = buf.get(offset);
+        consumer.accept(UdpType.get(t));
+        return offset + 1;
     }
 
     /**
@@ -140,6 +138,10 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
+    static int decodeBoolean(ByteBuffer buf, int offset, BiConsumer<Integer, Boolean> consumer) {
+        return -2;
+    }
+
     /**
      * <pre>
      * KKTdddddddd
@@ -158,8 +160,11 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
-    static double decodeDouble(ByteBuffer buf, int offset) {
-        return buf.getDouble(offset);
+    /** just the double part */
+    static int decodeDouble(ByteBuffer buf, int offset, DoubleConsumer consumer) {
+        double val = buf.getDouble(offset);
+        consumer.accept(val);
+        return offset + 8;
     }
 
     /**
@@ -190,6 +195,11 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
+    static int decodeDoubleArray(ByteBuffer buf, int offset, BiConsumer<Integer, double[]> consumer) {
+        return -2;
+
+    }
+
     /**
      * <pre>
      * KKTiiii
@@ -206,6 +216,11 @@ public class UdpPrimitiveProtocol2 {
         buf.put(UdpType.INT.id); // type = 1 byte
         buf.putInt(val); // 4 bytes
         return totalLength;
+    }
+
+    static int decodeInt(ByteBuffer buf, int offset, BiConsumer<Integer, Integer> consumer) {
+        return -2;
+
     }
 
     /**
@@ -234,7 +249,8 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
-    static int decodeString(ByteBuffer buf, BiConsumer<Integer, String> consumer) {
+    static int decodeString(ByteBuffer buf, int offset, BiConsumer<Integer, String> consumer) {
+        return -2;
 
     }
 
@@ -258,7 +274,8 @@ public class UdpPrimitiveProtocol2 {
         return totalLength;
     }
 
-    static int decodeLong(ByteBuffer buf, BiConsumer<Integer, Long> consumer) {
+    static int decodeLong(ByteBuffer buf, int offset, BiConsumer<Integer, Long> consumer) {
+        return -2;
 
     }
 

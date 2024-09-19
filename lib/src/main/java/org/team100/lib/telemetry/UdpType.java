@@ -1,5 +1,7 @@
 package org.team100.lib.telemetry;
 
+import java.util.Arrays;
+
 enum UdpType {
     UNKNOWN(0),
     BOOLEAN(1),
@@ -10,6 +12,23 @@ enum UdpType {
     STRING(6);
 
     public final byte id;
+
+    private static final UdpType[] list = new UdpType[values().length];
+
+    static {
+        Arrays.fill(list, UNKNOWN);
+        for (UdpType u : values()) {
+            list[u.id] = u;
+        }
+    }
+
+    public static UdpType get(byte id) {
+        if (id < 0)
+            return UNKNOWN;
+        if (id > values().length)
+            return UNKNOWN;
+        return list[id];
+    }
 
     private UdpType(int typeId) {
         id = (byte) typeId;

@@ -5,56 +5,194 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.ByteBuffer;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
-
-import edu.wpi.first.wpilibj.Timer;
 
 class UdpPrimitiveProtocol2Test {
 
     int key;
-    String stringVal;
+    UdpType type;
+    Boolean boolVal;
+    Double doubleVal;
+    Integer intVal;
+    double[] doubleArrayVal;
     Long longVal;
+    String stringVal;
 
-    ///////////////////// STRING
+    //////////////////////////////
+    //
+    // single-type tests, encoding and decoding
+    //
 
     @Test
-    void testString() {
-        byte[] b = new byte[12];
+    void testKey() {
+        byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
-        assertEquals(9, len);
+        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        assertEquals(4, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // key high byte
         assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 6, b[4]); // type
-        assertEquals((byte) 5, b[5]); // length
-        assertEquals((byte) 104, b[6]); // h
-        assertEquals((byte) 101, b[7]); // e
-        assertEquals((byte) 108, b[8]); // l
-        assertEquals((byte) 108, b[9]); // l
-        assertEquals((byte) 111, b[10]); // o
-        assertEquals((byte) 0, b[11]);
+        assertEquals((byte) 1, b[4]); // type
+        assertEquals((byte) 1, b[5]); // value
+        assertEquals((byte) 0, b[6]); //
 
         bb.rewind();
-        BiConsumer<Integer, String> consumer = (k, v) -> {key = k; stringVal = v;};
-        int offset = UdpPrimitiveProtocol2.decodeString(bb, consumer);
+        int offset = UdpPrimitiveProtocol2.decodeKey(bb, 2, k -> key = k);
+        assertEquals(4, offset);
+        assertEquals(16, key);
+    }
+
+    @Test
+    void testType() {
+        byte[] b = new byte[16];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        // encoder doesn't start at the beginning
+        bb.position(2);
+        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        assertEquals(4, len);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]); // key high byte
+        assertEquals((byte) 16, b[3]); // key low byte
+        assertEquals((byte) 1, b[4]); // type
+        assertEquals((byte) 1, b[5]); // value
+        assertEquals((byte) 0, b[6]); //
+
+        bb.rewind();
+        int offset = UdpPrimitiveProtocol2.decodeType(bb, 4, t -> type = t);
+        assertEquals(5, offset);
+        assertEquals(UdpType.BOOLEAN, type);
+    }
+
+    @Test
+    void testBoolean() {
+        byte[] b = new byte[16];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        // encoder doesn't start at the beginning
+        bb.position(2);
+        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        assertEquals(4, len);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]); // key high byte
+        assertEquals((byte) 16, b[3]); // key low byte
+        assertEquals((byte) 1, b[4]); // type
+        assertEquals((byte) 1, b[5]); // value
+        assertEquals((byte) 0, b[6]); //
+
+        bb.rewind();
+        BiConsumer<Integer, Boolean> consumer = (k, v) -> {
+            key = k;
+            boolVal = v;
+        };
+        int offset = UdpPrimitiveProtocol2.decodeBoolean(bb, 2, consumer);
         assertEquals(-1, offset);
     }
 
     @Test
-    void testStringOverflow() {
-        byte[] b = new byte[12];
+    void testDouble() {
+        byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
-        assertEquals(0, len);
+        // encoder doesn't start at the beginning
+        bb.position(2);
+        int len = UdpPrimitiveProtocol2.encodeDouble(bb, 16, 15);
+        assertEquals(11, len);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]); // key high byte
+        assertEquals((byte) 16, b[3]); // key low byte
+        assertEquals((byte) 2, b[4]); // type
+        assertEquals((byte) 64, b[5]); // value MSB
+        assertEquals((byte) 46, b[6]); //
+        assertEquals((byte) 0, b[7]); //
+        assertEquals((byte) 0, b[8]); //
+        assertEquals((byte) 0, b[9]); //
+        assertEquals((byte) 0, b[10]); //
+        assertEquals((byte) 0, b[11]); //
+        assertEquals((byte) 0, b[12]); // value LSB
+        assertEquals((byte) 0, b[13]);
+
+        bb.rewind();
+        int offset = UdpPrimitiveProtocol2.decodeDouble(bb, 5, v -> doubleVal = v);
+        assertEquals(13, offset);
+        assertEquals(15, doubleVal);
+
     }
 
-    ////////////// LONG
+    @Test
+    void testInt() {
+        byte[] b = new byte[16];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        // encoder doesn't start at the beginning
+        bb.position(2);
+        int len = UdpPrimitiveProtocol2.encodeInt(bb, 16, 15);
+        assertEquals(7, len);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]); // key high byte
+        assertEquals((byte) 16, b[3]); // key low byte
+        assertEquals((byte) 3, b[4]); // type
+        assertEquals((byte) 0, b[5]); // value MSB
+        assertEquals((byte) 0, b[6]); //
+        assertEquals((byte) 0, b[7]); //
+        assertEquals((byte) 15, b[8]); // value LSB
+        assertEquals((byte) 0, b[9]);
+
+        bb.rewind();
+        BiConsumer<Integer, Integer> consumer = (k, v) -> {
+            key = k;
+            intVal = v;
+        };
+        int offset = UdpPrimitiveProtocol2.decodeInt(bb, 2, consumer);
+        assertEquals(-1, offset);
+    }
+
+    @Test
+    void testDoubleArray() {
+        byte[] b = new byte[24];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        // encoder doesn't start at the beginning
+        bb.position(2);
+        int len = UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
+        assertEquals(20, len); // key (2) length (1) data (2*8)
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]); // key high byte
+        assertEquals((byte) 16, b[3]); // key low byte
+        assertEquals((byte) 4, b[4]); // type
+        assertEquals((byte) 2, b[5]); // length
+        assertEquals((byte) 63, b[6]); // val MSB
+        assertEquals((byte) -16, b[7]); //
+        assertEquals((byte) 0, b[8]); //
+        assertEquals((byte) 0, b[9]); //
+        assertEquals((byte) 0, b[10]); //
+        assertEquals((byte) 0, b[11]); //
+        assertEquals((byte) 0, b[12]); //
+        assertEquals((byte) 0, b[13]); // val LSB
+        assertEquals((byte) 64, b[14]); // val MSB
+        assertEquals((byte) 0, b[15]); //
+        assertEquals((byte) 0, b[16]); //
+        assertEquals((byte) 0, b[17]); //
+        assertEquals((byte) 0, b[18]); //
+        assertEquals((byte) 0, b[19]); //
+        assertEquals((byte) 0, b[20]); //
+        assertEquals((byte) 0, b[21]); // val LSB
+        assertEquals((byte) 0, b[22]); //
+        assertEquals((byte) 0, b[23]); //
+
+        bb.rewind();
+        BiConsumer<Integer, double[]> consumer = (k, v) -> {
+            key = k;
+            doubleArrayVal = v;
+        };
+        int offset = UdpPrimitiveProtocol2.decodeDoubleArray(bb, 2, consumer);
+        assertEquals(-1, offset);
+    }
 
     @Test
     void testLong() {
@@ -80,41 +218,103 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[13]);
 
         bb.rewind();
-        BiConsumer<Integer, Long> consumer = (k, v) -> {key = k; longVal = v;};
-        int offset = UdpPrimitiveProtocol2.decodeLong(bb, consumer);
+        BiConsumer<Integer, Long> consumer = (k, v) -> {
+            key = k;
+            longVal = v;
+        };
+        int offset = UdpPrimitiveProtocol2.decodeLong(bb, 2, consumer);
         assertEquals(-1, offset);
 
     }
 
     @Test
-    void testLongOverflow() {
+    void testString() {
         byte[] b = new byte[12];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeLong(bb, 16, 2);
-        assertEquals(0, len);
-    }
-
-    //////////// INT
-
-    @Test
-    void testInt() {
-        byte[] b = new byte[16];
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeInt(bb, 16, 15);
-        assertEquals(7, len);
+        int len = UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
+        assertEquals(9, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
         assertEquals((byte) 0, b[2]); // key high byte
         assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 3, b[4]); // type
-        assertEquals((byte) 0, b[5]); // value MSB
-        assertEquals((byte) 0, b[6]); //
-        assertEquals((byte) 0, b[7]); //
-        assertEquals((byte) 15, b[8]); // value LSB
-        assertEquals((byte) 0, b[9]);
+        assertEquals((byte) 6, b[4]); // type
+        assertEquals((byte) 5, b[5]); // length
+        assertEquals((byte) 104, b[6]); // h
+        assertEquals((byte) 101, b[7]); // e
+        assertEquals((byte) 108, b[8]); // l
+        assertEquals((byte) 108, b[9]); // l
+        assertEquals((byte) 111, b[10]); // o
+        assertEquals((byte) 0, b[11]);
+
+        bb.rewind();
+        BiConsumer<Integer, String> consumer = (k, v) -> {
+            key = k;
+            stringVal = v;
+        };
+        int offset = UdpPrimitiveProtocol2.decodeString(bb, 2, consumer);
+        assertEquals(-1, offset);
+    }
+
+    ////////////////////////////////////////////
+    //
+    // multi-type buffer
+
+    @Test
+    void testStateful() {
+        UdpPrimitiveProtocol2 p = new UdpPrimitiveProtocol2();
+        assertTrue(p.putString(16, "hello"));
+        // 2 for type, 2 for key, 1 for length, string length 5 = 10 bytes
+        assertEquals(17, p.buffer().position());
+        assertTrue(p.putDouble(17, 1.0));
+        // 2 for type, 2 for key, 8 for double, 12 bytes + 10 = position 22
+        assertEquals(28, p.buffer().position());
+        ByteBuffer bb = p.buffer();
+        byte[] b = new byte[28];
+        bb.rewind();
+        bb.get(b);
+        assertEquals((byte) 0, b[0]);
+        assertEquals((byte) 0, b[1]);
+        assertEquals((byte) 0, b[2]);
+        assertEquals((byte) 0, b[3]);
+        assertEquals((byte) 0, b[4]);
+        assertEquals((byte) 0, b[5]);
+        assertEquals((byte) 0, b[6]);
+        assertEquals((byte) 0, b[7]); // timestamp
+        assertEquals((byte) 0, b[8]); // key MSB
+        assertEquals((byte) 16, b[9]); // key LSB
+        assertEquals((byte) 6, b[10]); // string type
+        assertEquals((byte) 5, b[11]); // value length
+        assertEquals((byte) 104, b[12]); // "h"
+        assertEquals((byte) 101, b[13]);// "e"
+        assertEquals((byte) 108, b[14]);// "l"
+        assertEquals((byte) 108, b[15]);// "l"
+        assertEquals((byte) 111, b[16]);// "o"
+        assertEquals((byte) 0, b[17]); // key MSB
+        assertEquals((byte) 17, b[18]); // key LSB
+        assertEquals((byte) 2, b[19]); // double type
+        assertEquals((byte) 63, b[20]);
+        assertEquals((byte) -16, b[21]);
+        assertEquals((byte) 0, b[22]);
+        assertEquals((byte) 0, b[23]);
+        assertEquals((byte) 0, b[24]);
+        assertEquals((byte) 0, b[25]);
+        assertEquals((byte) 0, b[26]);
+        assertEquals((byte) 0, b[27]);
+    }
+
+    ////////////////////////////////////////////
+    //
+    // Overflow tests
+
+    @Test
+    void testBooleanOverflow() {
+        byte[] b = new byte[10];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        bb.position(8);
+        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        assertEquals(0, len);
     }
 
     @Test
@@ -126,32 +326,46 @@ class UdpPrimitiveProtocol2Test {
         assertEquals(0, len);
     }
 
-    /////////////// DOUBLE
-
     @Test
-    void testDouble() {
-        byte[] b = new byte[16];
+    void testLongOverflow() {
+        byte[] b = new byte[12];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        // encoder doesn't start at the beginning
-        bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeDouble(bb, 16, 15);
-        assertEquals(11, len);
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]); // key high byte
-        assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 2, b[4]); // type
-        assertEquals((byte) 64, b[5]); // value MSB
-        assertEquals((byte) 46, b[6]); //
-        assertEquals((byte) 0, b[7]); //
-        assertEquals((byte) 0, b[8]); //
-        assertEquals((byte) 0, b[9]); //
-        assertEquals((byte) 0, b[10]); //
-        assertEquals((byte) 0, b[11]); //
-        assertEquals((byte) 0, b[12]); // value LSB
-        assertEquals((byte) 0, b[13]);
+        bb.position(8);
+        int len = UdpPrimitiveProtocol2.encodeLong(bb, 16, 2);
+        assertEquals(0, len);
     }
 
+    @Test
+    void testDoubleOverflow() {
+        byte[] b = new byte[10];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        bb.position(8);
+        int len = UdpPrimitiveProtocol2.encodeDouble(bb, 16, 2);
+        assertEquals(0, len);
+    }
+
+    @Test
+    void testDoubleArrayOverflow() {
+        byte[] b = new byte[10];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        bb.position(8);
+        int len = UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
+        assertEquals(0, len);
+    }
+
+    @Test
+    void testStringOverflow() {
+        byte[] b = new byte[12];
+        ByteBuffer bb = ByteBuffer.wrap(b);
+        bb.position(8);
+        int len = UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
+        assertEquals(0, len);
+    }
+
+    ///////////////////////////////////////
+    //
+    // Malformed packets
+    //
     // dangling key tests
     // make sure we don't write a key with no value
     // a packet of doubles is 2 bytes for type, then 10 bytes per key+double
@@ -226,244 +440,4 @@ class UdpPrimitiveProtocol2Test {
         assertEquals((byte) 0, b[3]); //
         assertEquals((byte) 0, b[4]); //
     }
-
-    @Test
-    void testDoubleOverflow() {
-        byte[] b = new byte[10];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeDouble(bb, 16, 2);
-        assertEquals(0, len);
-    }
-
-    ///////////////////
-
-    @Test
-    void testBoolean() {
-        byte[] b = new byte[16];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        // encoder doesn't start at the beginning
-        bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
-        assertEquals(4, len);
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]); // key high byte
-        assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 1, b[4]); // type
-        assertEquals((byte) 1, b[5]); // value
-        assertEquals((byte) 0, b[6]); //
-    }
-
-    @Test
-    void testBooleanOverflow() {
-        byte[] b = new byte[10];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
-        assertEquals(0, len);
-    }
-
-    /////////////////////
-
-    @Test
-    void testDoubleArray() {
-        byte[] b = new byte[24];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        // encoder doesn't start at the beginning
-        bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
-        assertEquals(20, len); // key (2) length (1) data (2*8)
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]); // key high byte
-        assertEquals((byte) 16, b[3]); // key low byte
-        assertEquals((byte) 4, b[4]); // type
-        assertEquals((byte) 2, b[5]); // length
-        assertEquals((byte) 63, b[6]); // val MSB
-        assertEquals((byte) -16, b[7]); //
-        assertEquals((byte) 0, b[8]); //
-        assertEquals((byte) 0, b[9]); //
-        assertEquals((byte) 0, b[10]); //
-        assertEquals((byte) 0, b[11]); //
-        assertEquals((byte) 0, b[12]); //
-        assertEquals((byte) 0, b[13]); // val LSB
-        assertEquals((byte) 64, b[14]); // val MSB
-        assertEquals((byte) 0, b[15]); //
-        assertEquals((byte) 0, b[16]); //
-        assertEquals((byte) 0, b[17]); //
-        assertEquals((byte) 0, b[18]); //
-        assertEquals((byte) 0, b[19]); //
-        assertEquals((byte) 0, b[20]); //
-        assertEquals((byte) 0, b[21]); // val LSB
-        assertEquals((byte) 0, b[22]); //
-        assertEquals((byte) 0, b[23]); //
-    }
-
-    @Test
-    void testDoubleArrayOverflow() {
-        byte[] b = new byte[10];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
-        assertEquals(0, len);
-    }
-
-    /////////////////// TYPE
-
-    @Test
-    void testType() {
-        byte[] b = new byte[12];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        // encoder doesn't start at the beginning
-        bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeType(bb, UdpType.INT);
-        assertEquals(2, len);
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 3, b[3]);
-    }
-
-    @Test
-    void testTypeOverflow() {
-        byte[] b = new byte[10];
-        ByteBuffer bb = ByteBuffer.wrap(b);
-        bb.position(10); // off the end
-        int len = UdpPrimitiveProtocol2.encodeType(bb, UdpType.INT);
-        assertEquals(0, len);
-    }
-
-  
-
-    @Test
-    void testStateful() {
-        UdpPrimitiveProtocol2 p = new UdpPrimitiveProtocol2();
-        assertTrue(p.putString(16, "hello"));
-        // 2 for type, 2 for key, 1 for length, string length 5 = 10 bytes
-        assertEquals(17, p.buffer().position());
-        assertTrue(p.putDouble(17, 1.0));
-        // 2 for type, 2 for key, 8 for double, 12 bytes + 10 = position 22
-        assertEquals(28, p.buffer().position());
-        ByteBuffer bb = p.buffer();
-        byte[] b = new byte[28];
-        bb.rewind();
-        bb.get(b);
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 0, b[3]);
-        assertEquals((byte) 0, b[4]);
-        assertEquals((byte) 0, b[5]);
-        assertEquals((byte) 0, b[6]);
-        assertEquals((byte) 0, b[7]); // timestamp
-        assertEquals((byte) 0, b[8]); // key MSB
-        assertEquals((byte) 16, b[9]); // key LSB
-        assertEquals((byte) 6, b[10]); // string type
-        assertEquals((byte) 5, b[11]); // value length
-        assertEquals((byte) 104, b[12]); // "h"
-        assertEquals((byte) 101, b[13]);// "e"
-        assertEquals((byte) 108, b[14]);// "l"
-        assertEquals((byte) 108, b[15]);// "l"
-        assertEquals((byte) 111, b[16]);// "o"
-        assertEquals((byte) 0, b[17]); // key MSB
-        assertEquals((byte) 17, b[18]); // key LSB
-        assertEquals((byte) 2, b[19]); // double type
-        assertEquals((byte) 63, b[20]);
-        assertEquals((byte) -16, b[21]);
-        assertEquals((byte) 0, b[22]);
-        assertEquals((byte) 0, b[23]);
-        assertEquals((byte) 0, b[24]);
-        assertEquals((byte) 0, b[25]);
-        assertEquals((byte) 0, b[26]);
-        assertEquals((byte) 0, b[27]);
-    }
-
-    /**
-     * Encoding itself is quite fast, 4 ns per key, about 1 ns
-     * per int on my machine, which is about as fast as it can go, I think.
-     */
-    @Test
-    void testEncodingPerformance() throws Exception {
-        final int ITERATIONS = 200000000;
-        final int BUFFER_SIZE = 10000000;
-
-        // huge buffer for this test; we're testing the encoding.
-        UdpPrimitiveProtocol2 p = new UdpPrimitiveProtocol2(BUFFER_SIZE);
-
-        {
-            p.clear();
-            double t1 = Timer.getFPGATimestamp();
-            for (int i = 0; i < ITERATIONS; ++i) {
-                if (!p.putBoolean(17, true))
-                    p.clear();
-            }
-            double t2 = Timer.getFPGATimestamp();
-            System.out.printf("boolean duration sec %.3f\n", t2 - t1);
-            System.out.printf("boolean duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
-        }
-
-        {
-            p.clear();
-            double t1 = Timer.getFPGATimestamp();
-            for (int i = 0; i < ITERATIONS; ++i) {
-                if (!p.putDouble(17, 1.0))
-                    p.clear();
-            }
-            double t2 = Timer.getFPGATimestamp();
-            System.out.printf("double duration sec %.3f\n", t2 - t1);
-            System.out.printf("double duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
-        }
-        {
-            p.clear();
-            double t1 = Timer.getFPGATimestamp();
-            for (int i = 0; i < ITERATIONS; ++i) {
-                if (!p.putInt(17, 1))
-                    p.clear();
-            }
-            double t2 = Timer.getFPGATimestamp();
-            System.out.printf("int duration sec %.3f\n", t2 - t1);
-            System.out.printf("int duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
-        }
-        {
-            p.clear();
-            double t1 = Timer.getFPGATimestamp();
-            for (int i = 0; i < ITERATIONS; ++i) {
-                if (!p.putDoubleArray(17, new double[] { 1.0 }))
-                    p.clear();
-            }
-            double t2 = Timer.getFPGATimestamp();
-            System.out.printf("double[] duration sec %.3f\n", t2 - t1);
-            System.out.printf("double[] duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
-        }
-        {
-            p.clear();
-            double t1 = Timer.getFPGATimestamp();
-            for (int i = 0; i < ITERATIONS; ++i) {
-                if (!p.putLong(17, 1))
-                    p.clear();
-            }
-            double t2 = Timer.getFPGATimestamp();
-            System.out.printf("long duration sec %.3f\n", t2 - t1);
-            System.out.printf("long duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
-        }
-        {
-            p.clear();
-            double t1 = Timer.getFPGATimestamp();
-            for (int i = 0; i < ITERATIONS; ++i) {
-                if (!p.putString(17, "asdf"))
-                    p.clear();
-            }
-            double t2 = Timer.getFPGATimestamp();
-            System.out.printf("string duration sec %.3f\n", t2 - t1);
-            System.out.printf("string duration per row us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
-        }
-    }
-
-
-
-
-
-
-
 }
