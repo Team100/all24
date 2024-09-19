@@ -108,7 +108,7 @@ public class UdpPrimitiveProtocol2 {
     }
 
     /** just the key */
-    static int decodeKey(ByteBuffer buf, int offset, IntConsumer consumer) {
+    public static int decodeKey(ByteBuffer buf, int offset, IntConsumer consumer) {
         consumer.accept(buf.getChar(offset));
         return offset + 2;
     }
@@ -276,7 +276,10 @@ public class UdpPrimitiveProtocol2 {
 
     static int decodeLong(ByteBuffer buf, int offset, BiConsumer<Integer, Long> consumer) {
         return -2;
-
     }
 
+    // TODO: public?  private?
+    public static int decodeLong(ByteBuffer buf, int offset, Consumer<Long> consumer) {
+        return -2;
+    }
 }

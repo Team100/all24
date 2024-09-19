@@ -2,7 +2,8 @@ package org.team100.lib.telemetry;
 
 import java.util.Arrays;
 
-enum UdpType {
+/** TODO: clean up the packages */
+public enum UdpType {
     UNKNOWN(0),
     BOOLEAN(1),
     DOUBLE(2),

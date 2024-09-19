@@ -18,8 +18,9 @@ public class UdpSender implements Consumer<ByteBuffer> {
      */
     public static final int MTU = 1472;
     private static final byte[] ADDR = new byte[] { 10, 1, 0, 16 };
-    static final int kPort = 1995;
-    static final int kmetadataPort = 1996;
+    // TODO: rearrange packages to make these package-private
+    public static final int kPort = 1995;
+    public static final int kmetadataPort = 1996;
     /** nullable */
     private final DatagramChannel m_channel;
 
