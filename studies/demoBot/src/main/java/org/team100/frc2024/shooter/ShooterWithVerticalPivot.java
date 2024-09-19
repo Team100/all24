@@ -49,6 +49,7 @@ public class ShooterWithVerticalPivot extends SubsystemBase implements Glassy{
         }
     }
 
+    //TODO fix this once testing with real shooter is complete
     public void shootAll() {
         if (atVelocity) {
             m_indexer.setSpeed(1);
