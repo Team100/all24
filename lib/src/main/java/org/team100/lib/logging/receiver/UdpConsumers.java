@@ -1,4 +1,4 @@
-package org.team100.logging;
+package org.team100.lib.logging.receiver;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 

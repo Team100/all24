@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.frc2024.Timeless2024;
-import org.team100.lib.telemetry.SupplierLogger;
-import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.TestLogger;
 
 class ClimberSubsystemTest implements Timeless2024 {
     private static final double kDelta = 0.001;

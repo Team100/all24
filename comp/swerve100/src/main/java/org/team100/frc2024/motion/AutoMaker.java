@@ -17,7 +17,7 @@ import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.field.FieldPoint2024;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;

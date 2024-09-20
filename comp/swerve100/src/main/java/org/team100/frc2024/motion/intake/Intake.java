@@ -8,7 +8,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
