@@ -38,8 +38,6 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
  * Avoids touching the suppliers if not enabled.
  * 
  * Each primitive logger is independently selectable.
- * 
- * TODO: support network tables time-alignment.
  */
 public class SupplierLogger {
     private final Telemetry m_telemetry;

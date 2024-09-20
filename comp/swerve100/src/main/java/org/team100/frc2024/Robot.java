@@ -67,10 +67,6 @@ public class Robot extends TimedRobot100 implements Glassy {
      */
     @Override
     public void robotPeriodic() {
-        // set the load-shedding timer; this happens before any other work in this
-        // cycle.
-        Telemetry.get().getLoadShedder().start();
-
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
         // t.log(Level.TRACE, "Voltage", m_pdh.getVoltage());

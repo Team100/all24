@@ -62,8 +62,6 @@ public class Telemetry {
     private static final double kLoggingTimeBudgetS = 0.01;
     private static final Telemetry instance = new Telemetry();
 
-    private final LoadShedder m_loadShedder;
-
     // private final NetworkTableInstance inst;
     final PrimitiveLogger ntLogger;
     final PrimitiveLogger usbLogger;
@@ -83,7 +81,6 @@ public class Telemetry {
             Util.warn("=======================================");
         }
         // inst = NetworkTableInstance.getDefault();
-        m_loadShedder = new LoadShedder(kLoggingTimeBudgetS);
         ntLogger = new NTLogger();
         usbLogger = new DataLogLogger();
         udpLogger = new UdpPrimitiveLogger();
@@ -96,10 +93,6 @@ public class Telemetry {
 
     public void periodic() {
         udpLogger.periodic();
-    }
-
-    public LoadShedder getLoadShedder() {
-        return m_loadShedder;
     }
 
     void setLevel(Level level) {
