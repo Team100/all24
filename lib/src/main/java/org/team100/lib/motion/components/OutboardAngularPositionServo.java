@@ -67,7 +67,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     public void setPositionWithVelocity(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
         OptionalDouble positionRad = m_encoder.getPositionRad();
         m_logger.logDouble(Level.TRACE, "Position", () -> m_encoder.getPositionRad().getAsDouble());
-        System.out.println(positionRad.getAsDouble());
+        // System.out.println(positionRad.getAsDouble());
         if (positionRad.isEmpty())
             return;
         // double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());

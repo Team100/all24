@@ -44,6 +44,7 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * Remove stale entries and add the new one.
      */
     public void put(double timeS, T value) {
+        // System.out.println("put " + timeS + " value " + value);
         try {
             // wait for in-progress double-reads
             m_lock.readLock().lock();
@@ -66,6 +67,7 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * Remove all entries and add the new one.
      */
     public void reset(double timeS, T value) {
+        // System.out.println("reset " + timeS + " value " + value);
         try {
             // wait for in-progress double-reads
             m_lock.readLock().lock();
@@ -80,9 +82,11 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * Sample the buffer at the given time.
      */
     public T get(double timeSeconds) {
+        // System.out.println("timeSeconds " + timeSeconds);
         // Special case for when the requested time is the same as a sample
         T nowEntry = m_pastSnapshots.get(timeSeconds);
         if (nowEntry != null) {
+            // System.out.println("now " + nowEntry);
             return nowEntry;
         }
         Entry<Double, T> topBound = null;
@@ -99,11 +103,13 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         if (topBound == null) {
             String bottomValue = bottomBound.getValue().toString();
             m_logger.logString(Level.TRACE, "bottom", () -> bottomValue);
+            // System.out.println("bottom " + bottomValue);
             return bottomBound.getValue();
         }
         if (bottomBound == null) {
             String topValue = topBound.getValue().toString();
             m_logger.logString(Level.TRACE, "top", () -> topValue);
+            // System.out.println("top " + topValue);
             return topBound.getValue();
         }
 

@@ -32,7 +32,6 @@ class ArmTrajectoryCommandTest implements Timeless {
                 armSubSystem,
                 armKinematicsM,
                 goal);
-        ArmTrajectoryCommand.shutDownForTest();
         command.initialize();
         assertEquals(0, armSubSystem.getPosition().get().th1, kDelta);
         stepTime(0.02);

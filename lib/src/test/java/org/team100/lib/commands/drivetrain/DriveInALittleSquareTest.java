@@ -25,7 +25,6 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
     void testSteering() {
         SwerveDriveSubsystem swerve = fixture.drive;
         DriveInALittleSquare command = new DriveInALittleSquare(logger, swerve);
-        DriveInALittleSquare.shutDownForTest();
         command.initialize();
         // the first time we call execute, drive doesn't yet know it's at the goal
         stepTime(0.02);
@@ -71,7 +70,6 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(0.0, fixture.drive.getSwerveLocal().positions()[0].distanceMeters, 0.005);
 
         DriveInALittleSquare command = new DriveInALittleSquare(logger, fixture.drive);
-        DriveInALittleSquare.shutDownForTest();
         command.initialize();
 
         // first align the wheels in case they're not already aligned.

@@ -14,8 +14,6 @@ import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.logging.TestLogger;
 import org.team100.lib.testing.Timeless;
 
-import edu.wpi.first.wpilibj.simulation.SimHooks;
-
 class DriveManuallyTest extends Fixtured implements Timeless {
     private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
 
@@ -29,7 +27,6 @@ class DriveManuallyTest extends Fixtured implements Timeless {
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
 
         DriveManually command = new DriveManually(logger, twistSupplier, robotDrive);
-        DriveManually.shutDownForTest();
 
         command.register("MODULE_STATE", false,
                 new SimpleManualModuleStates(logger, swerveKinodynamics));
@@ -42,13 +39,15 @@ class DriveManuallyTest extends Fixtured implements Timeless {
 
         command.overrideMode(() -> desiredMode);
 
+        // System.out.println("command init");
         command.initialize();
 
         desiredMode = "MODULE_STATE";
+        // System.out.println("command exec");
         command.execute100(0.02);
 
+        stepTime(0.02);
         robotDrive.periodic();
-        SimHooks.stepTiming(0.02);
         assertEquals(1, robotDrive.getState().chassisSpeeds().vxMetersPerSecond, 0.001);
 
         desiredMode = "ROBOT_RELATIVE_CHASSIS_SPEED";

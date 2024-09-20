@@ -60,10 +60,6 @@ public enum Experiment {
      */
     SlipperyTires,
     /**
-     * Use Java executor for Command100.
-     */
-    UseCommandExecutor,
-    /**
      * Periodically publish all tag poses to all cameras
      */
     UseCameraUpdater,

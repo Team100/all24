@@ -20,6 +20,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
+import edu.wpi.first.wpilibj.DataLogManager;
 
 public class NTLogger extends PrimitiveLogger {
     private final NetworkTableInstance inst;
@@ -28,6 +29,8 @@ public class NTLogger extends PrimitiveLogger {
 
     public NTLogger() {
         inst = NetworkTableInstance.getDefault();
+        // Also log to disk
+        DataLogManager.start();
         m_publishers = new ConcurrentHashMap<>();
         m_chronos = Chronos.get();
     }

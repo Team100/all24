@@ -37,6 +37,8 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
         double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.x();
         m_logger.logDouble(Level.TRACE, "speed m_s", () -> speedM_S);
         m_logger.logRotation2d(Level.TRACE, "angle rad", angle::get);
+        // System.out.println("speed " + speedM_S);
+
         return new SwerveModuleState100[] {
                 new SwerveModuleState100(speedM_S, angle),
                 new SwerveModuleState100(speedM_S, angle),

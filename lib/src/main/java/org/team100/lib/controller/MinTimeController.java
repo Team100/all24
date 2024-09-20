@@ -257,7 +257,7 @@ public class MinTimeController implements Glassy {
             return fullG(dt, initial, -1);
         }
 
-        System.out.println("nonzero");
+        // System.out.println("nonzero");
 
         // There can be two non-zero-duration paths. As above, this happens when we're
         // on the goal path. The difference is that in this case, the goal has non-zero

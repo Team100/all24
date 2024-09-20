@@ -18,7 +18,6 @@ class SpinTest extends Fixtured implements Timeless {
     void testSimple() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         Spin command = new Spin(logger, fixture.drive, fixture.controller);
-        Spin.shutDownForTest();
         command.initialize();
         stepTime(0.02);
         // starts from rest

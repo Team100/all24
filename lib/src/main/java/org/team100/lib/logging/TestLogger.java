@@ -6,7 +6,7 @@ import org.team100.lib.telemetry.Telemetry;
 public class TestLogger extends PrimitiveLogger {
 
     public SupplierLogger getSupplierLogger() {
-        return new SupplierLogger(Telemetry.get(), "/", () -> false, this, () -> false, this);
+        return new SupplierLogger(Telemetry.get(), "/",  this);
     }
 
     @Override

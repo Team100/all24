@@ -20,10 +20,7 @@ class UdpPrimitiveLoggerTest {
         SupplierLogger logger = new SupplierLogger(
                 Telemetry.get(),
                 "root",
-                () -> true,
-                udpLogger,
-                () -> false,
-                null);
+                udpLogger);
         for (int i = 0; i < 100; ++i) {
             logger.logBoolean(Level.COMP, "boolkey", () -> true);
             logger.logDouble(Level.COMP, "doublekey", () -> 100.0);
@@ -75,10 +72,7 @@ class UdpPrimitiveLoggerTest {
         SupplierLogger logger = new SupplierLogger(
                 Telemetry.get(),
                 "root",
-                () -> true,
-                udpLogger,
-                () -> false,
-                null);
+                udpLogger);
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
@@ -102,11 +96,5 @@ class UdpPrimitiveLoggerTest {
         }
 
     }
-
-
-
-
-
-  
 
 }

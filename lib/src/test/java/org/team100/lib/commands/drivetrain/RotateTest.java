@@ -35,7 +35,6 @@ class RotateTest extends Fixtured implements Timeless {
                 gyro,
                 swerveKinodynamics,
                 targetAngle);
-        Rotate.shutDownForTest();
 
         rotate.initialize();
 

@@ -36,7 +36,6 @@ class DriveToWaypoint100Test extends Fixtured {
                 constraints,
                 0,
                 viz);
-        DriveToWaypoint100.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         command.execute100(0.02);
@@ -56,7 +55,6 @@ class DriveToWaypoint100Test extends Fixtured {
                 constraints,
                 0,
                 viz);
-        DriveToWaypoint100.shutDownForTest();
         assertEquals(GeometryUtil.kPoseZero, fixture.drive.getState().pose());
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
@@ -77,7 +75,6 @@ class DriveToWaypoint100Test extends Fixtured {
                 constraints,
                 0,
                 viz);
-        DriveToWaypoint100.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         command.execute100(0.02);
@@ -97,7 +94,6 @@ class DriveToWaypoint100Test extends Fixtured {
                 constraints,
                 0,
                 viz);
-        DriveToWaypoint100.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         command.execute100(0.02);

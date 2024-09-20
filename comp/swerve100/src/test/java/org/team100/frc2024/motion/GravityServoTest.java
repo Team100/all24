@@ -55,7 +55,7 @@ class GravityServoTest implements Timeless2024 {
         for (int i = 0; i < 70; ++i) {
             g.setPosition(1);
             stepTime(0.02);
-            System.out.printf("%5.3f\n", g.getPositionRad().getAsDouble());
+            // System.out.printf("%5.3f\n", g.getPositionRad().getAsDouble());
 
         }
         // this overshoots a little, i think maybe because of the slight lag in

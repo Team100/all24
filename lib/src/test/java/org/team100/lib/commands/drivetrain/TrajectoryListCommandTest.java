@@ -51,7 +51,6 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
                 control,
                 x -> List.of(maker.line(x)),
                 viz);
-        TrajectoryListCommand.shutDownForTest();
         c.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         c.execute100(0);
@@ -80,7 +79,6 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
                 controller,
                 x -> maker.square(x),
                 viz);
-        TrajectoryListCommand.shutDownForTest();
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, false);
         fixture.drive.periodic();
         command.initialize();

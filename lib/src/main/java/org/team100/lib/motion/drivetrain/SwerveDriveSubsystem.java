@@ -226,6 +226,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     /** used by the supplier */
     private SwerveState update() {
         double now = Timer.getFPGATimestamp();
+        // System.out.println("update now " + now);
         m_poseEstimator.put(
                 now,
                 m_gyro.getYawNWU(),
