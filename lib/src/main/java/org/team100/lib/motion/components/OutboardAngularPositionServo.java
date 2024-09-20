@@ -66,18 +66,26 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     @Override
     public void setPositionWithVelocity(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
         OptionalDouble positionRad = getPosition();
+        m_logger.logDouble(Level.TRACE, "Position", () -> m_encoder.getPositionRad().getAsDouble());
         if (positionRad.isEmpty())
             return;
-        double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
+        // double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
 
-        // use the modulus closest to the measurement.
-        m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocity);
+        // // use the modulus closest to the measurement.
+        // m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocity);
 
-        m_setpoint = new State100(
-                MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad,
-                m_setpoint.v());
+        // m_setpoint = new State100(
+        //         MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad, m_setpoint.v()
+        // );
 
-        // NOTE: fixed dt here
+        // // NOTE: fixed dt here
+        // m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
+
+        double measurementRad = positionRad.getAsDouble();
+        double anglulusRad = MathUtil.angleModulus(positionRad.getAsDouble());
+        m_goal = new State100(MathUtil.angleModulus(goalRad - anglulusRad) + measurementRad, goalVelocity);
+   
+        m_setpoint = new State100(measurementRad, m_setpoint.v());
         m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
@@ -87,6 +95,32 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         m_logger.logDouble(Level.TRACE, "measurement (rad)", () -> measurementRad);
         m_logger.logState100(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
     }
+
+    // public void setPositionWithVelocity2(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
+    //     OptionalDouble positionRad = m_encoder.getPositionRad();
+       
+    //     if (positionRad.isEmpty())
+    //         return;
+            
+    //     double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
+
+    //     // use the modulus closest to the measurement.
+    //     m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocity);
+
+    //     m_setpoint = new State100(
+    //             MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad, m_setpoint.v()
+    //     );
+
+    //     // NOTE: fixed dt here
+    //     m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
+
+    //     m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
+
+    //     m_logger.logState100(Level.TRACE, "goal (rad)", () -> m_goal);
+    //     m_logger.logDouble(Level.TRACE, "Feedforward Torque (Nm)", () -> feedForwardTorqueNm);
+    //     m_logger.logDouble(Level.TRACE, "measurement (rad)", () -> measurementRad);
+    //     m_logger.logState100(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
+    // }
 
     @Override
     public void setPosition(double goal, double feedForwardTorqueNm) {
@@ -155,5 +189,6 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     @Override
     public void periodic() {
         m_mechanism.periodic();
+        m_encoder.periodic();
     }
 }
