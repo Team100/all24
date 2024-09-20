@@ -27,6 +27,8 @@
             "debugConsole.infoForeground":"#000000"
         },
         "debug.console.fontFamily": "courier",
-        "debug.console.collapseIdenticalLines": false
+        "debug.console.collapseIdenticalLines": false,
+        "intellicodeApiExamples.python.enabled": false,
+        "intellicodeApiExamples.typescript.enabled": false
     }
 }

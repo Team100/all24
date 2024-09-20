@@ -11,7 +11,7 @@ import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 

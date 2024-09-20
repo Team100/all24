@@ -1,7 +1,7 @@
 package org.team100.lib.hid;
 
 import org.team100.lib.async.Async;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;

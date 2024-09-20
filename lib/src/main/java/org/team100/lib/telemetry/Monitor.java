@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.PowerDistribution;

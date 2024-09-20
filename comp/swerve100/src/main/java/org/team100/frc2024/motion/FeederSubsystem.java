@@ -3,7 +3,7 @@ package org.team100.frc2024.motion;
 import org.team100.frc2024.SensorInterface;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;

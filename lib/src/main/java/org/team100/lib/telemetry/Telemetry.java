@@ -1,5 +1,10 @@
 package org.team100.lib.telemetry;
 
+import org.team100.lib.logging.DataLogLogger;
+import org.team100.lib.logging.NTLogger;
+import org.team100.lib.logging.PrimitiveLogger;
+import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.UdpPrimitiveLogger;
 import org.team100.lib.util.Util;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -62,7 +67,7 @@ public class Telemetry {
     // private final NetworkTableInstance inst;
     final PrimitiveLogger ntLogger;
     final PrimitiveLogger usbLogger;
-    final PrimitiveLogger udpLogger;
+    final UdpPrimitiveLogger udpLogger;
 
     private Level m_level;
 
@@ -87,6 +92,10 @@ public class Telemetry {
         // DataLogManager.start();
         // turn off the CTRE log we never use
         SignalLogger.enableAutoLogging(false);
+    }
+
+    public void periodic() {
+        udpLogger.periodic();
     }
 
     public LoadShedder getLoadShedder() {

@@ -9,8 +9,8 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.SupplierLogger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 

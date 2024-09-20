@@ -1,10 +1,10 @@
 package org.team100.lib.commands.drivetrain.manual;
 
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 

@@ -3,10 +3,10 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Tire;
 
 import edu.wpi.first.math.geometry.Pose2d;

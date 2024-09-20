@@ -77,7 +77,7 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.GyroFactory;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelPoller;

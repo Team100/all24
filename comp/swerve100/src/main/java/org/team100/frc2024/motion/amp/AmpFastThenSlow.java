@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 

@@ -44,7 +44,7 @@ import org.team100.lib.telemetry.Annunciator;
 import org.team100.lib.telemetry.FieldLogger;
 import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.RootLogger;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;

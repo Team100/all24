@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.Fixtured;
-import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.SupplierLogger;
 
 class DriveRotationTest extends Fixtured {
     private static final double kDelta = 0.001;

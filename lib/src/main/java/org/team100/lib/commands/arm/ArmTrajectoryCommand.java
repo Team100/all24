@@ -3,11 +3,11 @@ package org.team100.lib.commands.arm;
 import java.util.Optional;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
 import org.team100.lib.motion.arm.ArmTrajectories;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.controller.PIDController;

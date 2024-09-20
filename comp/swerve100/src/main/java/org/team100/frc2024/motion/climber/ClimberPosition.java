@@ -4,7 +4,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LinearPositionServo;
 import org.team100.lib.motion.components.OnboardLinearDutyCyclePositionServo;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;

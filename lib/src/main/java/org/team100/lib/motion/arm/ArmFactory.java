@@ -9,12 +9,12 @@ import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.telemetry.SupplierLogger;
 
 /**
  * Produces real or simulated arm subsystems depending on identity.

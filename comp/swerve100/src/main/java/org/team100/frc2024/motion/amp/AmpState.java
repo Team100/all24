@@ -5,7 +5,7 @@ import java.util.OptionalDouble;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.State100;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 
 /**
  * Set the amp pivot state, including current limit, position, and velocity.

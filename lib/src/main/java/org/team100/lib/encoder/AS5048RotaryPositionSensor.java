@@ -1,6 +1,6 @@
 package org.team100.lib.encoder;
 
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger;
 
 /**
  * Implements max and min duty cycle to address the PWM output's "init" and
