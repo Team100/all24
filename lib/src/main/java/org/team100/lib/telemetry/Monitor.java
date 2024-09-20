@@ -5,6 +5,8 @@ import java.util.function.BooleanSupplier;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -22,6 +24,9 @@ public class Monitor implements Glassy {
     private final Annunciator m_annunciator;
     private final BooleanSupplier m_test;
     private final PowerDistribution m_pdp;
+    private final DoubleSupplierLogger2 m_log_voltage;
+    private final BooleanSupplierLogger2 m_log_master;
+
     private boolean m_shouldAlert;
 
     /**
@@ -30,6 +35,8 @@ public class Monitor implements Glassy {
      */
     public Monitor(SupplierLogger2 parent, Annunciator annunciator, BooleanSupplier test) {
         m_logger = parent.child(this);
+        m_log_voltage = m_logger.doubleLogger(Level.COMP, "battery_voltage");
+        m_log_master = m_logger.booleanLogger(Level.COMP, "master_warning");
         m_annunciator = annunciator;
         m_test = test;
         m_pdp = new PowerDistribution(1, ModuleType.kRev);
@@ -39,7 +46,7 @@ public class Monitor implements Glassy {
         m_shouldAlert = false;
         // this should test different things for different identities.
         if (Identity.instance == Identity.COMP_BOT || Identity.instance == Identity.BETA_BOT) {
-            m_logger.logDouble(Level.COMP, "battery_voltage", this::getBatteryVoltage);
+            m_log_voltage.log(this::getBatteryVoltage);
             // TODO: fix the pdp observer
             // t.log(Level.INFO, m_name, "bus_voltage", getBusVoltage());
             // t.log(Level.INFO, m_name, "total_current", getTotalCurrent());
@@ -51,7 +58,7 @@ public class Monitor implements Glassy {
 
         if (m_test.getAsBoolean())
             m_shouldAlert = true;
-        m_logger.logBoolean(Level.COMP, "master_warning", () -> m_shouldAlert);
+        m_log_master.log(() -> m_shouldAlert);
         m_annunciator.accept(m_shouldAlert);
         m_annunciator.periodic();
     }

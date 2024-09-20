@@ -34,7 +34,7 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
         m_positionRad += velocityRad_S.getAsDouble() * dtS;
         m_positionRad = MathUtil.angleModulus(m_positionRad);
         m_timeS = nowS;
-        m_logger.logDouble(Level.TRACE, "position", () -> m_positionRad);
+        m_logger.doubleLogger(Level.TRACE, "position").log( () -> m_positionRad);
         return OptionalDouble.of(m_positionRad);
     }
 
@@ -44,7 +44,7 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
         OptionalDouble m_rate = m_motor.getVelocityRad_S();
         if (m_rate.isEmpty())
             return OptionalDouble.empty();
-        m_logger.logOptionalDouble(Level.TRACE, "rate", () -> m_rate);
+        m_logger.optionalDoubleLogger(Level.TRACE, "rate").log( () -> m_rate);
         return m_rate;
     }
 

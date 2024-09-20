@@ -8,6 +8,10 @@ import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
+import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
+import org.team100.lib.logging.SupplierLogger2.Translation2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -38,6 +42,12 @@ public class DriveInACircle extends Command100 {
     private final HolonomicDriveController3 m_controller;
     private final TrajectoryVisualization m_viz;
 
+    // LOGGERS
+    private final Translation2dLogger m_log_center;
+    private final DoubleSupplierLogger2 m_log_angle;
+    private final SwerveStateLogger m_log_reference;
+    private final FieldRelativeVelocityLogger m_log_target;
+
     private Translation2d m_center;
     private double m_initialRotation;
     private double m_speedRad_S;
@@ -61,6 +71,11 @@ public class DriveInACircle extends Command100 {
             double turnRatio,
             TrajectoryVisualization viz) {
         super(parent);
+        m_log_center = m_logger.translation2dLogger(Level.TRACE, "center");
+        m_log_angle = m_logger.doubleLogger(Level.TRACE, "angle");
+        m_log_reference = m_logger.swerveStateLogger(Level.TRACE, "reference");
+        m_log_target = m_logger.fieldRelativeVelocityLogger(Level.TRACE, "target");
+
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
         m_controller = controller;
@@ -102,10 +117,10 @@ public class DriveInACircle extends Command100 {
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
 
-        m_logger.logTranslation2d(Level.TRACE, "center", () -> m_center);
-        m_logger.logDouble(Level.TRACE, "angle", () -> m_angleRad);
-        m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
-        m_logger.logFieldRelativeVelocity(Level.TRACE, "target", () -> fieldRelativeTarget);
+        m_log_center.log(() -> m_center);
+        m_log_angle.log(() -> m_angleRad);
+        m_log_reference.log(() -> reference);
+        m_log_target.log(() -> fieldRelativeTarget);
     }
 
     static Translation2d getCenter(Pose2d currentPose, double radiusM) {

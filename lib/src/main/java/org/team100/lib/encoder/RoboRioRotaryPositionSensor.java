@@ -41,7 +41,7 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
     @Override
     public OptionalDouble getPositionRad() {
         OptionalDouble positionRad = getRad();
-        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", () -> positionRad);
+        m_logger.optionalDoubleLogger(Level.TRACE, "position (rad)").log( () -> positionRad);
         return positionRad;
     }
 
@@ -65,10 +65,10 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
             return OptionalDouble.empty();
 
         double posTurns = mapSensorRange(ratio.getAsDouble());
-        m_logger.logDouble(Level.TRACE, "position (turns)", () -> posTurns);
+        m_logger.doubleLogger(Level.TRACE, "position (turns)").log( () -> posTurns);
 
         double turnsMinusOffset = posTurns - m_positionOffset;
-        m_logger.logDouble(Level.TRACE, "position (turns-offset)", () -> turnsMinusOffset);
+        m_logger.doubleLogger(Level.TRACE, "position (turns-offset)").log( () -> turnsMinusOffset);
 
         switch (m_drive) {
             case DIRECT:
@@ -109,7 +109,7 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
         m_prevTimeS = timeS;
 
         double rateRad_S = dxRad / dtS;
-        m_logger.logDouble(Level.TRACE, "rate (rad)s)", () -> rateRad_S);
+        m_logger.doubleLogger(Level.TRACE, "rate (rad)s)").log( () -> rateRad_S);
         return OptionalDouble.of(rateRad_S);
     }
 

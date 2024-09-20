@@ -5,6 +5,8 @@ import java.util.function.DoubleSupplier;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
@@ -38,6 +40,24 @@ public abstract class Talon6Motor implements BareMotor {
 
     private final double m_supplyLimit;
 
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_desired_duty;
+    private final DoubleSupplierLogger2 m_log_desired_position;
+    private final DoubleSupplierLogger2 m_log_desired_speed;
+    private final DoubleSupplierLogger2 m_log_desired_accel;
+    private final DoubleSupplierLogger2 m_log_friction_FF;
+    private final DoubleSupplierLogger2 m_log_velocity_FF;
+    private final DoubleSupplierLogger2 m_log_accel_FF;
+    private final DoubleSupplierLogger2 m_log_torque_FF;
+    private final IntSupplierLogger2 m_log_device_id;
+    private final DoubleSupplierLogger2 m_log_velocity;
+    private final DoubleSupplierLogger2 m_log_output;
+    private final DoubleSupplierLogger2 m_log_error;
+    private final DoubleSupplierLogger2 m_log_supply;
+    private final DoubleSupplierLogger2 m_log_stator;
+    private final DoubleSupplierLogger2 m_log_torque;
+    private final DoubleSupplierLogger2 m_log_temp;
+
     protected Talon6Motor(
             SupplierLogger2 parent,
             int canId,
@@ -69,13 +89,29 @@ public abstract class Talon6Motor implements BareMotor {
         m_stator = () -> m_motor.getStatorCurrent().refresh().getValueAsDouble();
         m_temp = () -> m_motor.getDeviceTemp().refresh().getValueAsDouble();
         m_torque = () -> m_motor.getTorqueCurrent().refresh().getValueAsDouble();
+        m_log_desired_duty = m_logger.doubleLogger(Level.TRACE, "desired duty cycle [-1,1]");
+        m_log_desired_position = m_logger.doubleLogger(Level.TRACE, "desired position (rev)");
+        m_log_desired_speed = m_logger.doubleLogger(Level.TRACE, "desired speed (rev_s)");
+        m_log_desired_accel = m_logger.doubleLogger(Level.TRACE, "desired accel (rev_s2)");
+        m_log_friction_FF = m_logger.doubleLogger(Level.TRACE, "friction feedforward (v)");
+        m_log_velocity_FF = m_logger.doubleLogger(Level.TRACE, "velocity feedforward (v)");
+        m_log_accel_FF = m_logger.doubleLogger(Level.TRACE, "accel feedforward (v)");
+        m_log_torque_FF = m_logger.doubleLogger(Level.TRACE, "torque feedforward (v)");
+        m_log_device_id = m_logger.intLogger(Level.TRACE, "Device ID");
+        m_log_velocity = m_logger.doubleLogger(Level.TRACE, "velocity (rev_s)");
+        m_log_output = m_logger.doubleLogger(Level.TRACE, "output [-1,1]");
+        m_log_error = m_logger.doubleLogger(Level.TRACE, "error (rev_s)");
+        m_log_supply = m_logger.doubleLogger(Level.TRACE, "supply current (A)");
+        m_log_stator = m_logger.doubleLogger(Level.TRACE, "stator current (A)");
+        m_log_torque = m_logger.doubleLogger(Level.TRACE, "torque (Nm)");
+        m_log_temp = m_logger.doubleLogger(Level.TRACE, "temperature (C)");
     }
 
     @Override
     public void setDutyCycle(double output) {
         Phoenix100.warn(() -> m_motor.setControl(m_dutyCycleOut
                 .withOutput(output)));
-        m_logger.logDouble(Level.TRACE, "desired duty cycle [-1,1]", () -> output);
+        m_log_desired_duty.log(() -> output);
         log();
     }
 
@@ -108,14 +144,14 @@ public abstract class Talon6Motor implements BareMotor {
         Phoenix100.warn(() -> m_motor.setControl(
                 m_velocityVoltage
                         .withVelocity(motorRev_S)
-                        .withFeedForward(kFFVolts * 0))); //TODO make this not zero
+                        .withFeedForward(kFFVolts * 0))); // TODO make this not zero
 
-        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
-        m_logger.logDouble(Level.TRACE, "desired accel (rev_s2)", () -> motorRev_S2);
-        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
-        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
-        m_logger.logDouble(Level.TRACE, "accel feedforward (v)", () -> accelFFVolts);
-        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
+        m_log_desired_speed.log(() -> motorRev_S);
+        m_log_desired_accel.log(() -> motorRev_S2);
+        m_log_friction_FF.log(() -> frictionFFVolts);
+        m_log_velocity_FF.log(() -> velocityFFVolts);
+        m_log_accel_FF.log(() -> accelFFVolts);
+        m_log_torque_FF.log(() -> torqueFFVolts);
         log();
     }
 
@@ -136,7 +172,7 @@ public abstract class Talon6Motor implements BareMotor {
         double torqueFFVolts = getTorqueFFVolts(motorTorqueNm);
 
         double kFFVolts = frictionFFVolts + velocityFFVolts + torqueFFVolts;
-        
+
         // PositionVoltage has a velocity field for kV feedforward but we use arbitrary
         // feedforward for that.
         Phoenix100.warn(() -> m_motor.setControl(
@@ -144,11 +180,11 @@ public abstract class Talon6Motor implements BareMotor {
                         .withPosition(motorRev)
                         .withFeedForward(kFFVolts)));
 
-        m_logger.logDouble(Level.TRACE, "desired position (rev)", () -> motorRev);
-        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
-        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
-        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
-        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
+        m_log_desired_position.log(() -> motorRev);
+        m_log_desired_speed.log(() -> motorRev_S);
+        m_log_friction_FF.log(() -> frictionFFVolts);
+        m_log_velocity_FF.log(() -> velocityFFVolts);
+        m_log_torque_FF.log(() -> torqueFFVolts);
         log();
     }
 
@@ -197,14 +233,14 @@ public abstract class Talon6Motor implements BareMotor {
 
     protected void log() {
         // suppliers here are never touched in the non-logging case.
-        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceID);
-        m_logger.logDouble(Level.TRACE, "velocity (rev_s)", m_velocity);
-        m_logger.logDouble(Level.TRACE, "output [-1,1]", m_dutyCycle);
-        m_logger.logDouble(Level.TRACE, "error (rev_s)", m_error);
-        m_logger.logDouble(Level.TRACE, "supply current (A)", m_supply);
-        m_logger.logDouble(Level.TRACE, "stator current (A)", m_stator);
-        m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
-        m_logger.logDouble(Level.TRACE, "temperature (C)", m_temp);
+        m_log_device_id.log(m_motor::getDeviceID);
+        m_log_velocity.log(m_velocity);
+        m_log_output.log(m_dutyCycle);
+        m_log_error.log(m_error);
+        m_log_supply.log(m_supply);
+        m_log_stator.log(m_stator);
+        m_log_torque.log(this::getMotorTorque);
+        m_log_temp.log(m_temp);
     }
 
     private double getMotorTorque() {

@@ -86,7 +86,7 @@ public class SteeringOverride implements Glassy {
             }
         }
         final double s = min_s;
-        m_logger.logDouble(Level.TRACE, "s", () -> s);
+        m_logger.doubleLogger(Level.TRACE, "s").log( () -> s);
         return min_s;
     }
 

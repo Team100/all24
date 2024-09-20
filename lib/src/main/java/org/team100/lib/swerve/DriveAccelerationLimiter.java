@@ -35,7 +35,7 @@ public class DriveAccelerationLimiter implements Glassy {
                     desired_vx[i],
                     desired_vy[i],
                     kDtSec);
-            m_logger.logDouble(Level.TRACE, "max_vel_step", () -> max_vel_step);
+            m_logger.doubleLogger(Level.TRACE, "max_vel_step").log( () -> max_vel_step);
 
             // reduces the size of the search space if min_s is already constrained (by
             // earlier modules)
@@ -55,7 +55,7 @@ public class DriveAccelerationLimiter implements Glassy {
             }
         }
         final double s = min_s;
-        m_logger.logDouble(Level.TRACE, "s", () -> s);
+        m_logger.doubleLogger(Level.TRACE, "s").log( () -> s);
         return min_s;
     }
 

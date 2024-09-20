@@ -125,12 +125,12 @@ public class Rotate extends Command100 {
         double headingRate = m_gyro.getYawRateNWU();
 
         // log what we did
-        m_logger.logDouble(Level.TRACE, "errorX", () -> refTheta.x() - headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "errorV", () -> refTheta.v() - headingRate);
-        m_logger.logDouble(Level.TRACE, "measurementX", () -> headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "measurementV", () -> headingRate);
-        m_logger.logDouble(Level.TRACE, "refX", () -> refTheta.x());
-        m_logger.logDouble(Level.TRACE, "refV", () -> refTheta.v());
+        m_logger.doubleLogger(Level.TRACE, "errorX").log( () -> refTheta.x() - headingMeasurement);
+        m_logger.doubleLogger(Level.TRACE, "errorV").log( () -> refTheta.v() - headingRate);
+        m_logger.doubleLogger(Level.TRACE, "measurementX").log( () -> headingMeasurement);
+        m_logger.doubleLogger(Level.TRACE, "measurementV").log( () -> headingRate);
+        m_logger.doubleLogger(Level.TRACE, "refX").log( () -> refTheta.x());
+        m_logger.doubleLogger(Level.TRACE, "refV").log( () -> refTheta.v());
     }
 
     @Override

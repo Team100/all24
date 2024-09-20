@@ -67,9 +67,9 @@ public class DriverXboxControl implements DriverControl {
         final double rightY = m_controller.getRightY();
         final double rightX = m_controller.getRightX();
         final double leftX = m_controller.getLeftX();
-        m_logger.logDouble(Level.TRACE, "Xbox/right y", () -> rightY);
-        m_logger.logDouble(Level.TRACE, "Xbox/right x", () -> rightX);
-        m_logger.logDouble(Level.TRACE, "Xbox/left x", () -> leftX);
+        m_logger.doubleLogger(Level.TRACE, "Xbox/right y").log( () -> rightY);
+        m_logger.doubleLogger(Level.TRACE, "Xbox/right x").log( () -> rightX);
+        m_logger.doubleLogger(Level.TRACE, "Xbox/left x").log( () -> leftX);
 
         double dx = 0;
         double dy = 0;
@@ -89,7 +89,7 @@ public class DriverXboxControl implements DriverControl {
         double dtheta = expo(deadband(-1.0 * clamp(leftX, 1), kDeadband, 1), kExpo);
 
         Speed speed = speed();
-        m_logger.logEnum(Level.TRACE, "control_speed", () -> speed);
+        m_logger.enumLogger(Level.TRACE, "control_speed").log( () -> speed);
 
         switch (speed) {
             case SLOW:

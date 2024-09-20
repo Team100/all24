@@ -24,7 +24,7 @@ public class CapsizeAccelerationLimiter implements Glassy {
             min_s = kDtSec * m_limits.getMaxCapsizeAccelM_S2() / dv;
         }
         double s = min_s;
-        m_logger.logDouble(Level.TRACE, "s", () -> s);
+        m_logger.doubleLogger(Level.TRACE, "s").log( () -> s);
         return s;
     }
 

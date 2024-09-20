@@ -6,6 +6,7 @@ import java.util.OptionalDouble;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.visualization.ArmVisualization;
@@ -30,6 +31,10 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     private final RotaryPositionSensor m_upperArmEncoder;
     private final ArmVisualization m_viz;
 
+    // LOGGERS
+    private final ArmAnglesLogger m_log_position;
+    private final ArmAnglesLogger m_log_velocity;
+
     private ArmAngles m_previousPosition;
 
     // use the factory to instantiate
@@ -46,6 +51,8 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
             RotaryMechanism upperMotor,
             RotaryPositionSensor upperEncoder) {
         m_logger = parent.child(this);
+        m_log_position = m_logger.armAnglesLogger(Level.TRACE, "position");
+        m_log_velocity = m_logger.armAnglesLogger(Level.TRACE, "velocity");
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
@@ -70,7 +77,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         ArmAngles position = new ArmAngles(
                 MathUtil.angleModulus(m_lowerMeasurementFilter.calculate(lowerPosition.getAsDouble())),
                 MathUtil.angleModulus(m_upperMeasurementFilter.calculate(upperPosition.getAsDouble())));
-        m_logger.logArmAngles(Level.TRACE, "position", () -> position);
+        m_log_position.log(() -> position);
         return Optional.of(position);
     }
 
@@ -83,7 +90,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         double th2 = position.get().th2 - m_previousPosition.th2;
         m_previousPosition = position.get();
         ArmAngles velocity = new ArmAngles(th1 * 50, th2 * 50);
-        m_logger.logArmAngles(Level.TRACE, "velocity", () -> velocity);
+        m_log_velocity.log(() -> velocity);
         return Optional.of(velocity);
     }
 

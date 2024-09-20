@@ -3,37 +3,73 @@ package org.team100.lib.logging;
 import org.team100.lib.telemetry.Telemetry;
 
 /** Doesn't do anything. */
-public class TestLogger extends PrimitiveLogger2 {
+public class TestLogger implements PrimitiveLogger2 {
 
     public SupplierLogger2 getSupplierLogger() {
-        return new SupplierLogger2(Telemetry.get(), "/",  this);
+        return new SupplierLogger2(Telemetry.get(), "/", this);
     }
 
     @Override
-    public void logBoolean(String key, boolean val) {
+    public BooleanLogger booleanLogger(String label) {
+        return new BooleanLogger() {
+            @Override
+            public void log(boolean val) {
+            }
+        };
     }
 
     @Override
-    public void logDouble(String key, double vals) {
+    public DoubleLogger doubleLogger(String label) {
+        return new DoubleLogger() {
+
+            @Override
+            public void log(double val) {
+            }
+        };
     }
 
     @Override
-    public void logInt(String key, int vals) {
+    public IntLogger intLogger(String label) {
+        return new IntLogger() {
+            @Override
+            public void log(int val) {
+            }
+        };
     }
 
     @Override
-    public void logDoubleArray(String key, double[] val) {
+    public DoubleArrayLogger doubleArrayLogger(String label) {
+        return new DoubleArrayLogger() {
+            @Override
+            public void log(double[] val) {
+            }
+        };
     }
 
     @Override
-    public void logDoubleObjArray(String key, Double[] val) {
+    public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
+        return new DoubleObjArrayLogger() {
+            @Override
+            public void log(Double[] val) {
+            }
+        };
     }
 
     @Override
-    public void logLong(String key, long val) {
+    public LongLogger longLogger(String label) {
+        return new LongLogger() {
+            @Override
+            public void log(long val) {
+            }
+        };
     }
 
     @Override
-    public void logString(String key, String val) {
+    public StringLogger stringLogger(String label) {
+        return new StringLogger() {
+            @Override
+            public void log(String val) {
+            }
+        };
     }
 }

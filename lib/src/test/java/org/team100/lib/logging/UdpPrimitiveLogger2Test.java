@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.ByteBuffer;
 import java.util.HexFormat;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.PrimitiveLogger2.IntLogger;
@@ -280,22 +279,6 @@ class UdpPrimitiveLogger2Test {
         System.out.printf("duration per flush us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
         System.out.printf("duration per key us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS * KEYS));
         System.out.printf("keys per second %.0f\n", ITERATIONS * KEYS / (t2 - t1));
-    }
-
-    /**
-     * For performance testing, to count output packets.
-     */
-    class DummySender implements Consumer<ByteBuffer> {
-        private int m_counter = 0;
-
-        @Override
-        public void accept(ByteBuffer arg0) {
-            m_counter++;
-        }
-
-        public int getCounter() {
-            return m_counter;
-        }
     }
 
     /**

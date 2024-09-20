@@ -92,8 +92,8 @@ public class CombinedEncoder implements RotaryPositionSensor {
     }
 
     public void periodic(){
-        m_logger.logDouble(Level.TRACE, "Primary Rads", ()->m_primary.getPositionRad().getAsDouble());
-        m_logger.logDouble(Level.TRACE, "Combined Encoder Output", ()-> getPositionRad().getAsDouble());
+        m_logger.doubleLogger(Level.TRACE, "Primary Rads").log( ()->m_primary.getPositionRad().getAsDouble());
+        m_logger.doubleLogger(Level.TRACE, "Combined Encoder Output").log( ()-> getPositionRad().getAsDouble());
 
     }
 

@@ -40,11 +40,11 @@ public class AnalogTurningEncoder extends RoboRioRotaryPositionSensor {
 
     @Override
     protected OptionalDouble getRatio() {
-        m_logger.logInt(Level.TRACE, "channel", m_input::getChannel);
+        m_logger.intLogger(Level.TRACE, "channel").log( m_input::getChannel);
         double voltage = m_input.getVoltage();
-        m_logger.logDouble(Level.TRACE, "voltage", () -> voltage);
+        m_logger.doubleLogger(Level.TRACE, "voltage").log( () -> voltage);
         double ratio = voltage / RobotController.getVoltage5V();
-        m_logger.logDouble(Level.TRACE, "ratio", () -> ratio);
+        m_logger.doubleLogger(Level.TRACE, "ratio").log( () -> ratio);
         return OptionalDouble.of(ratio);
     }
 }

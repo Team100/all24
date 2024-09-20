@@ -55,10 +55,10 @@ public class ForceViz {
 
     public void render() {
         for (Entry<String, List<Double>> entry : items.entrySet()) {
-            m_logger.logDoubleObjArray(
+            m_logger.doubleObjArrayLogger(
                     Level.DEBUG,
-                    entry.getKey(),
-                    () -> entry.getValue().toArray(new Double[0]));
+                    entry.getKey()).log(
+                            () -> entry.getValue().toArray(new Double[0]));
             entry.getValue().clear();
         }
     }

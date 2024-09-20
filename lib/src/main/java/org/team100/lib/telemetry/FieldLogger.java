@@ -11,7 +11,7 @@ public class FieldLogger extends RootLogger {
 
     FieldLogger(Telemetry telemetry) {
         super(telemetry, "field");
-        logString(Level.COMP, ".type", () -> "Field2d");
+        stringLogger(Level.COMP, ".type").log(() -> "Field2d");
     }
 
 }

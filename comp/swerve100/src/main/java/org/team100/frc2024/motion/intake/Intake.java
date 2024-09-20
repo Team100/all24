@@ -1,5 +1,7 @@
 package org.team100.frc2024.motion.intake;
 
+import java.util.Optional;
+
 import org.team100.frc2024.SensorInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
@@ -9,6 +11,8 @@ import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
@@ -30,11 +34,21 @@ public class Intake extends SubsystemBase implements Glassy {
     private final PWMSparkMax m_centering;
     private final LimitedLinearVelocityServo superRollers;
 
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_lower;
+    private final OptionalDoubleLogger m_log_upper;
+    private final DoubleSupplierLogger2 m_log_centering;
+
     private int count = 0;
     private int currentCount = 0;
 
     public Intake(SupplierLogger2 parent, SensorInterface sensors) {
         m_logger = parent.child(this);
+
+        m_log_lower = m_logger.doubleLogger(Level.TRACE, "lower");
+        m_log_upper = m_logger.optionalDoubleLogger(Level.TRACE, "upper");
+        m_log_centering = m_logger.doubleLogger(Level.TRACE, "centering");
+
         m_sensors = sensors;
 
         switch (Identity.instance) {
@@ -125,9 +139,9 @@ public class Intake extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.logDouble(Level.TRACE, "lower", m_intake::get);
-        m_logger.logOptionalDouble(Level.TRACE, "upper", superRollers::getVelocity);
-        m_logger.logDouble(Level.TRACE, "centering", m_centering::get);
+        m_log_lower.log(m_intake::get);
+        m_log_upper.log(superRollers::getVelocity);
+        m_log_centering.log(m_centering::get);
     }
 
     @Override

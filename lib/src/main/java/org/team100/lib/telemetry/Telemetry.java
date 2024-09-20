@@ -1,6 +1,7 @@
 package org.team100.lib.telemetry;
 
 import org.team100.lib.logging.DataLogLogger;
+import org.team100.lib.logging.DummySender;
 import org.team100.lib.logging.NTLogger;
 import org.team100.lib.logging.PrimitiveLogger;
 import org.team100.lib.logging.SupplierLogger2;
@@ -84,7 +85,11 @@ public class Telemetry {
         // inst = NetworkTableInstance.getDefault();
         ntLogger = new NTLogger();
         usbLogger = new DataLogLogger();
-        udpLogger = new UdpPrimitiveLogger();
+        // TODO: real senders
+        DummySender dataSink = new DummySender();
+        DummySender metaSink = new DummySender();
+
+        udpLogger = new UdpPrimitiveLogger2(dataSink, metaSink);
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
         // DataLogManager.start();
@@ -111,7 +116,7 @@ public class Telemetry {
     public SupplierLogger2 fieldLogger() {
         if (USE_UDP_LOGGING) {
             SupplierLogger2 logger = new NetworkLogger(this, "field");
-            logger.logString(Level.COMP, ".type", () -> "Field2d");
+            logger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
             return logger;
 
         } else {

@@ -25,7 +25,7 @@ public class BareMotorController100 implements BareMotor {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        m_logger.logDouble(Level.TRACE, "duty cycle", () -> output);
+        m_logger.doubleLogger(Level.TRACE, "duty cycle").log( () -> output);
     }
 
     /**
@@ -35,7 +35,7 @@ public class BareMotorController100 implements BareMotor {
     public void setVelocity(double motorRad_S, double accelRad_S2, double torqueNm) {
         double motorDutyCycle = motorRad_S * velocityFFDutyCycle_Rad_S;
         m_motor.set(motorDutyCycle);
-        m_logger.logDouble(Level.TRACE, "duty cycle", () -> motorDutyCycle);
+        m_logger.doubleLogger(Level.TRACE, "duty cycle").log( () -> motorDutyCycle);
     }
 
     /** MotorControllers do not support positional control. */
@@ -84,6 +84,6 @@ public class BareMotorController100 implements BareMotor {
 
     @Override
     public void periodic() {
-        m_logger.logDouble(Level.TRACE, "duty cycle reported", m_motor::get);
+        m_logger.doubleLogger(Level.TRACE, "duty cycle reported").log( m_motor::get);
     }
 }

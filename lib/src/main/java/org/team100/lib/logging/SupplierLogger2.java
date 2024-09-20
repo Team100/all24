@@ -705,7 +705,7 @@ public class SupplierLogger2 {
         }
     }
 
-    public SwerveStateLogger swerveStateLogger(Level level, String leaf, Supplier<SwerveState> vals) {
+    public SwerveStateLogger swerveStateLogger(Level level, String leaf) {
         return new SwerveStateLogger(level, leaf);
     }
 
@@ -731,7 +731,7 @@ public class SupplierLogger2 {
         }
     }
 
-    public SwerveModulePosition100Logger logSwerveModulePosition100(Level level, String leaf) {
+    public SwerveModulePosition100Logger swerveModulePosition100Logger(Level level, String leaf) {
         return new SwerveModulePosition100Logger(level, leaf);
     }
 

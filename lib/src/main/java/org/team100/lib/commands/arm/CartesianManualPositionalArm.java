@@ -5,6 +5,9 @@ import java.util.function.DoubleSupplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.Translation2dLogger;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
@@ -30,6 +33,17 @@ public class CartesianManualPositionalArm extends Command100 {
     private final PIDController m_lowerController;
     private final PIDController m_upperController;
 
+    // LOGGERS
+
+    private final Translation2dLogger m_log_input;
+    private final ArmAnglesLogger m_log_setpoint;
+    private final ArmAnglesLogger m_log_measurement;
+    private final Translation2dLogger m_log_cartesian_measurement;
+    private final DoubleSupplierLogger2 m_log_output_u1;
+    private final DoubleSupplierLogger2 m_log_output_u2;
+    private final DoubleSupplierLogger2 m_log_error_e1;
+    private final DoubleSupplierLogger2 m_log_error_e2;
+
     public CartesianManualPositionalArm(
             SupplierLogger2 parent,
             ArmSubsystem arm,
@@ -37,6 +51,16 @@ public class CartesianManualPositionalArm extends Command100 {
             DoubleSupplier x,
             DoubleSupplier y) {
         super(parent);
+
+        m_log_input = m_logger.translation2dLogger(Level.TRACE, "input");
+        m_log_setpoint = m_logger.armAnglesLogger(Level.TRACE, "setpoint");
+        m_log_measurement = m_logger.armAnglesLogger(Level.TRACE, "measurement");
+        m_log_cartesian_measurement = m_logger.translation2dLogger(Level.TRACE, "cartesian_measurement");
+        m_log_output_u1 = m_logger.doubleLogger(Level.TRACE, "output/u1");
+        m_log_output_u2 = m_logger.doubleLogger(Level.TRACE, "output/u2");
+        m_log_error_e1 = m_logger.doubleLogger(Level.TRACE, "error/e1");
+        m_log_error_e2 = m_logger.doubleLogger(Level.TRACE, "error/e2");
+
         m_arm = arm;
         m_kinematics = kinematics;
         m_x = x;
@@ -78,14 +102,14 @@ public class CartesianManualPositionalArm extends Command100 {
 
         m_arm.set(u1, u2);
 
-        m_logger.logTranslation2d(Level.TRACE, "input", () -> input);
-        m_logger.logArmAngles(Level.TRACE, "setpoint", () -> setpoint);
-        m_logger.logArmAngles(Level.TRACE, "measurement", measurement::get);
-        m_logger.logTranslation2d(Level.TRACE, "cartesian_measurement", () -> cartesian_measurement);
-        m_logger.logDouble(Level.TRACE, "output/u1", () -> u1);
-        m_logger.logDouble(Level.TRACE, "output/u2", () -> u2);
-        m_logger.logDouble(Level.TRACE, "error/e1", m_lowerController::getPositionError);
-        m_logger.logDouble(Level.TRACE, "error/e2", m_upperController::getPositionError);
+        m_log_input.log(() -> input);
+        m_log_setpoint.log(() -> setpoint);
+        m_log_measurement.log(measurement::get);
+        m_log_cartesian_measurement.log(() -> cartesian_measurement);
+        m_log_output_u1.log(() -> u1);
+        m_log_output_u2.log(() -> u2);
+        m_log_error_e1.log(m_lowerController::getPositionError);
+        m_log_error_e2.log(m_upperController::getPositionError);
     }
 
     @Override

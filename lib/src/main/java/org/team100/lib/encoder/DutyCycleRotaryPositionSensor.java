@@ -40,9 +40,9 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
             Util.warn(String.format("encoder %d not connected", m_dutyCycle.getSourceChannel()));
             return OptionalDouble.empty();
         }
-        m_logger.logInt(Level.TRACE, "channel", m_dutyCycle::getSourceChannel);
+        m_logger.intLogger(Level.TRACE, "channel").log( m_dutyCycle::getSourceChannel);
         double dutyCycle = m_dutyCycle.getOutput();
-        m_logger.logDouble(Level.TRACE, "duty cycle", () -> dutyCycle);
+        m_logger.doubleLogger(Level.TRACE, "duty cycle").log( () -> dutyCycle);
         return OptionalDouble.of(dutyCycle);
     }
 

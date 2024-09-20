@@ -20,7 +20,7 @@ public class SimulatedBareMotor implements BareMotor {
     public void setDutyCycle(double dutyCycle) {
         final double output = MathUtil.clamp(
                 Util.notNaN(dutyCycle), -1, 1);
-        m_logger.logDouble(Level.TRACE, "duty_cycle", () -> output);
+        m_logger.doubleLogger(Level.TRACE, "duty_cycle").log( () -> output);
         setVelocity(output * m_freeSpeedRad_S, 0, 0);
     }
 
@@ -28,7 +28,7 @@ public class SimulatedBareMotor implements BareMotor {
     public void setVelocity(double velocityRad_S, double accelRad_S2, double torqueNm) {
         m_velocity = MathUtil.clamp(
                 Util.notNaN(velocityRad_S), -m_freeSpeedRad_S, m_freeSpeedRad_S);
-        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> m_velocity);
+        m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)").log( () -> m_velocity);
     }
 
     @Override

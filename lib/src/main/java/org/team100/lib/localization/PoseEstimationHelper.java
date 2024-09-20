@@ -50,14 +50,14 @@ public class PoseEstimationHelper implements Glassy {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            m_logger.logString(Level.TRACE, "rotation_source", () -> "CAMERA");
+            m_logger.stringLogger(Level.TRACE, "rotation_source").log( () -> "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        m_logger.logString(Level.TRACE, "rotation_source", () -> "GYRO");
+        m_logger.stringLogger(Level.TRACE, "rotation_source").log( () -> "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -134,16 +134,16 @@ public class PoseEstimationHelper implements Glassy {
 
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
-        m_logger.logRotation2d(Level.TRACE, "CAMERA ROT IN FIELD COORDS",
+        m_logger.rotation2dLogger(Level.TRACE, "CAMERA ROT IN FIELD COORDS").log(
                 cameraRotationInFieldCoords::toRotation2d);
-        m_logger.logTranslation2d(Level.TRACE, "TAG TRANSLATION IN CAM COORDS",
+        m_logger.translation2dLogger(Level.TRACE, "TAG TRANSLATION IN CAM COORDS").log(
                 tagTranslationInCameraCoords::toTranslation2d);
 
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
 
-        m_logger.logRotation2d(Level.TRACE, "TAG ROTATION IN CAM COORDS",
+        m_logger.rotation2dLogger(Level.TRACE, "TAG ROTATION IN CAM COORDS").log(
                 tagRotationInCameraCoords::toRotation2d);
 
         Transform3d tagInCameraCoords = new Transform3d(
@@ -154,7 +154,7 @@ public class PoseEstimationHelper implements Glassy {
                 tagInCameraCoords,
                 tagInFieldCoords);
 
-        m_logger.logTranslation2d(Level.TRACE, "CAM IN FIELD COORDS",
+        m_logger.translation2dLogger(Level.TRACE, "CAM IN FIELD COORDS").log(
                 () -> cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(

@@ -8,6 +8,10 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.JvmLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -24,8 +28,28 @@ public class Robot extends TimedRobot100 implements Glassy {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
+    private final DoubleSupplierLogger2 m_log_DriverStation_MatchTime;
+    private final BooleanSupplierLogger2 m_log_DriverStation_AutonomousEnabled;
+    private final BooleanSupplierLogger2 m_log_DriverStation_TeleopEnabled;
+    private final BooleanSupplierLogger2 m_log_DriverStation_FMSAttached;
+    private final StringSupplierLogger2 m_log_mode;
+    private final IntSupplierLogger2 m_log_key_list_size;
+    private final StringSupplierLogger2 m_log_active_auton_routine;
+    private final DoubleSupplierLogger2 m_log_voltage;
+
     private RobotContainer m_robotContainer;
     private JvmLogger m_jvmLogger;
+
+    public Robot() {
+        m_log_DriverStation_MatchTime = m_logger.doubleLogger(Level.TRACE, "DriverStation MatchTime");
+        m_log_DriverStation_AutonomousEnabled = m_logger.booleanLogger(Level.TRACE, "DriverStation AutonomousEnabled");
+        m_log_DriverStation_TeleopEnabled = m_logger.booleanLogger(Level.TRACE, "DriverStation TeleopEnabled");
+        m_log_DriverStation_FMSAttached = m_logger.booleanLogger(Level.TRACE, "DriverStation FMSAttached");
+        m_log_mode = m_logger.stringLogger(Level.TRACE, "mode");
+        m_log_key_list_size = m_logger.intLogger(Level.TRACE, "key list size");
+        m_log_active_auton_routine = m_logger.stringLogger(Level.COMP, "active auton routine");
+        m_log_voltage = m_logger.doubleLogger(Level.TRACE, "voltage");
+    }
 
     @Override
     public void robotInit() {
@@ -69,19 +93,13 @@ public class Robot extends TimedRobot100 implements Glassy {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
-        // t.log(Level.TRACE, "Voltage", m_pdh.getVoltage());
-        // t.log(Level.TRACE, "Total Current", m_pdh.getTotalCurrent());
 
-        // for(int channel = 0; channel < 20; channel++){
-        // t.log(Level.TRACE, "Channel " + String.valueOf(channel),
-        // m_pdh.getCurrent(channel));
+        ;
 
-        // }
-
-        m_logger.logDouble(Level.TRACE, "DriverStation MatchTime", DriverStation::getMatchTime);
-        m_logger.logBoolean(Level.TRACE, "DriverStation AutonomousEnabled", DriverStation::isAutonomousEnabled);
-        m_logger.logBoolean(Level.TRACE, "DriverStation TeleopEnabled", DriverStation::isTeleopEnabled);
-        m_logger.logBoolean(Level.TRACE, "DriverStation FMSAttached", DriverStation::isFMSAttached);
+        m_log_DriverStation_MatchTime.log(DriverStation::getMatchTime);
+        m_log_DriverStation_AutonomousEnabled.log(DriverStation::isAutonomousEnabled);
+        m_log_DriverStation_TeleopEnabled.log(DriverStation::isTeleopEnabled);
+        m_log_DriverStation_FMSAttached.log(DriverStation::isFMSAttached);
 
         m_jvmLogger.logGarbageCollectors();
         m_jvmLogger.logMemoryPools();
@@ -97,12 +115,11 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void disabledPeriodic() {
-        m_logger.logString(Level.TRACE, "mode", () -> "disabled");
-        double keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
-        m_logger.logDouble(Level.TRACE, "key list size", () -> keyListSize);
-
+        m_log_mode.log(() -> "disabled");
+        int keyListSize = NetworkTableInstance.getDefault().getTable("Vision").getKeys().size();
+        m_log_key_list_size.log(() -> keyListSize);
         // this forces the static initializer to run, so that the widget appears.
-        m_logger.logString(Level.COMP, "active auton routine", () -> AutonChooser.routine().name());
+        m_log_active_auton_routine.log(() -> AutonChooser.routine().name());
     }
 
     @Override
@@ -152,24 +169,23 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void autonomousPeriodic() {
-        m_logger.logString(Level.TRACE, "mode", () -> "autonomous");
+        m_log_mode.log(() -> "autonomous");
     }
 
     @Override
     public void simulationPeriodic() {
-        m_logger.logString(Level.TRACE, "mode", () -> "simulation");
+        m_log_mode.log(() -> "simulation");
     }
 
     @Override
     public void teleopPeriodic() {
-        m_logger.logString(Level.TRACE, "mode", () -> "teleop");
-        m_logger.logDouble(Level.TRACE, "voltage", RobotController::getBatteryVoltage);
-
+        m_log_mode.log(() -> "teleop");
+        m_log_voltage.log(RobotController::getBatteryVoltage);
     }
 
     @Override
     public void testPeriodic() {
-        m_logger.logString(Level.TRACE, "mode", () -> "test");
+        m_log_mode.log(() -> "test");
     }
 
     private void banner() {

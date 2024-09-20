@@ -2,6 +2,7 @@ package org.team100.lib.commands.drivetrain.manual;
 
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -18,10 +19,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
     private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
+    // LOGGERS
+    private final FieldRelativeVelocityLogger m_log_twist;
 
     public ManualFieldRelativeSpeeds(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_logger = parent.child(this);
+        m_log_twist = m_logger.fieldRelativeVelocityLogger(Level.TRACE, "twist");
     }
 
     /**
@@ -41,9 +45,7 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
                         m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                         m_swerveKinodynamics.getMaxAngleSpeedRad_S()));
 
-        m_logger.logDouble(Level.TRACE, "twist x m_s", twistM_S::x);
-        m_logger.logDouble(Level.TRACE, "twist y m_s", twistM_S::y);
-        m_logger.logDouble(Level.TRACE, "twist theta rad_s", twistM_S::theta);
+        m_log_twist.log(() -> twistM_S);
         return twistM_S;
     }
 

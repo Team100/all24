@@ -118,7 +118,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
-            m_logger.logString(Level.TRACE, "mode", () -> "free");
+            m_logger.stringLogger(Level.TRACE, "mode").log( () -> "free");
             // desaturate to feasibility
             return m_swerveKinodynamics.analyticDesaturation(twistM_S);
         }
@@ -155,17 +155,17 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
 
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
-        m_logger.logString(Level.TRACE, "mode", () -> "snap");
-        m_logger.logDouble(Level.TRACE, "goal/theta", m_goal::getRadians);
-        m_logger.logState100(Level.TRACE, "setpoint/theta", () -> m_thetaSetpoint);
-        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> yawMeasurement);
-        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> yawRate);
-        m_logger.logDouble(Level.TRACE, "error/theta", () -> thetaError);
-        m_logger.logDouble(Level.TRACE, "error/omega", () -> omegaError);
-        m_logger.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);
-        m_logger.logDouble(Level.TRACE, "thetaFB", () -> thetaFB);
-        m_logger.logDouble(Level.TRACE, "omegaFB", () -> omegaFB);
-        m_logger.logDouble(Level.TRACE, "output/omega", () -> omega);
+        m_logger.stringLogger(Level.TRACE, "mode").log( () -> "snap");
+        m_logger.doubleLogger(Level.TRACE, "goal/theta").log( m_goal::getRadians);
+        m_logger.state100Logger(Level.TRACE, "setpoint/theta").log( () -> m_thetaSetpoint);
+        m_logger.doubleLogger(Level.TRACE, "measurement/theta").log( () -> yawMeasurement);
+        m_logger.doubleLogger(Level.TRACE, "measurement/omega").log( () -> yawRate);
+        m_logger.doubleLogger(Level.TRACE, "error/theta").log( () -> thetaError);
+        m_logger.doubleLogger(Level.TRACE, "error/omega").log( () -> omegaError);
+        m_logger.doubleLogger(Level.TRACE, "thetaFF").log( () -> thetaFF);
+        m_logger.doubleLogger(Level.TRACE, "thetaFB").log( () -> thetaFB);
+        m_logger.doubleLogger(Level.TRACE, "omegaFB").log( () -> omegaFB);
+        m_logger.doubleLogger(Level.TRACE, "output/omega").log( () -> omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

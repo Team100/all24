@@ -21,8 +21,8 @@ public class Talon6Encoder implements IncrementalBareEncoder {
     public OptionalDouble getVelocityRad_S() {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
         double velocityRad_S = motorVelocityRev_S * 2 * Math.PI;
-        m_logger.logDouble(Level.TRACE, "velocity (rev_s)", () -> motorVelocityRev_S);
-        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> velocityRad_S);
+        m_logger.doubleLogger(Level.TRACE, "velocity (rev_s)").log(() -> motorVelocityRev_S);
+        m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)").log( () -> velocityRad_S);
         return OptionalDouble.of(velocityRad_S);
     }
 
@@ -30,8 +30,8 @@ public class Talon6Encoder implements IncrementalBareEncoder {
     public OptionalDouble getPositionRad() {
         double motorPositionRev = m_motor.getPositionRev();
         double positionRad = motorPositionRev * 2 * Math.PI;
-        m_logger.logDouble(Level.TRACE, "position (rev)", () -> motorPositionRev);
-        m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
+        m_logger.doubleLogger(Level.TRACE, "position (rev)").log( () -> motorPositionRev);
+        m_logger.doubleLogger(Level.TRACE, "position (rad)").log( () -> positionRad);
         return OptionalDouble.of(positionRad);
     }
 
@@ -52,8 +52,8 @@ public class Talon6Encoder implements IncrementalBareEncoder {
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", this::getPositionRad);
-        m_logger.logOptionalDouble(Level.TRACE, "velocity (rad_s)", this::getVelocityRad_S);
+        m_logger.optionalDoubleLogger(Level.TRACE, "position (rad)").log( this::getPositionRad);
+        m_logger.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)").log( this::getVelocityRad_S);
     }
 
 }

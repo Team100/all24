@@ -29,6 +29,8 @@ import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -71,6 +73,12 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private final LinearVelocityServo rightRoller;
     private final GravityServoInterface pivotServo;
 
+    // LOGGERS
+
+    private final OptionalDoubleLogger m_log_left_velocity;
+    private final OptionalDoubleLogger m_log_right_velocity;
+    private final OptionalDoubleLogger m_log_pivot_angle;
+
     public DrumShooter(
             SupplierLogger2 parent,
             int leftID,
@@ -79,6 +87,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
             double supplyLimit,
             double statorLimit) {
         m_logger = parent.child(this);
+        m_log_left_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "left velocity");
+        m_log_right_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "right velocity");
+        m_log_pivot_angle = m_logger.optionalDoubleLogger(Level.TRACE, "pivot angle (rad)");
 
         double period = 0.02;
         PIDController pivotController = new PIDController(4.5, 0.0, 0.000, period);
@@ -299,9 +310,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.TRACE, "left velocity", leftRoller::getVelocity);
-        m_logger.logOptionalDouble(Level.TRACE, "right velocity", rightRoller::getVelocity);
-        m_logger.logOptionalDouble(Level.TRACE, "pivot angle (rad)", pivotServo::getPositionRad);
+        m_log_left_velocity.log(leftRoller::getVelocity);
+        m_log_right_velocity.log(rightRoller::getVelocity);
+        m_log_pivot_angle.log(pivotServo::getPositionRad);
     }
 
     @Override

@@ -45,7 +45,7 @@ public abstract class CANSparkMotor implements BareMotor {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        m_logger.logDouble(Level.TRACE, "Duty Cycle", () -> output);
+        m_logger.doubleLogger(Level.TRACE, "Duty Cycle").log( () -> output);
         log();
     }
 
@@ -76,12 +76,12 @@ public abstract class CANSparkMotor implements BareMotor {
         Rev100.warn(() -> m_pidController.setReference(
                 motorRev_M, ControlType.kVelocity, 0, kFF, ArbFFUnits.kVoltage));
 
-        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
-        m_logger.logDouble(Level.TRACE, "desired accel (rev_s2)", () -> motorRev_S2);
-        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
-        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
-        m_logger.logDouble(Level.TRACE, "accel feedforward (v)", () -> accelFFVolts);
-        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
+        m_logger.doubleLogger(Level.TRACE, "desired speed (rev_s)").log( () -> motorRev_S);
+        m_logger.doubleLogger(Level.TRACE, "desired accel (rev_s2)").log( () -> motorRev_S2);
+        m_logger.doubleLogger(Level.TRACE, "friction feedforward (v)").log( () -> frictionFFVolts);
+        m_logger.doubleLogger(Level.TRACE, "velocity feedforward (v)").log( () -> velocityFFVolts);
+        m_logger.doubleLogger(Level.TRACE, "accel feedforward (v)").log( () -> accelFFVolts);
+        m_logger.doubleLogger(Level.TRACE, "torque feedforward (v)").log( () -> torqueFFVolts);
         log();
     }
 
@@ -106,11 +106,11 @@ public abstract class CANSparkMotor implements BareMotor {
         Rev100.warn(() -> m_pidController.setReference(
                 motorRev, ControlType.kPosition, 0, kFF, ArbFFUnits.kVoltage));
 
-        m_logger.logDouble(Level.TRACE, "desired position (rev)", () -> motorRev);
-        m_logger.logDouble(Level.TRACE, "desired speed (rev_s)", () -> motorRev_S);
-        m_logger.logDouble(Level.TRACE, "friction feedforward (v)", () -> frictionFFVolts);
-        m_logger.logDouble(Level.TRACE, "velocity feedforward (v)", () -> velocityFFVolts);
-        m_logger.logDouble(Level.TRACE, "torque feedforward (v)", () -> torqueFFVolts);
+        m_logger.doubleLogger(Level.TRACE, "desired position (rev)").log( () -> motorRev);
+        m_logger.doubleLogger(Level.TRACE, "desired speed (rev_s)").log( () -> motorRev_S);
+        m_logger.doubleLogger(Level.TRACE, "friction feedforward (v)").log( () -> frictionFFVolts);
+        m_logger.doubleLogger(Level.TRACE, "velocity feedforward (v)").log( () -> velocityFFVolts);
+        m_logger.doubleLogger(Level.TRACE, "torque feedforward (v)").log(() -> torqueFFVolts);
         log();
     }
 
@@ -169,14 +169,14 @@ public abstract class CANSparkMotor implements BareMotor {
     }
 
     protected void log() {
-        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceId);
-        m_logger.logDouble(Level.TRACE, "position (rev)", m_encoder::getPosition);
-        m_logger.logDouble(Level.TRACE, "velocity (rev_s)", () -> m_encoder.getVelocity() / 60);
-        m_logger.logDouble(Level.TRACE, "velocity (RPM)", m_encoder::getVelocity);
-        m_logger.logDouble(Level.TRACE, "current (A)", m_motor::getOutputCurrent);
-        m_logger.logDouble(Level.TRACE, "duty cycle", m_motor::getAppliedOutput);
-        m_logger.logDouble(Level.TRACE, "torque (Nm)", this::getMotorTorque);
-        m_logger.logDouble(Level.TRACE, "temperature (C)", m_motor::getMotorTemperature);
+        m_logger.intLogger(Level.TRACE, "Device ID").log( m_motor::getDeviceId);
+        m_logger.doubleLogger(Level.TRACE, "position (rev)").log( m_encoder::getPosition);
+        m_logger.doubleLogger(Level.TRACE, "velocity (rev_s)").log( () -> m_encoder.getVelocity() / 60);
+        m_logger.doubleLogger(Level.TRACE, "velocity (RPM)").log( m_encoder::getVelocity);
+        m_logger.doubleLogger(Level.TRACE, "current (A)").log( m_motor::getOutputCurrent);
+        m_logger.doubleLogger(Level.TRACE, "duty cycle").log( m_motor::getAppliedOutput);
+        m_logger.doubleLogger(Level.TRACE, "torque (Nm)").log( this::getMotorTorque);
+        m_logger.doubleLogger(Level.TRACE, "temperature (C)").log( m_motor::getMotorTemperature);
     }
 
     @Override

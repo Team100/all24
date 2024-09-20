@@ -107,20 +107,20 @@ public class Oscillate extends Command100 {
 
         }
 
-        m_logger.logDouble(Level.TRACE, "period", () -> m_period);
-        m_logger.logDouble(Level.TRACE, "time", () -> time);
-        m_logger.logDouble(Level.TRACE, "setpoint/accel", () -> accelM_S_S);
-        m_logger.logDouble(Level.TRACE, "setpoint/speed", () -> speedM_S);
-        m_logger.logDouble(Level.TRACE, "setpoint/position", () -> positionM);
+        m_logger.doubleLogger(Level.TRACE, "period").log( () -> m_period);
+        m_logger.doubleLogger(Level.TRACE, "time").log( () -> time);
+        m_logger.doubleLogger(Level.TRACE, "setpoint/accel").log( () -> accelM_S_S);
+        m_logger.doubleLogger(Level.TRACE, "setpoint/speed").log( () -> speedM_S);
+        m_logger.doubleLogger(Level.TRACE, "setpoint/position").log( () -> positionM);
 
         SwerveState swerveState = m_swerve.getState();
         if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
-            m_logger.logDouble(Level.TRACE, "measurement/speed", () -> swerveState.theta().v());
-            m_logger.logDouble(Level.TRACE, "measurement/position",
+            m_logger.doubleLogger(Level.TRACE, "measurement/speed").log( () -> swerveState.theta().v());
+            m_logger.doubleLogger(Level.TRACE, "measurement/position").log(
                     () -> swerveState.theta().x() - m_initial.theta().x());
         } else {
-            m_logger.logDouble(Level.TRACE, "measurement/speed", () -> swerveState.x().v());
-            m_logger.logDouble(Level.TRACE, "measurement/position",
+            m_logger.doubleLogger(Level.TRACE, "measurement/speed").log( () -> swerveState.x().v());
+            m_logger.doubleLogger(Level.TRACE, "measurement/position").log(
                     () -> swerveState.x().x() - m_initial.x().x());
         }
     }

@@ -66,7 +66,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     @Override
     public void setPositionWithVelocity(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
         OptionalDouble positionRad = m_encoder.getPositionRad();
-        m_logger.logDouble(Level.TRACE, "Position", () -> m_encoder.getPositionRad().getAsDouble());
+        m_logger.doubleLogger(Level.TRACE, "Position").log( () -> m_encoder.getPositionRad().getAsDouble());
         // System.out.println(positionRad.getAsDouble());
         if (positionRad.isEmpty())
             return;
@@ -91,10 +91,10 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 
-        m_logger.logState100(Level.TRACE, "goal (rad)", () -> m_goal);
-        m_logger.logDouble(Level.TRACE, "Feedforward Torque (Nm)", () -> feedForwardTorqueNm);
-        m_logger.logDouble(Level.TRACE, "measurement (rad)", () -> measurementRad);
-        m_logger.logState100(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
+        m_logger.state100Logger(Level.TRACE, "goal (rad)").log( () -> m_goal);
+        m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)").log( () -> feedForwardTorqueNm);
+        m_logger.doubleLogger(Level.TRACE, "measurement (rad)").log( () -> measurementRad);
+        m_logger.state100Logger(Level.TRACE, "setpoint (rad)").log( () -> m_setpoint);
     }
 
     // public void setPositionWithVelocity2(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
@@ -117,10 +117,10 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     //     m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 
-    //     m_logger.logState100(Level.TRACE, "goal (rad)", () -> m_goal);
-    //     m_logger.logDouble(Level.TRACE, "Feedforward Torque (Nm)", () -> feedForwardTorqueNm);
-    //     m_logger.logDouble(Level.TRACE, "measurement (rad)", () -> measurementRad);
-    //     m_logger.logState100(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
+    //     m_logger.state100Logger(Level.TRACE, "goal (rad)", () -> m_goal);
+    //     m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)", () -> feedForwardTorqueNm);
+    //     m_logger.doubleLogger(Level.TRACE, "measurement (rad)", () -> measurementRad);
+    //     m_logger.state100Logger(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
     // }
 
     @Override

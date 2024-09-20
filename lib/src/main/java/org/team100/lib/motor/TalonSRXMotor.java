@@ -137,7 +137,7 @@ public class TalonSRXMotor implements BareMotor {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        m_logger.logDouble(Level.TRACE, "Output", () -> output);
+        m_logger.doubleLogger(Level.TRACE, "Output").log( () -> output);
         log();
     }
 
@@ -200,10 +200,10 @@ public class TalonSRXMotor implements BareMotor {
     }
 
     public void log() {
-        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceID);
-        m_logger.logDouble(Level.TRACE, "Encoder Value",
+        m_logger.intLogger(Level.TRACE, "Device ID").log( m_motor::getDeviceID);
+        m_logger.doubleLogger(Level.TRACE, "Encoder Value").log(
                 () -> m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        m_logger.logDouble(Level.TRACE, "Velocity Value",
+        m_logger.doubleLogger(Level.TRACE, "Velocity Value").log(
                 () -> m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 

@@ -69,7 +69,7 @@ public class RotaryMechanism implements Glassy {
         if (velocityRad_S.isEmpty())
             return OptionalDouble.empty();
         double velo = velocityRad_S.getAsDouble() / m_gearRatio;
-        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> velo);
+        m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)").log( () -> velo);
         return OptionalDouble.of(velo);
     }
 
@@ -103,8 +103,8 @@ public class RotaryMechanism implements Glassy {
 
     public void periodic() {
         // do some logging
-        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", ()->getVelocityRad_S().getAsDouble());
-        m_logger.logDouble(Level.TRACE, "position (rad)", ()->MathUtil.angleModulus(getPositionRad().getAsDouble()));
+        m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)").log( ()->getVelocityRad_S().getAsDouble());
+        m_logger.doubleLogger(Level.TRACE, "position (rad)").log( ()->MathUtil.angleModulus(getPositionRad().getAsDouble()));
         m_motor.periodic();
         m_encoder.periodic();
     }

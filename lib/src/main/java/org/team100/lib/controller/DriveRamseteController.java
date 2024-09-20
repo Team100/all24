@@ -56,7 +56,7 @@ public class DriveRamseteController implements DriveMotionController {
         if (m_iter == null)
             return null;
 
-        m_logger.logPose2d(Level.TRACE, "current state", () -> measurement);
+        m_logger.pose2dLogger(Level.TRACE, "current state").log( () -> measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -66,7 +66,7 @@ public class DriveRamseteController implements DriveMotionController {
             return new ChassisSpeeds();
         }
         TimedPose setpoint = optionalSetpoint.get();
-        m_logger.logTimedPose(Level.TRACE, "setpoint", () -> setpoint);
+        m_logger.timedPoseLogger(Level.TRACE, "setpoint").log(() -> setpoint);
 
         // Convert from current velocity into course.
         Optional<Rotation2d> maybe_field_to_course = Optional.empty();
@@ -104,7 +104,7 @@ public class DriveRamseteController implements DriveMotionController {
         Rotation2d course_to_goal = field_to_course.unaryMinus().rotateBy(maybe_field_to_goal.get());
 
         Twist2d mErrorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, setpoint);
-        m_logger.logTwist2d(Level.TRACE, "error", () -> mErrorTwist);
+        m_logger.twist2dLogger(Level.TRACE, "error").log( () -> mErrorTwist);
 
         // Rotate error to be aligned to current course.
         // Error is in robot (heading) frame. Need to rotate it to be in course frame.
@@ -160,7 +160,7 @@ public class DriveRamseteController implements DriveMotionController {
             return Optional.empty();
         }
 
-        m_logger.logTrajectorySamplePoint(Level.TRACE, "sample point", sample_point::get);
+        m_logger.trajectorySamplePointLogger(Level.TRACE, "sample point").log( sample_point::get);
         return Optional.of(sample_point.get().state());
     }
 

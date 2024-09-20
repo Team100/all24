@@ -3,6 +3,8 @@ package org.team100.lib.util;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.Vector2dLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
@@ -24,11 +26,27 @@ public class Tire implements Glassy {
     private final double m_saturationM_s_s;
     private final double m_slipAtSaturation0_1;
 
+    // LOGGING
+    private final Vector2dLogger m_log_corner;
+    private final Vector2dLogger m_log_wheel;
+    private final DoubleSupplierLogger2 m_log_dtS;
+    private final Vector2dLogger m_log_desired;
+    private final Vector2dLogger m_log_limited;
+    private final Vector2dLogger m_log_actual;
+    private final Vector2dLogger m_log_limit;
+
     /** for testing */
     Tire(SupplierLogger2 parent, double saturationM_s_s, double slip0_1) {
         m_saturationM_s_s = saturationM_s_s;
         m_slipAtSaturation0_1 = slip0_1;
         m_logger = parent.child(this);
+        m_log_corner = m_logger.vector2dLogger(Level.TRACE, "corner M_s");
+        m_log_wheel = m_logger.vector2dLogger(Level.TRACE, "wheel M_s");
+        m_log_dtS = m_logger.doubleLogger(Level.COMP, "dtS");
+        m_log_desired = m_logger.vector2dLogger(Level.COMP, "desired accel M_s_s");
+        m_log_limited = m_logger.vector2dLogger(Level.COMP, "limited accel M_s_s");
+        m_log_actual = m_logger.vector2dLogger(Level.COMP, "actual M_s");
+        m_log_limit = m_logger.vector2dLogger(Level.COMP, "limit M_s_s");
     }
 
     public static Tire noslip(SupplierLogger2 parent) {
@@ -51,21 +69,21 @@ public class Tire implements Glassy {
      * @param dtS       length of the current period
      */
     public Vector2d actual(Vector2d cornerM_s, Vector2d wheelM_s, double dtS) {
-        m_logger.logVector2d(Level.TRACE, "corner M_s", () -> cornerM_s);
-        m_logger.logVector2d(Level.TRACE, "wheel M_s", () -> wheelM_s);
-        m_logger.logDouble(Level.COMP, "dtS", () -> dtS); // usually about 0.02
+        m_log_corner.log(() -> cornerM_s);
+        m_log_wheel.log(() -> wheelM_s);
+        m_log_dtS.log(() -> dtS); // usually about 0.02
 
         Vector2d desiredAccelM_s_s = desiredAccelM_s_s(cornerM_s, wheelM_s, dtS);
-        m_logger.logVector2d(Level.COMP, "desired accel M_s_s", () -> desiredAccelM_s_s);
+        m_log_desired.log(() -> desiredAccelM_s_s);
         double fraction = fraction(desiredAccelM_s_s);
         double scale = scale(fraction);
         Vector2d scaledAccelM_s_s = scaledAccelM_s_s(desiredAccelM_s_s, scale);
         Vector2d limitedAccelM_s_s = limit(scaledAccelM_s_s);
-        m_logger.logVector2d(Level.COMP, "limited accel M_s_s", () -> limitedAccelM_s_s);
+        m_log_limited.log(() -> limitedAccelM_s_s);
 
         // Vector2d actual = apply(cornerM_s, desiredAccelM_s_s, dtS);
         Vector2d actual = apply(cornerM_s, limitedAccelM_s_s, dtS);
-        m_logger.logVector2d(Level.TRACE, "actual M_s", () -> actual);
+        m_log_actual.log(() -> actual);
         return actual;
     }
 
@@ -115,11 +133,11 @@ public class Tire implements Glassy {
         double normM_s_s = scaledAccelM_s_s.norm();
         double saturationM_s_s = m_saturationM_s_s;
         if (normM_s_s <= saturationM_s_s) {
-            m_logger.logVector2d(Level.TRACE, "limit M_s_s", () -> scaledAccelM_s_s);
+            m_log_limit.log(() -> scaledAccelM_s_s);
             return scaledAccelM_s_s;
         }
         Vector2d limitedM_s_s = scaledAccelM_s_s.times(saturationM_s_s / normM_s_s);
-        m_logger.logVector2d(Level.TRACE, "limit M_s_s", () -> limitedM_s_s);
+        m_log_limit.log(() -> limitedM_s_s);
         return limitedM_s_s;
     }
 

@@ -60,14 +60,14 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
         double u_TOTAL = MathUtil.clamp(u_FF + u_FB, -1.0, 1.0);
         m_mechanism.setDutyCycle(u_TOTAL);
 
-        m_logger.logState100(Level.TRACE, "goal (m)", () -> goal);
-        m_logger.logDouble(Level.TRACE, "measurement (m)", () -> measurementM);
-        m_logger.logState100(Level.TRACE, "setpoint (m)", () -> m_setpoint);
-        m_logger.logDouble(Level.TRACE, "u_FB (duty cycle)", () -> u_FB);
-        m_logger.logDouble(Level.TRACE, "u_FF (duty cycle)", () -> u_FF);
-        m_logger.logDouble(Level.TRACE, "u_TOTAL (duty cycle)", () -> u_TOTAL);
-        m_logger.logDouble(Level.TRACE, "Controller Position Error (m)", m_controller::getPositionError);
-        m_logger.logDouble(Level.TRACE, "Controller Velocity Error (m_s)", m_controller::getVelocityError);
+        m_logger.state100Logger(Level.TRACE, "goal (m)").log( () -> goal);
+        m_logger.doubleLogger(Level.TRACE, "measurement (m)").log( () -> measurementM);
+        m_logger.state100Logger(Level.TRACE, "setpoint (m)").log( () -> m_setpoint);
+        m_logger.doubleLogger(Level.TRACE, "u_FB (duty cycle)").log( () -> u_FB);
+        m_logger.doubleLogger(Level.TRACE, "u_FF (duty cycle)").log( () -> u_FF);
+        m_logger.doubleLogger(Level.TRACE, "u_TOTAL (duty cycle)").log( () -> u_TOTAL);
+        m_logger.doubleLogger(Level.TRACE, "Controller Position Error (m)").log( m_controller::getPositionError);
+        m_logger.doubleLogger(Level.TRACE, "Controller Velocity Error (m_s)").log( m_controller::getVelocityError);
     }
 
     @Override

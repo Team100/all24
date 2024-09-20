@@ -23,7 +23,7 @@ public class TrajectoryVisualization {
     }
 
     public void setViz(Trajectory100 m_trajectory) {
-        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromTrajectory100(m_trajectory));
+        m_fieldLogger.doubleArrayLogger(Level.TRACE, kTrajectory).log( () -> fromTrajectory100(m_trajectory));
     }
 
     private static double[] fromTrajectory100(Trajectory100 m_trajectory) {
@@ -40,7 +40,7 @@ public class TrajectoryVisualization {
     }
 
     public void setViz(Trajectory m_trajectory) {
-        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromWPITrajectory(m_trajectory));
+        m_fieldLogger.doubleArrayLogger(Level.TRACE, kTrajectory).log( () -> fromWPITrajectory(m_trajectory));
     }
 
     private static double[] fromWPITrajectory(Trajectory m_trajectory) {
@@ -57,7 +57,7 @@ public class TrajectoryVisualization {
     }
 
     public void setViz(List<Pose2d> poses) {
-        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> fromPoses(poses));
+        m_fieldLogger.doubleArrayLogger(Level.TRACE, kTrajectory).log( () -> fromPoses(poses));
     }
 
     private static double[] fromPoses(List<Pose2d> poses) {
@@ -77,7 +77,7 @@ public class TrajectoryVisualization {
     }
 
     public void clear() {
-        m_fieldLogger.logDoubleArray(Level.TRACE, kTrajectory, () -> new double[0]);
+        m_fieldLogger.doubleArrayLogger(Level.TRACE, kTrajectory).log( () -> new double[0]);
     }
 
 }

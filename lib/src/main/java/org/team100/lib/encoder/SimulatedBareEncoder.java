@@ -26,7 +26,7 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
     @Override
     public OptionalDouble getVelocityRad_S() {
         double m_rate = m_motor.getVelocityRad_S();
-        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> m_rate);
+        m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)").log( () -> m_rate);
         return OptionalDouble.of(m_rate);
     }
 
@@ -37,7 +37,7 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
         double m_rate = m_motor.getVelocityRad_S();
         m_position += m_rate * dt;
         m_time = now;
-        m_logger.logDouble(Level.TRACE, "position (m)", () -> m_position);
+        m_logger.doubleLogger(Level.TRACE, "position (m)").log( () -> m_position);
         return OptionalDouble.of(m_position);
     }
 
@@ -59,8 +59,8 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", this::getPositionRad);
-        m_logger.logOptionalDouble(Level.TRACE, "velocity (rad_s)", this::getVelocityRad_S);
+        m_logger.optionalDoubleLogger(Level.TRACE, "position (rad)").log( this::getPositionRad);
+        m_logger.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)").log( this::getVelocityRad_S);
     }
 
 }

@@ -8,6 +8,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
@@ -51,15 +52,24 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final SwerveModuleCollection m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
+    private final ChassisSpeedsLogger m_log_desired;
+    private final ChassisSpeedsLogger m_log_setpoint_delta;
+    private final ChassisSpeedsLogger m_log_prev_setpoint;
+    private final ChassisSpeedsLogger m_log_setpoint;
+
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
             SupplierLogger2 parent,
             SwerveKinodynamics swerveKinodynamics,
             SwerveModuleCollection modules) {
+        m_logger = parent.child(this);
+        m_log_desired = parent.chassisSpeedsLogger(Level.TRACE, "desired chassis speed");
+        m_log_setpoint_delta = parent.chassisSpeedsLogger(Level.TRACE, "setpoint delta");
+        m_log_prev_setpoint = parent.chassisSpeedsLogger(Level.TRACE, "prevSetpoint chassis speed");
+        m_log_setpoint = parent.chassisSpeedsLogger(Level.TRACE, "setpoint chassis speed");
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
-        m_logger = parent.child(this);
         m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_logger, m_swerveKinodynamics);
         prevSetpoint = new SwerveSetpoint();
     }
@@ -81,7 +91,7 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
      *                      calculate
      */
     public void setChassisSpeeds(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
-        m_logger.logChassisSpeeds(Level.TRACE, "desired chassis speed", () -> speeds);
+        m_log_desired.log(() -> speeds);
         if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
             setChassisSpeedsWithSetpointGenerator(speeds, kDtSec);
         } else {
@@ -243,9 +253,9 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
                 kDtSec);
         // ideally delta would be zero because our input would be feasible.
         ChassisSpeeds delta = setpoint.getChassisSpeeds().minus(speeds);
-        m_logger.logChassisSpeeds(Level.TRACE, "setpoint delta", () -> delta);
-        m_logger.logChassisSpeeds(Level.TRACE, "prevSetpoint chassis speed", prevSetpoint::getChassisSpeeds);
-        m_logger.logChassisSpeeds(Level.TRACE, "setpoint chassis speed", setpoint::getChassisSpeeds);
+        m_log_setpoint_delta.log(() -> delta);
+        m_log_prev_setpoint.log(prevSetpoint::getChassisSpeeds);
+        m_log_setpoint.log(setpoint::getChassisSpeeds);
         setModuleStates(setpoint.getModuleStates());
         prevSetpoint = setpoint;
     }

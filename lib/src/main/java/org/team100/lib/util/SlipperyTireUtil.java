@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -30,9 +31,16 @@ public class SlipperyTireUtil implements Glassy {
 
     private final Tire m_tire;
 
+    private final DoubleSupplierLogger2 m_log_pose0x;
+    private final DoubleSupplierLogger2 m_log_pose1x;
+    private final DoubleSupplierLogger2 m_log_twistdx;
+
     public SlipperyTireUtil(SupplierLogger2 parent, Tire tire) {
         m_tire = tire;
         m_logger = parent.child(this);
+        m_log_pose0x = m_logger.doubleLogger(Level.TRACE, "pose0x");
+        m_log_pose1x = m_logger.doubleLogger(Level.TRACE, "pose1x");
+        m_log_twistdx = m_logger.doubleLogger(Level.TRACE, "twistdx");
     }
 
     /**
@@ -56,11 +64,11 @@ public class SlipperyTireUtil implements Glassy {
         SwerveModulePosition100[] result = new SwerveModulePosition100[deltas.length];
         for (int i = 0; i < deltas.length; i++) {
             SwerveModulePosition100 delta = deltas[i];
-            m_logger.logSwerveModulePosition100(Level.TRACE, "deltas" + i, () -> delta);
+            // m_logger.logSwerveModulePosition100(Level.TRACE, "deltas" + i, () -> delta);
 
             // corners are robot-relative
             final Vector2d corner = corners[i];
-            m_logger.logVector2d(Level.TRACE, "corner" + i, () -> corner);
+            // m_logger.logVector2d(Level.TRACE, "corner" + i, () -> corner);
             Vector2d cornerSpeedM_s = getCornerSpeedM_s(corners[i], cornerDtS);
 
             if (Math.abs(delta.distanceMeters) < 1e-6 || delta.angle.isEmpty()) {
@@ -74,17 +82,18 @@ public class SlipperyTireUtil implements Glassy {
                     delta.distanceMeters * delta.angle.get().getSin() / dtS);
 
             Vector2d actualSpeedM_s = m_tire.actual(cornerSpeedM_s, wheelSpeedM_s, dtS);
-            m_logger.logVector2d(Level.TRACE, "cornerSpeed" + i, () -> cornerSpeedM_s);
-            m_logger.logVector2d(Level.TRACE, "actualSpeed" + i, () -> actualSpeedM_s);
+            // m_logger.logVector2d(Level.TRACE, "cornerSpeed" + i, () -> cornerSpeedM_s);
+            // m_logger.logVector2d(Level.TRACE, "actualSpeed" + i, () -> actualSpeedM_s);
 
             // this throws away the "optimization" of the input. :(
             // TODO: fix that
 
             result[i] = safePosition(dtS, delta, actualSpeedM_s);
             final SwerveModulePosition100 resulti = result[i];
-            m_logger.logSwerveModulePosition100(Level.TRACE, "result" + i, () -> resulti);
+            // m_logger.logSwerveModulePosition100(Level.TRACE, "result" + i, () ->
+            // resulti);
         }
-        m_logger.logDouble(Level.TRACE, "dts", () -> dtS);
+        // m_logger.doubleLogger(Level.TRACE, "dts", () -> dtS);
         return result;
     }
 
@@ -161,10 +170,10 @@ public class SlipperyTireUtil implements Glassy {
             SwerveDriveKinematics100 kinematics,
             Pose2d pose0,
             Pose2d pose1) {
-        m_logger.logDouble(Level.TRACE, "pose0x", pose0::getX);
-        m_logger.logDouble(Level.TRACE, "pose1x", pose1::getX);
+        m_log_pose0x.log(pose0::getX);
+        m_log_pose1x.log(pose1::getX);
         Twist2d twist = pose0.log(pose1);
-        m_logger.logDouble(Level.TRACE, "twistdx", () -> twist.dx);
+        m_log_twistdx.log(() -> twist.dx);
         SwerveModulePosition100[] p = kinematics.toSwerveModulePosition(twist);
         return kinematics.pos2vec(p);
     }

@@ -38,8 +38,8 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     public void setVelocity(double setpointM_S, double setpointM_S2) {
         m_setpoint = setpointM_S;
         m_motor.setVelocity(setpointM_S, setpointM_S2, 0);
-        m_logger.logDouble(Level.TRACE, "setpoint v (m_s)", () -> setpointM_S);
-        m_logger.logDouble(Level.TRACE, "setpoint a (m_s2)", () -> setpointM_S2);
+        m_logger.doubleLogger(Level.TRACE, "setpoint v (m_s)").log( () -> setpointM_S);
+        m_logger.doubleLogger(Level.TRACE, "setpoint a (m_s2)").log( () -> setpointM_S2);
     }
 
     /**
@@ -49,7 +49,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     @Override
     public OptionalDouble getVelocity() {
         OptionalDouble velocityM_S = m_motor.getVelocityM_S();
-        m_logger.logOptionalDouble(Level.TRACE, "velocity (m_s)", () -> velocityM_S);
+        m_logger.optionalDoubleLogger(Level.TRACE, "velocity (m_s)").log( () -> velocityM_S);
         return velocityM_S;
     }
 
@@ -61,7 +61,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     @Override
     public OptionalDouble getDistance() {
         OptionalDouble positionM = m_motor.getPositionM();
-        m_logger.logOptionalDouble(Level.TRACE, "position (m)", () -> positionM);
+        m_logger.optionalDoubleLogger(Level.TRACE, "position (m)").log( () -> positionM);
         return positionM;
     }
 

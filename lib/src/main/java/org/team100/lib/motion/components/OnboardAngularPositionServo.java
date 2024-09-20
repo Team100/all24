@@ -151,16 +151,16 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         // m_mechanism.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
         m_mechanism.setVelocity(u_TOTAL, m_setpointRad.a(), feedForwardTorqueNm);
 
-        m_logger.logState100(Level.TRACE, "goal (rad)", () -> m_goal);
-        m_logger.logDouble(Level.TRACE, "Feedforward Torque (Nm)", () -> feedForwardTorqueNm);
-        m_logger.logState100(Level.TRACE, "measurement (rad)",
+        m_logger.state100Logger(Level.TRACE, "goal (rad)").log( () -> m_goal);
+        m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)").log( () -> feedForwardTorqueNm);
+        m_logger.state100Logger(Level.TRACE, "measurement (rad)").log(
                 () -> new State100(measurementPositionRad, mechanismVelocityRad_S));
-        m_logger.logState100(Level.TRACE, "setpoint (rad)", () -> m_setpointRad);
-        m_logger.logDouble(Level.TRACE, "u_FB (rad_s)", () -> u_FB);
-        m_logger.logDouble(Level.TRACE, "u_FF (rad_s)", () -> u_FF);
-        m_logger.logDouble(Level.TRACE, "u_TOTAL (rad_s)", () -> u_TOTAL);
-        m_logger.logDouble(Level.TRACE, "Controller Position Error (rad)", m_controller::getPositionError);
-        m_logger.logDouble(Level.TRACE, "Controller Velocity Error (rad_s)", m_controller::getVelocityError);
+        m_logger.state100Logger(Level.TRACE, "setpoint (rad)").log( () -> m_setpointRad);
+        m_logger.doubleLogger(Level.TRACE, "u_FB (rad_s)").log( () -> u_FB);
+        m_logger.doubleLogger(Level.TRACE, "u_FF (rad_s)").log( () -> u_FF);
+        m_logger.doubleLogger(Level.TRACE, "u_TOTAL (rad_s)").log( () -> u_TOTAL);
+        m_logger.doubleLogger(Level.TRACE, "Controller Position Error (rad)").log( m_controller::getPositionError);
+        m_logger.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)").log( m_controller::getVelocityError);
     }
 
     @Override
@@ -190,9 +190,9 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     @Override
     public boolean atSetpoint() {
         boolean atSetpoint = m_controller.atSetpoint();
-        m_logger.logDouble(Level.TRACE, "Position Tolerance", m_controller::getPositionTolerance);
-        m_logger.logDouble(Level.TRACE, "Velocity Tolerance", m_controller::getVelocityTolerance);
-        m_logger.logBoolean(Level.TRACE, "At Setpoint", () -> atSetpoint);
+        m_logger.doubleLogger(Level.TRACE, "Position Tolerance").log( m_controller::getPositionTolerance);
+        m_logger.doubleLogger(Level.TRACE, "Velocity Tolerance").log( m_controller::getVelocityTolerance);
+        m_logger.booleanLogger(Level.TRACE, "At Setpoint").log( () -> atSetpoint);
         return atSetpoint;
     }
 
@@ -232,8 +232,8 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     @Override
     public void periodic() {
         m_mechanism.periodic();
-        m_logger.logState100(Level.TRACE, "setpoint", () -> m_setpointRad);
-        m_logger.logState100(Level.TRACE, "goal", () -> m_goal);
+        m_logger.state100Logger(Level.TRACE, "setpoint").log( () -> m_setpointRad);
+        m_logger.state100Logger(Level.TRACE, "goal").log( () -> m_goal);
     }
 
     ////////////////////////////////////////////////

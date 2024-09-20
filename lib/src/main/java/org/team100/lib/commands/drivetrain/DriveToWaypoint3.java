@@ -94,8 +94,8 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            m_logger.logDouble(Level.TRACE, "Desired X", () -> desiredState.state().getPose().getX());
-            m_logger.logDouble(Level.TRACE, "Desired Y", () -> desiredState.state().getPose().getY());
+            m_logger.doubleLogger(Level.TRACE, "Desired X").log(() -> desiredState.state().getPose().getX());
+            m_logger.doubleLogger(Level.TRACE, "Desired Y").log( () -> desiredState.state().getPose().getY());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -114,8 +114,8 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            m_logger.logDouble(Level.TRACE, "Desired X", () -> desiredState.state().getPose().getX());
-            m_logger.logDouble(Level.TRACE, "Desired Y", () -> desiredState.state().getPose().getY());
+            m_logger.doubleLogger(Level.TRACE, "Desired X").log( () -> desiredState.state().getPose().getX());
+            m_logger.doubleLogger(Level.TRACE, "Desired Y").log( () -> desiredState.state().getPose().getY());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -123,12 +123,12 @@ public class DriveToWaypoint3 extends Command100 {
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
 
-        m_logger.logBoolean(Level.TRACE, "Aligned", () -> m_steeringAligned);
+        m_logger.booleanLogger(Level.TRACE, "Aligned").log( () -> m_steeringAligned);
 
-        m_logger.logDouble(Level.TRACE, "Pose X", () -> m_swerve.getState().pose().getX());
-        m_logger.logDouble(Level.TRACE, "Pose Y", () -> m_swerve.getState().pose().getY());
-        m_logger.logDouble(Level.TRACE, "Desired Rot", () -> m_goal.getRotation().getRadians());
-        m_logger.logDouble(Level.TRACE, "Pose Rot", () -> m_swerve.getState().pose().getRotation().getRadians());
+        m_logger.doubleLogger(Level.TRACE, "Pose X").log( () -> m_swerve.getState().pose().getX());
+        m_logger.doubleLogger(Level.TRACE, "Pose Y").log( () -> m_swerve.getState().pose().getY());
+        m_logger.doubleLogger(Level.TRACE, "Desired Rot").log( () -> m_goal.getRotation().getRadians());
+        m_logger.doubleLogger(Level.TRACE, "Pose Rot").log( () -> m_swerve.getState().pose().getRotation().getRadians());
     }
 
     @Override
