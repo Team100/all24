@@ -1,4 +1,4 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

@@ -1,8 +1,8 @@
 package org.team100.lib.commands.arm;
 
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.telemetry.SupplierLogger;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;

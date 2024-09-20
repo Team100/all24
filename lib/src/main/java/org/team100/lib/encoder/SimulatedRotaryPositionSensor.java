@@ -2,8 +2,8 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.RotaryMechanism;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;

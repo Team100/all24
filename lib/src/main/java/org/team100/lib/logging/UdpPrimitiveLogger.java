@@ -1,4 +1,4 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

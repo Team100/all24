@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.MockBareMotor;
-import org.team100.lib.telemetry.SupplierLogger;
-import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.TestLogger;
 
 class CombinedEncoderTest {
     private static final double kDelta = 0.001;

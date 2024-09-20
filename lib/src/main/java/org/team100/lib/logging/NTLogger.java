@@ -1,10 +1,11 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Chronos.Sample;
 
 import edu.wpi.first.networktables.BooleanPublisher;
@@ -25,7 +26,7 @@ public class NTLogger extends PrimitiveLogger {
     private final Map<String, Publisher> m_publishers;
     private final Chronos m_chronos;
 
-    NTLogger() {
+    public NTLogger() {
         inst = NetworkTableInstance.getDefault();
         m_publishers = new ConcurrentHashMap<>();
         m_chronos = Chronos.get();

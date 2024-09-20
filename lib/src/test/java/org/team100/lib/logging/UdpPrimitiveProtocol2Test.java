@@ -1,4 +1,4 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.telemetry.UdpPrimitiveProtocol2.ProtocolException;
+import org.team100.lib.logging.UdpPrimitiveProtocol2.ProtocolException;
 
 class UdpPrimitiveProtocol2Test {
 
@@ -266,14 +266,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[28];
         bb.rewind();
         bb.get(b);
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 0, b[3]);
-        assertEquals((byte) 0, b[4]);
-        assertEquals((byte) 0, b[5]);
-        assertEquals((byte) 0, b[6]);
-        assertEquals((byte) 0, b[7]); // timestamp
+        // skip timestamp since it varies
         assertEquals((byte) 0, b[8]); // key MSB
         assertEquals((byte) 16, b[9]); // key LSB
         assertEquals((byte) 6, b[10]); // string type

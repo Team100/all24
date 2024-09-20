@@ -6,8 +6,8 @@ import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.telemetry.TestLogger;
-import org.team100.lib.telemetry.SupplierLogger;
+import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.SupplierLogger;
 
 import edu.wpi.first.math.MathUtil;
 

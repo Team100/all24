@@ -1,4 +1,4 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,16 +8,19 @@ import java.util.HexFormat;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.telemetry.PrimitiveLogger2.IntLogger;
-import org.team100.lib.telemetry.PrimitiveLogger2.StringLogger;
-import org.team100.lib.telemetry.PrimitiveLogger2.BooleanLogger;
-import org.team100.lib.telemetry.SupplierLogger2.BooleanSupplierLogger;
-import org.team100.lib.telemetry.SupplierLogger2.DoubleArraySupplierLogger;
-import org.team100.lib.telemetry.SupplierLogger2.DoubleObjArraySupplierLogger;
-import org.team100.lib.telemetry.SupplierLogger2.DoubleSupplierLogger;
-import org.team100.lib.telemetry.SupplierLogger2.IntSupplierLogger;
-import org.team100.lib.telemetry.SupplierLogger2.LongSupplierLogger;
-import org.team100.lib.telemetry.SupplierLogger2.StringSupplierLogger;
+import org.team100.lib.logging.PrimitiveLogger2.IntLogger;
+import org.team100.lib.logging.PrimitiveLogger2.StringLogger;
+import org.team100.lib.logging.PrimitiveLogger2;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.telemetry.Telemetry;
+import org.team100.lib.logging.PrimitiveLogger2.BooleanLogger;
+import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger;
+import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger;
+import org.team100.lib.logging.SupplierLogger2.DoubleObjArraySupplierLogger;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger;
+import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger;
+import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import java.nio.charset.StandardCharsets;
 
@@ -56,8 +59,8 @@ class UdpPrimitiveLogger2Test {
         assertEquals(90, bb.remaining());
 
         HexFormat hex = HexFormat.of();
-        String expectedStr = "0000000000000000" // timestamp
-                + "0001" // key
+        String expectedStr =  // omit "0000000000000000" // timestamp
+                 "0001" // key
                 + "01" // type = boolean
                 + "01" // value = true
                 + "0002" // key
@@ -84,7 +87,8 @@ class UdpPrimitiveLogger2Test {
                 + "05" // length = 5
                 + hex.formatHex("value".getBytes());
         byte[] expectedBB = hex.parseHex(expectedStr);
-        byte[] actualBB = new byte[90];
+        byte[] actualBB = new byte[82];
+        bb.get(new byte[8]); // skip
         bb.get(actualBB);
         assertArrayEquals(expectedBB, actualBB);
 
@@ -100,8 +104,8 @@ class UdpPrimitiveLogger2Test {
         udpLogger.dumpLabels();
         assertEquals(147, mb.remaining());
 
-        expectedStr = "\00\00\00\00\00\00\00\00" // timestamp
-                + "\00\01" // key
+        expectedStr = // skip "\00\00\00\00\00\00\00\00" // timestamp
+                 "\00\01" // key
                 + "\01" // type
                 + "\15" // 1 6 length
                 + "/root/boolkey" // 13 19 label
@@ -130,7 +134,8 @@ class UdpPrimitiveLogger2Test {
                 + "\17" // 1 108 length
                 + "/root/stringkey"; // 15 123 label
         expectedBB = expectedStr.getBytes(StandardCharsets.US_ASCII);
-        actualBB = new byte[147];
+        actualBB = new byte[139];
+        mb.get(new byte[8]); // skip
         mb.get(actualBB);
         assertArrayEquals(expectedBB, actualBB);
     }
@@ -350,14 +355,7 @@ class UdpPrimitiveLogger2Test {
         byte[] b = new byte[17];
         bb.rewind();
         bb.get(b);
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 0, b[3]);
-        assertEquals((byte) 0, b[4]);
-        assertEquals((byte) 0, b[5]);
-        assertEquals((byte) 0, b[6]);
-        assertEquals((byte) 0, b[7]); // ... timestamp
+        // the first 8 bytes are timestamp, which varies
         assertEquals((byte) 0, b[8]); // key
         assertEquals((byte) 1, b[9]); // key
         assertEquals((byte) 6, b[10]); // type
@@ -376,14 +374,7 @@ class UdpPrimitiveLogger2Test {
         mb.rewind();
         mb.get(b);
 
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 0, b[3]);
-        assertEquals((byte) 0, b[4]);
-        assertEquals((byte) 0, b[5]);
-        assertEquals((byte) 0, b[6]);
-        assertEquals((byte) 0, b[7]); // ... timestamp
+        // the first 8 bytes are timestamp, which varies
         assertEquals((byte) 0, b[8]); // key
         assertEquals((byte) 1, b[9]); // key
         assertEquals((byte) 6, b[10]); // type
@@ -408,14 +399,7 @@ class UdpPrimitiveLogger2Test {
         byte[] b = new byte[16];
         bb.rewind();
         bb.get(b);
-        assertEquals((byte) 0, b[0]); // timestamp ...
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 0, b[3]);
-        assertEquals((byte) 0, b[4]);
-        assertEquals((byte) 0, b[5]);
-        assertEquals((byte) 0, b[6]);
-        assertEquals((byte) 0, b[7]); // ... timestamp
+        // the first 8 bytes are timestamp, which varies
         assertEquals((byte) 0, b[8]); // key
         assertEquals((byte) 1, b[9]); // key
         assertEquals((byte) 1, b[10]); // type
@@ -430,13 +414,8 @@ class UdpPrimitiveLogger2Test {
         b = new byte[22];
         mb.rewind();
         mb.get(b);
-        assertEquals((byte) 0, b[0]); // timestamp ...
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 0, b[3]);
-        assertEquals((byte) 0, b[5]);
-        assertEquals((byte) 0, b[6]);
-        assertEquals((byte) 0, b[7]); // ... timestamp
+
+        // the first 8 bytes are timestamp, which varies
         assertEquals((byte) 0, b[8]);// key
         assertEquals((byte) 1, b[9]);// key
         assertEquals((byte) 1, b[10]);// type
@@ -466,14 +445,7 @@ class UdpPrimitiveLogger2Test {
         bb.rewind();
         bb.get(b);
 
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 0, b[3]);
-        assertEquals((byte) 0, b[4]);
-        assertEquals((byte) 0, b[5]);
-        assertEquals((byte) 0, b[6]);
-        assertEquals((byte) 0, b[7]); // ... timestamp
+        // the first 8 bytes are timestamp, which varies
         assertEquals((byte) 0, b[8]); // key MSB
         assertEquals((byte) 2, b[9]); // key LSB
         assertEquals((byte) 3, b[10]); // int type
@@ -497,14 +469,8 @@ class UdpPrimitiveLogger2Test {
         b = new byte[24];
         mb.rewind();
         mb.get(b);
-        assertEquals((byte) 0, b[0]);
-        assertEquals((byte) 0, b[1]);
-        assertEquals((byte) 0, b[2]);
-        assertEquals((byte) 0, b[3]);
-        assertEquals((byte) 0, b[4]);
-        assertEquals((byte) 0, b[5]);
-        assertEquals((byte) 0, b[6]);
-        assertEquals((byte) 0, b[7]); // ... timestamp
+
+        // the first 8 bytes are timestamp, which varies
         assertEquals((byte) 0, b[8]); //
         assertEquals((byte) 1, b[9]); // key
         assertEquals((byte) 6, b[10]); // type

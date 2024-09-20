@@ -1,9 +1,9 @@
 package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.commands.Command100;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.SquareWave;
 

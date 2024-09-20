@@ -1,5 +1,7 @@
 package org.team100.lib.telemetry;
 
+import org.team100.lib.logging.SupplierLogger;
+
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.networktables.BooleanTopic;

@@ -7,10 +7,10 @@ import java.util.function.Function;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.Trajectory100;

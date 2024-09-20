@@ -1,4 +1,4 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -80,13 +80,15 @@ public class UdpMetadataProtocol {
     /**
      * Clear the underlying buffer, update the timestamp if possible, and write the
      * timestamp into the buffer.
+     * 
+     * TODO: allow setting the timestamp to a specific value, for testing.
      */
     void clear() {
         m_buffer.clear();
         setTimestamp();
         m_buffer.putLong(UdpMetadataProtocol.timestamp);
     }
-
+    
     /**
      * If it hasn't already been set, and if a valid value is available, set the
      * timestamp.

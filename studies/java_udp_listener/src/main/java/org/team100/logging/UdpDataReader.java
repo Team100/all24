@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 
-import org.team100.lib.telemetry.UdpPrimitiveProtocol2;
-import org.team100.lib.telemetry.UdpPrimitiveProtocol2.ProtocolException;
-import org.team100.lib.telemetry.UdpSender;
+import org.team100.lib.logging.UdpPrimitiveProtocol2;
+import org.team100.lib.logging.UdpSender;
+import org.team100.lib.logging.UdpPrimitiveProtocol2.ProtocolException;
 
 public class UdpDataReader implements Runnable {
     private final UdpDataDecoder m_decoder;

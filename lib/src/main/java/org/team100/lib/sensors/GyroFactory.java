@@ -4,9 +4,9 @@ import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Util;
 
 /**

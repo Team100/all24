@@ -1,5 +1,10 @@
 package org.team100.lib.telemetry;
 
+import org.team100.lib.logging.DataLogLogger;
+import org.team100.lib.logging.NTLogger;
+import org.team100.lib.logging.PrimitiveLogger;
+import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.UdpPrimitiveLogger;
 import org.team100.lib.util.Util;
 
 import com.ctre.phoenix6.SignalLogger;

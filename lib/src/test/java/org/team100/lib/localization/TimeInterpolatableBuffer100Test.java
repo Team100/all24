@@ -3,8 +3,8 @@ package org.team100.lib.localization;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.telemetry.SupplierLogger;
-import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.TestLogger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.interpolation.Interpolatable;

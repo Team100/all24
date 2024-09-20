@@ -5,9 +5,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import org.team100.lib.logging.UdpType;
 
-import org.team100.lib.telemetry.UdpType;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /** For testing */
 public class DummyUdpConsumers implements UdpConsumersInterface {

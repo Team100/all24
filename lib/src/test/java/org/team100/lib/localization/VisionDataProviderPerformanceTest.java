@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.telemetry.SupplierLogger;
-import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.TestLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;

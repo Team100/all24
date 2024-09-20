@@ -5,8 +5,8 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.RotaryMechanism;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.visualization.ArmVisualization;
 

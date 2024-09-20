@@ -10,8 +10,8 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.telemetry.SupplierLogger;
-import org.team100.lib.telemetry.TestLogger;
+import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;

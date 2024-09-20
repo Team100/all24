@@ -3,9 +3,9 @@ package org.team100.lib.motion.components;
 import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;

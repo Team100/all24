@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.telemetry.Chronos;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 

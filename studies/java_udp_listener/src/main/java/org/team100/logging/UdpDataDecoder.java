@@ -2,9 +2,9 @@ package org.team100.logging;
 
 import java.nio.ByteBuffer;
 
-import org.team100.lib.telemetry.UdpPrimitiveProtocol2;
-import org.team100.lib.telemetry.UdpPrimitiveProtocol2.ProtocolException;
-import org.team100.lib.telemetry.UdpType;
+import org.team100.lib.logging.UdpPrimitiveProtocol2;
+import org.team100.lib.logging.UdpType;
+import org.team100.lib.logging.UdpPrimitiveProtocol2.ProtocolException;
 
 public class UdpDataDecoder {
     private static final int kFlushFrequency = 50;

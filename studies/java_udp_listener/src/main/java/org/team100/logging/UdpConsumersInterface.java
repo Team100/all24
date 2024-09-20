@@ -1,6 +1,6 @@
 package org.team100.logging;
 
-import org.team100.lib.telemetry.UdpType;
+import org.team100.lib.logging.UdpType;
 
 public interface UdpConsumersInterface {
 

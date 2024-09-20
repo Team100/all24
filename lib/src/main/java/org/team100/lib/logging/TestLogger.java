@@ -1,4 +1,6 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
+
+import org.team100.lib.telemetry.Telemetry;
 
 /** Doesn't do anything. */
 public class TestLogger extends PrimitiveLogger {

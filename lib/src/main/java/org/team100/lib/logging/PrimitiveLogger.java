@@ -1,4 +1,4 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 /**
  * This should not be used by client code. Use {@link SupplierLogger} instead.
