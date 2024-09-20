@@ -248,7 +248,7 @@ class UdpPrimitiveLogger2Test {
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
-        final double total_time = 5;
+        final double total_time = 10;
         // 5000 keys at 50hz, listener works perfectly.
         final int KEYS = 5000;
         final int ITERATIONS = (int) (total_time / interval);

@@ -110,6 +110,8 @@ public class UdpConsumers implements UdpConsumersInterface {
             log_file = new DataLog("", "", 0.1);
             System.out.println("impl " + log_file.getImpl());
             Instant i = Instant.ofEpochSecond(timestamp);
+            // TODO: sometimes this fails because the internal
+            // "impl" is somehow null!?
             log_file.setFilename("FRC_" + m_timeFormatter.format(i) + ".wpilog");
 
             // restart the NT server?
