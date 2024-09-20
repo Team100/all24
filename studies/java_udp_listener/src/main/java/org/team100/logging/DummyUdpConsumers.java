@@ -25,6 +25,11 @@ public class DummyUdpConsumers implements UdpConsumersInterface {
     }
 
     @Override
+    public boolean validateTimestamp(long timestamp) {
+        return true;
+    }
+
+    @Override
     public void acceptBoolean(int key, boolean val) {
         counter.incrementAndGet();
         if (PRINT)
@@ -70,6 +75,11 @@ public class DummyUdpConsumers implements UdpConsumersInterface {
     public void flush() {
         if (PRINT)
             System.out.printf("udp consumer flushing");
+    }
+
+    @Override
+    public void close() {
+        //
     }
 
 }

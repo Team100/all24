@@ -4,6 +4,8 @@ import org.team100.lib.telemetry.UdpType;
 
 public interface UdpConsumersInterface {
 
+    boolean validateTimestamp(long timestamp);
+
     void acceptBoolean(int key, boolean val);
 
     void acceptDouble(int key, double val);
@@ -18,4 +20,5 @@ public interface UdpConsumersInterface {
 
     void flush();
 
+    void close();
 }

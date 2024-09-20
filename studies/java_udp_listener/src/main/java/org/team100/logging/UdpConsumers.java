@@ -2,6 +2,10 @@ package org.team100.logging;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -30,6 +34,10 @@ import edu.wpi.first.util.datalog.StringLogEntry;
  * reader adds items (in its own thread), so we use ConcurrentHashMap.
  */
 public class UdpConsumers implements UdpConsumersInterface {
+    // see DataLogManager.java
+    private static final ZoneId m_utc = ZoneId.of("UTC");
+    private static final DateTimeFormatter m_timeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+            .withZone(m_utc);
     // write to network tables
     private static final boolean PUB = true;
 
@@ -38,10 +46,12 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     // write the count periodically
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    AtomicInteger counter = new AtomicInteger(0);
+    private final AtomicInteger counter = new AtomicInteger(0);
 
     NetworkTableInstance inst;
     DataLog log_file;
+
+    volatile long m_timestamp;
 
     Map<Integer, BooleanPublisher> booleanPublishers = new ConcurrentHashMap<>();
     Map<Integer, BooleanLogEntry> booleanEntries = new ConcurrentHashMap<>();
@@ -59,18 +69,67 @@ public class UdpConsumers implements UdpConsumersInterface {
                 () -> System.out.printf("counter %d\n", counter.getAndSet(0)),
                 0, 1, SECONDS);
         if (PUB) {
-            inst = NetworkTableInstance.getDefault();
-            inst.startServer();
+            // inst = NetworkTableInstance.getDefault();
+            // inst.startServer();
         }
         if (LOG) {
             // log_file = DataLog(dir=LOG_DIR, filename=LOG_FILENAME)
-            log_file = new DataLog("", "", 0.1);
+            // log_file = new DataLog("", "", 0.1);
         }
     }
 
     @Override
+    public boolean validateTimestamp(long timestamp) {
+        if (timestamp == 0) {
+            System.out.println("zero timestamp");
+            // not a real timestamp, this only happens on startup
+            // before the DS connects to the robot. Since we don't
+            // know what the timestamp is, there's no reason to record
+            // any data that arrives.
+            m_timestamp = 0;
+            return true;
+        }
+        if (m_timestamp == 0 || timestamp != m_timestamp) {
+            System.out.println("new timestamp");
+            m_timestamp = 0;
+            
+            booleanPublishers.clear();
+            booleanEntries.clear();
+            doublePublishers.clear();
+            doubleEntries.clear();
+            intPublishers.clear();
+            intEntries.clear();
+            doubleArrayPublishers.clear();
+            doubleArrayEntries.clear();
+            stringPublishers.clear();
+            stringEntries.clear();
+
+            // make a new log file?
+            if (log_file != null)
+                log_file.close();
+            log_file = new DataLog("", "", 0.1);
+            System.out.println("impl " + log_file.getImpl());
+            Instant i = Instant.ofEpochSecond(timestamp);
+            log_file.setFilename("FRC_" + m_timeFormatter.format(i) + ".wpilog");
+
+            // restart the NT server?
+            if (inst != null)
+                inst.close();
+            inst = NetworkTableInstance.getDefault();
+            inst.startServer();
+
+            m_timestamp = timestamp;
+            return true;
+        }
+        return true;
+    }
+
+    @Override
     public void acceptBoolean(int key, boolean val) {
+        if (m_timestamp == 0)
+            return;
         counter.incrementAndGet();
+        System.out.println("bool " + val);
         if (PUB) {
             BooleanPublisher pub = booleanPublishers.get(key);
             if (pub != null)
@@ -85,6 +144,8 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptDouble(int key, double val) {
+        if (m_timestamp == 0)
+            return;
         counter.incrementAndGet();
         if (PUB) {
             DoublePublisher pub = doublePublishers.get(key);
@@ -100,6 +161,8 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptInt(int key, int val) {
+        if (m_timestamp == 0)
+            return;
         counter.incrementAndGet();
         if (PUB) {
             IntegerPublisher pub = intPublishers.get(key);
@@ -115,6 +178,8 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptDoubleArray(int key, double[] val) {
+        if (m_timestamp == 0)
+            return;
         counter.incrementAndGet();
         if (PUB) {
             DoubleArrayPublisher pub = doubleArrayPublishers.get(key);
@@ -130,6 +195,8 @@ public class UdpConsumers implements UdpConsumersInterface {
 
     @Override
     public void acceptString(int key, String val) {
+        if (m_timestamp == 0)
+            return;
         counter.incrementAndGet();
         if (PUB) {
             StringPublisher pub = stringPublishers.get(key);
@@ -222,5 +289,10 @@ public class UdpConsumers implements UdpConsumersInterface {
             inst.flush();
         if (LOG)
             log_file.flush();
+    }
+
+    @Override
+    public void close() {
+        scheduler.shutdown();
     }
 }

@@ -150,6 +150,8 @@ class UdpPrimitiveLogger2Test {
         LongSupplierLogger longLogger = logger.longLogger(Level.COMP, "longkey");
         StringSupplierLogger stringLogger = logger.stringLogger(Level.COMP, "stringkey");
 
+        udpLogger.dumpLabels();
+
         for (int i = 0; i < 100; ++i) {
             booleanLogger.log(() -> true);
             doubleLogger.log(() -> 100.0);
@@ -160,7 +162,6 @@ class UdpPrimitiveLogger2Test {
             stringLogger.log(() -> "value");
         }
         udpLogger.flush();
-        udpLogger.dumpLabels();
         assertEquals(7, udpLogger.metadata.size());
         assertEquals("/root/boolkey", udpLogger.metadata.get(0).label());
         assertEquals("/root/doublekey", udpLogger.metadata.get(1).label());

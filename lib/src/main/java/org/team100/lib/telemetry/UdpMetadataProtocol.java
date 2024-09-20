@@ -77,9 +77,13 @@ public class UdpMetadataProtocol {
         return m_buffer;
     }
 
-    /** Clear the underlying buffer and rewrite the timestamp into it. */
+    /**
+     * Clear the underlying buffer, update the timestamp if possible, and write the
+     * timestamp into the buffer.
+     */
     void clear() {
         m_buffer.clear();
+        setTimestamp();
         m_buffer.putLong(UdpMetadataProtocol.timestamp);
     }
 

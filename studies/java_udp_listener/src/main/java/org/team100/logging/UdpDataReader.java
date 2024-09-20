@@ -33,12 +33,14 @@ public class UdpDataReader implements Runnable {
         while (true) {
             try {
                 m_buffer.clear();
+                // TODO: replace this with socket.read with a timeout
                 m_channel.receive(m_buffer);
                 m_buffer.limit(m_buffer.position());
                 m_buffer.position(0);
-                // System.out.printf("read data buffer position %d remaining %d\n", m_buffer.position(), m_buffer.remaining());
-                // packet starts with timestamp
-                long timestamp = UdpPrimitiveProtocol2.decodeLong(m_buffer);
+                if (!m_decoder.validateTimestamp(m_buffer)) {
+                    System.out.println("data timestamp is bad, bail");
+                    return;
+                }
                 while (m_buffer.remaining() > 0) {
                     m_decoder.decode(m_buffer);
                 }

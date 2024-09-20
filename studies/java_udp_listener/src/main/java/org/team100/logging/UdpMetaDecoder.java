@@ -16,6 +16,16 @@ public class UdpMetaDecoder {
         m_consumers = consumers;
     }
 
+    /**
+     * return true if timestamp is the first we've seen, or the same as the previous
+     * one.
+     * @throws ProtocolException 
+     */
+    public boolean validateTimestamp(ByteBuffer buf) throws ProtocolException {
+        long timestamp = UdpPrimitiveProtocol2.decodeLong(buf);
+        return m_consumers.validateTimestamp(timestamp);
+    }
+
     /** Starts at buf.position() */
     public void decode(ByteBuffer buf) throws ProtocolException {
         int key = UdpPrimitiveProtocol2.decodeKey(buf);
