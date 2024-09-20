@@ -10,12 +10,12 @@ import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
 import org.team100.lib.testing.Timeless;
 
 class DriveManuallyTest extends Fixtured implements Timeless {
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     String desiredMode = null;
     DriverControl.Velocity desiredTwist = new DriverControl.Velocity(1, 0, 0);

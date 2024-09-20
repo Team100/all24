@@ -1,6 +1,6 @@
 package org.team100.lib.motor;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
@@ -11,11 +11,11 @@ public class BareMotorController100 implements BareMotor {
      * Say 600 rad/s max so 0.0016?
      */
     private static final double velocityFFDutyCycle_Rad_S = 0.0016;
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final MotorController m_motor;
 
     public BareMotorController100(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             MotorController motorController) {
         m_motor = motorController;
         m_motor.setInverted(true);

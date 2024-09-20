@@ -3,7 +3,7 @@ package org.team100.lib.motion.components;
 import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -16,7 +16,7 @@ import edu.wpi.first.math.controller.PIDController;
  */
 public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo {
     private static final double kV = 0.1;
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final LinearMechanism m_mechanism;
     private final PIDController m_controller;
     private final double m_period;
@@ -25,7 +25,7 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
     private State100 m_setpoint = new State100(0, 0);
 
     public OnboardLinearDutyCyclePositionServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             LinearMechanism mechanism,
             PIDController controller,
             double period,

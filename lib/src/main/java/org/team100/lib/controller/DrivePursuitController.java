@@ -5,7 +5,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -50,7 +50,7 @@ public class DrivePursuitController implements DriveMotionController {
     private static final double kPositionkP = 2.0;
 
     private final SwerveKinodynamics m_limits;
-    public final SupplierLogger m_logger;
+    public final SupplierLogger2 m_logger;
 
     private Lookahead mSpeedLookahead = null;
 
@@ -61,7 +61,7 @@ public class DrivePursuitController implements DriveMotionController {
     private boolean useMinSpeed;
 
     /** Use the factory. */
-    DrivePursuitController(SupplierLogger parent, SwerveKinodynamics limits) {
+    DrivePursuitController(SupplierLogger2 parent, SwerveKinodynamics limits) {
         m_limits = limits;
         m_logger = parent.child(this);
     }

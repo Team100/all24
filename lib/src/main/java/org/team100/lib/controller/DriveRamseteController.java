@@ -3,7 +3,7 @@ package org.team100.lib.controller;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -32,9 +32,9 @@ public class DriveRamseteController implements DriveMotionController {
     private static final double kZeta = 0.7; // Damping coefficient, [0, 1].
     private static final double kLooperDt = 0.02;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
 
-    public DriveRamseteController(SupplierLogger parent) {
+    public DriveRamseteController(SupplierLogger2 parent) {
         m_logger = parent.child(this);
     }
 

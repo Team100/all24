@@ -6,7 +6,7 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
@@ -35,7 +35,7 @@ public class FancyTrajectory extends Command100 {
     private final List<TimingConstraint> m_constraints;
 
     public FancyTrajectory(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem robotDrive,
             List<TimingConstraint> constraints) {
         super(parent);

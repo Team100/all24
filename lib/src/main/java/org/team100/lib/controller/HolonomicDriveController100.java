@@ -2,7 +2,7 @@ package org.team100.lib.controller;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -15,18 +15,18 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Drivetrain control with three independent PID controllers.
  */
 public class HolonomicDriveController100 implements Glassy {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
 
-    public HolonomicDriveController100(SupplierLogger parent) {
+    public HolonomicDriveController100(SupplierLogger2 parent) {
         this(parent, cartesian(), cartesian(), theta(), omega());
     }
 
     public HolonomicDriveController100(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             PIDController xController,
             PIDController yController,
             PIDController thetaController,
@@ -39,7 +39,7 @@ public class HolonomicDriveController100 implements Glassy {
     }
 
     public static HolonomicDriveController100 withTolerance(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double cartesianPosition,
             double cartesianVelocity,
             double rotationPosition,

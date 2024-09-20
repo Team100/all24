@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -39,7 +39,7 @@ public class DriveToState101 extends Command100 {
     private final TrajectoryVisualization m_viz;
 
     public DriveToState101(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             Pose2d goal,
             FieldRelativeVelocity endVelocity,
             SwerveDriveSubsystem drivetrain,

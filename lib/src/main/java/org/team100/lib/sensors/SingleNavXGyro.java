@@ -2,7 +2,7 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -55,7 +55,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private static final int kSPIBitRateHz = 500000;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
 
     // TODO: remove this if it's not useful
     // private final AHRS100 m_ahrs;
@@ -76,7 +76,7 @@ public class SingleNavXGyro implements Gyro {
     /**
      * NOTE: the async is just for logging, maybe don't use a whole thread for it.
      */
-    public SingleNavXGyro(SupplierLogger parent, Async async) {
+    public SingleNavXGyro(SupplierLogger2 parent, Async async) {
 
         m_logger = parent.child(this);
 

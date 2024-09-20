@@ -77,7 +77,7 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.GyroFactory;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelPoller;
@@ -122,19 +122,19 @@ public class RobotContainer implements Glassy {
         poller.setDefault(Level.TRACE);
 
         final Telemetry telemetry = Telemetry.get();
-        final SupplierLogger fieldLogger = telemetry.fieldLogger(true, true);
+        final SupplierLogger2 fieldLogger = telemetry.fieldLogger();
 
         final boolean defaultEnabled = Identity.instance.equals(Identity.BLANK);
 
-        final SupplierLogger sensorLogger = telemetry.namedRootLogger("SENSOR", defaultEnabled, false);
-        final SupplierLogger driveLogger = telemetry.namedRootLogger("DRIVE", defaultEnabled, false);
-        final SupplierLogger driveLowLevelLogger = telemetry.namedRootLogger("DRIVE_LOW_LEVEL", defaultEnabled, false);
-        final SupplierLogger commandLogger = telemetry.namedRootLogger("COMMAND", defaultEnabled, false);
-        final SupplierLogger shooterLogger = telemetry.namedRootLogger("SHOOTER", defaultEnabled, false);
-        final SupplierLogger intakeLogger = telemetry.namedRootLogger("INTAKE", defaultEnabled, false);
-        final SupplierLogger ampLogger = telemetry.namedRootLogger("AMP", defaultEnabled, false);
-        final SupplierLogger climberLogger = telemetry.namedRootLogger("CLIMBER", defaultEnabled, false);
-        final SupplierLogger visionLogger = telemetry.namedRootLogger("VISION", defaultEnabled, false);
+        final SupplierLogger2 sensorLogger = telemetry.namedRootLogger("SENSOR");
+        final SupplierLogger2 driveLogger = telemetry.namedRootLogger("DRIVE");
+        final SupplierLogger2 driveLowLevelLogger = telemetry.namedRootLogger("DRIVE_LOW_LEVEL");
+        final SupplierLogger2 commandLogger = telemetry.namedRootLogger("COMMAND");
+        final SupplierLogger2 shooterLogger = telemetry.namedRootLogger("SHOOTER");
+        final SupplierLogger2 intakeLogger = telemetry.namedRootLogger("INTAKE");
+        final SupplierLogger2 ampLogger = telemetry.namedRootLogger("AMP");
+        final SupplierLogger2 climberLogger = telemetry.namedRootLogger("CLIMBER");
+        final SupplierLogger2 visionLogger = telemetry.namedRootLogger("VISION");
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(driveLogger, async);

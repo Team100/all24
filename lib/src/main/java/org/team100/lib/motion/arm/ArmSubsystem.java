@@ -5,7 +5,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.visualization.ArmVisualization;
@@ -21,7 +21,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
     private final RotaryMechanism m_lowerArmMotor;
@@ -40,7 +40,7 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
      * @param upperEncoder Upper arm angle (radians), 0 up, positive forward.
      */
     ArmSubsystem(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             RotaryMechanism lowerMotor,
             RotaryPositionSensor lowerEncoder,
             RotaryMechanism upperMotor,

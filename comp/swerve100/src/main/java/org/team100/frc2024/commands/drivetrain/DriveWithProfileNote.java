@@ -14,7 +14,10 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
 
@@ -32,7 +35,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * TODO: force the theta axis to finish first, so that the approach is correct.
  */
 public class DriveWithProfileNote extends Command100 {
-    private final SupplierLogger m_fieldLogger;
+    private final SupplierLogger2 m_fieldLogger;
     private final Intake m_intake;
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
@@ -42,6 +45,10 @@ public class DriveWithProfileNote extends Command100 {
     private final TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
 
+    // LOGGERS
+    private final BooleanSupplierLogger2 m_log_note_detected;
+    private final DoubleArraySupplierLogger2 m_log_target;
+
     private Translation2d m_previousGoal;
     private State100 m_xSetpoint;
     private State100 m_ySetpoint;
@@ -49,8 +56,8 @@ public class DriveWithProfileNote extends Command100 {
     private int m_count;
 
     public DriveWithProfileNote(
-            SupplierLogger fieldLogger,
-            SupplierLogger parent,
+            SupplierLogger2 fieldLogger,
+            SupplierLogger2 parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
@@ -58,6 +65,10 @@ public class DriveWithProfileNote extends Command100 {
             SwerveKinodynamics limits) {
         super(parent);
         m_fieldLogger = fieldLogger;
+
+        m_log_note_detected = m_logger.booleanLogger(Level.TRACE, "Note detected");
+        m_log_target = m_fieldLogger.doubleArrayLogger(Level.TRACE, "target");
+
         m_intake = intake;
         m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;
@@ -96,8 +107,7 @@ public class DriveWithProfileNote extends Command100 {
      */
     private Optional<Translation2d> getGoal() {
         Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
-        m_logger.logBoolean(Level.TRACE, "Note detected", optGoal::isPresent);
-
+        m_log_note_detected.log(optGoal::isPresent);
         if (optGoal.isPresent()) {
             // Supplier is ok, use this goal and reset the history mechanism.
             m_previousGoal = optGoal.get();
@@ -148,10 +158,7 @@ public class DriveWithProfileNote extends Command100 {
 
         m_swerve.driveInFieldCoords(output, dt);
 
-        m_fieldLogger.logDoubleArray(Level.TRACE, "target", () -> new double[] {
-                goal.getX(),
-                goal.getY(),
-                0 });
+        m_log_target.log(() -> new double[] { goal.getX(), goal.getY(), 0 });
     }
 
     private static State100 getThetaGoalState(Pose2d pose, Translation2d goal) {

@@ -1,7 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
@@ -23,7 +23,7 @@ import org.team100.lib.util.Util;
  * lower it here.
  */
 public class SwerveKinodynamicsFactory {
-    public static SwerveKinodynamics get(SupplierLogger parent) {
+    public static SwerveKinodynamics get(SupplierLogger2 parent) {
         switch (Identity.instance) {
             case COMP_BOT:
                 // these numbers are a guess based on the betabot numbers.
@@ -138,7 +138,7 @@ public class SwerveKinodynamicsFactory {
      * In particular, the steering rate is *very* slow, which might be useful if
      * you're wanting to allow for steering delay.
      */
-    public static SwerveKinodynamics forTest(SupplierLogger parent) {
+    public static SwerveKinodynamics forTest(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 1, // vel m/s
@@ -154,7 +154,7 @@ public class SwerveKinodynamicsFactory {
                 Tire.noslip(parent));
     }
 
-    public static SwerveKinodynamics forTestWithSlip(SupplierLogger parent) {
+    public static SwerveKinodynamics forTestWithSlip(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 1, // vel m/s
@@ -170,7 +170,7 @@ public class SwerveKinodynamicsFactory {
                 Tire.defaultTire(parent));
     }
 
-    public static SwerveKinodynamics forTest2(SupplierLogger parent) {
+    public static SwerveKinodynamics forTest2(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 2, // vel m/s
@@ -186,7 +186,7 @@ public class SwerveKinodynamicsFactory {
                 Tire.noslip(parent));
     }
 
-    public static SwerveKinodynamics forWPITest(SupplierLogger parent) {
+    public static SwerveKinodynamics forWPITest(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 1, // vel m/s
@@ -205,7 +205,7 @@ public class SwerveKinodynamicsFactory {
     //
     // below are specific test cases. try to minimize their number
 
-    public static SwerveKinodynamics highDecelAndCapsize(SupplierLogger parent) {
+    public static SwerveKinodynamics highDecelAndCapsize(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 5, // vel m/s
@@ -221,7 +221,7 @@ public class SwerveKinodynamicsFactory {
                 Tire.noslip(parent));
     }
 
-    public static SwerveKinodynamics decelCase(SupplierLogger parent) {
+    public static SwerveKinodynamics decelCase(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 1, // vel m/s
@@ -237,7 +237,7 @@ public class SwerveKinodynamicsFactory {
                 Tire.noslip(parent));
     }
 
-    public static SwerveKinodynamics highCapsize(SupplierLogger parent) {
+    public static SwerveKinodynamics highCapsize(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 5, // vel m/s
@@ -253,7 +253,7 @@ public class SwerveKinodynamicsFactory {
                 Tire.noslip(parent));
     }
 
-    public static SwerveKinodynamics lowCapsize(SupplierLogger parent) {
+    public static SwerveKinodynamics lowCapsize(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 5, // vel m/s
@@ -269,7 +269,7 @@ public class SwerveKinodynamicsFactory {
                 Tire.noslip(parent));
     }
 
-    public static SwerveKinodynamics limiting(SupplierLogger parent) {
+    public static SwerveKinodynamics limiting(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 5, // vel m/s
@@ -286,7 +286,7 @@ public class SwerveKinodynamicsFactory {
     }
 
     /** Large difference in accel and decel, to make asymmetry obvious. */
-    public static SwerveKinodynamics lowAccelHighDecel(SupplierLogger parent) {
+    public static SwerveKinodynamics lowAccelHighDecel(SupplierLogger2 parent) {
         return new SwerveKinodynamics(
                 parent,
                 4, // vel m/s

@@ -3,7 +3,7 @@ package org.team100.lib.commands.arm;
 import java.util.Optional;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
@@ -48,7 +48,7 @@ public class ArmTrajectoryCommand extends Command100 {
     private Trajectory m_trajectory;
 
     public ArmTrajectoryCommand(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             ArmSubsystem armSubSystem,
             ArmKinematics armKinematicsM,
             Translation2d goal) {

@@ -5,7 +5,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -41,11 +41,11 @@ public class SwerveModuleCollection {
      * Creates collections according to Identity.
      */
     public static SwerveModuleCollection get(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double currentLimit,
             double statorLimit,
             SwerveKinodynamics kinodynamics) {
-        SupplierLogger collectionLogger = parent.child(kSwerveModules);
+        SupplierLogger2 collectionLogger = parent.child(kSwerveModules);
         switch (Identity.instance) {
             case COMP_BOT:
                 Util.println("************** WCP MODULES w/Duty-Cycle Encoders **************");

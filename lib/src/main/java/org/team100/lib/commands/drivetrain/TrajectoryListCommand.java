@@ -8,7 +8,7 @@ import java.util.function.Function;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -43,7 +43,7 @@ public class TrajectoryListCommand extends Command100 {
     private boolean done;
 
     public TrajectoryListCommand(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem swerve,
             HolonomicFieldRelativeController controller,
             Function<Pose2d, List<Trajectory100>> trajectories,

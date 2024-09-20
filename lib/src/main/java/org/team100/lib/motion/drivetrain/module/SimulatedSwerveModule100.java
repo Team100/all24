@@ -2,7 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
@@ -20,9 +20,9 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     public static SimulatedSwerveModule100 get(
             String name,
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveKinodynamics kinodynamics) {
-        SupplierLogger moduleLogger = parent.child(name);
+        SupplierLogger2 moduleLogger = parent.child(name);
         LinearVelocityServo driveServo = simulatedDriveServo(
                 moduleLogger.child("Drive"));
         AngularPositionServo turningServo = simulatedTurningServo(
@@ -31,7 +31,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         return new SimulatedSwerveModule100(name, driveServo, turningServo);
     }
 
-    private static LinearVelocityServo simulatedDriveServo(SupplierLogger parent) {
+    private static LinearVelocityServo simulatedDriveServo(SupplierLogger2 parent) {
         // simulated drive motor free speed is 5 m/s
         SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
         // simulated gearing is 2 meter wheel, 1:1, so rad/s and m/s are the same.
@@ -46,7 +46,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo simulatedTurningServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveKinodynamics kinodynamics) {
         // simulated turning motor free speed is 20 rad/s
         SimulatedBareMotor turningMotor = new SimulatedBareMotor(parent, 20);

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -40,7 +40,7 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 class PanTiltOffsetTest {
     private static final double kDelta = 0.01;
-    private static final SupplierLogger m_logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 m_logger = new TestLogger().getSupplierLogger();
 
     /**
      * Correct for offset but the offset is zero.

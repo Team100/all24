@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -44,8 +44,8 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
      */
     private static final double kRotationSpeed = 0.5;
 
-    private final SupplierLogger m_fieldLogger;
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_fieldLogger;
+    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     private final Supplier<Translation2d> m_target;
@@ -60,8 +60,8 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     private Pose2d m_prevPose;
 
     public ManualWithTargetLock(
-            SupplierLogger fieldLogger,
-            SupplierLogger parent,
+            SupplierLogger2 fieldLogger,
+            SupplierLogger2 parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             Supplier<Translation2d> target,

@@ -2,16 +2,16 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motor.Talon6Motor;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 public class Talon6Encoder implements IncrementalBareEncoder {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final Talon6Motor m_motor;
 
     public Talon6Encoder(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             Talon6Motor motor) {
         m_logger = parent.child(this);
         m_motor = motor;

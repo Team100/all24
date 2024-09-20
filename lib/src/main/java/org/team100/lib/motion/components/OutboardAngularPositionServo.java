@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -24,7 +24,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final RotaryMechanism m_mechanism;
     private final CombinedEncoder m_encoder;
 
@@ -36,7 +36,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     /** Don't forget to set a profile. */
     public OutboardAngularPositionServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             RotaryMechanism mech,
             CombinedEncoder encoder) {
         m_logger = parent.child(this);

@@ -17,7 +17,7 @@ import org.team100.lib.selftest.OscillateSelfTest;
 import org.team100.lib.selftest.SelfTestCase;
 import org.team100.lib.selftest.SelfTestListener;
 import org.team100.lib.selftest.VeeringSelfTest;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.util.ExcludeFromJacocoGeneratedReport;
 import org.team100.lib.util.Util;
@@ -68,7 +68,7 @@ public class SelfTestRunner extends Command implements Glassy {
         // addCase(new BatterySelfTest(m_container.m_monitor, m_listener));
 
         SwerveDriveSubsystem drivetrain = m_container.m_drive;
-        SupplierLogger logger = Telemetry.get().namedRootLogger("SELF TEST", false, false);
+        SupplierLogger2 logger = Telemetry.get().namedRootLogger("SELF TEST");
 
         if (kTestDrivetrain) {
             // "treatment" is in situ.

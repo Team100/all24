@@ -12,7 +12,7 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
@@ -29,7 +29,7 @@ public class ShootSmartWithRotation extends Command100 {
     private final Supplier<DriverControl.Velocity> m_twistSupplier;
 
     public ShootSmartWithRotation(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem drive,
             DrumShooter shooter,
             FeederSubsystem feeder,

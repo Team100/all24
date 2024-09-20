@@ -7,7 +7,9 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -33,11 +35,24 @@ public class GravityServo implements GravityServoInterface {
     /** Offset from horizontal */
     private static final double kOffsetRad = 0.0;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final RotaryMechanism m_mech;
     private final PIDController m_controller;
     private final double m_period;
     private final RotaryPositionSensor m_encoder;
+
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_u_FB;
+    private final DoubleSupplierLogger2 m_log_gravity;
+    private final DoubleSupplierLogger2 m_log_u_TOTAL;
+    private final DoubleSupplierLogger2 m_log_Measurement_position;
+    private final DoubleSupplierLogger2 m_log_Measurement_velocity;
+    private final State100Logger m_log_Goal;
+    private final State100Logger m_log_Setpoint;
+    private final DoubleSupplierLogger2 m_log_Controller_Position_Error;
+    private final DoubleSupplierLogger2 m_log_Controller_Velocity_Error;
+    private final DoubleSupplierLogger2 m_log_periodic_Measurement_position;
+    private final DoubleSupplierLogger2 m_log_periodic_Measurement_velocity;
 
     /** Profile may be updated at runtime. */
     private Profile100 m_profile = new NullProfile();
@@ -49,12 +64,25 @@ public class GravityServo implements GravityServoInterface {
     /** Remember to set a profile! */
     public GravityServo(
             RotaryMechanism motor,
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             PIDController controller,
             double period,
             RotaryPositionSensor encoder) {
         m_mech = motor;
         m_logger = parent.child(this);
+        m_log_u_FB = m_logger.doubleLogger(Level.TRACE, "u_FB");
+        m_log_gravity = m_logger.doubleLogger(Level.TRACE, "gravity T");
+        m_log_u_TOTAL = m_logger.doubleLogger(Level.TRACE, "u_TOTAL");
+        m_log_Measurement_position = m_logger.doubleLogger(Level.TRACE, "Measurement position (rad)");
+        m_log_Measurement_velocity = m_logger.doubleLogger(Level.TRACE, "Measurement velocity (rad_s)");
+        m_log_Goal = m_logger.state100Logger(Level.TRACE, "Goal (rad)");
+        m_log_Setpoint = m_logger.state100Logger(Level.TRACE, "Setpoint (rad)");
+        m_log_Controller_Position_Error = m_logger.doubleLogger(Level.TRACE, "Controller Position Error (rad)");
+        m_log_Controller_Velocity_Error = m_logger.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)");
+        m_log_periodic_Measurement_position = m_logger.doubleLogger(Level.TRACE, "periodic Measurement position (rad)");
+        m_log_periodic_Measurement_velocity = m_logger.doubleLogger(Level.TRACE,
+                "periodic Measurement velocity (rad_s)");
+
         m_controller = controller;
         m_period = period;
         m_encoder = encoder;
@@ -107,15 +135,15 @@ public class GravityServo implements GravityServoInterface {
 
         m_mech.setVelocity(u_TOTAL, m_setpointRad.a(), gravityTorqueNm);
 
-        m_logger.logDouble(Level.TRACE, "u_FB", () -> u_FB);
-        m_logger.logDouble(Level.TRACE, "gravity T", () -> gravityTorqueNm);
-        m_logger.logDouble(Level.TRACE, "u_TOTAL", () -> u_TOTAL);
-        m_logger.logDouble(Level.TRACE, "Measurement position (rad)", () -> mechanismPositionRad);
-        m_logger.logDouble(Level.TRACE, "Measurement velocity (rad_s)", () -> mechanismVelocityRad_S);
-        m_logger.logState100(Level.TRACE, "Goal (rad)", () -> goal);
-        m_logger.logState100(Level.TRACE, "Setpoint (rad)", () -> m_setpointRad);
-        m_logger.logDouble(Level.TRACE, "Controller Position Error (rad)", m_controller::getPositionError);
-        m_logger.logDouble(Level.TRACE, "Controller Velocity Error (rad_s)", m_controller::getVelocityError);
+        m_log_u_FB.log(() -> u_FB);
+        m_log_gravity.log(() -> gravityTorqueNm);
+        m_log_u_TOTAL.log(() -> u_TOTAL);
+        m_log_Measurement_position.log(() -> mechanismPositionRad);
+        m_log_Measurement_velocity.log(() -> mechanismVelocityRad_S);
+        m_log_Goal.log(() -> goal);
+        m_log_Setpoint.log(() -> m_setpointRad);
+        m_log_Controller_Position_Error.log(m_controller::getPositionError);
+        m_log_Controller_Velocity_Error.log(m_controller::getVelocityError);
     }
 
     @Override
@@ -146,8 +174,8 @@ public class GravityServo implements GravityServoInterface {
         double mechanismPositionRad = optPos.getAsDouble();
         double mechanismVelocityRad_S = optVel.getAsDouble();
 
-        m_logger.logDouble(Level.TRACE, "Measurement (rad)", () -> mechanismPositionRad);
-        m_logger.logDouble(Level.TRACE, "Measurement velocity (rad_s)", () -> mechanismVelocityRad_S);
+        m_log_periodic_Measurement_position.log(() -> mechanismPositionRad);
+        m_log_periodic_Measurement_velocity.log(() -> mechanismVelocityRad_S);
     }
 
 }

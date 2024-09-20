@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -47,7 +47,7 @@ public class DriveManually extends Command100 {
     String currentManualMode = null;
 
     public DriveManually(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             Supplier<DriverControl.Velocity> twistSupplier,
             SwerveDriveSubsystem robotDrive) {
         super(parent);

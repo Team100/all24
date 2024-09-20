@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
@@ -17,7 +17,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  */
 class SwerveKinodynamicsTest {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testComputedValues() {

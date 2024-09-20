@@ -85,11 +85,11 @@ public class SupplierLogger2 {
         return "/" + root + "/" + leaf;
     }
 
-    public class BooleanSupplierLogger {
+    public class BooleanSupplierLogger2 {
         private final Level m_level;
         private final PrimitiveLogger2.BooleanLogger m_primitiveLogger;
 
-        BooleanSupplierLogger(Level level, String leaf) {
+        BooleanSupplierLogger2(Level level, String leaf) {
             m_level = level;
             m_primitiveLogger = m_primitiveLoggerA.booleanLogger(append(m_root, leaf));
         }
@@ -102,15 +102,15 @@ public class SupplierLogger2 {
         }
     }
 
-    public BooleanSupplierLogger booleanLogger(Level level, String leaf) {
-        return new BooleanSupplierLogger(level, leaf);
+    public BooleanSupplierLogger2 booleanLogger(Level level, String leaf) {
+        return new BooleanSupplierLogger2(level, leaf);
     }
 
-    public class DoubleSupplierLogger {
+    public class DoubleSupplierLogger2 {
         private final Level m_level;
         private final PrimitiveLogger2.DoubleLogger m_primitiveLogger;
 
-        DoubleSupplierLogger(Level level, String leaf) {
+        DoubleSupplierLogger2(Level level, String leaf) {
             m_level = level;
             m_primitiveLogger = m_primitiveLoggerA.doubleLogger(append(m_root, leaf));
         }
@@ -123,15 +123,15 @@ public class SupplierLogger2 {
         }
     }
 
-    public DoubleSupplierLogger doubleLogger(Level level, String leaf) {
-        return new DoubleSupplierLogger(level, leaf);
+    public DoubleSupplierLogger2 doubleLogger(Level level, String leaf) {
+        return new DoubleSupplierLogger2(level, leaf);
     }
 
-    public class IntSupplierLogger {
+    public class IntSupplierLogger2 {
         private final Level m_level;
         private final PrimitiveLogger2.IntLogger m_primitiveLogger;
 
-        IntSupplierLogger(Level level, String leaf) {
+        IntSupplierLogger2(Level level, String leaf) {
             m_level = level;
             m_primitiveLogger = m_primitiveLoggerA.intLogger(append(m_root, leaf));
         }
@@ -144,15 +144,15 @@ public class SupplierLogger2 {
         }
     }
 
-    public IntSupplierLogger intLogger(Level level, String leaf) {
-        return new IntSupplierLogger(level, leaf);
+    public IntSupplierLogger2 intLogger(Level level, String leaf) {
+        return new IntSupplierLogger2(level, leaf);
     }
 
-    public class DoubleArraySupplierLogger {
+    public class DoubleArraySupplierLogger2 {
         private final Level m_level;
         private final PrimitiveLogger2.DoubleArrayLogger m_primitiveLogger;
 
-        DoubleArraySupplierLogger(Level level, String leaf) {
+        DoubleArraySupplierLogger2(Level level, String leaf) {
             m_level = level;
             m_primitiveLogger = m_primitiveLoggerA.doubleArrayLogger(append(m_root, leaf));
         }
@@ -165,15 +165,15 @@ public class SupplierLogger2 {
         }
     }
 
-    public DoubleArraySupplierLogger doubleArrayLogger(Level level, String leaf) {
-        return new DoubleArraySupplierLogger(level, leaf);
+    public DoubleArraySupplierLogger2 doubleArrayLogger(Level level, String leaf) {
+        return new DoubleArraySupplierLogger2(level, leaf);
     }
 
-    public class DoubleObjArraySupplierLogger {
+    public class DoubleObjArraySupplierLogger2 {
         private final Level m_level;
         private final PrimitiveLogger2.DoubleObjArrayLogger m_primitiveLogger;
 
-        DoubleObjArraySupplierLogger(Level level, String leaf) {
+        DoubleObjArraySupplierLogger2(Level level, String leaf) {
             m_level = level;
             m_primitiveLogger = m_primitiveLoggerA.doubleObjArrayLogger(append(m_root, leaf));
         }
@@ -186,15 +186,15 @@ public class SupplierLogger2 {
         }
     }
 
-    public DoubleObjArraySupplierLogger doubleObjArrayLogger(Level level, String leaf) {
-        return new DoubleObjArraySupplierLogger(level, leaf);
+    public DoubleObjArraySupplierLogger2 doubleObjArrayLogger(Level level, String leaf) {
+        return new DoubleObjArraySupplierLogger2(level, leaf);
     }
 
-    public class LongSupplierLogger {
+    public class LongSupplierLogger2 {
         private final Level m_level;
         private final PrimitiveLogger2.LongLogger m_primitiveLogger;
 
-        LongSupplierLogger(Level level, String leaf) {
+        LongSupplierLogger2(Level level, String leaf) {
             m_level = level;
             m_primitiveLogger = m_primitiveLoggerA.longLogger(append(m_root, leaf));
         }
@@ -207,15 +207,15 @@ public class SupplierLogger2 {
         }
     }
 
-    public LongSupplierLogger longLogger(Level level, String leaf) {
-        return new LongSupplierLogger(level, leaf);
+    public LongSupplierLogger2 longLogger(Level level, String leaf) {
+        return new LongSupplierLogger2(level, leaf);
     }
 
-    public class StringSupplierLogger {
+    public class StringSupplierLogger2 {
         private final Level m_level;
         private final PrimitiveLogger2.StringLogger m_primitiveLogger;
 
-        StringSupplierLogger(Level level, String leaf) {
+        StringSupplierLogger2(Level level, String leaf) {
             m_level = level;
             m_primitiveLogger = m_primitiveLoggerA.stringLogger(append(m_root, leaf));
         }
@@ -228,8 +228,8 @@ public class SupplierLogger2 {
         }
     }
 
-    public StringSupplierLogger stringLogger(Level level, String leaf) {
-        return new StringSupplierLogger(level, leaf);
+    public StringSupplierLogger2 stringLogger(Level level, String leaf) {
+        return new StringSupplierLogger2(level, leaf);
     }
 
     public class OptionalDoubleLogger {
@@ -326,9 +326,9 @@ public class SupplierLogger2 {
 
     public class Translation3dLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_xLogger;
-        private final DoubleSupplierLogger m_yLogger;
-        private final DoubleSupplierLogger m_zLogger;
+        private final DoubleSupplierLogger2 m_xLogger;
+        private final DoubleSupplierLogger2 m_yLogger;
+        private final DoubleSupplierLogger2 m_zLogger;
 
         Translation3dLogger(Level level, String leaf) {
             m_level = level;
@@ -353,9 +353,9 @@ public class SupplierLogger2 {
 
     public class Rotation3dLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_rollLogger;
-        private final DoubleSupplierLogger m_pitchLogger;
-        private final DoubleSupplierLogger m_yawLogger;
+        private final DoubleSupplierLogger2 m_rollLogger;
+        private final DoubleSupplierLogger2 m_pitchLogger;
+        private final DoubleSupplierLogger2 m_yawLogger;
 
         Rotation3dLogger(Level level, String leaf) {
             m_level = level;
@@ -380,8 +380,8 @@ public class SupplierLogger2 {
 
     public class Translation2dLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_xLogger;
-        private final DoubleSupplierLogger m_yLogger;
+        private final DoubleSupplierLogger2 m_xLogger;
+        private final DoubleSupplierLogger2 m_yLogger;
 
         Translation2dLogger(Level level, String leaf) {
             m_level = level;
@@ -404,8 +404,8 @@ public class SupplierLogger2 {
 
     public class Vector2dLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_xLogger;
-        private final DoubleSupplierLogger m_yLogger;
+        private final DoubleSupplierLogger2 m_xLogger;
+        private final DoubleSupplierLogger2 m_yLogger;
 
         Vector2dLogger(Level level, String leaf) {
             m_level = level;
@@ -428,7 +428,7 @@ public class SupplierLogger2 {
 
     public class Rotation2dLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_radLogger;
+        private final DoubleSupplierLogger2 m_radLogger;
 
         Rotation2dLogger(Level level, String leaf) {
             m_level = level;
@@ -471,9 +471,9 @@ public class SupplierLogger2 {
     public class TimedPoseLogger {
         private final Level m_level;
         private final Pose2dWithMotionLogger m_pose2dWithMotionLogger;
-        private final DoubleSupplierLogger m_timeLogger;
-        private final DoubleSupplierLogger m_velocityLogger;
-        private final DoubleSupplierLogger m_accelLogger;
+        private final DoubleSupplierLogger2 m_timeLogger;
+        private final DoubleSupplierLogger2 m_velocityLogger;
+        private final DoubleSupplierLogger2 m_accelLogger;
 
         TimedPoseLogger(Level level, String leaf) {
             m_level = level;
@@ -549,9 +549,9 @@ public class SupplierLogger2 {
 
     public class Twist2dLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_dxLogger;
-        private final DoubleSupplierLogger m_dyLogger;
-        private final DoubleSupplierLogger m_dthetaLogger;
+        private final DoubleSupplierLogger2 m_dxLogger;
+        private final DoubleSupplierLogger2 m_dyLogger;
+        private final DoubleSupplierLogger2 m_dthetaLogger;
 
         Twist2dLogger(Level level, String leaf) {
             m_level = level;
@@ -576,9 +576,9 @@ public class SupplierLogger2 {
 
     public class ChassisSpeedsLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_vxLogger;
-        private final DoubleSupplierLogger m_vyLogger;
-        private final DoubleSupplierLogger m_omegaLogger;
+        private final DoubleSupplierLogger2 m_vxLogger;
+        private final DoubleSupplierLogger2 m_vyLogger;
+        private final DoubleSupplierLogger2 m_omegaLogger;
 
         ChassisSpeedsLogger(Level level, String leaf) {
             m_level = level;
@@ -603,9 +603,9 @@ public class SupplierLogger2 {
 
     public class FieldRelativeVelocityLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_xLogger;
-        private final DoubleSupplierLogger m_yLogger;
-        private final DoubleSupplierLogger m_thetaLogger;
+        private final DoubleSupplierLogger2 m_xLogger;
+        private final DoubleSupplierLogger2 m_yLogger;
+        private final DoubleSupplierLogger2 m_thetaLogger;
 
         FieldRelativeVelocityLogger(Level level, String leaf) {
             m_level = level;
@@ -630,9 +630,9 @@ public class SupplierLogger2 {
 
     public class FieldRelativeAccelerationLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_xLogger;
-        private final DoubleSupplierLogger m_yLogger;
-        private final DoubleSupplierLogger m_thetaLogger;
+        private final DoubleSupplierLogger2 m_xLogger;
+        private final DoubleSupplierLogger2 m_yLogger;
+        private final DoubleSupplierLogger2 m_thetaLogger;
 
         FieldRelativeAccelerationLogger(Level level, String leaf) {
             m_level = level;
@@ -657,9 +657,9 @@ public class SupplierLogger2 {
 
     public class State100Logger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_xLogger;
-        private final DoubleSupplierLogger m_vLogger;
-        private final DoubleSupplierLogger m_aLogger;
+        private final DoubleSupplierLogger2 m_xLogger;
+        private final DoubleSupplierLogger2 m_vLogger;
+        private final DoubleSupplierLogger2 m_aLogger;
 
         State100Logger(Level level, String leaf) {
             m_level = level;
@@ -711,7 +711,7 @@ public class SupplierLogger2 {
 
     public class SwerveModulePosition100Logger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_distanceLogger;
+        private final DoubleSupplierLogger2 m_distanceLogger;
         private final Rotation2dLogger m_rotation2dLogger;
 
         SwerveModulePosition100Logger(Level level, String leaf) {
@@ -737,8 +737,8 @@ public class SupplierLogger2 {
 
     public class ArmAnglesLogger {
         private final Level m_level;
-        private final DoubleSupplierLogger m_th1Logger;
-        private final DoubleSupplierLogger m_th2Logger;
+        private final DoubleSupplierLogger2 m_th1Logger;
+        private final DoubleSupplierLogger2 m_th2Logger;
 
         ArmAnglesLogger(Level level, String leaf) {
             m_level = level;
@@ -762,9 +762,9 @@ public class SupplierLogger2 {
     public class StateLogger {
         private final Level m_level;
         private final Pose2dLogger m_poseLogger;
-        private final DoubleSupplierLogger m_curvatureLogger;
-        private final DoubleSupplierLogger m_velocityLogger;
-        private final DoubleSupplierLogger m_accelLogger;
+        private final DoubleSupplierLogger2 m_curvatureLogger;
+        private final DoubleSupplierLogger2 m_velocityLogger;
+        private final DoubleSupplierLogger2 m_accelLogger;
 
         StateLogger(Level level, String leaf) {
             m_level = level;
@@ -791,7 +791,7 @@ public class SupplierLogger2 {
 
     public class Blip24Logger {
         private final Level m_level;
-        private final IntSupplierLogger m_idLogger;
+        private final IntSupplierLogger2 m_idLogger;
         private final Transform3dLogger m_transformLogger;
 
         Blip24Logger(Level level, String leaf) {

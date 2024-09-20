@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.IncrementalBareEncoder;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -19,13 +19,13 @@ import edu.wpi.first.math.MathUtil;
  * The included encoder is the incremental motor encoder.
  */
 public class RotaryMechanism implements Glassy {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final BareMotor m_motor;
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
 
     public RotaryMechanism(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             BareMotor motor,
             IncrementalBareEncoder encoder,
             double gearRatio) {

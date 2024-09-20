@@ -19,7 +19,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
 import org.team100.lib.util.Util;
 
@@ -36,7 +36,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 
 class SwerveDrivePoseEstimator100Test {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
     private static final boolean kPrint = false;
 
     private final SwerveModulePosition100 p0 = new SwerveModulePosition100(0, Optional.of(GeometryUtil.kRotationZero));

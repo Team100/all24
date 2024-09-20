@@ -11,7 +11,8 @@ import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -78,17 +79,28 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      */
     private static final double kReduction = 45;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final LimitedLinearMechanism m_left;
     private final LimitedLinearMechanism m_right;
 
-    public ClimberSubsystem(SupplierLogger parent, int leftClimberID, int rightClimberID) {
+    // LOGGERS
+    OptionalDoubleLogger m_log_left_position;
+    OptionalDoubleLogger m_log_right_position;
+    OptionalDoubleLogger m_log_left_velocity;
+    OptionalDoubleLogger m_log_right_velocity;
+
+    public ClimberSubsystem(SupplierLogger2 parent, int leftClimberID, int rightClimberID) {
         m_logger = parent.child(this);
+        m_log_left_position = m_logger.optionalDoubleLogger(Level.TRACE, "left position (m)");
+        m_log_right_position = m_logger.optionalDoubleLogger(Level.TRACE, "right position (m)");
+        m_log_left_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "left velocity (m_s)");
+        m_log_right_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "right velocity (m_s)");
+
         Util.warn("\n**** Uncalibrated climber current limit!!!  FIX THIS FOR COMP! ****\n");
         Util.warn("\n**** Uncalibrated climber polarity!!!  FIX THIS FOR COMP! ****\n");
         Util.warn("\n**** Uncalibrated climber PID!!!  FIX THIS FOR COMP! ****\n");
-        SupplierLogger leftLogger = m_logger.child("left");
-        SupplierLogger rightLogger = m_logger.child("right");
+        SupplierLogger2 leftLogger = m_logger.child("left");
+        SupplierLogger2 rightLogger = m_logger.child("right");
         switch (Identity.instance) {
             case COMP_BOT -> {
                 m_left = comp(leftLogger, leftClimberID, MotorPhase.REVERSE);
@@ -101,15 +113,15 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         }
     }
 
-    public Command upPosition(SupplierLogger logger) {
+    public Command upPosition(SupplierLogger2 logger) {
         return new ClimberPosition(logger, kUpPositionM, this);
     }
 
-    public Command downPosition(SupplierLogger logger) {
+    public Command downPosition(SupplierLogger2 logger) {
         return new ClimberPosition(logger, kDownPositionM, this);
     }
 
-    private static LimitedLinearMechanism comp(SupplierLogger logger, int id, MotorPhase phase) {
+    private static LimitedLinearMechanism comp(SupplierLogger2 logger, int id, MotorPhase phase) {
         Feedforward100 ff = Feedforward100.makeNeoVortex();
         /** The PID constants units are duty cycle per RPM, so very small numbers. */
         PIDConstants pid = new PIDConstants(0, 0, 0);
@@ -134,7 +146,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      * 
      * https://docs.revrobotics.com/brushless/neo/vortex
      */
-    private static LimitedLinearMechanism simulated(SupplierLogger logger) {
+    private static LimitedLinearMechanism simulated(SupplierLogger2 logger) {
         SimulatedBareMotor vs2 = new SimulatedBareMotor(logger, 710);
         SimpleLinearMechanism lm = new SimpleLinearMechanism(
                 vs2,
@@ -166,10 +178,10 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.TRACE, "left position (m)", m_left::getPositionM);
-        m_logger.logOptionalDouble(Level.TRACE, "right position (m)", m_right::getPositionM);
-        m_logger.logOptionalDouble(Level.TRACE, "left velocity (m_s)", m_left::getVelocityM_S);
-        m_logger.logOptionalDouble(Level.TRACE, "right velocity (m_s)", m_right::getVelocityM_S);
+        m_log_left_position.log(m_left::getPositionM);
+        m_log_right_position.log(m_right::getPositionM);
+        m_log_left_velocity.log(m_left::getVelocityM_S);
+        m_log_right_velocity.log(m_right::getVelocityM_S);
     }
 
     @Override

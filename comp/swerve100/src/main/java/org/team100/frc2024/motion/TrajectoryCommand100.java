@@ -3,7 +3,7 @@ package org.team100.frc2024.motion;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -28,7 +28,7 @@ public class TrajectoryCommand100 extends Command100 {
     private final TrajectoryVisualization m_viz;
 
     public TrajectoryCommand100(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem robotDrive,
             Trajectory100 trajectory,
             DriveMotionController controller,

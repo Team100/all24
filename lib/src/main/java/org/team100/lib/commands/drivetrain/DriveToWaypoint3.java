@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -54,7 +54,7 @@ public class DriveToWaypoint3 extends Command100 {
      *                     trajectory between them.
      */
     public DriveToWaypoint3(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             StraightLineTrajectory trajectories,

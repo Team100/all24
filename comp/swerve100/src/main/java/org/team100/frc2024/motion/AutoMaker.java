@@ -17,7 +17,7 @@ import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.field.FieldPoint2024;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -47,11 +47,11 @@ public class AutoMaker implements Glassy {
     private final DrumShooter m_shooter;
     private final FeederSubsystem m_feeder;
     private final double kShooterScale;
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final TrajectoryVisualization m_viz;
 
     public AutoMaker(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem swerve,
             DriveMotionController controller,
             double shooterScale,

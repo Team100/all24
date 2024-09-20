@@ -5,7 +5,8 @@ import java.util.OptionalDouble;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.LimitedLinearMechanism;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Timer100;
 import org.team100.lib.util.Util;
@@ -44,17 +45,28 @@ public class HomeClimber extends Command implements Glassy {
     /** Wait 0.5s to stop moving. */
     private static final double kHomeTimeS = 0.2;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final ClimberSubsystem m_climber;
     private final Timer100 m_leftStart;
     private final Timer100 m_leftDone;
     private final Timer100 m_rightStart;
     private final Timer100 m_rightDone;
 
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_left_start_timer_s;
+    private final DoubleSupplierLogger2 m_log_right_start_timer_s;
+    private final DoubleSupplierLogger2 m_log_left_done_timer_s;
+    private final DoubleSupplierLogger2 m_log_right_done_timer_s;
+
     public HomeClimber(
-            SupplierLogger logger,
+            SupplierLogger2 logger,
             ClimberSubsystem climber) {
         m_logger = logger.child(this);
+        m_log_left_start_timer_s = m_logger.doubleLogger(Level.TRACE, "left start timer (s)");
+        m_log_right_start_timer_s = m_logger.doubleLogger(Level.TRACE, "right start timer (s)");
+        m_log_left_done_timer_s = m_logger.doubleLogger(Level.TRACE, "left done timer (s)");
+        m_log_right_done_timer_s = m_logger.doubleLogger(Level.TRACE, "right done timer (s)");
+
         m_climber = climber;
         m_leftStart = new Timer100();
         m_leftDone = new Timer100();
@@ -71,8 +83,8 @@ public class HomeClimber extends Command implements Glassy {
 
     @Override
     public void execute() {
-        oneSide("left", m_leftStart, m_leftDone, m_climber.getLeft());
-        oneSide("right", m_rightStart, m_rightDone, m_climber.getRight());
+        oneSide(m_log_left_start_timer_s, m_log_left_done_timer_s, m_leftStart, m_leftDone, m_climber.getLeft());
+        oneSide(m_log_right_start_timer_s, m_log_right_done_timer_s, m_rightStart, m_rightDone, m_climber.getRight());
     }
 
     private static void init(Timer100 start, Timer100 done) {
@@ -82,12 +94,14 @@ public class HomeClimber extends Command implements Glassy {
     }
 
     private void oneSide(
-            String name,
+            DoubleSupplierLogger2 start_timer_s,
+            DoubleSupplierLogger2 done_timer_s,
             Timer100 start,
             Timer100 done,
             LimitedLinearMechanism mech) {
-        m_logger.logDouble(Level.TRACE, name + " start timer (s)", start::get);
-        m_logger.logDouble(Level.TRACE, name + " done timer (s)", done::get);
+        start_timer_s.log(start::get);
+        done_timer_s.log(done::get);
+
         OptionalDouble opt = mech.getVelocityM_S();
         if (opt.isEmpty()) {
             Util.warn("HomeClimber: can't home, broken velocity sensor!");

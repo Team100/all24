@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -22,7 +22,7 @@ public class DrivePIDFController implements DriveMotionController {
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final boolean m_feedforwardOnly;
     private final double m_kPCart;
     private final double m_kPTheta;
@@ -33,7 +33,7 @@ public class DrivePIDFController implements DriveMotionController {
 
     /** Use the factory. */
     DrivePIDFController(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             boolean feedforwardOnly,
             double kPCart,
             double kPTheta) {

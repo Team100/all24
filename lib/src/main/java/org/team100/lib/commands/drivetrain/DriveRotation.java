@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
@@ -15,7 +15,7 @@ public class DriveRotation extends Command100 {
     private final Supplier<Double> m_rotSpeed;
 
     public DriveRotation(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem robotDrive,
             Supplier<Double> rot) {
         super(parent);

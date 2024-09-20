@@ -9,7 +9,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -68,7 +68,7 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             0.001,
             0.1 };
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
 
     private final PoseEstimator100 m_poseEstimator;
     private final FireControl m_fireControl;
@@ -91,7 +91,7 @@ public class VisionDataProvider24 implements VisionData, Glassy {
      * @throws IOException
      */
     public VisionDataProvider24(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             AprilTagFieldLayoutWithCorrectOrientation layout,
             PoseEstimator100 poseEstimator,
             FireControl fireControl) {

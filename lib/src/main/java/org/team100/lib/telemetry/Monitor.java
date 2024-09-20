@@ -4,7 +4,7 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * Sets the annunciator if bounds are exceeded.
  */
 public class Monitor implements Glassy {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final Annunciator m_annunciator;
     private final BooleanSupplier m_test;
     private final PowerDistribution m_pdp;
@@ -28,7 +28,7 @@ public class Monitor implements Glassy {
      * @param annunciator some sort of alert.
      * @param test        activates the annunciator, to make sure it's working.
      */
-    public Monitor(SupplierLogger parent, Annunciator annunciator, BooleanSupplier test) {
+    public Monitor(SupplierLogger2 parent, Annunciator annunciator, BooleanSupplier test) {
         m_logger = parent.child(this);
         m_annunciator = annunciator;
         m_test = test;

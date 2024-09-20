@@ -9,7 +9,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -38,7 +38,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
      */
     private static final double kIndexerVelocityM_S = 5;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final LimitedLinearVelocityServo m_servo;
     private final PIDConstants m_velocityConstants;
     private final Feedforward100 m_lowLevelFeedforwardConstants;
@@ -46,7 +46,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
     DigitalInput beamBreak1;
     // DigitalInput beamBreak2;
 
-    public IndexerSubsystem(SupplierLogger parent, int driveID) {
+    public IndexerSubsystem(SupplierLogger2 parent, int driveID) {
         m_logger = parent.child(this);
         m_velocityConstants = new PIDConstants(0.0001, 0, 0);
         m_lowLevelFeedforwardConstants = Feedforward100.makeNeo();

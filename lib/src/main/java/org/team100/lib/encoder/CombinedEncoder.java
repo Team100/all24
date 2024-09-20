@@ -2,7 +2,7 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Math100;
@@ -27,7 +27,7 @@ public class CombinedEncoder implements RotaryPositionSensor {
     private final RotaryPositionSensor m_primary;
     private final double m_authority;
     private final RotaryMechanism m_secondary;
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
 
     /**
      * 
@@ -37,7 +37,7 @@ public class CombinedEncoder implements RotaryPositionSensor {
      * @param secondary
      */
     public CombinedEncoder(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             RotaryPositionSensor primary,
             double authority,
             RotaryMechanism secondary) {

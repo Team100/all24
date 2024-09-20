@@ -5,7 +5,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionData;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.sensors.Gyro;
@@ -24,8 +24,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
-    private final SupplierLogger m_fieldLogger;
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_fieldLogger;
+    private final SupplierLogger2 m_logger;
     private final Gyro m_gyro;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
@@ -33,8 +33,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     private final CotemporalCache<SwerveState> m_stateSupplier;
 
     public SwerveDriveSubsystem(
-            SupplierLogger fieldLogger,
-            SupplierLogger parent,
+            SupplierLogger2 fieldLogger,
+            SupplierLogger2 parent,
             Gyro gyro,
             SwerveDrivePoseEstimator100 poseEstimator,
             SwerveLocal swerveLocal,

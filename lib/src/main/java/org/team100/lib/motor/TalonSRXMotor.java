@@ -1,6 +1,6 @@
 package org.team100.lib.motor;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -86,10 +86,10 @@ public class TalonSRXMotor implements BareMotor {
      */
     private static final double saturationVoltage = 11;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final WPI_TalonSRX m_motor;
 
-    public TalonSRXMotor(SupplierLogger parent, int channel) {
+    public TalonSRXMotor(SupplierLogger2 parent, int channel) {
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
         m_motor.setNeutralMode(NeutralMode.Brake);

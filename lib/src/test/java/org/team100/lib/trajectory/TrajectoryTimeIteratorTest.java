@@ -9,7 +9,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 
@@ -22,7 +22,7 @@ class TrajectoryTimeIteratorTest {
     private static final double kDelta = 0.001;
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testPreviewAndAdvance() {

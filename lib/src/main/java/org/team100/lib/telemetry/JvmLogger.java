@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
@@ -17,11 +17,11 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * LoggedRobot.GcStatsCollector().
  */
 public class JvmLogger implements Glassy {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final Map<String, Long> times;
     private final Map<String, Long> counts;
 
-    public JvmLogger(SupplierLogger parent) {
+    public JvmLogger(SupplierLogger2 parent) {
         m_logger = parent.child(this);
         times = new HashMap<>();
         counts = new HashMap<>();

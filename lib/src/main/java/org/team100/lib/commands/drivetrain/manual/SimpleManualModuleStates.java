@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain.manual;
 import java.util.Optional;
 
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -19,10 +19,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * The input dy is ignored.
  */
 public class SimpleManualModuleStates implements ModuleStateDriver {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
 
-    public SimpleManualModuleStates(SupplierLogger parent, SwerveKinodynamics swerveKinodynamics) {
+    public SimpleManualModuleStates(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_logger = parent.child(this);
     }

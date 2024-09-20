@@ -3,7 +3,7 @@ package org.team100.lib.controller;
 import java.util.function.DoubleUnaryOperator;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -90,7 +90,7 @@ import edu.wpi.first.math.MathUtil;
  * TODO: allow different acceleration and deceleration.
  */
 public class MinTimeController implements Glassy {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
 
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
@@ -135,7 +135,7 @@ public class MinTimeController implements Glassy {
      * @param k              full-state gains
      */
     public MinTimeController(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             DoubleUnaryOperator modulus,
             double maxVel,
             double switchingAccel,

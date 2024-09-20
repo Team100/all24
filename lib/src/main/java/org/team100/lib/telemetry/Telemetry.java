@@ -3,8 +3,9 @@ package org.team100.lib.telemetry;
 import org.team100.lib.logging.DataLogLogger;
 import org.team100.lib.logging.NTLogger;
 import org.team100.lib.logging.PrimitiveLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.UdpPrimitiveLogger;
+import org.team100.lib.logging.UdpPrimitiveLogger2;
 import org.team100.lib.util.Util;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -65,7 +66,7 @@ public class Telemetry {
     // private final NetworkTableInstance inst;
     final PrimitiveLogger ntLogger;
     final PrimitiveLogger usbLogger;
-    final UdpPrimitiveLogger udpLogger;
+    final UdpPrimitiveLogger2 udpLogger;
 
     private Level m_level;
 
@@ -107,25 +108,23 @@ public class Telemetry {
         return instance;
     }
 
-    public SupplierLogger fieldLogger(boolean defaultEnabledNT, boolean defaultEnabledUSB) {
+    public SupplierLogger2 fieldLogger() {
         if (USE_UDP_LOGGING) {
-            SupplierLogger logger = new NetworkLogger(this, "field");
+            SupplierLogger2 logger = new NetworkLogger(this, "field");
             logger.logString(Level.COMP, ".type", () -> "Field2d");
             return logger;
 
         } else {
-            return new FieldLogger(this, defaultEnabledNT, defaultEnabledUSB);
+            return new FieldLogger(this);
         }
     }
 
-    public SupplierLogger namedRootLogger(
-            String str,
-            boolean defaultEnabledNT,
-            boolean defaultEnabledUSB) {
+    public SupplierLogger2 namedRootLogger(
+            String str) {
         if (USE_UDP_LOGGING) {
             return new NetworkLogger(this, str);
         } else {
-            return new RootLogger(this, str, defaultEnabledNT, defaultEnabledUSB);
+            return new RootLogger(this, str);
         }
     }
 

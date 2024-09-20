@@ -6,7 +6,7 @@ import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.encoder.VelocityBareEncoder;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
@@ -41,7 +41,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
 
     public static AMCANSwerveModule100 get(
             String name,
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -50,7 +50,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
-        SupplierLogger moduleLogger = parent.child(name);
+        SupplierLogger2 moduleLogger = parent.child(name);
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         Feedforward100 ff = Feedforward100.makeAMSwerveDriveFalcon6();
         LinearVelocityServo driveServo = driveServo(
@@ -73,7 +73,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     }
 
     private static LinearVelocityServo driveServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -97,7 +97,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     }
 
     private static OnboardAngularPositionServo turningServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             int turningMotorCanId,
             int turningEncoderChannel,
             double turningOffset,

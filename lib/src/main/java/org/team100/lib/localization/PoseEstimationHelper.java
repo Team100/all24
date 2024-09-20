@@ -2,7 +2,7 @@ package org.team100.lib.localization;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,9 +19,9 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public class PoseEstimationHelper implements Glassy {
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
 
-    public PoseEstimationHelper(SupplierLogger parent) {
+    public PoseEstimationHelper(SupplierLogger2 parent) {
         m_logger = parent.child(this);
     }
 

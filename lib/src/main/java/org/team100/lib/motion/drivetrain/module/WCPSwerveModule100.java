@@ -11,7 +11,7 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.motion.RotaryMechanism;
@@ -61,7 +61,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     public static WCPSwerveModule100 get(
             String name,
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double supplyLimitAmps,
             double statorLimitAmps,
             int driveMotorCanId,
@@ -73,7 +73,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
             MotorPhase motorPhase) {
-        SupplierLogger moduleLogger = parent.child(name);
+        SupplierLogger2 moduleLogger = parent.child(name);
 
         // TODO: revisit these constants
         PIDConstants drivePidConstants = new PIDConstants(.2); // .2
@@ -107,7 +107,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static LinearVelocityServo driveServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double supplyLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -133,7 +133,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo turningServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             Class<? extends RotaryPositionSensor> encoderClass,
             int turningMotorCanId,
             int turningEncoderChannel,
@@ -174,7 +174,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo getTurningServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveKinodynamics kinodynamics,
             Falcon6Motor turningMotor,
             RotaryPositionSensor turningEncoder,
@@ -211,7 +211,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo getOutboard(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             RotaryPositionSensor turningEncoder,
             Profile100 profile,
             RotaryMechanism mech) {
@@ -233,7 +233,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo getOnboard(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveKinodynamics kinodynamics,
             RotaryPositionSensor turningEncoder, Profile100 profile, RotaryMechanism mech) {
         PIDController turningPositionController = new PIDController(
@@ -255,7 +255,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static RotaryPositionSensor turningEncoder(
             Class<? extends RotaryPositionSensor> encoderClass,
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             int channel,
             double inputOffset,
             EncoderDrive drive) {

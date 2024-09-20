@@ -6,7 +6,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
@@ -27,7 +27,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     private static final double kDtSec = 0.02;
     private static final double kFeedbackDeadbandRad_S = 0.01;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final RotaryMechanism m_mechanism;
     private final RotaryPositionSensor m_positionSensor;
     private final double m_maxVel;
@@ -58,7 +58,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
      * TODO: remove maxVel.
      */
     public OnboardAngularPositionServo(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             RotaryMechanism mech,
             RotaryPositionSensor positionSensor,
             double maxVel,

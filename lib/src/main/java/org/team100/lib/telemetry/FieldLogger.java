@@ -9,11 +9,8 @@ import org.team100.lib.telemetry.Telemetry.Level;
  */
 public class FieldLogger extends RootLogger {
 
-    FieldLogger(
-            Telemetry telemetry,
-            boolean defaultEnabledNT,
-            boolean defaultEnabledUSB) {
-        super(telemetry, "field", defaultEnabledNT, defaultEnabledUSB);
+    FieldLogger(Telemetry telemetry) {
+        super(telemetry, "field");
         logString(Level.COMP, ".type", () -> "Field2d");
     }
 

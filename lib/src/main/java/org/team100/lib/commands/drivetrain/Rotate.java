@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -43,7 +43,7 @@ public class Rotate extends Command100 {
     private boolean m_steeringAligned;
 
     public Rotate(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem drivetrain,
             Gyro gyro,
             SwerveKinodynamics swerveKinodynamics,

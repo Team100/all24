@@ -9,7 +9,7 @@ import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,7 +36,7 @@ public class DriveToAmp extends SequentialCommandGroup {
             kAmpXM, kFieldWidthM - kCloseToAmpYM, GeometryUtil.kRotation90);
 
     public DriveToAmp(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem drive,
             SwerveKinodynamics limits,
             AmpPivot amp,

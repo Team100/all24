@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
@@ -31,7 +31,7 @@ public class CartesianManualPositionalArm extends Command100 {
     private final PIDController m_upperController;
 
     public CartesianManualPositionalArm(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             ArmSubsystem arm,
             ArmKinematics kinematics,
             DoubleSupplier x,

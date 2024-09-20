@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.motion.SimpleLinearMechanism;
 import org.team100.lib.motor.MockBareMotor;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
 
 class LinearVelocityServoTest {
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testSimple() {

@@ -1,7 +1,7 @@
 package org.team100.lib.commands.drivetrain.manual;
 
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -17,10 +17,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * corresponding ChassisSpeeds components (and scaled).
  */
 public class ManualChassisSpeeds implements ChassisSpeedDriver {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
 
-    public ManualChassisSpeeds(SupplierLogger parent, SwerveKinodynamics swerveKinodynamics) {
+    public ManualChassisSpeeds(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_logger = parent.child(this);
     }

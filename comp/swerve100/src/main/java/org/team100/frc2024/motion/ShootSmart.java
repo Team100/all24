@@ -9,7 +9,7 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootSmart extends Command implements Glassy {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -29,7 +29,7 @@ public class ShootSmart extends Command implements Glassy {
     private boolean atVelocity;
 
     public ShootSmart(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,

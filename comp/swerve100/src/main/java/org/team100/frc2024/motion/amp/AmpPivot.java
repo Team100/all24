@@ -23,7 +23,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -52,10 +52,10 @@ public class AmpPivot extends SubsystemBase implements Glassy {
      */
     private static final double kGearRatio = 70;
 
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final GravityServoInterface m_ampAngleServo;
 
-    public AmpPivot(SupplierLogger parent) {
+    public AmpPivot(SupplierLogger2 parent) {
         m_logger = parent.child(this);
 
         double period = 0.02;

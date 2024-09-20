@@ -3,7 +3,7 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -29,7 +29,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * lower it here.
  */
 public class SwerveKinodynamics implements Glassy {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
 
     // geometry
     private final double m_fronttrack;
@@ -73,7 +73,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -129,7 +129,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,

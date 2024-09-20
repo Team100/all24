@@ -2,7 +2,7 @@ package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -20,7 +20,7 @@ public class AmpFastThenSlow extends SequentialCommandGroup {
             kSlowAccelRad_S2, kTolerance);
 
     public AmpFastThenSlow(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             AmpPivot pivot,
             double switchRad,
             double goalRad) {

@@ -3,10 +3,10 @@ package org.team100.lib.logging;
 import org.team100.lib.telemetry.Telemetry;
 
 /** Doesn't do anything. */
-public class TestLogger extends PrimitiveLogger {
+public class TestLogger extends PrimitiveLogger2 {
 
-    public SupplierLogger getSupplierLogger() {
-        return new SupplierLogger(Telemetry.get(), "/",  this);
+    public SupplierLogger2 getSupplierLogger() {
+        return new SupplierLogger2(Telemetry.get(), "/",  this);
     }
 
     @Override

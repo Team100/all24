@@ -8,7 +8,7 @@ import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -16,10 +16,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * The feeder is independent from the pivot, so it's a separate subsystem.
  */
 public class AmpFeeder extends SubsystemBase implements Glassy {
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final BareMotor ampDrive;
 
-    public AmpFeeder(SupplierLogger parent) {
+    public AmpFeeder(SupplierLogger2 parent) {
         m_logger = parent.child(this);
         switch (Identity.instance) {
             case COMP_BOT:

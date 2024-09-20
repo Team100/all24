@@ -7,7 +7,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -31,7 +31,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private static final double kDtSec = 0.02;
-    private final SupplierLogger m_logger;
+    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
@@ -56,7 +56,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * @param omegaController
      */
     public ManualWithProfiledHeading(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
