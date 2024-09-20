@@ -15,21 +15,23 @@ public class IndexerSubsystem implements Glassy {
 
     private final SupplierLogger m_logger;
     private final OutboardLinearPositionServo m_indexer;
+    private final LinearMechanism m_linearMechanism;
 
     
     public IndexerSubsystem(SupplierLogger parent, LinearMechanism linearMechanism, double maxAccel, double objectLengthM, double indexVelocityM_S) {
         m_logger = parent.child(this);
         m_objectLength = objectLengthM;
         kIndexerVelocityM_S = indexVelocityM_S;
+        m_linearMechanism = linearMechanism;
         m_indexer = new OutboardLinearPositionServo(m_logger, linearMechanism, new TrapezoidProfile100(indexVelocityM_S, maxAccel, 0.02));
     }
 
     public void index() {
-        m_indexer.setVelocity(kIndexerVelocityM_S, 0);
+        m_linearMechanism.setVelocity(kIndexerVelocityM_S, 0, 0);
     }
 
     public void unindex() {
-        m_indexer.setVelocity(-1.0 * kIndexerVelocityM_S, 0);
+        m_linearMechanism.setVelocity(-1.0 * kIndexerVelocityM_S,0, 0);
     }
     
     public void indexOne() {

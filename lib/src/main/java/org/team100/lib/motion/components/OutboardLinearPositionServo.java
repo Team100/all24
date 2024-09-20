@@ -57,10 +57,6 @@ public class OutboardLinearPositionServo implements LinearPositionServo {
         setPositionWithVelocity(goalM, 0.0, feedForwardTorqueNm);
     }
 
-    public void setVelocity(double goalVelocityM_S, double feedForwardTorqueNm) {
-        m_mechanism.setVelocity(goalVelocityM_S, 0, feedForwardTorqueNm);
-    }
-
     @Override
     public OptionalDouble getPosition() {
         return m_mechanism.getPositionM();
