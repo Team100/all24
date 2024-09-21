@@ -80,8 +80,8 @@ public class DrivePursuitController implements DriveMotionController {
     DrivePursuitController(SupplierLogger2 parent, SwerveKinodynamics limits) {
         m_limits = limits;
         m_logger = parent.child(this);
-        m_log_u_FF = parent.chassisSpeedsLogger(Level.TRACE, "u_FF");
-        m_log_u_FB = parent.chassisSpeedsLogger(Level.TRACE, "u_FB");
+        m_log_u_FF = m_logger.chassisSpeedsLogger(Level.TRACE, "u_FF");
+        m_log_u_FB = m_logger.chassisSpeedsLogger(Level.TRACE, "u_FB");
         m_log_measurement = m_logger.pose2dLogger(Level.TRACE, "current state");
         m_log_setpoint = m_logger.timedPoseLogger(Level.TRACE, "setpoint");
         m_log_lookahead = m_logger.timedPoseLogger(Level.TRACE, "lookahead state");
