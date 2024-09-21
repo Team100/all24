@@ -52,7 +52,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     private final List<UdpStringLogger> stringLoggers = new ArrayList<>();
 
     final List<Metadata> metadata = new ArrayList<>();
-
+    private final Set<String> keys = new HashSet<>();
     private final Consumer<ByteBuffer> m_bufferSink;
     private final Consumer<ByteBuffer> m_metadataSink;
 
@@ -82,6 +82,9 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
      */
     private synchronized int getKey(UdpType type, String label) {
         int key = metadata.size() + 1;
+        if (keys.containsKey(key))
+            throw new.IllegalArgumentException("duplicate key " + key);
+        keys.add(key);
         metadata.add(new Metadata(key, type, label));
         return key;
     }
