@@ -3,7 +3,9 @@ package org.team100.lib.logging;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -82,9 +84,9 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
      */
     private synchronized int getKey(UdpType type, String label) {
         int key = metadata.size() + 1;
-        if (keys.containsKey(key))
-            throw new.IllegalArgumentException("duplicate key " + key);
-        keys.add(key);
+        if (keys.contains(label))
+            throw new IllegalArgumentException("duplicate key " + key);
+        keys.add(label);
         metadata.add(new Metadata(key, type, label));
         return key;
     }
