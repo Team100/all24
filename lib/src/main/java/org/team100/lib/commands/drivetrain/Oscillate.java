@@ -7,6 +7,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -43,10 +44,14 @@ public class Oscillate extends Command100 {
     private final ParabolicWave m_parabola;
     private final Timer m_timer;
     private final double m_period;
-
-    public double getPeriod() {
-        return m_period;
-    }
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_period;
+    private final DoubleSupplierLogger2 m_log_time;
+    private final DoubleSupplierLogger2 m_log_setpoint_accel;
+    private final DoubleSupplierLogger2 m_log_setpoint_speed;
+    private final DoubleSupplierLogger2 m_log_setpoint_position;
+    private final DoubleSupplierLogger2 m_log_measurement_speed;
+    private final DoubleSupplierLogger2 m_log_measurement_position;
 
     private SwerveState m_initial;
 
@@ -59,6 +64,17 @@ public class Oscillate extends Command100 {
         m_parabola = new ParabolicWave(kMaxSpeed * m_period / 4, m_period);
         m_timer = new Timer();
         addRequirements(m_swerve);
+        m_log_period = m_logger.doubleLogger(Level.TRACE, "period");
+        m_log_time = m_logger.doubleLogger(Level.TRACE, "time");
+        m_log_setpoint_accel = m_logger.doubleLogger(Level.TRACE, "setpoint/accel");
+        m_log_setpoint_speed = m_logger.doubleLogger(Level.TRACE, "setpoint/speed");
+        m_log_setpoint_position = m_logger.doubleLogger(Level.TRACE, "setpoint/position");
+        m_log_measurement_speed = m_logger.doubleLogger(Level.TRACE, "measurement/speed");
+        m_log_measurement_position = m_logger.doubleLogger(Level.TRACE, "measurement/position");
+    }
+
+    public double getPeriod() {
+        return m_period;
     }
 
     @Override
@@ -107,21 +123,19 @@ public class Oscillate extends Command100 {
 
         }
 
-        m_logger.doubleLogger(Level.TRACE, "period").log( () -> m_period);
-        m_logger.doubleLogger(Level.TRACE, "time").log( () -> time);
-        m_logger.doubleLogger(Level.TRACE, "setpoint/accel").log( () -> accelM_S_S);
-        m_logger.doubleLogger(Level.TRACE, "setpoint/speed").log( () -> speedM_S);
-        m_logger.doubleLogger(Level.TRACE, "setpoint/position").log( () -> positionM);
+        m_log_period.log(() -> m_period);
+        m_log_time.log(() -> time);
+        m_log_setpoint_accel.log(() -> accelM_S_S);
+        m_log_setpoint_speed.log(() -> speedM_S);
+        m_log_setpoint_position.log(() -> positionM);
 
         SwerveState swerveState = m_swerve.getState();
         if (Experiments.instance.enabled(Experiment.OscillateTheta)) {
-            m_logger.doubleLogger(Level.TRACE, "measurement/speed").log( () -> swerveState.theta().v());
-            m_logger.doubleLogger(Level.TRACE, "measurement/position").log(
-                    () -> swerveState.theta().x() - m_initial.theta().x());
+            m_log_measurement_speed.log(() -> swerveState.theta().v());
+            m_log_measurement_position.log(() -> swerveState.theta().x() - m_initial.theta().x());
         } else {
-            m_logger.doubleLogger(Level.TRACE, "measurement/speed").log( () -> swerveState.x().v());
-            m_logger.doubleLogger(Level.TRACE, "measurement/position").log(
-                    () -> swerveState.x().x() - m_initial.x().x());
+            m_log_measurement_speed.log(() -> swerveState.x().v());
+            m_log_measurement_position.log(() -> swerveState.x().x() - m_initial.x().x());
         }
     }
 

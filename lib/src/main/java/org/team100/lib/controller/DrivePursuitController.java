@@ -7,6 +7,11 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
+import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
+import org.team100.lib.logging.SupplierLogger2.TimedPoseLogger;
+import org.team100.lib.logging.SupplierLogger2.TrajectorySamplePointLogger;
+import org.team100.lib.logging.SupplierLogger2.Translation2dLogger;
+import org.team100.lib.logging.SupplierLogger2.Twist2dLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
@@ -55,6 +60,13 @@ public class DrivePursuitController implements DriveMotionController {
     // LOGGERS
     private final ChassisSpeedsLogger m_log_u_FF;
     private final ChassisSpeedsLogger m_log_u_FB;
+    private final Pose2dLogger m_log_measurement;
+    private final TimedPoseLogger m_log_setpoint;
+    private final TimedPoseLogger m_log_lookahead;
+    private final TimedPoseLogger m_log_updated_lookahead;
+    private final Translation2dLogger m_log_lookahead_translation;
+    private final Twist2dLogger m_log_error;
+    private final TrajectorySamplePointLogger m_log_sample;
 
     private Lookahead mSpeedLookahead = null;
 
@@ -70,6 +82,13 @@ public class DrivePursuitController implements DriveMotionController {
         m_logger = parent.child(this);
         m_log_u_FF = parent.chassisSpeedsLogger(Level.TRACE, "u_FF");
         m_log_u_FB = parent.chassisSpeedsLogger(Level.TRACE, "u_FB");
+        m_log_measurement = m_logger.pose2dLogger(Level.TRACE, "current state");
+        m_log_setpoint = m_logger.timedPoseLogger(Level.TRACE, "setpoint");
+        m_log_lookahead = m_logger.timedPoseLogger(Level.TRACE, "lookahead state");
+        m_log_updated_lookahead = m_logger.timedPoseLogger(Level.TRACE, "updated lookahead state");
+        m_log_lookahead_translation = m_logger.translation2dLogger(Level.TRACE, "lookahead translation");
+        m_log_error = m_logger.twist2dLogger(Level.TRACE, "pursuit error");
+        m_log_sample = m_logger.trajectorySamplePointLogger(Level.TRACE, "sample point");
     }
 
     @Override
@@ -104,7 +123,7 @@ public class DrivePursuitController implements DriveMotionController {
             return null;
         }
 
-        m_logger.pose2dLogger(Level.TRACE, "current state").log( () -> measurement);
+        m_log_measurement.log(() -> measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -115,7 +134,7 @@ public class DrivePursuitController implements DriveMotionController {
             return new ChassisSpeeds();
         }
         TimedPose mSetpoint = optionalSetpoint.get();
-        m_logger.timedPoseLogger(Level.TRACE, "setpoint").log( () -> mSetpoint);
+        m_log_setpoint.log(() -> mSetpoint);
 
         double lookahead_time = kPathLookaheadTime;
 
@@ -126,7 +145,7 @@ public class DrivePursuitController implements DriveMotionController {
         }
 
         TimedPose lookahead_state = preview.get().state();
-        m_logger.timedPoseLogger(Level.TRACE, "lookahead state").log( () -> preview.get().state());
+        m_log_lookahead.log(() -> preview.get().state());
 
         double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
         double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityM_S());
@@ -158,12 +177,12 @@ public class DrivePursuitController implements DriveMotionController {
                     lookahead_state.getTimeS(), lookahead_state.velocityM_S(), lookahead_state.acceleration());
         }
         final TimedPose updatedLookaheadState = lookahead_state;
-        m_logger.timedPoseLogger(Level.TRACE, "updated lookahead state").log( () -> updatedLookaheadState);
+        m_log_updated_lookahead.log(() -> updatedLookaheadState);
 
         // Find the vector between robot's current position and the lookahead state
         Translation2d lookaheadTranslation = lookahead_state.state().getTranslation()
                 .minus(measurement.getTranslation());
-        m_logger.translation2dLogger(Level.TRACE, "lookahead translation").log( () -> lookaheadTranslation);
+        m_log_lookahead_translation.log(() -> lookaheadTranslation);
 
         // Set the steering direction as the direction of the vector
         Rotation2d steeringDirection = lookaheadTranslation.getAngle();
@@ -196,7 +215,7 @@ public class DrivePursuitController implements DriveMotionController {
         m_log_u_FF.log(() -> u_FF);
 
         Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, mSetpoint);
-        m_logger.twist2dLogger(Level.TRACE, "pursuit error").log( () -> errorTwist);
+        m_log_error.log(() -> errorTwist);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPositionkP * errorTwist.dx,
                 kPositionkP * errorTwist.dy,
@@ -225,7 +244,7 @@ public class DrivePursuitController implements DriveMotionController {
         if (!sample_point.isPresent()) {
             return Optional.empty();
         }
-        m_logger.trajectorySamplePointLogger(Level.TRACE, "sample point").log( sample_point::get);
+        m_log_sample.log(sample_point::get);
         return Optional.of(sample_point.get().state());
     }
 

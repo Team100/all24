@@ -8,6 +8,9 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -41,6 +44,22 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private final PIDController m_omegaController;
     private final LinearFilter m_outputFilter;
 
+    // LOGGERS
+    private final StringSupplierLogger2 m_log_mode;
+    private final DoubleSupplierLogger2 m_log_max_speed;
+    private final DoubleSupplierLogger2 m_log_max_accel;
+    private final DoubleSupplierLogger2 m_log_goal_theta;
+    private final State100Logger m_log_setpoint_theta;
+    private final DoubleSupplierLogger2 m_log_measurement_theta;
+    private final DoubleSupplierLogger2 m_log_measurement_omega;
+    private final DoubleSupplierLogger2 m_log_error_theta;
+    private final DoubleSupplierLogger2 m_log_error_omega;
+    private final DoubleSupplierLogger2 m_log_theta_FF;
+    private final DoubleSupplierLogger2 m_log_theta_FB;
+    private final DoubleSupplierLogger2 m_log_omega_FB;
+    private final DoubleSupplierLogger2 m_log_output_omega;
+
+
     // package private for testing
     Rotation2d m_goal = null;
     State100 m_thetaSetpoint = null;
@@ -70,6 +89,19 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_logger = parent.child(this);
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
+        m_log_mode = m_logger.stringLogger(Level.TRACE, "mode");
+        m_log_max_speed = m_logger.doubleLogger(Level.TRACE, "maxSpeedRad_S");
+        m_log_max_accel = m_logger.doubleLogger(Level.TRACE, "maxAccelRad_S2");
+        m_log_goal_theta = m_logger.doubleLogger(Level.TRACE, "goal/theta");
+        m_log_setpoint_theta = m_logger.state100Logger(Level.TRACE, "setpoint/theta");
+        m_log_measurement_theta = m_logger.doubleLogger(Level.TRACE, "measurement/theta");
+        m_log_measurement_omega = m_logger.doubleLogger(Level.TRACE, "measurement/omega");
+        m_log_error_theta = m_logger.doubleLogger(Level.TRACE, "error/theta");
+        m_log_error_omega = m_logger.doubleLogger(Level.TRACE, "error/omega");
+        m_log_theta_FF = m_logger.doubleLogger(Level.TRACE, "thetaFF");
+        m_log_theta_FB = m_logger.doubleLogger(Level.TRACE, "thetaFB");
+        m_log_omega_FB = m_logger.doubleLogger(Level.TRACE, "omegaFB");
+        m_log_output_omega = m_logger.doubleLogger(Level.TRACE, "output/omega");
     }
 
     public void reset(Pose2d currentPose) {
@@ -125,7 +157,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
-            m_logger.stringLogger(Level.TRACE, "mode").log( () -> "free");
+            m_log_mode.log( () -> "free");
             // desaturate to feasibility
             return m_swerveKinodynamics.analyticDesaturation(twistM_S);
         }
@@ -173,8 +205,8 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed) * lessV;
         double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * lessA;
 
-        m_logger.doubleLogger(Level.TRACE, "maxSpeedRad_S").log( () -> maxSpeedRad_S);
-        m_logger.doubleLogger(Level.TRACE, "maxAccelRad_S2").log( () -> maxAccelRad_S2);
+        m_log_max_speed.log( () -> maxSpeedRad_S);
+        m_log_max_accel.log( () -> maxAccelRad_S2);
 
         final TrapezoidProfile100 m_profile = new TrapezoidProfile100(
                 maxSpeedRad_S,
@@ -196,17 +228,17 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
-        m_logger.stringLogger(Level.TRACE, "mode").log( () -> "snap");
-        m_logger.doubleLogger(Level.TRACE, "goal/theta").log( m_goal::getRadians);
-        m_logger.state100Logger(Level.TRACE, "setpoint/theta").log( () -> m_thetaSetpoint);
-        m_logger.doubleLogger(Level.TRACE, "measurement/theta").log( () -> yawMeasurement);
-        m_logger.doubleLogger(Level.TRACE, "measurement/omega").log( () -> yawRate);
-        m_logger.doubleLogger(Level.TRACE, "error/theta").log( () -> m_thetaSetpoint.x() - yawMeasurement);
-        m_logger.doubleLogger(Level.TRACE, "error/omega").log(() -> m_thetaSetpoint.v() - yawRate);
-        m_logger.doubleLogger(Level.TRACE, "thetaFF").log( () -> thetaFF);
-        m_logger.doubleLogger(Level.TRACE, "thetaFB").log( () -> thetaFB);
-        m_logger.doubleLogger(Level.TRACE, "omegaFB").log( () -> omegaFB);
-        m_logger.doubleLogger(Level.TRACE, "output/omega").log( () -> omega);
+        m_log_mode.log( () -> "snap");
+        m_log_goal_theta.log( m_goal::getRadians);
+        m_log_setpoint_theta.log( () -> m_thetaSetpoint);
+        m_log_measurement_theta.log( () -> yawMeasurement);
+        m_log_measurement_omega.log( () -> yawRate);
+        m_log_error_theta.log( () -> m_thetaSetpoint.x() - yawMeasurement);
+        m_log_error_omega.log(() -> m_thetaSetpoint.v() - yawRate);
+        m_log_theta_FF.log( () -> thetaFF);
+        m_log_theta_FB.log( () -> thetaFB);
+        m_log_omega_FB.log( () -> omegaFB);
+        m_log_output_omega.log( () -> omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

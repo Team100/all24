@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -21,10 +23,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public class SimpleManualModuleStates implements ModuleStateDriver {
     private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_speed;
+    private final Rotation2dLogger m_log_angle;
 
     public SimpleManualModuleStates(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
         m_swerveKinodynamics = swerveKinodynamics;
         m_logger = parent.child(this);
+        m_log_speed = m_logger.doubleLogger(Level.TRACE, "speed m_s");
+        m_log_angle = m_logger.rotation2dLogger(Level.TRACE, "angle rad");
     }
 
     /**
@@ -35,8 +42,8 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
         // dtheta is from [-1, 1], so angle is [-pi, pi]
         Optional<Rotation2d> angle = Optional.of(Rotation2d.fromRadians(Math.PI * input.theta()));
         double speedM_S = m_swerveKinodynamics.getMaxDriveVelocityM_S() * input.x();
-        m_logger.doubleLogger(Level.TRACE, "speed m_s").log( () -> speedM_S);
-        m_logger.rotation2dLogger(Level.TRACE, "angle rad").log( angle::get);
+        m_log_speed.log( () -> speedM_S);
+        m_log_angle.log( angle::get);
         // System.out.println("speed " + speedM_S);
 
         return new SwerveModuleState100[] {

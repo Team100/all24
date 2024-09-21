@@ -4,6 +4,8 @@ import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -33,6 +35,13 @@ public class Rotate extends Command100 {
     private final Gyro m_gyro;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final State100 m_goalState;
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_error_x;
+    private final DoubleSupplierLogger2 m_log_error_v;
+    private final DoubleSupplierLogger2 m_log_measurement_x;
+    private final DoubleSupplierLogger2 m_log_measurement_v;
+    private final State100Logger m_log_reference;
+
     final HolonomicDriveController3 m_controller;
 
     private boolean m_finished = false;
@@ -69,6 +78,11 @@ public class Rotate extends Command100 {
         refTheta = new State100(0, 0);
 
         addRequirements(drivetrain);
+        m_log_error_x = m_logger.doubleLogger(Level.TRACE, "errorX");
+        m_log_error_v = m_logger.doubleLogger(Level.TRACE, "errorV");
+        m_log_measurement_x = m_logger.doubleLogger(Level.TRACE, "measurementX");
+        m_log_measurement_v = m_logger.doubleLogger(Level.TRACE, "measurementV");
+        m_log_reference = m_logger.state100Logger(Level.TRACE, "reference");
     }
 
     @Override
@@ -125,12 +139,11 @@ public class Rotate extends Command100 {
         double headingRate = m_gyro.getYawRateNWU();
 
         // log what we did
-        m_logger.doubleLogger(Level.TRACE, "errorX").log( () -> refTheta.x() - headingMeasurement);
-        m_logger.doubleLogger(Level.TRACE, "errorV").log( () -> refTheta.v() - headingRate);
-        m_logger.doubleLogger(Level.TRACE, "measurementX").log( () -> headingMeasurement);
-        m_logger.doubleLogger(Level.TRACE, "measurementV").log( () -> headingRate);
-        m_logger.doubleLogger(Level.TRACE, "refX").log( () -> refTheta.x());
-        m_logger.doubleLogger(Level.TRACE, "refV").log( () -> refTheta.v());
+        m_log_error_x.log(() -> refTheta.x() - headingMeasurement);
+        m_log_error_v.log(() -> refTheta.v() - headingRate);
+        m_log_measurement_x.log(() -> headingMeasurement);
+        m_log_measurement_v.log(() -> headingRate);
+        m_log_reference.log(() -> refTheta);
     }
 
     @Override

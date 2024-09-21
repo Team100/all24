@@ -7,6 +7,9 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -53,6 +56,18 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
     private final BooleanSupplier m_trigger;
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_apparent_motion;
+    private final State100Logger m_log_theta_setpoint;
+    private final DoubleSupplierLogger2 m_log_theta_measurement;
+    private final DoubleSupplierLogger2 m_log_theta_error;
+    private final DoubleSupplierLogger2 m_log_theta_FB;
+    private final State100Logger m_log_omega_reference;
+    private final DoubleSupplierLogger2 m_log_omega_measurement;
+    private final DoubleSupplierLogger2 m_log_omega_error;
+    private final DoubleSupplierLogger2 m_log_omega_FB;
+    private final DoubleArraySupplierLogger2 m_log_target;
+    private final DoubleArraySupplierLogger2 m_log_ball;
 
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
@@ -80,6 +95,17 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed,
                 0.01);
         m_trigger = trigger;
+        m_log_apparent_motion = m_logger.doubleLogger(Level.TRACE, "apparent motion");
+        m_log_theta_setpoint = m_logger.state100Logger(Level.TRACE, "theta/setpoint");
+        m_log_theta_measurement = m_logger.doubleLogger(Level.TRACE, "theta/measurement");
+        m_log_theta_error = m_logger.doubleLogger(Level.TRACE, "theta/error");
+        m_log_theta_FB = m_logger.doubleLogger(Level.TRACE, "theta/fb");
+        m_log_omega_reference = m_logger.state100Logger(Level.TRACE, "omega/reference");
+        m_log_omega_measurement = m_logger.doubleLogger(Level.TRACE, "omega/measurement");
+        m_log_omega_error = m_logger.doubleLogger(Level.TRACE, "omega/error");
+        m_log_omega_FB = m_logger.doubleLogger(Level.TRACE, "omega/fb");
+        m_log_target = m_fieldLogger.doubleArrayLogger(Level.TRACE, "target");
+        m_log_ball = m_fieldLogger.doubleArrayLogger(Level.TRACE, "ball");
     }
 
     @Override
@@ -122,7 +148,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target);
-        m_logger.doubleLogger(Level.TRACE, "apparent motion").log( () -> targetMotion);
+        m_log_apparent_motion.log( () -> targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -137,16 +163,16 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        m_logger.state100Logger(Level.TRACE, "theta/setpoint").log( () -> m_thetaSetpoint);
-        m_logger.doubleLogger(Level.TRACE, "theta/measurement").log( () -> measurement);
-        m_logger.doubleLogger(Level.TRACE, "theta/error").log( m_thetaController::getPositionError);
-        m_logger.doubleLogger(Level.TRACE, "theta/fb").log( () -> thetaFB);
+        m_log_theta_setpoint.log( () -> m_thetaSetpoint);
+        m_log_theta_measurement.log( () -> measurement);
+        m_log_theta_error.log( m_thetaController::getPositionError);
+        m_log_theta_FB.log( () -> thetaFB);
 
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        m_logger.state100Logger(Level.TRACE, "omega/reference").log( () -> m_thetaSetpoint);
-        m_logger.doubleLogger(Level.TRACE, "omega/measurement").log( () -> headingRate);
-        m_logger.doubleLogger(Level.TRACE, "omega/error").log( m_omegaController::getPositionError);
-        m_logger.doubleLogger(Level.TRACE, "omega/fb").log( () -> omegaFB);
+        m_log_omega_reference.log( () -> m_thetaSetpoint);
+        m_log_omega_measurement.log( () -> headingRate);
+        m_log_omega_error.log( m_omegaController::getPositionError);
+        m_log_omega_FB.log( () -> omegaFB);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -158,7 +184,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
 
         // this name needs to be exactly "/field/target" for glass.
-        m_fieldLogger.doubleArrayLogger(Level.TRACE, "target").log( () -> new double[] {
+        m_log_target.log( () -> new double[] {
                 target.getX(),
                 target.getY(),
                 0 });
@@ -173,7 +199,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            m_fieldLogger.doubleArrayLogger(Level.TRACE, "ball").log( () -> new double[] {
+            m_log_ball.log( () -> new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

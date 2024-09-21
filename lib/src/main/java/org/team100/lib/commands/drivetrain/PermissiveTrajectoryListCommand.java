@@ -8,6 +8,7 @@ import java.util.function.Function;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -32,6 +33,8 @@ public class PermissiveTrajectoryListCommand extends Command100 {
     private final HolonomicFieldRelativeController m_controller;
     private final List<Function<Pose2d, Trajectory100>> m_trajectories;
     private final TrajectoryVisualization m_viz;
+    // LOGGERS
+    private final SwerveStateLogger m_log_reference;
 
     private Iterator<Function<Pose2d, Trajectory100>> m_trajectoryIter;
     private Trajectory100 m_currentTrajectory;
@@ -51,6 +54,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
         m_trajectories = trajectories;
         m_viz = viz;
         addRequirements(m_swerve);
+        m_log_reference = m_logger.swerveStateLogger(Level.TRACE, "reference");
     }
 
     @Override
@@ -92,7 +96,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
 
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            m_logger.swerveStateLogger(Level.TRACE, "reference").log( () -> reference);
+            m_log_reference.log(() -> reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
         } else {
@@ -108,7 +112,7 @@ public class PermissiveTrajectoryListCommand extends Command100 {
 
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            m_logger.swerveStateLogger(Level.TRACE, "reference").log( () -> reference);
+            m_log_reference.log(() -> reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }

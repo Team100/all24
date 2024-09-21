@@ -2,6 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -21,6 +22,7 @@ public class Veering extends Command100 {
     private final SwerveDriveSubsystem m_swerve;
     private final SquareWave m_square;
     private final Timer m_timer;
+    private final FieldRelativeVelocityLogger m_log_input;
 
     public Veering(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
         super(parent);
@@ -28,6 +30,7 @@ public class Veering extends Command100 {
         m_square = new SquareWave(kAmplitude, kPeriod);
         m_timer = new Timer();
         addRequirements(m_swerve);
+        m_log_input = m_logger.fieldRelativeVelocityLogger(Level.TRACE, "input");
     }
 
     @Override
@@ -41,7 +44,7 @@ public class Veering extends Command100 {
         double dx = m_square.applyAsDouble(time);
         FieldRelativeVelocity input = new FieldRelativeVelocity(dx, 0, kOmega);
         m_swerve.driveInFieldCoords(input, dt);
-        m_logger.fieldRelativeVelocityLogger(Level.TRACE, "input").log( () -> input);
+        m_log_input.log( () -> input);
     }
 
     @Override
