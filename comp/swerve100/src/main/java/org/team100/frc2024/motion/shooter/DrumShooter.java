@@ -67,8 +67,6 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private static final double kDriveReduction = 1;
     private static final double kWheelDiameterM = 0.1;
 
-    private final SupplierLogger2 m_logger;
-
     private final LinearVelocityServo leftRoller;
     private final LinearVelocityServo rightRoller;
     private final GravityServoInterface pivotServo;
@@ -86,10 +84,10 @@ public class DrumShooter extends SubsystemBase implements Glassy {
             int pivotID,
             double supplyLimit,
             double statorLimit) {
-        m_logger = parent.child(this);
-        m_log_left_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "left velocity");
-        m_log_right_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "right velocity");
-        m_log_pivot_angle = m_logger.optionalDoubleLogger(Level.TRACE, "pivot angle (rad)");
+        SupplierLogger2 child = parent.child(this);
+        m_log_left_velocity = child.optionalDoubleLogger(Level.TRACE, "left velocity");
+        m_log_right_velocity = child.optionalDoubleLogger(Level.TRACE, "right velocity");
+        m_log_pivot_angle = child.optionalDoubleLogger(Level.TRACE, "pivot angle (rad)");
 
         double period = 0.02;
         PIDController pivotController = new PIDController(4.5, 0.0, 0.000, period);
@@ -97,9 +95,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         pivotController.setIntegratorRange(0, 0.1);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
 
-        SupplierLogger2 leftLogger = m_logger.child("Left");
-        SupplierLogger2 rightLogger = m_logger.child("Right");
-        SupplierLogger2 pivotLogger = m_logger.child("Pivot");
+        SupplierLogger2 leftLogger = child.child("Left");
+        SupplierLogger2 rightLogger = child.child("Right");
+        SupplierLogger2 pivotLogger = child.child("Pivot");
 
         // we use velocityvoltage control so the P value here is volts per rev/s of the
         // motor. Typical rev/s is 50, so typical error might be 5, and for that we'd

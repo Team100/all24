@@ -11,7 +11,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ClimberDefault extends Command implements Glassy {
-    private final SupplierLogger2 m_logger;
     private final ClimberSubsystem m_climber;
     private final DoubleSupplier m_left;
     private final DoubleSupplier m_right;
@@ -25,9 +24,9 @@ public class ClimberDefault extends Command implements Glassy {
             ClimberSubsystem climber,
             DoubleSupplier leftSupplier,
             DoubleSupplier rightSupplier) {
-        m_logger = logger.child(this);
-        m_log_left_manual = m_logger.doubleLogger(Level.TRACE, "left manual");
-        m_log_right_manual = m_logger.doubleLogger(Level.TRACE, "right manual");
+        SupplierLogger2 child = logger.child(this);
+        m_log_left_manual = child.doubleLogger(Level.TRACE, "left manual");
+        m_log_right_manual = child.doubleLogger(Level.TRACE, "right manual");
         m_climber = climber;
         m_left = leftSupplier;
         m_right = rightSupplier;

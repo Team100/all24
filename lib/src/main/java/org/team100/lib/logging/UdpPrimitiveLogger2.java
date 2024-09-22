@@ -77,7 +77,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     private synchronized int getKey(UdpType type, String label) {
         int key = metadata.size() + 1;
         if (keys.contains(label))
-            throw new IllegalArgumentException("duplicate key " + key);
+            throw new IllegalArgumentException("duplicate label " + label);
         keys.add(label);
         metadata.add(new Metadata(key, type, label));
         return key;

@@ -47,8 +47,8 @@ public class DriveWithTrajectory extends Command100 {
             String fileName,
             TrajectoryVisualization viz) {
         super(parent);
-        m_log_chassis_speeds = m_logger.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
-
+        SupplierLogger2 child = parent.child(this);
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = drivetrain;
         m_controller = controller;
 

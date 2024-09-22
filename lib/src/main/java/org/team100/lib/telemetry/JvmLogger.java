@@ -18,7 +18,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * LoggedRobot.GcStatsCollector().
  */
 public class JvmLogger implements Glassy {
-    private final SupplierLogger2 m_logger;
     private final Map<String, Long> times;
     private final Map<String, Long> counts;
     // LOGGERS
@@ -29,14 +28,14 @@ public class JvmLogger implements Glassy {
     private final LongSupplierLogger2 m_log_gc_count;
 
     public JvmLogger(SupplierLogger2 parent) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         times = new HashMap<>();
         counts = new HashMap<>();
-        m_log_heap = m_logger.longLogger(Level.COMP, "MemoryUsage/heap");
-        m_log_nonheap = m_logger.longLogger(Level.COMP, "MemoryUsage/non-heap");
-        m_log_memory_total = m_logger.longLogger(Level.COMP, "MemoryPool/total");
-        m_log_gc_time = m_logger.longLogger(Level.TRACE, "GCTimeMS/total");
-        m_log_gc_count = m_logger.longLogger(Level.TRACE, "GCCounts/total");
+        m_log_heap = child.longLogger(Level.COMP, "MemoryUsage/heap");
+        m_log_nonheap = child.longLogger(Level.COMP, "MemoryUsage/non-heap");
+        m_log_memory_total = child.longLogger(Level.COMP, "MemoryPool/total");
+        m_log_gc_time = child.longLogger(Level.TRACE, "GCTimeMS/total");
+        m_log_gc_count = child.longLogger(Level.TRACE, "GCCounts/total");
     }
 
     /** This doesn't seem to ever log anything. */
@@ -58,8 +57,8 @@ public class JvmLogger implements Glassy {
         }
         long finalAccumTime = accumTime;
         long finalAccumCount = accumCount;
-        m_log_gc_time.log( () -> finalAccumTime);
-        m_log_gc_count.log( () -> finalAccumCount);
+        m_log_gc_time.log(() -> finalAccumTime);
+        m_log_gc_count.log(() -> finalAccumCount);
     }
 
     public void logMemoryPools() {
@@ -69,13 +68,13 @@ public class JvmLogger implements Glassy {
             accumUsage += usage.getUsed();
         }
         long finalAccumUsage = accumUsage;
-        m_log_memory_total.log( () -> finalAccumUsage);
+        m_log_memory_total.log(() -> finalAccumUsage);
     }
 
     public void logMemoryUsage() {
         MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
-        m_log_heap.log( () -> bean.getHeapMemoryUsage().getUsed());
-        m_log_nonheap.log( () -> bean.getNonHeapMemoryUsage().getUsed());
+        m_log_heap.log(() -> bean.getHeapMemoryUsage().getUsed());
+        m_log_nonheap.log(() -> bean.getNonHeapMemoryUsage().getUsed());
     }
 
     @Override

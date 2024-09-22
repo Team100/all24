@@ -44,14 +44,13 @@ public class RealFlight implements DriverControl {
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
 
-    private final SupplierLogger2 m_logger;
     private final GenericHID hid;
     private final EnumLogger m_log_speed;
 
     public RealFlight(SupplierLogger2 parent) {
         hid = new GenericHID(0);
-        m_logger = parent.child(this);
-        m_log_speed = m_logger.enumLogger(Level.TRACE, "control_speed");
+        SupplierLogger2 child = parent.child(this);
+        m_log_speed = child.enumLogger(Level.TRACE, "control_speed");
     }
 
     @Override

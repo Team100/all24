@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.Timer;
 public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSensor {
     private static final double kTwoPi = 2.0 * Math.PI;
 
-    protected final SupplierLogger2 m_logger;
     private final double m_positionOffset;
     private final EncoderDrive m_drive;
     // LOGGERS
@@ -34,13 +33,13 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
             SupplierLogger2 parent,
             double inputOffset,
             EncoderDrive drive) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_positionOffset = Util.inRange(inputOffset, 0.0, 1.0);
         m_drive = drive;
-        m_log_position = m_logger.optionalDoubleLogger(Level.TRACE, "position (rad)");
-        m_log_position_turns = m_logger.doubleLogger(Level.TRACE, "position (turns)");
-        m_log_position_turns_offset = m_logger.doubleLogger(Level.TRACE, "position (turns-offset)");
-        m_log_rate = m_logger.doubleLogger(Level.TRACE, "rate (rad)s)");
+        m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (rad)");
+        m_log_position_turns = child.doubleLogger(Level.TRACE, "position (turns)");
+        m_log_position_turns_offset = child.doubleLogger(Level.TRACE, "position (turns-offset)");
+        m_log_rate = child.doubleLogger(Level.TRACE, "rate (rad)s)");
     }
 
     protected abstract OptionalDouble getRatio();

@@ -36,14 +36,15 @@ public class FancyTrajectory extends Command100 {
     private final List<TimingConstraint> m_constraints;
 
     // LOGGERS
-    private final ChassisSpeedsLogger m_log_chassis_speeds; 
+    private final ChassisSpeedsLogger m_log_chassis_speeds;
 
     public FancyTrajectory(
             SupplierLogger2 parent,
             SwerveDriveSubsystem robotDrive,
             List<TimingConstraint> constraints) {
         super(parent);
-        m_log_chassis_speeds = m_logger.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
+        SupplierLogger2 child = parent.child(this);
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_robotDrive = robotDrive;
         m_controller = DriveMotionControllerFactory.fancyPIDF(parent);
         m_constraints = constraints;

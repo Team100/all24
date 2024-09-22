@@ -40,7 +40,6 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 class PanTiltOffsetTest {
     private static final double kDelta = 0.01;
-    private static final SupplierLogger2 m_logger = new TestLogger().getSupplierLogger();
 
     /**
      * Correct for offset but the offset is zero.
@@ -681,8 +680,8 @@ class PanTiltOffsetTest {
         Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(0, 0, -3.0 * Math.PI / 4.0);
 
         // CALCULATIONS
-
-        PoseEstimationHelper helper = new PoseEstimationHelper(m_logger);
+        SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+        PoseEstimationHelper helper = new PoseEstimationHelper(logger);
         Pose3d robotInFieldCoords = helper.getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
                 tagInFieldCoords,

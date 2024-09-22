@@ -65,15 +65,15 @@ public class ArmTrajectoryCommand extends Command100 {
             ArmKinematics armKinematicsM,
             Translation2d goal) {
         super(parent);
-
-        m_log_Lower_FF = m_logger.doubleLogger(Level.TRACE, "Lower FF");
-        m_log_Lower_Controller_Output = m_logger.doubleLogger(Level.TRACE, "Lower Controller Output");
-        m_log_Upper_FF = m_logger.doubleLogger(Level.TRACE, "Upper FF");
-        m_log_Upper_Controller_Output = m_logger.doubleLogger(Level.TRACE, "Upper Controller Output");
-        m_log_Lower_Ref = m_logger.doubleLogger(Level.TRACE, "Lower Ref");
-        m_log_Upper_Ref = m_logger.doubleLogger(Level.TRACE, "Upper Ref");
-        m_log_Output_Upper = m_logger.doubleLogger(Level.TRACE, "Output Upper");
-        m_log_Output_Lower = m_logger.doubleLogger(Level.TRACE, "Output Lower");
+        SupplierLogger2 child = parent.child(this);
+        m_log_Lower_FF = child.doubleLogger(Level.TRACE, "Lower FF");
+        m_log_Lower_Controller_Output = child.doubleLogger(Level.TRACE, "Lower Controller Output");
+        m_log_Upper_FF = child.doubleLogger(Level.TRACE, "Upper FF");
+        m_log_Upper_Controller_Output = child.doubleLogger(Level.TRACE, "Upper Controller Output");
+        m_log_Lower_Ref = child.doubleLogger(Level.TRACE, "Lower Ref");
+        m_log_Upper_Ref = child.doubleLogger(Level.TRACE, "Upper Ref");
+        m_log_Output_Upper = child.doubleLogger(Level.TRACE, "Output Upper");
+        m_log_Output_Lower = child.doubleLogger(Level.TRACE, "Output Lower");
 
         m_armSubsystem = armSubSystem;
         m_armKinematicsM = armKinematicsM;

@@ -21,7 +21,6 @@ import edu.wpi.first.math.interpolation.Interpolatable;
  * The buffer is never empty, so get() always returns *something*.
  */
 public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> implements Glassy {
-    private final SupplierLogger2 m_logger;
     private final double m_historyS;
     private final NavigableMap<Double, T> m_pastSnapshots = new ConcurrentSkipListMap<>();
 
@@ -37,12 +36,12 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
     private final StringSupplierLogger2 m_log_top;
 
     public TimeInterpolatableBuffer100(SupplierLogger2 parent, double historyS, double timeS, T initialValue) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_historyS = historyS;
         // no lock needed in constructor
         m_pastSnapshots.put(timeS, initialValue);
-        m_log_bottom = m_logger.stringLogger(Level.TRACE, "bottom");
-        m_log_top = m_logger.stringLogger(Level.TRACE, "top");
+        m_log_bottom = child.stringLogger(Level.TRACE, "bottom");
+        m_log_top = child.stringLogger(Level.TRACE, "top");
     }
 
     /**
@@ -107,13 +106,13 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         // Return the opposite bound if the other is null
         if (topBound == null) {
             String bottomValue = bottomBound.getValue().toString();
-            m_log_bottom.log( () -> bottomValue);
+            m_log_bottom.log(() -> bottomValue);
             // System.out.println("bottom " + bottomValue);
             return bottomBound.getValue();
         }
         if (bottomBound == null) {
             String topValue = topBound.getValue().toString();
-            m_log_top.log( () -> topValue);
+            m_log_top.log(() -> topValue);
             // System.out.println("top " + topValue);
             return topBound.getValue();
         }
@@ -124,9 +123,9 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         // difference between top and bottom bounds).
 
         String bottomValue = bottomBound.getValue().toString();
-        m_log_bottom.log( () -> bottomValue);
+        m_log_bottom.log(() -> bottomValue);
         String topValue = topBound.getValue().toString();
-        m_log_top.log( () -> topValue);
+        m_log_top.log(() -> topValue);
         double timeSinceBottom = timeSeconds - bottomBound.getKey();
         double timeSpan = topBound.getKey() - bottomBound.getKey();
         double timeFraction = timeSinceBottom / timeSpan;

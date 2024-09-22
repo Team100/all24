@@ -88,7 +88,6 @@ public class TalonSRXMotor implements BareMotor {
      */
     private static final double saturationVoltage = 11;
 
-    private final SupplierLogger2 m_logger;
     private final WPI_TalonSRX m_motor;
     // LOGGERS
     private final IntSupplierLogger2 m_log_id;
@@ -134,11 +133,11 @@ public class TalonSRXMotor implements BareMotor {
 
         m_motor.setSensorPhase(true);
 
-        m_logger = parent.child(this);
-        m_log_id = m_logger.intLogger(Level.TRACE, "Device ID");
-        m_log_encoder = m_logger.doubleLogger(Level.TRACE, "Encoder Value");
-        m_log_velocity = m_logger.doubleLogger(Level.TRACE, "Velocity Value");
-        m_log_output = m_logger.doubleLogger(Level.TRACE, "Output");
+        SupplierLogger2 child = parent.child(this);
+        m_log_id = child.intLogger(Level.TRACE, "Device ID");
+        m_log_encoder = child.doubleLogger(Level.TRACE, "Encoder Value");
+        m_log_velocity = child.doubleLogger(Level.TRACE, "Velocity Value");
+        m_log_output = child.doubleLogger(Level.TRACE, "Output");
     }
 
     public WPI_TalonSRX getMotor() {

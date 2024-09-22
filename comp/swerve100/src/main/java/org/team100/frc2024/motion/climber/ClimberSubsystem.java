@@ -79,7 +79,6 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      */
     private static final double kReduction = 45;
 
-    private final SupplierLogger2 m_logger;
     private final LimitedLinearMechanism m_left;
     private final LimitedLinearMechanism m_right;
 
@@ -90,17 +89,17 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     OptionalDoubleLogger m_log_right_velocity;
 
     public ClimberSubsystem(SupplierLogger2 parent, int leftClimberID, int rightClimberID) {
-        m_logger = parent.child(this);
-        m_log_left_position = m_logger.optionalDoubleLogger(Level.TRACE, "left position (m)");
-        m_log_right_position = m_logger.optionalDoubleLogger(Level.TRACE, "right position (m)");
-        m_log_left_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "left velocity (m_s)");
-        m_log_right_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "right velocity (m_s)");
+        SupplierLogger2 child = parent.child(this);
+        m_log_left_position = child.optionalDoubleLogger(Level.TRACE, "left position (m)");
+        m_log_right_position = child.optionalDoubleLogger(Level.TRACE, "right position (m)");
+        m_log_left_velocity = child.optionalDoubleLogger(Level.TRACE, "left velocity (m_s)");
+        m_log_right_velocity = child.optionalDoubleLogger(Level.TRACE, "right velocity (m_s)");
 
         Util.warn("\n**** Uncalibrated climber current limit!!!  FIX THIS FOR COMP! ****\n");
         Util.warn("\n**** Uncalibrated climber polarity!!!  FIX THIS FOR COMP! ****\n");
         Util.warn("\n**** Uncalibrated climber PID!!!  FIX THIS FOR COMP! ****\n");
-        SupplierLogger2 leftLogger = m_logger.child("left");
-        SupplierLogger2 rightLogger = m_logger.child("right");
+        SupplierLogger2 leftLogger = child.child("left");
+        SupplierLogger2 rightLogger = child.child("right");
         switch (Identity.instance) {
             case COMP_BOT -> {
                 m_left = comp(leftLogger, leftClimberID, MotorPhase.REVERSE);

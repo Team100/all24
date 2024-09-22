@@ -10,14 +10,13 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * Enforces a fixed limit on delta v.
  */
 public class CapsizeAccelerationLimiter implements Glassy {
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_limits;
     private final DoubleSupplierLogger2 m_log_s;
 
     public CapsizeAccelerationLimiter(SupplierLogger2 parent, SwerveKinodynamics limits) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_limits = limits;
-        m_log_s = m_logger.doubleLogger(Level.TRACE, "s");
+        m_log_s = child.doubleLogger(Level.TRACE, "s");
     }
 
     public double enforceCentripetalLimit(double dx, double dy, double kDtSec) {

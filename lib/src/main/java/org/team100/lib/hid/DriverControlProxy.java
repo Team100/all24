@@ -21,6 +21,7 @@ public class DriverControlProxy implements DriverControl {
 
     private String m_name;
     private DriverControl m_driverControl;
+    /** Used by the private factory method below. */
     private final SupplierLogger2 m_logger;
 
     /**

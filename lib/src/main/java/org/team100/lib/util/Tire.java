@@ -21,7 +21,6 @@ public class Tire implements Glassy {
     private static final double kDefaultSaturationM_s_s = 10.0;
     private static final double kDefaultSlipAtSaturation0_1 = 0.1;
 
-    private final SupplierLogger2 m_logger;
 
     private final double m_saturationM_s_s;
     private final double m_slipAtSaturation0_1;
@@ -39,14 +38,14 @@ public class Tire implements Glassy {
     Tire(SupplierLogger2 parent, double saturationM_s_s, double slip0_1) {
         m_saturationM_s_s = saturationM_s_s;
         m_slipAtSaturation0_1 = slip0_1;
-        m_logger = parent.child(this);
-        m_log_corner = m_logger.vector2dLogger(Level.TRACE, "corner M_s");
-        m_log_wheel = m_logger.vector2dLogger(Level.TRACE, "wheel M_s");
-        m_log_dtS = m_logger.doubleLogger(Level.COMP, "dtS");
-        m_log_desired = m_logger.vector2dLogger(Level.COMP, "desired accel M_s_s");
-        m_log_limited = m_logger.vector2dLogger(Level.COMP, "limited accel M_s_s");
-        m_log_actual = m_logger.vector2dLogger(Level.COMP, "actual M_s");
-        m_log_limit = m_logger.vector2dLogger(Level.COMP, "limit M_s_s");
+        SupplierLogger2 child = parent.child(this);
+        m_log_corner = child.vector2dLogger(Level.TRACE, "corner M_s");
+        m_log_wheel = child.vector2dLogger(Level.TRACE, "wheel M_s");
+        m_log_dtS = child.doubleLogger(Level.COMP, "dtS");
+        m_log_desired = child.vector2dLogger(Level.COMP, "desired accel M_s_s");
+        m_log_limited = child.vector2dLogger(Level.COMP, "limited accel M_s_s");
+        m_log_actual = child.vector2dLogger(Level.COMP, "actual M_s");
+        m_log_limit = child.vector2dLogger(Level.COMP, "limit M_s_s");
     }
 
     public static Tire noslip(SupplierLogger2 parent) {

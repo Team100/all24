@@ -65,8 +65,8 @@ public class DriveWithProfileNote extends Command100 {
             SwerveKinodynamics limits) {
         super(parent);
         m_fieldLogger = fieldLogger;
-
-        m_log_note_detected = m_logger.booleanLogger(Level.TRACE, "Note detected");
+        SupplierLogger2 child = parent.child(this);
+        m_log_note_detected = child.booleanLogger(Level.TRACE, "Note detected");
         m_log_target = m_fieldLogger.doubleArrayLogger(Level.TRACE, "target");
 
         m_intake = intake;

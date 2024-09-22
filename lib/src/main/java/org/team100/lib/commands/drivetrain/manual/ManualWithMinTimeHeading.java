@@ -33,7 +33,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     private static final double kDtSec = 0.02;
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
@@ -58,7 +57,6 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     Rotation2d m_goal = null;
     State100 m_thetaSetpoint = null;
 
-
     /**
      * 
      * @param parent
@@ -74,16 +72,16 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             Supplier<Rotation2d> desiredRotation) {
+        SupplierLogger2 child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;
         m_desiredRotation = desiredRotation;
-        m_logger = parent.child(this);
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
 
         // these parameters are total guesses
         m_controller = new MinTimeController(
-                parent,
+                child,
                 MathUtil::angleModulus,
                 15, // maxV
                 12, // switchingA
@@ -92,17 +90,17 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 0.01, // tolerance
                 0.1, // finish
                 new double[] { 5.0, 0.5 });
-        m_log_mode = m_logger.stringLogger(Level.TRACE, "mode");
-        m_log_goal_theta = m_logger.doubleLogger(Level.TRACE, "goal/theta");
-        m_log_setpoint_theta = m_logger.state100Logger(Level.TRACE, "setpoint/theta");
-        m_log_measurement_theta = m_logger.doubleLogger(Level.TRACE, "measurement/theta");
-        m_log_measurement_omega = m_logger.doubleLogger(Level.TRACE, "measurement/omega");
-        m_log_error_theta = m_logger.doubleLogger(Level.TRACE, "error/theta");
-        m_log_error_omega = m_logger.doubleLogger(Level.TRACE, "error/omega");
-        m_log_goal_error_theta = m_logger.doubleLogger(Level.TRACE, "goal_error/theta");
-        m_log_goal_error_omega = m_logger.doubleLogger(Level.TRACE, "goal_error/omega");
-        m_log_theta_FF = m_logger.doubleLogger(Level.TRACE, "thetaFF");
-        m_log_output_omega = m_logger.doubleLogger(Level.TRACE, "output/omega");
+        m_log_mode = child.stringLogger(Level.TRACE, "mode");
+        m_log_goal_theta = child.doubleLogger(Level.TRACE, "goal/theta");
+        m_log_setpoint_theta = child.state100Logger(Level.TRACE, "setpoint/theta");
+        m_log_measurement_theta = child.doubleLogger(Level.TRACE, "measurement/theta");
+        m_log_measurement_omega = child.doubleLogger(Level.TRACE, "measurement/omega");
+        m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
+        m_log_error_omega = child.doubleLogger(Level.TRACE, "error/omega");
+        m_log_goal_error_theta = child.doubleLogger(Level.TRACE, "goal_error/theta");
+        m_log_goal_error_omega = child.doubleLogger(Level.TRACE, "goal_error/omega");
+        m_log_theta_FF = child.doubleLogger(Level.TRACE, "thetaFF");
+        m_log_output_omega = child.doubleLogger(Level.TRACE, "output/omega");
     }
 
     public void reset(Pose2d currentPose) {
@@ -159,7 +157,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
-            m_log_mode.log( () -> "free");
+            m_log_mode.log(() -> "free");
             // desaturate to feasibility
             return m_swerveKinodynamics.analyticDesaturation(twistM_S);
         }
@@ -199,17 +197,17 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
-        m_log_mode.log( () -> "snap");
-        m_log_goal_theta.log( () -> m_goal.getRadians());
-        m_log_setpoint_theta.log( () -> m_thetaSetpoint);
-        m_log_measurement_theta.log( () -> yawMeasurement);
-        m_log_measurement_omega.log( () -> yawRate);
-        m_log_error_theta.log( () -> m_thetaSetpoint.x() - yawMeasurement);
+        m_log_mode.log(() -> "snap");
+        m_log_goal_theta.log(() -> m_goal.getRadians());
+        m_log_setpoint_theta.log(() -> m_thetaSetpoint);
+        m_log_measurement_theta.log(() -> yawMeasurement);
+        m_log_measurement_omega.log(() -> yawRate);
+        m_log_error_theta.log(() -> m_thetaSetpoint.x() - yawMeasurement);
         m_log_error_omega.log(() -> m_thetaSetpoint.v() - yawRate);
-        m_log_goal_error_theta.log( () -> m_thetaSetpoint.x() - goalState.x());
-        m_log_goal_error_omega.log( () -> m_thetaSetpoint.v() - goalState.v());
-        m_log_theta_FF.log( () -> thetaFF);
-        m_log_output_omega.log( () -> omega);
+        m_log_goal_error_theta.log(() -> m_thetaSetpoint.x() - goalState.x());
+        m_log_goal_error_omega.log(() -> m_thetaSetpoint.v() - goalState.v());
+        m_log_theta_FF.log(() -> thetaFF);
+        m_log_output_omega.log(() -> omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

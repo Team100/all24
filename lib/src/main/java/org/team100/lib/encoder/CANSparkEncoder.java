@@ -14,7 +14,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * per turn.
  */
 public class CANSparkEncoder implements IncrementalBareEncoder {
-    private final SupplierLogger2 m_logger;
     private final CANSparkMotor m_motor;
     // LOGGERS
     private final OptionalDoubleLogger m_log_position;
@@ -23,10 +22,10 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
     public CANSparkEncoder(
             SupplierLogger2 parent,
             CANSparkMotor motor) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_motor = motor;
-        m_log_position = m_logger.optionalDoubleLogger(Level.TRACE, "position (rad)");
-        m_log_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
+        m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (rad)");
+        m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
     // /** Position in meters. */

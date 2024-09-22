@@ -20,14 +20,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public class SteeringRateLimiter implements Glassy {
     private static final int kMaxIterations = 10;
 
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_limits;
     private final DoubleSupplierLogger2 m_log_s;
 
     public SteeringRateLimiter(SupplierLogger2 parent, SwerveKinodynamics limits) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_limits = limits;
-        m_log_s = m_logger.doubleLogger(Level.TRACE, "s");
+        m_log_s = child.doubleLogger(Level.TRACE, "s");
     }
 
     public double enforceSteeringLimit(

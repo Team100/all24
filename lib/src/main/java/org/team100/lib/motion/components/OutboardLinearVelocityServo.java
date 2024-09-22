@@ -11,7 +11,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import edu.wpi.first.wpilibj.Timer;
 
 public class OutboardLinearVelocityServo implements LinearVelocityServo {
-    private final SupplierLogger2 m_logger;
     private final LinearMechanism m_motor;
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_setpoint_v;
@@ -27,12 +26,12 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     public OutboardLinearVelocityServo(
             SupplierLogger2 parent,
             LinearMechanism motor) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_motor = motor;
-        m_log_setpoint_v = m_logger.doubleLogger(Level.TRACE, "setpoint v (m_s)");
-        m_log_setpoint_a = m_logger.doubleLogger(Level.TRACE, "setpoint a (m_s2)");
-        m_log_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "velocity (m_s)");
-        m_log_position = m_logger.optionalDoubleLogger(Level.TRACE, "position (m)");
+        m_log_setpoint_v = child.doubleLogger(Level.TRACE, "setpoint v (m_s)");
+        m_log_setpoint_a = child.doubleLogger(Level.TRACE, "setpoint a (m_s2)");
+        m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (m_s)");
+        m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (m)");
     }
 
     @Override

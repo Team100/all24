@@ -54,7 +54,8 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
             double shooterScale,
             TrajectoryVisualization viz) {
         super(parent);
-        m_log_chassis_speeds = m_logger.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
+        SupplierLogger2 child = parent.child(this);
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = swerve;
         m_goalTranslation = goalTranslation;
         m_controller = controller;

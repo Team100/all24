@@ -29,8 +29,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * lower it here.
  */
 public class SwerveKinodynamics implements Glassy {
-    private final SupplierLogger2 m_logger;
-
     // geometry
     private final double m_fronttrack;
     private final double m_backtrack;
@@ -85,7 +83,6 @@ public class SwerveKinodynamics implements Glassy {
             double frontoffset,
             double vcg,
             Tire tire) {
-        m_logger = parent.child(this);
         if (track < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -142,7 +139,6 @@ public class SwerveKinodynamics implements Glassy {
             double frontoffset,
             double vcg,
             Tire tire) {
-        m_logger = parent.child(this);
         if (fronttrack < 0.1 || backtrack < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -427,12 +423,13 @@ public class SwerveKinodynamics implements Glassy {
     }
 
     public SwerveDrivePoseEstimator100 newPoseEstimator(
+            SupplierLogger2 parent,
             Rotation2d gyroAngle,
             SwerveModulePosition100[] modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
         return new SwerveDrivePoseEstimator100(
-                m_logger,
+                parent,
                 this,
                 gyroAngle,
                 modulePositions,

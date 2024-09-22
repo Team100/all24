@@ -42,8 +42,9 @@ public class ShootSmartWithRotation extends Command100 {
             ManualWithShooterLock driver,
             Supplier<DriverControl.Velocity> twistSupplier) {
         super(parent);
-        m_log_angle = m_logger.doubleLogger(Level.TRACE, "angle");
-        m_log_realangle = m_logger.doubleLogger(Level.TRACE, "realangle");
+        SupplierLogger2 child = parent.child(this);
+        m_log_angle = child.doubleLogger(Level.TRACE, "angle");
+        m_log_realangle = child.doubleLogger(Level.TRACE, "realangle");
         m_shooter = shooter;
         m_drive = drive;
         m_intake = intake;

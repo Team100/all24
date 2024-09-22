@@ -27,7 +27,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 public class SlipperyTireUtil implements Glassy {
     /** Clip corner speeds to this. */
     private static final double kMaxSpeedM_s = 5.0;
-    private final SupplierLogger2 m_logger;
 
     private final Tire m_tire;
 
@@ -37,10 +36,10 @@ public class SlipperyTireUtil implements Glassy {
 
     public SlipperyTireUtil(SupplierLogger2 parent, Tire tire) {
         m_tire = tire;
-        m_logger = parent.child(this);
-        m_log_pose0x = m_logger.doubleLogger(Level.TRACE, "pose0x");
-        m_log_pose1x = m_logger.doubleLogger(Level.TRACE, "pose1x");
-        m_log_twistdx = m_logger.doubleLogger(Level.TRACE, "twistdx");
+        SupplierLogger2 child = parent.child(this);
+        m_log_pose0x = child.doubleLogger(Level.TRACE, "pose0x");
+        m_log_pose1x = child.doubleLogger(Level.TRACE, "pose1x");
+        m_log_twistdx = child.doubleLogger(Level.TRACE, "twistdx");
     }
 
     /**

@@ -26,7 +26,6 @@ public class Intake extends SubsystemBase implements Glassy {
     private static final double kWheelDiameterM = 0.05;
     private static final int kCurrentLimit = 20;
 
-    private final SupplierLogger2 m_logger;
     private final SensorInterface m_sensors;
 
     // this uses PWMSparkMax instead of PWM to get MotorSafety.
@@ -43,11 +42,10 @@ public class Intake extends SubsystemBase implements Glassy {
     private int currentCount = 0;
 
     public Intake(SupplierLogger2 parent, SensorInterface sensors) {
-        m_logger = parent.child(this);
-
-        m_log_lower = m_logger.doubleLogger(Level.TRACE, "lower");
-        m_log_upper = m_logger.optionalDoubleLogger(Level.TRACE, "upper");
-        m_log_centering = m_logger.doubleLogger(Level.TRACE, "centering");
+        SupplierLogger2 child = parent.child(this);
+        m_log_lower = child.doubleLogger(Level.TRACE, "lower");
+        m_log_upper = child.optionalDoubleLogger(Level.TRACE, "upper");
+        m_log_centering = child.doubleLogger(Level.TRACE, "centering");
 
         m_sensors = sensors;
 
@@ -56,7 +54,7 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_intake = new PWMSparkMax(1);
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedNeoVelocityServo(
-                        m_logger.child("Super Roller"),
+                        child.child("Super Roller"),
                         5,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
@@ -73,7 +71,7 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_intake = new PWMSparkMax(1);
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
-                        m_logger.child("Super Roller"),
+                        child.child("Super Roller"),
                         kGearRatio,
                         kWheelDiameterM,
                         kMaxVelocity,

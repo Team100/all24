@@ -48,7 +48,6 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
             new SwerveModuleState100(0, Optional.of(new Rotation2d(-3 * Math.PI / 4)))
     };
 
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final SwerveModuleCollection m_modules;
     private final AsymSwerveSetpointGenerator m_SwerveSetpointGenerator;
@@ -63,14 +62,14 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
             SupplierLogger2 parent,
             SwerveKinodynamics swerveKinodynamics,
             SwerveModuleCollection modules) {
-        m_logger = parent.child(this);
-        m_log_desired = parent.chassisSpeedsLogger(Level.TRACE, "desired chassis speed");
-        m_log_setpoint_delta = parent.chassisSpeedsLogger(Level.TRACE, "setpoint delta");
-        m_log_prev_setpoint = parent.chassisSpeedsLogger(Level.TRACE, "prevSetpoint chassis speed");
-        m_log_setpoint = parent.chassisSpeedsLogger(Level.TRACE, "setpoint chassis speed");
+        SupplierLogger2 child = parent.child(this);
+        m_log_desired = child.chassisSpeedsLogger(Level.TRACE, "desired chassis speed");
+        m_log_setpoint_delta = child.chassisSpeedsLogger(Level.TRACE, "setpoint delta");
+        m_log_prev_setpoint = child.chassisSpeedsLogger(Level.TRACE, "prevSetpoint chassis speed");
+        m_log_setpoint = child.chassisSpeedsLogger(Level.TRACE, "setpoint chassis speed");
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
-        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(m_logger, m_swerveKinodynamics);
+        m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(child, m_swerveKinodynamics);
         prevSetpoint = new SwerveSetpoint();
     }
 

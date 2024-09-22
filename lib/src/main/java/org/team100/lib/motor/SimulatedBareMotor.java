@@ -8,7 +8,6 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.math.MathUtil;
 
 public class SimulatedBareMotor implements BareMotor {
-    private final SupplierLogger2 m_logger;
     private final double m_freeSpeedRad_S;
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_duty;
@@ -17,10 +16,10 @@ public class SimulatedBareMotor implements BareMotor {
     private double m_velocity = 0;
 
     public SimulatedBareMotor(SupplierLogger2 parent, double freeSpeedRad_S) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_freeSpeedRad_S = freeSpeedRad_S;
-        m_log_duty = m_logger.doubleLogger(Level.TRACE, "duty_cycle");
-        m_log_velocity = m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)");
+        m_log_duty = child.doubleLogger(Level.TRACE, "duty_cycle");
+        m_log_velocity = child.doubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
     @Override

@@ -17,15 +17,14 @@ import edu.wpi.first.math.geometry.Pose2d;
  * The input is a twist, so the output is just scaled.
  */
 public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     // LOGGERS
     private final FieldRelativeVelocityLogger m_log_twist;
 
     public ManualFieldRelativeSpeeds(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
+        SupplierLogger2 child = parent.child(this);
+        m_log_twist = child.fieldRelativeVelocityLogger(Level.TRACE, "twist");
         m_swerveKinodynamics = swerveKinodynamics;
-        m_logger = parent.child(this);
-        m_log_twist = m_logger.fieldRelativeVelocityLogger(Level.TRACE, "twist");
     }
 
     /**

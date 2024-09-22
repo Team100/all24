@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleObjArraySupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,15 +16,14 @@ public class ForceViz {
     // see simgui.json for these names
     private static final double kScale = 0.5;
 
-    private final SupplierLogger2 m_logger = Telemetry.get().fieldLogger();
     private final List<Double> m_tactics = new ArrayList<>();
     private final List<Double> m_desired = new ArrayList<>();
     private final DoubleObjArraySupplierLogger2 m_log_tactics;
     private final DoubleObjArraySupplierLogger2 m_log_desired;
 
-    public ForceViz() {
-        m_log_tactics = m_logger.doubleObjArrayLogger(Level.DEBUG, "tactics");
-        m_log_desired = m_logger.doubleObjArrayLogger(Level.DEBUG, "desired");
+    public ForceViz(SupplierLogger2 fieldLogger) {
+        m_log_tactics = fieldLogger.doubleObjArrayLogger(Level.DEBUG, "tactics");
+        m_log_desired = fieldLogger.doubleObjArrayLogger(Level.DEBUG, "desired");
 
     }
 

@@ -31,7 +31,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Rotation uses simple full-state feedback and that's all..
  */
 public class ManualWithFullStateHeading implements FieldRelativeDriver {
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
@@ -72,24 +71,24 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
             Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             double[] k) {
+        SupplierLogger2 child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;
         m_desiredRotation = desiredRotation;
-        m_logger = parent.child(this);
         m_K = k;
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
-        m_log_mode = m_logger.stringLogger(Level.TRACE, "mode");
-        m_log_goal_theta = m_logger.doubleLogger(Level.TRACE, "goal/theta");
-        m_log_setpoint_theta = m_logger.state100Logger(Level.TRACE, "setpoint/theta");
-        m_log_measurement_theta = m_logger.doubleLogger(Level.TRACE, "measurement/theta");
-        m_log_measurement_omega = m_logger.doubleLogger(Level.TRACE, "measurement/omega");
-        m_log_error_theta = m_logger.doubleLogger(Level.TRACE, "error/theta");
-        m_log_error_omega = m_logger.doubleLogger(Level.TRACE, "error/omega");
-        m_log_theta_FF = m_logger.doubleLogger(Level.TRACE, "thetaFF");
-        m_log_theta_FB = m_logger.doubleLogger(Level.TRACE, "thetaFB");
-        m_log_omega_FB = m_logger.doubleLogger(Level.TRACE, "omegaFB");
-        m_log_output_omega = m_logger.doubleLogger(Level.TRACE, "output/omega");
+        m_log_mode = child.stringLogger(Level.TRACE, "mode");
+        m_log_goal_theta = child.doubleLogger(Level.TRACE, "goal/theta");
+        m_log_setpoint_theta = child.state100Logger(Level.TRACE, "setpoint/theta");
+        m_log_measurement_theta = child.doubleLogger(Level.TRACE, "measurement/theta");
+        m_log_measurement_omega = child.doubleLogger(Level.TRACE, "measurement/omega");
+        m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
+        m_log_error_omega = child.doubleLogger(Level.TRACE, "error/omega");
+        m_log_theta_FF = child.doubleLogger(Level.TRACE, "thetaFF");
+        m_log_theta_FB = child.doubleLogger(Level.TRACE, "thetaFB");
+        m_log_omega_FB = child.doubleLogger(Level.TRACE, "omegaFB");
+        m_log_output_omega = child.doubleLogger(Level.TRACE, "output/omega");
     }
 
     public void reset(Pose2d currentPose) {

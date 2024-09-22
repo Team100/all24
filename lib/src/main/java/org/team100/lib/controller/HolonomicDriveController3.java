@@ -18,7 +18,6 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Drivetrain control with three independent PID controllers.
  */
 public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
-    private final SupplierLogger2 m_logger;
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
@@ -47,18 +46,18 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_xController = xController;
         m_yController = yController;
         m_thetaController = thetaController;
-        m_logger = parent.child(this);
-        m_log_reference = m_logger.swerveStateLogger(Level.TRACE, "reference");
-        m_log_u_FB_x = m_logger.doubleLogger(Level.TRACE, "u_FB/x");
-        m_log_u_FB_y = m_logger.doubleLogger(Level.TRACE, "u_FB/y");
-        m_log_u_FB_theta = m_logger.doubleLogger(Level.TRACE, "u_FB/theta");
-        m_log_measurement = m_logger.pose2dLogger(Level.TRACE, "measurement");
-        m_log_setpoint_x = m_logger.doubleLogger(Level.TRACE, "setpoint/x");
-        m_log_setpoint_y = m_logger.doubleLogger(Level.TRACE, "setpoint/y");
-        m_log_setpoint_theta = m_logger.doubleLogger(Level.TRACE, "setpoint/theta");
-        m_log_error_x = m_logger.doubleLogger(Level.TRACE, "error/x");
-        m_log_error_y = m_logger.doubleLogger(Level.TRACE, "error/y");
-        m_log_error_theta = m_logger.doubleLogger(Level.TRACE, "error/theta");
+        SupplierLogger2 child = parent.child(this);
+        m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");
+        m_log_u_FB_x = child.doubleLogger(Level.TRACE, "u_FB/x");
+        m_log_u_FB_y = child.doubleLogger(Level.TRACE, "u_FB/y");
+        m_log_u_FB_theta = child.doubleLogger(Level.TRACE, "u_FB/theta");
+        m_log_measurement = child.pose2dLogger(Level.TRACE, "measurement");
+        m_log_setpoint_x = child.doubleLogger(Level.TRACE, "setpoint/x");
+        m_log_setpoint_y = child.doubleLogger(Level.TRACE, "setpoint/y");
+        m_log_setpoint_theta = child.doubleLogger(Level.TRACE, "setpoint/theta");
+        m_log_error_x = child.doubleLogger(Level.TRACE, "error/x");
+        m_log_error_y = child.doubleLogger(Level.TRACE, "error/y");
+        m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
     }
 
     public static HolonomicDriveController3 withTolerance(

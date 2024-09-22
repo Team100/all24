@@ -38,7 +38,6 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
      */
     private static final double kIndexerVelocityM_S = 5;
 
-    private final SupplierLogger2 m_logger;
     private final LimitedLinearVelocityServo m_servo;
     private final PIDConstants m_velocityConstants;
     private final Feedforward100 m_lowLevelFeedforwardConstants;
@@ -47,7 +46,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
     // DigitalInput beamBreak2;
 
     public IndexerSubsystem(SupplierLogger2 parent, int driveID) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_velocityConstants = new PIDConstants(0.0001, 0, 0);
         m_lowLevelFeedforwardConstants = Feedforward100.makeNeo();
 
@@ -58,7 +57,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
                 // beamBreak2 = new DigitalInput(8);
 
                 m_servo = ServoFactory.limitedNeoVelocityServo(
-                        m_logger,
+                        child,
                         driveID,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
@@ -73,7 +72,7 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
             case BLANK:
             default:
                 m_servo = ServoFactory.limitedSimulatedVelocityServo(
-                        m_logger,
+                        child,
                         kGearRatio,
                         kWheelDiameterM,
                         kMaxVelocity,

@@ -46,7 +46,6 @@ public class DriverXboxControl implements DriverControl {
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
 
-    private final SupplierLogger2 m_logger;
     private final XboxController m_controller;
     private final DoubleSupplierLogger2 m_log_right_y;
     private final DoubleSupplierLogger2 m_log_right_x;
@@ -57,11 +56,11 @@ public class DriverXboxControl implements DriverControl {
 
     public DriverXboxControl(SupplierLogger2 parent) {
         m_controller = new XboxController(0);
-        m_logger = parent.child(this);
-        m_log_right_y = m_logger.doubleLogger(Level.TRACE, "Xbox/right y");
-        m_log_right_x = m_logger.doubleLogger(Level.TRACE, "Xbox/right x");
-        m_log_left_x = m_logger.doubleLogger(Level.TRACE, "Xbox/left x");
-        m_log_speed = m_logger.enumLogger(Level.TRACE, "control_speed");
+        SupplierLogger2 child = parent.child(this);
+        m_log_right_y = child.doubleLogger(Level.TRACE, "Xbox/right y");
+        m_log_right_x = child.doubleLogger(Level.TRACE, "Xbox/right x");
+        m_log_left_x = child.doubleLogger(Level.TRACE, "Xbox/left x");
+        m_log_speed = child.enumLogger(Level.TRACE, "control_speed");
     }
 
     @Override

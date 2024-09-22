@@ -45,12 +45,13 @@ public class FullStateTrajectoryListCommand extends Command100 {
             Function<Pose2d, List<Trajectory100>> trajectories,
             TrajectoryVisualization viz) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
         m_controller = new FullStateDriveController();
         m_trajectories = trajectories;
         m_viz = viz;
         addRequirements(m_swerve);
-        m_log_reference = m_logger.swerveStateLogger(Level.TRACE, "reference");
+        m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");
     }
 
     @Override

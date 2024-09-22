@@ -18,15 +18,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * corresponding ChassisSpeeds components (and scaled).
  */
 public class ManualChassisSpeeds implements ChassisSpeedDriver {
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     // LOGGERS
     private final ChassisSpeedsLogger m_log_chassis_speeds;
 
     public ManualChassisSpeeds(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
-        m_log_chassis_speeds = parent.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
+        SupplierLogger2 child = parent.child(this);
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerveKinodynamics = swerveKinodynamics;
-        m_logger = parent.child(this);
     }
 
     /**

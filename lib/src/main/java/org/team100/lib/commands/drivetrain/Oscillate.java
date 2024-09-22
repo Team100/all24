@@ -57,6 +57,7 @@ public class Oscillate extends Command100 {
 
     public Oscillate(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
         m_period = 4 * kMaxSpeed / kAccel;
         m_square = new SquareWave(kAccel, m_period);
@@ -64,13 +65,13 @@ public class Oscillate extends Command100 {
         m_parabola = new ParabolicWave(kMaxSpeed * m_period / 4, m_period);
         m_timer = new Timer();
         addRequirements(m_swerve);
-        m_log_period = m_logger.doubleLogger(Level.TRACE, "period");
-        m_log_time = m_logger.doubleLogger(Level.TRACE, "time");
-        m_log_setpoint_accel = m_logger.doubleLogger(Level.TRACE, "setpoint/accel");
-        m_log_setpoint_speed = m_logger.doubleLogger(Level.TRACE, "setpoint/speed");
-        m_log_setpoint_position = m_logger.doubleLogger(Level.TRACE, "setpoint/position");
-        m_log_measurement_speed = m_logger.doubleLogger(Level.TRACE, "measurement/speed");
-        m_log_measurement_position = m_logger.doubleLogger(Level.TRACE, "measurement/position");
+        m_log_period = child.doubleLogger(Level.TRACE, "period");
+        m_log_time = child.doubleLogger(Level.TRACE, "time");
+        m_log_setpoint_accel = child.doubleLogger(Level.TRACE, "setpoint/accel");
+        m_log_setpoint_speed = child.doubleLogger(Level.TRACE, "setpoint/speed");
+        m_log_setpoint_position = child.doubleLogger(Level.TRACE, "setpoint/position");
+        m_log_measurement_speed = child.doubleLogger(Level.TRACE, "measurement/speed");
+        m_log_measurement_position = child.doubleLogger(Level.TRACE, "measurement/position");
     }
 
     public double getPeriod() {

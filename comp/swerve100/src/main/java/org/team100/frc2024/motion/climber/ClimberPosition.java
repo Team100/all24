@@ -15,7 +15,6 @@ public class ClimberPosition extends Command implements Glassy {
 
     private final LinearPositionServo m_leftServo;
     private final LinearPositionServo m_rightServo;
-    private final SupplierLogger2 m_logger;
     private final ClimberSubsystem m_climber;
     private final double m_goalM;
 
@@ -23,17 +22,17 @@ public class ClimberPosition extends Command implements Glassy {
             SupplierLogger2 logger,
             double goalM,
             ClimberSubsystem climber) {
-        m_logger = logger.child(this);
+        SupplierLogger2 child = logger.child(this);
         m_goalM = goalM;
         m_climber = climber;
         m_leftServo = new OnboardLinearDutyCyclePositionServo(
-                m_logger,
+                child,
                 m_climber.getLeft(),
                 new PIDController(0.1, 0, 0),
                 0.02,
                 new TrapezoidProfile100(0.02, 0.1, 0.01));
         m_rightServo = new OnboardLinearDutyCyclePositionServo(
-                m_logger,
+                child,
                 m_climber.getRight(),
                 new PIDController(0.1, 0, 0),
                 0.02,

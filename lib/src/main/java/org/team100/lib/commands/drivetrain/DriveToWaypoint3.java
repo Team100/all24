@@ -68,15 +68,16 @@ public class DriveToWaypoint3 extends Command100 {
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
         m_goal = goal;
         m_swerve = drivetrain;
         m_trajectories = trajectories;
         m_controller = controller;
         m_viz = viz;
         addRequirements(m_swerve);
-        m_log_desired = m_logger.pose2dLogger(Level.TRACE, "Desired");
-        m_log_aligned = m_logger.booleanLogger(Level.TRACE, "Aligned");
-        m_log_pose = m_logger.pose2dLogger(Level.TRACE, "Pose");
+        m_log_desired = child.pose2dLogger(Level.TRACE, "Desired");
+        m_log_aligned = child.booleanLogger(Level.TRACE, "Aligned");
+        m_log_pose = child.pose2dLogger(Level.TRACE, "Pose");
     }
 
     @Override
@@ -104,7 +105,7 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            m_log_desired.log( () -> desiredState.state().getPose());
+            m_log_desired.log(() -> desiredState.state().getPose());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -123,7 +124,7 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            m_log_desired.log( () -> desiredState.state().getPose());
+            m_log_desired.log(() -> desiredState.state().getPose());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -131,9 +132,9 @@ public class DriveToWaypoint3 extends Command100 {
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
 
-        m_log_aligned.log( () -> m_steeringAligned);
+        m_log_aligned.log(() -> m_steeringAligned);
 
-        m_log_pose.log( () -> m_swerve.getState().pose());
+        m_log_pose.log(() -> m_swerve.getState().pose());
     }
 
     @Override

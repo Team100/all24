@@ -45,7 +45,6 @@ public class HomeClimber extends Command implements Glassy {
     /** Wait 0.5s to stop moving. */
     private static final double kHomeTimeS = 0.2;
 
-    private final SupplierLogger2 m_logger;
     private final ClimberSubsystem m_climber;
     private final Timer100 m_leftStart;
     private final Timer100 m_leftDone;
@@ -58,14 +57,12 @@ public class HomeClimber extends Command implements Glassy {
     private final DoubleSupplierLogger2 m_log_left_done_timer_s;
     private final DoubleSupplierLogger2 m_log_right_done_timer_s;
 
-    public HomeClimber(
-            SupplierLogger2 logger,
-            ClimberSubsystem climber) {
-        m_logger = logger.child(this);
-        m_log_left_start_timer_s = m_logger.doubleLogger(Level.TRACE, "left start timer (s)");
-        m_log_right_start_timer_s = m_logger.doubleLogger(Level.TRACE, "right start timer (s)");
-        m_log_left_done_timer_s = m_logger.doubleLogger(Level.TRACE, "left done timer (s)");
-        m_log_right_done_timer_s = m_logger.doubleLogger(Level.TRACE, "right done timer (s)");
+    public HomeClimber(SupplierLogger2 logger, ClimberSubsystem climber) {
+        SupplierLogger2 child = logger.child(this);
+        m_log_left_start_timer_s = child.doubleLogger(Level.TRACE, "left start timer (s)");
+        m_log_right_start_timer_s = child.doubleLogger(Level.TRACE, "right start timer (s)");
+        m_log_left_done_timer_s = child.doubleLogger(Level.TRACE, "left done timer (s)");
+        m_log_right_done_timer_s = child.doubleLogger(Level.TRACE, "right done timer (s)");
 
         m_climber = climber;
         m_leftStart = new Timer100();

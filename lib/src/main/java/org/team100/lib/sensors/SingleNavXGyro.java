@@ -57,8 +57,6 @@ public class SingleNavXGyro implements Gyro {
      */
     private static final int kSPIBitRateHz = 500000;
 
-    private final SupplierLogger2 m_logger;
-
     // TODO: remove this if it's not useful
     // private final AHRS100 m_ahrs;
     private final AHRS m_ahrs;
@@ -89,8 +87,7 @@ public class SingleNavXGyro implements Gyro {
      * NOTE: the async is just for logging, maybe don't use a whole thread for it.
      */
     public SingleNavXGyro(SupplierLogger2 parent, Async async) {
-
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
         // much CPU?
@@ -139,15 +136,15 @@ public class SingleNavXGyro implements Gyro {
 
         m_ahrs.zeroYaw();
         async.addPeriodic(this::logStuff, 1, "SingleNavXGyro");
-        m_log_heading = m_logger.doubleLogger(Level.TRACE, "Heading NWU (rad)");
-        m_log_heading_rate = m_logger.doubleLogger(Level.TRACE, "Heading Rate NWU (rad_s)");
-        m_log_pitch = m_logger.doubleLogger(Level.TRACE, "Pitch NWU (rad)");
-        m_log_roll = m_logger.doubleLogger(Level.TRACE, "Roll NWU (rad)");
-        m_log_yaw_deg = m_logger.doubleLogger(Level.TRACE, "Yaw NED (deg)");
-        m_log_pitch_deg = m_logger.doubleLogger(Level.TRACE, "Pitch (deg)");
-        m_log_roll_deg = m_logger.doubleLogger(Level.TRACE, "Roll (deg)");
-        m_log_yaw_rate_deg = m_logger.doubleLogger(Level.TRACE, "Rate NED (deg_s)");
-        m_log_connected = m_logger.booleanLogger(Level.TRACE, "Connected");
+        m_log_heading = child.doubleLogger(Level.TRACE, "Heading NWU (rad)");
+        m_log_heading_rate = child.doubleLogger(Level.TRACE, "Heading Rate NWU (rad_s)");
+        m_log_pitch = child.doubleLogger(Level.TRACE, "Pitch NWU (rad)");
+        m_log_roll = child.doubleLogger(Level.TRACE, "Roll NWU (rad)");
+        m_log_yaw_deg = child.doubleLogger(Level.TRACE, "Yaw NED (deg)");
+        m_log_pitch_deg = child.doubleLogger(Level.TRACE, "Pitch (deg)");
+        m_log_roll_deg = child.doubleLogger(Level.TRACE, "Roll (deg)");
+        m_log_yaw_rate_deg = child.doubleLogger(Level.TRACE, "Rate NED (deg_s)");
+        m_log_connected = child.booleanLogger(Level.TRACE, "Connected");
 
     }
 

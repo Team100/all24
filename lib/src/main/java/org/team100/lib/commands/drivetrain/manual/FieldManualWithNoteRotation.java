@@ -48,8 +48,6 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
      */
     private static final double kRotationSpeed = 0.5;
 
-    private final SupplierLogger2 m_fieldLogger;
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     private final Supplier<Optional<Translation2d>> m_target;
@@ -85,19 +83,18 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
             PIDController thetaController,
             PIDController omegaController,
             BooleanSupplier trigger) {
-        m_fieldLogger = fieldLogger;
-        m_log_target = m_fieldLogger.doubleArrayLogger(Level.TRACE, "target");
-        m_log_ball = m_fieldLogger.doubleArrayLogger(Level.TRACE, "ball");
-        m_logger = parent.child(this);
-        m_log_apparent_motion = m_logger.doubleLogger(Level.TRACE, "apparent motion");
-        m_log_theta_setpoint = m_logger.state100Logger(Level.TRACE, "theta/setpoint");
-        m_log_theta_measurement = m_logger.doubleLogger(Level.TRACE, "theta/measurement");
-        m_log_theta_error = m_logger.doubleLogger(Level.TRACE, "theta/error");
-        m_log_theta_fb = m_logger.doubleLogger(Level.TRACE, "theta/fb");
-        m_log_omega_reference = m_logger.state100Logger(Level.TRACE, "omega/reference");
-        m_log_omega_measurement = m_logger.doubleLogger(Level.TRACE, "omega/measurement");
-        m_log_omega_error = m_logger.doubleLogger(Level.TRACE, "omega/error");
-        m_log_omega_fb = m_logger.doubleLogger(Level.TRACE, "omega/fb");
+        m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
+        m_log_ball = fieldLogger.doubleArrayLogger(Level.TRACE, "ball");
+        SupplierLogger2 child = parent.child(this);
+        m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
+        m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
+        m_log_theta_measurement = child.doubleLogger(Level.TRACE, "theta/measurement");
+        m_log_theta_error = child.doubleLogger(Level.TRACE, "theta/error");
+        m_log_theta_fb = child.doubleLogger(Level.TRACE, "theta/fb");
+        m_log_omega_reference = child.state100Logger(Level.TRACE, "omega/reference");
+        m_log_omega_measurement = child.doubleLogger(Level.TRACE, "omega/measurement");
+        m_log_omega_error = child.doubleLogger(Level.TRACE, "omega/error");
+        m_log_omega_fb = child.doubleLogger(Level.TRACE, "omega/fb");
 
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;

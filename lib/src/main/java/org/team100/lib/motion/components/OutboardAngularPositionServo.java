@@ -26,7 +26,6 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
 
-    private final SupplierLogger2 m_logger;
     private final RotaryMechanism m_mechanism;
     private final CombinedEncoder m_encoder;
     // LOGGERS
@@ -47,14 +46,14 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
             SupplierLogger2 parent,
             RotaryMechanism mech,
             CombinedEncoder encoder) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_mechanism = mech;
         m_encoder = encoder;
-        m_log_goal = m_logger.state100Logger(Level.TRACE, "goal (rad)");
-        m_log_ff_torque = m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
-        m_log_measurement = m_logger.doubleLogger(Level.TRACE, "measurement (rad)");
-        m_log_setpoint = m_logger.state100Logger(Level.TRACE, "setpoint (rad)");
-        m_log_position = m_logger.doubleLogger(Level.TRACE, "Position");
+        m_log_goal = child.state100Logger(Level.TRACE, "goal (rad)");
+        m_log_ff_torque = child.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
+        m_log_measurement = child.doubleLogger(Level.TRACE, "measurement (rad)");
+        m_log_setpoint = child.state100Logger(Level.TRACE, "setpoint (rad)");
+        m_log_position = child.doubleLogger(Level.TRACE, "Position");
     }
 
     @Override

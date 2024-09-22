@@ -28,10 +28,11 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
             double inputOffset,
             EncoderDrive drive) {
         super(parent, inputOffset, drive);
+        SupplierLogger2 child = parent.child(this);
         m_digitalInput = new DigitalInput(channel);
         m_dutyCycle = new DutyCycle(m_digitalInput);
-        m_log_duty = m_logger.doubleLogger(Level.TRACE, "duty cycle");
-        m_log_channel = m_logger.intLogger(Level.TRACE, "channel");
+        m_log_duty = child.doubleLogger(Level.TRACE, "duty cycle");
+        m_log_channel = child.intLogger(Level.TRACE, "channel");
     }
 
     @Override
@@ -46,9 +47,9 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
             Util.warn(String.format("encoder %d not connected", m_dutyCycle.getSourceChannel()));
             return OptionalDouble.empty();
         }
-        m_log_channel.log( m_dutyCycle::getSourceChannel);
+        m_log_channel.log(m_dutyCycle::getSourceChannel);
         double dutyCycle = m_dutyCycle.getOutput();
-        m_log_duty.log( () -> dutyCycle);
+        m_log_duty.log(() -> dutyCycle);
         return OptionalDouble.of(dutyCycle);
     }
 

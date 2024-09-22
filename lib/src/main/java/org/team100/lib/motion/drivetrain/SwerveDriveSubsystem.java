@@ -29,8 +29,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
-    private final SupplierLogger2 m_fieldLogger;
-    private final SupplierLogger2 m_logger;
     private final Gyro m_gyro;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
@@ -52,21 +50,20 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
             SwerveDrivePoseEstimator100 poseEstimator,
             SwerveLocal swerveLocal,
             VisionData cameras) {
-        m_fieldLogger = fieldLogger;
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_gyro = gyro;
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_cameras = cameras;
         m_stateSupplier = new CotemporalCache<>(this::update);
         stop();
-        m_log_state = m_logger.swerveStateLogger(Level.COMP, "state");
-        m_log_turning = m_logger.doubleLogger(Level.TRACE, "Tur Deg");
-        m_log_pose_array = m_logger.doubleArrayLogger(Level.COMP, "pose array");
-        m_log_field_robot = m_fieldLogger.doubleArrayLogger(Level.COMP, "robot");
-        m_log_yaw_rate = m_logger.doubleLogger(Level.TRACE, "heading rate rad_s");
-        m_log_skill = m_logger.enumLogger(Level.TRACE, "skill level");
-        m_log_input = m_logger.fieldRelativeVelocityLogger(Level.TRACE, "drive input");
+        m_log_state = child.swerveStateLogger(Level.COMP, "state");
+        m_log_turning = child.doubleLogger(Level.TRACE, "Tur Deg");
+        m_log_pose_array = child.doubleArrayLogger(Level.COMP, "pose array");
+        m_log_field_robot = fieldLogger.doubleArrayLogger(Level.COMP, "robot");
+        m_log_yaw_rate = child.doubleLogger(Level.TRACE, "heading rate rad_s");
+        m_log_skill = child.enumLogger(Level.TRACE, "skill level");
+        m_log_input = child.fieldRelativeVelocityLogger(Level.TRACE, "drive input");
     }
 
     ////////////////
@@ -84,11 +81,11 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
     public void driveInFieldCoords(FieldRelativeVelocity vIn, double kDtSec) {
-        m_log_input.log( () -> vIn);
+        m_log_input.log(() -> vIn);
 
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        m_log_skill.log( () -> driverSkillLevel);
+        m_log_skill.log(() -> driverSkillLevel);
         FieldRelativeVelocity v = GeometryUtil.scale(vIn, driverSkillLevel.scale());
 
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -128,7 +125,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        m_log_skill.log( () -> driverSkillLevel);
+        m_log_skill.log(() -> driverSkillLevel);
         speeds = speeds.times(driverSkillLevel.scale());
         m_swerveLocal.setChassisSpeeds(speeds, m_gyro.getYawRateNWU(), kDtSec);
     }
@@ -211,8 +208,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     public void periodic() {
         // m_poseEstimator.periodic();
         m_stateSupplier.reset();
-        m_log_state.log( this::getState);
-        m_log_turning.log( () -> getState().pose().getRotation().getDegrees());
+        m_log_state.log(this::getState);
+        m_log_turning.log(() -> getState().pose().getRotation().getDegrees());
         m_log_pose_array.log(
                 () -> new double[] {
                         getState().pose().getX(),
@@ -223,12 +220,12 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
-        m_log_field_robot.log( () -> new double[] {
+        m_log_field_robot.log(() -> new double[] {
                 getState().pose().getX(),
                 getState().pose().getY(),
                 getState().pose().getRotation().getDegrees()
         });
-        m_log_yaw_rate.log( m_gyro::getYawRateNWU);
+        m_log_yaw_rate.log(m_gyro::getYawRateNWU);
         m_swerveLocal.periodic();
     }
 

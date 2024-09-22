@@ -28,7 +28,6 @@ public class CombinedEncoder implements RotaryPositionSensor {
     private final RotaryPositionSensor m_primary;
     private final double m_authority;
     private final RotaryMechanism m_secondary;
-    private final SupplierLogger2 m_logger;
     private final DoubleSupplierLogger2 m_log_primary;
     private final DoubleSupplierLogger2 m_log_combined;
 
@@ -45,7 +44,7 @@ public class CombinedEncoder implements RotaryPositionSensor {
             double authority,
             RotaryMechanism secondary) {
         m_primary = primary;
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_authority = Util.inRange(authority, 0.0, 1.0);
         m_secondary = secondary;
 
@@ -53,8 +52,8 @@ public class CombinedEncoder implements RotaryPositionSensor {
         double primaryPositionRad = optPrimaryPositionRad.getAsDouble();
         double secondaryPosition = m_secondary.getPositionRad().orElse(primaryPositionRad);
         m_secondary.setEncoderPosition(primaryPositionRad);
-        m_log_primary = m_logger.doubleLogger(Level.TRACE, "Primary Rads");
-        m_log_combined = m_logger.doubleLogger(Level.TRACE, "Combined Encoder Output");
+        m_log_primary = child.doubleLogger(Level.TRACE, "Primary Rads");
+        m_log_combined = child.doubleLogger(Level.TRACE, "Combined Encoder Output");
     }
 
     @Override

@@ -20,7 +20,6 @@ import edu.wpi.first.math.MathUtil;
  * The included encoder is the incremental motor encoder.
  */
 public class RotaryMechanism implements Glassy {
-    private final SupplierLogger2 m_logger;
     private final BareMotor m_motor;
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
@@ -32,12 +31,12 @@ public class RotaryMechanism implements Glassy {
             BareMotor motor,
             IncrementalBareEncoder encoder,
             double gearRatio) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;
         m_gearRatio = gearRatio;
-        m_log_velocity = m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)");
-        m_log_position = m_logger.doubleLogger(Level.TRACE, "position (rad)");
+        m_log_velocity = child.doubleLogger(Level.TRACE, "velocity (rad_s)");
+        m_log_position = child.doubleLogger(Level.TRACE, "position (rad)");
     }
 
     public void setDutyCycle(double output) {
@@ -52,7 +51,7 @@ public class RotaryMechanism implements Glassy {
             double outputRad_S,
             double outputAccelRad_S2,
             double outputTorqueNm) {
-                
+
         m_motor.setVelocity(
                 outputRad_S * m_gearRatio,
                 outputAccelRad_S2 * m_gearRatio,
@@ -107,8 +106,8 @@ public class RotaryMechanism implements Glassy {
 
     public void periodic() {
         // do some logging
-        m_log_velocity.log( ()->getVelocityRad_S().getAsDouble());
-        m_log_position.log( ()->MathUtil.angleModulus(getPositionRad().getAsDouble()));
+        m_log_velocity.log(() -> getVelocityRad_S().getAsDouble());
+        m_log_position.log(() -> MathUtil.angleModulus(getPositionRad().getAsDouble()));
         m_motor.periodic();
         m_encoder.periodic();
     }

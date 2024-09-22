@@ -12,7 +12,6 @@ public class BareMotorController100 implements BareMotor {
      * Say 600 rad/s max so 0.0016?
      */
     private static final double velocityFFDutyCycle_Rad_S = 0.0016;
-    private final SupplierLogger2 m_logger;
     private final MotorController m_motor;
     private final DoubleSupplierLogger2 m_log_duty;
     private final DoubleSupplierLogger2 m_log_reported;
@@ -22,9 +21,9 @@ public class BareMotorController100 implements BareMotor {
             MotorController motorController) {
         m_motor = motorController;
         m_motor.setInverted(true);
-        m_logger = parent.child(this);
-        m_log_duty = m_logger.doubleLogger(Level.TRACE, "duty cycle");
-        m_log_reported = m_logger.doubleLogger(Level.TRACE, "duty cycle reported");
+        SupplierLogger2 child = parent.child(this);
+        m_log_duty = child.doubleLogger(Level.TRACE, "duty cycle");
+        m_log_reported = child.doubleLogger(Level.TRACE, "duty cycle reported");
     }
 
     @Override

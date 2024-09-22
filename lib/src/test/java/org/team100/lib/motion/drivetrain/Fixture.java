@@ -36,6 +36,7 @@ public class Fixture {
         gyro = new SimulatedGyro(swerveKinodynamics, collection);
         swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
+                logger,
                 gyro.getYawNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,

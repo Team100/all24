@@ -48,8 +48,6 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
      */
     private static final double kRotationSpeed = 0.5;
 
-    private final SupplierLogger2 m_fieldLogger;
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     private final Supplier<Optional<Translation2d>> m_target;
@@ -84,8 +82,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
             PIDController thetaController,
             PIDController omegaController,
             BooleanSupplier trigger) {
-        m_fieldLogger = fieldLogger;
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;
         m_target = target;
@@ -96,17 +93,17 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed,
                 0.01);
         m_trigger = trigger;
-        m_log_apparent_motion = m_logger.doubleLogger(Level.TRACE, "apparent motion");
-        m_log_theta_setpoint = m_logger.state100Logger(Level.TRACE, "theta/setpoint");
-        m_log_theta_measurement = m_logger.doubleLogger(Level.TRACE, "theta/measurement");
-        m_log_theta_error = m_logger.doubleLogger(Level.TRACE, "theta/error");
-        m_log_theta_FB = m_logger.doubleLogger(Level.TRACE, "theta/fb");
-        m_log_omega_reference = m_logger.state100Logger(Level.TRACE, "omega/reference");
-        m_log_omega_measurement = m_logger.doubleLogger(Level.TRACE, "omega/measurement");
-        m_log_omega_error = m_logger.doubleLogger(Level.TRACE, "omega/error");
-        m_log_omega_FB = m_logger.doubleLogger(Level.TRACE, "omega/fb");
-        m_log_target = m_fieldLogger.doubleArrayLogger(Level.TRACE, "target");
-        m_log_ball = m_fieldLogger.doubleArrayLogger(Level.TRACE, "ball");
+        m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
+        m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
+        m_log_theta_measurement = child.doubleLogger(Level.TRACE, "theta/measurement");
+        m_log_theta_error = child.doubleLogger(Level.TRACE, "theta/error");
+        m_log_theta_FB = child.doubleLogger(Level.TRACE, "theta/fb");
+        m_log_omega_reference = child.state100Logger(Level.TRACE, "omega/reference");
+        m_log_omega_measurement = child.doubleLogger(Level.TRACE, "omega/measurement");
+        m_log_omega_error = child.doubleLogger(Level.TRACE, "omega/error");
+        m_log_omega_FB = child.doubleLogger(Level.TRACE, "omega/fb");
+        m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
+        m_log_ball = fieldLogger.doubleArrayLogger(Level.TRACE, "ball");
     }
 
     public void reset(Pose2d currentPose) {
@@ -161,7 +158,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
 
         // the goal omega should match the target's apparent motion
         double targetMotion = TargetUtil.targetMotion(state, target.get());
-        m_log_apparent_motion.log( () -> targetMotion);
+        m_log_apparent_motion.log(() -> targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
@@ -169,15 +166,15 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
-        m_log_theta_setpoint.log( () -> m_thetaSetpoint);
-        m_log_theta_measurement.log( () -> measurement);
-        m_log_theta_error.log( m_thetaController::getPositionError);
-        m_log_theta_FB.log( () -> thetaFB);
+        m_log_theta_setpoint.log(() -> m_thetaSetpoint);
+        m_log_theta_measurement.log(() -> measurement);
+        m_log_theta_error.log(m_thetaController::getPositionError);
+        m_log_theta_FB.log(() -> thetaFB);
         double omegaFB = m_omegaController.calculate(yawRate, m_thetaSetpoint.v());
-        m_log_omega_reference.log( () -> m_thetaSetpoint);
-        m_log_omega_measurement.log( () -> yawRate);
-        m_log_omega_error.log( m_omegaController::getPositionError);
-        m_log_omega_FB.log( () -> omegaFB);
+        m_log_omega_reference.log(() -> m_thetaSetpoint);
+        m_log_omega_measurement.log(() -> yawRate);
+        m_log_omega_error.log(m_omegaController::getPositionError);
+        m_log_omega_FB.log(() -> omegaFB);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
@@ -185,7 +182,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // this name needs to be exactly "/field/target" for glass.
-        m_log_target.log( () -> new double[] {
+        m_log_target.log(() -> new double[] {
                 target.get().getX(),
                 target.get().getY(),
                 0 });
@@ -200,7 +197,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
             // this name needs to be exactly "/field/ball" for glass.
-            m_log_ball.log( () -> new double[] {
+            m_log_ball.log(() -> new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });

@@ -17,7 +17,6 @@ import edu.wpi.first.math.geometry.Transform2d;
  * Drivetrain control with three independent PID controllers.
  */
 public class HolonomicDriveController100 implements Glassy {
-    private final SupplierLogger2 m_logger;
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
@@ -51,20 +50,20 @@ public class HolonomicDriveController100 implements Glassy {
         m_yController = yController;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
-        m_logger = parent.child(this);
-        m_log_u_FF_x = m_logger.doubleLogger(Level.TRACE, "u_FF/x");
-        m_log_u_FF_y = m_logger.doubleLogger(Level.TRACE, "u_FF/y");
-        m_log_u_FF_theta = m_logger.doubleLogger(Level.TRACE, "u_FF/theta");
-        m_log_u_FB_x = m_logger.doubleLogger(Level.TRACE, "u_FB/x");
-        m_log_u_FB_y = m_logger.doubleLogger(Level.TRACE, "u_FB/y");
-        m_log_u_FB_theta = m_logger.doubleLogger(Level.TRACE, "u_FB/theta");
-        m_log_measurement = m_logger.swerveStateLogger(Level.TRACE, "measurement");
-        m_log_setpoint_x = m_logger.doubleLogger(Level.TRACE, "setpoint/x");
-        m_log_setpoint_y = m_logger.doubleLogger(Level.TRACE, "setpoint/y");
-        m_log_setpoint_theta = m_logger.doubleLogger(Level.TRACE, "setpoint/theta");
-        m_log_error_x = m_logger.doubleLogger(Level.TRACE, "error/x");
-        m_log_error_y = m_logger.doubleLogger(Level.TRACE, "error/y");
-        m_log_error_theta = m_logger.doubleLogger(Level.TRACE, "error/theta");
+        SupplierLogger2 child = parent.child(this);
+        m_log_u_FF_x = child.doubleLogger(Level.TRACE, "u_FF/x");
+        m_log_u_FF_y = child.doubleLogger(Level.TRACE, "u_FF/y");
+        m_log_u_FF_theta = child.doubleLogger(Level.TRACE, "u_FF/theta");
+        m_log_u_FB_x = child.doubleLogger(Level.TRACE, "u_FB/x");
+        m_log_u_FB_y = child.doubleLogger(Level.TRACE, "u_FB/y");
+        m_log_u_FB_theta = child.doubleLogger(Level.TRACE, "u_FB/theta");
+        m_log_measurement = child.swerveStateLogger(Level.TRACE, "measurement");
+        m_log_setpoint_x = child.doubleLogger(Level.TRACE, "setpoint/x");
+        m_log_setpoint_y = child.doubleLogger(Level.TRACE, "setpoint/y");
+        m_log_setpoint_theta = child.doubleLogger(Level.TRACE, "setpoint/theta");
+        m_log_error_x = child.doubleLogger(Level.TRACE, "error/x");
+        m_log_error_y = child.doubleLogger(Level.TRACE, "error/y");
+        m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
     }
 
     public static HolonomicDriveController100 withTolerance(
@@ -111,20 +110,20 @@ public class HolonomicDriveController100 implements Glassy {
         double thetaFB = m_thetaController.calculate(currentPose.theta().x(), desiredState.theta().x());
         double omegaFB = m_omegaController.calculate(currentPose.theta().v(), desiredState.theta().v());
         double omega = thetaFF + thetaFB + omegaFB;
-        m_log_u_FF_x.log( () -> xFF);
-        m_log_u_FF_y.log( () -> yFF);
-        m_log_u_FF_theta.log( () -> thetaFF);
-        m_log_u_FB_x.log( () -> xFB);
-        m_log_u_FB_y.log( () -> yFB);
-        m_log_u_FB_theta.log( () -> thetaFB);
-        m_log_measurement.log( () -> currentPose);
+        m_log_u_FF_x.log(() -> xFF);
+        m_log_u_FF_y.log(() -> yFF);
+        m_log_u_FF_theta.log(() -> thetaFF);
+        m_log_u_FB_x.log(() -> xFB);
+        m_log_u_FB_y.log(() -> yFB);
+        m_log_u_FB_theta.log(() -> thetaFB);
+        m_log_measurement.log(() -> currentPose);
 
-        m_log_setpoint_x.log( m_xController::getSetpoint);
-        m_log_setpoint_y.log( m_yController::getSetpoint);
-        m_log_setpoint_theta.log( m_thetaController::getSetpoint);
-        m_log_error_x.log( m_xController::getPositionError);
-        m_log_error_y.log( m_yController::getPositionError);
-        m_log_error_theta.log( m_thetaController::getPositionError);
+        m_log_setpoint_x.log(m_xController::getSetpoint);
+        m_log_setpoint_y.log(m_yController::getSetpoint);
+        m_log_setpoint_theta.log(m_thetaController::getSetpoint);
+        m_log_error_x.log(m_xController::getPositionError);
+        m_log_error_y.log(m_yController::getPositionError);
+        m_log_error_theta.log(m_thetaController::getPositionError);
 
         return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, omega);
     }

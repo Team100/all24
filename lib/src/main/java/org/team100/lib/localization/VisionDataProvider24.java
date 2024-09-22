@@ -69,8 +69,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             0.001,
             0.1 };
 
-    private final SupplierLogger2 m_logger;
-
     private final PoseEstimator100 m_poseEstimator;
     private final FireControl m_fireControl;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
@@ -98,9 +96,9 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             AprilTagFieldLayoutWithCorrectOrientation layout,
             PoseEstimator100 poseEstimator,
             FireControl fireControl) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_layout = layout;
-        m_helper = new PoseEstimationHelper(m_logger);
+        m_helper = new PoseEstimationHelper(child);
         m_poseEstimator = poseEstimator;
         m_fireControl = fireControl;
 
@@ -109,7 +107,7 @@ public class VisionDataProvider24 implements VisionData, Glassy {
         m_poller.addListener(
                 new MultiSubscriber(inst, new String[] { "vision" }),
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll));
-        m_log_alliance = m_logger.enumLogger(Level.TRACE, "alliance");
+        m_log_alliance = child.enumLogger(Level.TRACE, "alliance");
     }
 
     /**
@@ -178,10 +176,8 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             final Blip24[] blips,
             double blipTimeSec,
             Alliance alliance) {
-        m_log_alliance.log( () -> alliance);
+        m_log_alliance.log(() -> alliance);
         final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
-
-
 
         final Rotation2d gyroRotation = m_poseEstimator.get(blipTimeSec).pose().getRotation();
 
@@ -244,8 +240,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             Alliance alliance) {
         for (int i = 0; i < blips.length; ++i) {
             Blip24 blip = blips[i];
-            m_logger.logBlip24(Level.TRACE, cameraSerialNumber + "/blip/" + i, () -> blip);
-
 
             Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
             if (!tagInFieldCoordsOptional.isPresent())

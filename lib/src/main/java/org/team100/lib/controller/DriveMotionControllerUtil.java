@@ -17,7 +17,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class DriveMotionControllerUtil implements Glassy {
-    private final SupplierLogger2 m_logger;
     // LOGGERS
     private final ChassisSpeedsLogger m_log_u_FF;
     private final ChassisSpeedsLogger m_log_u_FB;
@@ -28,14 +27,14 @@ public class DriveMotionControllerUtil implements Glassy {
     private final Twist2dLogger m_log_position_error;
 
     public DriveMotionControllerUtil(SupplierLogger2 parent) {
-        m_logger = parent.child(this);
-        m_log_u_FF = parent.chassisSpeedsLogger(Level.TRACE, "u_FF");
-        m_log_u_FB = parent.chassisSpeedsLogger(Level.TRACE, "u_FB");
-        m_log_velocity_error = parent.chassisSpeedsLogger(Level.TRACE, "velocityError");
-        m_log_u_VFB = parent.chassisSpeedsLogger(Level.TRACE, "u_VFB");
-        m_log_motion_direction = m_logger.rotation2dLogger(Level.TRACE, "motion direction");
-        m_log_setpoint_velocity = m_logger.doubleLogger(Level.TRACE, "setpoint velocity");
-        m_log_position_error = m_logger.twist2dLogger(Level.TRACE, "errorTwist");
+        SupplierLogger2 child = parent.child(this);
+        m_log_u_FF = child.chassisSpeedsLogger(Level.TRACE, "u_FF");
+        m_log_u_FB = child.chassisSpeedsLogger(Level.TRACE, "u_FB");
+        m_log_velocity_error = child.chassisSpeedsLogger(Level.TRACE, "velocityError");
+        m_log_u_VFB = child.chassisSpeedsLogger(Level.TRACE, "u_VFB");
+        m_log_motion_direction = child.rotation2dLogger(Level.TRACE, "motion direction");
+        m_log_setpoint_velocity = child.doubleLogger(Level.TRACE, "setpoint velocity");
+        m_log_position_error = child.twist2dLogger(Level.TRACE, "errorTwist");
     }
 
     /**

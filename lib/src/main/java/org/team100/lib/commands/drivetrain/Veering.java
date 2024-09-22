@@ -26,11 +26,12 @@ public class Veering extends Command100 {
 
     public Veering(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
         m_square = new SquareWave(kAmplitude, kPeriod);
         m_timer = new Timer();
         addRequirements(m_swerve);
-        m_log_input = m_logger.fieldRelativeVelocityLogger(Level.TRACE, "input");
+        m_log_input = child.fieldRelativeVelocityLogger(Level.TRACE, "input");
     }
 
     @Override

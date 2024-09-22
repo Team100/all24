@@ -37,7 +37,7 @@ public class TimedRobot100 extends IterativeRobotBase {
          * @param offsetSeconds    The offset from the common starting time in seconds.
          * @param name             for logging
          */
-        Callback(SupplierLogger2 m_logger, Runnable func, double startTimeSeconds, double periodSeconds,
+        Callback(SupplierLogger2 logger, Runnable func, double startTimeSeconds, double periodSeconds,
                 double offsetSeconds, String name) {
             this.func = func;
             this.period = periodSeconds;
@@ -46,7 +46,7 @@ public class TimedRobot100 extends IterativeRobotBase {
                     + Math.floor((Timer.getFPGATimestamp() - startTimeSeconds) / this.period)
                             * this.period
                     + this.period;
-            this.logger = m_logger.doubleLogger(Level.COMP, "duration (s)/" + name);
+            this.logger = logger.doubleLogger(Level.COMP, "duration (s)/" + name);
         }
 
         public void run() {
@@ -83,6 +83,7 @@ public class TimedRobot100 extends IterativeRobotBase {
     /** Default loop period. */
     public static final double kDefaultPeriod = 0.02;
 
+    /** An exception to the no-member rule. */
     protected final SupplierLogger2 m_logger;
 
     // The C pointer to the notifier object. We don't use it directly, it is

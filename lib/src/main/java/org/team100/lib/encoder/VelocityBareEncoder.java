@@ -9,7 +9,6 @@ import org.team100.lib.telemetry.Telemetry.Level;
 
 /** encoder implementation that supports only velocity measurement. */
 public class VelocityBareEncoder implements IncrementalBareEncoder {
-    private final SupplierLogger2 m_logger;
     private final BareMotor m_motor;
     // LOGGERS
     private final OptionalDoubleLogger m_log_position;
@@ -18,10 +17,10 @@ public class VelocityBareEncoder implements IncrementalBareEncoder {
     public VelocityBareEncoder(
             SupplierLogger2 parent,
             BareMotor motor) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_motor = motor;
-        m_log_position = m_logger.optionalDoubleLogger(Level.TRACE, "position (rad)");
-        m_log_velocity = m_logger.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
+        m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (rad)");
+        m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
     @Override
@@ -52,8 +51,8 @@ public class VelocityBareEncoder implements IncrementalBareEncoder {
 
     @Override
     public void periodic() {
-        m_log_position.log( this::getPositionRad);
-        m_log_velocity.log( this::getVelocityRad_S);
+        m_log_position.log(this::getPositionRad);
+        m_log_velocity.log(this::getVelocityRad_S);
     }
 
 }

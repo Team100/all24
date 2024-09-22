@@ -71,10 +71,11 @@ public class DriveInACircle extends Command100 {
             double turnRatio,
             TrajectoryVisualization viz) {
         super(parent);
-        m_log_center = m_logger.translation2dLogger(Level.TRACE, "center");
-        m_log_angle = m_logger.doubleLogger(Level.TRACE, "angle");
-        m_log_reference = m_logger.swerveStateLogger(Level.TRACE, "reference");
-        m_log_target = m_logger.fieldRelativeVelocityLogger(Level.TRACE, "target");
+        SupplierLogger2 child = parent.child(this);
+        m_log_center = child.translation2dLogger(Level.TRACE, "center");
+        m_log_angle = child.doubleLogger(Level.TRACE, "angle");
+        m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");
+        m_log_target = child.fieldRelativeVelocityLogger(Level.TRACE, "target");
 
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;

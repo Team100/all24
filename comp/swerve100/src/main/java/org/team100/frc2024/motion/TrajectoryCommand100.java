@@ -44,10 +44,11 @@ public class TrajectoryCommand100 extends Command100 {
             DriveMotionController controller,
             TrajectoryVisualization viz) {
         super(parent);
-        m_log_goal = m_logger.pose2dLogger(Level.TRACE, "goal");
-        m_log_chassis_speeds = m_logger.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
-        m_log_THETA_ERROR = m_logger.doubleLogger(Level.TRACE, "THETA ERROR");
-        m_log_FINSIHED = m_logger.booleanLogger(Level.TRACE, "FINSIHED");
+        SupplierLogger2 child = parent.child(this);
+        m_log_goal = child.pose2dLogger(Level.TRACE, "goal");
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
+        m_log_THETA_ERROR = child.doubleLogger(Level.TRACE, "THETA ERROR");
+        m_log_FINSIHED = child.booleanLogger(Level.TRACE, "FINSIHED");
         m_robotDrive = robotDrive;
         m_trajectory = trajectory;
         m_controller = controller;

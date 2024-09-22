@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootSmart extends Command implements Glassy {
-    private final SupplierLogger2 m_logger;
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -40,8 +39,8 @@ public class ShootSmart extends Command implements Glassy {
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
-        m_logger = parent.child(this);
-        m_log_pivot_error = m_logger.doubleLogger(Level.TRACE, "pivot error (rad)");
+        SupplierLogger2 child = parent.child(this);
+        m_log_pivot_error = child.doubleLogger(Level.TRACE, "pivot error (rad)");
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;

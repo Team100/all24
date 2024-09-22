@@ -21,17 +21,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * The input dy is ignored.
  */
 public class SimpleManualModuleStates implements ModuleStateDriver {
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_speed;
     private final Rotation2dLogger m_log_angle;
 
     public SimpleManualModuleStates(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
+        SupplierLogger2 child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_logger = parent.child(this);
-        m_log_speed = m_logger.doubleLogger(Level.TRACE, "speed m_s");
-        m_log_angle = m_logger.rotation2dLogger(Level.TRACE, "angle rad");
+        m_log_speed = child.doubleLogger(Level.TRACE, "speed m_s");
+        m_log_angle = child.rotation2dLogger(Level.TRACE, "angle rad");
     }
 
     /**

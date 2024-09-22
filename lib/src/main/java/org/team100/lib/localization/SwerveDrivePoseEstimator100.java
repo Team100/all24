@@ -31,7 +31,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     // look back a little to get a pose for velocity estimation
     private static final double velocityDtS = 0.02;
 
-    private final SupplierLogger2 m_logger;
     private final int m_numModules;
     private final SwerveKinodynamics m_kinodynamics;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
@@ -64,12 +63,12 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             SwerveModulePosition100[] modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
-        m_tireUtil = new SlipperyTireUtil(m_logger, m_kinodynamics.getTire());
+        m_tireUtil = new SlipperyTireUtil(child, m_kinodynamics.getTire());
         m_poseBuffer = new TimeInterpolatableBuffer100<>(
-                m_logger,
+                child,
                 kBufferDuration,
                 timestampSeconds,
                 new InterpolationRecord(
@@ -81,12 +80,12 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         gyroAngle,
                         modulePositions));
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
-        m_log_offset = m_logger.rotation2dLogger(Level.TRACE, "GYRO OFFSET");
-        m_log_pose_x = m_logger.doubleLogger(Level.TRACE, "posex");
-        m_log_delta0 = m_logger.swerveModulePosition100Logger(Level.TRACE, "delta0");
-        m_log_delta1 = m_logger.swerveModulePosition100Logger(Level.TRACE, "delta1");
-        m_log_t0 = m_logger.doubleLogger(Level.TRACE, "t0");
-        m_log_t1 = m_logger.doubleLogger(Level.TRACE, "t1");
+        m_log_offset = child.rotation2dLogger(Level.TRACE, "GYRO OFFSET");
+        m_log_pose_x = child.doubleLogger(Level.TRACE, "posex");
+        m_log_delta0 = child.swerveModulePosition100Logger(Level.TRACE, "delta0");
+        m_log_delta1 = child.swerveModulePosition100Logger(Level.TRACE, "delta1");
+        m_log_t0 = child.doubleLogger(Level.TRACE, "t0");
+        m_log_t1 = child.doubleLogger(Level.TRACE, "t1");
     }
 
     @Override

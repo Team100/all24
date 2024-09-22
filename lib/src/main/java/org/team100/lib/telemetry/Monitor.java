@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.RobotController;
  * Sets the annunciator if bounds are exceeded.
  */
 public class Monitor implements Glassy {
-    private final SupplierLogger2 m_logger;
     private final Annunciator m_annunciator;
     private final BooleanSupplier m_test;
     private final PowerDistribution m_pdp;
@@ -34,9 +33,9 @@ public class Monitor implements Glassy {
      * @param test        activates the annunciator, to make sure it's working.
      */
     public Monitor(SupplierLogger2 parent, Annunciator annunciator, BooleanSupplier test) {
-        m_logger = parent.child(this);
-        m_log_voltage = m_logger.doubleLogger(Level.COMP, "battery_voltage");
-        m_log_master = m_logger.booleanLogger(Level.COMP, "master_warning");
+        SupplierLogger2 child = parent.child(this);
+        m_log_voltage = child.doubleLogger(Level.COMP, "battery_voltage");
+        m_log_master = child.booleanLogger(Level.COMP, "master_warning");
         m_annunciator = annunciator;
         m_test = test;
         m_pdp = new PowerDistribution(1, ModuleType.kRev);

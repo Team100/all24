@@ -46,7 +46,8 @@ public class DriveWithWaypoints extends Command100 {
             SwerveKinodynamics limits,
             Supplier<List<Pose2d>> goal) {
         super(parent);
-        m_log_chassis_speeds = m_logger.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
+        SupplierLogger2 child = parent.child(this);
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = drivetrain;
         m_controller = controller;
         constraints = new TimingConstraintFactory(limits).allGood();

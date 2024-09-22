@@ -51,15 +51,15 @@ public class CartesianManualPositionalArm extends Command100 {
             DoubleSupplier x,
             DoubleSupplier y) {
         super(parent);
-
-        m_log_input = m_logger.translation2dLogger(Level.TRACE, "input");
-        m_log_setpoint = m_logger.armAnglesLogger(Level.TRACE, "setpoint");
-        m_log_measurement = m_logger.armAnglesLogger(Level.TRACE, "measurement");
-        m_log_cartesian_measurement = m_logger.translation2dLogger(Level.TRACE, "cartesian_measurement");
-        m_log_output_u1 = m_logger.doubleLogger(Level.TRACE, "output/u1");
-        m_log_output_u2 = m_logger.doubleLogger(Level.TRACE, "output/u2");
-        m_log_error_e1 = m_logger.doubleLogger(Level.TRACE, "error/e1");
-        m_log_error_e2 = m_logger.doubleLogger(Level.TRACE, "error/e2");
+        SupplierLogger2 child = parent.child(this);
+        m_log_input = child.translation2dLogger(Level.TRACE, "input");
+        m_log_setpoint = child.armAnglesLogger(Level.TRACE, "setpoint");
+        m_log_measurement = child.armAnglesLogger(Level.TRACE, "measurement");
+        m_log_cartesian_measurement = child.translation2dLogger(Level.TRACE, "cartesian_measurement");
+        m_log_output_u1 = child.doubleLogger(Level.TRACE, "output/u1");
+        m_log_output_u2 = child.doubleLogger(Level.TRACE, "output/u2");
+        m_log_error_e1 = child.doubleLogger(Level.TRACE, "error/e1");
+        m_log_error_e2 = child.doubleLogger(Level.TRACE, "error/e2");
 
         m_arm = arm;
         m_kinematics = kinematics;

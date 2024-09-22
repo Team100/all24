@@ -106,6 +106,7 @@ public class RobotContainerParkingLot implements Glassy {
                 m_modules,
                 asyncFactory);
         final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
+                driveLogger,
                 m_gyro.getYawNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,

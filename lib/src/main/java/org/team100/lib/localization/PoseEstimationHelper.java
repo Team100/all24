@@ -20,12 +20,11 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public class PoseEstimationHelper implements Glassy {
 
-    private final SupplierLogger2 m_logger;
-    private StringSupplierLogger2 m_log_rotation_source;
+    private final StringSupplierLogger2 m_log_rotation_source;
 
     public PoseEstimationHelper(SupplierLogger2 parent) {
-        m_logger = parent.child(this);
-        m_log_rotation_source = m_logger.stringLogger(Level.TRACE, "rotation_source");
+        SupplierLogger2 child = parent.child(this);
+        m_log_rotation_source = child.stringLogger(Level.TRACE, "rotation_source");
     }
 
     /** Convert robot-relative translation to field-relative translation. */

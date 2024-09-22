@@ -22,7 +22,6 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterTimeConstantS = 0.06;
     private static final double kFilterPeriodS = 0.02;
 
-    private final SupplierLogger2 m_logger;
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
     private final RotaryMechanism m_lowerArmMotor;
@@ -50,9 +49,9 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
             RotaryPositionSensor lowerEncoder,
             RotaryMechanism upperMotor,
             RotaryPositionSensor upperEncoder) {
-        m_logger = parent.child(this);
-        m_log_position = m_logger.armAnglesLogger(Level.TRACE, "position");
-        m_log_velocity = m_logger.armAnglesLogger(Level.TRACE, "velocity");
+        SupplierLogger2 child = parent.child(this);
+        m_log_position = child.armAnglesLogger(Level.TRACE, "position");
+        m_log_velocity = child.armAnglesLogger(Level.TRACE, "velocity");
 
         m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
         m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);

@@ -66,6 +66,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -173,6 +174,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -289,6 +291,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -397,6 +400,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -445,6 +449,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 1.0, 1.0, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -493,6 +498,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.05, 0.05, 0.05 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -543,6 +549,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.001, 0.001, 0.01 };
         double[] visionMeasurementStdDevs = new double[] { 0.1, 0.1, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,

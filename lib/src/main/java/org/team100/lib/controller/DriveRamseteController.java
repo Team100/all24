@@ -36,7 +36,6 @@ public class DriveRamseteController implements DriveMotionController {
     private static final double kZeta = 0.7; // Damping coefficient, [0, 1].
     private static final double kLooperDt = 0.02;
 
-    private final SupplierLogger2 m_logger;
     // LOGGERS
     private final Pose2dLogger m_log_measurement;
     private final TimedPoseLogger m_log_setpoint;
@@ -45,13 +44,13 @@ public class DriveRamseteController implements DriveMotionController {
 
     private TrajectoryTimeIterator m_iter;
     private double mLastTime = Double.POSITIVE_INFINITY;
-    
+
     public DriveRamseteController(SupplierLogger2 parent) {
-        m_logger = parent.child(this);
-        m_log_measurement = m_logger.pose2dLogger(Level.TRACE, "current state");
-        m_log_setpoint = m_logger.timedPoseLogger(Level.TRACE, "setpoint");
-        m_log_error = m_logger.twist2dLogger(Level.TRACE, "error");
-        m_log_sample = m_logger.trajectorySamplePointLogger(Level.TRACE, "sample point");
+        SupplierLogger2 child = parent.child(this);
+        m_log_measurement = child.pose2dLogger(Level.TRACE, "current state");
+        m_log_setpoint = child.timedPoseLogger(Level.TRACE, "setpoint");
+        m_log_error = child.twist2dLogger(Level.TRACE, "error");
+        m_log_sample = child.trajectorySamplePointLogger(Level.TRACE, "sample point");
     }
 
     @Override
@@ -69,7 +68,7 @@ public class DriveRamseteController implements DriveMotionController {
         if (m_iter == null)
             return null;
 
-        m_log_measurement.log( () -> measurement);
+        m_log_measurement.log(() -> measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -117,7 +116,7 @@ public class DriveRamseteController implements DriveMotionController {
         Rotation2d course_to_goal = field_to_course.unaryMinus().rotateBy(maybe_field_to_goal.get());
 
         Twist2d mErrorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, setpoint);
-        m_log_error.log( () -> mErrorTwist);
+        m_log_error.log(() -> mErrorTwist);
 
         // Rotate error to be aligned to current course.
         // Error is in robot (heading) frame. Need to rotate it to be in course frame.
@@ -173,7 +172,7 @@ public class DriveRamseteController implements DriveMotionController {
             return Optional.empty();
         }
 
-        m_log_sample.log( sample_point::get);
+        m_log_sample.log(sample_point::get);
         return Optional.of(sample_point.get().state());
     }
 

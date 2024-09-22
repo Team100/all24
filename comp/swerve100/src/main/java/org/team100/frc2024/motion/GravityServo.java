@@ -35,7 +35,6 @@ public class GravityServo implements GravityServoInterface {
     /** Offset from horizontal */
     private static final double kOffsetRad = 0.0;
 
-    private final SupplierLogger2 m_logger;
     private final RotaryMechanism m_mech;
     private final PIDController m_controller;
     private final double m_period;
@@ -69,18 +68,18 @@ public class GravityServo implements GravityServoInterface {
             double period,
             RotaryPositionSensor encoder) {
         m_mech = motor;
-        m_logger = parent.child(this);
-        m_log_u_FB = m_logger.doubleLogger(Level.TRACE, "u_FB");
-        m_log_gravity = m_logger.doubleLogger(Level.TRACE, "gravity T");
-        m_log_u_TOTAL = m_logger.doubleLogger(Level.TRACE, "u_TOTAL");
-        m_log_Measurement_position = m_logger.doubleLogger(Level.TRACE, "Measurement position (rad)");
-        m_log_Measurement_velocity = m_logger.doubleLogger(Level.TRACE, "Measurement velocity (rad_s)");
-        m_log_Goal = m_logger.state100Logger(Level.TRACE, "Goal (rad)");
-        m_log_Setpoint = m_logger.state100Logger(Level.TRACE, "Setpoint (rad)");
-        m_log_Controller_Position_Error = m_logger.doubleLogger(Level.TRACE, "Controller Position Error (rad)");
-        m_log_Controller_Velocity_Error = m_logger.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)");
-        m_log_periodic_Measurement_position = m_logger.doubleLogger(Level.TRACE, "periodic Measurement position (rad)");
-        m_log_periodic_Measurement_velocity = m_logger.doubleLogger(Level.TRACE,
+        SupplierLogger2 child = parent.child(this);
+        m_log_u_FB = child.doubleLogger(Level.TRACE, "u_FB");
+        m_log_gravity = child.doubleLogger(Level.TRACE, "gravity T");
+        m_log_u_TOTAL = child.doubleLogger(Level.TRACE, "u_TOTAL");
+        m_log_Measurement_position = child.doubleLogger(Level.TRACE, "Measurement position (rad)");
+        m_log_Measurement_velocity = child.doubleLogger(Level.TRACE, "Measurement velocity (rad_s)");
+        m_log_Goal = child.state100Logger(Level.TRACE, "Goal (rad)");
+        m_log_Setpoint = child.state100Logger(Level.TRACE, "Setpoint (rad)");
+        m_log_Controller_Position_Error = child.doubleLogger(Level.TRACE, "Controller Position Error (rad)");
+        m_log_Controller_Velocity_Error = child.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)");
+        m_log_periodic_Measurement_position = child.doubleLogger(Level.TRACE, "periodic Measurement position (rad)");
+        m_log_periodic_Measurement_velocity = child.doubleLogger(Level.TRACE,
                 "periodic Measurement velocity (rad_s)");
 
         m_controller = controller;

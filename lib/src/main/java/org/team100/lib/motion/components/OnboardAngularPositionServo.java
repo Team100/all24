@@ -30,7 +30,6 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     private static final double kDtSec = 0.02;
     private static final double kFeedbackDeadbandRad_S = 0.01;
 
-    private final SupplierLogger2 m_logger;
     private final RotaryMechanism m_mechanism;
     private final RotaryPositionSensor m_positionSensor;
     private final double m_maxVel;
@@ -79,25 +78,25 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
             RotaryPositionSensor positionSensor,
             double maxVel,
             PIDController controller) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_mechanism = mech;
         m_positionSensor = positionSensor;
         m_maxVel = maxVel;
         m_controller = controller;
         m_period = controller.getPeriod();
         m_controller.setIntegratorRange(0, 0.1);
-        m_log_goal = m_logger.state100Logger(Level.TRACE, "goal (rad)");
-        m_log_feedforward_torque = m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
-        m_log_measurement = m_logger.state100Logger(Level.TRACE, "measurement (rad)");
-        m_log_setpoint = m_logger.state100Logger(Level.TRACE, "setpoint (rad)");
-        m_log_u_FB = m_logger.doubleLogger(Level.TRACE, "u_FB (rad_s)");
-        m_log_u_FF = m_logger.doubleLogger(Level.TRACE, "u_FF (rad_s)");
-        m_log_u_TOTAL = m_logger.doubleLogger(Level.TRACE, "u_TOTAL (rad_s)");
-        m_log_error = m_logger.doubleLogger(Level.TRACE, "Controller Position Error (rad)");
-        m_log_velocity_error = m_logger.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)");
-        m_log_position_tolerance = m_logger.doubleLogger(Level.TRACE, "Position Tolerance");
-        m_log_velocity_tolerance = m_logger.doubleLogger(Level.TRACE, "Velocity Tolerance");
-        m_log_at_setpoint = m_logger.booleanLogger(Level.TRACE, "At Setpoint");
+        m_log_goal = child.state100Logger(Level.TRACE, "goal (rad)");
+        m_log_feedforward_torque = child.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
+        m_log_measurement = child.state100Logger(Level.TRACE, "measurement (rad)");
+        m_log_setpoint = child.state100Logger(Level.TRACE, "setpoint (rad)");
+        m_log_u_FB = child.doubleLogger(Level.TRACE, "u_FB (rad_s)");
+        m_log_u_FF = child.doubleLogger(Level.TRACE, "u_FF (rad_s)");
+        m_log_u_TOTAL = child.doubleLogger(Level.TRACE, "u_TOTAL (rad_s)");
+        m_log_error = child.doubleLogger(Level.TRACE, "Controller Position Error (rad)");
+        m_log_velocity_error = child.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)");
+        m_log_position_tolerance = child.doubleLogger(Level.TRACE, "Position Tolerance");
+        m_log_velocity_tolerance = child.doubleLogger(Level.TRACE, "Velocity Tolerance");
+        m_log_at_setpoint = child.booleanLogger(Level.TRACE, "At Setpoint");
     }
 
     /**

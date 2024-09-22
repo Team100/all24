@@ -124,8 +124,7 @@ public class Telemetry {
         return logger;
     }
 
-    public SupplierLogger2 namedRootLogger(
-            String str) {
+    public SupplierLogger2 namedRootLogger(String str) {
         if (USE_UDP_LOGGING) {
             return new SupplierLogger2(this, str, udpLogger);
         } else {

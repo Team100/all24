@@ -12,7 +12,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 
 public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
-    private final SupplierLogger2 m_logger;
     private final RotaryMechanism m_motor;
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_position;
@@ -24,10 +23,10 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
     public SimulatedRotaryPositionSensor(
             SupplierLogger2 parent,
             RotaryMechanism motor) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_motor = motor;
-        m_log_position = m_logger.doubleLogger(Level.TRACE, "position");
-        m_log_rate = m_logger.optionalDoubleLogger(Level.TRACE, "rate");
+        m_log_position = child.doubleLogger(Level.TRACE, "position");
+        m_log_rate = child.optionalDoubleLogger(Level.TRACE, "rate");
     }
 
     @Override

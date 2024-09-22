@@ -51,8 +51,8 @@ public class DriveToState101 extends Command100 {
             List<TimingConstraint> constraints,
             TrajectoryVisualization viz) {
         super(parent);
-        m_log_chassis_speeds = m_logger.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
-
+        SupplierLogger2 child = parent.child(this);
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_goal = goal;
         m_endVelocity = endVelocity;
         m_swerve = drivetrain;

@@ -13,7 +13,6 @@ import org.team100.lib.util.Math100;
 public class DriveAccelerationLimiter implements Glassy {
     private static final int kMaxIterations = 10;
 
-    private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_limits;
     // LOGGER
     private final DoubleSupplierLogger2 m_log_max_step;
@@ -21,9 +20,9 @@ public class DriveAccelerationLimiter implements Glassy {
 
     public DriveAccelerationLimiter(SupplierLogger2 parent, SwerveKinodynamics limits) {
         m_limits = limits;
-        m_logger = parent.child(this);
-        m_log_max_step = m_logger.doubleLogger(Level.TRACE, "max_vel_step");
-        m_log_s = m_logger.doubleLogger(Level.TRACE, "s");
+        SupplierLogger2 child = parent.child(this);
+        m_log_max_step = child.doubleLogger(Level.TRACE, "max_vel_step");
+        m_log_s = child.doubleLogger(Level.TRACE, "s");
     }
 
     public double enforceWheelAccelLimit(
@@ -41,7 +40,7 @@ public class DriveAccelerationLimiter implements Glassy {
                     desired_vx[i],
                     desired_vy[i],
                     kDtSec);
-            m_log_max_step.log( () -> max_vel_step);
+            m_log_max_step.log(() -> max_vel_step);
 
             // reduces the size of the search space if min_s is already constrained (by
             // earlier modules)
@@ -61,7 +60,7 @@ public class DriveAccelerationLimiter implements Glassy {
             }
         }
         final double s = min_s;
-        m_log_s.log( () -> s);
+        m_log_s.log(() -> s);
         return min_s;
     }
 

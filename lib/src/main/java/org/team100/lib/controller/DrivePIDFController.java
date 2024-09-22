@@ -26,7 +26,6 @@ public class DrivePIDFController implements DriveMotionController {
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
 
-    private final SupplierLogger2 m_logger;
     private final boolean m_feedforwardOnly;
     private final double m_kPCart;
     private final double m_kPTheta;
@@ -49,12 +48,12 @@ public class DrivePIDFController implements DriveMotionController {
         m_feedforwardOnly = feedforwardOnly;
         m_kPCart = kPCart;
         m_kPTheta = kPTheta;
-        m_logger = parent.child(this);
-        m_util = new DriveMotionControllerUtil(m_logger);
-        m_log_measurement = m_logger.pose2dLogger(Level.TRACE, "measurement");
-        m_log_setpoint = m_logger.timedPoseLogger(Level.TRACE, "setpoint");
-        m_log_is_mt = m_logger.booleanLogger(Level.TRACE, "IS MT");
-        m_log_sample = m_logger.trajectorySamplePointLogger(Level.TRACE, "sample point");
+        SupplierLogger2 child = parent.child(this);
+        m_util = new DriveMotionControllerUtil(child);
+        m_log_measurement = child.pose2dLogger(Level.TRACE, "measurement");
+        m_log_setpoint = child.timedPoseLogger(Level.TRACE, "setpoint");
+        m_log_is_mt = child.booleanLogger(Level.TRACE, "IS MT");
+        m_log_sample = child.trajectorySamplePointLogger(Level.TRACE, "sample point");
     }
 
     @Override

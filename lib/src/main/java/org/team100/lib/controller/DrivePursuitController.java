@@ -56,7 +56,6 @@ public class DrivePursuitController implements DriveMotionController {
     private static final double kPositionkP = 2.0;
 
     private final SwerveKinodynamics m_limits;
-    public final SupplierLogger2 m_logger;
     // LOGGERS
     private final ChassisSpeedsLogger m_log_u_FF;
     private final ChassisSpeedsLogger m_log_u_FB;
@@ -78,17 +77,17 @@ public class DrivePursuitController implements DriveMotionController {
 
     /** Use the factory. */
     DrivePursuitController(SupplierLogger2 parent, SwerveKinodynamics limits) {
+        SupplierLogger2 child = parent.child(this);
         m_limits = limits;
-        m_logger = parent.child(this);
-        m_log_u_FF = m_logger.chassisSpeedsLogger(Level.TRACE, "u_FF");
-        m_log_u_FB = m_logger.chassisSpeedsLogger(Level.TRACE, "u_FB");
-        m_log_measurement = m_logger.pose2dLogger(Level.TRACE, "current state");
-        m_log_setpoint = m_logger.timedPoseLogger(Level.TRACE, "setpoint");
-        m_log_lookahead = m_logger.timedPoseLogger(Level.TRACE, "lookahead state");
-        m_log_updated_lookahead = m_logger.timedPoseLogger(Level.TRACE, "updated lookahead state");
-        m_log_lookahead_translation = m_logger.translation2dLogger(Level.TRACE, "lookahead translation");
-        m_log_error = m_logger.twist2dLogger(Level.TRACE, "pursuit error");
-        m_log_sample = m_logger.trajectorySamplePointLogger(Level.TRACE, "sample point");
+        m_log_u_FF = child.chassisSpeedsLogger(Level.TRACE, "u_FF");
+        m_log_u_FB = child.chassisSpeedsLogger(Level.TRACE, "u_FB");
+        m_log_measurement = child.pose2dLogger(Level.TRACE, "current state");
+        m_log_setpoint = child.timedPoseLogger(Level.TRACE, "setpoint");
+        m_log_lookahead = child.timedPoseLogger(Level.TRACE, "lookahead state");
+        m_log_updated_lookahead = child.timedPoseLogger(Level.TRACE, "updated lookahead state");
+        m_log_lookahead_translation = child.translation2dLogger(Level.TRACE, "lookahead translation");
+        m_log_error = child.twist2dLogger(Level.TRACE, "pursuit error");
+        m_log_sample = child.trajectorySamplePointLogger(Level.TRACE, "sample point");
     }
 
     @Override
