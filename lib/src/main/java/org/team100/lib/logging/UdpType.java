@@ -2,7 +2,6 @@ package org.team100.lib.logging;
 
 import java.util.Arrays;
 
-/** TODO: clean up the packages */
 public enum UdpType {
     UNKNOWN(0),
     BOOLEAN(1),

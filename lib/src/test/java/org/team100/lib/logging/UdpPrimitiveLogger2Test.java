@@ -32,7 +32,7 @@ class UdpPrimitiveLogger2Test {
     @Test
     void testSendingLocally() {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
-        SupplierLogger2 logger = new SupplierLogger2(Telemetry.get(), "root", udpLogger);
+        SupplierLogger2 logger = new SupplierLogger2(Telemetry.instance()::getLevel, "root", udpLogger);
         BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
         IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
@@ -56,33 +56,33 @@ class UdpPrimitiveLogger2Test {
         assertEquals(90, bb.remaining());
 
         HexFormat hex = HexFormat.of();
-        String expectedStr =  // omit "0000000000000000" // timestamp
-                 "0001" // key
-                + "01" // type = boolean
-                + "01" // value = true
-                + "0002" // key
-                + "02" // type = double
-                + "4059000000000000" // value
-                + "0003" // key
-                + "03" // type = int
-                + "00000064" // value
-                + "0004"// key
-                + "04" // type = double array
-                + "02" // length = 2
-                + "3ff0000000000000" // value
-                + "4000000000000000"// value
-                + "0005" // key
-                + "04" // type = double array
-                + "02" // length = 2
-                + "3ff0000000000000" // value
-                + "4000000000000000"// value
-                + "0006" // key
-                + "05" // type = long
-                + "0000000000000064" // value
-                + "0007" // key
-                + "06" // type = string
-                + "05" // length = 5
-                + hex.formatHex("value".getBytes());
+        String expectedStr = // omit "0000000000000000" // timestamp
+                "0001" // key
+                        + "01" // type = boolean
+                        + "01" // value = true
+                        + "0002" // key
+                        + "02" // type = double
+                        + "4059000000000000" // value
+                        + "0003" // key
+                        + "03" // type = int
+                        + "00000064" // value
+                        + "0004"// key
+                        + "04" // type = double array
+                        + "02" // length = 2
+                        + "3ff0000000000000" // value
+                        + "4000000000000000"// value
+                        + "0005" // key
+                        + "04" // type = double array
+                        + "02" // length = 2
+                        + "3ff0000000000000" // value
+                        + "4000000000000000"// value
+                        + "0006" // key
+                        + "05" // type = long
+                        + "0000000000000064" // value
+                        + "0007" // key
+                        + "06" // type = string
+                        + "05" // length = 5
+                        + hex.formatHex("value".getBytes());
         byte[] expectedBB = hex.parseHex(expectedStr);
         byte[] actualBB = new byte[82];
         bb.get(new byte[8]); // skip
@@ -102,34 +102,34 @@ class UdpPrimitiveLogger2Test {
         assertEquals(140, mb.remaining());
 
         expectedStr = // skip "\00\00\00\00\00\00\00\00" // timestamp
-                 "\00\01" // key
-                + "\01" // type
-                + "\14" // 1 6 length
-                + "root/boolkey" // 13 19 label
-                + "\00\02" // key
-                + "\02" // type
-                + "\16" // 1 20 length
-                + "root/doublekey" // 15 35 label
-                + "\00\03" // key
-                + "\03" // type
-                + "\13" // 1 36 length
-                + "root/intkey" // 12 48 label
-                + "\00\04" // key
-                + "\04" // type
-                + "\23" // 1 49 length
-                + "root/doublearraykey" // 20 69 label
-                + "\00\05" // key
-                + "\04" // type
-                + "\26" // 1 70 length
-                + "root/doubleobjarraykey" // 23 93 label
-                + "\00\06" // key
-                + "\05" // type
-                + "\14" // 1 94 length
-                + "root/longkey" // 13 107 label
-                + "\00\07" // key
-                + "\06" // type
-                + "\16" // 1 108 length
-                + "root/stringkey"; // 15 123 label
+                "\00\01" // key
+                        + "\01" // type
+                        + "\14" // 1 6 length
+                        + "root/boolkey" // 13 19 label
+                        + "\00\02" // key
+                        + "\02" // type
+                        + "\16" // 1 20 length
+                        + "root/doublekey" // 15 35 label
+                        + "\00\03" // key
+                        + "\03" // type
+                        + "\13" // 1 36 length
+                        + "root/intkey" // 12 48 label
+                        + "\00\04" // key
+                        + "\04" // type
+                        + "\23" // 1 49 length
+                        + "root/doublearraykey" // 20 69 label
+                        + "\00\05" // key
+                        + "\04" // type
+                        + "\26" // 1 70 length
+                        + "root/doubleobjarraykey" // 23 93 label
+                        + "\00\06" // key
+                        + "\05" // type
+                        + "\14" // 1 94 length
+                        + "root/longkey" // 13 107 label
+                        + "\00\07" // key
+                        + "\06" // type
+                        + "\16" // 1 108 length
+                        + "root/stringkey"; // 15 123 label
         expectedBB = expectedStr.getBytes(StandardCharsets.US_ASCII);
         actualBB = new byte[132];
         mb.get(new byte[8]); // skip
@@ -142,7 +142,7 @@ class UdpPrimitiveLogger2Test {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
-        SupplierLogger2 logger = new SupplierLogger2(Telemetry.get(), "root", udpLogger);
+        SupplierLogger2 logger = new SupplierLogger2(Telemetry.instance()::getLevel, "root", udpLogger);
         BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
         IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
@@ -200,7 +200,7 @@ class UdpPrimitiveLogger2Test {
     void testAWholeLotLocally() throws InterruptedException {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
         SupplierLogger2 logger = new SupplierLogger2(
-                Telemetry.get(),
+                Telemetry.instance()::getLevel,
                 "root",
                 udpLogger);
 
@@ -244,7 +244,7 @@ class UdpPrimitiveLogger2Test {
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
         SupplierLogger2 logger = new SupplierLogger2(
-                Telemetry.get(),
+                Telemetry.instance()::getLevel,
                 "root",
                 udpLogger);
 
@@ -296,7 +296,7 @@ class UdpPrimitiveLogger2Test {
                 dataSink,
                 metadataSink);
         SupplierLogger2 logger = new SupplierLogger2(
-                Telemetry.get(),
+                Telemetry.instance()::getLevel,
                 "root",
                 udpLogger);
 

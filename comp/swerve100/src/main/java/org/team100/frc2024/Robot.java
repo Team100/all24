@@ -105,7 +105,7 @@ public class Robot extends TimedRobot100 implements Glassy {
         m_jvmLogger.logMemoryPools();
         m_jvmLogger.logMemoryUsage();
 
-        Telemetry.get().periodic();
+        Telemetry.instance().periodic();
 
         if (Experiments.instance.enabled(Experiment.FlushOften)) {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");

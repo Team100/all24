@@ -94,6 +94,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         return key;
     }
 
+    /** Emits some labels and flushes all dirty values. */
     public void periodic() {
         double now = Timer.getFPGATimestamp();
         if (flushTime + kFlushPeriod < now) {
@@ -266,7 +267,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    //////////////////////////////////////////p/
+    //////////////////////////////////////////
 
     /** @param putter puts the value if there's room, returns false if not. */
     private void putAndMaybeSend(BooleanSupplier putter) {

@@ -5,6 +5,7 @@ import org.team100.lib.logging.NTPrimitiveLogger2;
 import org.team100.lib.logging.PrimitiveLogger2;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.UdpPrimitiveLogger2;
+import org.team100.lib.logging.UdpSender;
 import org.team100.lib.util.Util;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -21,11 +22,8 @@ import com.ctre.phoenix6.SignalLogger;
  * stops; this means you should see the latest values after disabling the robot.
  */
 public class Telemetry {
-    /**
-     * Using an experiment would be a pain.
-     * TODO: remove the complexity here after the UDP thing is validated.
-     */
-    private static final boolean USE_UDP_LOGGING = false;
+    private static final boolean USE_UDP_LOGGING = true;
+    private static final boolean USE_REAL_UDP = true;
 
     public enum Level {
         /**
@@ -55,14 +53,10 @@ public class Telemetry {
         }
     }
 
-    /**
-     * Logging is prevented after this much time per cycle.
-     * TODO: tune this value to leave time for real work.
-     */
     private static final Telemetry instance = new Telemetry();
 
-    final UdpPrimitiveLogger2 udpLogger;
-    final PrimitiveLogger2 ntLogger;
+    private UdpPrimitiveLogger2 udpLogger;
+    private PrimitiveLogger2 ntLogger;
 
     private Level m_level;
 
@@ -76,25 +70,29 @@ public class Telemetry {
             Util.warn("Using UDP network logging!");
             Util.warn("You must have a log listener connected!");
             Util.warn("=======================================");
+            if (USE_REAL_UDP) {
+                udpLogger = new UdpPrimitiveLogger2(
+                        UdpSender.data(),
+                        UdpSender.meta());
+            } else {
+                udpLogger = new UdpPrimitiveLogger2(
+                        new DummySender(),
+                        new DummySender());
+            }
+        } else {
+            ntLogger = new NTPrimitiveLogger2();
         }
-
-        ntLogger = new NTPrimitiveLogger2();
-
-        // TODO: real senders
-        DummySender dataSink = new DummySender();
-        DummySender metaSink = new DummySender();
-
-        udpLogger = new UdpPrimitiveLogger2(dataSink, metaSink);
 
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
-        // DataLogManager.start();
+
         // turn off the CTRE log we never use
         SignalLogger.enableAutoLogging(false);
     }
 
     public void periodic() {
-        udpLogger.periodic();
+        if (udpLogger != null)
+            udpLogger.periodic();
     }
 
     void setLevel(Level level) {
@@ -105,7 +103,7 @@ public class Telemetry {
         return m_level;
     }
 
-    public static Telemetry get() {
+    public static Telemetry instance() {
         return instance;
     }
 
@@ -113,22 +111,25 @@ public class Telemetry {
      * field logger root is "field" and has a ".type"->"Field2d" entry as required
      * by glass.
      */
+    // TODO: make this a static singleton
     public SupplierLogger2 fieldLogger() {
         SupplierLogger2 logger;
         if (USE_UDP_LOGGING) {
-            logger = new SupplierLogger2(this, "field", udpLogger);
+            logger = new SupplierLogger2(this::getLevel, "field", udpLogger);
         } else {
-            logger = new SupplierLogger2(this, "field", ntLogger);
+            logger = new SupplierLogger2(this::getLevel, "field", ntLogger);
         }
         logger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
         return logger;
     }
 
+    // TODO: make this a static singleton, so that TimedRobot100 can use the same
+    // one as RobotContainer.
     public SupplierLogger2 namedRootLogger(String str) {
         if (USE_UDP_LOGGING) {
-            return new SupplierLogger2(this, str, udpLogger);
+            return new SupplierLogger2(this::getLevel, str, udpLogger);
         } else {
-            return new SupplierLogger2(this, str, ntLogger);
+            return new SupplierLogger2(this::getLevel, str, ntLogger);
         }
     }
 

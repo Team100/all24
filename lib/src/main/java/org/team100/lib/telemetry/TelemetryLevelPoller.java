@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Asynchronously looks for updates in telemetry level. */
 public class TelemetryLevelPoller {
-    private final Telemetry t = Telemetry.get();
+    private final Telemetry t = Telemetry.instance();
     private final SendableChooser<Level> m_levelChooser;
 
     /** Create a chooser with no default; use setDefault if you want one. */

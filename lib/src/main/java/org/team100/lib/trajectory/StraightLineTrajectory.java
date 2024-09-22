@@ -2,8 +2,6 @@ package org.team100.lib.trajectory;
 
 import java.util.List;
 
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.util.Util;

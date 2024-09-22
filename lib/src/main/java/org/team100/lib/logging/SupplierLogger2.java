@@ -18,7 +18,6 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -39,19 +38,19 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
  * constructors to create instances of the inner classes.
  */
 public class SupplierLogger2 {
-    private final Telemetry m_telemetry;
+    private final Supplier<Level> m_level;
     private final String m_root;
-    private final PrimitiveLogger2 m_primitiveLoggerA;
+    private final PrimitiveLogger2 m_pLogger;
 
     public SupplierLogger2(
-            Telemetry telemetry,
+            Supplier<Level> level,
             String root,
             PrimitiveLogger2 primitiveLoggerA) {
         if (root.startsWith("/"))
             throw new IllegalArgumentException("don't lead with a slash");
-        m_telemetry = telemetry;
+        m_level = level;
         m_root = root;
-        m_primitiveLoggerA = primitiveLoggerA;
+        m_pLogger = primitiveLoggerA;
     }
 
     /**
@@ -61,8 +60,7 @@ public class SupplierLogger2 {
      * Each child level is separated by slashes, to make a tree in glass.
      */
     public SupplierLogger2 child(String stem) {
-        return new SupplierLogger2(m_telemetry, m_root + "/" + stem,
-                m_primitiveLoggerA);
+        return new SupplierLogger2(m_level, m_root + "/" + stem, m_pLogger);
     }
 
     /**
@@ -74,14 +72,13 @@ public class SupplierLogger2 {
         return child(obj.getGlassName());
     }
 
-    // TODO remove this, allow everything all the time.
-    @Deprecated
     private boolean allow(Level level) {
-        if (m_telemetry.getLevel() == Level.COMP && level == Level.COMP) {
+        Level allowed = m_level.get();
+        if (allowed == Level.COMP && level == Level.COMP) {
             // comp mode allows COMP level regardless of enablement.
             return true;
         }
-        return m_telemetry.getLevel().admit(level);
+        return allowed.admit(level);
     }
 
     /** @return root/stem */
@@ -100,7 +97,7 @@ public class SupplierLogger2 {
 
         BooleanSupplierLogger2(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.booleanLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.booleanLogger(root(leaf));
         }
 
         public void log(BooleanSupplier vals) {
@@ -121,7 +118,7 @@ public class SupplierLogger2 {
 
         DoubleSupplierLogger2(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.doubleLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.doubleLogger(root(leaf));
         }
 
         public void log(DoubleSupplier vals) {
@@ -142,7 +139,7 @@ public class SupplierLogger2 {
 
         IntSupplierLogger2(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.intLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.intLogger(root(leaf));
         }
 
         public void log(IntSupplier vals) {
@@ -163,7 +160,7 @@ public class SupplierLogger2 {
 
         DoubleArraySupplierLogger2(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.doubleArrayLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.doubleArrayLogger(root(leaf));
         }
 
         public void log(Supplier<double[]> vals) {
@@ -184,7 +181,7 @@ public class SupplierLogger2 {
 
         DoubleObjArraySupplierLogger2(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.doubleObjArrayLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.doubleObjArrayLogger(root(leaf));
         }
 
         public void log(Supplier<Double[]> vals) {
@@ -205,7 +202,7 @@ public class SupplierLogger2 {
 
         LongSupplierLogger2(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.longLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.longLogger(root(leaf));
         }
 
         public void log(LongSupplier vals) {
@@ -226,7 +223,7 @@ public class SupplierLogger2 {
 
         StringSupplierLogger2(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.stringLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.stringLogger(root(leaf));
         }
 
         public void log(Supplier<String> vals) {
@@ -247,7 +244,7 @@ public class SupplierLogger2 {
 
         OptionalDoubleLogger(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.doubleLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.doubleLogger(root(leaf));
         }
 
         public void log(Supplier<OptionalDouble> vals) {
@@ -270,7 +267,7 @@ public class SupplierLogger2 {
 
         EnumLogger(Level level, String leaf) {
             m_level = level;
-            m_primitiveLogger = m_primitiveLoggerA.stringLogger(root(leaf));
+            m_primitiveLogger = m_pLogger.stringLogger(root(leaf));
         }
 
         public void log(Supplier<Enum<?>> vals) {
@@ -794,7 +791,7 @@ public class SupplierLogger2 {
         }
     }
 
-    public StateLogger logState(Level level, String leaf, Supplier<State> vals) {
+    public StateLogger logState(Level level, String leaf) {
         return new StateLogger(level, leaf);
     }
 
@@ -818,7 +815,7 @@ public class SupplierLogger2 {
         }
     }
 
-    public Blip24Logger logBlip24(Level level, String leaf, Supplier<Blip24> vals) {
+    public Blip24Logger logBlip24(Level level, String leaf) {
         return new Blip24Logger(level, leaf);
     }
 }
