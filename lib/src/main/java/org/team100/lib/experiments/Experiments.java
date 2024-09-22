@@ -29,7 +29,6 @@ public class Experiments implements Glassy {
     private final Set<Experiment> globalExperiments = Set.of(
             Experiment.UseSetpointGenerator,
             Experiment.UseInitialVelocity,
-            Experiment.OscillateDirect,
             Experiment.HeedVision);
 
     /** These experiments are enabled on specific robot types. */
