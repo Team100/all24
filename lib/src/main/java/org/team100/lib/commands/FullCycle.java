@@ -31,7 +31,7 @@ public class FullCycle extends SequentialCommandGroup {
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {
         TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(maxVelocityM_S, maxAccelM_S_S)));
-        StraightLineTrajectory maker = new StraightLineTrajectory(tmaker);
+        StraightLineTrajectory maker = new StraightLineTrajectory(true, tmaker);
         // for now just drive back and forth.
         addCommands(
                 new DriveToWaypoint3(

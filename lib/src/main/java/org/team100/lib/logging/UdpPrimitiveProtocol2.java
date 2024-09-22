@@ -42,15 +42,12 @@ import java.nio.charset.StandardCharsets;
  */
 public class UdpPrimitiveProtocol2 {
     public static class ProtocolException extends Exception {
-
     }
 
     private final ByteBuffer m_buffer;
 
     public UdpPrimitiveProtocol2(int bufferSize) {
-        // m_buffer = ByteBuffer.allocate(bufferSize);
-        // direct buffer goes faster out the network
-        // TODO: make sure we reuse this buffer!
+        // direct buffer goes slightly faster out the network
         m_buffer = ByteBuffer.allocateDirect(bufferSize);
         // big-endian is the default, but just to make it clear...
         m_buffer.order(ByteOrder.BIG_ENDIAN);

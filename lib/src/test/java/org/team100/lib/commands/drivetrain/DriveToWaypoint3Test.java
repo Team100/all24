@@ -47,7 +47,7 @@ class DriveToWaypoint3Test extends Fixtured {
         Pose2d goal = GeometryUtil.kPoseZero;
         SwerveDriveSubsystem drivetrain = fixture.drive;
 
-        StraightLineTrajectory trajectories = new StraightLineTrajectory(null) {
+        StraightLineTrajectory trajectories = new StraightLineTrajectory(true, null) {
             public Trajectory100 apply(SwerveState startState, Pose2d end) {
                 return new Trajectory100(List.of(new TimedPose(Pose2dWithMotion.kIdentity, 0, 0, 0)));
             }
@@ -74,7 +74,7 @@ class DriveToWaypoint3Test extends Fixtured {
         SwerveDriveSubsystem drivetrain = fixture.drive;
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
-        StraightLineTrajectory maker = new StraightLineTrajectory(tmaker);
+        StraightLineTrajectory maker = new StraightLineTrajectory(true, tmaker);
         Transform2d transform = new Transform2d(
                 new Translation2d(-1, -1),
                 GeometryUtil.kRotationZero);

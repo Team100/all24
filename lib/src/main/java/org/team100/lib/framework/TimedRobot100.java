@@ -108,7 +108,7 @@ public class TimedRobot100 extends IterativeRobotBase {
      */
     protected TimedRobot100(double period) {
         super(period);
-        m_logger = Telemetry.get().namedRootLogger("ROBOT");
+        m_logger = Telemetry.instance().rootLogger;
         m_log_slack = m_logger.doubleLogger(Level.COMP, "slack time (s)");
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");

@@ -36,7 +36,7 @@ public class DrawSquare extends SequentialCommandGroup {
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {
         TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(maxVelocityM_S, maxAccelM_S_S)));
-        StraightLineTrajectory maker = new StraightLineTrajectory(tmaker);
+        StraightLineTrajectory maker = new StraightLineTrajectory(true, tmaker);
         addCommands(
                 new DriveToWaypoint3(parent,
                         new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),

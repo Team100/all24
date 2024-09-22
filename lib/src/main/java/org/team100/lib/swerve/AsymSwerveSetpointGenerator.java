@@ -162,10 +162,8 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
         min_s = Math.min(min_s, accel_min_s);
 
-        if (Experiments.instance.enabled(Experiment.LimitBatterySag)) {
-            double battery_min_s = m_BatterySagLimiter.get(RobotController.getBatteryVoltage());
-            min_s = Math.min(min_s, battery_min_s);
-        }
+        double battery_min_s = m_BatterySagLimiter.get(RobotController.getBatteryVoltage());
+        min_s = Math.min(min_s, battery_min_s);
 
         return makeSetpoint(
                 prevSetpoint,

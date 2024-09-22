@@ -1,29 +1,32 @@
 package org.team100.lib.commands.drivetrain;
 
+import java.util.Optional;
+
 import org.team100.lib.commands.Command100;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Drive back and forth forever, for calibration.
  * 
- * Uses the middle control levels through drive.setChassisSpeeds.
+ * This version operates on module states directly.
  * 
  * It uses minimum-time profiles, so the acceleration is a square wave (i.e.
  * infinite jerk), velocity is a triangle wave, so the resulting position should
  * be a piecewise parabolic curve that looks a lot like a sine wave, though it
  * is not one.
  */
-public class Oscillate extends Command100 {
+public class OscillateDirect extends Command100 {
     private static final double kAccel = 1;
     private static final double kMaxSpeed = 1;
     private static final double kPeriod = 4 * kMaxSpeed / kAccel;
@@ -45,7 +48,7 @@ public class Oscillate extends Command100 {
 
     private SwerveState m_initial;
 
-    public Oscillate(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
+    public OscillateDirect(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
         super(parent);
         SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
@@ -76,7 +79,12 @@ public class Oscillate extends Command100 {
         double speedM_S = m_triangle.applyAsDouble(time);
         double positionM = m_parabola.applyAsDouble(time);
 
-        m_swerve.setChassisSpeeds(new ChassisSpeeds(speedM_S, 0, 0), dt);
+        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero))
+        });
 
         m_log_period.log(() -> kPeriod);
         m_log_time.log(() -> time);

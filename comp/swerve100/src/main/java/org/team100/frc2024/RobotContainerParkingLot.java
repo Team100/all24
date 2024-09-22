@@ -79,9 +79,9 @@ public class RobotContainerParkingLot implements Glassy {
      * @throws IOException
      */
     RobotContainerParkingLot(TimedRobot100 robot) throws IOException {
-        Telemetry telemetry = Telemetry.get();
-        final SupplierLogger2 fieldLogger = telemetry.fieldLogger();
-        final SupplierLogger2 driveLogger = telemetry.namedRootLogger("DRIVE");
+        Telemetry telemetry = Telemetry.instance();
+        final SupplierLogger2 fieldLogger = telemetry.fieldLogger;
+        final SupplierLogger2 driveLogger = telemetry.rootLogger;
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
 
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
