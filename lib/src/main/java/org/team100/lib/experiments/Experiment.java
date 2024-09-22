@@ -36,10 +36,6 @@ public enum Experiment {
      */
     AvoidVisionJitter,
     /**
-     * Include sag limiter in setpoint generator
-     */
-    LimitBatterySag,
-    /**
      * 
      */
     UseSecondDerivativeSwerve,
