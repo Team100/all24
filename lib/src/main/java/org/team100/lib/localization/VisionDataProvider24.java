@@ -228,11 +228,8 @@ public class VisionDataProvider24 implements VisionData, Glassy {
                     (blip.getId() == 5 && alliance == Alliance.Red)) {
                 Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
                         .getTranslation().toTranslation2d();
-                m_logger.translation2dLogger(Level.TRACE, cameraSerialNumber + "/Firing Solution").log( () -> translation2d);
-
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;
-
                 m_fireControl.accept(translation2d);
             }
         }
@@ -249,9 +246,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             Blip24 blip = blips[i];
             m_logger.logBlip24(Level.TRACE, cameraSerialNumber + "/blip/" + i, () -> blip);
 
-            // this is just for logging
-            m_logger.doubleLogger(Level.TRACE, cameraSerialNumber + "/Blip Tag Rotation").log(
-                    () -> PoseEstimationHelper.blipToRotation(blip).getAngle());
 
             Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
             if (!tagInFieldCoordsOptional.isPresent())
@@ -266,9 +260,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
                     0, 0, gyroRotation.getRadians());
 
             Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
-            m_logger.pose2dLogger(Level.TRACE, cameraSerialNumber + "/Blip Tag In Field Cords").log(
-                    tagInFieldCoords::toPose2d);
-
             Pose3d robotPoseInFieldCoords = m_helper.getRobotPoseInFieldCoords(
                     cameraInRobotCoordinates,
                     tagInFieldCoords,
@@ -279,8 +270,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             Translation2d robotTranslationInFieldCoords = robotPoseInFieldCoords.getTranslation().toTranslation2d();
 
             Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
-
-            m_logger.pose2dLogger(Level.TRACE, cameraSerialNumber + "/Blip Pose").log( () -> currentRobotinFieldCoords);
 
             if (!Experiments.instance.enabled(Experiment.HeedVision))
                 continue;
@@ -347,9 +336,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
 
                 Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
                 Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
-
-                m_logger.pose2dLogger(Level.TRACE, cameraSerialNumber + "/Triangulate Pose").log(
-                        () -> currentRobotinFieldCoords);
 
                 if (!Experiments.instance.enabled(Experiment.HeedVision))
                     continue;

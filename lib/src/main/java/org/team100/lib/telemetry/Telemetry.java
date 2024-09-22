@@ -61,7 +61,6 @@ public class Telemetry {
      * Logging is prevented after this much time per cycle.
      * TODO: tune this value to leave time for real work.
      */
-    private static final double kLoggingTimeBudgetS = 0.01;
     private static final Telemetry instance = new Telemetry();
 
     // private final NetworkTableInstance inst;
@@ -113,15 +112,19 @@ public class Telemetry {
         return instance;
     }
 
+    /**
+     * field logger root is "field" and has a ".type"->"Field2d" entry as required
+     * by glass.
+     */
     public SupplierLogger2 fieldLogger() {
+        SupplierLogger2 logger;
         if (USE_UDP_LOGGING) {
-            SupplierLogger2 logger = new NetworkLogger(this, "field");
-            logger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
-            return logger;
-
+            logger = new NetworkLogger(this, "field");
         } else {
-            return new FieldLogger(this);
+            logger = new RootLogger(this, "field");
         }
+        logger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
+        return logger;
     }
 
     public SupplierLogger2 namedRootLogger(

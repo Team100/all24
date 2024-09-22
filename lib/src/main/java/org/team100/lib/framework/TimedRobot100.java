@@ -8,10 +8,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.hal.NotifierJNI;
 
-import java.util.Map;
 import java.util.PriorityQueue;
 
-import org.team100.lib.config.Identity;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry;
@@ -27,7 +25,7 @@ public class TimedRobot100 extends IterativeRobotBase {
         public Runnable func;
         public double period;
         public double expirationTime;
-        public String name;
+        public DoubleSupplierLogger2 logger;
 
         /**
          * Construct a callback container.
@@ -39,7 +37,8 @@ public class TimedRobot100 extends IterativeRobotBase {
          * @param offsetSeconds    The offset from the common starting time in seconds.
          * @param name             for logging
          */
-        Callback(Runnable func, double startTimeSeconds, double periodSeconds, double offsetSeconds, String name) {
+        Callback(SupplierLogger2 m_logger, Runnable func, double startTimeSeconds, double periodSeconds,
+                double offsetSeconds, String name) {
             this.func = func;
             this.period = periodSeconds;
             this.expirationTime = startTimeSeconds
@@ -47,7 +46,17 @@ public class TimedRobot100 extends IterativeRobotBase {
                     + Math.floor((Timer.getFPGATimestamp() - startTimeSeconds) / this.period)
                             * this.period
                     + this.period;
-            this.name = name;
+            this.logger = m_logger.doubleLogger(Level.COMP, "duration (s)/" + name);
+        }
+
+        public void run() {
+
+            double startWaitingS = Timer.getFPGATimestamp();
+            func.run();
+            double endWaitingS = Timer.getFPGATimestamp();
+            double durationS = endWaitingS - startWaitingS;
+            this.logger.log(() -> durationS);
+
         }
 
         @Override
@@ -130,7 +139,7 @@ public class TimedRobot100 extends IterativeRobotBase {
             // We don't have to check there's an element in the queue first because
             // there's always at least one (the constructor adds one). It's reenqueued
             // at the end of the loop.
-            var callback = m_callbacks.poll();
+            Callback callback = m_callbacks.poll();
 
             NotifierJNI.updateNotifierAlarm(m_notifier, (long) (callback.expirationTime * 1e6));
 
@@ -146,7 +155,7 @@ public class TimedRobot100 extends IterativeRobotBase {
             // this is the main loop slack, don't let it go to zero!
             m_log_slack.log(() -> slackS);
 
-            log(callback.func::run, callback.name);
+            callback.run();
 
             callback.expirationTime += callback.period;
             m_callbacks.add(callback);
@@ -157,20 +166,12 @@ public class TimedRobot100 extends IterativeRobotBase {
             while ((long) (m_callbacks.peek().expirationTime * 1e6) <= curTime) {
                 callback = m_callbacks.poll();
 
-                log(callback.func::run, callback.name);
+                callback.run();
 
                 callback.expirationTime += callback.period;
                 m_callbacks.add(callback);
             }
         }
-    }
-
-    private void log(Runnable r, String name) {
-        double startWaitingS = Timer.getFPGATimestamp();
-        r.run();
-        double endWaitingS = Timer.getFPGATimestamp();
-        double durationS = endWaitingS - startWaitingS;
-        m_logger.doubleLogger(Level.COMP, "duration (s)/" + name).log(() -> durationS);
     }
 
     /** Ends the main loop in startCompetition(). */
@@ -191,7 +192,7 @@ public class TimedRobot100 extends IterativeRobotBase {
      * @param periodSeconds The period at which to run the callback in seconds.
      */
     public final void addPeriodic(Runnable callback, double periodSeconds, String name) {
-        m_callbacks.add(new Callback(callback, m_startTime, periodSeconds, 0.0, name));
+        m_callbacks.add(new Callback(m_logger, callback, m_startTime, periodSeconds, 0.0, name));
     }
 
     /**
@@ -210,7 +211,7 @@ public class TimedRobot100 extends IterativeRobotBase {
      *                      to TimedRobot.
      */
     public final void addPeriodic(Runnable callback, double periodSeconds, double offsetSeconds, String name) {
-        m_callbacks.add(new Callback(callback, m_startTime, periodSeconds, offsetSeconds, name));
+        m_callbacks.add(new Callback(m_logger, callback, m_startTime, periodSeconds, offsetSeconds, name));
     }
 
 }

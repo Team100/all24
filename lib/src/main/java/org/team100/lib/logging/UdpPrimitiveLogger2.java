@@ -10,14 +10,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.team100.lib.logging.PrimitiveLogger2.BooleanLogger;
-import org.team100.lib.logging.PrimitiveLogger2.DoubleArrayLogger;
-import org.team100.lib.logging.PrimitiveLogger2.DoubleLogger;
-import org.team100.lib.logging.PrimitiveLogger2.DoubleObjArrayLogger;
-import org.team100.lib.logging.PrimitiveLogger2.IntLogger;
-import org.team100.lib.logging.PrimitiveLogger2.LongLogger;
-import org.team100.lib.logging.PrimitiveLogger2.StringLogger;
-
 import edu.wpi.first.wpilibj.Timer;
 
 /**
