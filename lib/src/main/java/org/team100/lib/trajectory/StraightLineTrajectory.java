@@ -15,10 +15,11 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGeneratio
 
 /** Make straight lines, rest-to-rest. */
 public class StraightLineTrajectory {
-
+    private final boolean m_useInitialVelocity;
     private final TrajectoryMaker m_maker;
 
-    public StraightLineTrajectory(TrajectoryMaker maker) {
+    public StraightLineTrajectory(boolean useInitialVelocity, TrajectoryMaker maker) {
+        m_useInitialVelocity = useInitialVelocity;
         m_maker = maker;
     }
 
@@ -27,7 +28,7 @@ public class StraightLineTrajectory {
      * rest.
      */
     public Trajectory100 apply(SwerveState startState, Pose2d end) {
-        if (Experiments.instance.enabled(Experiment.UseInitialVelocity))
+        if (m_useInitialVelocity)
             return movingToRest(startState, end);
         else
             return m_maker.restToRest(startState.translation(), end.getTranslation());

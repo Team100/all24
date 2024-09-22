@@ -31,7 +31,7 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testRestToRest() {
-        StraightLineTrajectory t = new StraightLineTrajectory(maker);
+        StraightLineTrajectory t = new StraightLineTrajectory(false, maker);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
@@ -40,8 +40,7 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testMovingToRest() {
-        Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
-        StraightLineTrajectory t = new StraightLineTrajectory(maker);
+        StraightLineTrajectory t = new StraightLineTrajectory(true, maker);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
@@ -50,8 +49,7 @@ class StraightLineTrajectoryTest {
 
     @Test
     void testBackingUp() {
-        Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
-        StraightLineTrajectory t = new StraightLineTrajectory(maker);
+        StraightLineTrajectory t = new StraightLineTrajectory(true, maker);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(-1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
@@ -60,8 +58,7 @@ class StraightLineTrajectoryTest {
 
     @Test
     void test2d() {
-        Experiments.instance.testOverride(Experiment.UseInitialVelocity, true);
-        StraightLineTrajectory t = new StraightLineTrajectory(maker);
+        StraightLineTrajectory t = new StraightLineTrajectory(true, maker);
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 1, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
