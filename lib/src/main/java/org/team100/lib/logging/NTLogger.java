@@ -5,9 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.team100.lib.telemetry.Chronos;
-import org.team100.lib.telemetry.Chronos.Sample;
-
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -25,14 +22,12 @@ import edu.wpi.first.wpilibj.DataLogManager;
 public class NTLogger extends PrimitiveLogger {
     private final NetworkTableInstance inst;
     private final Map<String, Publisher> m_publishers;
-    private final Chronos m_chronos;
 
     public NTLogger() {
         inst = NetworkTableInstance.getDefault();
         // Also log to disk
         DataLogManager.start();
         m_publishers = new ConcurrentHashMap<>();
-        m_chronos = Chronos.get();
     }
 
     @Override
@@ -47,17 +42,12 @@ public class NTLogger extends PrimitiveLogger {
 
     @Override
     public void logDouble(String key, double val) {
-        Sample s = m_chronos.sample("NTLogger/logDouble");
-        try {
-            pub(key, k -> {
-                DoubleTopic t = inst.getDoubleTopic(k);
-                DoublePublisher p = t.publish();
-                t.setRetained(true);
-                return p;
-            }, DoublePublisher.class).set(val);
-        } finally {
-            s.end();
-        }
+        pub(key, k -> {
+            DoubleTopic t = inst.getDoubleTopic(k);
+            DoublePublisher p = t.publish();
+            t.setRetained(true);
+            return p;
+        }, DoublePublisher.class).set(val);
     }
 
     @Override

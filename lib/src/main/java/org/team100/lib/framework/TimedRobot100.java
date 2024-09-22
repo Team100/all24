@@ -14,7 +14,6 @@ import java.util.PriorityQueue;
 import org.team100.lib.config.Identity;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.telemetry.Chronos;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -76,7 +75,6 @@ public class TimedRobot100 extends IterativeRobotBase {
     public static final double kDefaultPeriod = 0.02;
 
     protected final SupplierLogger2 m_logger;
-    private final Chronos chronos;
 
     // The C pointer to the notifier object. We don't use it directly, it is
     // just passed to the JNI bindings.
@@ -87,8 +85,6 @@ public class TimedRobot100 extends IterativeRobotBase {
     private final PriorityQueue<Callback> m_callbacks = new PriorityQueue<>();
 
     private final DoubleSupplierLogger2 m_log_slack;
-
-    private DoubleSupplierLogger2 m_log_elapsed;
 
     /** Constructor for TimedRobot. */
     protected TimedRobot100() {
@@ -102,20 +98,12 @@ public class TimedRobot100 extends IterativeRobotBase {
      */
     protected TimedRobot100(double period) {
         super(period);
-        boolean defaultEnabled = false;
-        if (Identity.instance.equals(Identity.BLANK)) {
-            defaultEnabled = true;
-        }
         m_logger = Telemetry.get().namedRootLogger("ROBOT");
         m_log_slack = m_logger.doubleLogger(Level.COMP, "slack time (s)");
-        chronos = Chronos.get();
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, period, "main loop");
-        addPeriodic(this::dumpChronos, period, "chronos output");
         NotifierJNI.setNotifierName(m_notifier, "TimedRobot");
-
         HAL.report(tResourceType.kResourceType_Framework, tInstances.kFramework_Timed);
-        m_log_elapsed = m_logger.doubleLogger(Level.COMP, "elapsed (s)");
     }
 
     @Override
@@ -177,25 +165,12 @@ public class TimedRobot100 extends IterativeRobotBase {
         }
     }
 
-    private void dumpChronos() {
-        final double elapsed = chronos.elapsed();
-        m_log_elapsed.log( () -> elapsed);
-        for (Map.Entry<String, Double> durations : chronos.durations().entrySet()) {
-            Double duration = durations.getValue();
-            String name = durations.getKey();
-            m_logger.doubleLogger(Level.COMP, "duration (s)/" + name).log( () -> duration);
-            double fraction = duration / elapsed;
-            m_logger.doubleLogger(Level.COMP, "fraction (pct)/" + name).log( () -> 100.0 * fraction);
-        }
-        chronos.reset();
-    }
-
     private void log(Runnable r, String name) {
         double startWaitingS = Timer.getFPGATimestamp();
         r.run();
         double endWaitingS = Timer.getFPGATimestamp();
         double durationS = endWaitingS - startWaitingS;
-        m_logger.doubleLogger(Level.COMP, "duration (s)/" + name).log( () -> durationS);
+        m_logger.doubleLogger(Level.COMP, "duration (s)/" + name).log(() -> durationS);
     }
 
     /** Ends the main loop in startCompetition(). */
