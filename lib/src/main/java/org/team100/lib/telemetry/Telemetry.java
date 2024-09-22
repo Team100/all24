@@ -3,7 +3,9 @@ package org.team100.lib.telemetry;
 import org.team100.lib.logging.DataLogLogger;
 import org.team100.lib.logging.DummySender;
 import org.team100.lib.logging.NTLogger;
+import org.team100.lib.logging.NTPrimitiveLogger2;
 import org.team100.lib.logging.PrimitiveLogger;
+import org.team100.lib.logging.PrimitiveLogger2;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.UdpPrimitiveLogger;
 import org.team100.lib.logging.UdpPrimitiveLogger2;
@@ -63,10 +65,8 @@ public class Telemetry {
      */
     private static final Telemetry instance = new Telemetry();
 
-    // private final NetworkTableInstance inst;
-    final PrimitiveLogger ntLogger;
-    final PrimitiveLogger usbLogger;
     final UdpPrimitiveLogger2 udpLogger;
+    final PrimitiveLogger2 ntLogger;
 
     private Level m_level;
 
@@ -81,14 +81,15 @@ public class Telemetry {
             Util.warn("You must have a log listener connected!");
             Util.warn("=======================================");
         }
-        // inst = NetworkTableInstance.getDefault();
-        ntLogger = new NTLogger();
-        usbLogger = new DataLogLogger();
+
+        ntLogger = new NTPrimitiveLogger2();
+
         // TODO: real senders
         DummySender dataSink = new DummySender();
         DummySender metaSink = new DummySender();
 
         udpLogger = new UdpPrimitiveLogger2(dataSink, metaSink);
+
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
         // DataLogManager.start();
@@ -119,9 +120,9 @@ public class Telemetry {
     public SupplierLogger2 fieldLogger() {
         SupplierLogger2 logger;
         if (USE_UDP_LOGGING) {
-            logger = new NetworkLogger(this, "field");
+            logger = new SupplierLogger2(this, "field", udpLogger);
         } else {
-            logger = new RootLogger(this, "field");
+            logger = new SupplierLogger2(this, "field", ntLogger);
         }
         logger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
         return logger;
@@ -130,9 +131,9 @@ public class Telemetry {
     public SupplierLogger2 namedRootLogger(
             String str) {
         if (USE_UDP_LOGGING) {
-            return new NetworkLogger(this, str);
+            return new SupplierLogger2(this, str, udpLogger);
         } else {
-            return new RootLogger(this, str);
+            return new SupplierLogger2(this, str, ntLogger);
         }
     }
 
