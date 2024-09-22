@@ -22,7 +22,7 @@ import com.ctre.phoenix6.SignalLogger;
  * stops; this means you should see the latest values after disabling the robot.
  */
 public class Telemetry {
-    private static final boolean USE_UDP_LOGGING = true;
+    private static final boolean USE_UDP_LOGGING = false;
     private static final boolean USE_REAL_UDP = true;
 
     public enum Level {
@@ -57,14 +57,22 @@ public class Telemetry {
 
     private UdpPrimitiveLogger2 udpLogger;
     private PrimitiveLogger2 ntLogger;
-
     private Level m_level;
+
+    /**
+     * root is "field", with a ".type"->"Field2d" entry as required by glass.
+     */
+    public final SupplierLogger2 fieldLogger;
+    public final SupplierLogger2 rootLogger;
 
     /**
      * Uses the default network table instance.
      * Clients should use the static instance, not the constructor.
      */
     private Telemetry() {
+        // this will be overridden by {@link TelemetryLevelPoller}
+        m_level = Level.TRACE;
+        
         if (USE_UDP_LOGGING) {
             Util.warn("=======================================");
             Util.warn("Using UDP network logging!");
@@ -83,8 +91,14 @@ public class Telemetry {
             ntLogger = new NTPrimitiveLogger2();
         }
 
-        // this will be overridden by {@link TelemetryLevelPoller}
-        m_level = Level.TRACE;
+        if (USE_UDP_LOGGING) {
+            fieldLogger = new SupplierLogger2(this::getLevel, "field", udpLogger);
+            rootLogger = new SupplierLogger2(this::getLevel, "log", udpLogger);
+        } else {
+            fieldLogger = new SupplierLogger2(this::getLevel, "field", ntLogger);
+            rootLogger = new SupplierLogger2(this::getLevel, "log", ntLogger);
+        }
+        fieldLogger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
 
         // turn off the CTRE log we never use
         SignalLogger.enableAutoLogging(false);
@@ -105,32 +119,6 @@ public class Telemetry {
 
     public static Telemetry instance() {
         return instance;
-    }
-
-    /**
-     * field logger root is "field" and has a ".type"->"Field2d" entry as required
-     * by glass.
-     */
-    // TODO: make this a static singleton
-    public SupplierLogger2 fieldLogger() {
-        SupplierLogger2 logger;
-        if (USE_UDP_LOGGING) {
-            logger = new SupplierLogger2(this::getLevel, "field", udpLogger);
-        } else {
-            logger = new SupplierLogger2(this::getLevel, "field", ntLogger);
-        }
-        logger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
-        return logger;
-    }
-
-    // TODO: make this a static singleton, so that TimedRobot100 can use the same
-    // one as RobotContainer.
-    public SupplierLogger2 namedRootLogger(String str) {
-        if (USE_UDP_LOGGING) {
-            return new SupplierLogger2(this::getLevel, str, udpLogger);
-        } else {
-            return new SupplierLogger2(this::getLevel, str, ntLogger);
-        }
     }
 
 }

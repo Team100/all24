@@ -114,9 +114,8 @@ public class RobotContainer implements Glassy {
         poller.setDefault(Level.TRACE);
 
         final Telemetry telemetry = Telemetry.instance();
-        // TODO: make these static singletons
-        final SupplierLogger2 fieldLogger = telemetry.fieldLogger();
-        final SupplierLogger2 logger = telemetry.namedRootLogger("log");
+        final SupplierLogger2 fieldLogger = telemetry.fieldLogger;
+        final SupplierLogger2 logger = telemetry.rootLogger;
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(logger, async);
