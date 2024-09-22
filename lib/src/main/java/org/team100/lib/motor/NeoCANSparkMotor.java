@@ -2,7 +2,7 @@ package org.team100.lib.motor;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
@@ -18,7 +18,7 @@ public class NeoCANSparkMotor extends CANSparkMotor {
      * Rev100}
      */
     public NeoCANSparkMotor(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,

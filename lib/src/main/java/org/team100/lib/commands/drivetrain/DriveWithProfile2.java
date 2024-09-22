@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -43,7 +43,7 @@ public class DriveWithProfile2 extends Command100 {
     private State100 m_thetaGoalRaw;
 
     public DriveWithProfile2(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             Supplier<Optional<Pose2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,

@@ -85,11 +85,6 @@ public class OperatorControlProxy implements OperatorControl {
     }
 
     @Override
-    public boolean selfTestEnable() {
-        return m_operatorControl.selfTestEnable();
-    }
-
-    @Override
     public boolean feed() {
         return m_operatorControl.feed();
     }

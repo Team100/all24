@@ -18,7 +18,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
@@ -35,7 +35,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class DriveToWaypoint3Test extends Fixtured {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
     private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
     SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
@@ -62,7 +62,6 @@ class DriveToWaypoint3Test extends Fixtured {
                 trajectories,
                 controller,
                 viz);
-        DriveToWaypoint3.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         command.execute100(0.02);
@@ -91,7 +90,6 @@ class DriveToWaypoint3Test extends Fixtured {
 
         DriveToWaypoint3 command = new DriveToWaypoint3(
                 logger, goal, drivetrain, maker, m_controller, viz);
-        DriveToWaypoint3.shutDownForTest();
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         command.execute100(0.02);

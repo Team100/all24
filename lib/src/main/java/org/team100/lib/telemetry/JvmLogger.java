@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
@@ -17,14 +18,24 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * LoggedRobot.GcStatsCollector().
  */
 public class JvmLogger implements Glassy {
-    private final SupplierLogger m_logger;
     private final Map<String, Long> times;
     private final Map<String, Long> counts;
+    // LOGGERS
+    private final LongSupplierLogger2 m_log_heap;
+    private final LongSupplierLogger2 m_log_nonheap;
+    private final LongSupplierLogger2 m_log_memory_total;
+    private final LongSupplierLogger2 m_log_gc_time;
+    private final LongSupplierLogger2 m_log_gc_count;
 
-    public JvmLogger(SupplierLogger parent) {
-        m_logger = parent.child(this);
+    public JvmLogger(SupplierLogger2 parent) {
+        SupplierLogger2 child = parent.child(this);
         times = new HashMap<>();
         counts = new HashMap<>();
+        m_log_heap = child.longLogger(Level.COMP, "MemoryUsage/heap");
+        m_log_nonheap = child.longLogger(Level.COMP, "MemoryUsage/non-heap");
+        m_log_memory_total = child.longLogger(Level.COMP, "MemoryPool/total");
+        m_log_gc_time = child.longLogger(Level.TRACE, "GCTimeMS/total");
+        m_log_gc_count = child.longLogger(Level.TRACE, "GCCounts/total");
     }
 
     /** This doesn't seem to ever log anything. */
@@ -41,15 +52,13 @@ public class JvmLogger implements Glassy {
             long thisCount = collectionCount - counts.get(pool);
             times.put(pool, collectionTime);
             counts.put(pool, collectionCount);
-            m_logger.logLong(Level.TRACE, "GCTimeMS/" + pool, () -> thisTime);
-            m_logger.logLong(Level.TRACE, "GCCounts/" + pool, () -> thisCount);
             accumTime += thisTime;
             accumCount += thisCount;
         }
         long finalAccumTime = accumTime;
         long finalAccumCount = accumCount;
-        m_logger.logLong(Level.TRACE, "GCTimeMS/total", () -> finalAccumTime);
-        m_logger.logLong(Level.TRACE, "GCCounts/total", () -> finalAccumCount);
+        m_log_gc_time.log(() -> finalAccumTime);
+        m_log_gc_count.log(() -> finalAccumCount);
     }
 
     public void logMemoryPools() {
@@ -57,16 +66,15 @@ public class JvmLogger implements Glassy {
         for (MemoryPoolMXBean bean : ManagementFactory.getMemoryPoolMXBeans()) {
             MemoryUsage usage = bean.getUsage();
             accumUsage += usage.getUsed();
-            m_logger.logLong(Level.COMP, "MemoryPool/" + bean.getName(), usage::getUsed);
         }
         long finalAccumUsage = accumUsage;
-        m_logger.logLong(Level.COMP, "MemoryPool/total", () -> finalAccumUsage);
+        m_log_memory_total.log(() -> finalAccumUsage);
     }
 
     public void logMemoryUsage() {
         MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
-        m_logger.logLong(Level.COMP, "MemoryUsage/heap", () -> bean.getHeapMemoryUsage().getUsed());
-        m_logger.logLong(Level.COMP, "MemoryUsage/non-heap", () -> bean.getNonHeapMemoryUsage().getUsed());
+        m_log_heap.log(() -> bean.getHeapMemoryUsage().getUsed());
+        m_log_nonheap.log(() -> bean.getNonHeapMemoryUsage().getUsed());
     }
 
     @Override

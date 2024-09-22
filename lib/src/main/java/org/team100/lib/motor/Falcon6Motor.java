@@ -2,7 +2,7 @@ package org.team100.lib.motor;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 /**
  * Falcon 500 using Phoenix 6.
@@ -12,7 +12,7 @@ import org.team100.lib.logging.SupplierLogger;
 public class Falcon6Motor extends Talon6Motor {
 
     public Falcon6Motor(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             int canId,
             MotorPhase motorPhase,
             double supplyLimit,

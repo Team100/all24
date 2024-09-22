@@ -3,7 +3,8 @@ package org.team100.lib.commands.arm;
 import java.util.Optional;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
@@ -45,14 +46,35 @@ public class ArmTrajectoryCommand extends Command100 {
 
     private final ArmTrajectories m_trajectories;
 
+    // LOGGERS
+
+    private final DoubleSupplierLogger2 m_log_Lower_FF;
+    private final DoubleSupplierLogger2 m_log_Lower_Controller_Output;
+    private final DoubleSupplierLogger2 m_log_Upper_FF;
+    private final DoubleSupplierLogger2 m_log_Upper_Controller_Output;
+    private final DoubleSupplierLogger2 m_log_Lower_Ref;
+    private final DoubleSupplierLogger2 m_log_Upper_Ref;
+    private final DoubleSupplierLogger2 m_log_Output_Upper;
+    private final DoubleSupplierLogger2 m_log_Output_Lower;
+
     private Trajectory m_trajectory;
 
     public ArmTrajectoryCommand(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             ArmSubsystem armSubSystem,
             ArmKinematics armKinematicsM,
             Translation2d goal) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
+        m_log_Lower_FF = child.doubleLogger(Level.TRACE, "Lower FF");
+        m_log_Lower_Controller_Output = child.doubleLogger(Level.TRACE, "Lower Controller Output");
+        m_log_Upper_FF = child.doubleLogger(Level.TRACE, "Upper FF");
+        m_log_Upper_Controller_Output = child.doubleLogger(Level.TRACE, "Upper Controller Output");
+        m_log_Lower_Ref = child.doubleLogger(Level.TRACE, "Lower Ref");
+        m_log_Upper_Ref = child.doubleLogger(Level.TRACE, "Upper Ref");
+        m_log_Output_Upper = child.doubleLogger(Level.TRACE, "Output Upper");
+        m_log_Output_Lower = child.doubleLogger(Level.TRACE, "Output Lower");
+
         m_armSubsystem = armSubSystem;
         m_armKinematicsM = armKinematicsM;
         m_goal = goal;
@@ -107,10 +129,10 @@ public class ArmTrajectoryCommand extends Command100 {
         ArmAngles rdot = getThetaVelReference(desiredState, r);
 
         // System.out.printf("%5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f\n",
-        //         measurement.get().th1, measurement.get().th2,
-        //         r.th1, r.th2,
-        //         velocityMeasurement.get().th1, velocityMeasurement.get().th2,
-        //         rdot.th1, rdot.th2);
+        // measurement.get().th1, measurement.get().th2,
+        // r.th1, r.th2,
+        // velocityMeasurement.get().th1, velocityMeasurement.get().th2,
+        // rdot.th1, rdot.th2);
 
         // feedforward
         // this is a guess.
@@ -127,14 +149,14 @@ public class ArmTrajectoryCommand extends Command100 {
 
         m_armSubsystem.set(u1, u2);
 
-        m_logger.logDouble(Level.TRACE, "Lower FF ", () -> ff1);
-        m_logger.logDouble(Level.TRACE, "Lower Controller Output: ", () -> u1_pos);
-        m_logger.logDouble(Level.TRACE, "Upper FF ", () -> ff2);
-        m_logger.logDouble(Level.TRACE, "Upper Controller Output: ", () -> u2_pos);
-        m_logger.logDouble(Level.TRACE, "Lower Ref: ", () -> r.th1);
-        m_logger.logDouble(Level.TRACE, "Upper Ref: ", () -> r.th2);
-        m_logger.logDouble(Level.TRACE, "Output Upper: ", () -> u1);
-        m_logger.logDouble(Level.TRACE, "Output Lower: ", () -> u2);
+        m_log_Lower_FF.log(() -> ff1);
+        m_log_Lower_Controller_Output.log(() -> u1_pos);
+        m_log_Upper_FF.log(() -> ff2);
+        m_log_Upper_Controller_Output.log(() -> u2_pos);
+        m_log_Lower_Ref.log(() -> r.th1);
+        m_log_Upper_Ref.log(() -> r.th2);
+        m_log_Output_Upper.log(() -> u1);
+        m_log_Output_Lower.log(() -> u2);
     }
 
     private State getDesiredState() {

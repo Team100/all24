@@ -7,18 +7,17 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.testing.Timeless;
 
 class SpinTest extends Fixtured implements Timeless {
     private static final double kDelta = 0.01;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testSimple() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         Spin command = new Spin(logger, fixture.drive, fixture.controller);
-        Spin.shutDownForTest();
         command.initialize();
         stepTime(0.02);
         // starts from rest

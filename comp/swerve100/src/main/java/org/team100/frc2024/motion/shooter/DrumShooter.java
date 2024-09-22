@@ -28,7 +28,8 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -65,20 +66,27 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private static final double kDriveReduction = 1;
     private static final double kWheelDiameterM = 0.1;
 
-    private final SupplierLogger m_logger;
-
     private final LinearVelocityServo leftRoller;
     private final LinearVelocityServo rightRoller;
     private final GravityServoInterface pivotServo;
 
+    // LOGGERS
+
+    private final OptionalDoubleLogger m_log_left_velocity;
+    private final OptionalDoubleLogger m_log_right_velocity;
+    private final OptionalDoubleLogger m_log_pivot_angle;
+
     public DrumShooter(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             int leftID,
             int rightID,
             int pivotID,
             double supplyLimit,
             double statorLimit) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
+        m_log_left_velocity = child.optionalDoubleLogger(Level.TRACE, "left velocity");
+        m_log_right_velocity = child.optionalDoubleLogger(Level.TRACE, "right velocity");
+        m_log_pivot_angle = child.optionalDoubleLogger(Level.TRACE, "pivot angle (rad)");
 
         double period = 0.02;
         PIDController pivotController = new PIDController(4.5, 0.0, 0.000, period);
@@ -86,9 +94,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         pivotController.setIntegratorRange(0, 0.1);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
 
-        SupplierLogger leftLogger = m_logger.child("Left");
-        SupplierLogger rightLogger = m_logger.child("Right");
-        SupplierLogger pivotLogger = m_logger.child("Pivot");
+        SupplierLogger2 leftLogger = child.child("Left");
+        SupplierLogger2 rightLogger = child.child("Right");
+        SupplierLogger2 pivotLogger = child.child("Pivot");
 
         // we use velocityvoltage control so the P value here is volts per rev/s of the
         // motor. Typical rev/s is 50, so typical error might be 5, and for that we'd
@@ -299,9 +307,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.TRACE, "left velocity", leftRoller::getVelocity);
-        m_logger.logOptionalDouble(Level.TRACE, "right velocity", rightRoller::getVelocity);
-        m_logger.logOptionalDouble(Level.TRACE, "pivot angle (rad)", pivotServo::getPositionRad);
+        m_log_left_velocity.log(leftRoller::getVelocity);
+        m_log_right_velocity.log(rightRoller::getVelocity);
+        m_log_pivot_angle.log(pivotServo::getPositionRad);
     }
 
     @Override

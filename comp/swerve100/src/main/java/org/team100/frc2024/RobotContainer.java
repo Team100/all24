@@ -50,12 +50,9 @@ import org.team100.lib.commands.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -64,20 +61,17 @@ import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
-import org.team100.lib.localization.CameraUpdater;
-import org.team100.lib.localization.FireControl;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.sensors.GyroFactory;
 import org.team100.lib.sensors.Gyro;
-import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.sensors.GyroFactory;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelPoller;
@@ -108,9 +102,7 @@ public class RobotContainer implements Glassy {
 
     private final SwerveModuleCollection m_modules;
     private final Command m_auton;
-    private final SelfTestRunner m_selfTest;
     private final DrumShooter m_shooter;
-    private final CameraUpdater m_cameraUpdater;
     final SwerveDriveSubsystem m_drive;
     final AmpFeeder m_ampFeeder;
     final AmpPivot m_ampPivot;
@@ -122,19 +114,17 @@ public class RobotContainer implements Glassy {
         poller.setDefault(Level.TRACE);
 
         final Telemetry telemetry = Telemetry.get();
-        final SupplierLogger fieldLogger = telemetry.fieldLogger(true, true);
+        final SupplierLogger2 fieldLogger = telemetry.fieldLogger();
 
-        final boolean defaultEnabled = Identity.instance.equals(Identity.BLANK);
-
-        final SupplierLogger sensorLogger = telemetry.namedRootLogger("SENSOR", defaultEnabled, false);
-        final SupplierLogger driveLogger = telemetry.namedRootLogger("DRIVE", defaultEnabled, false);
-        final SupplierLogger driveLowLevelLogger = telemetry.namedRootLogger("DRIVE_LOW_LEVEL", defaultEnabled, false);
-        final SupplierLogger commandLogger = telemetry.namedRootLogger("COMMAND", defaultEnabled, false);
-        final SupplierLogger shooterLogger = telemetry.namedRootLogger("SHOOTER", defaultEnabled, false);
-        final SupplierLogger intakeLogger = telemetry.namedRootLogger("INTAKE", defaultEnabled, false);
-        final SupplierLogger ampLogger = telemetry.namedRootLogger("AMP", defaultEnabled, false);
-        final SupplierLogger climberLogger = telemetry.namedRootLogger("CLIMBER", defaultEnabled, false);
-        final SupplierLogger visionLogger = telemetry.namedRootLogger("VISION", defaultEnabled, false);
+        final SupplierLogger2 sensorLogger = telemetry.namedRootLogger("SENSOR");
+        final SupplierLogger2 driveLogger = telemetry.namedRootLogger("DRIVE");
+        final SupplierLogger2 driveLowLevelLogger = telemetry.namedRootLogger("DRIVE_LOW_LEVEL");
+        final SupplierLogger2 commandLogger = telemetry.namedRootLogger("COMMAND");
+        final SupplierLogger2 shooterLogger = telemetry.namedRootLogger("SHOOTER");
+        final SupplierLogger2 intakeLogger = telemetry.namedRootLogger("INTAKE");
+        final SupplierLogger2 ampLogger = telemetry.namedRootLogger("AMP");
+        final SupplierLogger2 climberLogger = telemetry.namedRootLogger("CLIMBER");
+        final SupplierLogger2 visionLogger = telemetry.namedRootLogger("VISION");
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(driveLogger, async);
@@ -159,20 +149,17 @@ public class RobotContainer implements Glassy {
 
         // ignores the rotation derived from vision.
         final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
+                driveLogger,
                 gyro.getYawNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
 
-        final FireControl fireControl = new FireControl() {
-        };
-
         final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
         final VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 visionLogger,
                 m_layout,
-                poseEstimator,
-                fireControl);
+                poseEstimator);
 
         final SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
 
@@ -186,10 +173,6 @@ public class RobotContainer implements Glassy {
 
         final NotePosition24ArrayListener noteListener = new NotePosition24ArrayListener(
                 () -> m_drive.getState().pose());
-
-        m_cameraUpdater = new CameraUpdater(
-                () -> m_drive.getState().pose(),
-                m_layout);
 
         final FeederSubsystem feeder = new FeederSubsystem(shooterLogger, m_sensors);
 
@@ -228,7 +211,7 @@ public class RobotContainer implements Glassy {
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
 
-        final FullStateDriveController fullStateController = new FullStateDriveController();
+        // final FullStateDriveController fullStateController = new FullStateDriveController();
         final HolonomicDriveController100 dthetaController = new HolonomicDriveController100(commandLogger);
 
         final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
@@ -480,9 +463,6 @@ public class RobotContainer implements Glassy {
                                 new PrintCommand("nothing red goes here"),
                                 new PrintCommand("nothing blue goes here"))),
                 AutonChooser::routine);
-
-        // selftest uses fields we just initialized above, so it comes last.
-        m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
     }
 
     public void beforeCommandCycle() {
@@ -512,10 +492,6 @@ public class RobotContainer implements Glassy {
         new Trigger(condition).onTrue(command);
     }
 
-    public void scheduleSelfTest() {
-        m_selfTest.schedule();
-    }
-
     public void scheduleAuton() {
         if (m_auton == null)
             return;
@@ -523,8 +499,7 @@ public class RobotContainer implements Glassy {
     }
 
     public void periodic() {
-        if (Experiments.instance.enabled(Experiment.UseCameraUpdater))
-            m_cameraUpdater.update();
+        //
     }
 
     public void cancelAuton() {

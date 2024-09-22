@@ -10,7 +10,8 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -19,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootPreload extends Command implements Glassy {
-    private final SupplierLogger logger;
+    private final SupplierLogger2 logger;
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -29,11 +30,14 @@ public class ShootPreload extends Command implements Glassy {
     private final boolean m_isPreload;
     private final double m_pivotOverride;
 
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_pivot_deficit;
+
     private boolean atVelocity = false;
     private boolean finished = false;
 
     public ShootPreload(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
@@ -42,36 +46,27 @@ public class ShootPreload extends Command implements Glassy {
             double pivotOverride,
             boolean isPreload) {
         logger = parent.child(this);
-        m_intake = intake;
+        m_log_pivot_deficit = logger.doubleLogger(Level.TRACE, "pivot deficit");
         m_sensor = sensor;
-        m_feeder = feeder;
         m_shooter = shooter;
-        m_timer = new Timer();
+        m_intake = intake;
+        m_feeder = feeder;
         m_drive = drive;
         m_pivotOverride = pivotOverride;
         m_isPreload = isPreload;
+        m_timer = new Timer();
         addRequirements(m_intake, m_feeder, m_shooter);
     }
 
     public ShootPreload(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
-        logger = parent.child(this);
-        m_intake = intake;
-        m_sensor = sensor;
-        m_feeder = feeder;
-        m_shooter = shooter;
-        m_timer = new Timer();
-        m_drive = drive;
-        m_pivotOverride = -1;
-        m_isPreload = isPreload;
-
-        addRequirements(m_intake, m_feeder, m_shooter);
+        this(parent, sensor, shooter, intake, feeder, drive, -1, isPreload);
     }
 
     @Override
@@ -79,8 +74,6 @@ public class ShootPreload extends Command implements Glassy {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
-
-        logger.logString(Level.TRACE, "command state", () -> "initialize");
 
         double distance = m_drive.getState().pose().getTranslation()
                 .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
@@ -94,8 +87,6 @@ public class ShootPreload extends Command implements Glassy {
 
     @Override
     public void execute() {
-        logger.logString(Level.TRACE, "command state", () -> "end");
-        logger.logInt(Level.TRACE, "END", () -> 0);
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
@@ -112,7 +103,7 @@ public class ShootPreload extends Command implements Glassy {
         m_shooter.setAngle(pivotSetpoint);
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
-            logger.logDouble(Level.TRACE, "PIVOT DEFECIT",
+            m_log_pivot_deficit.log(
                     () -> Math.abs(shooterPivotPosition.getAsDouble() - pivotSetpoint));
         }
 
@@ -141,9 +132,6 @@ public class ShootPreload extends Command implements Glassy {
 
     @Override
     public void end(boolean interrupted) {
-        logger.logString(Level.TRACE, "command state", () -> "end");
-        logger.logString(Level.TRACE, "command state", () -> "end");
-        logger.logInt(Level.TRACE, "END", () -> 1);
         atVelocity = false;
         finished = false;
         m_timer.stop();

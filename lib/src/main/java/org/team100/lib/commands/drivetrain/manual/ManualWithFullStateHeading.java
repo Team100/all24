@@ -7,7 +7,10 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -28,7 +31,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Rotation uses simple full-state feedback and that's all..
  */
 public class ManualWithFullStateHeading implements FieldRelativeDriver {
-    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
@@ -37,6 +39,18 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
     // feedback gains
     private final double[] m_K;
     private final LinearFilter m_outputFilter;
+
+    private final StringSupplierLogger2 m_log_mode;
+    private final DoubleSupplierLogger2 m_log_goal_theta;
+    private final State100Logger m_log_setpoint_theta;
+    private final DoubleSupplierLogger2 m_log_measurement_theta;
+    private final DoubleSupplierLogger2 m_log_measurement_omega;
+    private final DoubleSupplierLogger2 m_log_error_theta;
+    private final DoubleSupplierLogger2 m_log_error_omega;
+    private final DoubleSupplierLogger2 m_log_theta_FF;
+    private final DoubleSupplierLogger2 m_log_theta_FB;
+    private final DoubleSupplierLogger2 m_log_omega_FB;
+    private final DoubleSupplierLogger2 m_log_output_omega;
 
     // package private for testing
     Rotation2d m_goal = null;
@@ -52,18 +66,29 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      * @param k                  full state gains
      */
     public ManualWithFullStateHeading(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             double[] k) {
+        SupplierLogger2 child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;
         m_desiredRotation = desiredRotation;
-        m_logger = parent.child(this);
         m_K = k;
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
+        m_log_mode = child.stringLogger(Level.TRACE, "mode");
+        m_log_goal_theta = child.doubleLogger(Level.TRACE, "goal/theta");
+        m_log_setpoint_theta = child.state100Logger(Level.TRACE, "setpoint/theta");
+        m_log_measurement_theta = child.doubleLogger(Level.TRACE, "measurement/theta");
+        m_log_measurement_omega = child.doubleLogger(Level.TRACE, "measurement/omega");
+        m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
+        m_log_error_omega = child.doubleLogger(Level.TRACE, "error/omega");
+        m_log_theta_FF = child.doubleLogger(Level.TRACE, "thetaFF");
+        m_log_theta_FB = child.doubleLogger(Level.TRACE, "thetaFB");
+        m_log_omega_FB = child.doubleLogger(Level.TRACE, "omegaFB");
+        m_log_output_omega = child.doubleLogger(Level.TRACE, "output/omega");
     }
 
     public void reset(Pose2d currentPose) {
@@ -118,7 +143,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
-            m_logger.logString(Level.TRACE, "mode", () -> "free");
+            m_log_mode.log(() -> "free");
             // desaturate to feasibility
             return m_swerveKinodynamics.analyticDesaturation(twistM_S);
         }
@@ -155,17 +180,17 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
 
         FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
-        m_logger.logString(Level.TRACE, "mode", () -> "snap");
-        m_logger.logDouble(Level.TRACE, "goal/theta", m_goal::getRadians);
-        m_logger.logState100(Level.TRACE, "setpoint/theta", () -> m_thetaSetpoint);
-        m_logger.logDouble(Level.TRACE, "measurement/theta", () -> yawMeasurement);
-        m_logger.logDouble(Level.TRACE, "measurement/omega", () -> yawRate);
-        m_logger.logDouble(Level.TRACE, "error/theta", () -> thetaError);
-        m_logger.logDouble(Level.TRACE, "error/omega", () -> omegaError);
-        m_logger.logDouble(Level.TRACE, "thetaFF", () -> thetaFF);
-        m_logger.logDouble(Level.TRACE, "thetaFB", () -> thetaFB);
-        m_logger.logDouble(Level.TRACE, "omegaFB", () -> omegaFB);
-        m_logger.logDouble(Level.TRACE, "output/omega", () -> omega);
+        m_log_mode.log(() -> "snap");
+        m_log_goal_theta.log(m_goal::getRadians);
+        m_log_setpoint_theta.log(() -> m_thetaSetpoint);
+        m_log_measurement_theta.log(() -> yawMeasurement);
+        m_log_measurement_omega.log(() -> yawRate);
+        m_log_error_theta.log(() -> thetaError);
+        m_log_error_omega.log(() -> omegaError);
+        m_log_theta_FF.log(() -> thetaFF);
+        m_log_theta_FB.log(() -> thetaFB);
+        m_log_omega_FB.log(() -> omegaFB);
+        m_log_output_omega.log(() -> omega);
 
         // desaturate the end result to feasibility by preferring the rotation over
         // translation

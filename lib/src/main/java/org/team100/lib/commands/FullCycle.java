@@ -5,7 +5,7 @@ import java.util.List;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.timing.ConstantConstraint;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -26,7 +26,7 @@ public class FullCycle extends SequentialCommandGroup {
     private static final Pose2d waypoint1 = new Pose2d(2, 2, GeometryUtil.kRotationZero);
 
     public FullCycle(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {

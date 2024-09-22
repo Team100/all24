@@ -1,6 +1,8 @@
 package org.team100.lib.motor;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -86,10 +88,14 @@ public class TalonSRXMotor implements BareMotor {
      */
     private static final double saturationVoltage = 11;
 
-    private final SupplierLogger m_logger;
     private final WPI_TalonSRX m_motor;
+    // LOGGERS
+    private final IntSupplierLogger2 m_log_id;
+    private final DoubleSupplierLogger2 m_log_encoder;
+    private final DoubleSupplierLogger2 m_log_velocity;
+    private final DoubleSupplierLogger2 m_log_output;
 
-    public TalonSRXMotor(SupplierLogger parent, int channel) {
+    public TalonSRXMotor(SupplierLogger2 parent, int channel) {
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
         m_motor.setNeutralMode(NeutralMode.Brake);
@@ -127,7 +133,11 @@ public class TalonSRXMotor implements BareMotor {
 
         m_motor.setSensorPhase(true);
 
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
+        m_log_id = child.intLogger(Level.TRACE, "Device ID");
+        m_log_encoder = child.doubleLogger(Level.TRACE, "Encoder Value");
+        m_log_velocity = child.doubleLogger(Level.TRACE, "Velocity Value");
+        m_log_output = child.doubleLogger(Level.TRACE, "Output");
     }
 
     public WPI_TalonSRX getMotor() {
@@ -137,7 +147,7 @@ public class TalonSRXMotor implements BareMotor {
     @Override
     public void setDutyCycle(double output) {
         m_motor.set(output);
-        m_logger.logDouble(Level.TRACE, "Output", () -> output);
+        m_log_output.log(() -> output);
         log();
     }
 
@@ -200,11 +210,9 @@ public class TalonSRXMotor implements BareMotor {
     }
 
     public void log() {
-        m_logger.logInt(Level.TRACE, "Device ID", m_motor::getDeviceID);
-        m_logger.logDouble(Level.TRACE, "Encoder Value",
-                () -> m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
-        m_logger.logDouble(Level.TRACE, "Velocity Value",
-                () -> m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
+        m_log_id.log(m_motor::getDeviceID);
+        m_log_encoder.log(() -> m_motor.getSelectedSensorPosition() / (m_gearRatio * ticksPerRevolution));
+        m_log_velocity.log(() -> m_motor.getSelectedSensorVelocity() / (ticksPerRevolution * m_gearRatio) * 10);
     }
 
     @Override

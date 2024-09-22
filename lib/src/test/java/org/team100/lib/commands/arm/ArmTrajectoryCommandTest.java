@@ -10,7 +10,7 @@ import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmFactory;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
 import org.team100.lib.testing.Timeless;
 
@@ -20,7 +20,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 
 class ArmTrajectoryCommandTest implements Timeless {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testSimple() {
@@ -32,7 +32,6 @@ class ArmTrajectoryCommandTest implements Timeless {
                 armSubSystem,
                 armKinematicsM,
                 goal);
-        ArmTrajectoryCommand.shutDownForTest();
         command.initialize();
         assertEquals(0, armSubSystem.getPosition().get().th1, kDelta);
         stepTime(0.02);

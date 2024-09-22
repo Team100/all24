@@ -6,7 +6,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -42,7 +42,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
     private final BatterySagLimiter m_BatterySagLimiter;
 
-    public AsymSwerveSetpointGenerator(SupplierLogger parent, SwerveKinodynamics limits) {
+    public AsymSwerveSetpointGenerator(SupplierLogger2 parent, SwerveKinodynamics limits) {
         m_limits = limits;
         m_centripetalLimiter = new CapsizeAccelerationLimiter(parent, limits);
         m_SteeringOverride = new SteeringOverride(parent, limits);
@@ -262,8 +262,6 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
     /**
      * Make sure desiredState respects velocity limits.
-     * 
-     * does not involve the Tire model.
      */
     private ChassisSpeeds desaturate(
             ChassisSpeeds desiredState,

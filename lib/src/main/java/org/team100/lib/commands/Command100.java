@@ -1,21 +1,12 @@
 package org.team100.lib.commands;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.io.StringWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,18 +17,16 @@ import edu.wpi.first.wpilibj2.command.Command;
  * The glass name leaf is always the implementing class name.
  */
 public abstract class Command100 extends Command implements Glassy {
-    private static final int kExecutePeriodMilliS = 5;
-
-    private static final ScheduledExecutorService m_scheduler = Executors.newSingleThreadScheduledExecutor(
-            new MaxPriorityThreads());
-
-    protected final SupplierLogger m_logger;
+    private final StringSupplierLogger2 m_log_command_state;
+    private final DoubleSupplierLogger2 m_log_dt;
 
     private double prevTime;
     private Future<?> m_task;
 
-    protected Command100(SupplierLogger parent) {
-        m_logger = parent.child(this);
+    protected Command100(SupplierLogger2 parent) {
+        SupplierLogger2 child = parent.child(this);
+        m_log_command_state = child.stringLogger(Level.TRACE, "command state");
+        m_log_dt = child.doubleLogger(Level.TRACE, "dt");
     }
 
     public void initialize100() {
@@ -53,28 +42,17 @@ public abstract class Command100 extends Command implements Glassy {
 
     @Override
     public final void initialize() {
-        m_logger.logString(Level.TRACE, "command state", () -> "initialize");
+        m_log_command_state.log(() -> "initialize");
         prevTime = Timer.getFPGATimestamp();
         initialize100();
-        if (Experiments.instance.enabled(Experiment.UseCommandExecutor)) {
-            if (m_scheduler.isShutdown()) {
-                Util.warn("TEST MODE: skipping scheduler.");
-                return;
-            }
-            m_task = m_scheduler.scheduleAtFixedRate(new CrashWrapper(), 0, kExecutePeriodMilliS,
-                    TimeUnit.MILLISECONDS);
-        }
     }
 
     @Override
     public final void execute() {
-        if (Experiments.instance.enabled(Experiment.UseCommandExecutor)) {
-            return;
-        }
-        m_logger.logString(Level.TRACE, "command state", () -> "execute");
+        m_log_command_state.log(() -> "execute");
         double now = Timer.getFPGATimestamp();
         double dt = now - prevTime;
-        m_logger.logDouble(Level.TRACE, "dt", () -> dt);
+        m_log_dt.log(() -> dt);
         prevTime = now;
         execute100(dt);
     }
@@ -90,54 +68,4 @@ public abstract class Command100 extends Command implements Glassy {
     public final String getGlassName() {
         return this.getClass().getSimpleName();
     }
-
-    /**
-     * {@link #execute100()} is usually run in a separate thread, but for tests,
-     * it's better to run it in the test itself.
-     */
-    public static void shutDownForTest() {
-        m_scheduler.shutdownNow();
-    }
-
-    private static class MaxPriorityThreads implements ThreadFactory {
-        private final AtomicInteger id;
-
-        private MaxPriorityThreads() {
-            id = new AtomicInteger();
-        }
-
-        /**
-         * Should only ever be called once but just in case, there's an incrementing
-         * id so we can tell what's happening.
-         */
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread thread = new Thread(r);
-            thread.setPriority(10);
-            thread.setDaemon(true);
-            thread.setName("Command100 Thread " + id.getAndIncrement());
-            return thread;
-        }
-    }
-
-    private class CrashWrapper implements Runnable {
-
-        @Override
-        public void run() {
-            try {
-                m_logger.logString(Level.TRACE, "command state", () -> "execute");
-                double now = Timer.getFPGATimestamp();
-                double dt = now - prevTime;
-                m_logger.logDouble(Level.TRACE, "dt", () -> dt);
-                prevTime = now;
-                execute100(dt);
-            } catch (Throwable e) {
-                Util.warn(e.toString());
-                Writer writer = new StringWriter();
-                e.printStackTrace(new PrintWriter(writer));
-                Util.warn(writer.toString());
-            }
-        }
-    }
-
 }

@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,10 +24,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 class VisionDataProviderTest implements Timeless {
     private static final double kDelta = 0.01;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
-
-    FireControl f = new FireControl() {
-    };
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testEstimateRobotPose() throws IOException {
@@ -52,8 +47,7 @@ class VisionDataProviderTest implements Timeless {
         };
 
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         // in red layout blip 7 is on the other side of the field
 
@@ -106,8 +100,7 @@ class VisionDataProviderTest implements Timeless {
         };
 
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         // camera sees the tag straight ahead in the center of the frame,
         // but rotated pi/4 to the left. this is ignored anyway.
@@ -185,8 +178,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 2.4),
@@ -197,8 +189,6 @@ class VisionDataProviderTest implements Timeless {
 
         final String cameraSerialNumber = "1000000013c9c96c";
         final Blip24[] tags = new Blip24[] { tag3, tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -232,8 +222,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1),
@@ -242,8 +231,6 @@ class VisionDataProviderTest implements Timeless {
         // test camera has zero offset
         final String cameraSerialNumber = "test";
         final Blip24[] tags = new Blip24[] { tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -277,8 +264,7 @@ class VisionDataProviderTest implements Timeless {
         };
 
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1),
@@ -287,8 +273,6 @@ class VisionDataProviderTest implements Timeless {
         // test2 camera is 1m in front, so robot is 1m further away.
         final String cameraSerialNumber = "test2";
         final Blip24[] tags = new Blip24[] { tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -323,8 +307,7 @@ class VisionDataProviderTest implements Timeless {
         };
 
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag3 = new Blip24(3, new Transform3d(
                 new Translation3d(0.561, 0, 1),
@@ -336,8 +319,6 @@ class VisionDataProviderTest implements Timeless {
         // test camera has zero offset
         final String cameraSerialNumber = "test";
         final Blip24[] tags = new Blip24[] { tag3, tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, true);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -372,8 +353,7 @@ class VisionDataProviderTest implements Timeless {
         };
 
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -382,8 +362,6 @@ class VisionDataProviderTest implements Timeless {
         // test camera has zero offset
         final String cameraSerialNumber = "test1";
         final Blip24[] tags = new Blip24[] { tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -418,8 +396,7 @@ class VisionDataProviderTest implements Timeless {
         };
 
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(-1, 0, 1),
@@ -428,8 +405,6 @@ class VisionDataProviderTest implements Timeless {
         // test camera has zero offset
         final String cameraSerialNumber = "test";
         final Blip24[] tags = new Blip24[] { tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -464,8 +439,7 @@ class VisionDataProviderTest implements Timeless {
         };
 
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -474,8 +448,6 @@ class VisionDataProviderTest implements Timeless {
         // test camera has zero offset
         final String cameraSerialNumber = "test";
         final Blip24[] tags = new Blip24[] { tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -509,8 +481,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
@@ -519,8 +490,6 @@ class VisionDataProviderTest implements Timeless {
         // test camera has zero offset
         final String cameraSerialNumber = "test";
         final Blip24[] tags = new Blip24[] { tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -555,8 +524,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         Blip24 tag4 = new Blip24(4, new Transform3d(
                 new Translation3d(0, 0, 2),
@@ -565,8 +533,6 @@ class VisionDataProviderTest implements Timeless {
         // test1 camera is tilted up 45 degrees
         final String cameraSerialNumber = "test1";
         final Blip24[] tags = new Blip24[] { tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
@@ -601,8 +567,7 @@ class VisionDataProviderTest implements Timeless {
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         // 30 degrees, long side is sqrt2, so hypotenuse is sqrt2/sqrt3/2
         Blip24 tag4 = new Blip24(4, new Transform3d(
@@ -612,8 +577,6 @@ class VisionDataProviderTest implements Timeless {
         // test3 camera is tilted up 30 degrees
         final String cameraSerialNumber = "test3";
         final Blip24[] tags = new Blip24[] { tag4 };
-
-        Experiments.instance.testOverride(Experiment.Triangulate, false);
 
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);
         vdp.estimateRobotPose(cameraSerialNumber, tags, Timer.getFPGATimestamp(), Alliance.Red);

@@ -2,7 +2,9 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -10,17 +12,21 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 
 public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
-    private final SupplierLogger m_logger;
     private final RotaryMechanism m_motor;
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_position;
+    private final OptionalDoubleLogger m_log_rate;
 
     private double m_positionRad = 0;
     private double m_timeS = Timer.getFPGATimestamp();
 
     public SimulatedRotaryPositionSensor(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             RotaryMechanism motor) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_motor = motor;
+        m_log_position = child.doubleLogger(Level.TRACE, "position");
+        m_log_rate = child.optionalDoubleLogger(Level.TRACE, "rate");
     }
 
     @Override
@@ -34,7 +40,7 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
         m_positionRad += velocityRad_S.getAsDouble() * dtS;
         m_positionRad = MathUtil.angleModulus(m_positionRad);
         m_timeS = nowS;
-        m_logger.logDouble(Level.TRACE, "position", () -> m_positionRad);
+        m_log_position.log(() -> m_positionRad);
         return OptionalDouble.of(m_positionRad);
     }
 
@@ -44,7 +50,7 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
         OptionalDouble m_rate = m_motor.getVelocityRad_S();
         if (m_rate.isEmpty())
             return OptionalDouble.empty();
-        m_logger.logOptionalDouble(Level.TRACE, "rate", () -> m_rate);
+        m_log_rate.log(() -> m_rate);
         return m_rate;
     }
 

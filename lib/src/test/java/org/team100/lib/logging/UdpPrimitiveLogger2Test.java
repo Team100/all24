@@ -4,25 +4,22 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.logging.PrimitiveLogger2.BooleanLogger;
 import org.team100.lib.logging.PrimitiveLogger2.IntLogger;
 import org.team100.lib.logging.PrimitiveLogger2.StringLogger;
-import org.team100.lib.logging.PrimitiveLogger2;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleObjArraySupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.logging.PrimitiveLogger2.BooleanLogger;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger;
-import org.team100.lib.logging.SupplierLogger2.DoubleObjArraySupplierLogger;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger;
-import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
-import java.nio.charset.StandardCharsets;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -36,14 +33,14 @@ class UdpPrimitiveLogger2Test {
     void testSendingLocally() {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
         SupplierLogger2 logger = new SupplierLogger2(Telemetry.get(), "root", udpLogger);
-        BooleanSupplierLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
-        DoubleSupplierLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
-        IntSupplierLogger intLogger = logger.intLogger(Level.COMP, "intkey");
-        DoubleArraySupplierLogger doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
-        DoubleObjArraySupplierLogger doubleObjArrayLogger = logger.doubleObjArrayLogger(Level.COMP,
+        BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
+        DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
+        IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
+        DoubleArraySupplierLogger2 doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
+        DoubleObjArraySupplierLogger2 doubleObjArrayLogger = logger.doubleObjArrayLogger(Level.COMP,
                 "doubleobjarraykey");
-        LongSupplierLogger longLogger = logger.longLogger(Level.COMP, "longkey");
-        StringSupplierLogger stringLogger = logger.stringLogger(Level.COMP, "stringkey");
+        LongSupplierLogger2 longLogger = logger.longLogger(Level.COMP, "longkey");
+        StringSupplierLogger2 stringLogger = logger.stringLogger(Level.COMP, "stringkey");
 
         for (int i = 0; i < 100; ++i) {
             booleanLogger.log(() -> true);
@@ -93,48 +90,48 @@ class UdpPrimitiveLogger2Test {
         assertArrayEquals(expectedBB, actualBB);
 
         assertEquals(7, udpLogger.metadata.size());
-        assertEquals("/root/boolkey", udpLogger.metadata.get(0).label());
-        assertEquals("/root/doublekey", udpLogger.metadata.get(1).label());
-        assertEquals("/root/intkey", udpLogger.metadata.get(2).label());
-        assertEquals("/root/doublearraykey", udpLogger.metadata.get(3).label());
-        assertEquals("/root/doubleobjarraykey", udpLogger.metadata.get(4).label());
-        assertEquals("/root/longkey", udpLogger.metadata.get(5).label());
-        assertEquals("/root/stringkey", udpLogger.metadata.get(6).label());
+        assertEquals("root/boolkey", udpLogger.metadata.get(0).label());
+        assertEquals("root/doublekey", udpLogger.metadata.get(1).label());
+        assertEquals("root/intkey", udpLogger.metadata.get(2).label());
+        assertEquals("root/doublearraykey", udpLogger.metadata.get(3).label());
+        assertEquals("root/doubleobjarraykey", udpLogger.metadata.get(4).label());
+        assertEquals("root/longkey", udpLogger.metadata.get(5).label());
+        assertEquals("root/stringkey", udpLogger.metadata.get(6).label());
 
         udpLogger.dumpLabels();
-        assertEquals(147, mb.remaining());
+        assertEquals(140, mb.remaining());
 
         expectedStr = // skip "\00\00\00\00\00\00\00\00" // timestamp
                  "\00\01" // key
                 + "\01" // type
-                + "\15" // 1 6 length
-                + "/root/boolkey" // 13 19 label
+                + "\14" // 1 6 length
+                + "root/boolkey" // 13 19 label
                 + "\00\02" // key
                 + "\02" // type
-                + "\17" // 1 20 length
-                + "/root/doublekey" // 15 35 label
+                + "\16" // 1 20 length
+                + "root/doublekey" // 15 35 label
                 + "\00\03" // key
                 + "\03" // type
-                + "\14" // 1 36 length
-                + "/root/intkey" // 12 48 label
+                + "\13" // 1 36 length
+                + "root/intkey" // 12 48 label
                 + "\00\04" // key
                 + "\04" // type
-                + "\24" // 1 49 length
-                + "/root/doublearraykey" // 20 69 label
+                + "\23" // 1 49 length
+                + "root/doublearraykey" // 20 69 label
                 + "\00\05" // key
                 + "\04" // type
-                + "\27" // 1 70 length
-                + "/root/doubleobjarraykey" // 23 93 label
+                + "\26" // 1 70 length
+                + "root/doubleobjarraykey" // 23 93 label
                 + "\00\06" // key
                 + "\05" // type
-                + "\15" // 1 94 length
-                + "/root/longkey" // 13 107 label
+                + "\14" // 1 94 length
+                + "root/longkey" // 13 107 label
                 + "\00\07" // key
                 + "\06" // type
-                + "\17" // 1 108 length
-                + "/root/stringkey"; // 15 123 label
+                + "\16" // 1 108 length
+                + "root/stringkey"; // 15 123 label
         expectedBB = expectedStr.getBytes(StandardCharsets.US_ASCII);
-        actualBB = new byte[139];
+        actualBB = new byte[132];
         mb.get(new byte[8]); // skip
         mb.get(actualBB);
         assertArrayEquals(expectedBB, actualBB);
@@ -146,14 +143,14 @@ class UdpPrimitiveLogger2Test {
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
         SupplierLogger2 logger = new SupplierLogger2(Telemetry.get(), "root", udpLogger);
-        BooleanSupplierLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
-        DoubleSupplierLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
-        IntSupplierLogger intLogger = logger.intLogger(Level.COMP, "intkey");
-        DoubleArraySupplierLogger doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
-        DoubleObjArraySupplierLogger doubleObjArrayLogger = logger.doubleObjArrayLogger(Level.COMP,
+        BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
+        DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
+        IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
+        DoubleArraySupplierLogger2 doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
+        DoubleObjArraySupplierLogger2 doubleObjArrayLogger = logger.doubleObjArrayLogger(Level.COMP,
                 "doubleobjarraykey");
-        LongSupplierLogger longLogger = logger.longLogger(Level.COMP, "longkey");
-        StringSupplierLogger stringLogger = logger.stringLogger(Level.COMP, "stringkey");
+        LongSupplierLogger2 longLogger = logger.longLogger(Level.COMP, "longkey");
+        StringSupplierLogger2 stringLogger = logger.stringLogger(Level.COMP, "stringkey");
 
         udpLogger.dumpLabels();
 
@@ -168,13 +165,13 @@ class UdpPrimitiveLogger2Test {
         }
         udpLogger.flush();
         assertEquals(7, udpLogger.metadata.size());
-        assertEquals("/root/boolkey", udpLogger.metadata.get(0).label());
-        assertEquals("/root/doublekey", udpLogger.metadata.get(1).label());
-        assertEquals("/root/intkey", udpLogger.metadata.get(2).label());
-        assertEquals("/root/doublearraykey", udpLogger.metadata.get(3).label());
-        assertEquals("/root/doubleobjarraykey", udpLogger.metadata.get(4).label());
-        assertEquals("/root/longkey", udpLogger.metadata.get(5).label());
-        assertEquals("/root/stringkey", udpLogger.metadata.get(6).label());
+        assertEquals("root/boolkey", udpLogger.metadata.get(0).label());
+        assertEquals("root/doublekey", udpLogger.metadata.get(1).label());
+        assertEquals("root/intkey", udpLogger.metadata.get(2).label());
+        assertEquals("root/doublearraykey", udpLogger.metadata.get(3).label());
+        assertEquals("root/doubleobjarraykey", udpLogger.metadata.get(4).label());
+        assertEquals("root/longkey", udpLogger.metadata.get(5).label());
+        assertEquals("root/stringkey", udpLogger.metadata.get(6).label());
     }
 
     /**
@@ -212,7 +209,7 @@ class UdpPrimitiveLogger2Test {
         final double total_time = 2;
         final int keys = 5000;
         final double expected_keys_per_sec = keys / interval;
-        DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[keys];
+        DoubleSupplierLogger2[] loggers = new DoubleSupplierLogger2[keys];
         for (int j = 0; j < keys; ++j) {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }
@@ -258,7 +255,7 @@ class UdpPrimitiveLogger2Test {
         final int KEYS = 5000;
         final int ITERATIONS = (int) (total_time / interval);
 
-        DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[KEYS];
+        DoubleSupplierLogger2[] loggers = new DoubleSupplierLogger2[KEYS];
         for (int j = 0; j < KEYS; ++j) {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }
@@ -280,22 +277,6 @@ class UdpPrimitiveLogger2Test {
         System.out.printf("duration per flush us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS));
         System.out.printf("duration per key us %.3f\n", 1000000 * (t2 - t1) / (ITERATIONS * KEYS));
         System.out.printf("keys per second %.0f\n", ITERATIONS * KEYS / (t2 - t1));
-    }
-
-    /**
-     * For performance testing, to count output packets.
-     */
-    class DummySender implements Consumer<ByteBuffer> {
-        private int m_counter = 0;
-
-        @Override
-        public void accept(ByteBuffer arg0) {
-            m_counter++;
-        }
-
-        public int getCounter() {
-            return m_counter;
-        }
     }
 
     /**
@@ -322,7 +303,7 @@ class UdpPrimitiveLogger2Test {
         final int KEYS = 20000;
         final int ITERATIONS = 10000;
 
-        DoubleSupplierLogger[] loggers = new DoubleSupplierLogger[KEYS];
+        DoubleSupplierLogger2[] loggers = new DoubleSupplierLogger2[KEYS];
         for (int j = 0; j < KEYS; ++j) {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }

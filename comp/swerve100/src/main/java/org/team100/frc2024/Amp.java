@@ -2,14 +2,13 @@ package org.team100.frc2024;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.team100.frc2024.motion.AmpUtil;
 import org.team100.lib.commands.drivetrain.DriveWithWaypoints;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.logging.SupplierLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,8 +16,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class Amp extends SequentialCommandGroup {
     public Amp(
-            SupplierLogger parent,
-            Supplier<Pose2d> poseSupplier,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem m_swerve,
             DriveMotionController controller,
             SwerveKinodynamics limits) {

@@ -5,10 +5,12 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.motion.components.LimitedLinearVelocityServo;
 import org.team100.lib.motion.components.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.logging.SupplierLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
@@ -22,7 +24,6 @@ public class Intake extends SubsystemBase implements Glassy {
     private static final double kWheelDiameterM = 0.05;
     private static final int kCurrentLimit = 20;
 
-    private final SupplierLogger m_logger;
     private final SensorInterface m_sensors;
 
     // this uses PWMSparkMax instead of PWM to get MotorSafety.
@@ -30,11 +31,20 @@ public class Intake extends SubsystemBase implements Glassy {
     private final PWMSparkMax m_centering;
     private final LimitedLinearVelocityServo superRollers;
 
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_lower;
+    private final OptionalDoubleLogger m_log_upper;
+    private final DoubleSupplierLogger2 m_log_centering;
+
     private int count = 0;
     private int currentCount = 0;
 
-    public Intake(SupplierLogger parent, SensorInterface sensors) {
-        m_logger = parent.child(this);
+    public Intake(SupplierLogger2 parent, SensorInterface sensors) {
+        SupplierLogger2 child = parent.child(this);
+        m_log_lower = child.doubleLogger(Level.TRACE, "lower");
+        m_log_upper = child.optionalDoubleLogger(Level.TRACE, "upper");
+        m_log_centering = child.doubleLogger(Level.TRACE, "centering");
+
         m_sensors = sensors;
 
         switch (Identity.instance) {
@@ -42,7 +52,7 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_intake = new PWMSparkMax(1);
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedNeoVelocityServo(
-                        m_logger.child("Super Roller"),
+                        child.child("Super Roller"),
                         5,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
@@ -59,7 +69,7 @@ public class Intake extends SubsystemBase implements Glassy {
                 m_intake = new PWMSparkMax(1);
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedSimulatedVelocityServo(
-                        m_logger.child("Super Roller"),
+                        child.child("Super Roller"),
                         kGearRatio,
                         kWheelDiameterM,
                         kMaxVelocity,
@@ -125,9 +135,9 @@ public class Intake extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        m_logger.logDouble(Level.TRACE, "lower", m_intake::get);
-        m_logger.logOptionalDouble(Level.TRACE, "upper", superRollers::getVelocity);
-        m_logger.logDouble(Level.TRACE, "centering", m_centering::get);
+        m_log_lower.log(m_intake::get);
+        m_log_upper.log(superRollers::getVelocity);
+        m_log_centering.log(m_centering::get);
     }
 
     @Override

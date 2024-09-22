@@ -9,7 +9,8 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -18,7 +19,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootSmart extends Command implements Glassy {
-    private final SupplierLogger m_logger;
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -26,17 +26,21 @@ public class ShootSmart extends Command implements Glassy {
     private final SwerveDriveSubsystem m_drive;
     private final boolean m_isPreload;
 
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_pivot_error;
+
     private boolean atVelocity;
 
     public ShootSmart(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
+        m_log_pivot_error = child.doubleLogger(Level.TRACE, "pivot error (rad)");
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;
@@ -63,7 +67,7 @@ public class ShootSmart extends Command implements Glassy {
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
             double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
-            m_logger.logDouble(Level.TRACE, "pivot error (rad)", () -> errorRad);
+            m_log_pivot_error.log(() -> errorRad);
         }
 
         // no matter the note position, set the shooter angle and speed

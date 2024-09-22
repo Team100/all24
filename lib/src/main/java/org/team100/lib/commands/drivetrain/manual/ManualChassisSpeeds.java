@@ -1,7 +1,8 @@
 package org.team100.lib.commands.drivetrain.manual;
 
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -17,12 +18,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * corresponding ChassisSpeeds components (and scaled).
  */
 public class ManualChassisSpeeds implements ChassisSpeedDriver {
-    private final SupplierLogger m_logger;
     private final SwerveKinodynamics m_swerveKinodynamics;
+    // LOGGERS
+    private final ChassisSpeedsLogger m_log_chassis_speeds;
 
-    public ManualChassisSpeeds(SupplierLogger parent, SwerveKinodynamics swerveKinodynamics) {
+    public ManualChassisSpeeds(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
+        SupplierLogger2 child = parent.child(this);
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerveKinodynamics = swerveKinodynamics;
-        m_logger = parent.child(this);
     }
 
     /**
@@ -41,7 +44,7 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver {
 
         // desaturate to feasibility
         ChassisSpeeds speeds = m_swerveKinodynamics.analyticDesaturation(scaled);
-        m_logger.logChassisSpeeds(Level.TRACE, "speeds", () -> speeds);
+        m_log_chassis_speeds.log(() -> speeds);
         return speeds;
     }
 

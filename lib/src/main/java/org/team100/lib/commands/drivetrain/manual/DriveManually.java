@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -47,7 +47,7 @@ public class DriveManually extends Command100 {
     String currentManualMode = null;
 
     public DriveManually(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             Supplier<DriverControl.Velocity> twistSupplier,
             SwerveDriveSubsystem robotDrive) {
         super(parent);
@@ -80,11 +80,13 @@ public class DriveManually extends Command100 {
     @Override
     public void execute100(double dt) {
         String manualMode = m_mode.get();
+        // System.out.println("manual mode " + manualMode);
         if (manualMode == null) {
             return;
         }
 
         if (!(manualMode.equals(currentManualMode))) {
+            // System.out.println("reset mode");
             currentManualMode = manualMode;
             // there's state in there we'd like to forget
             Pose2d p = m_drive.getState().pose();
@@ -95,6 +97,7 @@ public class DriveManually extends Command100 {
 
         // input in [-1,1] control units
         DriverControl.Velocity input = m_twistSupplier.get();
+        // System.out.println("input" + input);
         SwerveState state = m_drive.getState();
         Driver d = m_drivers.getOrDefault(manualMode, m_defaultDriver);
         d.apply(state, input, dt);
@@ -117,11 +120,13 @@ public class DriveManually extends Command100 {
 
     /** Register a driver for module state mode */
     public void register(String name, boolean isDefault, ModuleStateDriver d) {
+        // System.out.println("register " + name);
         addName(name, isDefault);
         m_drivers.put(
                 name,
                 new Driver() {
                     public void apply(SwerveState s, DriverControl.Velocity t, double dt) {
+                        // System.out.println("apply t " + t);
                         m_drive.setRawModuleStates(d.apply(t));
                     }
 

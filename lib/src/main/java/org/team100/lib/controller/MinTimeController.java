@@ -3,7 +3,8 @@ package org.team100.lib.controller;
 import java.util.function.DoubleUnaryOperator;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -90,7 +91,6 @@ import edu.wpi.first.math.MathUtil;
  * TODO: allow different acceleration and deceleration.
  */
 public class MinTimeController implements Glassy {
-    private final SupplierLogger m_logger;
 
     // how close to a boundary (e.g. switching curve, max v) to behave as if we were
     // "on" the boundary
@@ -119,6 +119,8 @@ public class MinTimeController implements Glassy {
     private final double m_switchingAcceleration;
     private final double m_tolerance;
 
+    private final StringSupplierLogger2 m_log_mode;
+
     /**
      * @param modulus        for angle wrapping
      * @param maxVel
@@ -135,7 +137,7 @@ public class MinTimeController implements Glassy {
      * @param k              full-state gains
      */
     public MinTimeController(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             DoubleUnaryOperator modulus,
             double maxVel,
             double switchingAccel,
@@ -152,7 +154,8 @@ public class MinTimeController implements Glassy {
         m_tolerance = tolerance;
         m_finish = finish;
         m_k = k;
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
+        m_log_mode = child.stringLogger(Level.TRACE, "mode");
     }
 
     private State100 modulus(double x, double v, double a) {
@@ -192,13 +195,13 @@ public class MinTimeController implements Glassy {
 
         // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
-            m_logger.logString(Level.TRACE, "mode", () -> "within tolerance");
+            m_log_mode.log(() -> "within tolerance");
             return modulus(goal);
         }
 
         // NEAR THE GOAL: USE FULL STATE to avoid oscillation
         if (goal.near(initial, m_finish)) {
-            m_logger.logString(Level.TRACE, "mode", () -> "full state");
+            m_log_mode.log(() -> "full state");
             double xError = goal.x() - initial.x();
             double vError = goal.v() - initial.v();
             double u_FBx = xError * m_k[0];
@@ -228,7 +231,7 @@ public class MinTimeController implements Glassy {
             return modulus(initial);
         }
 
-        m_logger.logString(Level.TRACE, "mode", () -> "min time");
+        m_log_mode.log(() -> "min time");
 
         // ON THE INITIAL PATH
 
@@ -257,7 +260,7 @@ public class MinTimeController implements Glassy {
             return fullG(dt, initial, -1);
         }
 
-        System.out.println("nonzero");
+        // System.out.println("nonzero");
 
         // There can be two non-zero-duration paths. As above, this happens when we're
         // on the goal path. The difference is that in this case, the goal has non-zero

@@ -2,26 +2,30 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 /** encoder implementation that supports only velocity measurement. */
 public class VelocityBareEncoder implements IncrementalBareEncoder {
-    private final SupplierLogger m_logger;
     private final BareMotor m_motor;
+    // LOGGERS
+    private final OptionalDoubleLogger m_log_position;
+    private final OptionalDoubleLogger m_log_velocity;
 
     public VelocityBareEncoder(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             BareMotor motor) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_motor = motor;
+        m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (rad)");
+        m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
     @Override
     public OptionalDouble getVelocityRad_S() {
         double m_rate = m_motor.getVelocityRad_S();
-        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> m_rate);
         return OptionalDouble.of(m_rate);
     }
 
@@ -47,8 +51,8 @@ public class VelocityBareEncoder implements IncrementalBareEncoder {
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", this::getPositionRad);
-        m_logger.logOptionalDouble(Level.TRACE, "velocity (rad_s)", this::getVelocityRad_S);
+        m_log_position.log(this::getPositionRad);
+        m_log_velocity.log(this::getVelocityRad_S);
     }
 
 }

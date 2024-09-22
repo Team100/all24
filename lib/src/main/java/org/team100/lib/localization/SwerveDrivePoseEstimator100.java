@@ -5,10 +5,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
-import org.team100.lib.geometry.Vector2d;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
@@ -17,7 +16,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
-import org.team100.lib.util.SlipperyTireUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,11 +26,12 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     // look back a little to get a pose for velocity estimation
     private static final double velocityDtS = 0.02;
 
-    private final SupplierLogger m_logger;
     private final int m_numModules;
     private final SwerveKinodynamics m_kinodynamics;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
-    private final SlipperyTireUtil m_tireUtil;
+    // LOGGERS
+    private final Rotation2dLogger m_log_offset;
+    private final DoubleSupplierLogger2 m_log_pose_x;
 
     /**
      * maintained in resetPosition().
@@ -48,18 +47,17 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      * @param initialPoseMeters The starting pose estimate.
      */
     public SwerveDrivePoseEstimator100(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveKinodynamics kinodynamics,
             Rotation2d gyroAngle,
             SwerveModulePosition100[] modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
-        m_tireUtil = new SlipperyTireUtil(m_logger, m_kinodynamics.getTire());
         m_poseBuffer = new TimeInterpolatableBuffer100<>(
-                m_logger,
+                child,
                 kBufferDuration,
                 timestampSeconds,
                 new InterpolationRecord(
@@ -71,10 +69,13 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         gyroAngle,
                         modulePositions));
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
+        m_log_offset = child.rotation2dLogger(Level.TRACE, "GYRO OFFSET");
+        m_log_pose_x = child.doubleLogger(Level.TRACE, "posex");
     }
 
     @Override
     public SwerveState get(double timestampSeconds) {
+        // System.out.println("pose estimator get " + timestampSeconds);
         return m_poseBuffer.get(timestampSeconds).m_state;
     }
 
@@ -101,7 +102,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         gyroAngle,
                         modulePositions));
 
-        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
+        m_log_offset.log( () -> m_gyroOffset);
     }
 
     @Override
@@ -129,7 +130,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         InterpolationRecord sample = m_poseBuffer.get(timestampS);
 
         // Step 2: Measure the twist between the odometry pose and the vision pose.
-        Twist2d twist = sample.m_state.pose().log(measurement);
+        Pose2d pose = sample.m_state.pose();
+        Twist2d twist = pose.log(measurement);
 
         // Step 3: We should not trust the twist entirely, so instead we scale this
         // twist by a Kalman gain matrix representing how much we trust vision
@@ -152,7 +154,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         // this should have no effect if you disregard vision angle input
 
         m_gyroOffset = newPose.getRotation().minus(sample.m_gyroAngle);
-        m_logger.logRotation2d(Level.TRACE, "GYRO OFFSET", () -> m_gyroOffset);
+        m_log_offset.log( () -> m_gyroOffset);
 
         // Step 6: Record the current pose to allow multiple measurements from the same
         // timestamp
@@ -198,34 +200,12 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
 
         double t1 = currentTimeS - lowerEntry.getKey();
-        m_logger.logDouble(Level.TRACE, "t1", () -> t1);
         InterpolationRecord value = lowerEntry.getValue();
         SwerveState previousPose = value.m_state;
 
         SwerveModulePosition100[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 value.m_wheelPositions,
                 wheelPositions);
-
-        SwerveState earlierPose = null;
-        double t0 = 0;
-        if (Experiments.instance.enabled(Experiment.SlipperyTires) && consistentPair.size() > 1) {
-            // get an earlier pose in order to adjust the corner velocities
-            Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
-
-            t0 = lowerEntry.getKey() - earlierEntry.getKey();
-            final double t00 = t0;
-            m_logger.logDouble(Level.TRACE, "t0", () -> t00);
-            earlierPose = earlierEntry.getValue().m_state;
-            Vector2d[] corners = m_tireUtil.cornerDeltas(
-                    m_kinodynamics.getKinematics(),
-                    earlierPose.pose(),
-                    previousPose.pose());
-            final SwerveModulePosition100[] delta0 = modulePositionDelta;
-            m_logger.logSwerveModulePosition100(Level.TRACE, "delta0", () -> delta0[0]);
-            modulePositionDelta = m_tireUtil.adjust(corners, t0, modulePositionDelta, t1);
-            final SwerveModulePosition100[] delta1 = modulePositionDelta;
-            m_logger.logSwerveModulePosition100(Level.TRACE, "delta1", () -> delta1[0]);
-        }
 
         Twist2d twist = m_kinodynamics.getKinematics().toTwist2d(modulePositionDelta);
 
@@ -237,7 +217,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         Pose2d newPose = new Pose2d(previousPose.pose().exp(twist).getTranslation(), angle);
 
-        m_logger.logDouble(Level.TRACE, "posex", newPose::getX);
+        m_log_pose_x.log( newPose::getX);
 
         FieldRelativeDelta deltaTransform = FieldRelativeDelta.delta(
                 previousPose.pose(), newPose).div(t1);
@@ -245,8 +225,13 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 deltaTransform.getX(),
                 deltaTransform.getY(),
                 deltaTransform.getRotation().getRadians());
+
+        // calculate acceleration if possible
         FieldRelativeAcceleration accel = new FieldRelativeAcceleration(0, 0, 0);
-        if (earlierPose != null) {
+        if (consistentPair.size() > 1) {
+            Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
+            double t0 = lowerEntry.getKey() - earlierEntry.getKey();
+            SwerveState earlierPose = earlierEntry.getValue().m_state;
             FieldRelativeDelta earlierTransform = FieldRelativeDelta.delta(
                     earlierPose.pose(), previousPose.pose()).div(t0);
             accel = new FieldRelativeAcceleration(

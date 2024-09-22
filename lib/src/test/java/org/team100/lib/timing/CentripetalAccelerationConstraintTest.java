@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 class CentripetalAccelerationConstraintTest {
     private static final double kDelta = 0.001;
     private static final double kCentripetalScale = 1.0;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testSimple() {

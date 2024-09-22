@@ -4,7 +4,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.components.LinearPositionServo;
 import org.team100.lib.motion.components.OnboardLinearDutyCyclePositionServo;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -15,25 +15,24 @@ public class ClimberPosition extends Command implements Glassy {
 
     private final LinearPositionServo m_leftServo;
     private final LinearPositionServo m_rightServo;
-    private final SupplierLogger m_logger;
     private final ClimberSubsystem m_climber;
     private final double m_goalM;
 
     public ClimberPosition(
-            SupplierLogger logger,
+            SupplierLogger2 logger,
             double goalM,
             ClimberSubsystem climber) {
-        m_logger = logger.child(this);
+        SupplierLogger2 child = logger.child(this);
         m_goalM = goalM;
         m_climber = climber;
         m_leftServo = new OnboardLinearDutyCyclePositionServo(
-                m_logger,
+                child,
                 m_climber.getLeft(),
                 new PIDController(0.1, 0, 0),
                 0.02,
                 new TrapezoidProfile100(0.02, 0.1, 0.01));
         m_rightServo = new OnboardLinearDutyCyclePositionServo(
-                m_logger,
+                child,
                 m_climber.getRight(),
                 new PIDController(0.1, 0, 0),
                 0.02,

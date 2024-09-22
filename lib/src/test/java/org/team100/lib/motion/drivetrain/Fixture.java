@@ -9,7 +9,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.SimulatedGyro;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
 
 /**
@@ -25,8 +25,8 @@ public class Fixture {
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
     public HolonomicDriveController3 controller;
-    public SupplierLogger logger;
-    public SupplierLogger fieldLogger;
+    public SupplierLogger2 logger;
+    public SupplierLogger2 fieldLogger;
 
     public Fixture() {
         logger = new TestLogger().getSupplierLogger();
@@ -36,6 +36,7 @@ public class Fixture {
         gyro = new SimulatedGyro(swerveKinodynamics, collection);
         swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
+                logger,
                 gyro.getYawNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,

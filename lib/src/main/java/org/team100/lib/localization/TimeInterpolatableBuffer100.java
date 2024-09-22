@@ -9,7 +9,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.interpolation.Interpolatable;
@@ -20,7 +21,6 @@ import edu.wpi.first.math.interpolation.Interpolatable;
  * The buffer is never empty, so get() always returns *something*.
  */
 public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> implements Glassy {
-    private final SupplierLogger m_logger;
     private final double m_historyS;
     private final NavigableMap<Double, T> m_pastSnapshots = new ConcurrentSkipListMap<>();
 
@@ -32,18 +32,23 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * "read" (non-exclusive) lock.
      */
     private final ReadWriteLock m_lock = new ReentrantReadWriteLock();
+    private final StringSupplierLogger2 m_log_bottom;
+    private final StringSupplierLogger2 m_log_top;
 
-    public TimeInterpolatableBuffer100(SupplierLogger parent, double historyS, double timeS, T initialValue) {
-        m_logger = parent.child(this);
+    public TimeInterpolatableBuffer100(SupplierLogger2 parent, double historyS, double timeS, T initialValue) {
+        SupplierLogger2 child = parent.child(this);
         m_historyS = historyS;
         // no lock needed in constructor
         m_pastSnapshots.put(timeS, initialValue);
+        m_log_bottom = child.stringLogger(Level.TRACE, "bottom");
+        m_log_top = child.stringLogger(Level.TRACE, "top");
     }
 
     /**
      * Remove stale entries and add the new one.
      */
     public void put(double timeS, T value) {
+        // System.out.println("put " + timeS + " value " + value);
         try {
             // wait for in-progress double-reads
             m_lock.readLock().lock();
@@ -66,6 +71,7 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * Remove all entries and add the new one.
      */
     public void reset(double timeS, T value) {
+        // System.out.println("reset " + timeS + " value " + value);
         try {
             // wait for in-progress double-reads
             m_lock.readLock().lock();
@@ -80,9 +86,11 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * Sample the buffer at the given time.
      */
     public T get(double timeSeconds) {
+        // System.out.println("timeSeconds " + timeSeconds);
         // Special case for when the requested time is the same as a sample
         T nowEntry = m_pastSnapshots.get(timeSeconds);
         if (nowEntry != null) {
+            // System.out.println("now " + nowEntry);
             return nowEntry;
         }
         Entry<Double, T> topBound = null;
@@ -98,12 +106,14 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         // Return the opposite bound if the other is null
         if (topBound == null) {
             String bottomValue = bottomBound.getValue().toString();
-            m_logger.logString(Level.TRACE, "bottom", () -> bottomValue);
+            m_log_bottom.log(() -> bottomValue);
+            // System.out.println("bottom " + bottomValue);
             return bottomBound.getValue();
         }
         if (bottomBound == null) {
             String topValue = topBound.getValue().toString();
-            m_logger.logString(Level.TRACE, "top", () -> topValue);
+            m_log_top.log(() -> topValue);
+            // System.out.println("top " + topValue);
             return topBound.getValue();
         }
 
@@ -113,9 +123,9 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         // difference between top and bottom bounds).
 
         String bottomValue = bottomBound.getValue().toString();
-        m_logger.logString(Level.TRACE, "bottom", () -> bottomValue);
+        m_log_bottom.log(() -> bottomValue);
         String topValue = topBound.getValue().toString();
-        m_logger.logString(Level.TRACE, "top", () -> topValue);
+        m_log_top.log(() -> topValue);
         double timeSinceBottom = timeSeconds - bottomBound.getKey();
         double timeSpan = topBound.getKey() - bottomBound.getKey();
         double timeFraction = timeSinceBottom / timeSpan;

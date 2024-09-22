@@ -7,7 +7,8 @@ import java.util.function.Function;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.FullStateDriveController;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -30,6 +31,8 @@ public class FullStateTrajectoryListCommand extends Command100 {
     private final FullStateDriveController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;
     private final TrajectoryVisualization m_viz;
+    // LOGGERS
+    private final SwerveStateLogger m_log_reference;
 
     private Iterator<Trajectory100> m_trajectoryIter;
     private TrajectoryTimeIterator m_iter;
@@ -37,16 +40,18 @@ public class FullStateTrajectoryListCommand extends Command100 {
     private boolean m_aligned;
 
     public FullStateTrajectoryListCommand(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem swerve,
             Function<Pose2d, List<Trajectory100>> trajectories,
             TrajectoryVisualization viz) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
         m_controller = new FullStateDriveController();
         m_trajectories = trajectories;
         m_viz = viz;
         addRequirements(m_swerve);
+        m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");
     }
 
     @Override
@@ -89,7 +94,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
             SwerveState measurement = m_swerve.getState();
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
-            m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
+            m_log_reference.log( () -> reference);
         } else {
             // look one loop ahead by *previewing* the next point
             Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(dt);
@@ -105,7 +110,7 @@ public class FullStateTrajectoryListCommand extends Command100 {
             SwerveState measurement = m_swerve.getState();
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
-            m_logger.logSwerveState(Level.TRACE, "reference", () -> reference);
+            m_log_reference.log( () -> reference);
         }
 
     }

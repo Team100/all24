@@ -11,16 +11,14 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
-import org.team100.lib.logging.SupplierLogger;
-import org.team100.lib.logging.TestLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -36,7 +34,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 
 class SwerveDrivePoseEstimator100Test {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
     private static final boolean kPrint = false;
 
     private final SwerveModulePosition100 p0 = new SwerveModulePosition100(0, Optional.of(GeometryUtil.kRotationZero));
@@ -61,11 +59,11 @@ class SwerveDrivePoseEstimator100Test {
     @Test
     void outOfOrder() {
         // out of order vision updates
-        // no tire slip
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -165,130 +163,14 @@ class SwerveDrivePoseEstimator100Test {
     }
 
     @Test
-    void outOfOrderWithSliding() {
-        // out of order odometry?
-        // use a reasonable max accel.
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTestWithSlip(logger);
-        Experiments.instance.testOverride(Experiment.SlipperyTires, true);
-        double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
-        double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
-        SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
-                GeometryUtil.kRotationZero,
-                positionZero,
-                GeometryUtil.kPoseZero,
-                0); // zero initial time
-
-        // initial pose = 0
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.000, poseEstimator.get(0.02));
-        verify(0.000, poseEstimator.get(0.04));
-        verify(0.000, poseEstimator.get(0.06));
-        verify(0.000, poseEstimator.get(0.08));
-
-        // pose stays zero when updated at time zero
-        // if we try to update zero, there's nothing to compare it to,
-        // so we should just ignore this update.
-        poseEstimator.put(0.0, GeometryUtil.kRotationZero, positionZero);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.000, poseEstimator.get(0.02));
-        verify(0.000, poseEstimator.get(0.04));
-        verify(0.000, poseEstimator.get(0.06));
-        verify(0.000, poseEstimator.get(0.08));
-
-        // now vision says we're one meter away, so pose goes towards that
-        poseEstimator.put(0.01, visionRobotPoseMeters, stateStdDevs, visionMeasurementStdDevs);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.167, poseEstimator.get(0.02));
-        verify(0.167, poseEstimator.get(0.04));
-        verify(0.167, poseEstimator.get(0.06));
-        verify(0.167, poseEstimator.get(0.08));
-
-        // if we had added this vision measurement here, it would have pulled the
-        // estimate further
-        // poseEstimator.addVisionMeasurement(visionRobotPoseMeters, 0.015);
-        // verify(0.305, poseEstimator.get());
-
-        // wheels haven't moved, so the "odometry opinion" should be zero
-        // but it's not, it's applied relative to the vision update, so there's no
-        // change.
-        poseEstimator.put(0.02, GeometryUtil.kRotationZero, positionZero);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.167, poseEstimator.get(0.02));
-        verify(0.167, poseEstimator.get(0.04));
-        verify(0.167, poseEstimator.get(0.06));
-        verify(0.167, poseEstimator.get(0.08));
-
-        // wheels have moved 0.1m in +x, at t=0.04.
-        // but the velocity estimate says we're sliding, so it's a bit more than 0.1
-        // note the sliding rate is limited here.
-        poseEstimator.put(0.04, GeometryUtil.kRotationZero, position01);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.167, poseEstimator.get(0.02));
-        verify(0.267, poseEstimator.get(0.04));
-        verify(0.267, poseEstimator.get(0.06));
-        verify(0.267, poseEstimator.get(0.08));
-
-        // here's the delayed update from above, which replays the history
-        poseEstimator.put(0.015, visionRobotPoseMeters, stateStdDevs, visionMeasurementStdDevs);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.305, poseEstimator.get(0.02));
-        verify(0.405, poseEstimator.get(0.04));
-        verify(0.405, poseEstimator.get(0.06));
-        verify(0.405, poseEstimator.get(0.08));
-
-        // wheels are in the same position as the previous iteration,
-        // but we've moved since then so we must be sliding.
-        poseEstimator.put(0.06, GeometryUtil.kRotationZero, position01);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.305, poseEstimator.get(0.02));
-        verify(0.405, poseEstimator.get(0.04));
-        verify(0.501, poseEstimator.get(0.06));
-        verify(0.501, poseEstimator.get(0.08));
-
-        // a little earlier than the previous estimate does nothing.
-        // TODO: this is wrong; multiple vision updates should have
-        // the same effect no matter the order they're received.
-        poseEstimator.put(0.014, visionRobotPoseMeters, stateStdDevs, visionMeasurementStdDevs);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.305, poseEstimator.get(0.02));
-        verify(0.405, poseEstimator.get(0.04));
-        verify(0.501, poseEstimator.get(0.06));
-        verify(0.501, poseEstimator.get(0.08));
-
-        // a little later than the previous estimate works normally.
-        poseEstimator.put(0.016, visionRobotPoseMeters, stateStdDevs, visionMeasurementStdDevs);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.421, poseEstimator.get(0.02));
-        verify(0.521, poseEstimator.get(0.04));
-        verify(0.617, poseEstimator.get(0.06));
-        verify(0.617, poseEstimator.get(0.08));
-
-        // wheels not moving -> no change,
-        // except we are still sliding.
-        poseEstimator.put(0.08, GeometryUtil.kRotationZero, position01);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.421, poseEstimator.get(0.02));
-        verify(0.521, poseEstimator.get(0.04));
-        verify(0.617, poseEstimator.get(0.06));
-        verify(0.711, poseEstimator.get(0.08));
-
-        poseEstimator.put(1, GeometryUtil.kRotationZero, position01);
-        verify(0.000, poseEstimator.get(0.00));
-        verify(0.421, poseEstimator.get(0.02));
-        verify(0.521, poseEstimator.get(0.04));
-        verify(0.617, poseEstimator.get(0.06));
-        verify(0.711, poseEstimator.get(0.08));
-        verify(0.932, poseEstimator.get(1));
-    }
-
-    @Test
     void minorWeirdness() {
         // weirdness with out-of-order vision updates
-        // no wheel slip
+
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -397,6 +279,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -445,6 +328,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.1, 0.1, 0.1 };
         double[] visionMeasurementStdDevs = new double[] { 1.0, 1.0, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -493,6 +377,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.05, 0.05, 0.05 };
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -543,6 +428,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] stateStdDevs = new double[] { 0.001, 0.001, 0.01 };
         double[] visionMeasurementStdDevs = new double[] { 0.1, 0.1, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
+                logger,
                 GeometryUtil.kRotationZero,
                 positionZero,
                 GeometryUtil.kPoseZero,
@@ -591,7 +477,6 @@ class SwerveDrivePoseEstimator100Test {
 
     @Test
     void testAccuracyFacingTrajectory() {
-        // no wheel slip
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
 
         var fl = new SwerveModulePosition100();
@@ -640,7 +525,6 @@ class SwerveDrivePoseEstimator100Test {
 
     @Test
     void testBadInitialPose() {
-        // no wheel slip
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest(logger);
 
         var fl = new SwerveModulePosition100();

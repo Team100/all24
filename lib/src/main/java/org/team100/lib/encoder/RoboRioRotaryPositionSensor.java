@@ -2,7 +2,9 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -16,20 +18,28 @@ import edu.wpi.first.wpilibj.Timer;
 public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSensor {
     private static final double kTwoPi = 2.0 * Math.PI;
 
-    protected final SupplierLogger m_logger;
     private final double m_positionOffset;
     private final EncoderDrive m_drive;
+    // LOGGERS
+    private final OptionalDoubleLogger m_log_position;
+    private final DoubleSupplierLogger2 m_log_position_turns;
+    private final DoubleSupplierLogger2 m_log_position_turns_offset;
+    private final DoubleSupplierLogger2 m_log_rate;
 
     private Double m_prevAngleRad = null;
     private Double m_prevTimeS = null;
 
     protected RoboRioRotaryPositionSensor(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double inputOffset,
             EncoderDrive drive) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_positionOffset = Util.inRange(inputOffset, 0.0, 1.0);
         m_drive = drive;
+        m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (rad)");
+        m_log_position_turns = child.doubleLogger(Level.TRACE, "position (turns)");
+        m_log_position_turns_offset = child.doubleLogger(Level.TRACE, "position (turns-offset)");
+        m_log_rate = child.doubleLogger(Level.TRACE, "rate (rad)s)");
     }
 
     protected abstract OptionalDouble getRatio();
@@ -41,7 +51,7 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
     @Override
     public OptionalDouble getPositionRad() {
         OptionalDouble positionRad = getRad();
-        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", () -> positionRad);
+        m_log_position.log(() -> positionRad);
         return positionRad;
     }
 
@@ -65,10 +75,10 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
             return OptionalDouble.empty();
 
         double posTurns = mapSensorRange(ratio.getAsDouble());
-        m_logger.logDouble(Level.TRACE, "position (turns)", () -> posTurns);
+        m_log_position_turns.log(() -> posTurns);
 
         double turnsMinusOffset = posTurns - m_positionOffset;
-        m_logger.logDouble(Level.TRACE, "position (turns-offset)", () -> turnsMinusOffset);
+        m_log_position_turns_offset.log(() -> turnsMinusOffset);
 
         switch (m_drive) {
             case DIRECT:
@@ -109,7 +119,7 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
         m_prevTimeS = timeS;
 
         double rateRad_S = dxRad / dtS;
-        m_logger.logDouble(Level.TRACE, "rate (rad)s)", () -> rateRad_S);
+        m_log_rate.log(() -> rateRad_S);
         return OptionalDouble.of(rateRad_S);
     }
 

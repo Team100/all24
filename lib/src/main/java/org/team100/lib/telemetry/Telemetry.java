@@ -1,10 +1,10 @@
 package org.team100.lib.telemetry;
 
-import org.team100.lib.logging.DataLogLogger;
-import org.team100.lib.logging.NTLogger;
-import org.team100.lib.logging.PrimitiveLogger;
-import org.team100.lib.logging.SupplierLogger;
-import org.team100.lib.logging.UdpPrimitiveLogger;
+import org.team100.lib.logging.DummySender;
+import org.team100.lib.logging.NTPrimitiveLogger2;
+import org.team100.lib.logging.PrimitiveLogger2;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.UdpPrimitiveLogger2;
 import org.team100.lib.util.Util;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -25,7 +25,7 @@ public class Telemetry {
      * Using an experiment would be a pain.
      * TODO: remove the complexity here after the UDP thing is validated.
      */
-    private static final boolean USE_UDP_LOGGING = true;
+    private static final boolean USE_UDP_LOGGING = false;
 
     public enum Level {
         /**
@@ -59,15 +59,10 @@ public class Telemetry {
      * Logging is prevented after this much time per cycle.
      * TODO: tune this value to leave time for real work.
      */
-    private static final double kLoggingTimeBudgetS = 0.01;
     private static final Telemetry instance = new Telemetry();
 
-    private final LoadShedder m_loadShedder;
-
-    // private final NetworkTableInstance inst;
-    final PrimitiveLogger ntLogger;
-    final PrimitiveLogger usbLogger;
-    final UdpPrimitiveLogger udpLogger;
+    final UdpPrimitiveLogger2 udpLogger;
+    final PrimitiveLogger2 ntLogger;
 
     private Level m_level;
 
@@ -82,11 +77,15 @@ public class Telemetry {
             Util.warn("You must have a log listener connected!");
             Util.warn("=======================================");
         }
-        // inst = NetworkTableInstance.getDefault();
-        m_loadShedder = new LoadShedder(kLoggingTimeBudgetS);
-        ntLogger = new NTLogger();
-        usbLogger = new DataLogLogger();
-        udpLogger = new UdpPrimitiveLogger();
+
+        ntLogger = new NTPrimitiveLogger2();
+
+        // TODO: real senders
+        DummySender dataSink = new DummySender();
+        DummySender metaSink = new DummySender();
+
+        udpLogger = new UdpPrimitiveLogger2(dataSink, metaSink);
+
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
         // DataLogManager.start();
@@ -96,10 +95,6 @@ public class Telemetry {
 
     public void periodic() {
         udpLogger.periodic();
-    }
-
-    public LoadShedder getLoadShedder() {
-        return m_loadShedder;
     }
 
     void setLevel(Level level) {
@@ -114,25 +109,26 @@ public class Telemetry {
         return instance;
     }
 
-    public SupplierLogger fieldLogger(boolean defaultEnabledNT, boolean defaultEnabledUSB) {
+    /**
+     * field logger root is "field" and has a ".type"->"Field2d" entry as required
+     * by glass.
+     */
+    public SupplierLogger2 fieldLogger() {
+        SupplierLogger2 logger;
         if (USE_UDP_LOGGING) {
-            SupplierLogger logger = new NetworkLogger(this, "field");
-            logger.logString(Level.COMP, ".type", () -> "Field2d");
-            return logger;
-
+            logger = new SupplierLogger2(this, "field", udpLogger);
         } else {
-            return new FieldLogger(this, defaultEnabledNT, defaultEnabledUSB);
+            logger = new SupplierLogger2(this, "field", ntLogger);
         }
+        logger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
+        return logger;
     }
 
-    public SupplierLogger namedRootLogger(
-            String str,
-            boolean defaultEnabledNT,
-            boolean defaultEnabledUSB) {
+    public SupplierLogger2 namedRootLogger(String str) {
         if (USE_UDP_LOGGING) {
-            return new NetworkLogger(this, str);
+            return new SupplierLogger2(this, str, udpLogger);
         } else {
-            return new RootLogger(this, str, defaultEnabledNT, defaultEnabledUSB);
+            return new SupplierLogger2(this, str, ntLogger);
         }
     }
 

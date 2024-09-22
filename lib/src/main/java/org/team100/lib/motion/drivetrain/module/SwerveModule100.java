@@ -12,7 +12,6 @@ import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.util.Util;
-import org.team100.lib.visualization.SwerveModuleVisualization;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -25,7 +24,6 @@ public class SwerveModule100 implements Glassy {
     private final String m_name;
     private final LinearVelocityServo m_driveServo;
     private final AngularPositionServo m_turningServo;
-    private final SwerveModuleVisualization m_viz;
 
     public SwerveModule100(
             String name,
@@ -34,7 +32,6 @@ public class SwerveModule100 implements Glassy {
         m_name = name;
         m_driveServo = driveServo;
         m_turningServo = turningServo;
-        m_viz = new SwerveModuleVisualization(this);
     }
 
     /**
@@ -155,9 +152,8 @@ public class SwerveModule100 implements Glassy {
         m_turningServo.stop();
     }
 
-    /** Update visualization and logs. */
+    /** Update logs. */
     void periodic() {
-        m_viz.viz();
         m_driveServo.periodic();
         m_turningServo.periodic();
     }

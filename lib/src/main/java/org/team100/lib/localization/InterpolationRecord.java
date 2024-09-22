@@ -85,8 +85,6 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
 
         // Create a twist to represent the change based on the interpolated sensor
         // inputs.
-        // TODO: this should take tires into account since it modifies the pose
-        // estimate.
         Twist2d twist = m_kinematics.toTwist2d(
                 DriveUtil.modulePositionDelta(m_wheelPositions, wheelLerp));
         twist.dtheta = gyroLerp.minus(m_gyroAngle).getRadians();

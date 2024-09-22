@@ -3,7 +3,11 @@ package org.team100.lib.controller;
 import java.util.Optional;
 
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
+import org.team100.lib.logging.SupplierLogger2.TimedPoseLogger;
+import org.team100.lib.logging.SupplierLogger2.TrajectorySamplePointLogger;
+import org.team100.lib.logging.SupplierLogger2.Twist2dLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -32,14 +36,22 @@ public class DriveRamseteController implements DriveMotionController {
     private static final double kZeta = 0.7; // Damping coefficient, [0, 1].
     private static final double kLooperDt = 0.02;
 
-    private final SupplierLogger m_logger;
-
-    public DriveRamseteController(SupplierLogger parent) {
-        m_logger = parent.child(this);
-    }
+    // LOGGERS
+    private final Pose2dLogger m_log_measurement;
+    private final TimedPoseLogger m_log_setpoint;
+    private final Twist2dLogger m_log_error;
+    private final TrajectorySamplePointLogger m_log_sample;
 
     private TrajectoryTimeIterator m_iter;
     private double mLastTime = Double.POSITIVE_INFINITY;
+
+    public DriveRamseteController(SupplierLogger2 parent) {
+        SupplierLogger2 child = parent.child(this);
+        m_log_measurement = child.pose2dLogger(Level.TRACE, "current state");
+        m_log_setpoint = child.timedPoseLogger(Level.TRACE, "setpoint");
+        m_log_error = child.twist2dLogger(Level.TRACE, "error");
+        m_log_sample = child.trajectorySamplePointLogger(Level.TRACE, "sample point");
+    }
 
     @Override
     public void setTrajectory(final TrajectoryTimeIterator trajectory) {
@@ -56,7 +68,7 @@ public class DriveRamseteController implements DriveMotionController {
         if (m_iter == null)
             return null;
 
-        m_logger.logPose2d(Level.TRACE, "current state", () -> measurement);
+        m_log_measurement.log(() -> measurement);
         if (isDone()) {
             return new ChassisSpeeds();
         }
@@ -66,7 +78,7 @@ public class DriveRamseteController implements DriveMotionController {
             return new ChassisSpeeds();
         }
         TimedPose setpoint = optionalSetpoint.get();
-        m_logger.logTimedPose(Level.TRACE, "setpoint", () -> setpoint);
+        m_log_setpoint.log(() -> setpoint);
 
         // Convert from current velocity into course.
         Optional<Rotation2d> maybe_field_to_course = Optional.empty();
@@ -104,7 +116,7 @@ public class DriveRamseteController implements DriveMotionController {
         Rotation2d course_to_goal = field_to_course.unaryMinus().rotateBy(maybe_field_to_goal.get());
 
         Twist2d mErrorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, setpoint);
-        m_logger.logTwist2d(Level.TRACE, "error", () -> mErrorTwist);
+        m_log_error.log(() -> mErrorTwist);
 
         // Rotate error to be aligned to current course.
         // Error is in robot (heading) frame. Need to rotate it to be in course frame.
@@ -160,7 +172,7 @@ public class DriveRamseteController implements DriveMotionController {
             return Optional.empty();
         }
 
-        m_logger.logTrajectorySamplePoint(Level.TRACE, "sample point", sample_point::get);
+        m_log_sample.log(sample_point::get);
         return Optional.of(sample_point.get().state());
     }
 

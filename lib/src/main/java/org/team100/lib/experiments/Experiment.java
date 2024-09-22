@@ -26,10 +26,6 @@ public enum Experiment {
      */
     FlushOften,
     /**
-     * Use multiple april tags to triangulate position
-     */
-    Triangulate,
-    /**
      * Pay attention to camera input. It's useful to turn this off for testing and
      * calibration.
      */
@@ -55,18 +51,6 @@ public enum Experiment {
      * Include sag limiter in setpoint generator
      */
     LimitBatterySag,
-    /**
-     * Use slippery tire model
-     */
-    SlipperyTires,
-    /**
-     * Use Java executor for Command100.
-     */
-    UseCommandExecutor,
-    /**
-     * Periodically publish all tag poses to all cameras
-     */
-    UseCameraUpdater,
     /**
      * 
      */

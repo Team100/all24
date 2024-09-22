@@ -80,11 +80,6 @@ public class OperatorV2Control implements OperatorControl {
     }
 
     @Override
-    public boolean selfTestEnable() {
-        return m_controller.getStartButton();
-    }
-
-    @Override
     public double leftClimb() {
         // NOTE this used to use rightY, i.e. it was reversed.
         return -deadband(m_controller.getLeftY(), 0.2, Double.MAX_VALUE);

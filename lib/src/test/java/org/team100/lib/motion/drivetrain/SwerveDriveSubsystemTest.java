@@ -17,7 +17,6 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
     @Test
     void testAccel() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-        Experiments.instance.testOverride(Experiment.SlipperyTires, true);
 
         SwerveDriveSubsystem drive = fixture.drive;
 

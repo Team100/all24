@@ -9,7 +9,8 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.EnumLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -68,13 +69,12 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             0.001,
             0.1 };
 
-    private final SupplierLogger m_logger;
-
     private final PoseEstimator100 m_poseEstimator;
-    private final FireControl m_fireControl;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     private final PoseEstimationHelper m_helper;
     private final NetworkTableListenerPoller m_poller;
+    // LOGGERS
+    private final EnumLogger m_log_alliance;
 
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
@@ -91,21 +91,20 @@ public class VisionDataProvider24 implements VisionData, Glassy {
      * @throws IOException
      */
     public VisionDataProvider24(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             AprilTagFieldLayoutWithCorrectOrientation layout,
-            PoseEstimator100 poseEstimator,
-            FireControl fireControl) {
-        m_logger = parent.child(this);
+            PoseEstimator100 poseEstimator) {
+        SupplierLogger2 child = parent.child(this);
         m_layout = layout;
-        m_helper = new PoseEstimationHelper(m_logger);
+        m_helper = new PoseEstimationHelper(child);
         m_poseEstimator = poseEstimator;
-        m_fireControl = fireControl;
 
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
         m_poller = new NetworkTableListenerPoller(inst);
         m_poller.addListener(
                 new MultiSubscriber(inst, new String[] { "vision" }),
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll));
+        m_log_alliance = child.enumLogger(Level.TRACE, "alliance");
     }
 
     /**
@@ -174,68 +173,20 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             final Blip24[] blips,
             double blipTimeSec,
             Alliance alliance) {
-        m_logger.logEnum(Level.TRACE, "alliance", () -> alliance);
+        m_log_alliance.log(() -> alliance);
         final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
-
-
 
         final Rotation2d gyroRotation = m_poseEstimator.get(blipTimeSec).pose().getRotation();
 
         estimateFromBlips(
-                cameraSerialNumber,
                 blips,
                 cameraInRobotCoordinates,
                 blipTimeSec,
                 gyroRotation,
                 alliance);
-
-        if (Experiments.instance.enabled(Experiment.Triangulate)) {
-            triangulate(
-                    cameraSerialNumber,
-                    blips,
-                    cameraInRobotCoordinates,
-                    blipTimeSec,
-                    gyroRotation,
-                    alliance);
-        }
-
-        firingSolution(
-                cameraSerialNumber,
-                blips,
-                cameraInRobotCoordinates,
-                alliance);
-
-    }
-
-    /**
-     * a firing solution is a robot-relative translation2d to the correct target --
-     * 7 if we're blue, 5 if we're red.
-     * 
-     * @param blips
-     * @param cameraInRobotCoordinates
-     */
-    private void firingSolution(
-            final String cameraSerialNumber,
-            final Blip24[] blips,
-            final Transform3d cameraInRobotCoordinates,
-            Alliance alliance) {
-        for (Blip24 blip : blips) {
-            if ((blip.getId() == 7 && alliance == Alliance.Blue) ||
-                    (blip.getId() == 5 && alliance == Alliance.Red)) {
-                Translation2d translation2d = PoseEstimationHelper.toTarget(cameraInRobotCoordinates, blip)
-                        .getTranslation().toTranslation2d();
-                m_logger.logTranslation2d(Level.TRACE, cameraSerialNumber + "/Firing Solution", () -> translation2d);
-
-                if (!Experiments.instance.enabled(Experiment.HeedVision))
-                    continue;
-
-                m_fireControl.accept(translation2d);
-            }
-        }
     }
 
     private void estimateFromBlips(
-            final String cameraSerialNumber,
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
             final double frameTimeSec,
@@ -243,11 +194,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             Alliance alliance) {
         for (int i = 0; i < blips.length; ++i) {
             Blip24 blip = blips[i];
-            m_logger.logBlip24(Level.TRACE, cameraSerialNumber + "/blip/" + i, () -> blip);
-
-            // this is just for logging
-            m_logger.logDouble(Level.TRACE, cameraSerialNumber + "/Blip Tag Rotation",
-                    () -> PoseEstimationHelper.blipToRotation(blip).getAngle());
 
             Optional<Pose3d> tagInFieldCoordsOptional = m_layout.getTagPose(alliance, blip.getId());
             if (!tagInFieldCoordsOptional.isPresent())
@@ -262,9 +208,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
                     0, 0, gyroRotation.getRadians());
 
             Pose3d tagInFieldCoords = tagInFieldCoordsOptional.get();
-            m_logger.logPose2d(Level.TRACE, cameraSerialNumber + "/Blip Tag In Field Cords",
-                    tagInFieldCoords::toPose2d);
-
             Pose3d robotPoseInFieldCoords = m_helper.getRobotPoseInFieldCoords(
                     cameraInRobotCoordinates,
                     tagInFieldCoords,
@@ -275,8 +218,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             Translation2d robotTranslationInFieldCoords = robotPoseInFieldCoords.getTranslation().toTranslation2d();
 
             Pose2d currentRobotinFieldCoords = new Pose2d(robotTranslationInFieldCoords, gyroRotation);
-
-            m_logger.logPose2d(Level.TRACE, cameraSerialNumber + "/Blip Pose", () -> currentRobotinFieldCoords);
 
             if (!Experiments.instance.enabled(Experiment.HeedVision))
                 continue;
@@ -295,76 +236,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
                 }
             }
             lastRobotInFieldCoords = currentRobotinFieldCoords;
-        }
-    }
-
-    // TODO: triangulate multiple camera views, time-aligned.
-
-    private void triangulate(
-            final String cameraSerialNumber,
-            Blip24[] blips,
-            Transform3d cameraInRobotCoordinates,
-            double frameTimeSec,
-            Rotation2d gyroRotation,
-            Alliance alliance) {
-        // if multiple tags are in view, triangulate to get another (perhaps more
-        // accurate) estimate
-        for (int i = 0; i < blips.length - 1; i++) {
-            Blip24 b0 = blips[i];
-            for (int j = i + 1; j < blips.length; ++j) {
-                Blip24 b1 = blips[j];
-
-                Optional<Pose3d> tagInFieldCordsOptional0 = m_layout.getTagPose(alliance, b0.getId());
-                Optional<Pose3d> tagInFieldCordsOptional1 = m_layout.getTagPose(alliance, b1.getId());
-
-                if (!tagInFieldCordsOptional0.isPresent())
-                    continue;
-                if (!tagInFieldCordsOptional1.isPresent())
-                    continue;
-
-                Translation2d T0 = tagInFieldCordsOptional0.get().getTranslation().toTranslation2d();
-                Translation2d T1 = tagInFieldCordsOptional1.get().getTranslation().toTranslation2d();
-
-                // in camera frame
-                Transform3d t0 = PoseEstimationHelper.blipToTransform(b0);
-                Transform3d t1 = PoseEstimationHelper.blipToTransform(b1);
-
-                // in robot frame
-                Transform3d rf0 = t0.plus(cameraInRobotCoordinates);
-                Transform3d rf1 = t1.plus(cameraInRobotCoordinates);
-
-                // in 2d
-                Translation2d tr0 = rf0.getTranslation().toTranslation2d();
-                Translation2d tr1 = rf1.getTranslation().toTranslation2d();
-
-                // rotations
-                Rotation2d r0 = tr0.getAngle();
-                Rotation2d r1 = tr1.getAngle();
-
-                Translation2d X = TriangulationHelper.solve(T0, T1, r0, r1);
-                Pose2d currentRobotinFieldCoords = new Pose2d(X, gyroRotation);
-
-                m_logger.logPose2d(Level.TRACE, cameraSerialNumber + "/Triangulate Pose",
-                        () -> currentRobotinFieldCoords);
-
-                if (!Experiments.instance.enabled(Experiment.HeedVision))
-                    continue;
-
-                if (lastRobotInFieldCoords != null) {
-                    double distanceM = GeometryUtil.distance(lastRobotInFieldCoords, currentRobotinFieldCoords);
-                    if (distanceM <= kVisionChangeToleranceMeters) {
-                        // this hard limit excludes false positives, which were a bigger problem in 2023
-                        // due to the coarse tag family used. in 2024 this might not be an issue.
-                        latestTimeUs = RobotController.getFPGATime();
-                        m_poseEstimator.put(
-                                frameTimeSec,
-                                currentRobotinFieldCoords,
-                                stateStdDevs(),
-                                visionMeasurementStdDevs(distanceM));
-                    }
-                }
-                lastRobotInFieldCoords = currentRobotinFieldCoords;
-            }
         }
     }
 

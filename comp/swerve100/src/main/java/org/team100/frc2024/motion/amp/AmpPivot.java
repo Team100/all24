@@ -23,7 +23,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -52,11 +52,10 @@ public class AmpPivot extends SubsystemBase implements Glassy {
      */
     private static final double kGearRatio = 70;
 
-    private final SupplierLogger m_logger;
     private final GravityServoInterface m_ampAngleServo;
 
-    public AmpPivot(SupplierLogger parent) {
-        m_logger = parent.child(this);
+    public AmpPivot(SupplierLogger2 parent) {
+        SupplierLogger2 child = parent.child(this);
 
         double period = 0.02;
         PIDController controller = new PIDController(2.0, 0, 0, period);
@@ -68,19 +67,19 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 Feedforward100 ff = Feedforward100.makeArmPivot();
                 PIDConstants pid = new PIDConstants(kOutboardP, kOutboardI, kOutboardD);
                 CANSparkMotor motor = new NeoCANSparkMotor(
-                        m_logger,
+                        child,
                         kCanId,
                         MotorPhase.FORWARD,
                         kCurrentLimit,
                         ff,
                         pid);
                 RotaryMechanism mech = new RotaryMechanism(
-                        m_logger,
+                        child,
                         motor,
-                        new CANSparkEncoder(m_logger, motor),
+                        new CANSparkEncoder(child, motor),
                         kGearRatio);
                 RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(
-                        m_logger,
+                        child,
                         3,
                         0.645439,
                         EncoderDrive.INVERSE);
@@ -93,7 +92,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 // encoder);
 
                 AngularPositionServo servo = new OnboardAngularPositionServo(
-                        m_logger,
+                        child,
                         mech,
                         encoder,
                         10, // TODO: remove this
@@ -107,14 +106,14 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 // For testing and simulation
                 double freeSpeedRad_S = 600;
                 SimulatedBareMotor simMotor = new SimulatedBareMotor(
-                        m_logger, freeSpeedRad_S);
+                        child, freeSpeedRad_S);
                 RotaryMechanism simMech = new RotaryMechanism(
-                        m_logger,
+                        child,
                         simMotor,
-                        new SimulatedBareEncoder(m_logger, simMotor),
+                        new SimulatedBareEncoder(child, simMotor),
                         kGearRatio);
                 RotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
-                        m_logger, simMech);
+                        child, simMech);
 
                 // m_ampAngleServo = new GravityServo(
                 //         simMech,
@@ -124,7 +123,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 //         simEncoder);
 
                 AngularPositionServo simServo = new OnboardAngularPositionServo(
-                        m_logger,
+                        child,
                         simMech,
                         simEncoder,
                         10, // TODO: remove this

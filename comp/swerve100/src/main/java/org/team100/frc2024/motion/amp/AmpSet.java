@@ -1,7 +1,7 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.commands.Command100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 
 /**
  * Set the amp pivot angle goal.
@@ -12,7 +12,7 @@ public class AmpSet extends Command100 {
     private final AmpPivot m_pivot;
     private final double m_goal;
 
-    public AmpSet(SupplierLogger parent, AmpPivot pivot, double goal) {
+    public AmpSet(SupplierLogger2 parent, AmpPivot pivot, double goal) {
         super(parent);
         m_pivot = pivot;
         m_goal = goal;

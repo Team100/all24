@@ -9,7 +9,7 @@ import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -24,7 +24,7 @@ public class ArmFactory {
     private static final String kLower = "arm/lower";
     private static final String kUpper = "arm/upper";
 
-    public static ArmSubsystem get(SupplierLogger parent) {
+    public static ArmSubsystem get(SupplierLogger2 parent) {
         switch (Identity.instance) {
             case TEST_BOARD_6B:
                 return real(parent);
@@ -34,12 +34,12 @@ public class ArmFactory {
         }
     }
 
-    private static ArmSubsystem real(SupplierLogger parent) {
+    private static ArmSubsystem real(SupplierLogger2 parent) {
         final double kLowerEncoderOffset = 0.861614;
         final double kUpperEncoderOffset = 0.266396;
         final double kReduction = 600;
 
-        SupplierLogger lowerLogger = parent.child(kLower);
+        SupplierLogger2 lowerLogger = parent.child(kLower);
         CANSparkMotor lowerMotor = new NeoCANSparkMotor(
                 lowerLogger,
                 4,
@@ -61,7 +61,7 @@ public class ArmFactory {
                 kLowerEncoderOffset,
                 EncoderDrive.INVERSE);
 
-        SupplierLogger upperLogger = parent.child(kUpper);
+        SupplierLogger2 upperLogger = parent.child(kUpper);
         CANSparkMotor upperMotor = new NeoCANSparkMotor(
                 upperLogger,
                 30,
@@ -88,14 +88,14 @@ public class ArmFactory {
                 upperEncoder);
     }
 
-    private static ArmSubsystem simulated(SupplierLogger parent) {
+    private static ArmSubsystem simulated(SupplierLogger2 parent) {
         // for testing
         // note very high reduction ratio
         final double kFreeSpeedRad_S = 200;
         final double kReduction = 600;
         // motor speed is rad/s
 
-        SupplierLogger lowerLogger = parent.child(kLower);
+        SupplierLogger2 lowerLogger = parent.child(kLower);
         SimulatedBareMotor lowerMotor = new SimulatedBareMotor(lowerLogger, kFreeSpeedRad_S);
         RotaryMechanism lowerMech = new RotaryMechanism(
                 lowerLogger,
@@ -107,7 +107,7 @@ public class ArmFactory {
         SimulatedRotaryPositionSensor lowerEncoder = new SimulatedRotaryPositionSensor(
                 lowerLogger, lowerMech);
 
-        SupplierLogger upperLogger = parent.child(kUpper);
+        SupplierLogger2 upperLogger = parent.child(kUpper);
         SimulatedBareMotor upperMotor = new SimulatedBareMotor(upperLogger, kFreeSpeedRad_S);
         RotaryMechanism upperMech = new RotaryMechanism(
                 upperLogger,

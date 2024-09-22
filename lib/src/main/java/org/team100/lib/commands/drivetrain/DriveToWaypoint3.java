@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -38,6 +40,10 @@ public class DriveToWaypoint3 extends Command100 {
     private final StraightLineTrajectory m_trajectories;
     private final HolonomicDriveController3 m_controller;
     private final TrajectoryVisualization m_viz;
+    // LOGGERS
+    private final Pose2dLogger m_log_desired;
+    private final BooleanSupplierLogger2 m_log_aligned;
+    private final Pose2dLogger m_log_pose;
 
     private Trajectory100 m_trajectory;
     private TrajectoryTimeIterator m_iter;
@@ -54,19 +60,23 @@ public class DriveToWaypoint3 extends Command100 {
      *                     trajectory between them.
      */
     public DriveToWaypoint3(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             StraightLineTrajectory trajectories,
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
         m_goal = goal;
         m_swerve = drivetrain;
         m_trajectories = trajectories;
         m_controller = controller;
         m_viz = viz;
         addRequirements(m_swerve);
+        m_log_desired = child.pose2dLogger(Level.TRACE, "Desired");
+        m_log_aligned = child.booleanLogger(Level.TRACE, "Aligned");
+        m_log_pose = child.pose2dLogger(Level.TRACE, "Pose");
     }
 
     @Override
@@ -94,8 +104,7 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            m_logger.logDouble(Level.TRACE, "Desired X", () -> desiredState.state().getPose().getX());
-            m_logger.logDouble(Level.TRACE, "Desired Y", () -> desiredState.state().getPose().getY());
+            m_log_desired.log(() -> desiredState.state().getPose());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -114,8 +123,7 @@ public class DriveToWaypoint3 extends Command100 {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            m_logger.logDouble(Level.TRACE, "Desired X", () -> desiredState.state().getPose().getX());
-            m_logger.logDouble(Level.TRACE, "Desired Y", () -> desiredState.state().getPose().getY());
+            m_log_desired.log(() -> desiredState.state().getPose());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -123,12 +131,9 @@ public class DriveToWaypoint3 extends Command100 {
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
         }
 
-        m_logger.logBoolean(Level.TRACE, "Aligned", () -> m_steeringAligned);
+        m_log_aligned.log(() -> m_steeringAligned);
 
-        m_logger.logDouble(Level.TRACE, "Pose X", () -> m_swerve.getState().pose().getX());
-        m_logger.logDouble(Level.TRACE, "Pose Y", () -> m_swerve.getState().pose().getY());
-        m_logger.logDouble(Level.TRACE, "Desired Rot", () -> m_goal.getRotation().getRadians());
-        m_logger.logDouble(Level.TRACE, "Pose Rot", () -> m_swerve.getState().pose().getRotation().getRadians());
+        m_log_pose.log(() -> m_swerve.getState().pose());
     }
 
     @Override

@@ -15,9 +15,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-/**
- * None of these tests take tires into account.
- */
 class SwerveDriveKinematics100Test {
     private static final double kDelta = 0.001;
 
@@ -113,7 +110,6 @@ class SwerveDriveKinematics100Test {
     @Test
     void testStraightLineForwardKinematics() { // test forward kinematics going in a straight line
         SwerveModuleState100 state = new SwerveModuleState100(5.0, Optional.of(Rotation2d.fromDegrees(0.0)));
-        // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(state, state, state, state);
 
         assertAll(
@@ -153,7 +149,6 @@ class SwerveDriveKinematics100Test {
     @Test
     void testStraightStrafeForwardKinematics() {
         SwerveModuleState100 state = new SwerveModuleState100(5.0, Optional.of(Rotation2d.fromDegrees(90.0)));
-        // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(state, state, state, state);
 
         assertAll(
@@ -245,7 +240,6 @@ class SwerveDriveKinematics100Test {
         SwerveModuleState100 frState = new SwerveModuleState100(106.629, Optional.of(Rotation2d.fromDegrees(45)));
         SwerveModuleState100 blState = new SwerveModuleState100(106.629, Optional.of(Rotation2d.fromDegrees(-135)));
         SwerveModuleState100 brState = new SwerveModuleState100(106.629, Optional.of(Rotation2d.fromDegrees(-45)));
-        // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(flState, frState, blState, brState);
 
         assertAll(
@@ -278,7 +272,6 @@ class SwerveDriveKinematics100Test {
         SwerveModuleState100 frState = new SwerveModuleState100(150.796, Optional.of(Rotation2d.fromDegrees(0.0)));
         SwerveModuleState100 blState = new SwerveModuleState100(150.796, Optional.of(Rotation2d.fromDegrees(-90)));
         SwerveModuleState100 brState = new SwerveModuleState100(213.258, Optional.of(Rotation2d.fromDegrees(-45)));
-        // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(flState, frState, blState, brState);
 
         /*
@@ -339,7 +332,6 @@ class SwerveDriveKinematics100Test {
         SwerveModuleState100 frState = new SwerveModuleState100(23.43, Optional.of(Rotation2d.fromDegrees(-39.81)));
         SwerveModuleState100 blState = new SwerveModuleState100(54.08, Optional.of(Rotation2d.fromDegrees(-109.44)));
         SwerveModuleState100 brState = new SwerveModuleState100(54.08, Optional.of(Rotation2d.fromDegrees(-70.56)));
-        // does not take tires into account
         var chassisSpeeds = m_kinematics.toChassisSpeeds(flState, frState, blState, brState);
 
         /*

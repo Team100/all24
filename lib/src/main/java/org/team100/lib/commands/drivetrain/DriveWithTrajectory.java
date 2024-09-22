@@ -5,7 +5,8 @@ import java.util.List;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -35,14 +36,19 @@ public class DriveWithTrajectory extends Command100 {
     private final Trajectory100 trajectory;
     private final TrajectoryVisualization m_viz;
 
+    // LOGGERS
+    private final ChassisSpeedsLogger m_log_chassis_speeds;
+
     public DriveWithTrajectory(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem drivetrain,
             DriveMotionController controller,
             SwerveKinodynamics limits,
             String fileName,
             TrajectoryVisualization viz) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
+        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = drivetrain;
         m_controller = controller;
 
@@ -81,7 +87,7 @@ public class DriveWithTrajectory extends Command100 {
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
-        m_logger.logChassisSpeeds(Level.TRACE, "chassis speeds", () -> output);
+        m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
         m_swerve.setChassisSpeeds(output, dt);
     }

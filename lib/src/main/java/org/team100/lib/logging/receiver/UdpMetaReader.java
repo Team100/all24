@@ -6,9 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 
-import org.team100.lib.logging.UdpPrimitiveProtocol2;
-import org.team100.lib.logging.UdpSender;
 import org.team100.lib.logging.UdpPrimitiveProtocol2.ProtocolException;
+import org.team100.lib.logging.UdpSender;
 
 public class UdpMetaReader implements Runnable {
     private final UdpMetaDecoder m_decoder;

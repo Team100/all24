@@ -17,7 +17,7 @@ import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.field.FieldPoint2024;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
@@ -47,11 +47,15 @@ public class AutoMaker implements Glassy {
     private final DrumShooter m_shooter;
     private final FeederSubsystem m_feeder;
     private final double kShooterScale;
-    private final SupplierLogger m_logger;
+    /**
+     * This is an exception to the no-member rule; this is used by the factory
+     * methods below. TODO: pass it to the factories?
+     */
+    private final SupplierLogger2 m_logger;
     private final TrajectoryVisualization m_viz;
 
     public AutoMaker(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem swerve,
             DriveMotionController controller,
             double shooterScale,
@@ -106,7 +110,8 @@ public class AutoMaker implements Glassy {
         }
     }
 
-    public TrajectoryCommand100 adjacentWithShooterAngle(Alliance alliance, FieldPoint2024 noteA, FieldPoint2024 noteB) {
+    public TrajectoryCommand100 adjacentWithShooterAngle(Alliance alliance, FieldPoint2024 noteA,
+            FieldPoint2024 noteB) {
         Pose2d startPose = getPose(alliance, noteA);
         Pose2d endPose = getPose(alliance, noteB);
 
@@ -376,7 +381,8 @@ public class AutoMaker implements Glassy {
                 DriveMotionControllerFactory.complementPIDF(m_logger), m_viz);
     }
 
-    public TrajectoryCommand100 aroundStage(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end, Rotation2d heading) {
+    public TrajectoryCommand100 aroundStage(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end,
+            Rotation2d heading) {
         Translation2d point = (new Translation2d(5.7, 6.4));
         point = FieldPoint2024.forRedAlliance(point, alliance);
         Pose2d startPose = getPose(alliance, start);
@@ -408,7 +414,8 @@ public class AutoMaker implements Glassy {
                 DriveMotionControllerFactory.complementPIDF(m_logger), m_viz);
     }
 
-    public TrajectoryCommand100 aroundStage(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end, double begHeading) {
+    public TrajectoryCommand100 aroundStage(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end,
+            double begHeading) {
         Translation2d point = (new Translation2d(5.7, 6.4));
         point = FieldPoint2024.forRedAlliance(point, alliance);
         Pose2d startPose = getPose(alliance, start);
@@ -584,7 +591,8 @@ public class AutoMaker implements Glassy {
                 DriveMotionControllerFactory.newNewPIDF(m_logger), m_viz);
     }
 
-    public TrajectoryCommand100 stageManeuver(Alliance alliance, FieldPoint2024 start, FieldPoint2024 between, FieldPoint2024 end) {
+    public TrajectoryCommand100 stageManeuver(Alliance alliance, FieldPoint2024 start, FieldPoint2024 between,
+            FieldPoint2024 end) {
         Pose2d startPose = getPose(alliance, start);
         Pose2d betweenPose = getPose(alliance, between);
         Pose2d endPose = getPose(alliance, end);
@@ -619,7 +627,8 @@ public class AutoMaker implements Glassy {
         return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
     }
 
-    public TrajectoryCommand100 throughCentralStageOpening(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end) {
+    public TrajectoryCommand100 throughCentralStageOpening(Alliance alliance, FieldPoint2024 start,
+            FieldPoint2024 end) {
         return stageManeuver(alliance, start, FieldPoint2024.CENTRALSTAGEOPENING, end);
     }
 
@@ -674,14 +683,16 @@ public class AutoMaker implements Glassy {
                 new ParallelDeadlineGroup(
                         test(alliance, FieldPoint2024.NOTE3,
                                 FieldPoint2024.forAlliance(new Translation2d(1.99, 5.5583), alliance),
-                                FieldPoint2024.forAlliance(new Translation2d(2.3, 5.5583), alliance), FieldPoint2024.NOTE2, 3,
+                                FieldPoint2024.forAlliance(new Translation2d(2.3, 5.5583), alliance),
+                                FieldPoint2024.NOTE2, 3,
                                 2),
                         new ShootSmart(m_logger, sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
 
                 new ParallelDeadlineGroup(
                         test(alliance, FieldPoint2024.NOTE2,
                                 FieldPoint2024.forAlliance(new Translation2d(1.95, 6.47), alliance),
-                                FieldPoint2024.forAlliance(new Translation2d(2.307, 6.67), alliance), FieldPoint2024.NOTE1, 3,
+                                FieldPoint2024.forAlliance(new Translation2d(2.307, 6.67), alliance),
+                                FieldPoint2024.NOTE1, 3,
                                 2),
                         new ShootSmart(m_logger, sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
                 new ParallelDeadlineGroup(
@@ -705,13 +716,17 @@ public class AutoMaker implements Glassy {
     public Command sibling(Alliance alliance) {
         if (alliance == Alliance.Blue) {
             return new SequentialCommandGroup(
-                    new ParallelDeadlineGroup(driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
-                            -Math.toRadians(70), 0, 4, 3), new ChangeIntakeState(m_intake, m_sensors)),
+                    new ParallelDeadlineGroup(
+                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
+                                    -Math.toRadians(70), 0, 4, 3),
+                            new ChangeIntakeState(m_intake, m_sensors)),
                     driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.NOTE8, 4, 4));
         } else {
             return new SequentialCommandGroup(
-                    new ParallelDeadlineGroup(driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
-                            Math.toRadians(70), 0, 4, 3), new ChangeIntakeState(m_intake, m_sensors)),
+                    new ParallelDeadlineGroup(
+                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
+                                    Math.toRadians(70), 0, 4, 3),
+                            new ChangeIntakeState(m_intake, m_sensors)),
                     driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.NOTE8, 4, 4));
         }
     }
@@ -721,14 +736,16 @@ public class AutoMaker implements Glassy {
             return new SequentialCommandGroup(
                     new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelDeadlineGroup(
-                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, Math.PI / 4, 0, 4, 3),
+                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, Math.PI / 4,
+                                    0, 4, 3),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
                             Math.toRadians(180), Math.toRadians(245), 4, 3), new RampShooter(m_shooter)),
                     new ParallelRaceGroup(
                             new ShootSmart(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                             new WaitCommand(1.5)),
-                    new ParallelDeadlineGroup(throughStage(alliance, FieldPoint2024.COMPLEMENTSHOOT, FieldPoint2024.NOTE6),
+                    new ParallelDeadlineGroup(
+                            throughStage(alliance, FieldPoint2024.COMPLEMENTSHOOT, FieldPoint2024.NOTE6),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.NOTE6, FieldPoint2024.COMPLEMENTSHOOT2, Math.PI,
@@ -741,7 +758,8 @@ public class AutoMaker implements Glassy {
             return new SequentialCommandGroup(
                     new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelDeadlineGroup(
-                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, 3 * Math.PI / 2, 0, 4,
+                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
+                                    3 * Math.PI / 2, 0, 4,
                                     3),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
@@ -750,7 +768,8 @@ public class AutoMaker implements Glassy {
                     new ParallelRaceGroup(
                             new ShootSmart(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                             new WaitCommand(1.5)),
-                    new ParallelDeadlineGroup(throughStage(alliance, FieldPoint2024.COMPLEMENTSHOOT, FieldPoint2024.NOTE6),
+                    new ParallelDeadlineGroup(
+                            throughStage(alliance, FieldPoint2024.COMPLEMENTSHOOT, FieldPoint2024.NOTE6),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.NOTE6, FieldPoint2024.COMPLEMENTSHOOT2, Math.PI,
@@ -767,10 +786,12 @@ public class AutoMaker implements Glassy {
             return new SequentialCommandGroup(
                     new ShootSmart(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelRaceGroup(
-                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, Math.PI / 4, 0, 4, 3),
+                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, Math.PI / 4,
+                                    0, 4, 3),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(
-                            driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT, Math.toRadians(180),
+                            driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
+                                    Math.toRadians(180),
                                     Math.toRadians(245), 4, 2),
                             new RampShooter(m_shooter)),
                     new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
@@ -785,11 +806,13 @@ public class AutoMaker implements Glassy {
             return new SequentialCommandGroup(
                     new ShootSmart(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelRaceGroup(
-                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, 3 * Math.PI / 2, 0, 4,
+                            driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
+                                    3 * Math.PI / 2, 0, 4,
                                     3),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(
-                            driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT, Math.toRadians(180),
+                            driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
+                                    Math.toRadians(180),
                                     Math.toRadians(245.0 - 180), 4, 2),
                             new RampShooter(m_shooter)),
                     new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
@@ -798,7 +821,8 @@ public class AutoMaker implements Glassy {
                                     Rotation2d.fromDegrees(200)),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(
-                            aroundStage(alliance, FieldPoint2024.NOTE5, FieldPoint2024.COMPLEMENTSHOOT, Math.toRadians(200)),
+                            aroundStage(alliance, FieldPoint2024.NOTE5, FieldPoint2024.COMPLEMENTSHOOT,
+                                    Math.toRadians(200)),
                             new RampShooter(m_shooter)),
                     new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false));
         }

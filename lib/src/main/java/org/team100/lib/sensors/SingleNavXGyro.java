@@ -2,7 +2,9 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -55,10 +57,6 @@ public class SingleNavXGyro implements Gyro {
      */
     private static final int kSPIBitRateHz = 500000;
 
-    private final SupplierLogger m_logger;
-
-    // TODO: remove this if it's not useful
-    // private final AHRS100 m_ahrs;
     private final AHRS m_ahrs;
 
     /**
@@ -72,23 +70,37 @@ public class SingleNavXGyro implements Gyro {
      */
     private final float m_yawScaleFactor;
     private final float m_yawRateScaleFactor;
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_heading;
+    private final DoubleSupplierLogger2 m_log_heading_rate;
+    private final DoubleSupplierLogger2 m_log_pitch;
+    private final DoubleSupplierLogger2 m_log_roll;
+    private final DoubleSupplierLogger2 m_log_yaw_deg;
+    private final DoubleSupplierLogger2 m_log_pitch_deg;
+    private final DoubleSupplierLogger2 m_log_roll_deg;
+    private final DoubleSupplierLogger2 m_log_yaw_rate_deg;
+    private final BooleanSupplierLogger2 m_log_connected;
 
     /**
      * NOTE: the async is just for logging, maybe don't use a whole thread for it.
      */
-    public SingleNavXGyro(SupplierLogger parent, Async async) {
-
-        m_logger = parent.child(this);
+    public SingleNavXGyro(SupplierLogger2 parent, Async async) {
+        SupplierLogger2 child = parent.child(this);
 
         // maximum update rate == minimum latency (use most-recent updates). maybe too
         // much CPU?
         switch (Identity.instance) {
-            // case COMP_BOT:
+            case COMP_BOT:
+                m_ahrs = new AHRS(
+                        SerialPort.Port.kUSB,
+                        AHRS.SerialDataType.kProcessedData,
+                        kUpdateRateHz);
+                m_yawScaleFactor = 1.0f;
+                m_yawRateScaleFactor = 1.0f;
+                // TODO: remove this message when calibration is finished.
+                Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
+                break;
             default:
-                // Jun 29 2024: actually use the specified bit rate
-                // m_gyro1 = new AHRS(SPI.Port.kMXP);
-                // this is the version i hacked to avoid wpilib 2025 breaking changes
-                // m_ahrs = new AHRS100(SPI.Port.kMXP, kSPIBitRateHz, kUpdateRateHz);
                 m_ahrs = new AHRS(
                         SPI.Port.kMXP,
                         kSPIBitRateHz,
@@ -98,19 +110,6 @@ public class SingleNavXGyro implements Gyro {
                 // TODO: remove this message when calibration is finished.
                 Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
                 break;
-            // default:
-            case COMP_BOT:
-                // this is the version i hacked to avoid wpilib 2025 breaking changes
-                // m_ahrs = new AHRS100(SerialPort.Port.kUSB,
-                // AHRS100.SerialDataType.kProcessedData, kUpdateRateHz);
-                m_ahrs = new AHRS(
-                        SerialPort.Port.kUSB,
-                        AHRS.SerialDataType.kProcessedData,
-                        kUpdateRateHz);
-                m_yawScaleFactor = 1.0f;
-                m_yawRateScaleFactor = 1.0f;
-                // TODO: remove this message when calibration is finished.
-                Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
 
         }
         m_ahrs.enableBoardlevelYawReset(true);
@@ -127,34 +126,43 @@ public class SingleNavXGyro implements Gyro {
 
         m_ahrs.zeroYaw();
         async.addPeriodic(this::logStuff, 1, "SingleNavXGyro");
+        m_log_heading = child.doubleLogger(Level.TRACE, "Heading NWU (rad)");
+        m_log_heading_rate = child.doubleLogger(Level.TRACE, "Heading Rate NWU (rad_s)");
+        m_log_pitch = child.doubleLogger(Level.TRACE, "Pitch NWU (rad)");
+        m_log_roll = child.doubleLogger(Level.TRACE, "Roll NWU (rad)");
+        m_log_yaw_deg = child.doubleLogger(Level.TRACE, "Yaw NED (deg)");
+        m_log_pitch_deg = child.doubleLogger(Level.TRACE, "Pitch (deg)");
+        m_log_roll_deg = child.doubleLogger(Level.TRACE, "Roll (deg)");
+        m_log_yaw_rate_deg = child.doubleLogger(Level.TRACE, "Rate NED (deg_s)");
+        m_log_connected = child.booleanLogger(Level.TRACE, "Connected");
 
     }
 
     @Override
     public Rotation2d getYawNWU() {
         Rotation2d currentHeadingNWU = Rotation2d.fromDegrees(-1.0 * getYawNEDDeg());
-        m_logger.logDouble(Level.TRACE, "Heading NWU (rad)", currentHeadingNWU::getRadians);
+        m_log_heading.log(currentHeadingNWU::getRadians);
         return currentHeadingNWU;
     }
 
     @Override
     public double getYawRateNWU() {
         double currentHeadingRateNWU = Math.toRadians(getYawRateNEDDeg_s());
-        m_logger.logDouble(Level.TRACE, "Heading Rate NWU (rad_s)", () -> currentHeadingRateNWU);
+        m_log_heading_rate.log(() -> currentHeadingRateNWU);
         return currentHeadingRateNWU;
     }
 
     @Override
     public Rotation2d getPitchNWU() {
         Rotation2d pitchNWU = Rotation2d.fromDegrees(-1.0 * getPitchDeg());
-        m_logger.logDouble(Level.TRACE, "Pitch NWU (rad)", pitchNWU::getRadians);
+        m_log_pitch.log(pitchNWU::getRadians);
         return pitchNWU;
     }
 
     @Override
     public Rotation2d getRollNWU() {
         Rotation2d rollNWU = Rotation2d.fromDegrees(-1.0 * getRollDeg());
-        m_logger.logDouble(Level.TRACE, "Pitch NWU (rad)", rollNWU::getRadians);
+        m_log_roll.log(rollNWU::getRadians);
         return rollNWU;
     }
 
@@ -170,7 +178,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private float getYawNEDDeg() {
         float yawDeg = m_ahrs.getYaw() * m_yawScaleFactor;
-        m_logger.logDouble(Level.TRACE, "Yaw NED (deg)", () -> yawDeg);
+        m_log_yaw_deg.log(() -> yawDeg);
         return yawDeg;
     }
 
@@ -179,7 +187,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private float getPitchDeg() {
         float pitchDeg = m_ahrs.getPitch();
-        m_logger.logDouble(Level.TRACE, "Pitch (deg)", () -> pitchDeg);
+        m_log_pitch_deg.log(() -> pitchDeg);
         return pitchDeg;
     }
 
@@ -188,7 +196,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private float getRollDeg() {
         float rollDeg = m_ahrs.getRoll();
-        m_logger.logDouble(Level.TRACE, "Roll (deg)", () -> rollDeg);
+        m_log_roll_deg.log(() -> rollDeg);
         return rollDeg;
     }
 
@@ -202,7 +210,7 @@ public class SingleNavXGyro implements Gyro {
      */
     private float getYawRateNEDDeg_s() {
         final float rateDeg_S = getRateDeg_S() * m_yawRateScaleFactor;
-        m_logger.logDouble(Level.TRACE, "Rate NED (deg_s)", () -> rateDeg_S);
+        m_log_yaw_rate_deg.log(() -> rateDeg_S);
         return rateDeg_S;
     }
 
@@ -228,14 +236,11 @@ public class SingleNavXGyro implements Gyro {
 
     private void logStuff() {
         if (m_ahrs.isConnected()) {
-            m_logger.logBoolean(Level.TRACE, "Connected", () -> true);
+            m_log_connected.log(() -> true);
         } else {
-            m_logger.logBoolean(Level.COMP, "Connected", () -> false);
+            m_log_connected.log(() -> false);
         }
-        m_logger.logDouble(Level.TRACE, "Yaw (deg)", m_ahrs::getYaw);
-        // note we don't actually use any of the measurements below. maybe remove them?
-        m_logger.logDouble(Level.TRACE, "Angle (deg)", m_ahrs::getAngle);
-        m_logger.logDouble(Level.TRACE, "Angle Mod 360 (deg)", () -> m_ahrs.getAngle() % 360);
+        m_log_yaw_deg.log(m_ahrs::getYaw);
     }
 
 }

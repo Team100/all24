@@ -3,7 +3,9 @@ package org.team100.lib.commands.drivetrain;
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -33,6 +35,13 @@ public class Rotate extends Command100 {
     private final Gyro m_gyro;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final State100 m_goalState;
+    // LOGGERS
+    private final DoubleSupplierLogger2 m_log_error_x;
+    private final DoubleSupplierLogger2 m_log_error_v;
+    private final DoubleSupplierLogger2 m_log_measurement_x;
+    private final DoubleSupplierLogger2 m_log_measurement_v;
+    private final State100Logger m_log_reference;
+
     final HolonomicDriveController3 m_controller;
 
     private boolean m_finished = false;
@@ -43,12 +52,13 @@ public class Rotate extends Command100 {
     private boolean m_steeringAligned;
 
     public Rotate(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             SwerveDriveSubsystem drivetrain,
             Gyro gyro,
             SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
         super(parent);
+        SupplierLogger2 child = parent.child(this);
         m_robotDrive = drivetrain;
         // since we specify a different tolerance, use a new controller.
 
@@ -62,13 +72,18 @@ public class Rotate extends Command100 {
         // real effect.
         tc.setP(3.5);
 
-        m_controller = new HolonomicDriveController3(parent, xc, yc, tc);
+        m_controller = new HolonomicDriveController3(child, xc, yc, tc);
         m_gyro = gyro;
         m_swerveKinodynamics = swerveKinodynamics;
         m_goalState = new State100(targetAngleRadians, 0);
         refTheta = new State100(0, 0);
 
         addRequirements(drivetrain);
+        m_log_error_x = child.doubleLogger(Level.TRACE, "errorX");
+        m_log_error_v = child.doubleLogger(Level.TRACE, "errorV");
+        m_log_measurement_x = child.doubleLogger(Level.TRACE, "measurementX");
+        m_log_measurement_v = child.doubleLogger(Level.TRACE, "measurementV");
+        m_log_reference = child.state100Logger(Level.TRACE, "reference");
     }
 
     @Override
@@ -125,12 +140,11 @@ public class Rotate extends Command100 {
         double headingRate = m_gyro.getYawRateNWU();
 
         // log what we did
-        m_logger.logDouble(Level.TRACE, "errorX", () -> refTheta.x() - headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "errorV", () -> refTheta.v() - headingRate);
-        m_logger.logDouble(Level.TRACE, "measurementX", () -> headingMeasurement);
-        m_logger.logDouble(Level.TRACE, "measurementV", () -> headingRate);
-        m_logger.logDouble(Level.TRACE, "refX", () -> refTheta.x());
-        m_logger.logDouble(Level.TRACE, "refV", () -> refTheta.v());
+        m_log_error_x.log(() -> refTheta.x() - headingMeasurement);
+        m_log_error_v.log(() -> refTheta.v() - headingRate);
+        m_log_measurement_x.log(() -> headingMeasurement);
+        m_log_measurement_v.log(() -> headingRate);
+        m_log_reference.log(() -> refTheta);
     }
 
     @Override

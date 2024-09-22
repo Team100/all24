@@ -26,6 +26,7 @@ public class CotemporalCache<T> implements Supplier<T> {
         // synchronized adds ~20ns which seems ok, it's simple.
         if (m_value == null)
             m_value = m_delegate.get();
+        // System.out.println("cache get " + m_value);
         return m_value;
     }
 

@@ -11,21 +11,20 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.util.Util;
 
 class DriveInALittleSquareTest extends Fixtured implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
-    private static final SupplierLogger logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     /** Confirm that the steering commands are simple steps. */
     @Test
     void testSteering() {
         SwerveDriveSubsystem swerve = fixture.drive;
         DriveInALittleSquare command = new DriveInALittleSquare(logger, swerve);
-        DriveInALittleSquare.shutDownForTest();
         command.initialize();
         // the first time we call execute, drive doesn't yet know it's at the goal
         stepTime(0.02);
@@ -71,7 +70,6 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(0.0, fixture.drive.getSwerveLocal().positions()[0].distanceMeters, 0.005);
 
         DriveInALittleSquare command = new DriveInALittleSquare(logger, fixture.drive);
-        DriveInALittleSquare.shutDownForTest();
         command.initialize();
 
         // first align the wheels in case they're not already aligned.

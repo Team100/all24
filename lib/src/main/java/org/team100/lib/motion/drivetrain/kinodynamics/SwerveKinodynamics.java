@@ -3,11 +3,10 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.util.Tire;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,8 +28,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * lower it here.
  */
 public class SwerveKinodynamics implements Glassy {
-    private final SupplierLogger m_logger;
-
     // geometry
     private final double m_fronttrack;
     private final double m_backtrack;
@@ -48,7 +45,6 @@ public class SwerveKinodynamics implements Glassy {
     private double m_MaxDriveDecelerationM_S2;
     private double m_MaxSteeringVelocityRad_S;
     private double m_maxSteeringAccelerationRad_S2;
-    private Tire m_tire;
 
     // calculated
     private double m_maxAngleSpeedRad_S;
@@ -73,7 +69,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -83,9 +79,7 @@ public class SwerveKinodynamics implements Glassy {
             double track,
             double wheelbase,
             double frontoffset,
-            double vcg,
-            Tire tire) {
-        m_logger = parent.child(this);
+            double vcg) {
         if (track < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -96,7 +90,6 @@ public class SwerveKinodynamics implements Glassy {
         m_wheelbase = wheelbase;
         m_frontoffset = frontoffset;
         m_vcg = vcg;
-        m_tire = tire;
         // distance from center to wheel
         m_radius = Math.hypot(track / 2, m_wheelbase / 2);
         m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, frontoffset);
@@ -129,7 +122,7 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -140,9 +133,7 @@ public class SwerveKinodynamics implements Glassy {
             double backtrack,
             double wheelbase,
             double frontoffset,
-            double vcg,
-            Tire tire) {
-        m_logger = parent.child(this);
+            double vcg) {
         if (fronttrack < 0.1 || backtrack < 0.1)
             throw new IllegalArgumentException();
         if (wheelbase < 0.1)
@@ -153,7 +144,6 @@ public class SwerveKinodynamics implements Glassy {
         m_wheelbase = wheelbase;
         m_frontoffset = frontoffset;
         m_vcg = vcg;
-        m_tire = tire;
         // distance from center to wheel
         m_radius = Math.hypot((fronttrack + backtrack) / 4, m_wheelbase / 2);
         m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, m_frontoffset);
@@ -385,11 +375,8 @@ public class SwerveKinodynamics implements Glassy {
      * Forward kinematics, module states => chassis speeds.
      * 
      * Does not do inverse discretization.
-     * 
-     * Does not take Tires into account.
      */
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState100... moduleStates) {
-        // does not take tires into account
         return m_kinematics.toChassisSpeeds(moduleStates);
     }
 
@@ -398,8 +385,6 @@ public class SwerveKinodynamics implements Glassy {
      * instead of velocities, it is not needed.
      * 
      * It performs inverse discretization and an extra correction.
-     * 
-     * Does not take Tires into account.
      */
     public ChassisSpeeds toChassisSpeedsWithDiscretization(
             double gyroRateRad_S,
@@ -427,12 +412,13 @@ public class SwerveKinodynamics implements Glassy {
     }
 
     public SwerveDrivePoseEstimator100 newPoseEstimator(
+            SupplierLogger2 parent,
             Rotation2d gyroAngle,
             SwerveModulePosition100[] modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
         return new SwerveDrivePoseEstimator100(
-                m_logger,
+                parent,
                 this,
                 gyroAngle,
                 modulePositions,
@@ -545,9 +531,7 @@ public class SwerveKinodynamics implements Glassy {
                 speeds.theta());
     }
 
-    public Tire getTire() {
-        return m_tire;
-    }
+
 
     public SwerveDriveKinematics100 getKinematics() {
         return m_kinematics;

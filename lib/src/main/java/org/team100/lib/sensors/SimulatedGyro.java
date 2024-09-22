@@ -11,8 +11,6 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * A simulated gyro that uses drivetrain odometry.
- * 
- * Does not use the tire model.
  */
 public class SimulatedGyro implements Gyro {
     private double m_heading = 0;

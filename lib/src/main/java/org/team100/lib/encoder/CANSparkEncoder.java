@@ -2,7 +2,8 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -13,14 +14,18 @@ import org.team100.lib.telemetry.Telemetry.Level;
  * per turn.
  */
 public class CANSparkEncoder implements IncrementalBareEncoder {
-    private final SupplierLogger m_logger;
     private final CANSparkMotor m_motor;
+    // LOGGERS
+    private final OptionalDoubleLogger m_log_position;
+    private final OptionalDoubleLogger m_log_velocity;
 
     public CANSparkEncoder(
-            SupplierLogger parent,
+            SupplierLogger2 parent,
             CANSparkMotor motor) {
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_motor = motor;
+        m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (rad)");
+        m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
     // /** Position in meters. */
@@ -48,8 +53,6 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
         // this is fast so we don't need to cache it
         double motorPositionRev = m_motor.getPositionRot();
         double positionRad = motorPositionRev * 2 * Math.PI;
-        m_logger.logDouble(Level.TRACE, "motor position (rev)", () -> motorPositionRev);
-        m_logger.logDouble(Level.TRACE, "position (rad)", () -> positionRad);
         return OptionalDouble.of(positionRad);
     }
 
@@ -58,7 +61,6 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
         // raw velocity is in RPM
         // this is fast so we don't need to cache it
         double velocityRad_S = m_motor.getRateRPM() * 2 * Math.PI / 60;
-        m_logger.logDouble(Level.TRACE, "velocity (rad_s)", () -> velocityRad_S);
         return OptionalDouble.of(velocityRad_S);
     }
 
@@ -69,7 +71,7 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
 
     @Override
     public void periodic() {
-        m_logger.logOptionalDouble(Level.TRACE, "position (rad)", this::getPositionRad);
-        m_logger.logOptionalDouble(Level.TRACE, "velocity (rad_s)", this::getVelocityRad_S);
+        m_log_position.log(this::getPositionRad);
+        m_log_velocity.log(this::getVelocityRad_S);
     }
 }

@@ -4,7 +4,8 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.EnumLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -43,12 +44,13 @@ public class RealFlight implements DriverControl {
     private static final double kMedium = 0.5;
     private static final double kSlow = 0.15;
 
-    private final SupplierLogger m_logger;
     private final GenericHID hid;
+    private final EnumLogger m_log_speed;
 
-    public RealFlight(SupplierLogger parent) {
+    public RealFlight(SupplierLogger2 parent) {
         hid = new GenericHID(0);
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
+        m_log_speed = child.enumLogger(Level.TRACE, "control_speed");
     }
 
     @Override
@@ -65,9 +67,9 @@ public class RealFlight implements DriverControl {
         double dx = expo(deadband(-1.0 * clamp(scaled(0), 1), kDeadband, 1), kExpo);
         double dy = expo(deadband(-1.0 * clamp(scaled(1), 1), kDeadband, 1), kExpo);
         double dtheta = expo(deadband(-1.0 * clamp(scaled(4), 1), kDeadband, 1), kExpo);
-        
+
         Speed speed = speed();
-        m_logger.logEnum(Level.TRACE, "control_speed", () -> speed);
+        m_log_speed.log(() -> speed);
 
         switch (speed) {
             case SLOW:

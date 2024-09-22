@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.Filesystem;
 
 class PoseEstimationHelperTest {
     private static final double kDelta = 0.01;
-    private static final SupplierLogger m_logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testGetRobotPoseInFieldCoords2() {
@@ -155,8 +154,8 @@ class PoseEstimationHelperTest {
                         new Rotation3d(0, 0, 0)));
 
         Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d();
-
-        PoseEstimationHelper helper = new PoseEstimationHelper(m_logger);
+        SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+        PoseEstimationHelper helper = new PoseEstimationHelper(logger);
         Pose3d robotPoseInFieldCoords = helper.getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
                 tagInFieldCoords,

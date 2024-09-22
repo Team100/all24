@@ -17,7 +17,6 @@ import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.PermissiveTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
-import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
@@ -29,22 +28,17 @@ import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
-import org.team100.lib.localization.FireControl;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.sensors.GyroFactory;
 import org.team100.lib.sensors.Gyro;
-import org.team100.lib.telemetry.Annunciator;
-import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.telemetry.Monitor;
-import org.team100.lib.telemetry.RootLogger;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.sensors.GyroFactory;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -86,9 +80,8 @@ public class RobotContainerParkingLot implements Glassy {
      */
     RobotContainerParkingLot(TimedRobot100 robot) throws IOException {
         Telemetry telemetry = Telemetry.get();
-        final SupplierLogger fieldLogger = telemetry.fieldLogger(true, true);
-        final SupplierLogger monitorLogger = telemetry.namedRootLogger("MONITOR", false, false);
-        final SupplierLogger driveLogger = telemetry.namedRootLogger("DRIVE", false, false);
+        final SupplierLogger2 fieldLogger = telemetry.fieldLogger();
+        final SupplierLogger2 driveLogger = telemetry.namedRootLogger("DRIVE");
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
 
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
@@ -108,18 +101,16 @@ public class RobotContainerParkingLot implements Glassy {
                 m_modules,
                 asyncFactory);
         final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
+                driveLogger,
                 m_gyro.getYawNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
-        final FireControl fireControl = new FireControl() {
-        };
         final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
         final VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 driveLogger,
                 m_layout,
-                poseEstimator,
-                fireControl);
+                poseEstimator);
         SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
@@ -128,21 +119,6 @@ public class RobotContainerParkingLot implements Glassy {
                 poseEstimator,
                 swerveLocal,
                 visionDataProvider);
-
-        // joel 2/22/24 removing for SVR, put back after that.
-        // these should be fields
-        final MorseCodeBeep m_beep;
-        final Monitor m_monitor;
-
-        // joel 2/22/24 removing for SVR, put it back after that.
-        // 20 words per minute is 60 ms.
-        m_beep = new MorseCodeBeep(0.06);
-        // m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() ||
-                m_beep.getOutput();
-        m_monitor = new Monitor(monitorLogger, new Annunciator(6), test);
-        // The monitor runs less frequently than the control loop.
-        robot.addPeriodic(m_monitor::periodic, 0.2, "monitor");
 
         HolonomicDriveController3 controller = new HolonomicDriveController3(driveLogger);
 

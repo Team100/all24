@@ -5,7 +5,12 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionData;
-import org.team100.lib.logging.SupplierLogger;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.EnumLogger;
+import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
+import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.sensors.Gyro;
@@ -24,29 +29,41 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * We depend on CommandScheduler to enforce the mutex.
  */
 public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
-    private final SupplierLogger m_fieldLogger;
-    private final SupplierLogger m_logger;
     private final Gyro m_gyro;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
     private final VisionData m_cameras;
     private final CotemporalCache<SwerveState> m_stateSupplier;
+    // LOGGERS
+    private final SwerveStateLogger m_log_state;
+    private final DoubleSupplierLogger2 m_log_turning;
+    private final DoubleArraySupplierLogger2 m_log_pose_array;
+    private final DoubleArraySupplierLogger2 m_log_field_robot;
+    private final DoubleSupplierLogger2 m_log_yaw_rate;
+    private final EnumLogger m_log_skill;
+    private final FieldRelativeVelocityLogger m_log_input;
 
     public SwerveDriveSubsystem(
-            SupplierLogger fieldLogger,
-            SupplierLogger parent,
+            SupplierLogger2 fieldLogger,
+            SupplierLogger2 parent,
             Gyro gyro,
             SwerveDrivePoseEstimator100 poseEstimator,
             SwerveLocal swerveLocal,
             VisionData cameras) {
-        m_fieldLogger = fieldLogger;
-        m_logger = parent.child(this);
+        SupplierLogger2 child = parent.child(this);
         m_gyro = gyro;
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_cameras = cameras;
         m_stateSupplier = new CotemporalCache<>(this::update);
         stop();
+        m_log_state = child.swerveStateLogger(Level.COMP, "state");
+        m_log_turning = child.doubleLogger(Level.TRACE, "Tur Deg");
+        m_log_pose_array = child.doubleArrayLogger(Level.COMP, "pose array");
+        m_log_field_robot = fieldLogger.doubleArrayLogger(Level.COMP, "robot");
+        m_log_yaw_rate = child.doubleLogger(Level.TRACE, "heading rate rad_s");
+        m_log_skill = child.enumLogger(Level.TRACE, "skill level");
+        m_log_input = child.fieldRelativeVelocityLogger(Level.TRACE, "drive input");
     }
 
     ////////////////
@@ -64,11 +81,11 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      * @param kDtSec time in the future for the setpoint generator to calculate
      */
     public void driveInFieldCoords(FieldRelativeVelocity vIn, double kDtSec) {
-        m_logger.logFieldRelativeVelocity(Level.TRACE, "drive input", () -> vIn);
+        m_log_input.log(() -> vIn);
 
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        m_logger.logEnum(Level.TRACE, "skill level", () -> driverSkillLevel);
+        m_log_skill.log(() -> driverSkillLevel);
         FieldRelativeVelocity v = GeometryUtil.scale(vIn, driverSkillLevel.scale());
 
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -108,7 +125,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        m_logger.logEnum(Level.TRACE, "skill level", () -> driverSkillLevel);
+        m_log_skill.log(() -> driverSkillLevel);
         speeds = speeds.times(driverSkillLevel.scale());
         m_swerveLocal.setChassisSpeeds(speeds, m_gyro.getYawRateNWU(), kDtSec);
     }
@@ -191,9 +208,9 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     public void periodic() {
         // m_poseEstimator.periodic();
         m_stateSupplier.reset();
-        m_logger.logSwerveState(Level.COMP, "state", this::getState);
-        m_logger.logDouble(Level.TRACE, "Tur Deg", () -> getState().pose().getRotation().getDegrees());
-        m_logger.logDoubleArray(Level.COMP, "pose array",
+        m_log_state.log(this::getState);
+        m_log_turning.log(() -> getState().pose().getRotation().getDegrees());
+        m_log_pose_array.log(
                 () -> new double[] {
                         getState().pose().getX(),
                         getState().pose().getY(),
@@ -203,12 +220,12 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
-        m_fieldLogger.logDoubleArray(Level.COMP, "robot", () -> new double[] {
+        m_log_field_robot.log(() -> new double[] {
                 getState().pose().getX(),
                 getState().pose().getY(),
                 getState().pose().getRotation().getDegrees()
         });
-        m_logger.logDouble(Level.TRACE, "heading rate rad_s", m_gyro::getYawRateNWU);
+        m_log_yaw_rate.log(m_gyro::getYawRateNWU);
         m_swerveLocal.periodic();
     }
 
@@ -226,6 +243,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     /** used by the supplier */
     private SwerveState update() {
         double now = Timer.getFPGATimestamp();
+        // System.out.println("update now " + now);
         m_poseEstimator.put(
                 now,
                 m_gyro.getYawNWU(),
