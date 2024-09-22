@@ -64,7 +64,6 @@ import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.indicator.LEDIndicator;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
-import org.team100.lib.localization.CameraUpdater;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
@@ -107,7 +106,6 @@ public class RobotContainer implements Glassy {
     private final SwerveModuleCollection m_modules;
     private final Command m_auton;
     private final DrumShooter m_shooter;
-    private final CameraUpdater m_cameraUpdater;
     final SwerveDriveSubsystem m_drive;
     final AmpFeeder m_ampFeeder;
     final AmpPivot m_ampPivot;
@@ -180,10 +178,6 @@ public class RobotContainer implements Glassy {
 
         final NotePosition24ArrayListener noteListener = new NotePosition24ArrayListener(
                 () -> m_drive.getState().pose());
-
-        m_cameraUpdater = new CameraUpdater(
-                () -> m_drive.getState().pose(),
-                m_layout);
 
         final FeederSubsystem feeder = new FeederSubsystem(shooterLogger, m_sensors);
 
@@ -510,8 +504,7 @@ public class RobotContainer implements Glassy {
     }
 
     public void periodic() {
-        if (Experiments.instance.enabled(Experiment.UseCameraUpdater))
-            m_cameraUpdater.update();
+        //
     }
 
     public void cancelAuton() {

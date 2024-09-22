@@ -51,11 +51,6 @@ public enum Experiment {
      * Include sag limiter in setpoint generator
      */
     LimitBatterySag,
-
-    /**
-     * Periodically publish all tag poses to all cameras
-     */
-    UseCameraUpdater,
     /**
      * 
      */
