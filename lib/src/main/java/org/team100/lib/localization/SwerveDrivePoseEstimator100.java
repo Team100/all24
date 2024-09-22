@@ -20,7 +20,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
-import org.team100.lib.util.SlipperyTireUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -34,7 +33,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private final int m_numModules;
     private final SwerveKinodynamics m_kinodynamics;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
-    private final SlipperyTireUtil m_tireUtil;
     // LOGGERS
     private final Rotation2dLogger m_log_offset;
     private final DoubleSupplierLogger2 m_log_pose_x;
@@ -66,7 +64,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         SupplierLogger2 child = parent.child(this);
         m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
-        m_tireUtil = new SlipperyTireUtil(child, m_kinodynamics.getTire());
         m_poseBuffer = new TimeInterpolatableBuffer100<>(
                 child,
                 kBufferDuration,
@@ -223,27 +220,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 value.m_wheelPositions,
                 wheelPositions);
 
-        SwerveState earlierPose = null;
-        double t0 = 0;
-        if (Experiments.instance.enabled(Experiment.SlipperyTires) && consistentPair.size() > 1) {
-            // get an earlier pose in order to adjust the corner velocities
-            Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
-
-            t0 = lowerEntry.getKey() - earlierEntry.getKey();
-            final double t00 = t0;
-            m_log_t0.log( () -> t00);
-            earlierPose = earlierEntry.getValue().m_state;
-            Vector2d[] corners = m_tireUtil.cornerDeltas(
-                    m_kinodynamics.getKinematics(),
-                    earlierPose.pose(),
-                    previousPose.pose());
-            final SwerveModulePosition100[] delta0 = modulePositionDelta;
-            m_log_delta0.log( () -> delta0[0]);
-            modulePositionDelta = m_tireUtil.adjust(corners, t0, modulePositionDelta, t1);
-            final SwerveModulePosition100[] delta1 = modulePositionDelta;
-            m_log_delta1.log( () -> delta1[0]);
-        }
-
         Twist2d twist = m_kinodynamics.getKinematics().toTwist2d(modulePositionDelta);
 
         // replace the twist dtheta with one derived from the current pose
@@ -262,8 +238,13 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 deltaTransform.getX(),
                 deltaTransform.getY(),
                 deltaTransform.getRotation().getRadians());
+
+        // calculate acceleration if possible
         FieldRelativeAcceleration accel = new FieldRelativeAcceleration(0, 0, 0);
-        if (earlierPose != null) {
+        if (consistentPair.size() > 1) {
+            Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
+            double t0 = lowerEntry.getKey() - earlierEntry.getKey();
+            SwerveState earlierPose = earlierEntry.getValue().m_state;
             FieldRelativeDelta earlierTransform = FieldRelativeDelta.delta(
                     earlierPose.pose(), previousPose.pose()).div(t0);
             accel = new FieldRelativeAcceleration(

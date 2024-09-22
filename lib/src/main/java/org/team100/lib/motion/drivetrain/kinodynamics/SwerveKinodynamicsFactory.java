@@ -2,7 +2,6 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.util.Tire;
 import org.team100.lib.util.Util;
 
 /**
@@ -42,8 +41,7 @@ public class SwerveKinodynamicsFactory {
                         0.43, // back track m
                         0.46, // wheelbase m
                         0.31, // front offset m
-                        0.1, // vcg m
-                        Tire.noslip(parent));
+                        0.1); // vcg m
             case SWERVE_TWO:
                 return new SwerveKinodynamics(
                         parent,
@@ -56,8 +54,7 @@ public class SwerveKinodynamicsFactory {
                         0.380, // track m 
                         0.445, // wheelbase m
                         0.2225, // front offset m
-                        0.3, // vcg m
-                        Tire.noslip(parent));
+                        0.3); // vcg m
             case SWERVE_ONE:
                 return new SwerveKinodynamics(
                         parent,
@@ -70,8 +67,7 @@ public class SwerveKinodynamicsFactory {
                         0.449, // track m
                         0.464, // wheelbase m
                         .232, // front offset m
-                        0.3, // vcg m
-                        Tire.noslip(parent));
+                        0.3); // vcg m
             case BLANK:
                 // this is used for tests and simulation; if you change it you should fix all
                 // the broken tests.
@@ -86,8 +82,7 @@ public class SwerveKinodynamicsFactory {
                         0.5, // track m
                         0.5, // wheelbase m
                         .25, // front offset m
-                        0.3, // vcg m
-                        Tire.noslip(parent));
+                        0.3); // vcg m
             case BETA_BOT:
                 // these numbers were extracted from module mode acceleration
                 // runs as shown in this spreadsheet
@@ -112,8 +107,7 @@ public class SwerveKinodynamicsFactory {
                         0.44, // back track m
                         0.491, // wheelbase m
                         0.29, // front offset m
-                        0.1, // vcg m
-                        Tire.noslip(parent));
+                        0.1); // vcg m
             default:
                 Util.warn("Using default kinodynamics");
                 return new SwerveKinodynamics(
@@ -127,8 +121,7 @@ public class SwerveKinodynamicsFactory {
                         0.5, // track m
                         0.5, // wheelbase m
                         .25, // front offset m
-                        0.3, // vcg m
-                        Tire.noslip(parent));
+                        0.3); // vcg m
         }
     }
 
@@ -150,8 +143,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                0.3, // vcg m
-                Tire.noslip(parent));
+                0.3); // vcg m
     }
 
     public static SwerveKinodynamics forTestWithSlip(SupplierLogger2 parent) {
@@ -166,8 +158,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                0.3, // vcg m
-                Tire.defaultTire(parent));
+                0.3); // vcg m
     }
 
     public static SwerveKinodynamics forTest2(SupplierLogger2 parent) {
@@ -182,8 +173,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                0.6, // vcg m
-                Tire.noslip(parent));
+                0.6); // vcg m
     }
 
     public static SwerveKinodynamics forWPITest(SupplierLogger2 parent) {
@@ -198,8 +188,7 @@ public class SwerveKinodynamicsFactory {
                 2, // track m
                 2, // wheelbase m
                 1, // front offset m
-                1, // vcg m
-                Tire.noslip(parent));
+                1); // vcg m
     }
     //////////////////////////////////////////
     //
@@ -217,8 +206,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                0.001, // vcg m
-                Tire.noslip(parent));
+                0.001); // vcg m
     }
 
     public static SwerveKinodynamics decelCase(SupplierLogger2 parent) {
@@ -233,8 +221,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                0.3, // vcg m
-                Tire.noslip(parent));
+                0.3); // vcg m
     }
 
     public static SwerveKinodynamics highCapsize(SupplierLogger2 parent) {
@@ -249,8 +236,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                0.1, // vcg m
-                Tire.noslip(parent));
+                0.1); // vcg m
     }
 
     public static SwerveKinodynamics lowCapsize(SupplierLogger2 parent) {
@@ -265,8 +251,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                2, // vcg m (very high vcg)
-                Tire.noslip(parent));
+                2); // vcg m (very high vcg)
     }
 
     public static SwerveKinodynamics limiting(SupplierLogger2 parent) {
@@ -281,8 +266,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                0.3, // vcg m
-                Tire.noslip(parent));
+                0.3); // vcg m
     }
 
     /** Large difference in accel and decel, to make asymmetry obvious. */
@@ -298,8 +282,7 @@ public class SwerveKinodynamicsFactory {
                 0.5, // track m
                 0.5, // wheelbase m
                 .25, // front offset m
-                0.3, // vcg m
-                Tire.noslip(parent));
+                0.3); // vcg m
     }
 
     private SwerveKinodynamicsFactory() {

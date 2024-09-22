@@ -262,8 +262,6 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
     /**
      * Make sure desiredState respects velocity limits.
-     * 
-     * does not involve the Tire model.
      */
     private ChassisSpeeds desaturate(
             ChassisSpeeds desiredState,

@@ -16,9 +16,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-/**
- * None of the tests here involve the Tire model.
- */
 class SwerveDriveDynamicsConstraintTest {
     private static final double kDelta = 0.001;
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
