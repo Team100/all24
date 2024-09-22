@@ -57,8 +57,6 @@ public class SingleNavXGyro implements Gyro {
      */
     private static final int kSPIBitRateHz = 500000;
 
-    // TODO: remove this if it's not useful
-    // private final AHRS100 m_ahrs;
     private final AHRS m_ahrs;
 
     /**
@@ -92,12 +90,17 @@ public class SingleNavXGyro implements Gyro {
         // maximum update rate == minimum latency (use most-recent updates). maybe too
         // much CPU?
         switch (Identity.instance) {
-            // case COMP_BOT:
+            case COMP_BOT:
+                m_ahrs = new AHRS(
+                        SerialPort.Port.kUSB,
+                        AHRS.SerialDataType.kProcessedData,
+                        kUpdateRateHz);
+                m_yawScaleFactor = 1.0f;
+                m_yawRateScaleFactor = 1.0f;
+                // TODO: remove this message when calibration is finished.
+                Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
+                break;
             default:
-                // Jun 29 2024: actually use the specified bit rate
-                // m_gyro1 = new AHRS(SPI.Port.kMXP);
-                // this is the version i hacked to avoid wpilib 2025 breaking changes
-                // m_ahrs = new AHRS100(SPI.Port.kMXP, kSPIBitRateHz, kUpdateRateHz);
                 m_ahrs = new AHRS(
                         SPI.Port.kMXP,
                         kSPIBitRateHz,
@@ -107,19 +110,6 @@ public class SingleNavXGyro implements Gyro {
                 // TODO: remove this message when calibration is finished.
                 Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
                 break;
-            // default:
-            case COMP_BOT:
-                // this is the version i hacked to avoid wpilib 2025 breaking changes
-                // m_ahrs = new AHRS100(SerialPort.Port.kUSB,
-                // AHRS100.SerialDataType.kProcessedData, kUpdateRateHz);
-                m_ahrs = new AHRS(
-                        SerialPort.Port.kUSB,
-                        AHRS.SerialDataType.kProcessedData,
-                        kUpdateRateHz);
-                m_yawScaleFactor = 1.0f;
-                m_yawRateScaleFactor = 1.0f;
-                // TODO: remove this message when calibration is finished.
-                Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
 
         }
         m_ahrs.enableBoardlevelYawReset(true);

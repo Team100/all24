@@ -179,7 +179,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
         final Rotation2d gyroRotation = m_poseEstimator.get(blipTimeSec).pose().getRotation();
 
         estimateFromBlips(
-                cameraSerialNumber,
                 blips,
                 cameraInRobotCoordinates,
                 blipTimeSec,
@@ -188,7 +187,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
     }
 
     private void estimateFromBlips(
-            final String cameraSerialNumber,
             final Blip24[] blips,
             final Transform3d cameraInRobotCoordinates,
             final double frameTimeSec,

@@ -5,13 +5,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
-import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.Rotation2dLogger;
-import org.team100.lib.logging.SupplierLogger2.SwerveModulePosition100Logger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
@@ -36,10 +32,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     // LOGGERS
     private final Rotation2dLogger m_log_offset;
     private final DoubleSupplierLogger2 m_log_pose_x;
-    private final SwerveModulePosition100Logger m_log_delta0;
-    private final SwerveModulePosition100Logger m_log_delta1;
-    private final DoubleSupplierLogger2 m_log_t0;
-    private final DoubleSupplierLogger2 m_log_t1;
 
     /**
      * maintained in resetPosition().
@@ -79,10 +71,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
         m_log_offset = child.rotation2dLogger(Level.TRACE, "GYRO OFFSET");
         m_log_pose_x = child.doubleLogger(Level.TRACE, "posex");
-        m_log_delta0 = child.swerveModulePosition100Logger(Level.TRACE, "delta0");
-        m_log_delta1 = child.swerveModulePosition100Logger(Level.TRACE, "delta1");
-        m_log_t0 = child.doubleLogger(Level.TRACE, "t0");
-        m_log_t1 = child.doubleLogger(Level.TRACE, "t1");
     }
 
     @Override
@@ -212,7 +200,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
 
         double t1 = currentTimeS - lowerEntry.getKey();
-        m_log_t1.log( () -> t1);
         InterpolationRecord value = lowerEntry.getValue();
         SwerveState previousPose = value.m_state;
 

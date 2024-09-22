@@ -503,8 +503,7 @@ public class SwerveDriveKinematics100 {
         SimpleMatrix acceleration2vector = new SimpleMatrix(3, 1);
         acceleration2vector.setColumn(0, 0, chassisSpeedsAccelerationMatrix.get(0, 0),
                 chassisSpeedsAccelerationMatrix.get(1, 0), chassisSpeedsAccelerationMatrix.get(2, 0));
-        SimpleMatrix d2modulexy = m_mat[moduleLocation].mult(acceleration2vector);
-        return d2modulexy;
+        return m_mat[moduleLocation].mult(acceleration2vector);
     }
 
     /**
@@ -539,13 +538,6 @@ public class SwerveDriveKinematics100 {
             }
             m_moduleHeadings[i] = mods[i].angle.get();
         }
-    }
-
-    /** Module headings at zero to start. Maybe this is bad? */
-    private static Rotation2d[] zeros(int numModules) {
-        Rotation2d[] moduleHeadings = new Rotation2d[numModules];
-        Arrays.fill(moduleHeadings, new Rotation2d());
-        return moduleHeadings;
     }
 
     /** Module headings null to start to avoid transients? */

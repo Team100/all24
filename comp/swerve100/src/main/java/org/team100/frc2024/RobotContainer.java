@@ -50,12 +50,9 @@ import org.team100.lib.commands.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.FullStateDriveController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -118,8 +115,6 @@ public class RobotContainer implements Glassy {
 
         final Telemetry telemetry = Telemetry.get();
         final SupplierLogger2 fieldLogger = telemetry.fieldLogger();
-
-        final boolean defaultEnabled = Identity.instance.equals(Identity.BLANK);
 
         final SupplierLogger2 sensorLogger = telemetry.namedRootLogger("SENSOR");
         final SupplierLogger2 driveLogger = telemetry.namedRootLogger("DRIVE");
@@ -216,7 +211,7 @@ public class RobotContainer implements Glassy {
         // on xbox this is "start"
         onTrue(driverControl::resetRotation180, new SetRotation(m_drive, GeometryUtil.kRotation180));
 
-        final FullStateDriveController fullStateController = new FullStateDriveController();
+        // final FullStateDriveController fullStateController = new FullStateDriveController();
         final HolonomicDriveController100 dthetaController = new HolonomicDriveController100(commandLogger);
 
         final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();

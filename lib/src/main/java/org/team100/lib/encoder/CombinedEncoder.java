@@ -6,10 +6,7 @@ import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.Math100;
 import org.team100.lib.util.Util;
-
-import edu.wpi.first.math.MathUtil;
 
 /**
  * Proxies an absolute sensor and another sensor, corrects the position of the

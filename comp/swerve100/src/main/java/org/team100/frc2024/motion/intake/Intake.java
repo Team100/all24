@@ -1,18 +1,16 @@
 package org.team100.frc2024.motion.intake;
 
-import java.util.Optional;
-
 import org.team100.frc2024.SensorInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.LimitedLinearVelocityServo;
-import org.team100.lib.motion.components.ServoFactory;
-import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.motion.components.LimitedLinearVelocityServo;
+import org.team100.lib.motion.components.ServoFactory;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
