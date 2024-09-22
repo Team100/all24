@@ -3,6 +3,8 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.AnalogInput;
@@ -13,6 +15,10 @@ import edu.wpi.first.wpilibj.RobotController;
  */
 public class AnalogTurningEncoder extends RoboRioRotaryPositionSensor {
     private final AnalogInput m_input;
+    // LOGGERS
+    private final IntSupplierLogger2 m_log_channel;
+    private final DoubleSupplierLogger2 m_log_voltage;
+    private final DoubleSupplierLogger2 m_log_ratio;
 
     public AnalogTurningEncoder(
             SupplierLogger2 parent,
@@ -21,6 +27,9 @@ public class AnalogTurningEncoder extends RoboRioRotaryPositionSensor {
             EncoderDrive drive) {
         super(parent, inputOffset, drive);
         m_input = new AnalogInput(channel);
+        m_log_channel = m_logger.intLogger(Level.TRACE, "channel");
+        m_log_voltage = m_logger.doubleLogger(Level.TRACE, "voltage");
+        m_log_ratio = m_logger.doubleLogger(Level.TRACE, "ratio");
     }
 
     @Override
@@ -40,11 +49,11 @@ public class AnalogTurningEncoder extends RoboRioRotaryPositionSensor {
 
     @Override
     protected OptionalDouble getRatio() {
-        m_logger.intLogger(Level.TRACE, "channel").log( m_input::getChannel);
+        m_log_channel.log( m_input::getChannel);
         double voltage = m_input.getVoltage();
-        m_logger.doubleLogger(Level.TRACE, "voltage").log( () -> voltage);
+        m_log_voltage.log( () -> voltage);
         double ratio = voltage / RobotController.getVoltage5V();
-        m_logger.doubleLogger(Level.TRACE, "ratio").log( () -> ratio);
+        m_log_ratio.log( () -> ratio);
         return OptionalDouble.of(ratio);
     }
 }

@@ -7,6 +7,9 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
@@ -52,6 +55,19 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     // for calculating acceleration
     private double m_previousSetpoint = 0;
     private double m_prevTime;
+    // LOGGERS
+    private final State100Logger m_log_goal;
+    private final DoubleSupplierLogger2 m_log_feedforward_torque;
+    private final State100Logger m_log_measurement;
+    private final State100Logger m_log_setpoint;
+    private final DoubleSupplierLogger2 m_log_u_FB;
+    private final DoubleSupplierLogger2 m_log_u_FF;
+    private final DoubleSupplierLogger2 m_log_u_TOTAL;
+    private final DoubleSupplierLogger2 m_log_error;
+    private final DoubleSupplierLogger2 m_log_velocity_error;
+    private final DoubleSupplierLogger2 m_log_position_tolerance;
+    private final DoubleSupplierLogger2 m_log_velocity_tolerance;
+    private final BooleanSupplierLogger2 m_log_at_setpoint;
 
     /**
      * Don't forget to set a profile.
@@ -70,6 +86,18 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         m_controller = controller;
         m_period = controller.getPeriod();
         m_controller.setIntegratorRange(0, 0.1);
+        m_log_goal = m_logger.state100Logger(Level.TRACE, "goal (rad)");
+        m_log_feedforward_torque = m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
+        m_log_measurement = m_logger.state100Logger(Level.TRACE, "measurement (rad)");
+        m_log_setpoint = m_logger.state100Logger(Level.TRACE, "setpoint (rad)");
+        m_log_u_FB = m_logger.doubleLogger(Level.TRACE, "u_FB (rad_s)");
+        m_log_u_FF = m_logger.doubleLogger(Level.TRACE, "u_FF (rad_s)");
+        m_log_u_TOTAL = m_logger.doubleLogger(Level.TRACE, "u_TOTAL (rad_s)");
+        m_log_error = m_logger.doubleLogger(Level.TRACE, "Controller Position Error (rad)");
+        m_log_velocity_error = m_logger.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)");
+        m_log_position_tolerance = m_logger.doubleLogger(Level.TRACE, "Position Tolerance");
+        m_log_velocity_tolerance = m_logger.doubleLogger(Level.TRACE, "Velocity Tolerance");
+        m_log_at_setpoint = m_logger.booleanLogger(Level.TRACE, "At Setpoint");
     }
 
     /**
@@ -151,16 +179,15 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         // m_mechanism.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);
         m_mechanism.setVelocity(u_TOTAL, m_setpointRad.a(), feedForwardTorqueNm);
 
-        m_logger.state100Logger(Level.TRACE, "goal (rad)").log( () -> m_goal);
-        m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)").log( () -> feedForwardTorqueNm);
-        m_logger.state100Logger(Level.TRACE, "measurement (rad)").log(
-                () -> new State100(measurementPositionRad, mechanismVelocityRad_S));
-        m_logger.state100Logger(Level.TRACE, "setpoint (rad)").log( () -> m_setpointRad);
-        m_logger.doubleLogger(Level.TRACE, "u_FB (rad_s)").log( () -> u_FB);
-        m_logger.doubleLogger(Level.TRACE, "u_FF (rad_s)").log( () -> u_FF);
-        m_logger.doubleLogger(Level.TRACE, "u_TOTAL (rad_s)").log( () -> u_TOTAL);
-        m_logger.doubleLogger(Level.TRACE, "Controller Position Error (rad)").log( m_controller::getPositionError);
-        m_logger.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)").log( m_controller::getVelocityError);
+        m_log_goal.log(() -> m_goal);
+        m_log_feedforward_torque.log(() -> feedForwardTorqueNm);
+        m_log_measurement.log(() -> new State100(measurementPositionRad, mechanismVelocityRad_S));
+        m_log_setpoint.log(() -> m_setpointRad);
+        m_log_u_FB.log(() -> u_FB);
+        m_log_u_FF.log(() -> u_FF);
+        m_log_u_TOTAL.log(() -> u_TOTAL);
+        m_log_error.log(m_controller::getPositionError);
+        m_log_velocity_error.log(m_controller::getVelocityError);
     }
 
     @Override
@@ -190,9 +217,9 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     @Override
     public boolean atSetpoint() {
         boolean atSetpoint = m_controller.atSetpoint();
-        m_logger.doubleLogger(Level.TRACE, "Position Tolerance").log( m_controller::getPositionTolerance);
-        m_logger.doubleLogger(Level.TRACE, "Velocity Tolerance").log( m_controller::getVelocityTolerance);
-        m_logger.booleanLogger(Level.TRACE, "At Setpoint").log( () -> atSetpoint);
+        m_log_position_tolerance.log(m_controller::getPositionTolerance);
+        m_log_velocity_tolerance.log(m_controller::getVelocityTolerance);
+        m_log_at_setpoint.log(() -> atSetpoint);
         return atSetpoint;
     }
 
@@ -232,8 +259,8 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     @Override
     public void periodic() {
         m_mechanism.periodic();
-        m_logger.state100Logger(Level.TRACE, "setpoint").log( () -> m_setpointRad);
-        m_logger.state100Logger(Level.TRACE, "goal").log( () -> m_goal);
+        m_log_setpoint.log(() -> m_setpointRad);
+        m_log_goal.log(() -> m_goal);
     }
 
     ////////////////////////////////////////////////

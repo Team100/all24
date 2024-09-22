@@ -3,6 +3,7 @@ package org.team100.lib.localization;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,9 +21,11 @@ import edu.wpi.first.math.geometry.Translation3d;
 public class PoseEstimationHelper implements Glassy {
 
     private final SupplierLogger2 m_logger;
+    private StringSupplierLogger2 m_log_rotation_source;
 
     public PoseEstimationHelper(SupplierLogger2 parent) {
         m_logger = parent.child(this);
+        m_log_rotation_source = m_logger.stringLogger(Level.TRACE, "rotation_source");
     }
 
     /** Convert robot-relative translation to field-relative translation. */
@@ -50,14 +53,14 @@ public class PoseEstimationHelper implements Glassy {
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
         if (tagTranslationInCameraCoords.getNorm() < thresholdMeters) {
-            m_logger.stringLogger(Level.TRACE, "rotation_source").log( () -> "CAMERA");
+            m_log_rotation_source.log(() -> "CAMERA");
             return getRobotPoseInFieldCoords(
                     cameraInRobotCoords,
                     tagInFieldCoords,
                     blip);
         }
 
-        m_logger.stringLogger(Level.TRACE, "rotation_source").log( () -> "GYRO");
+        m_log_rotation_source.log(() -> "GYRO");
 
         return getRobotPoseInFieldCoords(
                 cameraInRobotCoords,
@@ -134,17 +137,9 @@ public class PoseEstimationHelper implements Glassy {
 
         Translation3d tagTranslationInCameraCoords = blipToTranslation(blip);
 
-        m_logger.rotation2dLogger(Level.TRACE, "CAMERA ROT IN FIELD COORDS").log(
-                cameraRotationInFieldCoords::toRotation2d);
-        m_logger.translation2dLogger(Level.TRACE, "TAG TRANSLATION IN CAM COORDS").log(
-                tagTranslationInCameraCoords::toTranslation2d);
-
         Rotation3d tagRotationInCameraCoords = tagRotationInRobotCoordsFromGyro(
                 tagInFieldCoords.getRotation(),
                 cameraRotationInFieldCoords);
-
-        m_logger.rotation2dLogger(Level.TRACE, "TAG ROTATION IN CAM COORDS").log(
-                tagRotationInCameraCoords::toRotation2d);
 
         Transform3d tagInCameraCoords = new Transform3d(
                 tagTranslationInCameraCoords,
@@ -153,9 +148,6 @@ public class PoseEstimationHelper implements Glassy {
         Pose3d cameraInFieldCoords = toFieldCoordinates(
                 tagInCameraCoords,
                 tagInFieldCoords);
-
-        m_logger.translation2dLogger(Level.TRACE, "CAM IN FIELD COORDS").log(
-                () -> cameraInFieldCoords.getTranslation().toTranslation2d());
 
         return applyCameraOffset(
                 cameraInFieldCoords,

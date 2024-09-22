@@ -4,6 +4,7 @@ import java.util.function.DoubleUnaryOperator;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -119,6 +120,8 @@ public class MinTimeController implements Glassy {
     private final double m_switchingAcceleration;
     private final double m_tolerance;
 
+    private final StringSupplierLogger2 m_log_mode;
+
     /**
      * @param modulus        for angle wrapping
      * @param maxVel
@@ -153,6 +156,7 @@ public class MinTimeController implements Glassy {
         m_finish = finish;
         m_k = k;
         m_logger = parent.child(this);
+        m_log_mode = m_logger.stringLogger(Level.TRACE, "mode");
     }
 
     private State100 modulus(double x, double v, double a) {
@@ -192,13 +196,13 @@ public class MinTimeController implements Glassy {
 
         // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
-            m_logger.stringLogger(Level.TRACE, "mode").log( () -> "within tolerance");
+            m_log_mode.log( () -> "within tolerance");
             return modulus(goal);
         }
 
         // NEAR THE GOAL: USE FULL STATE to avoid oscillation
         if (goal.near(initial, m_finish)) {
-            m_logger.stringLogger(Level.TRACE, "mode").log( () -> "full state");
+            m_log_mode.log( () -> "full state");
             double xError = goal.x() - initial.x();
             double vError = goal.v() - initial.v();
             double u_FBx = xError * m_k[0];
@@ -228,7 +232,7 @@ public class MinTimeController implements Glassy {
             return modulus(initial);
         }
 
-        m_logger.stringLogger(Level.TRACE, "mode").log( () -> "min time");
+        m_log_mode.log( () -> "min time");
 
         // ON THE INITIAL PATH
 

@@ -5,6 +5,7 @@ import java.util.OptionalDouble;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.IncrementalBareEncoder;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -23,6 +24,8 @@ public class RotaryMechanism implements Glassy {
     private final BareMotor m_motor;
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
+    private DoubleSupplierLogger2 m_log_velocity;
+    private DoubleSupplierLogger2 m_log_position;
 
     public RotaryMechanism(
             SupplierLogger2 parent,
@@ -33,6 +36,8 @@ public class RotaryMechanism implements Glassy {
         m_motor = motor;
         m_encoder = encoder;
         m_gearRatio = gearRatio;
+        m_log_velocity = m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)");
+        m_log_position = m_logger.doubleLogger(Level.TRACE, "position (rad)");
     }
 
     public void setDutyCycle(double output) {
@@ -69,7 +74,6 @@ public class RotaryMechanism implements Glassy {
         if (velocityRad_S.isEmpty())
             return OptionalDouble.empty();
         double velo = velocityRad_S.getAsDouble() / m_gearRatio;
-        m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)").log( () -> velo);
         return OptionalDouble.of(velo);
     }
 
@@ -103,8 +107,8 @@ public class RotaryMechanism implements Glassy {
 
     public void periodic() {
         // do some logging
-        m_logger.doubleLogger(Level.TRACE, "velocity (rad_s)").log( ()->getVelocityRad_S().getAsDouble());
-        m_logger.doubleLogger(Level.TRACE, "position (rad)").log( ()->MathUtil.angleModulus(getPositionRad().getAsDouble()));
+        m_log_velocity.log( ()->getVelocityRad_S().getAsDouble());
+        m_log_position.log( ()->MathUtil.angleModulus(getPositionRad().getAsDouble()));
         m_motor.periodic();
         m_encoder.periodic();
     }

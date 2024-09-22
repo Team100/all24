@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.interpolation.Interpolatable;
@@ -32,12 +33,16 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * "read" (non-exclusive) lock.
      */
     private final ReadWriteLock m_lock = new ReentrantReadWriteLock();
+    private final StringSupplierLogger2 m_log_bottom;
+    private final StringSupplierLogger2 m_log_top;
 
     public TimeInterpolatableBuffer100(SupplierLogger2 parent, double historyS, double timeS, T initialValue) {
         m_logger = parent.child(this);
         m_historyS = historyS;
         // no lock needed in constructor
         m_pastSnapshots.put(timeS, initialValue);
+        m_log_bottom = m_logger.stringLogger(Level.TRACE, "bottom");
+        m_log_top = m_logger.stringLogger(Level.TRACE, "top");
     }
 
     /**
@@ -102,13 +107,13 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         // Return the opposite bound if the other is null
         if (topBound == null) {
             String bottomValue = bottomBound.getValue().toString();
-            m_logger.stringLogger(Level.TRACE, "bottom").log( () -> bottomValue);
+            m_log_bottom.log( () -> bottomValue);
             // System.out.println("bottom " + bottomValue);
             return bottomBound.getValue();
         }
         if (bottomBound == null) {
             String topValue = topBound.getValue().toString();
-            m_logger.stringLogger(Level.TRACE, "top").log( () -> topValue);
+            m_log_top.log( () -> topValue);
             // System.out.println("top " + topValue);
             return topBound.getValue();
         }
@@ -119,9 +124,9 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         // difference between top and bottom bounds).
 
         String bottomValue = bottomBound.getValue().toString();
-        m_logger.stringLogger(Level.TRACE, "bottom").log( () -> bottomValue);
+        m_log_bottom.log( () -> bottomValue);
         String topValue = topBound.getValue().toString();
-        m_logger.stringLogger(Level.TRACE, "top").log( () -> topValue);
+        m_log_top.log( () -> topValue);
         double timeSinceBottom = timeSeconds - bottomBound.getKey();
         double timeSpan = topBound.getKey() - bottomBound.getKey();
         double timeFraction = timeSinceBottom / timeSpan;

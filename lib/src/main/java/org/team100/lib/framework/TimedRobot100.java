@@ -88,6 +88,8 @@ public class TimedRobot100 extends IterativeRobotBase {
 
     private final DoubleSupplierLogger2 m_log_slack;
 
+    private DoubleSupplierLogger2 m_log_elapsed;
+
     /** Constructor for TimedRobot. */
     protected TimedRobot100() {
         this(kDefaultPeriod);
@@ -113,6 +115,7 @@ public class TimedRobot100 extends IterativeRobotBase {
         NotifierJNI.setNotifierName(m_notifier, "TimedRobot");
 
         HAL.report(tResourceType.kResourceType_Framework, tInstances.kFramework_Timed);
+        m_log_elapsed = m_logger.doubleLogger(Level.COMP, "elapsed (s)");
     }
 
     @Override
@@ -176,7 +179,7 @@ public class TimedRobot100 extends IterativeRobotBase {
 
     private void dumpChronos() {
         final double elapsed = chronos.elapsed();
-        m_logger.doubleLogger(Level.COMP, "elapsed (s)").log( () -> elapsed);
+        m_log_elapsed.log( () -> elapsed);
         for (Map.Entry<String, Double> durations : chronos.durations().entrySet()) {
             Double duration = durations.getValue();
             String name = durations.getKey();

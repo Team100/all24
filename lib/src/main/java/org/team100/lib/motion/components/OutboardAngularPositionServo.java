@@ -5,6 +5,8 @@ import java.util.OptionalDouble;
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -27,6 +29,12 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private final SupplierLogger2 m_logger;
     private final RotaryMechanism m_mechanism;
     private final CombinedEncoder m_encoder;
+    // LOGGERS
+    private final State100Logger m_log_goal;
+    private final DoubleSupplierLogger2 m_log_ff_torque;
+    private final DoubleSupplierLogger2 m_log_measurement;
+    private final State100Logger m_log_setpoint;
+    private final DoubleSupplierLogger2 m_log_position;
 
     /** Profile may be updated at runtime. */
     private Profile100 m_profile;
@@ -42,6 +50,11 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         m_logger = parent.child(this);
         m_mechanism = mech;
         m_encoder = encoder;
+        m_log_goal = m_logger.state100Logger(Level.TRACE, "goal (rad)");
+        m_log_ff_torque = m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
+        m_log_measurement = m_logger.doubleLogger(Level.TRACE, "measurement (rad)");
+        m_log_setpoint = m_logger.state100Logger(Level.TRACE, "setpoint (rad)");
+        m_log_position = m_logger.doubleLogger(Level.TRACE, "Position");
     }
 
     @Override
@@ -66,17 +79,19 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     @Override
     public void setPositionWithVelocity(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
         OptionalDouble positionRad = m_encoder.getPositionRad();
-        m_logger.doubleLogger(Level.TRACE, "Position").log( () -> m_encoder.getPositionRad().getAsDouble());
+        m_log_position.log(() -> m_encoder.getPositionRad().getAsDouble());
         // System.out.println(positionRad.getAsDouble());
         if (positionRad.isEmpty())
             return;
         // double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
 
         // // use the modulus closest to the measurement.
-        // m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocity);
+        // m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) +
+        // measurementRad, goalVelocity);
 
         // m_setpoint = new State100(
-        //         MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad, m_setpoint.v()
+        // MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad,
+        // m_setpoint.v()
         // );
 
         // // NOTE: fixed dt here
@@ -85,42 +100,47 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         double measurementRad = positionRad.getAsDouble();
         double anglulusRad = MathUtil.angleModulus(positionRad.getAsDouble());
         m_goal = new State100(MathUtil.angleModulus(goalRad - anglulusRad) + measurementRad, goalVelocity);
-   
+
         m_setpoint = new State100(measurementRad, m_setpoint.v());
         m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 
-        m_logger.state100Logger(Level.TRACE, "goal (rad)").log( () -> m_goal);
-        m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)").log( () -> feedForwardTorqueNm);
-        m_logger.doubleLogger(Level.TRACE, "measurement (rad)").log( () -> measurementRad);
-        m_logger.state100Logger(Level.TRACE, "setpoint (rad)").log( () -> m_setpoint);
+        m_log_goal.log(() -> m_goal);
+        m_log_ff_torque.log(() -> feedForwardTorqueNm);
+        m_log_measurement.log(() -> measurementRad);
+        m_log_setpoint.log(() -> m_setpoint);
     }
 
-    // public void setPositionWithVelocity2(double goalRad, double goalVelocity, double feedForwardTorqueNm) {
-    //     OptionalDouble positionRad = m_encoder.getPositionRad();
-       
-    //     if (positionRad.isEmpty())
-    //         return;
-            
-    //     double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
+    // public void setPositionWithVelocity2(double goalRad, double goalVelocity,
+    // double feedForwardTorqueNm) {
+    // OptionalDouble positionRad = m_encoder.getPositionRad();
 
-    //     // use the modulus closest to the measurement.
-    //     m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) + measurementRad, goalVelocity);
+    // if (positionRad.isEmpty())
+    // return;
 
-    //     m_setpoint = new State100(
-    //             MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad, m_setpoint.v()
-    //     );
+    // double measurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
 
-    //     // NOTE: fixed dt here
-    //     m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
+    // // use the modulus closest to the measurement.
+    // m_goal = new State100(MathUtil.angleModulus(goalRad - measurementRad) +
+    // measurementRad, goalVelocity);
 
-    //     m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
+    // m_setpoint = new State100(
+    // MathUtil.angleModulus(m_setpoint.x() - measurementRad) + measurementRad,
+    // m_setpoint.v()
+    // );
 
-    //     m_logger.state100Logger(Level.TRACE, "goal (rad)", () -> m_goal);
-    //     m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)", () -> feedForwardTorqueNm);
-    //     m_logger.doubleLogger(Level.TRACE, "measurement (rad)", () -> measurementRad);
-    //     m_logger.state100Logger(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
+    // // NOTE: fixed dt here
+    // m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
+
+    // m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
+
+    // m_logger.state100Logger(Level.TRACE, "goal (rad)", () -> m_goal);
+    // m_logger.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)", () ->
+    // feedForwardTorqueNm);
+    // m_logger.doubleLogger(Level.TRACE, "measurement (rad)", () ->
+    // measurementRad);
+    // m_logger.state100Logger(Level.TRACE, "setpoint (rad)", () -> m_setpoint);
     // }
 
     @Override

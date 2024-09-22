@@ -10,6 +10,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.EnumLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -75,6 +76,8 @@ public class VisionDataProvider24 implements VisionData, Glassy {
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     private final PoseEstimationHelper m_helper;
     private final NetworkTableListenerPoller m_poller;
+    // LOGGERS
+    private final EnumLogger m_log_alliance;
 
     // for blip filtering
     private Pose2d lastRobotInFieldCoords;
@@ -106,6 +109,7 @@ public class VisionDataProvider24 implements VisionData, Glassy {
         m_poller.addListener(
                 new MultiSubscriber(inst, new String[] { "vision" }),
                 EnumSet.of(NetworkTableEvent.Kind.kValueAll));
+        m_log_alliance = m_logger.enumLogger(Level.TRACE, "alliance");
     }
 
     /**
@@ -174,7 +178,7 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             final Blip24[] blips,
             double blipTimeSec,
             Alliance alliance) {
-        m_logger.enumLogger(Level.TRACE, "alliance").log( () -> alliance);
+        m_log_alliance.log( () -> alliance);
         final Transform3d cameraInRobotCoordinates = Camera.get(cameraSerialNumber).getOffset();
 
 

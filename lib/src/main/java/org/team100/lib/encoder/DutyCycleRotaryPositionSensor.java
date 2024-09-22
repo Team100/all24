@@ -3,6 +3,8 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
@@ -17,6 +19,8 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
 
     private final DigitalInput m_digitalInput;
     private final DutyCycle m_dutyCycle;
+    private final DoubleSupplierLogger2 m_log_duty;
+    private final IntSupplierLogger2 m_log_channel;
 
     protected DutyCycleRotaryPositionSensor(
             SupplierLogger2 parent,
@@ -26,6 +30,8 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
         super(parent, inputOffset, drive);
         m_digitalInput = new DigitalInput(channel);
         m_dutyCycle = new DutyCycle(m_digitalInput);
+        m_log_duty = m_logger.doubleLogger(Level.TRACE, "duty cycle");
+        m_log_channel = m_logger.intLogger(Level.TRACE, "channel");
     }
 
     @Override
@@ -40,9 +46,9 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
             Util.warn(String.format("encoder %d not connected", m_dutyCycle.getSourceChannel()));
             return OptionalDouble.empty();
         }
-        m_logger.intLogger(Level.TRACE, "channel").log( m_dutyCycle::getSourceChannel);
+        m_log_channel.log( m_dutyCycle::getSourceChannel);
         double dutyCycle = m_dutyCycle.getOutput();
-        m_logger.doubleLogger(Level.TRACE, "duty cycle").log( () -> dutyCycle);
+        m_log_duty.log( () -> dutyCycle);
         return OptionalDouble.of(dutyCycle);
     }
 

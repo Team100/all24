@@ -6,6 +6,8 @@ import static org.team100.lib.hid.ControlUtil.expo;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.EnumLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -46,11 +48,20 @@ public class DriverXboxControl implements DriverControl {
 
     private final SupplierLogger2 m_logger;
     private final XboxController m_controller;
+    private final DoubleSupplierLogger2 m_log_right_y;
+    private final DoubleSupplierLogger2 m_log_right_x;
+    private final DoubleSupplierLogger2 m_log_left_x;
+    private final EnumLogger m_log_speed;
+
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public DriverXboxControl(SupplierLogger2 parent) {
         m_controller = new XboxController(0);
         m_logger = parent.child(this);
+        m_log_right_y = m_logger.doubleLogger(Level.TRACE, "Xbox/right y");
+        m_log_right_x = m_logger.doubleLogger(Level.TRACE, "Xbox/right x");
+        m_log_left_x = m_logger.doubleLogger(Level.TRACE, "Xbox/left x");
+        m_log_speed = m_logger.enumLogger(Level.TRACE, "control_speed");
     }
 
     @Override
@@ -67,9 +78,9 @@ public class DriverXboxControl implements DriverControl {
         final double rightY = m_controller.getRightY();
         final double rightX = m_controller.getRightX();
         final double leftX = m_controller.getLeftX();
-        m_logger.doubleLogger(Level.TRACE, "Xbox/right y").log( () -> rightY);
-        m_logger.doubleLogger(Level.TRACE, "Xbox/right x").log( () -> rightX);
-        m_logger.doubleLogger(Level.TRACE, "Xbox/left x").log( () -> leftX);
+        m_log_right_y.log(() -> rightY);
+        m_log_right_x.log(() -> rightX);
+        m_log_left_x.log(() -> leftX);
 
         double dx = 0;
         double dy = 0;
@@ -89,7 +100,7 @@ public class DriverXboxControl implements DriverControl {
         double dtheta = expo(deadband(-1.0 * clamp(leftX, 1), kDeadband, 1), kExpo);
 
         Speed speed = speed();
-        m_logger.enumLogger(Level.TRACE, "control_speed").log( () -> speed);
+        m_log_speed.log(() -> speed);
 
         switch (speed) {
             case SLOW:

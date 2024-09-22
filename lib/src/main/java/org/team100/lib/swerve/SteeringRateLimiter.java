@@ -4,6 +4,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.telemetry.Telemetry.Level;
 
@@ -21,10 +22,12 @@ public class SteeringRateLimiter implements Glassy {
 
     private final SupplierLogger2 m_logger;
     private final SwerveKinodynamics m_limits;
+    private final DoubleSupplierLogger2 m_log_s;
 
     public SteeringRateLimiter(SupplierLogger2 parent, SwerveKinodynamics limits) {
         m_logger = parent.child(this);
         m_limits = limits;
+        m_log_s = m_logger.doubleLogger(Level.TRACE, "s");
     }
 
     public double enforceSteeringLimit(
@@ -75,7 +78,7 @@ public class SteeringRateLimiter implements Glassy {
             min_s = Math.min(min_s, s);
         }
         double s = min_s;
-        m_logger.doubleLogger(Level.TRACE, "s").log( () -> s);
+        m_log_s.log( () -> s);
         return min_s;
     }
 
