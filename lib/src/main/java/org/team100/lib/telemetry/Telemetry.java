@@ -1,13 +1,9 @@
 package org.team100.lib.telemetry;
 
-import org.team100.lib.logging.DataLogLogger;
 import org.team100.lib.logging.DummySender;
-import org.team100.lib.logging.NTLogger;
 import org.team100.lib.logging.NTPrimitiveLogger2;
-import org.team100.lib.logging.PrimitiveLogger;
 import org.team100.lib.logging.PrimitiveLogger2;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.UdpPrimitiveLogger;
 import org.team100.lib.logging.UdpPrimitiveLogger2;
 import org.team100.lib.util.Util;
 
