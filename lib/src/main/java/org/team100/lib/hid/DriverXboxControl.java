@@ -181,11 +181,6 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public boolean annunicatorTest() {
-        return m_controller.getStartButton();
-    }
-
-    @Override
     public boolean test() {
         return false;
     }

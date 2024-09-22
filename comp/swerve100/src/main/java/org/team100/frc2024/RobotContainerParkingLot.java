@@ -17,7 +17,6 @@ import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.PermissiveTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
-import org.team100.lib.commands.telemetry.MorseCodeBeep;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.HolonomicDriveController3;
@@ -41,8 +40,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
-import org.team100.lib.telemetry.Annunciator;
-import org.team100.lib.telemetry.Monitor;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -85,7 +82,6 @@ public class RobotContainerParkingLot implements Glassy {
     RobotContainerParkingLot(TimedRobot100 robot) throws IOException {
         Telemetry telemetry = Telemetry.get();
         final SupplierLogger2 fieldLogger = telemetry.fieldLogger();
-        final SupplierLogger2 monitorLogger = telemetry.namedRootLogger("MONITOR");
         final SupplierLogger2 driveLogger = telemetry.namedRootLogger("DRIVE");
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
 
@@ -127,21 +123,6 @@ public class RobotContainerParkingLot implements Glassy {
                 poseEstimator,
                 swerveLocal,
                 visionDataProvider);
-
-        // joel 2/22/24 removing for SVR, put back after that.
-        // these should be fields
-        final MorseCodeBeep m_beep;
-        final Monitor m_monitor;
-
-        // joel 2/22/24 removing for SVR, put it back after that.
-        // 20 words per minute is 60 ms.
-        m_beep = new MorseCodeBeep(0.06);
-        // m_beep = new Beep();
-        BooleanSupplier test = () -> driverControl.annunicatorTest() ||
-                m_beep.getOutput();
-        m_monitor = new Monitor(monitorLogger, new Annunciator(6), test);
-        // The monitor runs less frequently than the control loop.
-        robot.addPeriodic(m_monitor::periodic, 0.2, "monitor");
 
         HolonomicDriveController3 controller = new HolonomicDriveController3(driveLogger);
 

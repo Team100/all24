@@ -38,10 +38,6 @@ public interface OperatorControl extends Glassy {
         return false;
     }
 
-    default boolean selfTestEnable() {
-        return false;
-    }
-
     default boolean homeClimber() {
         return false;
     }

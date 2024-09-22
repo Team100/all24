@@ -144,11 +144,6 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public boolean annunicatorTest() {
-        return m_driverControl.annunicatorTest();
-    }
-
-    @Override
     public boolean test() {
         return m_driverControl.test();
     }

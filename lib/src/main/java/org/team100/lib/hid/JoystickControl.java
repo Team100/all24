@@ -123,9 +123,4 @@ public abstract class JoystickControl implements DriverControl {
     private boolean button(int button) {
         return m_controller.getRawButton(button);
     }
-
-    @Override
-    public boolean annunicatorTest() {
-        return m_controller.getRawButton(1);
-    }
 }

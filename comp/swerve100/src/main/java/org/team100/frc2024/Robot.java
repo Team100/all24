@@ -136,18 +136,13 @@ public class Robot extends TimedRobot100 implements Glassy {
         m_robotContainer.cancelAuton();
         m_robotContainer.onTeleop();
 
-        // joel 2/22/24 removing for SVR, put it back after that.
-        // MorseCodeBeep beep = m_robotContainer.m_beep;
-        // beep.setDuration(1);
-        // beep.setMessage("K");
-        // CommandScheduler.getInstance().schedule(beep);
+
     }
 
     @Override
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().clearComposedCommands();
-        m_robotContainer.scheduleSelfTest();
     }
 
     @Override

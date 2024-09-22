@@ -118,10 +118,6 @@ public interface DriverControl extends Glassy {
         return false;
     }
 
-    default boolean annunicatorTest() {
-        return false;
-    }
-
     default boolean test() {
         return false;
     }

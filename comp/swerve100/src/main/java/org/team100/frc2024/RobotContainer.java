@@ -107,7 +107,6 @@ public class RobotContainer implements Glassy {
 
     private final SwerveModuleCollection m_modules;
     private final Command m_auton;
-    private final SelfTestRunner m_selfTest;
     private final DrumShooter m_shooter;
     private final CameraUpdater m_cameraUpdater;
     final SwerveDriveSubsystem m_drive;
@@ -480,9 +479,6 @@ public class RobotContainer implements Glassy {
                                 new PrintCommand("nothing red goes here"),
                                 new PrintCommand("nothing blue goes here"))),
                 AutonChooser::routine);
-
-        // selftest uses fields we just initialized above, so it comes last.
-        m_selfTest = new SelfTestRunner(this, operatorControl::selfTestEnable);
     }
 
     public void beforeCommandCycle() {
@@ -510,10 +506,6 @@ public class RobotContainer implements Glassy {
 
     private void onTrue(BooleanSupplier condition, Command command) {
         new Trigger(condition).onTrue(command);
-    }
-
-    public void scheduleSelfTest() {
-        m_selfTest.schedule();
     }
 
     public void scheduleAuton() {
