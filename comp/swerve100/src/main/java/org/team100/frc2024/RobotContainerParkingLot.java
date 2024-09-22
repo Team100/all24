@@ -28,7 +28,6 @@ import org.team100.lib.hid.DriverControlProxy;
 import org.team100.lib.hid.OperatorControl;
 import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
-import org.team100.lib.localization.FireControl;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.logging.SupplierLogger2;
@@ -107,14 +106,11 @@ public class RobotContainerParkingLot implements Glassy {
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
-        final FireControl fireControl = new FireControl() {
-        };
         final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
         final VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
                 driveLogger,
                 m_layout,
-                poseEstimator,
-                fireControl);
+                poseEstimator);
         SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,

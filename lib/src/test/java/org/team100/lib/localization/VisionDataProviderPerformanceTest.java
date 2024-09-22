@@ -24,8 +24,6 @@ import edu.wpi.first.wpilibj.Timer;
 class VisionDataProviderPerformanceTest {
     private static final double kDelta = 0.01;
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
-    FireControl f = new FireControl() {
-    };
 
     // uncomment this to run it. it consumes all the CPU.
     // @Test
@@ -48,8 +46,7 @@ class VisionDataProviderPerformanceTest {
         };
 
         VisionDataProvider24 vdp = new VisionDataProvider24(
-                logger, layout, poseEstimator,
-                f);
+                logger, layout, poseEstimator);
 
         // camera sees the tag straight ahead in the center of the frame,
         // but rotated pi/4 to the left. this is ignored anyway.
