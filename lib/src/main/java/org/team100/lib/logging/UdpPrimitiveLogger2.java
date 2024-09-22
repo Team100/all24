@@ -3,12 +3,16 @@ package org.team100.lib.logging;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -37,6 +41,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     private static final double kFlushPeriod = 0.1;
 
+    /** Using lists makes the scan for flushing ever-so-slightly faster */
     private final List<UdpBooleanLogger> booleanLoggers = new ArrayList<>();
     private final List<UdpDoubleLogger> doubleLoggers = new ArrayList<>();
     private final List<UdpIntLogger> integerLoggers = new ArrayList<>();
@@ -46,7 +51,18 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
     private final List<UdpStringLogger> stringLoggers = new ArrayList<>();
 
     final List<Metadata> metadata = new ArrayList<>();
-    private final Set<String> keys = new HashSet<>();
+    /**
+     * These are to catch duplicate keys at startup; it should complain when this
+     * happens. I'd prefer to eventually eliminate this issue; reusing the same log
+     * keys in different places can be confusing.
+     */
+    private final Map<String, UdpBooleanLogger> booleanIdx = new HashMap<>();
+    private final Map<String, UdpDoubleLogger> doubleIdx = new HashMap<>();
+    private final Map<String, UdpIntLogger> intIdx = new HashMap<>();
+    private final Map<String, UdpDoubleArrayLogger> doubleArrayIdx = new HashMap<>();
+    private final Map<String, UdpDoubleObjArrayLogger> doubleObjArrayIdx = new HashMap<>();
+    private final Map<String, UdpLongLogger> longIdx = new HashMap<>();
+    private final Map<String, UdpStringLogger> stringIdx = new HashMap<>();
     private final Consumer<ByteBuffer> m_bufferSink;
     private final Consumer<ByteBuffer> m_metadataSink;
 
@@ -76,9 +92,6 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
      */
     private synchronized int getKey(UdpType type, String label) {
         int key = metadata.size() + 1;
-        if (keys.contains(label))
-            throw new IllegalArgumentException("duplicate label " + label);
-        keys.add(label);
         metadata.add(new Metadata(key, type, label));
         return key;
     }
@@ -255,7 +268,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    ///////////////////////////////////////////
+    //////////////////////////////////////////p/
 
     /** @param putter puts the value if there's room, returns false if not. */
     private void putAndMaybeSend(BooleanSupplier putter) {
@@ -334,37 +347,58 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     @Override
     public BooleanLogger booleanLogger(String label) {
-        return new UdpBooleanLogger(label);
+        return booleanIdx.computeIfAbsent(label, x -> {
+            Util.warn("duplicate label " + label);
+            return new UdpBooleanLogger(x);
+        });
     }
 
     @Override
     public DoubleLogger doubleLogger(String label) {
-        return new UdpDoubleLogger(label);
+        return doubleIdx.computeIfAbsent(label, x -> {
+            Util.warn("duplicate label " + label);
+            return new UdpDoubleLogger(x);
+        });
     }
 
     @Override
     public IntLogger intLogger(String label) {
-        return new UdpIntLogger(label);
+        return intIdx.computeIfAbsent(label, x -> {
+            Util.warn("duplicate label " + label);
+            return new UdpIntLogger(x);
+        });
     }
 
     @Override
     public DoubleArrayLogger doubleArrayLogger(String label) {
-        return new UdpDoubleArrayLogger(label);
+        return doubleArrayIdx.computeIfAbsent(label, x -> {
+            Util.warn("duplicate label " + label);
+            return new UdpDoubleArrayLogger(x);
+        });
     }
 
     @Override
     public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
-        return new UdpDoubleObjArrayLogger(label);
+        return doubleObjArrayIdx.computeIfAbsent(label, x -> {
+            Util.warn("duplicate label " + label);
+            return new UdpDoubleObjArrayLogger(x);
+        });
     }
 
     @Override
     public LongLogger longLogger(String label) {
-        return new UdpLongLogger(label);
+        return longIdx.computeIfAbsent(label, x -> {
+            Util.warn("duplicate label " + label);
+            return new UdpLongLogger(x);
+        });
     }
 
     @Override
     public StringLogger stringLogger(String label) {
-        return new UdpStringLogger(label);
+        return stringIdx.computeIfAbsent(label, x -> {
+            Util.warn("duplicate label " + label);
+            return new UdpStringLogger(x);
+        });
     }
 
 }

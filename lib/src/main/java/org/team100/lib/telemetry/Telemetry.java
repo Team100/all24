@@ -25,7 +25,7 @@ public class Telemetry {
      * Using an experiment would be a pain.
      * TODO: remove the complexity here after the UDP thing is validated.
      */
-    private static final boolean USE_UDP_LOGGING = true;
+    private static final boolean USE_UDP_LOGGING = false;
 
     public enum Level {
         /**
