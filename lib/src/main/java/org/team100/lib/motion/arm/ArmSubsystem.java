@@ -9,7 +9,6 @@ import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
 import org.team100.lib.motion.RotaryMechanism;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.visualization.ArmVisualization;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -28,7 +27,6 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     private final RotaryMechanism m_upperArmMotor;
     private final RotaryPositionSensor m_lowerArmEncoder;
     private final RotaryPositionSensor m_upperArmEncoder;
-    private final ArmVisualization m_viz;
 
     // LOGGERS
     private final ArmAnglesLogger m_log_position;
@@ -64,7 +62,6 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         Optional<ArmAngles> position = getPosition();
         if (position.isPresent())
             m_previousPosition = position.get();
-        m_viz = new ArmVisualization(this);
     }
 
     /** Arm angles (radians), 0 up, positive forward. */
@@ -114,10 +111,5 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
     @Override
     public String getGlassName() {
         return "Arm";
-    }
-
-    @Override
-    public void periodic() {
-        m_viz.viz();
     }
 }
