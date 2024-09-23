@@ -1,24 +1,27 @@
 package org.team100.lib.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Cache a supplier forever.
+ * Cache a supplier until reset().
  * 
- * Invalidation is manual -- you should use your periodic() method for that,
- * which should be wired to Subsystem.periodic() somehow.
- * 
- * The idea is for all subsystem.periodics to have no side-effects other than
- * cache flushing, to that the computation cycle gets a each input calculated
- * just once (and cached thereafter).
+ * The easiest way to wire up reset() is to let Robot.robotPeriodic() call
+ * resetAll(). But it's also ok to call reset() on demand, if you have a reason
+ * (e.g. resetting a pose, and then wanting to do some more calculation with the
+ * just-reset version).
  */
 public class CotemporalCache<T> implements Supplier<T> {
+    private static final List<Runnable> resetters = new ArrayList<>();
+
     private final Supplier<T> m_delegate;
     private T m_value;
 
     public CotemporalCache(Supplier<T> delegate) {
         m_delegate = delegate;
         m_value = null;
+        resetters.add(this::reset);
     }
 
     @Override
@@ -34,4 +37,10 @@ public class CotemporalCache<T> implements Supplier<T> {
         m_value = null;
     }
 
+    /** This should be run in Robot.robotPeriodic(). */
+    public static void resetAll() {
+        for (Runnable r : resetters) {
+            r.run();
+        }
+    }
 }
