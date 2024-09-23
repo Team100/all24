@@ -18,12 +18,16 @@ import edu.wpi.first.wpilibj.Timer;
 /**
  * Single NavX over USB or SPI.
  * 
- * TODO: to work around SPI issues, implement the SPI reset in AHRS as suggested
+ * to work around SPI issues, implement the SPI reset in AHRS as suggested?
  * 
  * https://www.chiefdelphi.com/t/navx2-disconnecting-reconnecting-intermittently-not-browning-out/425487/39
  * 
- * TODO: try USB supplemental power for the NavX-MXP
+ * try USB supplemental power for the NavX-MXP?
+ * 
+ * @deprecated because the NavX just doesn't work very well (our most recent
+ *             navx-mxp broke soon after we got it), support is nonexistent.
  */
+@Deprecated
 public class SingleNavXGyro implements Gyro {
 
     /**
@@ -97,7 +101,7 @@ public class SingleNavXGyro implements Gyro {
                         kUpdateRateHz);
                 m_yawScaleFactor = 1.0f;
                 m_yawRateScaleFactor = 1.0f;
-                // TODO: remove this message when calibration is finished.
+                // remove this message when calibration is finished.
                 Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
                 break;
             default:
@@ -107,7 +111,7 @@ public class SingleNavXGyro implements Gyro {
                         kUpdateRateHz);
                 m_yawScaleFactor = 1.0f;
                 m_yawRateScaleFactor = 1.0f;
-                // TODO: remove this message when calibration is finished.
+                // remove this message when calibration is finished.
                 Util.warn("********** NAVX SCALE FACTOR IS UNCALIBRATED!  CALIBRATE ME! **********");
                 break;
 
@@ -220,18 +224,20 @@ public class SingleNavXGyro implements Gyro {
         // https://github.com/kauailabs/navxmxp/issues/69
         //
         // the recommended workaround is to use getRawGyroZ() instead.
-        float rateDeg_S = m_ahrs.getRawGyroZ();
+        return m_ahrs.getRawGyroZ();
+        // float rateDeg_S = m_ahrs.getRawGyroZ();
 
         // NavX spec says the noise density of the gyro is 0.005 deg/s/sqrt(hz), and the
         // bandwidth is 6600 hz, so the expected noise is about 0.007 rad/s.
         // The zero offset is specified as 1 deg/s (0.02 rad/s).
         // The deadband here is very slow: 0.05 rad/s is 2 min/revolution
         // measurement here is degrees, 0.05 rad is about 2.9 deg
-        // TODO: use a filter instead of a deadband.
+        //
+        // use a filter here instead of a deadband.
         // if (Math.abs(rateDeg_S) < 2.9) {
         // rateDeg_S = 0;
         // }
-        return rateDeg_S;
+        // return rateDeg_S;
     }
 
     private void logStuff() {
