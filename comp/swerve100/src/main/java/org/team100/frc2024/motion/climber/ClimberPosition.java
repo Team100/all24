@@ -48,8 +48,8 @@ public class ClimberPosition extends Command implements Glassy {
 
     @Override
     public void execute() {
-        m_leftServo.setPosition(m_goalM);
-        m_rightServo.setPosition(m_goalM);
+        m_leftServo.setPosition(m_goalM, 0);
+        m_rightServo.setPosition(m_goalM, 0);
     }
 
     @Override

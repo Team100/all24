@@ -153,7 +153,8 @@ class TagDetector:
         delay_ns: int = Timer.time_ns() - sensor_midpoint_ns
         delay_us = delay_ns // 1000
 
-        self.network.vision_nt_struct.set(blips, ntcore._now() - delay_us)
+        self.network.vision_nt_struct.set(blips)
+        self.network.vision_capture_time_ms.set(ntcore._now() - delay_us)
         self.network.vision_total_time_ms.set(total_time_ms)
         self.network.vision_image_age_ms.set(image_age_ms)
         self.network.vision_detect_time_ms.set(detect_time_ms)

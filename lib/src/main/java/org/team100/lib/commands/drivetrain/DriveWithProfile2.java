@@ -25,7 +25,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Sanjans version
  */
 public class DriveWithProfile2 extends Command100 {
-    private static final double kTolerance = 0.1;
+    private static final double kRotationToleranceRad = Math.PI/32;
+    private static final double kTranslationalToleranceM = 0.1;
+
     private final Supplier<Optional<Pose2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicDriveController100 m_controller;
@@ -113,9 +115,9 @@ public class DriveWithProfile2 extends Command100 {
         double xError = m_xGoalRaw.x() - m_swerve.getState().x().x();
         double yError = m_yGoalRaw.x() - m_swerve.getState().y().x();
         double thetaError = m_thetaGoalRaw.x() - m_swerve.getState().theta().x();
-        return Math.abs(xError) < kTolerance
-                && Math.abs(yError) < kTolerance
-                && Math.abs(thetaError) < kTolerance;
+        return Math.abs(xError) < kTranslationalToleranceM
+                && Math.abs(yError) < kTranslationalToleranceM
+                && Math.abs(thetaError) < kRotationToleranceRad;
     }
 
     @Override

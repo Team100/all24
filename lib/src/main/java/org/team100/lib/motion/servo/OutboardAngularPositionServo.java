@@ -78,13 +78,14 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     /** The outboard measurement does not wrap, but the goal does */
     @Override
+
     public void setPositionWithVelocity(double wrappedGoalRad, double goalVelocity, double feedForwardTorqueNm) {
         // goal is [-pi,pi]
         // but measurement is [-inf,inf]
 
         OptionalDouble positionRad = m_encoder.getPositionRad();
         m_log_position.log(() -> positionRad);
-
+ 
         if (positionRad.isEmpty())
             return;
 
@@ -139,11 +140,11 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     @Override
     public boolean atSetpoint() {
-        OptionalDouble positionRad = m_encoder.getPositionRad();
+        OptionalDouble positionRad = getPosition();
         if (positionRad.isEmpty())
             return false;
         double positionMeasurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
-        OptionalDouble velocityRad_S = m_encoder.getRateRad_S();
+        OptionalDouble velocityRad_S = getVelocity();
         if (velocityRad_S.isEmpty())
             return false;
         double velocityMeasurementRad_S = velocityRad_S.getAsDouble();
@@ -191,5 +192,4 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         m_mechanism.periodic();
         m_encoder.periodic();
     }
-
 }

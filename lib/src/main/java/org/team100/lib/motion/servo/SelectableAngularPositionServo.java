@@ -141,5 +141,4 @@ public class SelectableAngularPositionServo implements AngularPositionServo {
 
         m_whenTrue.periodic();
     }
-
 }

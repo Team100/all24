@@ -1,9 +1,8 @@
-package org.team100.frc2024.motion;
+package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
-import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.util.Util;
 
@@ -11,14 +10,14 @@ import org.team100.lib.util.Util;
  * Wraps an angular position servo, supplying it with the correct feed forward
  * torque for gravity compensation.
  */
-public class GravityServo2 implements GravityServoInterface {
+public class OutboardGravityServo implements GravityServoInterface {
     private final AngularPositionServo m_servo;
     /** Max gravity torque, newton-meters */
     private final double m_gravityNm; // = 5.0;
     /** Offset from horizontal */
     private final double m_offsetRad; // = 0.0;
 
-    public GravityServo2(
+    public OutboardGravityServo(
             AngularPositionServo servo,
             double gravityNm,
             double offsetRad) {
@@ -68,5 +67,4 @@ public class GravityServo2 implements GravityServoInterface {
     public void periodic() {
         m_servo.periodic();
     }
-
 }

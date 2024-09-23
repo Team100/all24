@@ -18,7 +18,7 @@ class Blip24:
 
 
 class Network:
-    def __init__(self, identity: Identity) -> None:
+    def __init__(self, identity: Identity, id: str) -> None:
         # TODO: use identity.name instead
         self.serial: str = identity.value
         self.inst: ntcore.NetworkTableInstance = (
@@ -31,7 +31,7 @@ class Network:
         # roboRio address. windows machines can impersonate this for simulation.
         # also localhost for testing
         self.inst.setServer(["10.1.0.2", "127.0.0.1"])
-        topic_name: str = "vision/" + self.serial
+        topic_name: str = "vision/" + self.serial + id
         self.vision_capture_time_ms: ntcore.DoublePublisher = self.inst.getDoubleTopic(
             topic_name + "/capture_time_ms"
         ).publish()
