@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": [
+        "java/src/main/java",
+        "java/src/test/java"
+    ],
+    "java.project.referencedLibraries": [
+        "/home/joel/FRC/TRUHER/all24/studies/fivebar/lib/junit-platform-console-standalone-1.11.0.jar"
+    ]
+}

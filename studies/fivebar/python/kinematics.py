@@ -8,6 +8,7 @@
 
     See pantograph.png for the coordinates used here.
 """
+
 import numpy as np
 from scenario import Scenario
 
@@ -78,8 +79,8 @@ def forward(scenario: Scenario, t1, t5):
 
     P3 = np.array([[x3], [y3]])
 
-    x5 = -scenario.a5
-    y5 = 0
+    x5 = scenario.x1 - scenario.a5
+    y5 = scenario.y1
     P5 = np.array([[x5], [y5]])
 
     return P1, P2, P3, P4, P5, Ph
@@ -133,9 +134,7 @@ def jacobian(scenario: Scenario, t1, t5, P1, P2, P3, P4, P5, Ph):
 
     # joint 1
     del1_d = ((x4 - x2) * (del1_x4 - del1_x2) + (y4 - y2) * (del1_y4 - del1_y2)) / d
-    del1_b = del1_d - (del1_d * (scenario.a2**2 - scenario.a3**2 + d**2)) / (
-        2 * d**2
-    )
+    del1_b = del1_d - (del1_d * (scenario.a2**2 - scenario.a3**2 + d**2)) / (2 * d**2)
     del1_h = -b * del1_b / h
 
     del1_yh = (
@@ -162,9 +161,7 @@ def jacobian(scenario: Scenario, t1, t5, P1, P2, P3, P4, P5, Ph):
 
     # joint 2
     del5_d = ((x4 - x2) * (del5_x4 - del5_x2) + (y4 - y2) * (del5_y4 - del5_y2)) / d
-    del5_b = del5_d - (del5_d * (scenario.a2**2 - scenario.a3**2 + d**2)) / (
-        2 * d**2
-    )
+    del5_b = del5_d - (del5_d * (scenario.a2**2 - scenario.a3**2 + d**2)) / (2 * d**2)
     del5_h = -b * del5_b / h
 
     del5_yh = (
