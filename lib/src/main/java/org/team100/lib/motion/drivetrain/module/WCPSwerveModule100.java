@@ -100,7 +100,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 kinodynamics,
                 drive,
                 motorPhase,
-                turningPidConstants,    
+                turningPidConstants,
                 turningFF);
 
         return new WCPSwerveModule100(name, driveServo, turningServo);
@@ -168,7 +168,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningEncoder,
                 gearRatio,
                 profile);
-                
+
         turningServo.reset();
         return turningServo;
     }
@@ -215,13 +215,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             RotaryPositionSensor turningEncoder,
             Profile100 profile,
             RotaryMechanism mech) {
-        // if we correct to exactly the primary reading, we effectively inject noise
-        // into the secondary, so soften the response.
-        final double primaryAuthority = 0.1;
         CombinedEncoder combinedEncoder = new CombinedEncoder(
                 parent,
                 turningEncoder,
-                primaryAuthority,
                 mech);
         AngularPositionServo servo = new OutboardAngularPositionServo(
                 parent,
