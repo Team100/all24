@@ -130,15 +130,9 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
         if (m_thetaSetpoint == null) {
-            double accel;
-            if (yawRate == 0 || Math.abs(yawRate) < 0.02*m_swerveKinodynamics.getMaxAngleAccelRad_S2()) {
-                accel = 0;
-            } else if (yawRate > 0) {
-                accel = yawRate - 0.02 * m_swerveKinodynamics.getMaxAngleAccelRad_S2();
-            } else {
-                accel = yawRate + 0.02 * m_swerveKinodynamics.getMaxAngleAccelRad_S2();
-            }
-            updateSetpoint(yawMeasurement + accel * 0.02, accel);
+            // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
+            // overshoot?
+            updateSetpoint(yawMeasurement, yawRate);
         }
 
         // in snap mode we take dx and dy from the user, and control dtheta.
