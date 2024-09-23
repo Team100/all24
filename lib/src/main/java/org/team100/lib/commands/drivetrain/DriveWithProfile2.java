@@ -25,7 +25,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Sanjans version
  */
 public class DriveWithProfile2 extends Command100 {
-    private static final double kRotationToleranceRad = Math.PI/16;
+    private static final double kRotationToleranceRad = Math.PI/32;
     private static final double kTranslationalToleranceM = 0.1;
 
     private final Supplier<Optional<Pose2d>> m_fieldRelativeGoal;
