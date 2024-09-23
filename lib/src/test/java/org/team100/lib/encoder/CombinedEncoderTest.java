@@ -10,54 +10,27 @@ import org.team100.lib.logging.TestLogger;
 
 class CombinedEncoderTest {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
-
-    // TODO: FIX THIS TEST
-    // @Test
-    void testSimple1() {
-        MockRotaryPositionSensor e1 = new MockRotaryPositionSensor();
-        MockBareMotor motor = new MockBareMotor();
-        MockIncrementalBareEncoder e2 = new MockIncrementalBareEncoder();
-        RotaryMechanism m = new RotaryMechanism(logger, motor, e2, 1.0);
-        CombinedEncoder c = new CombinedEncoder(logger, e1, 1.0, m);
-        e1.angle = 1; // this is the authority
-        e2.position = 0; // this is wrong
-        // read the authority value
-        assertEquals(1.0, c.getPositionRad().getAsDouble(), kDelta);
-        // and fix the secondary
-        assertEquals(1.0, e2.position, kDelta);
-    }
-
-    // TODO: FIX THIS TEST
-    // @Test
-    void testHalfPrimary() {
-        // primary, absolute sensor
-        MockRotaryPositionSensor e1 = new MockRotaryPositionSensor();
-        MockBareMotor motor = new MockBareMotor();
-        // secondary, built-in encoder.
-        MockIncrementalBareEncoder e2 = new MockIncrementalBareEncoder();
-        RotaryMechanism m = new RotaryMechanism(logger, motor, e2, 1.0);
-        CombinedEncoder c = new CombinedEncoder(logger, e1, 0.5, m);
-        e1.angle = 1; // this is the authority
-        e2.position = 0; // this is wrong
-        // read the authority value
-        assertEquals(0.5, c.getPositionRad().getAsDouble(), kDelta);
-        // and fix the secondary
-        assertEquals(0.5, e2.position, kDelta);
-    }
+    private static final SupplierLogger2 logger = new TestLogger(true).getSupplierLogger();
 
     @Test
-    void testIgnorePrimary() {
-        MockRotaryPositionSensor e1 = new MockRotaryPositionSensor();
+    void testZeroing() {
         MockBareMotor motor = new MockBareMotor();
+
+        // this is the "correct" value
+        MockRotaryPositionSensor e1 = new MockRotaryPositionSensor();
+        e1.angle = 1;
+
+        // this value is the "incorrect" value, should be overwritten by the combined
+        // encoder constructor.
         MockIncrementalBareEncoder e2 = new MockIncrementalBareEncoder();
+        e2.position = 0;
+
         RotaryMechanism m = new RotaryMechanism(logger, motor, e2, 1.0);
-        CombinedEncoder c = new CombinedEncoder(logger, e1, 0.0, m);
-        e1.angle = 1; // this is the authority
-        e2.position = 0; // this is wrong
-        // read the authority value
-        assertEquals(0.0, c.getPositionRad().getAsDouble(), kDelta);
-        // and fix the secondary
-        assertEquals(0.0, e2.position, kDelta);
+        CombinedEncoder c = new CombinedEncoder(logger, e1, m);
+        // the combined encoder reads the correct value
+        assertEquals(1.0, c.getPositionRad().getAsDouble(), kDelta);
+
+        // and the secondary encoder has been "fixed"
+        assertEquals(1.0, e2.position, kDelta);
     }
 }
