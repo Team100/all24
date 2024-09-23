@@ -1,6 +1,7 @@
 package org.team100.lib.motor;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
@@ -8,6 +9,7 @@ import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.CotemporalCache;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -22,15 +24,16 @@ public abstract class Talon6Motor implements BareMotor {
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
 
-    // caching these status signals saves a lookup
-    protected final DoubleSupplier m_position;
-    protected final DoubleSupplier m_velocity;
-    protected final DoubleSupplier m_dutyCycle;
-    protected final DoubleSupplier m_error;
-    protected final DoubleSupplier m_supply;
-    protected final DoubleSupplier m_stator;
-    protected final DoubleSupplier m_temp;
-    protected final DoubleSupplier m_torque;
+    // Two levels of caching here: the cotemporal cache caches the value
+    // and also the supplier
+    protected final Supplier<Double> m_position;
+    protected final Supplier<Double> m_velocity;
+    protected final Supplier<Double> m_dutyCycle;
+    protected final Supplier<Double> m_error;
+    protected final Supplier<Double> m_supply;
+    protected final Supplier<Double> m_stator;
+    protected final Supplier<Double> m_temp;
+    protected final Supplier<Double> m_torque;
 
     // caching the control requests saves allocation
     private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0);
@@ -80,14 +83,15 @@ public abstract class Talon6Motor implements BareMotor {
         Phoenix100.crash(() -> m_motor.getVelocity().setUpdateFrequency(50));
         Phoenix100.crash(() -> m_motor.getTorqueCurrent().setUpdateFrequency(50));
 
-        m_position = () -> m_motor.getPosition().refresh().getValueAsDouble();
-        m_velocity = () -> m_motor.getVelocity().refresh().getValueAsDouble();
-        m_dutyCycle = () -> m_motor.getDutyCycle().refresh().getValueAsDouble();
-        m_error = () -> m_motor.getClosedLoopError().refresh().getValueAsDouble();
-        m_supply = () -> m_motor.getSupplyCurrent().refresh().getValueAsDouble();
-        m_stator = () -> m_motor.getStatorCurrent().refresh().getValueAsDouble();
-        m_temp = () -> m_motor.getDeviceTemp().refresh().getValueAsDouble();
-        m_torque = () -> m_motor.getTorqueCurrent().refresh().getValueAsDouble();
+        m_position = new CotemporalCache<>(m_motor.getPosition().refresh()::getValueAsDouble);
+        m_velocity = new CotemporalCache<>(m_motor.getVelocity().refresh()::getValueAsDouble);
+        m_dutyCycle = new CotemporalCache<>(m_motor.getDutyCycle().refresh()::getValueAsDouble);
+        m_error = new CotemporalCache<>(m_motor.getClosedLoopError().refresh()::getValueAsDouble);
+        m_supply = new CotemporalCache<>(m_motor.getSupplyCurrent().refresh()::getValueAsDouble);
+        m_stator = new CotemporalCache<>(m_motor.getStatorCurrent().refresh()::getValueAsDouble);
+        m_temp = new CotemporalCache<>(m_motor.getDeviceTemp().refresh()::getValueAsDouble);
+        m_torque = new CotemporalCache<>(m_motor.getTorqueCurrent().refresh()::getValueAsDouble);
+       
         m_log_desired_duty = child.doubleLogger(Level.TRACE, "desired duty cycle [-1,1]");
         m_log_desired_position = child.doubleLogger(Level.TRACE, "desired position (rev)");
         m_log_desired_speed = child.doubleLogger(Level.TRACE, "desired speed (rev_s)");
@@ -129,7 +133,7 @@ public abstract class Talon6Motor implements BareMotor {
     public void setVelocity(double motorRad_S, double motorAccelRad_S2, double motorTorqueNm) {
         double motorRev_S = motorRad_S / (2 * Math.PI);
         double motorRev_S2 = motorAccelRad_S2 / (2 * Math.PI);
-        double currentMotorRev_S = m_velocity.getAsDouble();
+        double currentMotorRev_S = m_velocity.get();
 
         double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
@@ -164,7 +168,7 @@ public abstract class Talon6Motor implements BareMotor {
     public void setPosition(double motorPositionRad, double motorVelocityRad_S, double motorTorqueNm) {
         double motorRev = motorPositionRad / (2 * Math.PI);
         double motorRev_S = motorVelocityRad_S / (2 * Math.PI);
-        double currentMotorRev_S = m_velocity.getAsDouble();
+        double currentMotorRev_S = m_velocity.get();
 
         double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
@@ -223,11 +227,11 @@ public abstract class Talon6Motor implements BareMotor {
     }
 
     public double getVelocityRev_S() {
-        return m_velocity.getAsDouble();
+        return m_velocity.get();
     }
 
     public double getPositionRev() {
-        return m_position.getAsDouble();
+        return m_position.get();
     }
 
     protected void log() {
@@ -247,7 +251,7 @@ public abstract class Talon6Motor implements BareMotor {
         // possible. latency compensation requires a signal and its time derivative,
         // e.g. position and velocity, or yaw and angular velocity. There doesn't seem
         // to be such a thing for current.
-        return m_torque.getAsDouble() * kTNm_amp();
+        return m_torque.get() * kTNm_amp();
     }
 
     @Override
