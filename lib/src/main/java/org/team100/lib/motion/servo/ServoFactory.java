@@ -1,4 +1,4 @@
-package org.team100.lib.motion.components;
+package org.team100.lib.motion.servo;
 
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
@@ -8,9 +8,9 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.motion.SimpleLinearMechanism;
-import org.team100.lib.motion.LinearMechanism;
-import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motion.mechanism.LinearMechanism;
+import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;

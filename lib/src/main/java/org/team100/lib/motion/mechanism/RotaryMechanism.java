@@ -1,4 +1,4 @@
-package org.team100.lib.motion;
+package org.team100.lib.motion.mechanism;
 
 import java.util.OptionalDouble;
 

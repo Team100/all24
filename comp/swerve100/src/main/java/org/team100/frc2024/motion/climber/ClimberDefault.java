@@ -3,9 +3,9 @@ package org.team100.frc2024.motion.climber;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.LinearMechanism;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj2.command.Command;

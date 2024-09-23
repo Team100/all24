@@ -2,6 +2,8 @@ package org.team100.lib.motion.components;
 
 import java.util.OptionalDouble;
 
+import org.team100.lib.motion.servo.LinearVelocityServo;
+
 public class MockLinearVelocityServo implements LinearVelocityServo {
 
     double m_setpoint;

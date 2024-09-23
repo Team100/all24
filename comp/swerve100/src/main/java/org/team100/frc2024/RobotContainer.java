@@ -110,10 +110,8 @@ public class RobotContainer implements Glassy {
     public RobotContainer(TimedRobot100 robot) throws IOException {
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
         final Async async = asyncFactory.get();
-        final TelemetryLevelPoller poller = new TelemetryLevelPoller(async);
-        poller.setDefault(Level.TRACE);
-
         final Telemetry telemetry = Telemetry.instance();
+        new TelemetryLevelPoller(async, telemetry::setLevel, Level.TRACE);
         final SupplierLogger2 fieldLogger = telemetry.fieldLogger;
         final SupplierLogger2 logger = telemetry.rootLogger;
 

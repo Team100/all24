@@ -28,9 +28,9 @@ class ByteBufferTest {
         // is the position updated by get(offset)?
         ByteBuffer bb = ByteBuffer.allocate(10);
         assertEquals(0, bb.position());
-        byte b = bb.get(); // updates position
+        bb.get(); // updates position
         assertEquals(1, bb.position());
-        b = bb.get(2); // does not update position
+        bb.get(2); // does not update position
         assertEquals(1, bb.position());
     }
 

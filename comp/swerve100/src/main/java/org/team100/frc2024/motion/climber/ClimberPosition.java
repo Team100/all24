@@ -1,8 +1,8 @@
 package org.team100.frc2024.motion.climber;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.LinearPositionServo;
-import org.team100.lib.motion.components.OnboardLinearDutyCyclePositionServo;
+import org.team100.lib.motion.servo.LinearPositionServo;
+import org.team100.lib.motion.servo.OnboardLinearDutyCyclePositionServo;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.SupplierLogger2;
 

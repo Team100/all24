@@ -7,10 +7,10 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motion.components.AngularPositionServo;
-import org.team100.lib.motion.components.LinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.servo.AngularPositionServo;
+import org.team100.lib.motion.servo.LinearVelocityServo;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;

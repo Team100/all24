@@ -1,4 +1,4 @@
-package org.team100.lib.motion.components;
+package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
 import org.team100.lib.dashboard.Glassy;
