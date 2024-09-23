@@ -6,8 +6,8 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.LimitedLinearVelocityServo;
-import org.team100.lib.motion.components.ServoFactory;
+import org.team100.lib.motion.servo.LimitedLinearVelocityServo;
+import org.team100.lib.motion.servo.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.logging.SupplierLogger2;
 

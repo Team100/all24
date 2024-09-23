@@ -2,7 +2,7 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motion.mechanism.RotaryMechanism;
 
 import edu.wpi.first.math.MathUtil;
 

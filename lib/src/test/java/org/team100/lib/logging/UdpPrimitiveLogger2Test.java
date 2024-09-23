@@ -18,7 +18,6 @@ import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -32,7 +31,7 @@ class UdpPrimitiveLogger2Test {
     @Test
     void testSendingLocally() {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
-        SupplierLogger2 logger = new SupplierLogger2(Telemetry.instance()::getLevel, "root", udpLogger);
+        SupplierLogger2 logger = new SupplierLogger2(() -> Level.COMP, "root", udpLogger);
         BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
         IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
@@ -142,7 +141,7 @@ class UdpPrimitiveLogger2Test {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
-        SupplierLogger2 logger = new SupplierLogger2(Telemetry.instance()::getLevel, "root", udpLogger);
+        SupplierLogger2 logger = new SupplierLogger2(() -> Level.COMP, "root", udpLogger);
         BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
         IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
@@ -200,7 +199,7 @@ class UdpPrimitiveLogger2Test {
     void testAWholeLotLocally() throws InterruptedException {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
         SupplierLogger2 logger = new SupplierLogger2(
-                Telemetry.instance()::getLevel,
+                () -> Level.COMP,
                 "root",
                 udpLogger);
 
@@ -244,7 +243,7 @@ class UdpPrimitiveLogger2Test {
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
         SupplierLogger2 logger = new SupplierLogger2(
-                Telemetry.instance()::getLevel,
+                () -> Level.COMP,
                 "root",
                 udpLogger);
 
@@ -296,7 +295,7 @@ class UdpPrimitiveLogger2Test {
                 dataSink,
                 metadataSink);
         SupplierLogger2 logger = new SupplierLogger2(
-                Telemetry.instance()::getLevel,
+                () -> Level.COMP,
                 "root",
                 udpLogger);
 

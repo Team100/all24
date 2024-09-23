@@ -72,7 +72,7 @@ public class Telemetry {
     private Telemetry() {
         // this will be overridden by {@link TelemetryLevelPoller}
         m_level = Level.TRACE;
-        
+
         if (USE_UDP_LOGGING) {
             Util.warn("=======================================");
             Util.warn("Using UDP network logging!");
@@ -92,11 +92,11 @@ public class Telemetry {
         }
 
         if (USE_UDP_LOGGING) {
-            fieldLogger = new SupplierLogger2(this::getLevel, "field", udpLogger);
-            rootLogger = new SupplierLogger2(this::getLevel, "log", udpLogger);
+            fieldLogger = new SupplierLogger2(() -> m_level, "field", udpLogger);
+            rootLogger = new SupplierLogger2(() -> m_level, "log", udpLogger);
         } else {
-            fieldLogger = new SupplierLogger2(this::getLevel, "field", ntLogger);
-            rootLogger = new SupplierLogger2(this::getLevel, "log", ntLogger);
+            fieldLogger = new SupplierLogger2(() -> m_level, "field", ntLogger);
+            rootLogger = new SupplierLogger2(() -> m_level, "log", ntLogger);
         }
         fieldLogger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");
 
@@ -109,16 +109,11 @@ public class Telemetry {
             udpLogger.periodic();
     }
 
-    void setLevel(Level level) {
+    public void setLevel(Level level) {
         m_level = level;
-    }
-
-    public Level getLevel() {
-        return m_level;
     }
 
     public static Telemetry instance() {
         return instance;
     }
-
 }

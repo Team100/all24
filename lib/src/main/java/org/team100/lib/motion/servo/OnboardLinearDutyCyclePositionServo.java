@@ -1,4 +1,4 @@
-package org.team100.lib.motion.components;
+package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
 
@@ -6,7 +6,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.State100Logger;
-import org.team100.lib.motion.LinearMechanism;
+import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.telemetry.Telemetry.Level;
 

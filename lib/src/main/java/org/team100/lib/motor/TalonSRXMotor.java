@@ -34,7 +34,12 @@ import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
  * 
  * Given the issues with feedback, this controller should rely mostly on
  * feedforward.
+ * 
+ * @deprecated because it doesn't use the mechanism gear ratio and because we're
+ *             probably never going to use the andymark modules, or this
+ *             motor/gear combination, again.
  */
+@Deprecated
 public class TalonSRXMotor implements BareMotor {
     /**
      * see https://motors.vex.com/vexpro-motors/775pro

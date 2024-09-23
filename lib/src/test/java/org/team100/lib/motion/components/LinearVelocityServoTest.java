@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.MockIncrementalBareEncoder;
-import org.team100.lib.motion.SimpleLinearMechanism;
+import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
+import org.team100.lib.motion.servo.OutboardLinearVelocityServo;
 import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;

@@ -3,7 +3,7 @@ package org.team100.frc2024.motion;
 import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
-import org.team100.lib.motion.components.AngularPositionServo;
+import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.util.Util;
 

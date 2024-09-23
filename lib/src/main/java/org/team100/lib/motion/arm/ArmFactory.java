@@ -10,7 +10,7 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;

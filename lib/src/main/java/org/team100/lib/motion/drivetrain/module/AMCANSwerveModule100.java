@@ -7,14 +7,14 @@ import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.encoder.VelocityBareEncoder;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.motion.SimpleLinearMechanism;
-import org.team100.lib.motion.LinearMechanism;
-import org.team100.lib.motion.RotaryMechanism;
-import org.team100.lib.motion.components.AngularPositionServo;
-import org.team100.lib.motion.components.LinearVelocityServo;
-import org.team100.lib.motion.components.OnboardAngularPositionServo;
-import org.team100.lib.motion.components.OutboardLinearVelocityServo;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.mechanism.LinearMechanism;
+import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
+import org.team100.lib.motion.servo.AngularPositionServo;
+import org.team100.lib.motion.servo.LinearVelocityServo;
+import org.team100.lib.motion.servo.OnboardAngularPositionServo;
+import org.team100.lib.motion.servo.OutboardLinearVelocityServo;
 import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.TalonSRXMotor;
@@ -24,7 +24,9 @@ import edu.wpi.first.math.controller.PIDController;
 
 /**
  * For outboard closed-loop control.
+ * @deprecated because we're unlikely to use AndyMark swerve modules again.
  */
+@Deprecated
 public class AMCANSwerveModule100 extends SwerveModule100 {
 
     /**

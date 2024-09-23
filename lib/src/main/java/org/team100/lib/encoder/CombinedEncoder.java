@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.motion.RotaryMechanism;
+import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
