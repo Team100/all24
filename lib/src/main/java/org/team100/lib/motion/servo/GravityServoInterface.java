@@ -1,4 +1,4 @@
-package org.team100.frc2024.motion;
+package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
 

@@ -100,6 +100,14 @@ def main():
         # medium detection resolution, compromise speed vs range
         width = 832
         height = 616
+    elif model == "imx296":
+        print("GS Camera")
+        # full frame, 2x2, to set the detector mode to widest angle possible
+        fullwidth = 1408   # slightly larger than the detector, to match stride
+        fullheight = 1088
+        # medium detection resolution, compromise speed vs range
+        width = 1408
+        height = 1088
     else:
         print("UNKNOWN CAMERA: " + model)
         fullwidth = 100

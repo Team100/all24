@@ -63,8 +63,14 @@ class Model(Enum):
 
 
 class RealCamera(Camera):
-    def __init__(self, identity: Identity) -> None:
-        self.cam: Picamera2 = Picamera2()
+    def __init__(self, identity: Identity, id: int) -> None:
+        if (id == None):
+            self.cam: Picamera2 = Picamera2()
+        else:
+            self.cam: Picamera2 = Picamera2(id)
+        self.setup(identity)
+
+    def setup(self, identity: Identity) -> None:
         model: Model = Model.get(self.cam)
         self.size: Size = RealCamera.__size_from_model(model)
         self.camera_config: dict[str, Any] = RealCamera.__get_config(
@@ -94,6 +100,7 @@ class RealCamera(Camera):
         self.cam.start()
 
     def stop(self) -> None:
+        self.cam.stop()
         print("Camera stop")
 
     def get_size(self) -> Size:
@@ -115,7 +122,7 @@ class RealCamera(Camera):
                 return Size(fullwidth=1664, fullheight=1232, width=832, height=616)
 
             case Model.GS:
-                return Size(fullwidth=1472, fullheight=1088, width=1472, height=1088)
+                return Size(fullwidth=1408, fullheight=1088, width=1408, height=1088)
 
             case _:
                 return Size(fullwidth=100, fullheight=100, width=100, height=100)

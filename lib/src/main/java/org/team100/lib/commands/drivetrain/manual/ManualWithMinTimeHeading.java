@@ -170,7 +170,6 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // whatever the measurement is
         // min-time doesn't use this
         // if (m_thetaSetpoint == null) {
-        // // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
         // // overshoot?
         // // updateSetpoint(headingMeasurement, headingRate);
         // m_thetaSetpoint = state.theta();
@@ -191,6 +190,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // the snap overrides the user input for omega.
         final double thetaFF = getThetaFF();
 
+        
         final double omega = MathUtil.clamp(
                 thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),

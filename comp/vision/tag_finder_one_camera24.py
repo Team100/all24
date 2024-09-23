@@ -88,7 +88,7 @@ class TagFinder:
         elif self.model == "imx296":
             fx = 1680
             fy = 1680
-            cx = int(1456/2)
+            cx = int(1408/2)
             cy = int(1088/2)
             k1 = 0
             k2 = 0
@@ -297,10 +297,10 @@ def main():
     elif model == "imx296":
         print("GS Camera")
         # full frame, 2x2, to set the detector mode to widest angle possible
-        fullwidth = 1472   # slightly larger than the detector, to match stride
+        fullwidth = 1408   # slightly larger than the detector, to match stride
         fullheight = 1088
         # medium detection resolution, compromise speed vs range
-        width = 1472
+        width = 1408
         height = 1088
     else:
         print("UNKNOWN CAMERA: " + model)

@@ -1,4 +1,4 @@
-package org.team100.frc2024.motion;
+package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
 
@@ -27,7 +27,7 @@ import edu.wpi.first.math.filter.LinearFilter;
  * setter.
  */
 @Deprecated // TODO: remove this after testing
-public class GravityServo implements GravityServoInterface {
+public class OnboardGravityServo implements GravityServoInterface {
     private static final double kFeedbackDeadbandRad_S = 0.01;
     /** Max gravity torque */
     private static final double kGravityNm = 5.0;
@@ -61,7 +61,7 @@ public class GravityServo implements GravityServoInterface {
     private final LinearFilter m_filter = LinearFilter.singlePoleIIR(0.02, 0.02);
 
     /** Remember to set a profile! */
-    public GravityServo(
+    public OnboardGravityServo(
             RotaryMechanism motor,
             SupplierLogger2 parent,
             PIDController controller,

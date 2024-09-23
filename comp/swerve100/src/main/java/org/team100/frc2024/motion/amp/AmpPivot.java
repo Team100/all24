@@ -2,8 +2,6 @@ package org.team100.frc2024.motion.amp;
 
 import java.util.OptionalDouble;
 
-import org.team100.frc2024.motion.GravityServo2;
-import org.team100.frc2024.motion.GravityServoInterface;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -17,7 +15,9 @@ import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
+import org.team100.lib.motion.servo.GravityServoInterface;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
+import org.team100.lib.motion.servo.OutboardGravityServo;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
@@ -100,7 +100,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 // servo.setProfile(profile);
                 servo.reset();
 
-                m_ampAngleServo = new GravityServo2(servo, 5.0, 0.0);
+                m_ampAngleServo = new OutboardGravityServo(servo, 5.0, 0.0);
                 break;
             default:
                 // For testing and simulation
@@ -131,7 +131,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 // servo.setProfile(profile);
                 simServo.reset();
 
-                m_ampAngleServo = new GravityServo2(simServo, 5.0, 0.0);
+                m_ampAngleServo = new OutboardGravityServo(simServo, 5.0, 0.0);
         }
     }
 

@@ -9,6 +9,9 @@ import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
+import org.team100.lib.motion.servo.OutboardGravityServo;
+import org.team100.lib.motion.servo.GravityServoInterface;
+
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.SupplierLogger2;
@@ -46,7 +49,7 @@ class GravityServoTest implements Timeless2024 {
         servo.setProfile(profile);
         servo.reset();
 
-        GravityServoInterface g = new GravityServo2(
+        GravityServoInterface g = new OutboardGravityServo(
                 servo, 5.0, 0.0);
         g.setProfile(profile);
         // start at zero

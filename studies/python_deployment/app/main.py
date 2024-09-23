@@ -14,33 +14,45 @@ from app.network import Network
 from app.tag_detector import TagDetector
 from app.timer import Timer
 
-
 def main() -> None:
     print("main")
     identity: Identity = Identity.get()
-    camera: Camera = CameraFactory.get(identity)
-    size: Size = camera.get_size()
-    display: Display = Display(size.width, size.height)
-    network: Network = Network(identity)
-    tag_detector: TagDetector = TagDetector(
-        identity, size.width, size.height, camera, display, network
-    )
+    cameras = CameraFactory.get(identity)
+    num = 0
+    tag_detectors = []
+    for camera in cameras:
+        size: Size = camera.get_size()
+        display: Display = Display(size.width, size.height, str(num))
+        network: Network = Network(identity, str(num))
+        tag_detectors.append(TagDetector(
+            identity, size.width, size.height, camera, display, network
+        ))
+        num += 1
+    network: Network = Network(identity, "Gyro")
     gyro: Gyro = GyroFactory.get(network)
-
-    camera.start()
+    
+    for camera in cameras:
+        camera.start()
     try:
         while True:
             # the most recent completed frame, from the recent past
             capture_start: int = Timer.time_ns()
-            request: Request = camera.capture_request()
+            requests = []
+            for camera in cameras:
+                requests.append(camera.capture_request())
             capture_end: int = Timer.time_ns()
             # capture time is how long we wait for the camera, it should be close to zero.
             capture_time_ms: int = (capture_end - capture_start) // 1000000
             network.vision_capture_time_ms.set(capture_time_ms)
             try:
-                tag_detector.analyze(request)
+                num = 0
+                for tag_detector in tag_detectors:
+                    tag_detector.analyze(requests[num])
+                    num += 1
                 gyro.sample()
             finally:
-                request.release()
+                for request in requests:
+                    request.release()
     finally:
-        camera.stop()
+        for camera in cameras:
+            camera.stop()

@@ -21,7 +21,7 @@ public enum Identity {
     TEST_BOARD_8D("03063c8d"),
     FRC_100_ea4("0306cea4"),
     TEST_BOARD_6B("030d286b"),
-    CAMERA_DOLLY("03126d76"),
+    DEMO_BOT("03126d76"),
     TEAM100_2018("0313baf3"),
     BETA_BOT("0315db43"),
     SQUAREBOT("031e31e3"),

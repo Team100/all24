@@ -188,6 +188,10 @@ class TagFinder:
         self.initialize_nt(camList)
         self.blips = []
         self.at_detector = robotpy_apriltag.AprilTagDetector()
+        
+        config = self.at_detector.Config()
+        config.numThreads = 4
+        self.at_detector.setConfig(config)
         self.at_detector.addFamily("tag36h11")
 
     def analyze(self, request, camera):
