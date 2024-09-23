@@ -9,8 +9,6 @@ import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
@@ -21,7 +19,6 @@ import org.team100.lib.motion.servo.LinearVelocityServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
 import org.team100.lib.motion.servo.OutboardAngularPositionServo;
 import org.team100.lib.motion.servo.OutboardLinearVelocityServo;
-import org.team100.lib.motion.servo.SelectableAngularPositionServo;
 import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.Kraken6Motor;
 import org.team100.lib.motor.MotorPhase;
@@ -30,6 +27,7 @@ import org.team100.lib.profile.Profile100;
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
+    private static final boolean USE_OUTBOARD_STEERING = true;
     private static final double kSteeringSupplyLimit = 10;
     private static final double kSteeringStatorLimit = 20;
     /**
@@ -191,23 +189,19 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 builtInEncoder,
                 turningGearRatio);
 
-        AngularPositionServo outboard = getOutboard(
-                parent,
-                turningEncoder,
-                profile,
-                mech);
+        if (USE_OUTBOARD_STEERING)
+            return getOutboard(
+                    parent,
+                    turningEncoder,
+                    profile,
+                    mech);
 
-        AngularPositionServo onboard = getOnboard(
+        return getOnboard(
                 parent,
                 kinodynamics,
                 turningEncoder,
                 profile,
                 mech);
-
-        return new SelectableAngularPositionServo(
-                outboard,
-                outboard,
-                () -> Experiments.instance.enabled(Experiment.OutboardSteering));
     }
 
     private static AngularPositionServo getOutboard(
