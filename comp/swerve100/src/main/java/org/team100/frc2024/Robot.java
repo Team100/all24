@@ -15,7 +15,7 @@ import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
 import org.team100.lib.telemetry.JvmLogger;
 import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.CotemporalCache;
+import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -92,10 +92,10 @@ public class Robot extends TimedRobot100 implements Glassy {
      */
     @Override
     public void robotPeriodic() {
-        // CotemporalCache instances hold measurements that we want to keep
+        // Cache instances hold measurements that we want to keep
         // consistent for an entire cycle, but we want to forget between cycles, so we
         // reset them all here.
-        CotemporalCache.resetAll();
+        Memo.resetAll();
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
 

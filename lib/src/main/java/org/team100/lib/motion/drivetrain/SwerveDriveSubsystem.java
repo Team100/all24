@@ -16,7 +16,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.CotemporalCache;
+import org.team100.lib.util.Memo;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -33,7 +33,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
     private final VisionData m_cameras;
-    private final CotemporalCache<SwerveState> m_stateSupplier;
+    private final Memo.CotemporalCache<SwerveState> m_stateSupplier;
     // LOGGERS
     private final SwerveStateLogger m_log_state;
     private final DoubleSupplierLogger2 m_log_turning;
@@ -55,7 +55,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_cameras = cameras;
-        m_stateSupplier = new CotemporalCache<>(this::update);
+        m_stateSupplier = Memo.of(this::update);
         stop();
         m_log_state = child.swerveStateLogger(Level.COMP, "state");
         m_log_turning = child.doubleLogger(Level.TRACE, "Tur Deg");
