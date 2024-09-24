@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
+/** Stateless (except for loggers) calculations for drive controllers. */
 public class DriveMotionControllerUtil implements Glassy {
     // LOGGERS
     private final ChassisSpeedsLogger m_log_u_FF;
@@ -48,7 +49,7 @@ public class DriveMotionControllerUtil implements Glassy {
         // Adjust course by ACTUAL heading rather than planned to decouple heading and
         // translation errors.
         Rotation2d motion_direction = measurement.getRotation().unaryMinus().rotateBy(course.get());
-        m_log_motion_direction.log( () -> motion_direction);
+        m_log_motion_direction.log(() -> motion_direction);
         return Optional.of(motion_direction);
     }
 
@@ -57,7 +58,7 @@ public class DriveMotionControllerUtil implements Glassy {
      */
     public ChassisSpeeds feedforward(Pose2d currentPose, TimedPose setpoint) {
         final double velocity_m = setpoint.velocityM_S();
-        m_log_setpoint_velocity.log( () -> velocity_m);
+        m_log_setpoint_velocity.log(() -> velocity_m);
 
         // robot-relative motion direction
         Optional<Rotation2d> motion_direction = direction(currentPose, setpoint);
@@ -85,7 +86,7 @@ public class DriveMotionControllerUtil implements Glassy {
             double kPCart,
             double kPTheta) {
         final Twist2d positionError = getErrorTwist(currentPose, setpoint);
-        m_log_position_error.log( () -> positionError);
+        m_log_position_error.log(() -> positionError);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPCart * positionError.dx,
                 kPCart * positionError.dy,

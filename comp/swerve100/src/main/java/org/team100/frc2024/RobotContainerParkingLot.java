@@ -19,6 +19,7 @@ import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
+import org.team100.lib.controller.DriveMotionControllerUtil;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
@@ -149,7 +150,10 @@ public class RobotContainerParkingLot implements Glassy {
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         // 254 PID follower
-        DriveMotionController drivePID = DriveMotionControllerFactory.autoPIDF(driveLogger);
+        final DriveMotionControllerUtil util = new DriveMotionControllerUtil(driveLogger);
+        final DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
+
+        DriveMotionController drivePID = driveControllerFactory.autoPIDF(driveLogger);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
                         driveLogger,
@@ -164,7 +168,7 @@ public class RobotContainerParkingLot implements Glassy {
 
         // 254 FF follower
 
-        DriveMotionController driveFF = DriveMotionControllerFactory.ffOnly(driveLogger);
+        DriveMotionController driveFF = driveControllerFactory.ffOnly(driveLogger);
 
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(

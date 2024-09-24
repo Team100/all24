@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
@@ -41,12 +40,13 @@ public class FancyTrajectory extends Command100 {
     public FancyTrajectory(
             SupplierLogger2 parent,
             SwerveDriveSubsystem robotDrive,
+            DriveMotionController controller,
             List<TimingConstraint> constraints) {
         super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_robotDrive = robotDrive;
-        m_controller = DriveMotionControllerFactory.fancyPIDF(child);
+        m_controller = controller;
         m_constraints = constraints;
         addRequirements(m_robotDrive);
     }

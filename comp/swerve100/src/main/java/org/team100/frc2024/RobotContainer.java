@@ -50,6 +50,7 @@ import org.team100.lib.commands.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
+import org.team100.lib.controller.DriveMotionControllerUtil;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
@@ -206,12 +207,19 @@ public class RobotContainer implements Glassy {
 
         final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
+        final DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        final DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
+
         whileTrue(driverControl::driveWithFancyTrajec,
-                new FancyTrajectory(logger, m_drive, constraints));
+                new FancyTrajectory(
+                        logger,
+                        m_drive,
+                        driveControllerFactory.fancyPIDF(logger),
+                        constraints));
 
         // 254 PID follower
         final HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
-        final DriveMotionController drivePID = DriveMotionControllerFactory.goodPIDF(logger);
+        final DriveMotionController drivePID = driveControllerFactory.goodPIDF(logger);
 
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(
@@ -383,6 +391,7 @@ public class RobotContainer implements Glassy {
         final AutoMaker m_AutoMaker = new AutoMaker(
                 logger,
                 m_drive,
+                driveControllerFactory,
                 drivePID,
                 0,
                 feeder,

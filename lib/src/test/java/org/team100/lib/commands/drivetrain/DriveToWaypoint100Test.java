@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
+import org.team100.lib.controller.DriveMotionControllerUtil;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.logging.TestLogger;
@@ -25,7 +26,10 @@ class DriveToWaypoint100Test extends Fixtured {
 
     @Test
     void testWithPID() {
-        DriveMotionController controller = DriveMotionControllerFactory.testPIDF(logger);
+        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
+
+        DriveMotionController controller = driveControllerFactory.testPIDF(logger);
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
         // the trajectory here should be a no-op.
         DriveToWaypoint100 command = new DriveToWaypoint100(
@@ -83,7 +87,9 @@ class DriveToWaypoint100Test extends Fixtured {
 
     @Test
     void testWithFF() {
-        DriveMotionController controller = DriveMotionControllerFactory.testFFOnly(logger);
+        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
+        DriveMotionController controller = driveControllerFactory.testFFOnly(logger);
         List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).forTest();
         // the trajectory here should be a no-op.
         DriveToWaypoint100 command = new DriveToWaypoint100(
