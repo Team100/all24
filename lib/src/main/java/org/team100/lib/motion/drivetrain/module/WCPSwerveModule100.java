@@ -33,9 +33,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     /**
      * WCP calls this "rotation ratio" here, we use the "flipped belt" which is the
      * fastest steering ratio.
+     * 12t -> 24t
+     * 14t -> 72t
+     * = 72 / 7
      * https://docs.wcproducts.com/wcp-swervex/misc/other-configurations/ratio-options
      */
-    private static final double kSteeringRatio = 10.29;
+    private static final double kSteeringRatio = 10.28571429;
 
     /**
      * Flipped belt ratios.

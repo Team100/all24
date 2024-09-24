@@ -73,8 +73,12 @@ public class RotaryMechanism implements Glassy {
         OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
         if (velocityRad_S.isEmpty())
             return OptionalDouble.empty();
-        double velo = velocityRad_S.getAsDouble() / m_gearRatio;
-        return OptionalDouble.of(velo);
+        return OptionalDouble.of(velocityRad_S.getAsDouble() / m_gearRatio);
+    }
+
+    /** For checking calibration, very slow, do not use outside tests. */
+    double getPositionBlockingRad() {
+        return m_encoder.getPositionBlockingRad() / m_gearRatio;
     }
 
     /** nearly cached */
@@ -97,17 +101,13 @@ public class RotaryMechanism implements Glassy {
         m_encoder.reset();
     }
 
+    /** This can be very slow, only use it on startup. */
     public void setEncoderPosition(double positionRad) {
         double motorPositionRad = positionRad * m_gearRatio;
         m_encoder.setEncoderPositionRad(motorPositionRad);
     }
 
-    public OptionalDouble getEncoderPosition() {
-        return m_encoder.getPositionRad();
-    }
-
     public void periodic() {
-        // do some logging
         m_log_velocity.log(() -> getVelocityRad_S().getAsDouble());
         m_log_position.log(() -> MathUtil.angleModulus(getPositionRad().getAsDouble()));
         m_motor.periodic();

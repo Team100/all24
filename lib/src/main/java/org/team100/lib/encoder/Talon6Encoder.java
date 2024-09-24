@@ -38,6 +38,12 @@ public class Talon6Encoder implements IncrementalBareEncoder {
     }
 
     @Override
+    public double getPositionBlockingRad() {
+        double motorPositionRev = m_motor.getPositionBlockingRev();
+        return motorPositionRev * 2 * Math.PI;
+    }
+
+    @Override
     public void reset() {
         m_motor.resetEncoderPosition();
     }
@@ -47,6 +53,12 @@ public class Talon6Encoder implements IncrementalBareEncoder {
         m_motor.close();
     }
 
+    /**
+     * Set integrated sensor position in radians.
+     * 
+     * Note this takes **FOREVER**, like tens of milliseconds, so you can only do it
+     * at startup.
+     */
     @Override
     public void setEncoderPositionRad(double motorPositionRad) {
         m_motor.setEncoderPositionRad(motorPositionRad);

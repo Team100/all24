@@ -22,7 +22,7 @@ import com.ctre.phoenix6.SignalLogger;
  * stops; this means you should see the latest values after disabling the robot.
  */
 public class Telemetry {
-    private static final boolean USE_UDP_LOGGING = true;
+    private static final boolean USE_UDP_LOGGING = false;
     private static final boolean USE_REAL_UDP = false;
 
     public enum Level {
