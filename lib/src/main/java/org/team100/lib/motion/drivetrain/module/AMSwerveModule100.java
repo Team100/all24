@@ -42,7 +42,6 @@ public class AMSwerveModule100 extends SwerveModule100 {
 
     /** @param name like "front left" or whatever */
     public static AMSwerveModule100 get(
-            String name,
             SupplierLogger2 parent,
             double currentLimit,
             double statorLimit,
@@ -53,9 +52,8 @@ public class AMSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-        SupplierLogger2 moduleLogger = parent.child(name);
         LinearVelocityServo driveServo = driveServo(
-                moduleLogger.child("Drive"),
+                parent.child("Drive"),
                 currentLimit,
                 statorLimit,
                 driveMotorCanId,
@@ -63,13 +61,13 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 ff);
 
         AngularPositionServo turningServo = turningServo(
-                moduleLogger.child("Turning"),
+                parent.child("Turning"),
                 turningMotorChannel,
                 turningEncoderChannel,
                 turningOffset,
                 kinodynamics);
 
-        return new AMSwerveModule100(name, driveServo, turningServo);
+        return new AMSwerveModule100(driveServo, turningServo);
     }
 
     private static LinearVelocityServo driveServo(
@@ -137,10 +135,9 @@ public class AMSwerveModule100 extends SwerveModule100 {
     }
 
     private AMSwerveModule100(
-            String name,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
-        super(name, driveServo, turningServo);
+        super(driveServo, turningServo);
         //
     }
 

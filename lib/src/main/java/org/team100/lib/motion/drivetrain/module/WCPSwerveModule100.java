@@ -58,7 +58,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static final double kWheelDiameterM = 0.0975; // 0.1015
 
     public static WCPSwerveModule100 get(
-            String name,
             SupplierLogger2 parent,
             double supplyLimitAmps,
             double statorLimitAmps,
@@ -71,7 +70,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
             MotorPhase motorPhase) {
-        SupplierLogger2 moduleLogger = parent.child(name);
 
         // TODO: revisit these constants
         PIDConstants drivePidConstants = new PIDConstants(.2); // .2
@@ -80,7 +78,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         Feedforward100 driveFF = Feedforward100.makeWCPSwerveDriveFalcon6();
 
         LinearVelocityServo driveServo = driveServo(
-                moduleLogger.child("Drive"),
+                parent.child("Drive"),
                 supplyLimitAmps,
                 statorLimitAmps,
                 driveMotorCanId,
@@ -89,7 +87,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 driveFF);
 
         AngularPositionServo turningServo = turningServo(
-                moduleLogger.child("Turning"),
+                parent.child("Turning"),
                 encoderClass,
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -101,7 +99,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningPidConstants,
                 turningFF);
 
-        return new WCPSwerveModule100(name, driveServo, turningServo);
+        return new WCPSwerveModule100(driveServo, turningServo);
     }
 
     private static LinearVelocityServo driveServo(
@@ -268,10 +266,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private WCPSwerveModule100(
-            String name,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
-        super(name, driveServo, turningServo);
+        super(driveServo, turningServo);
         //
     }
 }

@@ -24,6 +24,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 /**
  * For outboard closed-loop control.
+ * 
  * @deprecated because we're unlikely to use AndyMark swerve modules again.
  */
 @Deprecated
@@ -42,7 +43,6 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     private static final double kDriveReduction = 6.67 * 9 / 10;
 
     public static AMCANSwerveModule100 get(
-            String name,
             SupplierLogger2 parent,
             double currentLimit,
             double statorLimit,
@@ -52,11 +52,10 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
             double turningOffset,
             EncoderDrive turningDrive,
             SwerveKinodynamics kinodynamics) {
-        SupplierLogger2 moduleLogger = parent.child(name);
         PIDConstants drivePidConstants = new PIDConstants(0.05);
         Feedforward100 ff = Feedforward100.makeAMSwerveDriveFalcon6();
         LinearVelocityServo driveServo = driveServo(
-                moduleLogger.child("Drive"),
+                parent.child("Drive"),
                 currentLimit,
                 statorLimit,
                 driveMotorCanId,
@@ -64,14 +63,14 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 ff);
 
         AngularPositionServo turningServo = turningServo(
-                moduleLogger.child("Turning"),
+                parent.child("Turning"),
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
                 turningDrive,
                 kinodynamics);
 
-        return new AMCANSwerveModule100(name, driveServo, turningServo);
+        return new AMCANSwerveModule100(driveServo, turningServo);
     }
 
     private static LinearVelocityServo driveServo(
@@ -137,9 +136,8 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
     }
 
     private AMCANSwerveModule100(
-            String name,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
-        super(name, driveServo, turningServo);
+        super(driveServo, turningServo);
     }
 }
