@@ -36,6 +36,7 @@ public class ClimberPosition extends Command implements Glassy {
                 new PIDController(0.1, 0, 0),
                 0.02,
                 new TrapezoidProfile100(0.02, 0.1, 0.02));
+        addRequirements(climber);
     }
 
     @Override
