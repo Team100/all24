@@ -52,6 +52,7 @@ public class AutoMaker implements Glassy {
      * methods below. TODO: pass it to the factories?
      */
     private final SupplierLogger2 m_logger;
+    private final TrajectoryCommand100.Log m_commandLog;
     private final DriveMotionControllerFactory m_factory;
     private final TrajectoryVisualization m_viz;
 
@@ -77,6 +78,7 @@ public class AutoMaker implements Glassy {
         m_intake = intake;
         m_sensors = sensor;
         m_logger = parent.child(this);
+        m_commandLog = new TrajectoryCommand100.Log(m_logger);
         m_viz = viz;
     }
 
@@ -144,7 +146,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 test(
@@ -184,7 +186,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 maxVel,
                 maxAcc);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_factory.goodPIDF(m_logger),
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_factory.goodPIDF(m_logger),
                 m_viz);
     }
 
@@ -211,7 +213,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory6() {
@@ -229,7 +231,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory2() {
@@ -247,7 +249,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory3() {
@@ -265,7 +267,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory4() {
@@ -283,7 +285,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 driveToStageBase(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end) {
@@ -313,7 +315,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 2,
                 2); // kNote
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.stageBase(m_logger), m_viz);
     }
 
@@ -348,7 +350,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 4,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_logger), m_viz);
     }
 
@@ -380,7 +382,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 2,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_logger), m_viz);
     }
 
@@ -413,7 +415,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 2,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_logger), m_viz);
     }
 
@@ -446,7 +448,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 2,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_logger), m_viz);
     }
 
@@ -473,7 +475,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 maxVel,
                 maxAcc);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.straightPIDF(m_logger), m_viz);
     }
 
@@ -498,7 +500,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 maxVel,
                 maxAcc);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.straightPIDF(m_logger), m_viz);
     }
 
@@ -524,7 +526,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 maxVel,
                 maxAcc);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_logger), m_viz);
     }
 
@@ -556,7 +558,7 @@ public class AutoMaker implements Glassy {
                 4,
                 3);
         return new TrajectoryCommand100(
-                m_logger,
+                m_commandLog,
                 m_swerve,
                 trajectory,
                 m_factory.straightPIDF(m_logger), m_viz);
@@ -590,7 +592,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 4,
                 2);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory,
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.newNewPIDF(m_logger), m_viz);
     }
 
@@ -627,7 +629,7 @@ public class AutoMaker implements Glassy {
                 0.0,
                 kMaxVelM_S,
                 kMaxAccelM_S_S);
-        return new TrajectoryCommand100(m_logger, m_swerve, trajectory, m_controller, m_viz);
+        return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 throughCentralStageOpening(Alliance alliance, FieldPoint2024 start,
