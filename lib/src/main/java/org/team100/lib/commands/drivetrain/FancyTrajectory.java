@@ -46,7 +46,7 @@ public class FancyTrajectory extends Command100 {
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_robotDrive = robotDrive;
-        m_controller = DriveMotionControllerFactory.fancyPIDF(parent);
+        m_controller = DriveMotionControllerFactory.fancyPIDF(child);
         m_constraints = constraints;
         addRequirements(m_robotDrive);
     }
