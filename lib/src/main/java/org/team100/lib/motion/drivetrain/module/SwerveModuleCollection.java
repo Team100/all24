@@ -90,7 +90,7 @@ public class SwerveModuleCollection {
                                 0.714328,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, MotorPhase.REVERSE));
-            case BETA_BOT:
+            case SWERVE_ONE:
                 Util.println("************** WCP MODULES w/Analog Encoders **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.get(kFrontLeft, collectionLogger,
@@ -99,7 +99,7 @@ public class SwerveModuleCollection {
                                 30,
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 11,
-                                0,
+                                1,
                                 0.620381,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
@@ -109,7 +109,7 @@ public class SwerveModuleCollection {
                                 12,
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 32,
-                                1,
+                                2,
                                 0.162019,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
@@ -119,7 +119,7 @@ public class SwerveModuleCollection {
                                 31,
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 21,
-                                2,
+                                3,
                                 0.875648,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
@@ -129,11 +129,11 @@ public class SwerveModuleCollection {
                                 22,
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 33,
-                                3,
+                                0,
                                 0.323889,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE));
-            case SWERVE_ONE:
+            case BETA_BOT:
                 Util.println("************** AM CAN MODULES **************");
                 return new SwerveModuleCollection(
                         AMCANSwerveModule100.get(kFrontLeft, collectionLogger,
