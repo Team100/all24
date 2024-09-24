@@ -45,29 +45,34 @@ public class DriveToAmp extends SequentialCommandGroup {
             DrumShooter shooter,
             FeederSubsystem feeder) {
 
+        final HolonomicDriveController100 controller = new HolonomicDriveController100(parent);
         addCommands(
                 new ParallelDeadlineGroup(
-                        new DriveWithProfile2(parent,
+                        new DriveWithProfile2(
+                                parent,
                                 () -> DriverStation.getAlliance().map(
                                         x -> switch (x) {
                                             case Red -> kRedNearAmp;
                                             case Blue -> kBlueNearAmp;
                                         }),
                                 drive,
-                                new HolonomicDriveController100(parent), limits),
+                                controller,
+                                limits),
                         new FeedToAmp(intake, shooter, ampFeeder, feeder)),
                 new ParallelCommandGroup(
                         // new AmpSet(parent, amp, kAmpUp),
                         new AmpFastThenSlow(parent, amp, kAmpSwitchingPt, kAmpUp),
                         new SequentialCommandGroup(
-                                new DriveWithProfile2(parent,
+                                new DriveWithProfile2(
+                                        parent,
                                         () -> DriverStation.getAlliance().map(
                                                 x -> switch (x) {
                                                     case Red -> kRedCloseToAmp;
                                                     case Blue -> kBlueCloseToAmp;
                                                 }),
                                         drive,
-                                        new HolonomicDriveController100(parent), limits),
+                                        controller,
+                                        limits),
                                 new ParallelCommandGroup(
                                         ampFeeder.run(ampFeeder::outtake),
                                         new WaitCommand(1)))));
