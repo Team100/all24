@@ -5,6 +5,8 @@ package org.team100.lib.logging;
  */
 public interface PrimitiveLogger2 {
 
+    int keyCount();
+
     @FunctionalInterface
     interface BooleanLogger {
         void log(boolean val);

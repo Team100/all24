@@ -1,5 +1,7 @@
 package org.team100.lib.logging;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import edu.wpi.first.networktables.BooleanPublisher;
@@ -24,11 +26,19 @@ import edu.wpi.first.wpilibj.DataLogManager;
  */
 public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
     private final NetworkTableInstance inst;
+    // this is duplicative of the NT topic list, but the NT topics includes
+    // other non-logging keys, so we keep our own list.
+    private final Set<String> keys = new HashSet<>();
 
     public NTPrimitiveLogger2() {
         inst = NetworkTableInstance.getDefault();
         // Also log to disk
         DataLogManager.start();
+    }
+
+    @Override
+    public int keyCount() {
+        return keys.size();
     }
 
     public class NTBooleanLogger implements PrimitiveLogger2.BooleanLogger {
@@ -139,36 +149,43 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
 
     @Override
     public BooleanLogger booleanLogger(String label) {
+        keys.add(label);
         return new NTBooleanLogger(label);
     }
 
     @Override
     public DoubleLogger doubleLogger(String label) {
+        keys.add(label);
         return new NTDoubleLogger(label);
     }
 
     @Override
     public IntLogger intLogger(String label) {
+        keys.add(label);
         return new NTIntLogger(label);
     }
 
     @Override
     public DoubleArrayLogger doubleArrayLogger(String label) {
+        keys.add(label);
         return new NTDoubleArrayLogger(label);
     }
 
     @Override
     public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
+        keys.add(label);
         return new NTDoubleObjArrayLogger(label);
     }
 
     @Override
     public LongLogger longLogger(String label) {
+        keys.add(label);
         return new NTLongLogger(label);
     }
 
     @Override
     public StringLogger stringLogger(String label) {
+        keys.add(label);
         return new NTStringLogger(label);
     }
 
