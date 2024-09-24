@@ -42,12 +42,14 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
         m_log_rate = child.doubleLogger(Level.TRACE, "rate (rad)s)");
     }
 
+    /** Implementations should cache this. */
     protected abstract OptionalDouble getRatio();
 
     protected abstract double m_sensorMin();
 
     protected abstract double m_sensorMax();
 
+    /** This should be nearly cached. */
     @Override
     public OptionalDouble getPositionRad() {
         OptionalDouble positionRad = getRad();
@@ -68,7 +70,11 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
         return pos;
     }
 
-    /** Radians, [-pi, pi] */
+    /**
+     * This should be nearly cached.
+     * 
+     * @return radians, [-pi, pi]
+     */
     protected OptionalDouble getRad() {
         OptionalDouble ratio = getRatio();
         if (ratio.isEmpty())
@@ -91,6 +97,8 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
     }
 
     /**
+     * Nearly cached.
+     * 
      * Current rate in rad/s.
      * 
      * This is simply the backward finite difference over one time step.

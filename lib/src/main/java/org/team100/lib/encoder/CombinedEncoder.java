@@ -26,6 +26,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 public class CombinedEncoder implements RotaryPositionSensor {
     private final RotaryPositionSensor m_primary;
     private final RotaryMechanism m_secondary;
+    // LOGGERS
     private final DoubleSupplierLogger2 m_log_primary;
     private final DoubleSupplierLogger2 m_log_secondary;
     private final DoubleSupplierLogger2 m_log_combined;

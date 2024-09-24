@@ -33,6 +33,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
     private final VisionData m_cameras;
+    // CACHES
     private final Memo.CotemporalCache<SwerveState> m_stateSupplier;
     // LOGGERS
     private final SwerveStateLogger m_log_state;
@@ -187,8 +188,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     //
 
     /**
+     * Cached.
+     * 
      * SwerveState representing the drivetrain's field-relative pose, velocity, and
-     * acceleration. This is rate-limited and cached.
+     * acceleration.
      */
     public SwerveState getState() {
         return m_stateSupplier.get();

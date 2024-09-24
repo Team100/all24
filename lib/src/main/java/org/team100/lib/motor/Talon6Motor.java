@@ -23,6 +23,7 @@ public abstract class Talon6Motor implements BareMotor {
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
 
+    // CACHES
     // Two levels of caching here: the cotemporal cache caches the value
     // and also the supplier
     protected final DoubleSupplier m_position;
@@ -190,6 +191,7 @@ public abstract class Talon6Motor implements BareMotor {
         log();
     }
 
+    /** Cached, almost */
     @Override
     public double getVelocityRad_S() {
         return getVelocityRev_S() * 2 * Math.PI;
@@ -225,10 +227,12 @@ public abstract class Talon6Motor implements BareMotor {
         setEncoderPosition(motorPositionRev);
     }
 
+    /** Cached. */
     public double getVelocityRev_S() {
         return m_velocity.getAsDouble();
     }
 
+    /** Cached. */
     public double getPositionRev() {
         return m_position.getAsDouble();
     }

@@ -47,6 +47,7 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
 
     //////////////////////////////////
 
+    /** Nearly cached. */
     @Override
     public OptionalDouble getPositionRad() {
         // raw position is in rotations
@@ -56,6 +57,7 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
         return OptionalDouble.of(positionRad);
     }
 
+    /** Nearly cached. */
     @Override
     public OptionalDouble getVelocityRad_S() {
         // raw velocity is in RPM

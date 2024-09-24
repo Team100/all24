@@ -12,6 +12,11 @@ import java.util.function.Supplier;
  * resetAll(). But it's also ok to call reset() on demand, if you have a reason
  * (e.g. resetting a pose, and then wanting to do some more calculation with the
  * just-reset version).
+ * 
+ * Note that there's little need for multiple layers of caching, if the only
+ * thing in the middle of the sandwich is simple arithmetic. So if a "motor"
+ * implements caching of its sensors, then the "sensor" that uses the "motor"
+ * doesn't need to apply its own cache layer.
  */
 public class Memo {
     private static final List<Runnable> resetters = new ArrayList<>();

@@ -23,6 +23,7 @@ public class RotaryMechanism implements Glassy {
     private final BareMotor m_motor;
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
+    // LOGGER
     private DoubleSupplierLogger2 m_log_velocity;
     private DoubleSupplierLogger2 m_log_position;
 
@@ -51,7 +52,6 @@ public class RotaryMechanism implements Glassy {
             double outputRad_S,
             double outputAccelRad_S2,
             double outputTorqueNm) {
-
         m_motor.setVelocity(
                 outputRad_S * m_gearRatio,
                 outputAccelRad_S2 * m_gearRatio,
@@ -68,6 +68,7 @@ public class RotaryMechanism implements Glassy {
                 outputTorqueNm / m_gearRatio);
     }
 
+    /** nearly cached */
     public OptionalDouble getVelocityRad_S() {
         OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
         if (velocityRad_S.isEmpty())
@@ -76,6 +77,7 @@ public class RotaryMechanism implements Glassy {
         return OptionalDouble.of(velo);
     }
 
+    /** nearly cached */
     public OptionalDouble getPositionRad() {
         OptionalDouble positionRad = m_encoder.getPositionRad();
         if (positionRad.isEmpty())

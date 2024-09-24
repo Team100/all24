@@ -27,12 +27,17 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
         m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
+    /** Cached. */
     @Override
     public OptionalDouble getVelocityRad_S() {
         double m_rate = m_motor.getVelocityRad_S();
         return OptionalDouble.of(m_rate);
     }
 
+    /**
+     * Cached, almost.
+     * Derives position by integrating velocity over one time step.
+     */
     @Override
     public OptionalDouble getPositionRad() {
         double now = Timer.getFPGATimestamp();

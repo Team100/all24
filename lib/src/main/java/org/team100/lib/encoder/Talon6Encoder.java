@@ -21,6 +21,7 @@ public class Talon6Encoder implements IncrementalBareEncoder {
         m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
+    /** Nearly cached. */
     @Override
     public OptionalDouble getVelocityRad_S() {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
@@ -28,6 +29,7 @@ public class Talon6Encoder implements IncrementalBareEncoder {
         return OptionalDouble.of(velocityRad_S);
     }
 
+    /** Nearly cached. */
     @Override
     public OptionalDouble getPositionRad() {
         double motorPositionRev = m_motor.getPositionRev();

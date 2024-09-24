@@ -1,11 +1,12 @@
 package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
+import java.util.function.DoubleSupplier;
 
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -17,10 +18,13 @@ import edu.wpi.first.wpilibj.DutyCycle;
 public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositionSensor {
     private static final int kFrequencyThreshold = 1000;
 
+    private final int m_channel;
     private final DigitalInput m_digitalInput;
     private final DutyCycle m_dutyCycle;
+    // CACHES
+    private final DoubleSupplier m_duty;
+    // LOGGERS
     private final DoubleSupplierLogger2 m_log_duty;
-    private final IntSupplierLogger2 m_log_channel;
 
     protected DutyCycleRotaryPositionSensor(
             SupplierLogger2 parent,
@@ -29,10 +33,12 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
             EncoderDrive drive) {
         super(parent, inputOffset, drive);
         SupplierLogger2 child = parent.child(this);
+        m_channel = channel;
         m_digitalInput = new DigitalInput(channel);
         m_dutyCycle = new DutyCycle(m_digitalInput);
+        m_duty = Memo.ofDouble(m_dutyCycle::getOutput);
         m_log_duty = child.doubleLogger(Level.TRACE, "duty cycle");
-        m_log_channel = child.intLogger(Level.TRACE, "channel");
+        child.intLogger(Level.TRACE, "channel").log(() -> channel);
     }
 
     @Override
@@ -41,14 +47,14 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
         m_digitalInput.close();
     }
 
+    /** Cached, almost. */
     @Override
     protected OptionalDouble getRatio() {
         if (!isConnected()) {
-            Util.warn(String.format("encoder %d not connected", m_dutyCycle.getSourceChannel()));
+            Util.warn(String.format("encoder %d not connected", m_channel));
             return OptionalDouble.empty();
         }
-        m_log_channel.log(m_dutyCycle::getSourceChannel);
-        double dutyCycle = m_dutyCycle.getOutput();
+        double dutyCycle = m_duty.getAsDouble();
         m_log_duty.log(() -> dutyCycle);
         return OptionalDouble.of(dutyCycle);
     }

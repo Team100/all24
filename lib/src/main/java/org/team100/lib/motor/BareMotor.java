@@ -9,7 +9,6 @@ import org.team100.lib.dashboard.Glassy;
  */
 public interface BareMotor extends Glassy {
 
-    
     /**
      * Some motors allow torque limiting through current limiting.
      */
@@ -36,7 +35,11 @@ public interface BareMotor extends Glassy {
             double accelRad_S2,
             double torqueNm);
 
-    /** Motor shaft speed. */
+    /**
+     * Should be cached.
+     * 
+     * Motor shaft speed.
+     */
     double getVelocityRad_S();
 
     void setEncoderPositionRad(double positionRad);
@@ -54,8 +57,6 @@ public interface BareMotor extends Glassy {
             double positionRad,
             double velocityRad_S,
             double torqueNm);
-
-    // TODO: add position output
 
     /**
      * Motor resistance in ohms, used to calculate voltage from desired torque

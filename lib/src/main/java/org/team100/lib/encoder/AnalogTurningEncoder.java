@@ -1,11 +1,12 @@
 package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
+import java.util.function.DoubleSupplier;
 
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Memo;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
@@ -15,8 +16,10 @@ import edu.wpi.first.wpilibj.RobotController;
  */
 public class AnalogTurningEncoder extends RoboRioRotaryPositionSensor {
     private final AnalogInput m_input;
+    // CACHES
+    private final DoubleSupplier m_voltage;
+    private final DoubleSupplier m_rail;
     // LOGGERS
-    private final IntSupplierLogger2 m_log_channel;
     private final DoubleSupplierLogger2 m_log_voltage;
     private final DoubleSupplierLogger2 m_log_ratio;
 
@@ -28,7 +31,9 @@ public class AnalogTurningEncoder extends RoboRioRotaryPositionSensor {
         super(parent, inputOffset, drive);
         SupplierLogger2 child = parent.child(this);
         m_input = new AnalogInput(channel);
-        m_log_channel = child.intLogger(Level.TRACE, "channel");
+        m_voltage = Memo.ofDouble(m_input::getVoltage);
+        m_rail = Memo.ofDouble(RobotController::getVoltage5V);
+        child.intLogger(Level.TRACE, "channel").log(m_input::getChannel);
         m_log_voltage = child.doubleLogger(Level.TRACE, "voltage");
         m_log_ratio = child.doubleLogger(Level.TRACE, "ratio");
     }
@@ -48,13 +53,13 @@ public class AnalogTurningEncoder extends RoboRioRotaryPositionSensor {
         m_input.close();
     }
 
+    /** Cached, almost. */
     @Override
     protected OptionalDouble getRatio() {
-        m_log_channel.log( m_input::getChannel);
-        double voltage = m_input.getVoltage();
-        m_log_voltage.log( () -> voltage);
-        double ratio = voltage / RobotController.getVoltage5V();
-        m_log_ratio.log( () -> ratio);
+        double voltage = m_voltage.getAsDouble();
+        double ratio = voltage / m_rail.getAsDouble();
+        m_log_voltage.log(() -> voltage);
+        m_log_ratio.log(() -> ratio);
         return OptionalDouble.of(ratio);
     }
 }

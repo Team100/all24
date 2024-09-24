@@ -12,6 +12,8 @@ import org.team100.lib.dashboard.Glassy;
 public interface RotaryPositionSensor extends Glassy {
 
     /**
+     * Implementations should cache this, or nearly so.
+     * 
      * Counterclockwise-positive rad within [-pi,pi], which is different from the
      * winding encoder behavior.
      * 
@@ -21,6 +23,8 @@ public interface RotaryPositionSensor extends Glassy {
     OptionalDouble getPositionRad();
 
     /**
+     * Implementations should cache this, or nearly so.
+     * 
      * Counterclockwise positive, rad/s.
      * Note some rate implementations can be noisy.
      * 
