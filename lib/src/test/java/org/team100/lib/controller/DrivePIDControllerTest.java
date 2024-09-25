@@ -65,8 +65,8 @@ class DrivePIDControllerTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
-
-        DrivePIDFController controller = new DrivePIDFController(logger, util, false, 2.4, 2.4);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
+        DrivePIDFController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,

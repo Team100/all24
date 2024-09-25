@@ -51,6 +51,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.DriveMotionControllerUtil;
+import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
@@ -209,17 +210,18 @@ public class RobotContainer implements Glassy {
 
         final DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         final DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
 
         whileTrue(driverControl::driveWithFancyTrajec,
                 new FancyTrajectory(
                         logger,
                         m_drive,
-                        driveControllerFactory.fancyPIDF(logger),
+                        driveControllerFactory.fancyPIDF(PIDFlog),
                         constraints));
 
         // 254 PID follower
         final HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
-        final DriveMotionController drivePID = driveControllerFactory.goodPIDF(logger);
+        final DriveMotionController drivePID = driveControllerFactory.goodPIDF(PIDFlog);
 
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(

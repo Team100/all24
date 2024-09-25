@@ -69,7 +69,8 @@ class DriveMotionPlannerTest {
                 end_vel);
 
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
-        DriveMotionController controller = new DrivePIDFController(logger, util, false, 2.4, 2.4);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
+        DriveMotionController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(timed_trajectory));
         controller.setTrajectory(traj_iterator);
@@ -97,8 +98,8 @@ class DriveMotionPlannerTest {
     @Test
     void testAllTrajectories() {
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
-
-        DrivePIDFController controller = new DrivePIDFController(logger, util, false, 2.4, 2.4);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
+        DrivePIDFController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100();
         List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();
 
