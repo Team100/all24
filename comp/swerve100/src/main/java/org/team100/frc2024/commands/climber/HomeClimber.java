@@ -134,8 +134,5 @@ public class HomeClimber extends Command implements Glassy {
         return m_leftDone.get() > kHomeTimeS && m_rightDone.get() > kHomeTimeS;
     }
 
-    @Override
-    public String getGlassName() {
-        return "HomeClimber";
-    }
+
 }

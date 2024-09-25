@@ -29,7 +29,7 @@ public class DriveBackwards extends Command {
   public void execute() {
     if(Math.abs(m_drive.getState().pose().getX() - m_startingPose.getX()) < m_length ){
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(-0.1, 0, 0);
-        m_drive.setChassisSpeeds(chassisSpeeds, 0.02);
+        m_drive.setChassisSpeeds(chassisSpeeds);
     } else {
         isFinished = true;
     }

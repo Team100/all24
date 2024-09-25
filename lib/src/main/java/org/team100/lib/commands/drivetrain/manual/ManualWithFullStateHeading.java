@@ -6,6 +6,7 @@ import org.team100.lib.commands.drivetrain.HeadingLatch;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -77,7 +78,7 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         m_desiredRotation = desiredRotation;
         m_K = k;
         m_latch = new HeadingLatch();
-        m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
+        m_outputFilter = LinearFilter.singlePoleIIR(0.01, TimedRobot100.LOOP_PERIOD_S);
         m_log_mode = child.stringLogger(Level.TRACE, "mode");
         m_log_goal_theta = child.doubleLogger(Level.TRACE, "goal/theta");
         m_log_setpoint_theta = child.state100Logger(Level.TRACE, "setpoint/theta");
@@ -115,8 +116,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      * 
      * Desaturation prefers the rotational profile completely in the snap case, and
      * normally in the non-snap case.
-     * 
-     * This uses a fixed dt = 0.02 for the profile.
      * 
      * @param state    current drivetrain state from the pose estimator
      * @param twist1_1 control units, [-1,1]
@@ -218,10 +217,4 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         }
         return thetaFB;
     }
-
-    @Override
-    public String getGlassName() {
-        return "ManualWithFullStateHeading";
-    }
-
 }

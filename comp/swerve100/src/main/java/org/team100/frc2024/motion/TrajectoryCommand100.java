@@ -1,7 +1,7 @@
 package org.team100.frc2024.motion;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
@@ -17,6 +17,7 @@ import org.team100.lib.visualization.TrajectoryVisualization;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Follow a fixed trajectory, using the new 254-derived trajectory and follower
@@ -24,19 +25,18 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * This is an experiment.
  */
-public class TrajectoryCommand100 extends Command100 {
+public class TrajectoryCommand100 extends Command implements Glassy  {
     /**
      * Log exists so multiple commands can use the same keys.
      */
     public static class Log {
-        private final SupplierLogger2 m_log;
         private final Pose2dLogger m_log_goal;
         private final ChassisSpeedsLogger m_log_chassis_speeds;
         private final DoubleSupplierLogger2 m_log_THETA_ERROR;
         private final BooleanSupplierLogger2 m_log_FINSIHED;
 
-        public Log(SupplierLogger2 log) {
-            m_log = log;
+        public Log(SupplierLogger2 parent) {
+            SupplierLogger2 log = parent.child("TrajectoryCommand100");
             m_log_goal = log.pose2dLogger(Level.TRACE, "goal");
             m_log_chassis_speeds = log.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
             m_log_THETA_ERROR = log.doubleLogger(Level.TRACE, "THETA ERROR");
@@ -57,7 +57,6 @@ public class TrajectoryCommand100 extends Command100 {
             Trajectory100 trajectory,
             DriveMotionController controller,
             TrajectoryVisualization viz) {
-        super(log.m_log);
         m_log = log;
         m_robotDrive = robotDrive;
         m_trajectory = trajectory;
@@ -69,20 +68,20 @@ public class TrajectoryCommand100 extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_viz.setViz(m_trajectory);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(m_trajectory));
         m_controller.setTrajectory(iter);
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         final double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_robotDrive.getState().pose();
         ChassisSpeeds currentRobotRelativeSpeed = m_robotDrive.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentRobotRelativeSpeed);
 
-        m_robotDrive.setChassisSpeedsNormally(output, dt);
+        m_robotDrive.setChassisSpeedsNormally(output);
 
         m_log.m_log_chassis_speeds.log(() -> output);
         double thetaErrorRad = m_goal.getRotation().getRadians()
@@ -97,7 +96,7 @@ public class TrajectoryCommand100 extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_log.m_log_FINSIHED.log(() -> true);
         m_robotDrive.stop();
         m_viz.clear();

@@ -5,11 +5,12 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -41,7 +42,6 @@ import edu.wpi.first.math.geometry.Translation2d;
  */
 public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
-    private static final double kDtSec = 0.02;
     /**
      * Relative rotational speed. Use a moderate value to trade rotation for
      * translation
@@ -58,8 +58,6 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_apparent_motion;
-    private final DoubleArraySupplierLogger2 m_log_target;
-    private final DoubleArraySupplierLogger2 m_log_ball;
     private final State100Logger m_log_theta_setpoint;
     private final DoubleSupplierLogger2 m_log_theta_measurement;
     private final DoubleSupplierLogger2 m_log_theta_error;
@@ -68,6 +66,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     private final DoubleSupplierLogger2 m_log_omega_measurement;
     private final DoubleSupplierLogger2 m_log_omega_error;
     private final DoubleSupplierLogger2 m_log_omega_fb;
+    private final FieldLogger.Log m_field_log;
 
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
@@ -75,7 +74,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     private Pose2d m_prevPose;
 
     public FieldManualWithNoteRotation(
-            SupplierLogger2 fieldLogger,
+            FieldLogger.Log fieldLogger,
             SupplierLogger2 parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
@@ -83,8 +82,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
             PIDController thetaController,
             PIDController omegaController,
             BooleanSupplier trigger) {
-        m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
-        m_log_ball = fieldLogger.doubleArrayLogger(Level.TRACE, "ball");
+        m_field_log = fieldLogger;
         SupplierLogger2 child = parent.child(this);
         m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
         m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
@@ -165,7 +163,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
-        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
 
         // this is user input scaled to m/s and rad/s
 
@@ -188,20 +186,18 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        // this name needs to be exactly "/field/target" for glass.
-        m_log_target.log(() -> new double[] { target.get().getX(), target.get().getY(), 0 });
+        m_field_log.m_log_target.log(() -> new double[] { target.get().getX(), target.get().getY(), 0 });
 
         // this is just for simulation
         if (m_trigger.getAsBoolean()) {
             m_ball = currentTranslation;
             // correct for newtonian relativity
-            m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
+            m_ballV = new Translation2d(kBallVelocityM_S * TimedRobot100.LOOP_PERIOD_S, currentRotation)
                     .plus(FieldRelativeDelta.delta(m_prevPose, state.pose()).getTranslation());
         }
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
-            // this name needs to be exactly "/field/ball" for glass.
-            m_log_ball.log(() -> new double[] { m_ball.getX(), m_ball.getY(), 0 });
+            m_field_log.m_log_ball.log(() -> new double[] { m_ball.getX(), m_ball.getY(), 0 });
 
         }
         FieldRelativeVelocity twistWithLockM_S = new FieldRelativeVelocity(scaledInput.x(), scaledInput.y(), omega);
@@ -211,10 +207,4 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         m_prevPose = state.pose();
         return twistWithLockM_S;
     }
-
-    @Override
-    public String getGlassName() {
-        return "FieldManualWithNoteRotation";
-    }
-
 }

@@ -29,7 +29,7 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
         verify(drive, 0, 0, 0);
 
         // set the motor speed...
-        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0), 0.02);
+        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
         // this state is hidden...
         assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
 
@@ -46,7 +46,7 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
         // new state should be accelerating
         verify(drive, 0.0003, 0.019, 0.006);
 
-        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0), 0.02);
+        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
 
         stepTime(0.02);
         drive.periodic();
@@ -55,7 +55,7 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
 
         verify(drive, 0.001, 0.039, 0.019);
 
-        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0), 0.02);
+        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
 
         stepTime(0.02);
         drive.periodic();

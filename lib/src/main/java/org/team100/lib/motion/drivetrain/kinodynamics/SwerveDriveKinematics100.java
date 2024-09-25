@@ -143,6 +143,7 @@ public class SwerveDriveKinematics100 {
      * INVERSE: chassis speeds -> module states
      * 
      * The resulting module state speeds are always positive.
+     * TODO(vasili): i think this is unfinished work from 2nd order control???
      */
     public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds, SwerveModuleState100[] prevStates) {
         if (fullStop(chassisSpeeds)) {
@@ -156,8 +157,9 @@ public class SwerveDriveKinematics100 {
         return states;
     }
 
-    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds,
-            ChassisSpeeds chassisSpeedsAcceleration, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(
+            ChassisSpeeds chassisSpeeds,
+            ChassisSpeeds chassisSpeedsAcceleration) {
         if (fullStop(chassisSpeeds)) {
             return constantModuleHeadings(); // avoid steering when stopped
         }
@@ -171,13 +173,13 @@ public class SwerveDriveKinematics100 {
                 new SwerveModuleState100(0, Optional.of(new Rotation2d())),
                 new SwerveModuleState100(0, Optional.of(new Rotation2d())) };
         SwerveModuleState100[] states = accelerationFromVector(chassisSpeedsVector, chassisSpeedsAccelerationVector,
-                prevStates, dt);
+                prevStates);
         updateHeadings(states);
         return states;
     }
 
     public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds chassisSpeeds,
-            ChassisSpeeds chassisSpeedsAcceleration, SwerveModuleState100[] prevStates, double dt) {
+            ChassisSpeeds chassisSpeedsAcceleration, SwerveModuleState100[] prevStates) {
         if (fullStop(chassisSpeeds)) {
             return constantModuleHeadings(); // avoid steering when stopped
         }
@@ -186,7 +188,7 @@ public class SwerveDriveKinematics100 {
         SimpleMatrix chassisSpeedsAccelerationVector = chassisSpeeds2Vector(chassisSpeedsAcceleration);
         // [v cos; v sin; ...] (2n x 1)
         SwerveModuleState100[] states = accelerationFromVector(chassisSpeedsVector, chassisSpeedsAccelerationVector,
-                prevStates, dt);
+                prevStates);
         updateHeadings(states);
         return states;
     }
@@ -443,13 +445,14 @@ public class SwerveDriveKinematics100 {
     }
 
     /**
+     * // TODO: test this and keep it or toss it
+     * 
      * https://www.chiefdelphi.com/uploads/short-url/qzj4k2LyBs7rLxAem0YajNIlStH.pdf
      */
     public SwerveModuleState100[] accelerationFromVector(
             SimpleMatrix chassisSpeedsMatrix,
             SimpleMatrix chassisSpeedsAccelerationMatrix,
-            SwerveModuleState100[] prevStates,
-            double dt) {
+            SwerveModuleState100[] prevStates) {
         SwerveModuleState100[] moduleStates = new SwerveModuleState100[m_numModules];
         for (int i = 0; i < m_numModules; i++) {
             Optional<Rotation2d> angle2 = prevStates[i].angle;
@@ -469,6 +472,7 @@ public class SwerveDriveKinematics100 {
                 // angle = new Rotation2d(MathUtil.angleModulus(
                 // angle2.get().getRadians() + dtheta));
                 // actually we really have no idea what the current state should be
+                // TODO: confirm this is OK 
                 moduleStates[i] = new SwerveModuleState100(0, Optional.empty());
                 continue;
             } else {

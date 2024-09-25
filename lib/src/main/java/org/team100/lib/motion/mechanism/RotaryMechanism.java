@@ -114,9 +114,4 @@ public class RotaryMechanism implements Glassy {
         m_encoder.periodic();
     }
 
-    @Override
-    public String getGlassName() {
-        return "RotaryMechanism";
-    }
-
 }

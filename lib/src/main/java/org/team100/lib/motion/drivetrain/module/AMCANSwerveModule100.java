@@ -6,6 +6,7 @@ import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.encoder.VelocityBareEncoder;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
@@ -115,7 +116,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
                 5, // kP
                 0, // kI
                 0, // kD
-                dt);
+                TimedRobot100.LOOP_PERIOD_S);
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();

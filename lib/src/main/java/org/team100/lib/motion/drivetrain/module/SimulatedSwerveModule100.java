@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
@@ -60,7 +61,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 20, // kP
                 0, // kI
                 0, // kD
-                dt);
+                TimedRobot100.LOOP_PERIOD_S);
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         // note low tolerance
         turningPositionController.setTolerance(0.05, 0.05);

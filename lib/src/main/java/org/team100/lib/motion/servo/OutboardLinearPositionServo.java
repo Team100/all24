@@ -3,6 +3,7 @@ package org.team100.lib.motion.servo;
 import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.logging.SupplierLogger2;
@@ -17,7 +18,6 @@ public class OutboardLinearPositionServo implements LinearPositionServo {
     private final LinearMechanism m_mechanism;
     private final Profile100 m_profile;
     
-    private static final double kDtSec = 0.02;
     private State100 m_goal;
     private State100 m_setpoint = new State100(0, 0);
 
@@ -53,7 +53,7 @@ public class OutboardLinearPositionServo implements LinearPositionServo {
         m_goal = new State100(goalM, goalVelocityM_S);
 
         // NOTE: fixed dt here
-        m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
+        m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, m_goal);
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 

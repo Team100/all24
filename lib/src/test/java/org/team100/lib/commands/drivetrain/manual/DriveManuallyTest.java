@@ -24,9 +24,9 @@ class DriveManuallyTest extends Fixtured implements Timeless {
     void testSimple() {
         Supplier<DriverControl.Velocity> twistSupplier = () -> desiredTwist;
         SwerveDriveSubsystem robotDrive = fixture.drive;
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
 
-        DriveManually command = new DriveManually(logger, twistSupplier, robotDrive);
+        DriveManually command = new DriveManually(twistSupplier, robotDrive);
 
         command.register("MODULE_STATE", false,
                 new SimpleManualModuleStates(logger, swerveKinodynamics));
@@ -44,17 +44,17 @@ class DriveManuallyTest extends Fixtured implements Timeless {
 
         desiredMode = "MODULE_STATE";
         // System.out.println("command exec");
-        command.execute100(0.02);
+        command.execute();
 
         stepTime(0.02);
         robotDrive.periodic();
         assertEquals(1, robotDrive.getState().chassisSpeeds().vxMetersPerSecond, 0.001);
 
         desiredMode = "ROBOT_RELATIVE_CHASSIS_SPEED";
-        command.execute100(0.02);
+        command.execute();
 
         desiredMode = "FIELD_RELATIVE_TWIST";
-        command.execute100(0.02);
+        command.execute();
 
         command.end(false);
     }

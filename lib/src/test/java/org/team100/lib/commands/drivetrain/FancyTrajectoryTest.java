@@ -12,6 +12,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.logging.TestLogger;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.DriveMotionControllerUtil;
+import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -21,18 +22,19 @@ class FancyTrajectoryTest extends Fixtured {
 
     @Test
     void testSimple() {
-        SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
         SwerveDriveSubsystem drive = fixture.drive;
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
         DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
         FancyTrajectory command = new FancyTrajectory(
                 logger,
                 drive,
-                driveControllerFactory.fancyPIDF(logger),
+                driveControllerFactory.fancyPIDF(PIDFlog),
                 constraints);
         command.initialize();
-        command.execute100(0.02);
+        command.execute();
 
         assertEquals(0, drive.getState().chassisSpeeds().vxMetersPerSecond, 0.001);
         assertEquals(0, drive.getState().chassisSpeeds().vyMetersPerSecond, 0.001);

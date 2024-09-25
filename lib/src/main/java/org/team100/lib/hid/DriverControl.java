@@ -133,9 +133,4 @@ public interface DriverControl extends Glassy {
     default boolean outtakeFromAmp() {
         return false;
     }
-
-    @Override
-    default String getGlassName() {
-        return "DriverControl";
-    }
 }

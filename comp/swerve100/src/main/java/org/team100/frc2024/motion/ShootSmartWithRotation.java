@@ -8,7 +8,7 @@ import org.team100.frc2024.commands.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
-import org.team100.lib.commands.Command100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -20,8 +20,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class ShootSmartWithRotation extends Command100 {
+public class ShootSmartWithRotation extends Command implements Glassy  {
     private final DrumShooter m_shooter;
     private final SwerveDriveSubsystem m_drive;
     private final ManualWithShooterLock m_driver;
@@ -41,7 +42,6 @@ public class ShootSmartWithRotation extends Command100 {
             Intake intake,
             ManualWithShooterLock driver,
             Supplier<DriverControl.Velocity> twistSupplier) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_angle = child.doubleLogger(Level.TRACE, "angle");
         m_log_realangle = child.doubleLogger(Level.TRACE, "realangle");
@@ -55,13 +55,14 @@ public class ShootSmartWithRotation extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_driver.reset(m_drive.getState().pose());
     }
 
-    public void execute100(double dt) {
+    @Override
+    public void execute() {
         FieldRelativeVelocity twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
-        m_drive.driveInFieldCoords(twist, 0.02);
+        m_drive.driveInFieldCoords(twist);
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent()) {
             return;

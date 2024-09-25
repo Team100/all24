@@ -6,22 +6,19 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.Fixtured;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.testing.Timeless;
 
 class SpinTest extends Fixtured implements Timeless {
     private static final double kDelta = 0.01;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testSimple() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-        Spin command = new Spin(logger, fixture.drive, fixture.controller);
+        Spin command = new Spin(fixture.drive, fixture.controller);
         command.initialize();
         stepTime(0.02);
         // starts from rest
-        command.execute100(0.02);
+        command.execute();
         assertEquals(0, command.m_center.getX(), kDelta);
         assertEquals(0, command.m_center.getY(), kDelta);
         assertEquals(0, command.m_initialRotation, kDelta);
@@ -30,8 +27,9 @@ class SpinTest extends Fixtured implements Timeless {
         assertEquals(0, fixture.drive.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-0.785, fixture.drive.getSwerveLocal().getDesiredStates()[0].angle.get().getRadians(), 0.01);
 
-        stepTime(5);
-        command.execute100(5);
+        for (int i = 0; i < 273; ++i) {
+            command.execute();
+        }
         assertEquals(0, command.m_center.getX(), kDelta);
         assertEquals(0, command.m_center.getY(), kDelta);
         assertEquals(0, command.m_initialRotation, kDelta);

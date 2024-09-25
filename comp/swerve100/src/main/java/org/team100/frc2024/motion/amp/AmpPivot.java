@@ -13,6 +13,7 @@ import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.GravityServoInterface;
@@ -57,8 +58,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
     public AmpPivot(SupplierLogger2 parent) {
         SupplierLogger2 child = parent.child(this);
 
-        double period = 0.02;
-        PIDController controller = new PIDController(2.0, 0, 0, period);
+        PIDController controller = new PIDController(2.0, 0, 0, TimedRobot100.LOOP_PERIOD_S);
         controller.setTolerance(0.02);
         controller.setIntegratorRange(0, 0.1);
 
@@ -83,23 +83,13 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                         3,
                         0.645439,
                         EncoderDrive.INVERSE);
-
-                // m_ampAngleServo = new GravityServo(
-                // mech,
-                // m_logger,
-                // controller,
-                // period,
-                // encoder);
-
                 AngularPositionServo servo = new OnboardAngularPositionServo(
                         child,
                         mech,
                         encoder,
                         10, // TODO: remove this
                         controller);
-                // servo.setProfile(profile);
                 servo.reset();
-
                 m_ampAngleServo = new OutboardGravityServo(servo, 5.0, 0.0);
                 break;
             default:
@@ -114,23 +104,13 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                         kGearRatio);
                 RotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         child, simMech);
-
-                // m_ampAngleServo = new GravityServo(
-                //         simMech,
-                //         m_logger,
-                //         controller,
-                //         period,
-                //         simEncoder);
-
                 AngularPositionServo simServo = new OnboardAngularPositionServo(
                         child,
                         simMech,
                         simEncoder,
                         10, // TODO: remove this
                         controller);
-                // servo.setProfile(profile);
                 simServo.reset();
-
                 m_ampAngleServo = new OutboardGravityServo(simServo, 5.0, 0.0);
         }
     }
@@ -169,8 +149,4 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         m_ampAngleServo.periodic();
     }
 
-    @Override
-    public String getGlassName() {
-        return "Amp Pivot";
-    }
 }

@@ -77,9 +77,5 @@ public class JvmLogger implements Glassy {
         m_log_nonheap.log(() -> bean.getNonHeapMemoryUsage().getUsed());
     }
 
-    @Override
-    public String getGlassName() {
-        return "JVM Logger";
-    }
 
 }

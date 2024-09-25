@@ -20,6 +20,7 @@ import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.DriveMotionControllerFactory;
 import org.team100.lib.controller.DriveMotionControllerUtil;
+import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
@@ -89,7 +90,7 @@ public class RobotContainerParkingLot implements Glassy {
         final Async async = asyncFactory.get();
         driverControl = new DriverControlProxy(driveLogger, async);
         operatorControl = new OperatorControlProxy(async);
-        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         m_modules = SwerveModuleCollection.get(
                 driveLogger,
@@ -129,7 +130,7 @@ public class RobotContainerParkingLot implements Glassy {
         // this should be a field.
         final DriveInALittleSquare m_driveInALittleSquare;
 
-        m_driveInALittleSquare = new DriveInALittleSquare(driveLogger, m_drive);
+        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
         whileTrue(driverControl::never, m_driveInALittleSquare);
 
         ///////////////////////
@@ -140,7 +141,7 @@ public class RobotContainerParkingLot implements Glassy {
         ///////////////////////
 
         whileTrue(driverControl::never, new DriveInACircle(driveLogger, m_drive, controller, -1, viz));
-        whileTrue(driverControl::never, new Spin(driveLogger, m_drive, controller));
+        whileTrue(driverControl::never, new Spin(m_drive, controller));
         whileTrue(driverControl::never, new Oscillate(driveLogger, m_drive));
 
         ////////////////////////
@@ -152,8 +153,9 @@ public class RobotContainerParkingLot implements Glassy {
         // 254 PID follower
         final DriveMotionControllerUtil util = new DriveMotionControllerUtil(driveLogger);
         final DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(driveLogger);
 
-        DriveMotionController drivePID = driveControllerFactory.autoPIDF(driveLogger);
+        DriveMotionController drivePID = driveControllerFactory.autoPIDF(PIDFlog);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
                         driveLogger,
@@ -168,7 +170,7 @@ public class RobotContainerParkingLot implements Glassy {
 
         // 254 FF follower
 
-        DriveMotionController driveFF = driveControllerFactory.ffOnly(driveLogger);
+        DriveMotionController driveFF = driveControllerFactory.ffOnly(PIDFlog);
 
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
@@ -256,11 +258,6 @@ public class RobotContainerParkingLot implements Glassy {
 
     private void whileTrue(BooleanSupplier condition, Command command) {
         new Trigger(condition).whileTrue(command);
-    }
-
-    @Override
-    public String getGlassName() {
-        return "RobotContainer";
     }
 
 }

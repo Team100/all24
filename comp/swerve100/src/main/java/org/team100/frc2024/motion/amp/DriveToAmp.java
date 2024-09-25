@@ -9,7 +9,6 @@ import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,20 +35,17 @@ public class DriveToAmp extends SequentialCommandGroup {
             kAmpXM, kFieldWidthM - kCloseToAmpYM, GeometryUtil.kRotation90);
 
     public DriveToAmp(
-            SupplierLogger2 parent,
             SwerveDriveSubsystem drive,
+            HolonomicDriveController100 controller,
             SwerveKinodynamics limits,
             AmpPivot amp,
             AmpFeeder ampFeeder,
             Intake intake,
             DrumShooter shooter,
             FeederSubsystem feeder) {
-
-        final HolonomicDriveController100 controller = new HolonomicDriveController100(parent);
         addCommands(
                 new ParallelDeadlineGroup(
                         new DriveWithProfile2(
-                                parent,
                                 () -> DriverStation.getAlliance().map(
                                         x -> switch (x) {
                                             case Red -> kRedNearAmp;
@@ -61,10 +57,9 @@ public class DriveToAmp extends SequentialCommandGroup {
                         new FeedToAmp(intake, shooter, ampFeeder, feeder)),
                 new ParallelCommandGroup(
                         // new AmpSet(parent, amp, kAmpUp),
-                        new AmpFastThenSlow(parent, amp, kAmpSwitchingPt, kAmpUp),
+                        new AmpFastThenSlow(amp, kAmpSwitchingPt, kAmpUp),
                         new SequentialCommandGroup(
                                 new DriveWithProfile2(
-                                        parent,
                                         () -> DriverStation.getAlliance().map(
                                                 x -> switch (x) {
                                                     case Red -> kRedCloseToAmp;

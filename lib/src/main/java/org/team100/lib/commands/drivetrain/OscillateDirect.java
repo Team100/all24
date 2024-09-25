@@ -2,7 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.Optional;
 
-import org.team100.lib.commands.Command100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -15,6 +15,7 @@ import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Drive back and forth forever, for calibration.
@@ -26,7 +27,7 @@ import edu.wpi.first.wpilibj.Timer;
  * be a piecewise parabolic curve that looks a lot like a sine wave, though it
  * is not one.
  */
-public class OscillateDirect extends Command100 {
+public class OscillateDirect extends Command implements Glassy  {
     private static final double kAccel = 1;
     private static final double kMaxSpeed = 1;
     private static final double kPeriod = 4 * kMaxSpeed / kAccel;
@@ -49,7 +50,6 @@ public class OscillateDirect extends Command100 {
     private SwerveState m_initial;
 
     public OscillateDirect(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
         m_square = new SquareWave(kAccel, kPeriod);
@@ -67,13 +67,13 @@ public class OscillateDirect extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_timer.restart();
         m_initial = m_swerve.getState();
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         double time = m_timer.get();
         double accelM_S_S = m_square.applyAsDouble(time);
         double speedM_S = m_triangle.applyAsDouble(time);
@@ -97,7 +97,7 @@ public class OscillateDirect extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
     }
 }

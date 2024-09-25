@@ -29,9 +29,4 @@ public interface GravityServoInterface extends Glassy {
     void setTorqueLimit(double torqueNm);
 
     void periodic();
-
-    @Override
-    default String getGlassName() {
-        return "GravityServo";
-    }
 }

@@ -1,6 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
-import org.team100.lib.commands.Command100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -9,11 +9,12 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.SquareWave;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Drive back and forth, fast, while spinning, to explore the causes of veering.
  */
-public class Veering extends Command100 {
+public class Veering extends Command implements Glassy  {
     /** translation command in m/s */
     private static final double kAmplitude = 2;
     private static final double kPeriod = 10;
@@ -25,7 +26,6 @@ public class Veering extends Command100 {
     private final FieldRelativeVelocityLogger m_log_input;
 
     public Veering(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
         m_square = new SquareWave(kAmplitude, kPeriod);
@@ -35,21 +35,21 @@ public class Veering extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_timer.restart();
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         double time = m_timer.get();
         double dx = m_square.applyAsDouble(time);
         FieldRelativeVelocity input = new FieldRelativeVelocity(dx, 0, kOmega);
-        m_swerve.driveInFieldCoords(input, dt);
+        m_swerve.driveInFieldCoords(input);
         m_log_input.log( () -> input);
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
     }
 }

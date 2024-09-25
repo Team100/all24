@@ -186,9 +186,4 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
     public Entry<Double, T> ceilingEntry(double arg0) {
         return m_pastSnapshots.ceilingEntry(arg0);
     }
-
-    @Override
-    public String getGlassName() {
-        return "TimeInterpolatableBuffer100";
-    }
 }

@@ -3,7 +3,7 @@ package org.team100.lib.commands.arm;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
-import org.team100.lib.commands.Command100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -17,13 +17,14 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Drive the arm to the specified cartesian position.
  * 
  * There are several flaws in this implementation.
  */
-public class CartesianManualPositionalArm extends Command100 {
+public class CartesianManualPositionalArm extends Command implements Glassy  {
 
     private final ArmSubsystem m_arm;
     private final ArmKinematics m_kinematics;
@@ -50,7 +51,6 @@ public class CartesianManualPositionalArm extends Command100 {
             ArmKinematics kinematics,
             DoubleSupplier x,
             DoubleSupplier y) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_input = child.translation2dLogger(Level.TRACE, "input");
         m_log_setpoint = child.armAnglesLogger(Level.TRACE, "setpoint");
@@ -78,7 +78,7 @@ public class CartesianManualPositionalArm extends Command100 {
      * This uses an offset to keep the inputs away from the origin.
      */
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         Translation2d input = new Translation2d(
                 0.6 * m_x.getAsDouble() + 0.7,
                 0.6 * m_y.getAsDouble() + 0.7);
@@ -113,7 +113,7 @@ public class CartesianManualPositionalArm extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_arm.set(0, 0);
     }
 

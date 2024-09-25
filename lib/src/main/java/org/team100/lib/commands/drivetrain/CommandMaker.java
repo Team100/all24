@@ -14,11 +14,8 @@ import edu.wpi.first.wpilibj2.command.WrapperCommand;
  * Utility class to produce commands.
  */
 public class CommandMaker {
-
     /**
      * Try the new Choreo library.
-     * 
-     * Note the fixed 0.02 sec dt here.
      * 
      * see https://github.com/SleipnirGroup/Choreo/wiki/ChoreoLib-Java-Usage
      */
@@ -33,7 +30,7 @@ public class CommandMaker {
                         new PIDController(0.25, 0.0, 0.0),
                         new PIDController(0.25, 0.0, 0.0),
                         new PIDController(0.25, 0.0, 0.0),
-                        x -> drivetrain.setChassisSpeeds(x, 0.02),
+                        drivetrain::setChassisSpeeds,
                         () -> false,
                         drivetrain)) {
 

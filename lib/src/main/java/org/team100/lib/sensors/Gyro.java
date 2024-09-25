@@ -25,8 +25,4 @@ public interface Gyro extends Glassy {
     /** Roll in radians, NWU, positive-right. */
     Rotation2d getRollNWU();
 
-    @Override
-    default String getGlassName() {
-        return "Gyro";
-    }
 }

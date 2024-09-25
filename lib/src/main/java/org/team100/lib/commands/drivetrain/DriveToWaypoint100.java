@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -21,12 +21,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToWaypoint100 extends Command100 {
+public class DriveToWaypoint100 extends Command implements Glassy  {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 2;
@@ -54,7 +55,6 @@ public class DriveToWaypoint100 extends Command100 {
             List<TimingConstraint> constraints,
             double timeBuffer,
             TrajectoryVisualization viz) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_goal = goal;
@@ -67,7 +67,7 @@ public class DriveToWaypoint100 extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         final Pose2d start = m_swerve.getState().pose();
         final double startVelocity = 0;
         Pose2d end = m_goal;
@@ -104,7 +104,7 @@ public class DriveToWaypoint100 extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
@@ -114,7 +114,7 @@ public class DriveToWaypoint100 extends Command100 {
 
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeedsNormally(output, dt);
+        m_swerve.setChassisSpeedsNormally(output);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class DriveToWaypoint100 extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_timer.stop();
         m_swerve.stop();
         m_viz.clear();
@@ -141,5 +141,4 @@ public class DriveToWaypoint100 extends Command100 {
                 new Pose2d(t0, theta),
                 new Pose2d(t1, theta));
     }
-
 }

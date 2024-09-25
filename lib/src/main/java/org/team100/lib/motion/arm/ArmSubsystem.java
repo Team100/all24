@@ -5,6 +5,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
@@ -19,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class ArmSubsystem extends SubsystemBase implements Glassy {
     private static final double kFilterTimeConstantS = 0.06;
-    private static final double kFilterPeriodS = 0.02;
 
     private final LinearFilter m_lowerMeasurementFilter;
     private final LinearFilter m_upperMeasurementFilter;
@@ -51,8 +51,8 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         m_log_position = child.armAnglesLogger(Level.TRACE, "position");
         m_log_velocity = child.armAnglesLogger(Level.TRACE, "velocity");
 
-        m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
-        m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, kFilterPeriodS);
+        m_lowerMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, TimedRobot100.LOOP_PERIOD_S);
+        m_upperMeasurementFilter = LinearFilter.singlePoleIIR(kFilterTimeConstantS, TimedRobot100.LOOP_PERIOD_S);
 
         m_lowerArmMotor = lowerMotor;
         m_lowerArmEncoder = lowerEncoder;
@@ -106,10 +106,5 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         m_upperArmMotor.close();
         m_lowerArmEncoder.close();
         m_upperArmEncoder.close();
-    }
-
-    @Override
-    public String getGlassName() {
-        return "Arm";
     }
 }

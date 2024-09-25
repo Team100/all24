@@ -16,36 +16,36 @@ public class DriveMotionControllerFactory {
         m_util = util;
     }
 
-    public DriveMotionController fancyPIDF(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, false, 2.4, 1.3);
+    public DriveMotionController fancyPIDF(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, false, 2.4, 1.3);
     }
 
-    public DriveMotionController straightPIDF(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, false, 4, 4);
+    public DriveMotionController straightPIDF(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, false, 4, 4);
     }
 
-    public DriveMotionController newNewPIDF(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, false, 5.5, 4);
+    public DriveMotionController newNewPIDF(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, false, 5.5, 4);
     }
 
-    public DriveMotionController complementPIDF(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, false, 6, 6);
+    public DriveMotionController complementPIDF(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, false, 6, 6);
     }
 
-    public DriveMotionController goodPIDF(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, false, 1, 1.3);
+    public DriveMotionController goodPIDF(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, false, 1, 1.3);
     }
 
-    public DriveMotionController stageBase(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, false, 2, 1.3);
+    public DriveMotionController stageBase(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, false, 2, 1.3);
     }
 
-    public DriveMotionController autoPIDF(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, false, 1, 1.3);
+    public DriveMotionController autoPIDF(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, false, 1, 1.3);
     }
 
-    public DriveMotionController ffOnly(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, true, 2.4, 1.3);
+    public DriveMotionController ffOnly(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, true, 2.4, 1.3);
     }
 
     public static DriveMotionController purePursuit(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
@@ -56,15 +56,15 @@ public class DriveMotionControllerFactory {
         return new DriveRamseteController(parent);
     }
 
-    public DriveMotionController testPIDF(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, false, 2.4, 2.4);
+    public DriveMotionController testPIDF(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, false, 2.4, 2.4);
     }
 
-    public DriveMotionController testFFOnly(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, true, 2.4, 2.4);
+    public DriveMotionController testFFOnly(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, true, 2.4, 2.4);
     }
 
-    public DriveMotionController fasterCurves(SupplierLogger2 parent) {
-        return new DrivePIDFController(parent, m_util, true, 4.5, 4.5);
+    public DriveMotionController fasterCurves(DrivePIDFController.Log log) {
+        return new DrivePIDFController(log, m_util, true, 4.5, 4.5);
     }
 }

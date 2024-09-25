@@ -52,9 +52,4 @@ public class ClimberDefault extends Command implements Glassy {
         log.log(() -> input);
         mech.setDutyCycle(input);
     }
-
-    @Override
-    public String getGlassName() {
-        return "ClimberDefault";
-    }
 }

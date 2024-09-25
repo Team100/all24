@@ -1,6 +1,7 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.logging.SupplierLogger2;
@@ -69,7 +70,6 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
-            SupplierLogger2 parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -122,7 +122,6 @@ public class SwerveKinodynamics implements Glassy {
      * @param vcg                     vertical center of gravity, meters
      */
     SwerveKinodynamics(
-            SupplierLogger2 parent,
             double maxDriveVelocity,
             double stallAcceleration,
             double maxDriveAcceleration,
@@ -299,9 +298,13 @@ public class SwerveKinodynamics implements Glassy {
      * 
      * @param in            chassis speeds to transform
      * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
-     * @param dt            time to aim for
      */
-    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S) {
+        return toSwerveModuleStates(in, gyroRateRad_S, TimedRobot100.LOOP_PERIOD_S);
+    }
+
+    /** For testing only */
+    SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, double gyroRateRad_S, double period) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         // ... which is subtracted here; this isn't really a field-relative
@@ -311,7 +314,7 @@ public class SwerveKinodynamics implements Glassy {
                 in.vyMetersPerSecond,
                 in.omegaRadiansPerSecond,
                 angle);
-        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
+        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, period);
         return m_kinematics.toSwerveModuleStates(descretized);
     }
 
@@ -328,10 +331,12 @@ public class SwerveKinodynamics implements Glassy {
      * @param in            chassis speeds to transform
      * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
      * @param accelM_S      magnitude of acceleration
-     * @param dt            time to aim for
      */
-    public SwerveModuleState100[] toSwerveModuleStates(ChassisSpeeds in, ChassisSpeeds prevIn,
-            SwerveModuleState100[] prevSwerveModuleState, double gyroRateRad_S, double dt) {
+    public SwerveModuleState100[] toSwerveModuleStates(
+            ChassisSpeeds in,
+            ChassisSpeeds prevIn,
+            SwerveModuleState100[] prevSwerveModuleState,
+            double gyroRateRad_S) {
         // This is the extra correction angle ...
         Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
         // ... which is subtracted here; this isn't really a field-relative
@@ -341,26 +346,26 @@ public class SwerveKinodynamics implements Glassy {
                 in.vyMetersPerSecond,
                 in.omegaRadiansPerSecond,
                 angle);
-        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, dt);
+        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, TimedRobot100.LOOP_PERIOD_S);
 
         ChassisSpeeds prevChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 prevIn.vxMetersPerSecond,
                 prevIn.vyMetersPerSecond,
                 prevIn.omegaRadiansPerSecond,
                 angle);
-        ChassisSpeeds prevDescretized = ChassisSpeeds.discretize(prevChassisSpeeds, dt);
+        ChassisSpeeds prevDescretized = ChassisSpeeds.discretize(prevChassisSpeeds, TimedRobot100.LOOP_PERIOD_S);
 
-        ChassisSpeeds acceleration = (chassisSpeeds.minus(prevDescretized)).div(dt);
+        ChassisSpeeds acceleration = (chassisSpeeds.minus(prevDescretized)).div(TimedRobot100.LOOP_PERIOD_S);
 
-        return m_kinematics.toSwerveModuleStates(descretized, acceleration, prevSwerveModuleState, dt);
+        return m_kinematics.toSwerveModuleStates(descretized, acceleration, prevSwerveModuleState);
     }
 
     /**
      * The resulting state speeds are always positive.
      */
     public SwerveModuleState100[] toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds,
-            ChassisSpeeds prevChassisSpeeds, SwerveModuleState100[] prevModuleStates, double dt) {
-        return m_kinematics.toSwerveModuleStates(speeds, prevChassisSpeeds, prevModuleStates, dt);
+            ChassisSpeeds prevChassisSpeeds, SwerveModuleState100[] prevModuleStates) {
+        return m_kinematics.toSwerveModuleStates(speeds, prevChassisSpeeds, prevModuleStates);
     }
 
     /**
@@ -530,15 +535,8 @@ public class SwerveKinodynamics implements Glassy {
                 speeds.theta());
     }
 
-
-
     public SwerveDriveKinematics100 getKinematics() {
         return m_kinematics;
-    }
-
-    @Override
-    public String getGlassName() {
-        return "SwerveKinodynamics";
     }
 
 }

@@ -170,10 +170,4 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         pid.enableContinuousInput(-1.0 * Math.PI, Math.PI);
         return pid;
     }
-
-    @Override
-    public String getGlassName() {
-        return "HolonomicDriveController3";
-    }
-
 }

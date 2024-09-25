@@ -24,7 +24,7 @@ class RotateTest extends Fixtured implements Timeless {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         SwerveDriveSubsystem swerveDriveSubsystem = fixture.drive;
         MockGyro gyro = new MockGyro();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         // remember the test rotation rate is *very* slow.
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), 0.001);
         double targetAngle = Math.PI / 2;
@@ -46,7 +46,7 @@ class RotateTest extends Fixtured implements Timeless {
         for (int i = 0; i < 18; ++i) {
             stepTime(0.02);
             fixture.drive.periodic();
-            rotate.execute100(0.02);
+            rotate.execute();
         }
         // there's no translation
         assertEquals(0, rotate.m_controller.error().getX(), kDelta);
@@ -62,7 +62,7 @@ class RotateTest extends Fixtured implements Timeless {
         for (int i = 0; i < 25; ++i) {
             stepTime(0.02);
             fixture.drive.periodic();
-            rotate.execute100(0.02);
+            rotate.execute();
         }
         assertEquals(0.461, rotate.refTheta.x(), 0.2);
         assertEquals(-0.512, fixture.drive.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
@@ -72,7 +72,7 @@ class RotateTest extends Fixtured implements Timeless {
         for (int i = 0; i < 50; ++i) {
             stepTime(0.02);
             fixture.drive.periodic();
-            rotate.execute100(0.02);
+            rotate.execute();
         }
 
         assertEquals(Math.PI / 2, rotate.refTheta.x(), kDelta);
@@ -83,7 +83,7 @@ class RotateTest extends Fixtured implements Timeless {
         for (int i = 0; i < 113; ++i) {
             stepTime(0.02);
             fixture.drive.periodic();
-            rotate.execute100(0.02);
+            rotate.execute();
         }
 
         assertTrue(rotate.isFinished());
