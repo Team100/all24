@@ -1,11 +1,13 @@
 package org.team100.lib.motor;
 
+import java.util.function.DoubleSupplier;
+
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Memo;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -19,6 +21,12 @@ public abstract class CANSparkMotor implements BareMotor {
     protected final CANSparkBase m_motor;
     protected final RelativeEncoder m_encoder;
     protected final SparkPIDController m_pidController;
+    // CACHES
+    private final DoubleSupplier m_encoder_position;
+    private final DoubleSupplier m_encoder_velocity;
+    private final DoubleSupplier m_current;
+    private final DoubleSupplier m_output;
+    private final DoubleSupplier m_temp;
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_desired_position;
     private final DoubleSupplierLogger2 m_log_desired_speed;
@@ -28,7 +36,6 @@ public abstract class CANSparkMotor implements BareMotor {
     private final DoubleSupplierLogger2 m_log_accel_FF;
     private final DoubleSupplierLogger2 m_log_torque_FF;
     private final DoubleSupplierLogger2 m_log_duty;
-    private final IntSupplierLogger2 m_log_device_id;
     private final DoubleSupplierLogger2 m_log_position;
     private final DoubleSupplierLogger2 m_log_velocity;
     private final DoubleSupplierLogger2 m_log_rpm;
@@ -57,6 +64,14 @@ public abstract class CANSparkMotor implements BareMotor {
         // make everything after this asynchronous.
         // NOTE: this makes error-checking not work at all.
         Rev100.crash(() -> m_motor.setCANTimeout(0));
+        // CACHES
+        m_encoder_position = Memo.ofDouble(m_encoder::getPosition);
+        m_encoder_velocity = Memo.ofDouble(m_encoder::getVelocity);
+        m_current = Memo.ofDouble(m_motor::getOutputCurrent);
+        m_output = Memo.ofDouble(m_motor::getAppliedOutput);
+        m_temp = Memo.ofDouble(m_motor::getMotorTemperature);
+        // LOGGERS
+        child.intLogger(Level.TRACE, "Device ID").log(m_motor::getDeviceId);
         m_log_desired_position = child.doubleLogger(Level.TRACE, "desired position (rev)");
         m_log_desired_speed = child.doubleLogger(Level.TRACE, "desired speed (rev_s)");
         m_log_desired_accel = child.doubleLogger(Level.TRACE, "desired accel (rev_s2)");
@@ -65,7 +80,6 @@ public abstract class CANSparkMotor implements BareMotor {
         m_log_accel_FF = child.doubleLogger(Level.TRACE, "accel feedforward (v)");
         m_log_torque_FF = child.doubleLogger(Level.TRACE, "torque feedforward (v)");
         m_log_duty = child.doubleLogger(Level.TRACE, "Duty Cycle");
-        m_log_device_id = child.intLogger(Level.TRACE, "Device ID");
         m_log_position = child.doubleLogger(Level.TRACE, "position (rev)");
         m_log_velocity = child.doubleLogger(Level.TRACE, "velocity (rev_s)");
         m_log_rpm = child.doubleLogger(Level.TRACE, "velocity (RPM)");
@@ -88,14 +102,14 @@ public abstract class CANSparkMotor implements BareMotor {
     }
 
     /**
-     * Use outboard PID control to hold the given velocty, with acceleration and
-     * torque feedforwards.
+     * Use outboard PID control to hold the given velocity, with velocity,
+     * acceleration, and torque feedforwards.
      */
     @Override
     public void setVelocity(double motorRad_S, double motorAccelRad_S2, double motorTorqueNm) {
         double motorRev_S = motorRad_S / (2 * Math.PI);
         double motorRev_S2 = motorAccelRad_S2 / (2 * Math.PI);
-        double currentMotorRev_S = m_encoder.getVelocity() / 60;
+        double currentMotorRev_S = m_encoder_velocity.getAsDouble() / 60;
 
         double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
@@ -127,7 +141,7 @@ public abstract class CANSparkMotor implements BareMotor {
     public void setPosition(double motorPositionRad, double motorVelocityRad_S, double motorTorqueNm) {
         double motorRev = motorPositionRad / (2 * Math.PI);
         double motorRev_S = motorVelocityRad_S / (2 * Math.PI);
-        double currentMotorRev_S = m_encoder.getVelocity() / 60;
+        double currentMotorRev_S = m_encoder_velocity.getAsDouble() / 60;
 
         double frictionFFVolts = m_ff.frictionFFVolts(currentMotorRev_S, motorRev_S);
         double velocityFFVolts = m_ff.velocityFFVolts(motorRev_S);
@@ -146,6 +160,7 @@ public abstract class CANSparkMotor implements BareMotor {
         log();
     }
 
+    /** Cached, almost. */
     @Override
     public double getVelocityRad_S() {
         return getRateRPM() * 2 * Math.PI / 60;
@@ -166,24 +181,31 @@ public abstract class CANSparkMotor implements BareMotor {
         m_motor.close();
     }
 
+    /**
+     * Cached, almost.
+     * 
+     * @return torque in Nm
+     */
     public double getMotorTorque() {
-        return m_motor.getOutputCurrent() * kTNm_amp();
+        return m_current.getAsDouble() * kTNm_amp();
     }
 
     /**
+     * Cached.
+     * 
      * @return integrated sensor position in rotations.
      */
     public double getPositionRot() {
-        // just reads the most-recently received message, so we don't need to cache it
-        return m_encoder.getPosition();
+        return m_encoder_position.getAsDouble();
     }
 
     /**
+     * Cached.
+     * 
      * @return integrated sensor velocity in RPM
      */
     public double getRateRPM() {
-        // just reads the most-recently received message, so we don't need to cache it
-        return m_encoder.getVelocity();
+        return m_encoder_velocity.getAsDouble();
     }
 
     /**
@@ -201,14 +223,13 @@ public abstract class CANSparkMotor implements BareMotor {
     }
 
     protected void log() {
-        m_log_device_id.log(m_motor::getDeviceId);
-        m_log_position.log(m_encoder::getPosition);
-        m_log_velocity.log(() -> m_encoder.getVelocity() / 60);
-        m_log_rpm.log(m_encoder::getVelocity);
-        m_log_current.log(m_motor::getOutputCurrent);
-        m_log_duty.log(m_motor::getAppliedOutput);
+        m_log_position.log(m_encoder_position);
+        m_log_velocity.log(() -> m_encoder_velocity.getAsDouble() / 60);
+        m_log_rpm.log(m_encoder_velocity);
+        m_log_current.log(m_current);
+        m_log_duty.log(m_output);
         m_log_torque.log(this::getMotorTorque);
-        m_log_temp.log(m_motor::getMotorTemperature);
+        m_log_temp.log(m_temp);
     }
 
     @Override

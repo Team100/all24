@@ -81,6 +81,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         m_controller = controller;
         m_period = controller.getPeriod();
         m_controller.setIntegratorRange(0, 0.1);
+
         m_log_goal = child.state100Logger(Level.TRACE, "goal (rad)");
         m_log_feedforward_torque = child.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
         m_log_measurement = child.state100Logger(Level.TRACE, "measurement (rad)");

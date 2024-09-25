@@ -19,16 +19,14 @@ import edu.wpi.first.math.controller.PIDController;
 public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     public static SimulatedSwerveModule100 get(
-            String name,
             SupplierLogger2 parent,
             SwerveKinodynamics kinodynamics) {
-        SupplierLogger2 moduleLogger = parent.child(name);
         LinearVelocityServo driveServo = simulatedDriveServo(
-                moduleLogger.child("Drive"));
+                parent.child("Drive"));
         AngularPositionServo turningServo = simulatedTurningServo(
-                moduleLogger.child("Turning"),
+                parent.child("Turning"),
                 kinodynamics);
-        return new SimulatedSwerveModule100(name, driveServo, turningServo);
+        return new SimulatedSwerveModule100(driveServo, turningServo);
     }
 
     private static LinearVelocityServo simulatedDriveServo(SupplierLogger2 parent) {
@@ -79,10 +77,9 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     }
 
     private SimulatedSwerveModule100(
-            String name,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
-        super(name, driveServo, turningServo);
+        super(driveServo, turningServo);
         //
     }
 

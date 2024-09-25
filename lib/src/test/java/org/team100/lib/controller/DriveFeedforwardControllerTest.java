@@ -65,8 +65,8 @@ class DriveFeedforwardControllerTest {
         TrajectoryTimeSampler view = new TrajectoryTimeSampler(trajectory);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
-
-        DrivePIDFController controller = new DrivePIDFController(logger, true, 2.4, 2.4);
+        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DrivePIDFController controller = new DrivePIDFController(logger, util, true, 2.4, 2.4);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,

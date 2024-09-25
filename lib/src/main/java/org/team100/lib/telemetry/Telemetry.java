@@ -23,7 +23,7 @@ import com.ctre.phoenix6.SignalLogger;
  */
 public class Telemetry {
     private static final boolean USE_UDP_LOGGING = false;
-    private static final boolean USE_REAL_UDP = true;
+    private static final boolean USE_REAL_UDP = false;
 
     public enum Level {
         /**
@@ -102,6 +102,14 @@ public class Telemetry {
 
         // turn off the CTRE log we never use
         SignalLogger.enableAutoLogging(false);
+    }
+
+    public int keyCount() {
+        if (udpLogger != null)
+            return udpLogger.keyCount();
+        if (ntLogger != null)
+            return ntLogger.keyCount();
+        return 0;
     }
 
     public void periodic() {

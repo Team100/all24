@@ -25,36 +25,46 @@ import edu.wpi.first.wpilibj.Timer;
  * This is an experiment.
  */
 public class TrajectoryCommand100 extends Command100 {
+    /**
+     * Log exists so multiple commands can use the same keys.
+     */
+    public static class Log {
+        private final SupplierLogger2 m_log;
+        private final Pose2dLogger m_log_goal;
+        private final ChassisSpeedsLogger m_log_chassis_speeds;
+        private final DoubleSupplierLogger2 m_log_THETA_ERROR;
+        private final BooleanSupplierLogger2 m_log_FINSIHED;
+
+        public Log(SupplierLogger2 log) {
+            m_log = log;
+            m_log_goal = log.pose2dLogger(Level.TRACE, "goal");
+            m_log_chassis_speeds = log.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
+            m_log_THETA_ERROR = log.doubleLogger(Level.TRACE, "THETA ERROR");
+            m_log_FINSIHED = log.booleanLogger(Level.TRACE, "FINSIHED");
+        }
+    }
+
+    private final Log m_log;
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveMotionController m_controller;
     private final Trajectory100 m_trajectory;
     private final Pose2d m_goal;
     private final TrajectoryVisualization m_viz;
 
-    // LOGGERS
-    private final Pose2dLogger m_log_goal;
-    private final ChassisSpeedsLogger m_log_chassis_speeds;
-    private final DoubleSupplierLogger2 m_log_THETA_ERROR;
-    private final BooleanSupplierLogger2 m_log_FINSIHED;
-
     public TrajectoryCommand100(
-            SupplierLogger2 parent,
+            Log log,
             SwerveDriveSubsystem robotDrive,
             Trajectory100 trajectory,
             DriveMotionController controller,
             TrajectoryVisualization viz) {
-        super(parent);
-        SupplierLogger2 child = parent.child(this);
-        m_log_goal = child.pose2dLogger(Level.TRACE, "goal");
-        m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
-        m_log_THETA_ERROR = child.doubleLogger(Level.TRACE, "THETA ERROR");
-        m_log_FINSIHED = child.booleanLogger(Level.TRACE, "FINSIHED");
+        super(log.m_log);
+        m_log = log;
         m_robotDrive = robotDrive;
         m_trajectory = trajectory;
         m_controller = controller;
         m_goal = m_trajectory.getLastPoint().state().state().getPose();
         m_viz = viz;
-        m_log_goal.log(() -> m_goal);
+        log.m_log_goal.log(() -> m_goal);
         addRequirements(m_robotDrive);
     }
 
@@ -74,11 +84,11 @@ public class TrajectoryCommand100 extends Command100 {
 
         m_robotDrive.setChassisSpeedsNormally(output, dt);
 
-        m_log_chassis_speeds.log(() -> output);
+        m_log.m_log_chassis_speeds.log(() -> output);
         double thetaErrorRad = m_goal.getRotation().getRadians()
                 - m_robotDrive.getState().pose().getRotation().getRadians();
-        m_log_THETA_ERROR.log(() -> thetaErrorRad);
-        m_log_FINSIHED.log(() -> false);
+        m_log.m_log_THETA_ERROR.log(() -> thetaErrorRad);
+        m_log.m_log_FINSIHED.log(() -> false);
     }
 
     @Override
@@ -88,7 +98,7 @@ public class TrajectoryCommand100 extends Command100 {
 
     @Override
     public void end100(boolean interrupted) {
-        m_log_FINSIHED.log(() -> true);
+        m_log.m_log_FINSIHED.log(() -> true);
         m_robotDrive.stop();
         m_viz.clear();
     }

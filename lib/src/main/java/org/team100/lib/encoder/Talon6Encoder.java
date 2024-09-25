@@ -21,6 +21,7 @@ public class Talon6Encoder implements IncrementalBareEncoder {
         m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
+    /** Nearly cached. */
     @Override
     public OptionalDouble getVelocityRad_S() {
         double motorVelocityRev_S = m_motor.getVelocityRev_S();
@@ -28,11 +29,18 @@ public class Talon6Encoder implements IncrementalBareEncoder {
         return OptionalDouble.of(velocityRad_S);
     }
 
+    /** Nearly cached. */
     @Override
     public OptionalDouble getPositionRad() {
         double motorPositionRev = m_motor.getPositionRev();
         double positionRad = motorPositionRev * 2 * Math.PI;
         return OptionalDouble.of(positionRad);
+    }
+
+    @Override
+    public double getPositionBlockingRad() {
+        double motorPositionRev = m_motor.getPositionBlockingRev();
+        return motorPositionRev * 2 * Math.PI;
     }
 
     @Override
@@ -45,6 +53,12 @@ public class Talon6Encoder implements IncrementalBareEncoder {
         m_motor.close();
     }
 
+    /**
+     * Set integrated sensor position in radians.
+     * 
+     * Note this takes **FOREVER**, like tens of milliseconds, so you can only do it
+     * at startup.
+     */
     @Override
     public void setEncoderPositionRad(double motorPositionRad) {
         m_motor.setEncoderPositionRad(motorPositionRad);

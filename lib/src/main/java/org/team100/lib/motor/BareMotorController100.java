@@ -33,7 +33,7 @@ public class BareMotorController100 implements BareMotor {
     }
 
     /**
-     * Velocity kV only, ignores accel and torque.
+     * Open-loop velocity control using velocity feedforward only.
      */
     @Override
     public void setVelocity(double motorRad_S, double accelRad_S2, double torqueNm) {

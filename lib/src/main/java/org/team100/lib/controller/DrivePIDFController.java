@@ -42,6 +42,7 @@ public class DrivePIDFController implements DriveMotionController {
     /** Use the factory. */
     DrivePIDFController(
             SupplierLogger2 parent,
+            DriveMotionControllerUtil util,
             boolean feedforwardOnly,
             double kPCart,
             double kPTheta) {
@@ -49,7 +50,8 @@ public class DrivePIDFController implements DriveMotionController {
         m_kPCart = kPCart;
         m_kPTheta = kPTheta;
         SupplierLogger2 child = parent.child(this);
-        m_util = new DriveMotionControllerUtil(child);
+        // m_util = new DriveMotionControllerUtil(child);
+        m_util = util;
         m_log_measurement = child.pose2dLogger(Level.TRACE, "measurement");
         m_log_setpoint = child.timedPoseLogger(Level.TRACE, "setpoint");
         m_log_is_mt = child.booleanLogger(Level.TRACE, "IS MT");

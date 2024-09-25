@@ -23,6 +23,7 @@ public class VelocityBareEncoder implements IncrementalBareEncoder {
         m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
+    /** Cached. */
     @Override
     public OptionalDouble getVelocityRad_S() {
         double m_rate = m_motor.getVelocityRad_S();
@@ -53,6 +54,11 @@ public class VelocityBareEncoder implements IncrementalBareEncoder {
     public void periodic() {
         m_log_position.log(this::getPositionRad);
         m_log_velocity.log(this::getVelocityRad_S);
+    }
+
+    @Override
+    public double getPositionBlockingRad() {
+        return getPositionRad().getAsDouble();
     }
 
 }

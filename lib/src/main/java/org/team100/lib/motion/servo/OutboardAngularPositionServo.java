@@ -16,7 +16,9 @@ import edu.wpi.first.math.MathUtil;
 
 /**
  * Passthrough to outboard closed-loop angular control, using a profile with
- * velocity feedforward, also extra torque (e.g. for gravity).
+ * velocity feedforward, also extra torque (e.g. for gravity).  There's no
+ * feedback at this level, and no feedforward calculation either, that's
+ * delegated to the mechanism.
  * 
  * Must be used with a combined encoder, to "zero" the motor encoder.
  * 

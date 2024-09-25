@@ -26,6 +26,9 @@ import edu.wpi.first.wpilibj.Timer;
  * newest value wins.
  */
 public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
+    /** if false, throw when a duplicate logger is created. */
+    private static final boolean ALLOW_DUPLICATES = true;
+
     record Metadata(int key, UdpType type, String label) {
         /** this is the only place we check the sizes. */
         public Metadata {
@@ -92,6 +95,11 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         int key = metadata.size() + 1;
         metadata.add(new Metadata(key, type, label));
         return key;
+    }
+
+    @Override
+    public int keyCount() {
+        return metadata.size();
     }
 
     /** Emits some labels and flushes all dirty values. */
@@ -346,58 +354,107 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     @Override
     public BooleanLogger booleanLogger(String label) {
-        return booleanIdx.computeIfAbsent(label, x -> {
-            Util.warn("duplicate label " + label);
-            return new UdpBooleanLogger(x);
-        });
+        if (booleanIdx.containsKey(label)) {
+            if (ALLOW_DUPLICATES) {
+                Util.warn("duplicate label " + label);
+                return booleanIdx.get(label);
+            } else {
+                throw new IllegalArgumentException("duplicate label " + label);
+            }
+        }
+        UdpBooleanLogger x = new UdpBooleanLogger(label);
+        booleanIdx.put(label, x);
+        return x;
     }
 
     @Override
     public DoubleLogger doubleLogger(String label) {
-        return doubleIdx.computeIfAbsent(label, x -> {
-            Util.warn("duplicate label " + label);
-            return new UdpDoubleLogger(x);
-        });
+        if (doubleIdx.containsKey(label)) {
+            if (ALLOW_DUPLICATES) {
+                Util.warn("duplicate label " + label);
+                return doubleIdx.get(label);
+            } else {
+                throw new IllegalArgumentException("duplicate label " + label);
+            }
+        }
+        UdpDoubleLogger x = new UdpDoubleLogger(label);
+        doubleIdx.put(label, x);
+        return x;
     }
 
     @Override
     public IntLogger intLogger(String label) {
-        return intIdx.computeIfAbsent(label, x -> {
-            Util.warn("duplicate label " + label);
-            return new UdpIntLogger(x);
-        });
+        if (intIdx.containsKey(label)) {
+            if (ALLOW_DUPLICATES) {
+                Util.warn("duplicate label " + label);
+                return intIdx.get(label);
+            } else {
+                throw new IllegalArgumentException("duplicate label " + label);
+            }
+        }
+        UdpIntLogger x = new UdpIntLogger(label);
+        intIdx.put(label, x);
+        return x;
     }
 
     @Override
     public DoubleArrayLogger doubleArrayLogger(String label) {
-        return doubleArrayIdx.computeIfAbsent(label, x -> {
-            Util.warn("duplicate label " + label);
-            return new UdpDoubleArrayLogger(x);
-        });
+        if (doubleArrayIdx.containsKey(label)) {
+            if (ALLOW_DUPLICATES) {
+                Util.warn("duplicate label " + label);
+                return doubleArrayIdx.get(label);
+            } else {
+                throw new IllegalArgumentException("duplicate label " + label);
+            }
+        }
+        UdpDoubleArrayLogger x = new UdpDoubleArrayLogger(label);
+        doubleArrayIdx.put(label, x);
+        return x;
     }
 
     @Override
     public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
-        return doubleObjArrayIdx.computeIfAbsent(label, x -> {
-            Util.warn("duplicate label " + label);
-            return new UdpDoubleObjArrayLogger(x);
-        });
+        if (doubleObjArrayIdx.containsKey(label)) {
+            if (ALLOW_DUPLICATES) {
+                Util.warn("duplicate label " + label);
+                return doubleObjArrayIdx.get(label);
+            } else {
+                throw new IllegalArgumentException("duplicate label " + label);
+            }
+        }
+        UdpDoubleObjArrayLogger x = new UdpDoubleObjArrayLogger(label);
+        doubleObjArrayIdx.put(label, x);
+        return x;
     }
 
     @Override
     public LongLogger longLogger(String label) {
-        return longIdx.computeIfAbsent(label, x -> {
-            Util.warn("duplicate label " + label);
-            return new UdpLongLogger(x);
-        });
+        if (longIdx.containsKey(label)) {
+            if (ALLOW_DUPLICATES) {
+                Util.warn("duplicate label " + label);
+                return longIdx.get(label);
+            } else {
+                throw new IllegalArgumentException("duplicate label " + label);
+            }
+        }
+        UdpLongLogger x = new UdpLongLogger(label);
+        longIdx.put(label, x);
+        return x;
     }
 
     @Override
     public StringLogger stringLogger(String label) {
-        return stringIdx.computeIfAbsent(label, x -> {
-            Util.warn("duplicate label " + label);
-            return new UdpStringLogger(x);
-        });
+        if (stringIdx.containsKey(label)) {
+            if (ALLOW_DUPLICATES) {
+                Util.warn("duplicate label " + label);
+                return stringIdx.get(label);
+            } else {
+                throw new IllegalArgumentException("duplicate label " + label);
+            }
+        }
+        UdpStringLogger x = new UdpStringLogger(label);
+        stringIdx.put(label, x);
+        return x;
     }
 
 }
