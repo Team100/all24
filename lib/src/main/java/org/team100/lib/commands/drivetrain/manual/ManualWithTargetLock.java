@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
@@ -39,7 +40,6 @@ import edu.wpi.first.math.geometry.Translation2d;
  */
 public class ManualWithTargetLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
-    private static final double kDtSec = 0.02;
     /**
      * Relative rotational speed. Use a moderate value to trade rotation for
      * translation
@@ -53,6 +53,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
     private final BooleanSupplier m_trigger;
+
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_apparent_motion;
     private final State100Logger m_log_theta_setpoint;
@@ -148,7 +149,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
-        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
 
         // this is user input scaled to m/s and rad/s
         FieldRelativeVelocity scaledInput = DriveUtil.scale(
@@ -189,7 +190,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         if (m_trigger.getAsBoolean()) {
             m_ball = currentTranslation;
             // correct for newtonian relativity
-            m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
+            m_ballV = new Translation2d(kBallVelocityM_S * TimedRobot100.LOOP_PERIOD_S, currentRotation)
                     .plus(FieldRelativeDelta.delta(m_prevPose, state.pose()).getTranslation());
         }
         if (m_ball != null) {

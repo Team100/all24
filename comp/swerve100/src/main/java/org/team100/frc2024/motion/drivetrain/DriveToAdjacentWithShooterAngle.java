@@ -107,7 +107,7 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  
 
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, 0.02);
+        m_swerve.setChassisSpeeds(output);
     }
 
     @Override

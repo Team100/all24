@@ -120,7 +120,7 @@ public class RobotContainer implements Glassy {
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(logger, async);
         final OperatorControl operatorControl = new OperatorControlProxy(async);
-        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         final SensorInterface m_sensors = switch (Identity.instance) {
             case COMP_BOT -> new CompSensors(logger, 2, 1, 4);
@@ -265,9 +265,8 @@ public class RobotContainer implements Glassy {
         // m_ampPivot, 1.8));
 
         // fast, then slow.
-        // TODO: tune these numbers
         whileTrue(operatorControl::pivotToAmpPosition,
-                new AmpFastThenSlow(logger, m_ampPivot, 1.7, 1.8));
+                new AmpFastThenSlow(m_ampPivot, 1.7, 1.8));
 
         whileTrue(operatorControl::feedToAmp,
                 new FeedToAmp(intake, m_shooter, m_ampFeeder, feeder));
@@ -294,7 +293,7 @@ public class RobotContainer implements Glassy {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         final PIDController omegaController = new PIDController(0.1, 0, 0); // .5
 
-        final DriveManually driveManually = new DriveManually(logger, driverControl::velocity, m_drive);
+        final DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
 
         driveManually.register("MODULE_STATE", false,
                 new SimpleManualModuleStates(logger, swerveKinodynamics));
@@ -430,7 +429,7 @@ public class RobotContainer implements Glassy {
         // m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
         // if far from the goal, go fast. if near, go slow.
         // TODO: tune these numbers
-        m_ampPivot.setDefaultCommand(new AmpFastThenSlow(logger, m_ampPivot, 0.1, 0));
+        m_ampPivot.setDefaultCommand(new AmpFastThenSlow(m_ampPivot, 0.1, 0));
 
         ////////////////////
         //
@@ -513,6 +512,5 @@ public class RobotContainer implements Glassy {
     public void close() {
         m_modules.close();
     }
-
 
 }

@@ -24,7 +24,7 @@ class RotateTest extends Fixtured implements Timeless {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
         SwerveDriveSubsystem swerveDriveSubsystem = fixture.drive;
         MockGyro gyro = new MockGyro();
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         // remember the test rotation rate is *very* slow.
         assertEquals(2.828, swerveKinodynamics.getMaxAngleSpeedRad_S(), 0.001);
         double targetAngle = Math.PI / 2;

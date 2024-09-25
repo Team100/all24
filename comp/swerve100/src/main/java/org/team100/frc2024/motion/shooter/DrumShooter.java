@@ -12,6 +12,7 @@ import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
@@ -88,8 +89,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         m_log_right_velocity = child.optionalDoubleLogger(Level.TRACE, "right velocity");
         m_log_pivot_angle = child.optionalDoubleLogger(Level.TRACE, "pivot angle (rad)");
 
-        double period = 0.02;
-        PIDController pivotController = new PIDController(4.5, 0.0, 0.000, period);
+        PIDController pivotController = new PIDController(4.5, 0.0, 0.000, TimedRobot100.LOOP_PERIOD_S);
         pivotController.setTolerance(0.02);
         pivotController.setIntegratorRange(0, 0.1);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
@@ -153,15 +153,10 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(pivotLogger, 0, 0.508753,
                         EncoderDrive.DIRECT);
 
-                // pivotServo = new GravityServo(
-                // pivotMech,
-                // pivotLogger,
-                // pivotController,
-                // period,
-                // encoder);
-
                 AngularPositionServo pivotAngleServo = new OnboardAngularPositionServo(
-                        pivotLogger, pivotMech, encoder,
+                        pivotLogger,
+                        pivotMech,
+                        encoder,
                         10, // TODO: remove this
                         pivotController);
                 pivotServo = new OutboardGravityServo(pivotAngleServo,
@@ -195,22 +190,15 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         pivotLogger,
                         simMech);
-
-                // pivotServo = new GravityServo(
-                // simMech,
-                // pivotLogger,
-                // pivotController,
-                // period,
-                // simEncoder);
-
                 AngularPositionServo simPivotAngleServo = new OnboardAngularPositionServo(
-                        pivotLogger, simMech, simEncoder,
+                        pivotLogger,
+                        simMech,
+                        simEncoder,
                         10, // TODO: remove this
                         pivotController);
                 pivotServo = new OutboardGravityServo(simPivotAngleServo,
                         5.0, // TODO: tune this
                         0.0);
-
                 pivotServo.setProfile(profile);
         }
     }

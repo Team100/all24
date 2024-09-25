@@ -37,7 +37,7 @@ public class RotateCommand extends Command {
         setpoint = Math100.getMinDistance(measurement, setpoint);
         double dtheta = m_controller.calculate(measurement, setpoint);
         FieldRelativeVelocity twist = new FieldRelativeVelocity(0, 0, dtheta);
-        m_drive.driveInFieldCoords(twist, 0.02);
+        m_drive.driveInFieldCoords(twist);
     }
 
     @Override

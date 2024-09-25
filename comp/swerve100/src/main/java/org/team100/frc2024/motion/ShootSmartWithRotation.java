@@ -59,9 +59,10 @@ public class ShootSmartWithRotation extends Command implements Glassy  {
         m_driver.reset(m_drive.getState().pose());
     }
 
+    @Override
     public void execute() {
         FieldRelativeVelocity twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
-        m_drive.driveInFieldCoords(twist, 0.02);
+        m_drive.driveInFieldCoords(twist);
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent()) {
             return;

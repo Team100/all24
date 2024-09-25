@@ -9,6 +9,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
@@ -127,7 +128,6 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
     @Override
     public void execute() {
-        double dt = 0.02;
         // intake the whole time
         m_intake.intakeSmart();
 
@@ -143,20 +143,20 @@ public class DriveWithProfileNote extends Command implements Glassy  {
         State100 xGoal = new State100(goal.getX(), 0, 0);
         State100 yGoal = new State100(goal.getY(), 0, 0);
 
-        m_xSetpoint = xProfile.calculate(dt, m_xSetpoint, xGoal);
-        m_ySetpoint = yProfile.calculate(dt, m_ySetpoint, yGoal);
+        m_xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_xSetpoint, xGoal);
+        m_ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_ySetpoint, yGoal);
         // make sure the setpoint uses the modulus close to the measurement.
         final double thetaMeasurement = m_swerve.getState().pose().getRotation().getRadians();
         m_thetaSetpoint = new State100(
                 Math100.getMinDistance(thetaMeasurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
-        m_thetaSetpoint = thetaProfile.calculate(dt, m_thetaSetpoint, thetaGoal);
+        m_thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, thetaGoal);
 
         SwerveState measurement = m_swerve.getState();
         SwerveState setpoint = new SwerveState(m_xSetpoint, m_ySetpoint, m_thetaSetpoint);
         FieldRelativeVelocity output = m_controller.calculate(measurement, setpoint);
 
-        m_swerve.driveInFieldCoords(output, dt);
+        m_swerve.driveInFieldCoords(output);
 
         m_log_target.log(() -> new double[] { goal.getX(), goal.getY(), 0 });
     }

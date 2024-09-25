@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
@@ -59,20 +60,18 @@ public class AsymSwerveSetpointGenerator implements Glassy {
      *                     measured/estimated kinematic state.
      * @param desiredState The desired state of motion, such as from the driver
      *                     sticks or a path following algorithm.
-     * @param kDtSec       time in the future the setpoint should apply.
      * @return A Setpoint object that satisfies all of the KinematicLimits while
      *         converging to desiredState quickly.
      */
     public SwerveSetpoint generateSetpoint(
             SwerveSetpoint prevSetpoint,
-            ChassisSpeeds desiredState,
-            double kDtSec) {
+            ChassisSpeeds desiredState) {
         SwerveModuleState100[] prevModuleStates = prevSetpoint.getModuleStates();
         // the desired module state speeds are always positive.
         SwerveModuleState100[] desiredModuleStates;
         if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
             desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
-                    desiredState, prevSetpoint.getChassisSpeeds(), prevModuleStates, kDtSec);
+                    desiredState, prevSetpoint.getChassisSpeeds(), prevModuleStates);
         } else {
             desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
                     desiredState);
@@ -98,7 +97,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 && !GeometryUtil.isZero(desiredState)) {
             // It will (likely) be faster to stop the robot, rotate the modules in place to
             // the complement of the desired angle, and accelerate again.
-            return generateSetpoint(prevSetpoint, new ChassisSpeeds(), kDtSec);
+            return generateSetpoint(prevSetpoint, new ChassisSpeeds());
         }
 
         // Compute the deltas between start and goal. We can then interpolate from the
@@ -114,7 +113,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         // 's' interpolates between start and goal. At 0, we are at prevState and at 1,
         // we are at desiredState.
 
-        double centripetal_min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy, kDtSec);
+        double centripetal_min_s = m_centripetalLimiter.enforceCentripetalLimit(dx, dy);
 
         double min_s = centripetal_min_s;
 
@@ -136,8 +135,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             double override_min_s = m_SteeringOverride.overrideIfStopped(
                     desiredModuleStates,
                     prevModuleStates,
-                    overrideSteering,
-                    kDtSec);
+                    overrideSteering);
             min_s = Math.min(min_s, override_min_s);
 
             double steering_min_s = m_steeringRateLimiter.enforceSteeringLimit(
@@ -148,8 +146,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                     desired_vy,
                     desired_heading,
                     desired_heading_velocity,
-                    overrideSteering,
-                    kDtSec);
+                    overrideSteering);
             min_s = Math.min(min_s, steering_min_s);
         }
 
@@ -157,8 +154,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 prev_vx,
                 prev_vy,
                 desired_vx,
-                desired_vy,
-                kDtSec);
+                desired_vy);
 
         min_s = Math.min(min_s, accel_min_s);
 
@@ -172,8 +168,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 dy,
                 dtheta,
                 min_s,
-                overrideSteering,
-                kDtSec);
+                overrideSteering);
     }
 
     ///////////////////////////////////////////////////////
@@ -273,15 +268,13 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             double dy,
             double dtheta,
             double min_s,
-            Rotation2d[] overrideSteering,
-            double kDtSec) {
+            Rotation2d[] overrideSteering) {
         ChassisSpeeds setpointSpeeds = makeSpeeds(
                 prevSetpoint.getChassisSpeeds(),
                 dx,
                 dy,
                 dtheta,
-                min_s,
-                kDtSec);
+                min_s);
         SwerveModuleState100[] setpointStates;
         // the speeds in these states are always positive.
         if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
@@ -289,13 +282,11 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                     setpointSpeeds,
                     prevSetpoint.getChassisSpeeds(),
                     prevModuleStates,
-                    setpointSpeeds.omegaRadiansPerSecond,
-                    kDtSec);
+                    setpointSpeeds.omegaRadiansPerSecond);
         } else {
             setpointStates = m_limits.toSwerveModuleStates(
                     setpointSpeeds,
-                    setpointSpeeds.omegaRadiansPerSecond,
-                    kDtSec);
+                    setpointSpeeds.omegaRadiansPerSecond);
         }
 
         applyOverrides(overrideSteering, setpointStates);
@@ -346,15 +337,14 @@ public class AsymSwerveSetpointGenerator implements Glassy {
      * min_s -- essentially modeling inertia. This part was missing before, which I
      * think must just be a mistake.
      */
-    private static ChassisSpeeds makeSpeeds(
+    private ChassisSpeeds makeSpeeds(
             ChassisSpeeds prev,
             double dx,
             double dy,
             double dtheta,
-            double min_s,
-            double kDtSec) {
+            double min_s) {
         double omega = prev.omegaRadiansPerSecond + min_s * dtheta;
-        double drift = -1.0 * omega * kDtSec;
+        double drift = -1.0 * omega * TimedRobot100.LOOP_PERIOD_S;
         double vx = prev.vxMetersPerSecond * Math.cos(drift)
                 - prev.vyMetersPerSecond * Math.sin(drift)
                 + min_s * dx;

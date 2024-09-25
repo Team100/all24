@@ -104,7 +104,7 @@ public class DriveToState101 extends Command implements Glassy  {
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, 0.02);
+        m_swerve.setChassisSpeeds(output);
     }
 
     @Override

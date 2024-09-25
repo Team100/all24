@@ -1,15 +1,13 @@
 package org.team100.lib.timing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.timing.TimingConstraint.MinMaxAcceleration;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,7 +16,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class SwerveDriveDynamicsConstraintTest {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     // the free speed of a module, which is also the free speed
     // of the robot going in a straight line without rotating.
@@ -26,7 +23,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testVelocity() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(l);
 
         // motionless
@@ -52,7 +49,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testAccel() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(l);
         // this is constant
         MinMaxAcceleration m = c.getMinMaxAcceleration(Pose2dWithMotion.kIdentity, 0);
@@ -62,7 +59,7 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testDesaturation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
         // this is for comparison to the above case.
 
@@ -72,7 +69,7 @@ class SwerveDriveDynamicsConstraintTest {
 
         // start with too-fast speed.
         ChassisSpeeds s = new ChassisSpeeds(1, 0, 10);
-        SwerveModuleState100[] ms = l.toSwerveModuleStates(s, 10, 0.02);
+        SwerveModuleState100[] ms = l.toSwerveModuleStates(s, 10);
         assertEquals(2.661, ms[0].speedMetersPerSecond, kDelta);
         assertEquals(4.061, ms[1].speedMetersPerSecond, kDelta);
         assertEquals(3.243, ms[2].speedMetersPerSecond, kDelta);
@@ -95,12 +92,12 @@ class SwerveDriveDynamicsConstraintTest {
 
     @Test
     void testDesaturation2() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
         // 0.62 m/s is pretty close to the maximum speed
         // possible at 5 rad/s; this is about 8 rad/m.
         ChassisSpeeds s = new ChassisSpeeds(0.62, 0, 5);
-        SwerveModuleState100[] ms = l.toSwerveModuleStates(s, 5, 0.02);
+        SwerveModuleState100[] ms = l.toSwerveModuleStates(s, 5);
         SwerveDriveKinematics100.desaturateWheelSpeeds(ms, maxV);
 
         ChassisSpeeds implied = l.toChassisSpeeds(ms);

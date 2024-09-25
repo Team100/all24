@@ -3,6 +3,7 @@ package org.team100.lib.motion.servo;
 import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.State100Logger;
@@ -20,7 +21,6 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
     private static final double kV = 0.1;
     private final LinearMechanism m_mechanism;
     private final PIDController m_controller;
-    private final double m_period;
     private final Profile100 m_profile;
     // LOGGERS
     private final State100Logger m_log_goal;
@@ -38,12 +38,10 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
             SupplierLogger2 parent,
             LinearMechanism mechanism,
             PIDController controller,
-            double period,
             Profile100 profile) {
         SupplierLogger2 child = parent.child(this);
         m_mechanism = mechanism;
         m_controller = controller;
-        m_period = period;
         m_profile = profile;
         m_log_goal = child.state100Logger(Level.TRACE, "goal (m)");
         m_log_measurement = child.doubleLogger(Level.TRACE, "measurement (m)");
@@ -72,7 +70,7 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
             return;
         double measurementM = positionM.getAsDouble();
         State100 goal = new State100(goalM, goalVelocityM_S);
-        m_setpoint = m_profile.calculate(m_period, m_setpoint, goal);
+        m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, goal);
         double u_FF = kV * m_setpoint.v();
         double u_FB = m_controller.calculate(measurementM, m_setpoint.x());
         double u_TOTAL = MathUtil.clamp(u_FF + u_FB, -1.0, 1.0);

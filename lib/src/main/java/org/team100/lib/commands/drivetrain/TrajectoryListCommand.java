@@ -8,6 +8,7 @@ import java.util.function.Function;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -33,7 +34,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * This just holds the starting rotation. If you want a holonomic trajectory
  * follower, try the {@link DriveMotionController} classes.
  */
-public class TrajectoryListCommand extends Command implements Glassy  {
+public class TrajectoryListCommand extends Command implements Glassy {
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;
@@ -73,7 +74,6 @@ public class TrajectoryListCommand extends Command implements Glassy  {
 
     @Override
     public void execute() {
-        double dt = 0.02;
         if (m_iter == null || m_iter.isDone()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
@@ -91,7 +91,7 @@ public class TrajectoryListCommand extends Command implements Glassy  {
         // now there is a trajectory to follow
 
         if (m_aligned) {
-            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(dt);
+            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(TimedRobot100.LOOP_PERIOD_S);
             if (optSamplePoint.isEmpty()) {
                 Util.warn("broken trajectory, cancelling!");
                 cancel(); // this should not happen
@@ -104,10 +104,10 @@ public class TrajectoryListCommand extends Command implements Glassy  {
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             m_log_reference.log(() -> reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-            m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
+            m_swerve.driveInFieldCoords(fieldRelativeTarget);
         } else {
             // look one loop ahead by *previewing* the next point
-            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(dt);
+            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(TimedRobot100.LOOP_PERIOD_S);
             if (optSamplePoint.isEmpty()) {
                 Util.warn("broken trajectory, cancelling!");
                 cancel(); // this should not happen
@@ -120,7 +120,7 @@ public class TrajectoryListCommand extends Command implements Glassy  {
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             m_log_reference.log(() -> reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
-            m_aligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
+            m_aligned = m_swerve.steerAtRest(fieldRelativeTarget);
         }
     }
 

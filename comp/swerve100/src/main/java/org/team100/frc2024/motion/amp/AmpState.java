@@ -8,8 +8,6 @@ import org.team100.lib.profile.Profile100;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-import org.team100.lib.logging.SupplierLogger2;
-
 /**
  * Set the amp pivot state, including current limit, position, and velocity.
  * 
@@ -27,7 +25,6 @@ public class AmpState extends Command implements Glassy  {
     private final boolean m_hold;
 
     public AmpState(
-            SupplierLogger2 parent,
             AmpPivot pivot,
             State100 goal,
             Profile100 profile,

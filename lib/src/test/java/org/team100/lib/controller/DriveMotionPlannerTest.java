@@ -33,7 +33,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveMotionPlannerTest {
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(logger);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test
     void testTrajectory() {
@@ -125,9 +125,9 @@ class DriveMotionPlannerTest {
                 ChassisSpeeds speeds = controller.update(time, pose, velocity);
                 if (true) {// setpoint == null) {
                     // Initialize from first chassis speeds.
-                    SwerveModuleState100[] states = kSmoothKinematicLimits.toSwerveModuleStates(speeds,
-                            velocity.omegaRadiansPerSecond,
-                            0.02);
+                    SwerveModuleState100[] states = kSmoothKinematicLimits.toSwerveModuleStates(
+                            speeds,
+                            velocity.omegaRadiansPerSecond);
                     setpoint = new SwerveSetpoint(speeds, states);
                 }
 

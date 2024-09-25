@@ -49,7 +49,6 @@ public class DriveToAmp extends SequentialCommandGroup {
         addCommands(
                 new ParallelDeadlineGroup(
                         new DriveWithProfile2(
-                                parent,
                                 () -> DriverStation.getAlliance().map(
                                         x -> switch (x) {
                                             case Red -> kRedNearAmp;
@@ -61,10 +60,9 @@ public class DriveToAmp extends SequentialCommandGroup {
                         new FeedToAmp(intake, shooter, ampFeeder, feeder)),
                 new ParallelCommandGroup(
                         // new AmpSet(parent, amp, kAmpUp),
-                        new AmpFastThenSlow(parent, amp, kAmpSwitchingPt, kAmpUp),
+                        new AmpFastThenSlow(amp, kAmpSwitchingPt, kAmpUp),
                         new SequentialCommandGroup(
                                 new DriveWithProfile2(
-                                        parent,
                                         () -> DriverStation.getAlliance().map(
                                                 x -> switch (x) {
                                                     case Red -> kRedCloseToAmp;

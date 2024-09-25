@@ -22,7 +22,7 @@ class FancyTrajectoryTest extends Fixtured {
 
     @Test
     void testSimple() {
-        SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
         SwerveDriveSubsystem drive = fixture.drive;
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
         DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);

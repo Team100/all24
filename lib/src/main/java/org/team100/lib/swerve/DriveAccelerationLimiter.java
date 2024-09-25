@@ -14,7 +14,7 @@ public class DriveAccelerationLimiter implements Glassy {
     private static final int kMaxIterations = 10;
 
     private final SwerveKinodynamics m_limits;
-    // LOGGER
+    // LOGGERS
     private final DoubleSupplierLogger2 m_log_max_step;
     private final DoubleSupplierLogger2 m_log_s;
 
@@ -29,8 +29,7 @@ public class DriveAccelerationLimiter implements Glassy {
             double[] prev_vx,
             double[] prev_vy,
             double[] desired_vx,
-            double[] desired_vy,
-            double kDtSec) {
+            double[] desired_vy) {
         double min_s = 1.0;
         for (int i = 0; i < prev_vx.length; ++i) {
             double max_vel_step = SwerveUtil.getMaxVelStep(
@@ -38,8 +37,7 @@ public class DriveAccelerationLimiter implements Glassy {
                     prev_vx[i],
                     prev_vy[i],
                     desired_vx[i],
-                    desired_vy[i],
-                    kDtSec);
+                    desired_vy[i]);
             m_log_max_step.log(() -> max_vel_step);
 
             // reduces the size of the search space if min_s is already constrained (by

@@ -5,22 +5,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class SwerveKinodynamicsTest {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testComputedValues() {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveV = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(logger,
+        SwerveKinodynamics k = new SwerveKinodynamics(
                 driveV, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
                 1);
         assertEquals(1, k.getMaxDriveVelocityM_S(), kDelta);
@@ -38,7 +35,7 @@ class SwerveKinodynamicsTest {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveV = 4;
-        SwerveKinodynamics k = new SwerveKinodynamics(logger,
+        SwerveKinodynamics k = new SwerveKinodynamics(
                 driveV, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
                 1);
         assertEquals(4, k.getMaxDriveVelocityM_S(), kDelta);
@@ -56,7 +53,7 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double driveV = 4;
-        SwerveKinodynamics k = new SwerveKinodynamics(logger,
+        SwerveKinodynamics k = new SwerveKinodynamics(
                 driveV, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase,
                 wheelbase / 2,
                 1);
@@ -75,7 +72,7 @@ class SwerveKinodynamicsTest {
         double track = 0.5;
         double wheelbase = 0.5;
         double driveA = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(logger,
+        SwerveKinodynamics k = new SwerveKinodynamics(
                 1, 1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
                 1);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
@@ -94,7 +91,7 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double driveA = 1;
-        SwerveKinodynamics k = new SwerveKinodynamics(logger,
+        SwerveKinodynamics k = new SwerveKinodynamics(
                 1, 1, driveA, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2,
                 1);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
@@ -114,7 +111,7 @@ class SwerveKinodynamicsTest {
         double track = 1;
         double wheelbase = 1;
         double vcg = 0.3;
-        SwerveKinodynamics k = new SwerveKinodynamics(logger,
+        SwerveKinodynamics k = new SwerveKinodynamics(
                 1, 1, 1, 1, 1, 20 * Math.PI, track, wheelbase, wheelbase / 2, vcg);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), kDelta);
 
@@ -129,7 +126,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testDesaturation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         double maxV = l.getMaxDriveVelocityM_S();
         double maxOmega = l.getMaxAngleSpeedRad_S();
         assertEquals(4, maxV, kDelta);
@@ -182,7 +179,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testDesaturation2() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         double maxV = l.getMaxDriveVelocityM_S();
         {
             // half speed in both -> no effect
@@ -237,7 +234,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testDesaturation3() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         double maxV = l.getMaxDriveVelocityM_S();
         {
             // full translation, half rotation preserves the ratio.
@@ -262,7 +259,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testAnalyticDesaturation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         double maxV = l.getMaxDriveVelocityM_S();
         double maxOmega = l.getMaxAngleSpeedRad_S();
         assertEquals(4, maxV, kDelta);
@@ -301,7 +298,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testAnalyticDesaturation2() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
         {
             ChassisSpeeds s = new ChassisSpeeds(2, 0, 5.656);
@@ -328,7 +325,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testAnalyticDesaturation3() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
         {
             ChassisSpeeds s = new ChassisSpeeds(2.828, 2.828, 5.656);
@@ -341,7 +338,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testAnalyticDesaturation4() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         {
             // verify the sign of the omega clamp
             assertEquals(11.314, l.getMaxAngleSpeedRad_S(), kDelta);
@@ -355,7 +352,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testAFewCases() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         double maxV = l.getMaxDriveVelocityM_S();
         double maxOmega = l.getMaxAngleSpeedRad_S();
         assertEquals(4, maxV, kDelta);
@@ -396,7 +393,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testEquivalentDesaturation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         double maxV = l.getMaxDriveVelocityM_S();
         double maxOmega = l.getMaxAngleSpeedRad_S();
         assertEquals(4, maxV, kDelta);
@@ -450,7 +447,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testEquivalentDesaturationTwist() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         double maxV = l.getMaxDriveVelocityM_S();
         double maxOmega = l.getMaxAngleSpeedRad_S();
         assertEquals(4, maxV, kDelta);
@@ -504,7 +501,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testPreferRotation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         assertEquals(11.313, l.getMaxAngleSpeedRad_S(), kDelta);
         {
             // trivial case works
@@ -518,7 +515,7 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testPreferRotation2() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         assertEquals(11.313, l.getMaxAngleSpeedRad_S(), kDelta);
         {
             // inside the envelope => no change
@@ -548,13 +545,13 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testDiscretizationNoEffect() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         // for this test the gyro rate and the commanded omega are the same,
         // though this is definitely not true in general
         {
             // pure rotation involves no discretization effect
             ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 1);
-            SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
+            SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1);
             ChassisSpeeds impliedSpeeds = l.toChassisSpeeds(states);
             assertEquals(0, impliedSpeeds.vxMetersPerSecond, kDelta);
             assertEquals(0, impliedSpeeds.vyMetersPerSecond, kDelta);
@@ -563,7 +560,7 @@ class SwerveKinodynamicsTest {
         {
             // pure translation involves no discretization effect
             ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 0);
-            SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 0, 0.02);
+            SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 0);
             ChassisSpeeds impliedSpeeds = l.toChassisSpeeds(states);
             assertEquals(1, impliedSpeeds.vxMetersPerSecond, kDelta);
             assertEquals(0, impliedSpeeds.vyMetersPerSecond, kDelta);
@@ -573,13 +570,13 @@ class SwerveKinodynamicsTest {
 
     @Test
     void testDiscretizationWithEffect() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         // for this test the gyro rate and the commanded omega are the same,
         // though this is definitely not true in general
         {
             // holonomic does have discretization effect
             ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 1);
-            SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
+            SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1);
             ChassisSpeeds impliedSpeeds = l.toChassisSpeeds(states);
             assertEquals(0.999, impliedSpeeds.vxMetersPerSecond, kDelta);
             assertEquals(-0.035, impliedSpeeds.vyMetersPerSecond, kDelta);
@@ -594,7 +591,7 @@ class SwerveKinodynamicsTest {
         {
             // more spinning => bigger effect
             ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 3);
-            SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 3, 0.02);
+            SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 3);
             ChassisSpeeds impliedSpeeds = l.toChassisSpeeds(states);
             assertEquals(0.994, impliedSpeeds.vxMetersPerSecond, kDelta);
             assertEquals(-0.105, impliedSpeeds.vyMetersPerSecond, kDelta);

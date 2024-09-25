@@ -30,14 +30,12 @@ public class TrajectoryCommand100 extends Command implements Glassy  {
      * Log exists so multiple commands can use the same keys.
      */
     public static class Log {
-        private final SupplierLogger2 m_log;
         private final Pose2dLogger m_log_goal;
         private final ChassisSpeedsLogger m_log_chassis_speeds;
         private final DoubleSupplierLogger2 m_log_THETA_ERROR;
         private final BooleanSupplierLogger2 m_log_FINSIHED;
 
         public Log(SupplierLogger2 log) {
-            m_log = log;
             m_log_goal = log.pose2dLogger(Level.TRACE, "goal");
             m_log_chassis_speeds = log.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
             m_log_THETA_ERROR = log.doubleLogger(Level.TRACE, "THETA ERROR");
@@ -82,7 +80,7 @@ public class TrajectoryCommand100 extends Command implements Glassy  {
         ChassisSpeeds currentRobotRelativeSpeed = m_robotDrive.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentRobotRelativeSpeed);
 
-        m_robotDrive.setChassisSpeedsNormally(output, 0.02);
+        m_robotDrive.setChassisSpeedsNormally(output);
 
         m_log.m_log_chassis_speeds.log(() -> output);
         double thetaErrorRad = m_goal.getRotation().getRadians()

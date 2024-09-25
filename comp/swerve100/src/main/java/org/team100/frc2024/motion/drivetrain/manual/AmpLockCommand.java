@@ -32,6 +32,6 @@ public class AmpLockCommand extends Command {
     @Override
     public void execute() {
         FieldRelativeVelocity twist = m_driver.apply(m_drive.getState(), m_twistSupplier.get());
-        m_drive.driveInFieldCoords(twist, 0.02);
+        m_drive.driveInFieldCoords(twist);
     }
 }

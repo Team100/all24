@@ -38,7 +38,7 @@ class DriveToWaypoint3Test extends Fixtured {
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
     private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
-    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     TrajectoryMaker tmaker = new TrajectoryMaker(constraints);
 

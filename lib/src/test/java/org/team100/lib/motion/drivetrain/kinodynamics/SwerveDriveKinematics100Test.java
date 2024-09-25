@@ -391,8 +391,8 @@ class SwerveDriveKinematics100Test {
         expected.setColumn(0, 0, 0, 0);
         SimpleMatrix output = kinematics.getModuleAccelerationXY(0, accelerations);
         Util.println(output.get(0, 0) + " " + output.get(1, 0));
-        assertEquals(expected.get(0, 0), 0, 0.0001);
-        assertEquals(expected.get(1, 0), 0, 0.0001);
+        assertEquals(0, output.get(0, 0), 0.0001);
+        assertEquals(0, output.get(1, 0), 0.0001);
     }
 
     @Test
@@ -417,7 +417,7 @@ class SwerveDriveKinematics100Test {
 
             SimpleMatrix a = new SimpleMatrix(3, 1);
             a.setColumn(0, 0, 0, 0, 0);
-            SwerveModuleState100[] output = kinematics.accelerationFromVector(v, a, prev, 0.02);
+            SwerveModuleState100[] output = kinematics.accelerationFromVector(v, a, prev);
 
             Util.println(output[0].toString());
 
@@ -434,7 +434,7 @@ class SwerveDriveKinematics100Test {
             SwerveModuleState100[] output4 = kinematics.statesFromVector(v);
             SimpleMatrix a = new SimpleMatrix(3, 1);
             a.setColumn(0, 0, 2, 2, 2);
-            SwerveModuleState100[] output3 = kinematics.accelerationFromVector(v, a, prev, 0.02);
+            SwerveModuleState100[] output3 = kinematics.accelerationFromVector(v, a, prev);
             for (int i = 0; i < output3.length; i++) {
                 assertEquals(output3[i].angle, output4[i].angle);
                 assertEquals(output3[i].speedMetersPerSecond, output4[i].speedMetersPerSecond);
@@ -450,7 +450,7 @@ class SwerveDriveKinematics100Test {
             SimpleMatrix a = new SimpleMatrix(3, 1);
             a.setColumn(0, 0, 1.32, 1.2, 2.2);
 
-            SwerveModuleState100[] output6 = kinematics.accelerationFromVector(v, a, prev, 0.02);
+            SwerveModuleState100[] output6 = kinematics.accelerationFromVector(v, a, prev);
 
             for (int i = 0; i < output5.length; i++) {
                 assertEquals(output5[i].angle, output6[i].angle);
@@ -465,7 +465,7 @@ class SwerveDriveKinematics100Test {
             SwerveModuleState100[] output7 = kinematics.statesFromVector(v);
             SimpleMatrix a = new SimpleMatrix(3, 1);
             a.setColumn(0, 0, 1, 1.1, 2);
-            SwerveModuleState100[] output8 = kinematics.accelerationFromVector(v, a, prev, 0.02);
+            SwerveModuleState100[] output8 = kinematics.accelerationFromVector(v, a, prev);
             for (int i = 0; i < output7.length; i++) {
                 assertEquals(output7[i].angle, output8[i].angle);
                 assertEquals(output7[i].speedMetersPerSecond, output8[i].speedMetersPerSecond);
@@ -497,15 +497,14 @@ class SwerveDriveKinematics100Test {
         SwerveModuleState100[] output = kinematics.accelerationFromVector(
                 velocities,
                 acceleration,
-                prevStates,
-                0.02);
+                prevStates);
 
         for (SwerveModuleState100 state : output) {
             // assertEquals(state.angle.get().getRadians(), 0, 0.0001);
             // since the module isn't yet moving it has an indeterminate angle.
             assertTrue(state.angle.isEmpty());
-            assertEquals(state.omega, 0, 0.0001);
-            assertEquals(state.speedMetersPerSecond, 0, 0.0001);
+            assertEquals(0, state.omega, 0.0001);
+            assertEquals(0, state.speedMetersPerSecond, 0.0001);
             // TODO: fix this test
             // assertEquals(state.accelMetersPerSecond_2, 1, 0.0001);
         }
@@ -532,14 +531,13 @@ class SwerveDriveKinematics100Test {
         velocities.setColumn(0, 0, 1, 0, 0);
         acceleration.setColumn(0, 0, 1, 0, 0);
 
-        output = kinematics.accelerationFromVector(velocities,
-                acceleration, prevStates, 0.02);
+        output = kinematics.accelerationFromVector(velocities, acceleration, prevStates);
 
         for (SwerveModuleState100 state : output) {
-            assertEquals(state.angle.get().getRadians(), 0, 0.0001);
-            assertEquals(state.omega, 0, 0.0001);
-            assertEquals(state.speedMetersPerSecond, 1, 0.0001);
-            assertEquals(state.accelMetersPerSecond_2, 1, 0.0001);
+            assertEquals(0, state.angle.get().getRadians(), 0.0001);
+            assertEquals(0, state.omega, 0.0001);
+            assertEquals(1, state.speedMetersPerSecond, 0.0001);
+            assertEquals(1, state.accelMetersPerSecond_2, 0.0001);
         }
 
     }
@@ -564,28 +562,28 @@ class SwerveDriveKinematics100Test {
         velocities.setColumn(0, 0, 1, 0, 0);
         acceleration.setColumn(0, 0, 0, 0, 1);
         output = kinematics.accelerationFromVector(velocities,
-                acceleration, prevStates, 0.02);
+                acceleration, prevStates);
 
         int count = 0;
         for (SwerveModuleState100 state : output) {
-            assertEquals(state.angle.get().getRadians(), 0, 0.0001);
-            assertEquals(state.speedMetersPerSecond, 1, 0.0001);
+            assertEquals(0, state.angle.get().getRadians(), 0.0001);
+            assertEquals(1, state.speedMetersPerSecond, 0.0001);
             switch (count) {
                 case 0:
-                    assertEquals(state.omega, 0.5, 0.0001);
-                    assertEquals(state.accelMetersPerSecond_2, -0.5, 0.0001);
+                    assertEquals(0.5, state.omega, 0.0001);
+                    assertEquals(-0.5, state.accelMetersPerSecond_2, 0.0001);
                     break;
                 case 1:
-                    assertEquals(state.omega, 0.5, 0.0001);
-                    assertEquals(state.accelMetersPerSecond_2, 0.5, 0.0001);
+                    assertEquals(0.5, state.omega, 0.0001);
+                    assertEquals(0.5, state.accelMetersPerSecond_2, 0.0001);
                     break;
                 case 2:
-                    assertEquals(state.omega, -0.5, 0.0001);
-                    assertEquals(state.accelMetersPerSecond_2, -0.5, 0.0001);
+                    assertEquals(-0.5, state.omega, 0.0001);
+                    assertEquals(-0.5, state.accelMetersPerSecond_2, 0.0001);
                     break;
                 case 3:
                     assertEquals(state.omega, -0.5, 0.0001);
-                    assertEquals(state.accelMetersPerSecond_2, 0.5, 0.0001);
+                    assertEquals(0.5, state.accelMetersPerSecond_2, 0.0001);
                     break;
                 default:
                     throw new UnsupportedOperationException("Not a swerve module");

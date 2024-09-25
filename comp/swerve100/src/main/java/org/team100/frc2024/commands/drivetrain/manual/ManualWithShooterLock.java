@@ -8,6 +8,7 @@ import org.team100.lib.commands.drivetrain.manual.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.hid.DriverControl;
@@ -53,7 +54,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  */
 public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
-    private static final double kDtSec = 0.02;
     /**
      * Relative rotational speed. Use a moderate value to trade rotation for
      * translation
@@ -123,7 +123,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
                 swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed / 4,
                 0.01);
-        m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
+        m_outputFilter = LinearFilter.singlePoleIIR(0.01, TimedRobot100.LOOP_PERIOD_S);
 
         isAligned = false;
         m_trigger = () -> false;
@@ -182,7 +182,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_log_apparent_motion.log(() -> targetMotion);
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
-        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
 
         // this is user input scaled to m/s and rad/s
         FieldRelativeVelocity scaledInput = DriveUtil.scale(
@@ -221,7 +221,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         if (m_trigger.getAsBoolean()) {
             m_ball = currentTranslation;
             // correct for newtonian relativity
-            m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
+            m_ballV = new Translation2d(kBallVelocityM_S * TimedRobot100.LOOP_PERIOD_S, currentRotation)
                     .plus(state.pose().minus(m_prevPose).getTranslation());
         }
         if (m_ball != null) {

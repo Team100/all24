@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.manual.FieldRelativeDriver;
 import org.team100.lib.controller.State100;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -40,7 +41,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * robot or target is moving. That effect can be compensated, though.
  */
 public class ManualWithAmpLock implements FieldRelativeDriver {
-    private static final double kDtSec = 0.02;
     /**
      * Relative rotational speed. Use a moderate value to trade rotation for
      * translation
@@ -52,6 +52,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
+
 
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_apparent_motion;
@@ -147,7 +148,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
-        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
 
         // this is user input scaled to m/s and rad/s
         FieldRelativeVelocity scaledInput = DriveUtil.scale(

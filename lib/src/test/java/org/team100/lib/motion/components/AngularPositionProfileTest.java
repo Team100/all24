@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
@@ -28,7 +29,6 @@ class AngularPositionProfileTest implements Timeless {
     private final MockBareMotor motor;
     private final RotaryMechanism mech;
     private final MockRotaryPositionSensor encoder;
-    private final double period;
     private final PIDController controller2;
 
     private AngularPositionServo servo;
@@ -41,8 +41,7 @@ class AngularPositionProfileTest implements Timeless {
                 new MockIncrementalBareEncoder(),
                 1);
         encoder = new MockRotaryPositionSensor();
-        period = 0.1;
-        controller2 = new PIDController(5, 0, 0, period);
+        controller2 = new PIDController(5, 0, 0, TimedRobot100.LOOP_PERIOD_S);
     }
 
     /**
@@ -103,9 +102,12 @@ class AngularPositionProfileTest implements Timeless {
     }
 
     private void verify(double motorVelocity, double setpointPosition, double setpointVelocity) {
-        encoder.angle += motor.velocity * period;
-        servo.setPosition(1, 0);
-        stepTime(0.02);
+        encoder.angle += motor.velocity * TimedRobot100.LOOP_PERIOD_S;
+        // spin for 100ms
+        for (int i = 0; i < 5; ++i) {
+            servo.setPosition(1, 0);
+        }
+        // stepTime(0.02);
         // useful to fix up the examples above
         if (dump)
             Util.printf("verify(%5.3f, %5.3f, %5.3f);\n", motor.velocity,

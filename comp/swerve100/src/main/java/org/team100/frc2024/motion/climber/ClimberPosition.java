@@ -28,13 +28,11 @@ public class ClimberPosition extends Command implements Glassy {
                 parent.child("LeftClimberPosition"),
                 m_climber.getLeft(),
                 new PIDController(0.1, 0, 0),
-                0.02,
                 new TrapezoidProfile100(0.02, 0.1, 0.01));
         m_rightServo = new OnboardLinearDutyCyclePositionServo(
                 parent.child("RightClimberPosition"),
                 m_climber.getRight(),
                 new PIDController(0.1, 0, 0),
-                0.02,
                 new TrapezoidProfile100(0.02, 0.1, 0.02));
         addRequirements(climber);
     }

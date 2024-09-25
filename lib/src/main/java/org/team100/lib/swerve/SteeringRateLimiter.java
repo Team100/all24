@@ -3,6 +3,7 @@ package org.team100.lib.swerve;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -21,6 +22,7 @@ public class SteeringRateLimiter implements Glassy {
     private static final int kMaxIterations = 10;
 
     private final SwerveKinodynamics m_limits;
+    // LOGGER
     private final DoubleSupplierLogger2 m_log_s;
 
     public SteeringRateLimiter(SupplierLogger2 parent, SwerveKinodynamics limits) {
@@ -37,8 +39,7 @@ public class SteeringRateLimiter implements Glassy {
             double[] desired_vy,
             Rotation2d[] desired_heading, // nullable entries
             double[] desired_heading_velocity,
-            Rotation2d[] overrideSteering,
-            double kDtSec) {
+            Rotation2d[] overrideSteering) {
 
         double min_s = 1.0;
 
@@ -60,8 +61,8 @@ public class SteeringRateLimiter implements Glassy {
                     desired_vx[i],
                     desired_vy[i],
                     desired_heading[i].getRadians(),
-                    desired_heading_velocity[i] * kDtSec,
-                    kDtSec * m_limits.getMaxSteeringVelocityRad_S(),
+                    desired_heading_velocity[i] * TimedRobot100.LOOP_PERIOD_S,
+                    TimedRobot100.LOOP_PERIOD_S * m_limits.getMaxSteeringVelocityRad_S(),
                     kMaxIterations);
             } else {
                 s = SwerveUtil.findSteeringMaxS(
@@ -71,7 +72,7 @@ public class SteeringRateLimiter implements Glassy {
                         desired_vx[i],
                         desired_vy[i],
                         desired_heading[i].getRadians(),
-                        kDtSec * m_limits.getMaxSteeringVelocityRad_S(),
+                        TimedRobot100.LOOP_PERIOD_S * m_limits.getMaxSteeringVelocityRad_S(),
                         kMaxIterations);
             }
             min_s = Math.min(min_s, s);

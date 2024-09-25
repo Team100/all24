@@ -6,6 +6,7 @@ import org.team100.lib.commands.drivetrain.HeadingLatch;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -33,7 +34,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  */
 public class ManualWithProfiledHeading implements FieldRelativeDriver {
-    private static final double kDtSec = 0.02;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
@@ -86,7 +86,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_latch = new HeadingLatch();
-        m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
+        m_outputFilter = LinearFilter.singlePoleIIR(0.01, TimedRobot100.LOOP_PERIOD_S);
         m_log_mode = child.stringLogger(Level.TRACE, "mode");
         m_log_max_speed = child.doubleLogger(Level.TRACE, "maxSpeedRad_S");
         m_log_max_accel = child.doubleLogger(Level.TRACE, "maxAccelRad_S2");
@@ -128,8 +128,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * 
      * Desaturation prefers the rotational profile completely in the snap case, and
      * normally in the non-snap case.
-     * 
-     * This uses a fixed dt = 0.02 for the profile.
      * 
      * @param state    current drivetrain state from the pose estimator
      * @param twist1_1 control units, [-1,1]
@@ -211,7 +209,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
                 maxAccelRad_S2,
                 0.01);
 
-        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goalState);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goalState);
 
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();

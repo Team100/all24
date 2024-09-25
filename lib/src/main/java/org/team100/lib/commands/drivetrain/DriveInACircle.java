@@ -6,6 +6,7 @@ import java.util.List;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -76,12 +77,10 @@ public class DriveInACircle extends Command implements Glassy {
         m_log_angle = child.doubleLogger(Level.TRACE, "angle");
         m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");
         m_log_target = child.fieldRelativeVelocityLogger(Level.TRACE, "target");
-
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
         m_controller = controller;
         m_viz = viz;
-
         addRequirements(m_swerve);
     }
 
@@ -98,14 +97,13 @@ public class DriveInACircle extends Command implements Glassy {
 
     @Override
     public void execute() {
-        double dt = 0.02;
         double accelRad_S_S = kAccel;
-        m_speedRad_S += accelRad_S_S * dt;
+        m_speedRad_S += accelRad_S_S * TimedRobot100.LOOP_PERIOD_S;
         if (m_speedRad_S > kMaxSpeed) {
             accelRad_S_S = 0;
             m_speedRad_S = kMaxSpeed;
         }
-        m_angleRad += m_speedRad_S * dt;
+        m_angleRad += m_speedRad_S * TimedRobot100.LOOP_PERIOD_S;
 
         SwerveState reference = getReference(
                 m_center,
@@ -117,7 +115,7 @@ public class DriveInACircle extends Command implements Glassy {
                 m_turnRatio);
 
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
-        m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
+        m_swerve.driveInFieldCoords(fieldRelativeTarget);
 
         m_log_center.log(() -> m_center);
         m_log_angle.log(() -> m_angleRad);

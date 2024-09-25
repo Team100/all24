@@ -89,27 +89,26 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
      * @param kDtSec        time in the future for the setpoint generator to
      *                      calculate
      */
-    public void setChassisSpeeds(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
+    public void setChassisSpeeds(ChassisSpeeds speeds, double gyroRateRad_S) {
         m_log_desired.log(() -> speeds);
         if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
-            setChassisSpeedsWithSetpointGenerator(speeds, kDtSec);
+            setChassisSpeedsWithSetpointGenerator(speeds);
         } else {
-            setChassisSpeedsNormally(speeds, gyroRateRad_S, kDtSec);
+            setChassisSpeedsNormally(speeds, gyroRateRad_S);
         }
     }
 
     public void setChassisSpeeds(ChassisSpeeds speeds) {
-        setChassisSpeedsNormally(speeds, 0, 0.02);
+        setChassisSpeedsNormally(speeds, 0);
     }
 
     /**
      * @return true if aligned
      */
-    public boolean steerAtRest(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
+    public boolean steerAtRest(ChassisSpeeds speeds, double gyroRateRad_S) {
         // this indicates that during the steering the goal is fixed
         // Informs SwerveDriveKinematics of the module states.
-        SwerveModuleState100[] swerveModuleStates = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
-                kDtSec);
+        SwerveModuleState100[] swerveModuleStates = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S);
         for (int i = 0; i < swerveModuleStates.length; i++) {
             if (swerveModuleStates[i] == null) {
                 swerveModuleStates[i] = prevSetpoint.getModuleStates()[i];
@@ -215,16 +214,14 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         prevSetpoint = setpoint;
     }
 
-    public void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S, double kDtSec) {
+    public void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S) {
         // Informs SwerveDriveKinematics of the module states.
         SwerveModuleState100[] states;
         if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
             states = m_swerveKinodynamics.toSwerveModuleStates(speeds, prevSetpoint.getChassisSpeeds(),
-                    prevSetpoint.getModuleStates(), gyroRateRad_S,
-                    kDtSec);
+                    prevSetpoint.getModuleStates(), gyroRateRad_S);
         } else {
-            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S,
-                    kDtSec);
+            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S);
         }
         setModuleStates(states);
         prevSetpoint = new SwerveSetpoint(speeds, states);
@@ -237,14 +234,11 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
 
     /////////////////////////////////////////////////////////
 
-    private void setChassisSpeedsWithSetpointGenerator(
-            ChassisSpeeds speeds,
-            double kDtSec) {
+    private void setChassisSpeedsWithSetpointGenerator(ChassisSpeeds speeds) {
         // Informs SwerveDriveKinematics of the module states.
         SwerveSetpoint setpoint = m_SwerveSetpointGenerator.generateSetpoint(
                 prevSetpoint,
-                speeds,
-                kDtSec);
+                speeds);
         // ideally delta would be zero because our input would be feasible.
         ChassisSpeeds delta = setpoint.getChassisSpeeds().minus(speeds);
         m_log_setpoint_delta.log(() -> delta);

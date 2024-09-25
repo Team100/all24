@@ -145,12 +145,15 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void testInit() {
-        CommandScheduler.getInstance().cancelAll();
-        CommandScheduler.getInstance().clearComposedCommands();
+        clearCommands();
     }
 
     @Override
     public void testExit() {
+        clearCommands();
+    }
+
+    private void clearCommands() {
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().clearComposedCommands();
     }

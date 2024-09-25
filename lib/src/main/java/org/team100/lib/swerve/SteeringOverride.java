@@ -3,6 +3,7 @@ package org.team100.lib.swerve;
 import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -20,6 +21,8 @@ public class SteeringOverride implements Glassy {
     private static final double kEpsilon = 1e-3;
 
     private final SwerveKinodynamics m_limits;
+
+    // LOGGERS
     private final DoubleSupplierLogger2 m_log_s;
 
     public SteeringOverride(SupplierLogger2 parent, SwerveKinodynamics limits) {
@@ -32,16 +35,14 @@ public class SteeringOverride implements Glassy {
      * @param desiredModuleStates
      * @param prevModuleStates
      * @param overrideSteering    outvar, nullable entries
-     * @param kDtSec
      */
     public double overrideIfStopped(
             SwerveModuleState100[] desiredModuleStates,
             SwerveModuleState100[] prevModuleStates,
-            Rotation2d[] overrideSteering,
-            double kDtSec) {
+            Rotation2d[] overrideSteering) {
         // in one cycle we can go this many radians. note this assumes infinite
         // acceleration; if the steering axes are slow to accelerate, maybe change this?
-        double maxThetaStepRad = kDtSec * m_limits.getMaxSteeringVelocityRad_S();
+        double maxThetaStepRad = TimedRobot100.LOOP_PERIOD_S * m_limits.getMaxSteeringVelocityRad_S();
         double min_s = 1.0;
         for (int i = 0; i < prevModuleStates.length; ++i) {
             if (Math.abs(prevModuleStates[i].speedMetersPerSecond) <= kEpsilon) {

@@ -41,11 +41,10 @@ public class Veering extends Command implements Glassy  {
 
     @Override
     public void execute() {
-        double dt = 0.02;
         double time = m_timer.get();
         double dx = m_square.applyAsDouble(time);
         FieldRelativeVelocity input = new FieldRelativeVelocity(dx, 0, kOmega);
-        m_swerve.driveInFieldCoords(input, dt);
+        m_swerve.driveInFieldCoords(input);
         m_log_input.log( () -> input);
     }
 

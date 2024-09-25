@@ -25,7 +25,7 @@ public class DriveSimple extends Command {
     @Override
     public void execute() {
         FieldRelativeVelocity twist = m_driver.apply(m_swerve.getState(), new DriverControl.Velocity(0, 0, 0));
-        m_swerve.driveInFieldCoords(twist, 0.02);
+        m_swerve.driveInFieldCoords(twist);
     }
 
     @Override

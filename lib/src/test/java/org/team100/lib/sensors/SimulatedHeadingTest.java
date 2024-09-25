@@ -20,7 +20,7 @@ class SimulatedHeadingTest implements Timeless {
 
     @Test
     void testInitial() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l);
         SimulatedGyro h = new SimulatedGyro(l, c);
         assertEquals(0, h.getYawNWU().getRadians(), kDelta);
@@ -29,7 +29,7 @@ class SimulatedHeadingTest implements Timeless {
 
     @Test
     void testTranslation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l);
         SwerveModulePosition100[] p = c.positions();
         assertEquals(0, p[0].distanceMeters, kDelta);
@@ -39,7 +39,7 @@ class SimulatedHeadingTest implements Timeless {
         SimulatedGyro h = new SimulatedGyro(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 0);
         // includes discretization
-        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 0, 0.02);
+        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 0);
         c.reset();
         // go for 0.4s
         for (int i = 0; i < 20; ++i) {
@@ -57,12 +57,12 @@ class SimulatedHeadingTest implements Timeless {
 
     @Test
     void testRotation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
         SwerveModuleCollection c = SwerveModuleCollection.get(logger, 10, 20, l);
         SimulatedGyro h = new SimulatedGyro(l, c);
         ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 1);
         // includes discretization
-        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
+        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1);
 
         c.reset();
         // steering velocity is 13 rad/s, we need to go about 2 rad? so wait 0.2 sec?
@@ -82,11 +82,11 @@ class SimulatedHeadingTest implements Timeless {
 
     @Test
     void testHolonomic() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.get();
 
         ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 1);
         // includes discretization
-        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1, 0.02);
+        SwerveModuleState100[] states = l.toSwerveModuleStates(speeds, 1);
         // these are discretized so not symmetrical
         assertEquals(0.779, states[0].speedMetersPerSecond, kDelta);
         assertEquals(1.268, states[1].speedMetersPerSecond, kDelta);

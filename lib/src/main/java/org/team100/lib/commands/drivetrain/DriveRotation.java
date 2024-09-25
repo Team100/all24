@@ -3,7 +3,6 @@ package org.team100.lib.commands.drivetrain;
 import java.util.function.Supplier;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
@@ -17,7 +16,6 @@ public class DriveRotation extends Command implements Glassy  {
     private final Supplier<Double> m_rotSpeed;
 
     public DriveRotation(
-            SupplierLogger2 parent,
             SwerveDriveSubsystem robotDrive,
             Supplier<Double> rot) {
         m_robotDrive = robotDrive;
@@ -33,7 +31,7 @@ public class DriveRotation extends Command implements Glassy  {
         }
 
         FieldRelativeVelocity fieldRelative = new FieldRelativeVelocity(0, 0, rot);
-        m_robotDrive.driveInFieldCoords(fieldRelative, 0.02);
+        m_robotDrive.driveInFieldCoords(fieldRelative);
     }
 
     @Override

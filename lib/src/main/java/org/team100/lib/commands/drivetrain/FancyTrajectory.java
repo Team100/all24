@@ -84,7 +84,7 @@ public class FancyTrajectory extends Command implements Glassy  {
         ChassisSpeeds currentSpeed = m_robotDrive.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         m_log_chassis_speeds.log(() -> output);
-        m_robotDrive.setChassisSpeeds(output, 0.02);
+        m_robotDrive.setChassisSpeeds(output);
     }
 
     @Override

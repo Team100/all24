@@ -19,8 +19,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Feedforward and feedback control of a single module.
  */
 public abstract class SwerveModule100 implements Glassy {
-    protected static final double dt = 0.02;
-
     private final LinearVelocityServo m_driveServo;
     private final AngularPositionServo m_turningServo;
 

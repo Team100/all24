@@ -106,7 +106,7 @@ public class DriveToWithAutoStart extends Command implements Glassy  {
 
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeedsNormally(output, 0.02);
+        m_swerve.setChassisSpeedsNormally(output);
     }
 
     @Override

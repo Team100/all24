@@ -30,7 +30,7 @@ class DrivePIDControllerTest {
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(logger);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test
     void testPIDControl() {

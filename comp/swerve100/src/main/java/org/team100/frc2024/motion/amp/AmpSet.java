@@ -1,20 +1,15 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-/**
- * Set the amp pivot angle goal.
- * 
- * This is a class because it resets the control and encoder on init.
- */
-public class AmpSet extends Command implements Glassy  {
+/** Set the amp pivot angle goal. */
+public class AmpSet extends Command implements Glassy {
     private final AmpPivot m_pivot;
     private final double m_goal;
 
-    public AmpSet(SupplierLogger2 parent, AmpPivot pivot, double goal) {
+    public AmpSet(AmpPivot pivot, double goal) {
         m_pivot = pivot;
         m_goal = goal;
         addRequirements(m_pivot);

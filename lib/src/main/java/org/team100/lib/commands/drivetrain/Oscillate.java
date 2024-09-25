@@ -76,7 +76,7 @@ public class Oscillate extends Command implements Glassy  {
         double speedM_S = m_triangle.applyAsDouble(time);
         double positionM = m_parabola.applyAsDouble(time);
 
-        m_swerve.setChassisSpeeds(new ChassisSpeeds(speedM_S, 0, 0), 0.02);
+        m_swerve.setChassisSpeeds(new ChassisSpeeds(speedM_S, 0, 0));
 
         m_log_period.log(() -> kPeriod);
         m_log_time.log(() -> time);

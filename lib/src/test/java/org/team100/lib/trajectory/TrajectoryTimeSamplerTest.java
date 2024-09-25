@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 
@@ -24,11 +22,10 @@ class TrajectoryTimeSamplerTest {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testSample() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));

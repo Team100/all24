@@ -2,6 +2,7 @@ package org.team100.lib.swerve;
 
 import java.util.function.DoubleBinaryOperator;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Math100;
@@ -163,9 +164,8 @@ public class SwerveUtil {
             double prev_vx,
             double prev_vy,
             double desired_vx,
-            double desired_vy,
-            double kDtSec) {
-        return kDtSec * getAccelLimit(
+            double desired_vy) {
+        return TimedRobot100.LOOP_PERIOD_S * getAccelLimit(
                 m_limits,
                 prev_vx,
                 prev_vy,

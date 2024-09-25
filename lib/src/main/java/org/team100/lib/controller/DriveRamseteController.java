@@ -2,6 +2,7 @@ package org.team100.lib.controller;
 
 import java.util.Optional;
 
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
@@ -34,7 +35,6 @@ public class DriveRamseteController implements DriveMotionController {
     private static final double kThetaKp = 5.0; // Units are rad/s per rad of error.
     private static final double kBeta = 2.0; // >0.
     private static final double kZeta = 0.7; // Damping coefficient, [0, 1].
-    private static final double kLooperDt = 0.02;
 
     // LOGGERS
     private final Pose2dLogger m_log_measurement;
@@ -146,13 +146,13 @@ public class DriveRamseteController implements DriveMotionController {
 
         // See where that takes us in one dt.
         Pose2d adjusted_course_to_goal = GeometryUtil.kPoseZero
-                .exp(GeometryUtil.scale(adjusted_course_relative_velocity, kLooperDt));
+                .exp(GeometryUtil.scale(adjusted_course_relative_velocity, TimedRobot100.LOOP_PERIOD_S));
 
         // Now rotate to be robot-relative.
         // robot_to_goal = robot_to_course * course_to_goal
         Translation2d adjusted_robot_to_goal = GeometryUtil
                 .transformBy(GeometryUtil.fromRotation(robot_to_course), adjusted_course_to_goal).getTranslation()
-                .times(1.0 / kLooperDt);
+                .times(1.0 / TimedRobot100.LOOP_PERIOD_S);
 
         return new ChassisSpeeds(
                 adjusted_robot_to_goal.getX(),

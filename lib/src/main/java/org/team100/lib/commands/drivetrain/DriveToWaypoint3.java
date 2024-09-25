@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
@@ -35,12 +36,13 @@ import edu.wpi.first.wpilibj2.command.Command;
  * If you want a holonomic trajectory follower, try the
  * {@link DriveMotionController} classes.
  */
-public class DriveToWaypoint3 extends Command implements Glassy  {
+public class DriveToWaypoint3 extends Command implements Glassy {
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final StraightLineTrajectory m_trajectories;
     private final HolonomicDriveController3 m_controller;
     private final TrajectoryVisualization m_viz;
+
     // LOGGERS
     private final Pose2dLogger m_log_desired;
     private final BooleanSupplierLogger2 m_log_aligned;
@@ -91,12 +93,11 @@ public class DriveToWaypoint3 extends Command implements Glassy  {
 
     @Override
     public void execute() {
-        double dt = 0.02;
         if (m_trajectory == null)
             return;
 
         if (m_steeringAligned) {
-            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(dt);
+            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(TimedRobot100.LOOP_PERIOD_S);
             if (optSamplePoint.isEmpty()) {
                 Util.warn("broken trajectory, cancelling!");
                 cancel(); // this should not happen
@@ -111,11 +112,11 @@ public class DriveToWaypoint3 extends Command implements Glassy  {
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
             // follow normally
-            m_swerve.driveInFieldCoords(fieldRelativeTarget, dt);
+            m_swerve.driveInFieldCoords(fieldRelativeTarget);
         } else {
             // not aligned yet, try aligning by *previewing* next point
 
-            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(dt);
+            Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(TimedRobot100.LOOP_PERIOD_S);
             if (optSamplePoint.isEmpty()) {
                 Util.warn("broken trajectory, cancelling!");
                 cancel(); // this should not happen
@@ -129,7 +130,7 @@ public class DriveToWaypoint3 extends Command implements Glassy  {
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
 
-            m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget, dt);
+            m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget);
         }
 
         m_log_aligned.log(() -> m_steeringAligned);

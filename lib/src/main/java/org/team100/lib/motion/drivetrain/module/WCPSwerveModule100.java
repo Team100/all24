@@ -9,6 +9,7 @@ import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
@@ -224,7 +225,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 20, // kP
                 0, // kI
                 0, // kD
-                dt);
+                TimedRobot100.LOOP_PERIOD_S);
         onboardPositionController.enableContinuousInput(-Math.PI, Math.PI);
         onboardPositionController.setTolerance(0.02, 0.02);
         AngularPositionServo servo = new OnboardAngularPositionServo(

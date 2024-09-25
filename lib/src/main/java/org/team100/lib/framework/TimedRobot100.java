@@ -80,8 +80,11 @@ public class TimedRobot100 extends IterativeRobotBase {
         }
     }
 
-    /** Default loop period. */
-    public static final double kDefaultPeriod = 0.02;
+    /**
+     * Fixed loop period.
+     * All uses of dt should refer to TimedRobot100.LOOP_PERIOD_S.
+     */
+    public static final double LOOP_PERIOD_S = 0.02;
 
     /** An exception to the no-member rule. */
     protected final SupplierLogger2 m_logger;
@@ -96,22 +99,12 @@ public class TimedRobot100 extends IterativeRobotBase {
 
     private final DoubleSupplierLogger2 m_log_slack;
 
-    /** Constructor for TimedRobot. */
     protected TimedRobot100() {
-        this(kDefaultPeriod);
-    }
-
-    /**
-     * Constructor for TimedRobot.
-     *
-     * @param period Period in seconds.
-     */
-    protected TimedRobot100(double period) {
-        super(period);
+        super(LOOP_PERIOD_S);
         m_logger = Telemetry.instance().rootLogger;
         m_log_slack = m_logger.doubleLogger(Level.COMP, "slack time (s)");
         m_startTime = Timer.getFPGATimestamp();
-        addPeriodic(this::loopFunc, period, "main loop");
+        addPeriodic(this::loopFunc, TimedRobot100.LOOP_PERIOD_S, "main loop");
         NotifierJNI.setNotifierName(m_notifier, "TimedRobot");
         HAL.report(tResourceType.kResourceType_Framework, tInstances.kFramework_Timed);
     }

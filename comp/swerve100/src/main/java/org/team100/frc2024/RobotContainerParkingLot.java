@@ -90,7 +90,7 @@ public class RobotContainerParkingLot implements Glassy {
         final Async async = asyncFactory.get();
         driverControl = new DriverControlProxy(driveLogger, async);
         operatorControl = new OperatorControlProxy(async);
-        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLogger);
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         m_modules = SwerveModuleCollection.get(
                 driveLogger,
@@ -130,7 +130,7 @@ public class RobotContainerParkingLot implements Glassy {
         // this should be a field.
         final DriveInALittleSquare m_driveInALittleSquare;
 
-        m_driveInALittleSquare = new DriveInALittleSquare(driveLogger, m_drive);
+        m_driveInALittleSquare = new DriveInALittleSquare(m_drive);
         whileTrue(driverControl::never, m_driveInALittleSquare);
 
         ///////////////////////
@@ -141,7 +141,7 @@ public class RobotContainerParkingLot implements Glassy {
         ///////////////////////
 
         whileTrue(driverControl::never, new DriveInACircle(driveLogger, m_drive, controller, -1, viz));
-        whileTrue(driverControl::never, new Spin(driveLogger, m_drive, controller));
+        whileTrue(driverControl::never, new Spin(m_drive, controller));
         whileTrue(driverControl::never, new Oscillate(driveLogger, m_drive));
 
         ////////////////////////
@@ -259,6 +259,5 @@ public class RobotContainerParkingLot implements Glassy {
     private void whileTrue(BooleanSupplier condition, Command command) {
         new Trigger(condition).whileTrue(command);
     }
-
 
 }
