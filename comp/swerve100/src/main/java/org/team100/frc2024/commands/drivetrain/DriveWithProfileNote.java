@@ -10,9 +10,9 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -36,7 +36,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * TODO: force the theta axis to finish first, so that the approach is correct.
  */
 public class DriveWithProfileNote extends Command implements Glassy  {
-    private final SupplierLogger2 m_fieldLogger;
+    private final FieldLogger.Log m_field_log;
     private final Intake m_intake;
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
@@ -48,7 +48,6 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
     // LOGGERS
     private final BooleanSupplierLogger2 m_log_note_detected;
-    private final DoubleArraySupplierLogger2 m_log_target;
 
     private Translation2d m_previousGoal;
     private State100 m_xSetpoint;
@@ -57,17 +56,16 @@ public class DriveWithProfileNote extends Command implements Glassy  {
     private int m_count;
 
     public DriveWithProfileNote(
-            SupplierLogger2 fieldLogger,
+            FieldLogger.Log fieldLogger,
             SupplierLogger2 parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
-        m_fieldLogger = fieldLogger;
+        m_field_log = fieldLogger;
         SupplierLogger2 child = parent.child(this);
         m_log_note_detected = child.booleanLogger(Level.TRACE, "Note detected");
-        m_log_target = m_fieldLogger.doubleArrayLogger(Level.TRACE, "target");
 
         m_intake = intake;
         m_fieldRelativeGoal = fieldRelativeGoal;
@@ -158,7 +156,7 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
         m_swerve.driveInFieldCoords(output);
 
-        m_log_target.log(() -> new double[] { goal.getX(), goal.getY(), 0 });
+        m_field_log.m_log_target.log(() -> new double[] { goal.getX(), goal.getY(), 0 });
     }
 
     private static State100 getThetaGoalState(Pose2d pose, Translation2d goal) {

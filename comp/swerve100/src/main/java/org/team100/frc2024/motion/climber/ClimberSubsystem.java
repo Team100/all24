@@ -9,13 +9,17 @@ import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.LimitedLinearMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
+import org.team100.lib.motion.servo.LinearPositionServo;
+import org.team100.lib.motion.servo.OnboardLinearDutyCyclePositionServo;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -82,11 +86,14 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private final LimitedLinearMechanism m_left;
     private final LimitedLinearMechanism m_right;
 
+    private final LinearPositionServo m_leftServo;
+    private final LinearPositionServo m_rightServo;
+
     // LOGGERS
-    OptionalDoubleLogger m_log_left_position;
-    OptionalDoubleLogger m_log_right_position;
-    OptionalDoubleLogger m_log_left_velocity;
-    OptionalDoubleLogger m_log_right_velocity;
+    private final OptionalDoubleLogger m_log_left_position;
+    private final OptionalDoubleLogger m_log_right_position;
+    private final OptionalDoubleLogger m_log_left_velocity;
+    private final OptionalDoubleLogger m_log_right_velocity;
 
     public ClimberSubsystem(SupplierLogger2 parent, int leftClimberID, int rightClimberID) {
         SupplierLogger2 child = parent.child(this);
@@ -95,9 +102,9 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         m_log_left_velocity = child.optionalDoubleLogger(Level.TRACE, "left velocity (m_s)");
         m_log_right_velocity = child.optionalDoubleLogger(Level.TRACE, "right velocity (m_s)");
 
-        Util.warn("\n**** Uncalibrated climber current limit!!!  FIX THIS FOR COMP! ****\n");
-        Util.warn("\n**** Uncalibrated climber polarity!!!  FIX THIS FOR COMP! ****\n");
-        Util.warn("\n**** Uncalibrated climber PID!!!  FIX THIS FOR COMP! ****\n");
+        Util.warn("**** Uncalibrated climber current limit!!!  FIX THIS FOR COMP! ****");
+        Util.warn("**** Uncalibrated climber polarity!!!  FIX THIS FOR COMP! ****");
+        Util.warn("**** Uncalibrated climber PID!!!  FIX THIS FOR COMP! ****");
         SupplierLogger2 leftLogger = child.child("left");
         SupplierLogger2 rightLogger = child.child("right");
         switch (Identity.instance) {
@@ -110,14 +117,24 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
                 m_right = simulated(rightLogger);
             }
         }
+        m_leftServo = new OnboardLinearDutyCyclePositionServo(
+                child.child("left"),
+                m_left,
+                new PIDController(0.1, 0, 0),
+                new TrapezoidProfile100(0.02, 0.1, 0.01));
+        m_rightServo = new OnboardLinearDutyCyclePositionServo(
+                child.child("right"),
+                m_right,
+                new PIDController(0.1, 0, 0),
+                new TrapezoidProfile100(0.02, 0.1, 0.02));
     }
 
-    public Command upPosition(SupplierLogger2 logger) {
-        return new ClimberPosition(logger, kUpPositionM, this);
+    public Command upPosition() {
+        return new ClimberPosition(kUpPositionM, this);
     }
 
-    public Command downPosition(SupplierLogger2 logger) {
-        return new ClimberPosition(logger, kDownPositionM, this);
+    public Command downPosition() {
+        return new ClimberPosition(kDownPositionM, this);
     }
 
     private static LimitedLinearMechanism comp(SupplierLogger2 logger, int id, MotorPhase phase) {
@@ -173,6 +190,21 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     public LimitedLinearMechanism getRight() {
         return m_right;
+    }
+
+    public void setPosition(double goalM) {
+        m_leftServo.setPosition(goalM, 0);
+        m_rightServo.setPosition(goalM, 0);
+    }
+
+    public void stop() {
+        m_leftServo.stop();
+        m_rightServo.stop();
+    }
+
+    public void resetServos() {
+        m_leftServo.reset();
+        m_rightServo.reset();
     }
 
     @Override

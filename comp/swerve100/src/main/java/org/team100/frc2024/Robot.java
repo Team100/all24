@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import org.team100.frc2024.config.AutonChooser;
 import org.team100.lib.config.Identity;
-import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
@@ -25,31 +25,33 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-public class Robot extends TimedRobot100 implements Glassy {
+public class Robot extends TimedRobot100 {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
-    private final DoubleSupplierLogger2 m_log_DriverStation_MatchTime;
-    private final BooleanSupplierLogger2 m_log_DriverStation_AutonomousEnabled;
-    private final BooleanSupplierLogger2 m_log_DriverStation_TeleopEnabled;
-    private final BooleanSupplierLogger2 m_log_DriverStation_FMSAttached;
+    private final DoubleSupplierLogger2 m_log_ds_MatchTime;
+    private final BooleanSupplierLogger2 m_log_ds_AutonomousEnabled;
+    private final BooleanSupplierLogger2 m_log_ds_TeleopEnabled;
+    private final BooleanSupplierLogger2 m_log_ds_FMSAttached;
     private final StringSupplierLogger2 m_log_mode;
     private final IntSupplierLogger2 m_log_key_list_size;
     private final StringSupplierLogger2 m_log_active_auton_routine;
     private final DoubleSupplierLogger2 m_log_voltage;
+    private final JvmLogger m_jvmLogger;
 
     private RobotContainer m_robotContainer;
-    private JvmLogger m_jvmLogger;
 
     public Robot() {
-        m_log_DriverStation_MatchTime = m_logger.doubleLogger(Level.TRACE, "DriverStation MatchTime");
-        m_log_DriverStation_AutonomousEnabled = m_logger.booleanLogger(Level.TRACE, "DriverStation AutonomousEnabled");
-        m_log_DriverStation_TeleopEnabled = m_logger.booleanLogger(Level.TRACE, "DriverStation TeleopEnabled");
-        m_log_DriverStation_FMSAttached = m_logger.booleanLogger(Level.TRACE, "DriverStation FMSAttached");
-        m_log_mode = m_logger.stringLogger(Level.TRACE, "mode");
-        m_log_key_list_size = m_logger.intLogger(Level.TRACE, "key list size");
-        m_log_active_auton_routine = m_logger.stringLogger(Level.COMP, "active auton routine");
-        m_log_voltage = m_logger.doubleLogger(Level.TRACE, "voltage");
+        SupplierLogger2 dsLog = m_robotLogger.child("DriverStation");
+        m_log_ds_MatchTime = dsLog.doubleLogger(Level.TRACE, "MatchTime");
+        m_log_ds_AutonomousEnabled = dsLog.booleanLogger(Level.TRACE, "AutonomousEnabled");
+        m_log_ds_TeleopEnabled = dsLog.booleanLogger(Level.TRACE, "TeleopEnabled");
+        m_log_ds_FMSAttached = dsLog.booleanLogger(Level.TRACE, "FMSAttached");
+        m_log_mode = m_robotLogger.stringLogger(Level.TRACE, "mode");
+        m_log_key_list_size = m_robotLogger.intLogger(Level.TRACE, "key list size");
+        m_log_active_auton_routine = m_robotLogger.stringLogger(Level.COMP, "active auton routine");
+        m_log_voltage = m_robotLogger.doubleLogger(Level.TRACE, "voltage");
+        m_jvmLogger = new JvmLogger(m_robotLogger);
     }
 
     @Override
@@ -60,7 +62,6 @@ public class Robot extends TimedRobot100 implements Glassy {
         RobotController.setBrownoutVoltage(5.5);
         banner();
 
-        m_jvmLogger = new JvmLogger(m_logger);
 
         // By default, LiveWindow turns off the CommandScheduler in test mode,
         // but we don't want that.
@@ -101,10 +102,10 @@ public class Robot extends TimedRobot100 implements Glassy {
         CommandScheduler.getInstance().run();
         m_robotContainer.periodic();
 
-        m_log_DriverStation_MatchTime.log(DriverStation::getMatchTime);
-        m_log_DriverStation_AutonomousEnabled.log(DriverStation::isAutonomousEnabled);
-        m_log_DriverStation_TeleopEnabled.log(DriverStation::isTeleopEnabled);
-        m_log_DriverStation_FMSAttached.log(DriverStation::isFMSAttached);
+        m_log_ds_MatchTime.log(DriverStation::getMatchTime);
+        m_log_ds_AutonomousEnabled.log(DriverStation::isAutonomousEnabled);
+        m_log_ds_TeleopEnabled.log(DriverStation::isTeleopEnabled);
+        m_log_ds_FMSAttached.log(DriverStation::isFMSAttached);
 
         m_jvmLogger.logGarbageCollectors();
         m_jvmLogger.logMemoryPools();
@@ -171,7 +172,7 @@ public class Robot extends TimedRobot100 implements Glassy {
 
     @Override
     public void simulationPeriodic() {
-        m_log_mode.log(() -> "simulation");
+        //
     }
 
     @Override

@@ -54,9 +54,9 @@ class DriveToWaypoint3Test extends Fixtured {
         };
 
         HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
-
+        DriveToWaypoint3.Log log = new DriveToWaypoint3.Log(logger);
         DriveToWaypoint3 command = new DriveToWaypoint3(
-                logger,
+                log,
                 goal,
                 drivetrain,
                 trajectories,
@@ -87,9 +87,9 @@ class DriveToWaypoint3Test extends Fixtured {
         assertEquals(-1.047, goal.getRotation().getRadians(), kDelta);
 
         HolonomicDriveController3 m_controller = new HolonomicDriveController3(logger);
-
+        DriveToWaypoint3.Log log = new DriveToWaypoint3.Log(logger);
         DriveToWaypoint3 command = new DriveToWaypoint3(
-                logger, goal, drivetrain, maker, m_controller, viz);
+                log, goal, drivetrain, maker, m_controller, viz);
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         command.execute();

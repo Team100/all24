@@ -35,7 +35,8 @@ public class TrajectoryCommand100 extends Command implements Glassy  {
         private final DoubleSupplierLogger2 m_log_THETA_ERROR;
         private final BooleanSupplierLogger2 m_log_FINSIHED;
 
-        public Log(SupplierLogger2 log) {
+        public Log(SupplierLogger2 parent) {
+            SupplierLogger2 log = parent.child("TrajectoryCommand100");
             m_log_goal = log.pose2dLogger(Level.TRACE, "goal");
             m_log_chassis_speeds = log.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
             m_log_THETA_ERROR = log.doubleLogger(Level.TRACE, "THETA ERROR");

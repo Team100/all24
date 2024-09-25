@@ -37,16 +37,28 @@ import edu.wpi.first.wpilibj2.command.Command;
  * {@link DriveMotionController} classes.
  */
 public class DriveToWaypoint3 extends Command implements Glassy {
+    /**
+     * DriveToWaypoint often appears in sequences, the members of which would want
+     * to log into the same key space.
+     */
+    public static class Log {
+        private final Pose2dLogger desired;
+        private final BooleanSupplierLogger2 aligned;
+        private final Pose2dLogger pose;
+        public Log(SupplierLogger2 parent) {
+            SupplierLogger2 log = parent.child("DriveToWaypoint3");
+            desired = log.pose2dLogger(Level.TRACE, "Desired");
+            aligned = log.booleanLogger(Level.TRACE, "Aligned");
+            pose = log.pose2dLogger(Level.TRACE, "Pose");
+        }
+    }
+
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final StraightLineTrajectory m_trajectories;
     private final HolonomicDriveController3 m_controller;
     private final TrajectoryVisualization m_viz;
-
-    // LOGGERS
-    private final Pose2dLogger m_log_desired;
-    private final BooleanSupplierLogger2 m_log_aligned;
-    private final Pose2dLogger m_log_pose;
+    private final Log m_log;
 
     private Trajectory100 m_trajectory;
     private TrajectoryTimeIterator m_iter;
@@ -63,22 +75,20 @@ public class DriveToWaypoint3 extends Command implements Glassy {
      *                     trajectory between them.
      */
     public DriveToWaypoint3(
-            SupplierLogger2 parent,
+            Log log,
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             StraightLineTrajectory trajectories,
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {
-        SupplierLogger2 child = parent.child(this);
+        m_log = log;
         m_goal = goal;
         m_swerve = drivetrain;
         m_trajectories = trajectories;
         m_controller = controller;
         m_viz = viz;
         addRequirements(m_swerve);
-        m_log_desired = child.pose2dLogger(Level.TRACE, "Desired");
-        m_log_aligned = child.booleanLogger(Level.TRACE, "Aligned");
-        m_log_pose = child.pose2dLogger(Level.TRACE, "Pose");
+
     }
 
     @Override
@@ -106,7 +116,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            m_log_desired.log(() -> desiredState.state().getPose());
+            m_log.desired.log(() -> desiredState.state().getPose());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -125,7 +135,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            m_log_desired.log(() -> desiredState.state().getPose());
+            m_log.desired.log(() -> desiredState.state().getPose());
             Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
@@ -133,9 +143,9 @@ public class DriveToWaypoint3 extends Command implements Glassy {
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget);
         }
 
-        m_log_aligned.log(() -> m_steeringAligned);
+        m_log.aligned.log(() -> m_steeringAligned);
 
-        m_log_pose.log(() -> m_swerve.getState().pose());
+        m_log.pose.log(() -> m_swerve.getState().pose());
     }
 
     @Override

@@ -33,7 +33,8 @@ public class DrivePIDFController implements DriveMotionController {
         private final BooleanSupplierLogger2 m_log_is_mt;
         private final TrajectorySamplePointLogger m_log_sample;
 
-        public Log(SupplierLogger2 log) {
+        public Log(SupplierLogger2 parent) {
+            SupplierLogger2 log = parent.child("DrivePIDFController");
             m_log_measurement = log.pose2dLogger(Level.TRACE, "measurement");
             m_log_setpoint = log.timedPoseLogger(Level.TRACE, "setpoint");
             m_log_is_mt = log.booleanLogger(Level.TRACE, "IS MT");
@@ -128,7 +129,6 @@ public class DrivePIDFController implements DriveMotionController {
         Optional<TrajectorySamplePoint> sample_point = m_iter.advance(mDt);
         if (!sample_point.isPresent()) {
             m_log.m_log_is_mt.log(() -> true);
-
             return Optional.empty();
         }
         m_log.m_log_sample.log(sample_point::get);
