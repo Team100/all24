@@ -6,8 +6,9 @@ import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.util.Memo;
+import org.team100.lib.util.Util;
 
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -22,7 +23,9 @@ public abstract class Talon6Motor implements BareMotor {
     private final TalonFX m_motor;
     private final Feedforward100 m_ff;
 
-    // caching these status signals saves a lookup
+    // CACHES
+    // Two levels of caching here: the cotemporal cache caches the value
+    // and also the supplier
     protected final DoubleSupplier m_position;
     protected final DoubleSupplier m_velocity;
     protected final DoubleSupplier m_dutyCycle;
@@ -48,7 +51,7 @@ public abstract class Talon6Motor implements BareMotor {
     private final DoubleSupplierLogger2 m_log_velocity_FF;
     private final DoubleSupplierLogger2 m_log_accel_FF;
     private final DoubleSupplierLogger2 m_log_torque_FF;
-    private final IntSupplierLogger2 m_log_device_id;
+    private final DoubleSupplierLogger2 m_log_position;
     private final DoubleSupplierLogger2 m_log_velocity;
     private final DoubleSupplierLogger2 m_log_output;
     private final DoubleSupplierLogger2 m_log_error;
@@ -80,14 +83,16 @@ public abstract class Talon6Motor implements BareMotor {
         Phoenix100.crash(() -> m_motor.getVelocity().setUpdateFrequency(50));
         Phoenix100.crash(() -> m_motor.getTorqueCurrent().setUpdateFrequency(50));
 
-        m_position = () -> m_motor.getPosition().refresh().getValueAsDouble();
-        m_velocity = () -> m_motor.getVelocity().refresh().getValueAsDouble();
-        m_dutyCycle = () -> m_motor.getDutyCycle().refresh().getValueAsDouble();
-        m_error = () -> m_motor.getClosedLoopError().refresh().getValueAsDouble();
-        m_supply = () -> m_motor.getSupplyCurrent().refresh().getValueAsDouble();
-        m_stator = () -> m_motor.getStatorCurrent().refresh().getValueAsDouble();
-        m_temp = () -> m_motor.getDeviceTemp().refresh().getValueAsDouble();
-        m_torque = () -> m_motor.getTorqueCurrent().refresh().getValueAsDouble();
+        // each memo refresh calls the motor refresh method
+        m_position = Memo.ofDouble(() -> m_motor.getPosition().refresh().getValueAsDouble());
+        m_velocity = Memo.ofDouble(() -> m_motor.getVelocity().refresh().getValueAsDouble());
+        m_dutyCycle = Memo.ofDouble(() -> m_motor.getDutyCycle().refresh().getValueAsDouble());
+        m_error = Memo.ofDouble(() -> m_motor.getClosedLoopError().refresh().getValueAsDouble());
+        m_supply = Memo.ofDouble(() -> m_motor.getSupplyCurrent().refresh().getValueAsDouble());
+        m_stator = Memo.ofDouble(() -> m_motor.getStatorCurrent().refresh().getValueAsDouble());
+        m_temp = Memo.ofDouble(() -> m_motor.getDeviceTemp().refresh().getValueAsDouble());
+        m_torque = Memo.ofDouble(() -> m_motor.getTorqueCurrent().refresh().getValueAsDouble());
+
         m_log_desired_duty = child.doubleLogger(Level.TRACE, "desired duty cycle [-1,1]");
         m_log_desired_position = child.doubleLogger(Level.TRACE, "desired position (rev)");
         m_log_desired_speed = child.doubleLogger(Level.TRACE, "desired speed (rev_s)");
@@ -96,7 +101,8 @@ public abstract class Talon6Motor implements BareMotor {
         m_log_velocity_FF = child.doubleLogger(Level.TRACE, "velocity feedforward (v)");
         m_log_accel_FF = child.doubleLogger(Level.TRACE, "accel feedforward (v)");
         m_log_torque_FF = child.doubleLogger(Level.TRACE, "torque feedforward (v)");
-        m_log_device_id = child.intLogger(Level.TRACE, "Device ID");
+
+        m_log_position = child.doubleLogger(Level.TRACE, "position (rev)");
         m_log_velocity = child.doubleLogger(Level.TRACE, "velocity (rev_s)");
         m_log_output = child.doubleLogger(Level.TRACE, "output [-1,1]");
         m_log_error = child.doubleLogger(Level.TRACE, "error (rev_s)");
@@ -104,6 +110,8 @@ public abstract class Talon6Motor implements BareMotor {
         m_log_stator = child.doubleLogger(Level.TRACE, "stator current (A)");
         m_log_torque = child.doubleLogger(Level.TRACE, "torque (Nm)");
         m_log_temp = child.doubleLogger(Level.TRACE, "temperature (C)");
+
+        child.intLogger(Level.TRACE, "Device ID").log(() -> canId);
     }
 
     @Override
@@ -123,7 +131,7 @@ public abstract class Talon6Motor implements BareMotor {
 
     /**
      * Use VelocityVoltage outboard PID control to hold the given velocity, with
-     * acceleration and torque feedforwards.
+     * friction, velocity, acceleration, and torque feedforwards.
      */
     @Override
     public void setVelocity(double motorRad_S, double motorAccelRad_S2, double motorTorqueNm) {
@@ -143,7 +151,7 @@ public abstract class Talon6Motor implements BareMotor {
         Phoenix100.warn(() -> m_motor.setControl(
                 m_velocityVoltage
                         .withVelocity(motorRev_S)
-                        .withFeedForward(kFFVolts * 0))); // TODO make this not zero
+                        .withFeedForward(kFFVolts)));
 
         m_log_desired_speed.log(() -> motorRev_S);
         m_log_desired_accel.log(() -> motorRev_S2);
@@ -156,7 +164,7 @@ public abstract class Talon6Motor implements BareMotor {
 
     /**
      * Use PositionVoltage outboard PID control to hold the given position, with
-     * velocity and torque feedforwards.
+     * friction, velocity, and torque feedforwards.
      * 
      * Motor revolutions wind up, so setting 0 revs and 1 rev are different.
      */
@@ -187,6 +195,7 @@ public abstract class Talon6Motor implements BareMotor {
         log();
     }
 
+    /** Cached, almost */
     @Override
     public double getVelocityRad_S() {
         return getVelocityRev_S() * 2 * Math.PI;
@@ -204,35 +213,55 @@ public abstract class Talon6Motor implements BareMotor {
 
     /**
      * Sets integrated sensor position to zero.
+     * 
+     * Note this takes **FOREVER**, like tens of milliseconds, so you can only do it
+     * at startup.
      */
     public void resetEncoderPosition() {
-        Phoenix100.warn(() -> m_motor.setPosition(0));
+        Util.warn("Setting CTRE encoder position is very slow!");
+        Phoenix100.warn(() -> m_motor.setPosition(0, 1));
     }
 
     /**
      * Set integrated sensor position in rotations.
+     * 
+     * Note this takes **FOREVER**, like tens of milliseconds, so you can only do it
+     * at startup.
      */
-    public void setEncoderPosition(double motorPositionRev) {
-        Phoenix100.warn(() -> m_motor.setPosition(motorPositionRev));
+    private void setEncoderPosition(double motorPositionRev) {
+        Util.warn("Setting CTRE encoder position is very slow!");
+        Phoenix100.warn(() -> m_motor.setPosition(motorPositionRev, 1));
     }
 
+    /**
+     * Set integrated sensor position in radians.
+     * 
+     * Note this takes **FOREVER**, like tens of milliseconds, so you can only do it
+     * at startup.
+     */
     @Override
     public void setEncoderPositionRad(double positionRad) {
-        double motorPositionRev = positionRad / (2 * Math.PI);
+        double motorPositionRev = positionRad / (2.0 * Math.PI);
         setEncoderPosition(motorPositionRev);
     }
 
+    /** Cached. */
     public double getVelocityRev_S() {
         return m_velocity.getAsDouble();
     }
 
+    /** Cached. */
     public double getPositionRev() {
         return m_position.getAsDouble();
     }
 
+    /** wait a long time for a new value, do not use outside testing. */
+    public double getPositionBlockingRev() {
+        return m_motor.getPosition().waitForUpdate(1).getValueAsDouble();
+    }
+
     protected void log() {
-        // suppliers here are never touched in the non-logging case.
-        m_log_device_id.log(m_motor::getDeviceID);
+        m_log_position.log(m_position);
         m_log_velocity.log(m_velocity);
         m_log_output.log(m_dutyCycle);
         m_log_error.log(m_error);

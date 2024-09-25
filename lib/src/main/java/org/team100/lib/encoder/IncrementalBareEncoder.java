@@ -8,22 +8,30 @@ import org.team100.lib.dashboard.Glassy;
 public interface IncrementalBareEncoder extends Glassy {
 
     /**
-     * Radians per second.
+     * Should be cached.
      * 
      * Note some rate implementations can be noisy.
      * 
      * If the encoder can't return a valid measurement (e.g. because hardware is not
      * connected), return empty.
+     * 
+     * @return rad/s
      */
     OptionalDouble getVelocityRad_S();
 
     /**
-     * Radians
+     * Should be cached.
      * 
      * If the encoder can't return a valid measurement (e.g. because hardware is not
      * connected), return empty.
+     * 
+     * @return rad
      */
     OptionalDouble getPositionRad();
+
+    /** For checking calibration, very slow, do not use outside tests. */
+    double getPositionBlockingRad();
+
 
     /**
      * Resets position to zero
@@ -35,11 +43,7 @@ public interface IncrementalBareEncoder extends Glassy {
      */
     void close();
 
-    @Override
-    default String getGlassName() {
-        return "IncrementalBareEncoder";
-    }
-
+    /** This is very slow, only use it on startup. */
     void setEncoderPositionRad(double motorPositionRad);
 
     /** For logging */

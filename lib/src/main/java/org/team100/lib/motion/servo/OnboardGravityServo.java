@@ -4,6 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.RotaryPositionSensor;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.logging.SupplierLogger2;
@@ -25,8 +26,9 @@ import edu.wpi.first.math.filter.LinearFilter;
  * 
  * Note there is no "friction" term here since it uses the motor velocity
  * setter.
+ * @deprecated remove this after testing
  */
-@Deprecated // TODO: remove this after testing
+@Deprecated
 public class OnboardGravityServo implements GravityServoInterface {
     private static final double kFeedbackDeadbandRad_S = 0.01;
     /** Max gravity torque */
@@ -37,8 +39,9 @@ public class OnboardGravityServo implements GravityServoInterface {
 
     private final RotaryMechanism m_mech;
     private final PIDController m_controller;
-    private final double m_period;
     private final RotaryPositionSensor m_encoder;
+    /** Smooth out the feedback output */
+    private final LinearFilter m_filter;
 
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_u_FB;
@@ -57,15 +60,11 @@ public class OnboardGravityServo implements GravityServoInterface {
     private Profile100 m_profile = new NullProfile();
     private State100 m_setpointRad = new State100(0, 0);
 
-    /** Smooth out the feedback output */
-    private final LinearFilter m_filter = LinearFilter.singlePoleIIR(0.02, 0.02);
-
     /** Remember to set a profile! */
     public OnboardGravityServo(
             RotaryMechanism motor,
             SupplierLogger2 parent,
             PIDController controller,
-            double period,
             RotaryPositionSensor encoder) {
         m_mech = motor;
         SupplierLogger2 child = parent.child(this);
@@ -83,8 +82,8 @@ public class OnboardGravityServo implements GravityServoInterface {
                 "periodic Measurement velocity (rad_s)");
 
         m_controller = controller;
-        m_period = period;
         m_encoder = encoder;
+        m_filter = LinearFilter.singlePoleIIR(0.02, TimedRobot100.LOOP_PERIOD_S);
     }
 
     /** Zeros controller errors, sets setpoint to current state. */
@@ -121,7 +120,7 @@ public class OnboardGravityServo implements GravityServoInterface {
         double mechanismPositionRad = optPos.getAsDouble();
         double mechanismVelocityRad_S = optVel.getAsDouble();
 
-        m_setpointRad = m_profile.calculate(m_period, m_setpointRad, goal);
+        m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad, goal);
 
         final double u_FB = MathUtil.applyDeadband(
                 m_filter.calculate(m_controller.calculate(mechanismPositionRad, m_setpointRad.x())),

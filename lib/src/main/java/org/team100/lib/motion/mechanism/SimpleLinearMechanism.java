@@ -54,6 +54,7 @@ public class SimpleLinearMechanism implements LinearMechanism {
                 outputForceN * m_wheelRadiusM / m_gearRatio);
     }
 
+    /** Nearly cached. */
     @Override
     public OptionalDouble getVelocityM_S() {
         OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
@@ -62,6 +63,7 @@ public class SimpleLinearMechanism implements LinearMechanism {
         return OptionalDouble.of(velocityRad_S.getAsDouble() * m_wheelRadiusM / m_gearRatio);
     }
 
+    /** Nearly cached. */
     @Override
     public OptionalDouble getPositionM() {
         OptionalDouble positionRad = m_encoder.getPositionRad();

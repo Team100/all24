@@ -157,7 +157,8 @@ public class TalonSRXMotor implements BareMotor {
     }
 
     /**
-     * ignores torque feedforward
+     * Open-loop velocity control with velocity and accel feedforward only, ignores
+     * torque feedforward.
      */
     @Override
     public void setVelocity(double outputRad_S, double accelRad_S2, double torqueNm) {

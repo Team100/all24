@@ -14,7 +14,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 
 /**
- * Drivetrain control with three independent PID controllers.
+ * Cartesian PID on position and full-state on rotation.
+ * 
+ * TODO: replace this with 3d full-state?
  */
 public class HolonomicDriveController100 implements Glassy {
     private final PIDController m_xController;
@@ -184,10 +186,4 @@ public class HolonomicDriveController100 implements Glassy {
         pid.setTolerance(0.01); // 0.5 degrees
         return pid;
     }
-
-    @Override
-    public String getGlassName() {
-        return "HolonomicDriveController100";
-    }
-
 }

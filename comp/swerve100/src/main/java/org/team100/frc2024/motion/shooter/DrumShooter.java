@@ -12,6 +12,7 @@ import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
@@ -29,6 +30,7 @@ import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
@@ -75,6 +77,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private final OptionalDoubleLogger m_log_left_velocity;
     private final OptionalDoubleLogger m_log_right_velocity;
     private final OptionalDoubleLogger m_log_pivot_angle;
+    private final DoubleSupplierLogger2 m_log_goal_err;
 
     public DrumShooter(
             SupplierLogger2 parent,
@@ -88,8 +91,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         m_log_right_velocity = child.optionalDoubleLogger(Level.TRACE, "right velocity");
         m_log_pivot_angle = child.optionalDoubleLogger(Level.TRACE, "pivot angle (rad)");
 
-        double period = 0.02;
-        PIDController pivotController = new PIDController(4.5, 0.0, 0.000, period);
+        PIDController pivotController = new PIDController(4.5, 0.0, 0.000, TimedRobot100.LOOP_PERIOD_S);
         pivotController.setTolerance(0.02);
         pivotController.setIntegratorRange(0, 0.1);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
@@ -97,6 +99,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         SupplierLogger2 leftLogger = child.child("Left");
         SupplierLogger2 rightLogger = child.child("Right");
         SupplierLogger2 pivotLogger = child.child("Pivot");
+        m_log_goal_err = pivotLogger.doubleLogger(Level.TRACE, "goal err (rad)");
 
         // we use velocityvoltage control so the P value here is volts per rev/s of the
         // motor. Typical rev/s is 50, so typical error might be 5, and for that we'd
@@ -153,15 +156,10 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(pivotLogger, 0, 0.508753,
                         EncoderDrive.DIRECT);
 
-                // pivotServo = new GravityServo(
-                // pivotMech,
-                // pivotLogger,
-                // pivotController,
-                // period,
-                // encoder);
-
                 AngularPositionServo pivotAngleServo = new OnboardAngularPositionServo(
-                        pivotLogger, pivotMech, encoder,
+                        pivotLogger,
+                        pivotMech,
+                        encoder,
                         10, // TODO: remove this
                         pivotController);
                 pivotServo = new OutboardGravityServo(pivotAngleServo,
@@ -195,22 +193,15 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                 SimulatedRotaryPositionSensor simEncoder = new SimulatedRotaryPositionSensor(
                         pivotLogger,
                         simMech);
-
-                // pivotServo = new GravityServo(
-                // simMech,
-                // pivotLogger,
-                // pivotController,
-                // period,
-                // simEncoder);
-
                 AngularPositionServo simPivotAngleServo = new OnboardAngularPositionServo(
-                        pivotLogger, simMech, simEncoder,
+                        pivotLogger,
+                        simMech,
+                        simEncoder,
                         10, // TODO: remove this
                         pivotController);
                 pivotServo = new OutboardGravityServo(simPivotAngleServo,
                         5.0, // TODO: tune this
                         0.0);
-
                 pivotServo.setProfile(profile);
         }
     }
@@ -234,7 +225,16 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         // pivotServo.rezero();
     }
 
+    /**
+     * Pass the goal to the servo; also log the difference between goal and
+     * measurement.
+     */
     public void setAngle(double goalRad) {
+        OptionalDouble position = getPivotPosition();
+        if (position.isPresent()) {
+            double errorRad = position.getAsDouble() - goalRad;
+            m_log_goal_err.log(() -> errorRad);
+        }
         pivotServo.setPosition(goalRad);
     }
 
@@ -310,10 +310,5 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         m_log_left_velocity.log(leftRoller::getVelocity);
         m_log_right_velocity.log(rightRoller::getVelocity);
         m_log_pivot_angle.log(pivotServo::getPositionRad);
-    }
-
-    @Override
-    public String getGlassName() {
-        return "DrumShooter";
     }
 }

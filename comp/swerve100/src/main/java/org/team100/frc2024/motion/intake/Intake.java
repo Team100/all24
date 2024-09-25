@@ -139,10 +139,4 @@ public class Intake extends SubsystemBase implements Glassy {
         m_log_upper.log(superRollers::getVelocity);
         m_log_centering.log(m_centering::get);
     }
-
-    @Override
-    public String getGlassName() {
-        return "Intake";
-    }
-
 }

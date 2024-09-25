@@ -12,11 +12,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 class SteeringRateLimiterTest {
     private static final double kDelta = 0.001;
-   private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
 
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
         SteeringRateLimiter c = new SteeringRateLimiter(logger, l);
 
         double[] prev_vx = new double[] { 0 };
@@ -24,7 +24,8 @@ class SteeringRateLimiterTest {
         Rotation2d[] prev_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
         double[] desired_vx = new double[] { 0 };
         double[] desired_vy = new double[] { 0 };
-        Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotationZero };        double[] desired_heading_velocity = new double[] { 0 };
+        Rotation2d[] desired_heading = new Rotation2d[] { GeometryUtil.kRotationZero };
+        double[] desired_heading_velocity = new double[] { 0 };
         Rotation2d[] overrideSteering = new Rotation2d[1];
 
         double s = c.enforceSteeringLimit(
@@ -35,15 +36,14 @@ class SteeringRateLimiterTest {
                 desired_vy,
                 desired_heading,
                 desired_heading_velocity,
-                overrideSteering,
-                0.02);
+                overrideSteering);
 
         assertEquals(1.0, s, kDelta);
     }
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2();
         SteeringRateLimiter c = new SteeringRateLimiter(logger, l);
 
         double[] prev_vx = new double[] { 0 };
@@ -63,8 +63,7 @@ class SteeringRateLimiterTest {
                 desired_vy,
                 desired_heading,
                 desired_heading_velocity,
-                overrideSteering,
-                0.02);
+                overrideSteering);
         // s = 0 stops the drive motors
         assertEquals(0, s, kDelta);
     }

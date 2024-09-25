@@ -571,9 +571,4 @@ public class MinTimeController implements Glassy {
         // switch immediately
         return 0;
     }
-
-    @Override
-    public String getGlassName() {
-        return "MinTimeController";
-    }
 }

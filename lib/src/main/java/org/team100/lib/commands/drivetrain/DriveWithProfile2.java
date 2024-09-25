@@ -3,10 +3,10 @@ package org.team100.lib.commands.drivetrain;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -17,6 +17,7 @@ import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
@@ -24,7 +25,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * 
  * Sanjans version
  */
-public class DriveWithProfile2 extends Command100 {
+public class DriveWithProfile2 extends Command implements Glassy  {
     private static final double kRotationToleranceRad = Math.PI/32;
     private static final double kTranslationalToleranceM = 0.1;
 
@@ -45,12 +46,10 @@ public class DriveWithProfile2 extends Command100 {
     private State100 m_thetaGoalRaw;
 
     public DriveWithProfile2(
-            SupplierLogger2 parent,
             Supplier<Optional<Pose2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
-        super(parent);
         m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;
         m_controller = controller;
@@ -71,14 +70,14 @@ public class DriveWithProfile2 extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         xSetpoint = m_swerve.getState().x();
         ySetpoint = m_swerve.getState().y();
         thetaSetpoint = m_swerve.getState().theta();
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         Rotation2d currentRotation = m_swerve.getState().pose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
@@ -99,15 +98,15 @@ public class DriveWithProfile2 extends Command100 {
 
         m_thetaGoalRaw = new State100(bearing.getRadians(), 0);
         m_xGoalRaw = new State100(fieldRelativeGoal.getX(), 0, 0);
-        xSetpoint = xProfile.calculate(0.02, xSetpoint, m_xGoalRaw);
+        xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, xSetpoint, m_xGoalRaw);
 
         m_yGoalRaw = new State100(fieldRelativeGoal.getY(), 0, 0);
-        ySetpoint = yProfile.calculate(0.02, ySetpoint, m_yGoalRaw);
+        ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, ySetpoint, m_yGoalRaw);
 
-        thetaSetpoint = thetaProfile.calculate(0.02, thetaSetpoint, m_thetaGoalRaw);
+        thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, thetaSetpoint, m_thetaGoalRaw);
         SwerveState goalState = new SwerveState(xSetpoint, ySetpoint, thetaSetpoint);
         FieldRelativeVelocity goal = m_controller.calculate(m_swerve.getState(), goalState);
-        m_swerve.driveInFieldCoords(goal, 0.02);
+        m_swerve.driveInFieldCoords(goal);
     }
 
     @Override
@@ -121,7 +120,7 @@ public class DriveWithProfile2 extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
     }
 

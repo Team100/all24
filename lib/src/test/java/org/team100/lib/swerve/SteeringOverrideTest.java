@@ -20,7 +20,7 @@ class SteeringOverrideTest {
 
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
         SteeringOverride c = new SteeringOverride(logger, l);
 
         SwerveModuleState100[] desiredModuleStates = new SwerveModuleState100[] {
@@ -34,15 +34,14 @@ class SteeringOverrideTest {
         double s = c.overrideIfStopped(
                 desiredModuleStates,
                 prevModuleStates,
-                overrideSteering,
-                0.02);
+                overrideSteering);
 
         assertEquals(1.0, s, kDelta);
     }
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest2();
         SteeringOverride c = new SteeringOverride(logger, l);
 
         SwerveModuleState100[] desiredModuleStates = new SwerveModuleState100[] {
@@ -56,8 +55,7 @@ class SteeringOverrideTest {
         double s = c.overrideIfStopped(
                 desiredModuleStates,
                 prevModuleStates,
-                overrideSteering,
-                0.02);
+                overrideSteering);
 
         // s = 0 stops the drive motors
         assertEquals(0, s, kDelta);

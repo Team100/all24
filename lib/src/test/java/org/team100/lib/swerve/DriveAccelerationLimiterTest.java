@@ -14,7 +14,7 @@ class DriveAccelerationLimiterTest {
 
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
         DriveAccelerationLimiter c = new DriveAccelerationLimiter(logger, l);
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
@@ -24,14 +24,13 @@ class DriveAccelerationLimiterTest {
                 prev_vx,
                 prev_vy,
                 desired_vx,
-                desired_vy,
-                0.02);
+                desired_vy);
         assertEquals(1, s, kDelta);
     }
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forTest();
         DriveAccelerationLimiter c = new DriveAccelerationLimiter(logger, l);
         double[] prev_vx = new double[] { 0 };
         double[] prev_vy = new double[] { 0 };
@@ -41,8 +40,7 @@ class DriveAccelerationLimiterTest {
                 prev_vx,
                 prev_vy,
                 desired_vx,
-                desired_vy,
-                0.02);
+                desired_vy);
         assertEquals(0.02, s, kDelta);
     }
 }

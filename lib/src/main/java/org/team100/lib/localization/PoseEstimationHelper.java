@@ -251,9 +251,4 @@ public class PoseEstimationHelper implements Glassy {
         return cameraInRobotCoordinates.plus(
                 new Transform3d(t, GeometryUtil.kRotation3Zero));
     }
-
-    @Override
-    public String getGlassName() {
-        return "PoseEstimationHelper";
-    }
 }

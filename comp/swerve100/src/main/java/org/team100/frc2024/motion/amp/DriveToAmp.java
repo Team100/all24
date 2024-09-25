@@ -9,7 +9,6 @@ import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,38 +35,39 @@ public class DriveToAmp extends SequentialCommandGroup {
             kAmpXM, kFieldWidthM - kCloseToAmpYM, GeometryUtil.kRotation90);
 
     public DriveToAmp(
-            SupplierLogger2 parent,
             SwerveDriveSubsystem drive,
+            HolonomicDriveController100 controller,
             SwerveKinodynamics limits,
             AmpPivot amp,
             AmpFeeder ampFeeder,
             Intake intake,
             DrumShooter shooter,
             FeederSubsystem feeder) {
-
         addCommands(
                 new ParallelDeadlineGroup(
-                        new DriveWithProfile2(parent,
+                        new DriveWithProfile2(
                                 () -> DriverStation.getAlliance().map(
                                         x -> switch (x) {
                                             case Red -> kRedNearAmp;
                                             case Blue -> kBlueNearAmp;
                                         }),
                                 drive,
-                                new HolonomicDriveController100(parent), limits),
+                                controller,
+                                limits),
                         new FeedToAmp(intake, shooter, ampFeeder, feeder)),
                 new ParallelCommandGroup(
                         // new AmpSet(parent, amp, kAmpUp),
-                        new AmpFastThenSlow(parent, amp, kAmpSwitchingPt, kAmpUp),
+                        new AmpFastThenSlow(amp, kAmpSwitchingPt, kAmpUp),
                         new SequentialCommandGroup(
-                                new DriveWithProfile2(parent,
+                                new DriveWithProfile2(
                                         () -> DriverStation.getAlliance().map(
                                                 x -> switch (x) {
                                                     case Red -> kRedCloseToAmp;
                                                     case Blue -> kBlueCloseToAmp;
                                                 }),
                                         drive,
-                                        new HolonomicDriveController100(parent), limits),
+                                        controller,
+                                        limits),
                                 new ParallelCommandGroup(
                                         ampFeeder.run(ampFeeder::outtake),
                                         new WaitCommand(1)))));

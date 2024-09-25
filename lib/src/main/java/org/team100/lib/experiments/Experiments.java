@@ -78,11 +78,6 @@ public class Experiments implements Glassy {
 
     ////////////////////////////////////////
 
-    @Override
-    public String getGlassName() {
-        return "Experiments";
-    }
-
     private String on(Experiment e) {
         return e.name() + " ON";
     }

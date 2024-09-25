@@ -39,7 +39,7 @@ public class RotateToShooter extends Command {
 
         double dtheta = m_controller.calculate(measurement, setpoint);
         FieldRelativeVelocity twist = new FieldRelativeVelocity(0, 0, dtheta);
-        m_drive.driveInFieldCoords(twist, 0.02);
+        m_drive.driveInFieldCoords(twist);
     }
 
     @Override

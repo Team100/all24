@@ -66,8 +66,4 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
         m_log_speed.log(feedRoller::get);
     }
 
-    @Override
-    public String getGlassName() {
-        return "Feeder";
-    }
 }

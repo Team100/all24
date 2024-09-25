@@ -33,7 +33,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveMotionPlannerTest {
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(logger);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test
     void testTrajectory() {
@@ -68,7 +68,9 @@ class DriveMotionPlannerTest {
                 start_vel,
                 end_vel);
 
-        DriveMotionController controller = new DrivePIDFController(logger, false, 2.4, 2.4);
+        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
+        DriveMotionController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(timed_trajectory));
         controller.setTrajectory(traj_iterator);
@@ -95,7 +97,9 @@ class DriveMotionPlannerTest {
 
     @Test
     void testAllTrajectories() {
-        DrivePIDFController controller = new DrivePIDFController(logger, false, 2.4, 2.4);
+        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
+        DrivePIDFController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100();
         List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();
 
@@ -121,9 +125,9 @@ class DriveMotionPlannerTest {
                 ChassisSpeeds speeds = controller.update(time, pose, velocity);
                 if (true) {// setpoint == null) {
                     // Initialize from first chassis speeds.
-                    SwerveModuleState100[] states = kSmoothKinematicLimits.toSwerveModuleStates(speeds,
-                            velocity.omegaRadiansPerSecond,
-                            0.02);
+                    SwerveModuleState100[] states = kSmoothKinematicLimits.toSwerveModuleStates(
+                            speeds,
+                            velocity.omegaRadiansPerSecond);
                     setpoint = new SwerveSetpoint(speeds, states);
                 }
 

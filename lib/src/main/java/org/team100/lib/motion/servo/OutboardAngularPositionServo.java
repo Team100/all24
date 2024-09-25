@@ -4,6 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
@@ -16,19 +17,21 @@ import edu.wpi.first.math.MathUtil;
 
 /**
  * Passthrough to outboard closed-loop angular control, using a profile with
- * velocity feedforward, also extra torque (e.g. for gravity).
+ * velocity feedforward, also extra torque (e.g. for gravity).  There's no
+ * feedback at this level, and no feedforward calculation either, that's
+ * delegated to the mechanism.
  * 
  * Must be used with a combined encoder, to "zero" the motor encoder.
  * 
  * TODO: allow other zeroing strategies.
  */
 public class OutboardAngularPositionServo implements AngularPositionServo {
-    private static final double kDtSec = 0.02;
     private static final double kPositionTolerance = 0.05;
     private static final double kVelocityTolerance = 0.05;
 
     private final RotaryMechanism m_mechanism;
     private final CombinedEncoder m_encoder;
+
     // LOGGERS
     private final State100Logger m_log_goal;
     private final DoubleSupplierLogger2 m_log_ff_torque;
@@ -113,7 +116,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         m_setpoint = new State100(setpointErr + unwrappedMeasurementRad, m_setpoint.v());
 
         // finally compute a new setpoint
-        m_setpoint = m_profile.calculate(kDtSec, m_setpoint, m_goal);
+        m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, m_goal);
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 

@@ -23,6 +23,7 @@ public class RotaryMechanism implements Glassy {
     private final BareMotor m_motor;
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
+    // LOGGER
     private DoubleSupplierLogger2 m_log_velocity;
     private DoubleSupplierLogger2 m_log_position;
 
@@ -51,7 +52,6 @@ public class RotaryMechanism implements Glassy {
             double outputRad_S,
             double outputAccelRad_S2,
             double outputTorqueNm) {
-
         m_motor.setVelocity(
                 outputRad_S * m_gearRatio,
                 outputAccelRad_S2 * m_gearRatio,
@@ -68,14 +68,20 @@ public class RotaryMechanism implements Glassy {
                 outputTorqueNm / m_gearRatio);
     }
 
+    /** nearly cached */
     public OptionalDouble getVelocityRad_S() {
         OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
         if (velocityRad_S.isEmpty())
             return OptionalDouble.empty();
-        double velo = velocityRad_S.getAsDouble() / m_gearRatio;
-        return OptionalDouble.of(velo);
+        return OptionalDouble.of(velocityRad_S.getAsDouble() / m_gearRatio);
     }
 
+    /** For checking calibration, very slow, do not use outside tests. */
+    double getPositionBlockingRad() {
+        return m_encoder.getPositionBlockingRad() / m_gearRatio;
+    }
+
+    /** nearly cached */
     public OptionalDouble getPositionRad() {
         OptionalDouble positionRad = m_encoder.getPositionRad();
         if (positionRad.isEmpty())
@@ -95,26 +101,17 @@ public class RotaryMechanism implements Glassy {
         m_encoder.reset();
     }
 
+    /** This can be very slow, only use it on startup. */
     public void setEncoderPosition(double positionRad) {
         double motorPositionRad = positionRad * m_gearRatio;
         m_encoder.setEncoderPositionRad(motorPositionRad);
     }
 
-    public OptionalDouble getEncoderPosition() {
-        return m_encoder.getPositionRad();
-    }
-
     public void periodic() {
-        // do some logging
         m_log_velocity.log(() -> getVelocityRad_S().getAsDouble());
         m_log_position.log(() -> MathUtil.angleModulus(getPositionRad().getAsDouble()));
         m_motor.periodic();
         m_encoder.periodic();
-    }
-
-    @Override
-    public String getGlassName() {
-        return "RotaryMechanism";
     }
 
 }

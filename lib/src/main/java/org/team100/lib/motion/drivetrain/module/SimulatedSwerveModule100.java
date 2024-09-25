@@ -2,6 +2,7 @@ package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
@@ -19,16 +20,14 @@ import edu.wpi.first.math.controller.PIDController;
 public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     public static SimulatedSwerveModule100 get(
-            String name,
             SupplierLogger2 parent,
             SwerveKinodynamics kinodynamics) {
-        SupplierLogger2 moduleLogger = parent.child(name);
         LinearVelocityServo driveServo = simulatedDriveServo(
-                moduleLogger.child("Drive"));
+                parent.child("Drive"));
         AngularPositionServo turningServo = simulatedTurningServo(
-                moduleLogger.child("Turning"),
+                parent.child("Turning"),
                 kinodynamics);
-        return new SimulatedSwerveModule100(name, driveServo, turningServo);
+        return new SimulatedSwerveModule100(driveServo, turningServo);
     }
 
     private static LinearVelocityServo simulatedDriveServo(SupplierLogger2 parent) {
@@ -62,7 +61,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 20, // kP
                 0, // kI
                 0, // kD
-                dt);
+                TimedRobot100.LOOP_PERIOD_S);
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         // note low tolerance
         turningPositionController.setTolerance(0.05, 0.05);
@@ -79,10 +78,9 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     }
 
     private SimulatedSwerveModule100(
-            String name,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
-        super(name, driveServo, turningServo);
+        super(driveServo, turningServo);
         //
     }
 

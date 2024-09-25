@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
@@ -27,9 +28,6 @@ class AnglePositionServoTest {
     /** A minimal exercise. */
     @Test
     void testOnboard() {
-        // long period to make the output bigger
-        double period = 1;
-
         MockBareMotor turningMotor = new MockBareMotor();
         RotaryMechanism mech = new RotaryMechanism(
                 logger,
@@ -38,7 +36,7 @@ class AnglePositionServoTest {
                 1);
         MockRotaryPositionSensor turningEncoder = new MockRotaryPositionSensor();
 
-        PIDController turningController2 = new PIDController(1, 0, 0, period);
+        PIDController turningController2 = new PIDController(1, 0, 0, TimedRobot100.LOOP_PERIOD_S);
 
         Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         double maxVel = 1;
@@ -50,7 +48,10 @@ class AnglePositionServoTest {
                 turningController2);
         servo.setProfile(profile);
         servo.reset();
-        servo.setPosition(1, 0);
+        // spin for 1 s
+        for (int i = 0; i < 50; ++i) {
+            servo.setPosition(1, 0);
+        }
         assertEquals(0, turningMotor.output, 0.001);
         assertEquals(0.5, servo.getSetpoint().x(), kDelta);
         assertEquals(1.0, servo.getSetpoint().v(), kDelta);

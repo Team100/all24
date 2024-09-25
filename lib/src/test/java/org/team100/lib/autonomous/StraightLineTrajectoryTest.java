@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -22,8 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 
 class StraightLineTrajectoryTest {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
-    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     TrajectoryMaker maker = new TrajectoryMaker(constraints);
 

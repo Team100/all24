@@ -30,7 +30,7 @@ class DrivePIDControllerTest {
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get(logger);
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test
     void testPIDControl() {
@@ -64,8 +64,9 @@ class DrivePIDControllerTest {
         TrajectoryTimeSampler view = new TrajectoryTimeSampler(trajectory);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
-
-        DrivePIDFController controller = new DrivePIDFController(logger, false, 2.4, 2.4);
+        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
+        DrivePIDFController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,

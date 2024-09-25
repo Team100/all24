@@ -3,6 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.List;
 
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -17,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 /**
  * Drive in a square. This used to be called "DrawCircle."
  */
-public class DrawSquare extends SequentialCommandGroup {
+public class DrawSquare extends SequentialCommandGroup implements Glassy {
     private static final double maxVelocityM_S = 2.0;
     private static final double maxAccelM_S_S = 2;
 
@@ -35,26 +36,27 @@ public class DrawSquare extends SequentialCommandGroup {
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {
+        DriveToWaypoint3.Log log = new DriveToWaypoint3.Log(parent.child(this));
         TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(maxVelocityM_S, maxAccelM_S_S)));
         StraightLineTrajectory maker = new StraightLineTrajectory(true, tmaker);
         addCommands(
-                new DriveToWaypoint3(parent,
+                new DriveToWaypoint3(log,
                         new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz),
-                new DriveToWaypoint3(parent,
+                new DriveToWaypoint3(log,
                         new Pose2d(-0.5, 0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz),
-                new DriveToWaypoint3(parent,
+                new DriveToWaypoint3(log,
                         new Pose2d(0.5, 0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz),
-                new DriveToWaypoint3(parent,
+                new DriveToWaypoint3(log,
                         new Pose2d(0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz),
-                new DriveToWaypoint3(parent,
+                new DriveToWaypoint3(log,
                         new Pose2d(-0.5, -0.5, GeometryUtil.kRotationZero),
                         drivetrain, maker,
                         controller, viz)

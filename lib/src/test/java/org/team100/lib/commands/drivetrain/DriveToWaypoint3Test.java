@@ -38,7 +38,7 @@ class DriveToWaypoint3Test extends Fixtured {
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
     private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
-    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get(logger);
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
     List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     TrajectoryMaker tmaker = new TrajectoryMaker(constraints);
 
@@ -54,9 +54,9 @@ class DriveToWaypoint3Test extends Fixtured {
         };
 
         HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
-
+        DriveToWaypoint3.Log log = new DriveToWaypoint3.Log(logger);
         DriveToWaypoint3 command = new DriveToWaypoint3(
-                logger,
+                log,
                 goal,
                 drivetrain,
                 trajectories,
@@ -64,7 +64,7 @@ class DriveToWaypoint3Test extends Fixtured {
                 viz);
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
-        command.execute100(0.02);
+        command.execute();
         command.end(false);
     }
 
@@ -87,12 +87,12 @@ class DriveToWaypoint3Test extends Fixtured {
         assertEquals(-1.047, goal.getRotation().getRadians(), kDelta);
 
         HolonomicDriveController3 m_controller = new HolonomicDriveController3(logger);
-
+        DriveToWaypoint3.Log log = new DriveToWaypoint3.Log(logger);
         DriveToWaypoint3 command = new DriveToWaypoint3(
-                logger, goal, drivetrain, maker, m_controller, viz);
+                log, goal, drivetrain, maker, m_controller, viz);
         command.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
-        command.execute100(0.02);
+        command.execute();
         command.end(false);
     }
 

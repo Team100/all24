@@ -127,6 +127,13 @@ public class SupplierLogger2 {
             double val = vals.getAsDouble();
             m_primitiveLogger.log(val);
         }
+
+        public void log(Supplier<Double> vals) {
+            if (!allow(m_level))
+                return;
+            double val = vals.get();
+            m_primitiveLogger.log(val);
+        }
     }
 
     public DoubleSupplierLogger2 doubleLogger(Level level, String leaf) {

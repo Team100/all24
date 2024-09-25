@@ -2,7 +2,7 @@ package org.team100.lib.commands.arm;
 
 import java.util.Optional;
 
-import org.team100.lib.commands.Command100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.arm.ArmAngles;
@@ -18,6 +18,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Trajectory follower for the two-jointed arm.
@@ -27,7 +28,7 @@ import edu.wpi.first.wpilibj.Timer;
  * feedforward and positional feedback, both using constant parameters (i.e. no
  * gravity feedforward, no inertia-dependent feedback).
  */
-public class ArmTrajectoryCommand extends Command100 {
+public class ArmTrajectoryCommand extends Command implements Glassy  {
     private static final double kTolerance = 0.02;
     private static final TrajectoryConfig kConf = new TrajectoryConfig(0.1, 0.1);
     private static final double kA = 0.2;
@@ -64,7 +65,6 @@ public class ArmTrajectoryCommand extends Command100 {
             ArmSubsystem armSubSystem,
             ArmKinematics armKinematicsM,
             Translation2d goal) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_Lower_FF = child.doubleLogger(Level.TRACE, "Lower FF");
         m_log_Lower_Controller_Output = child.doubleLogger(Level.TRACE, "Lower Controller Output");
@@ -93,7 +93,7 @@ public class ArmTrajectoryCommand extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_timer.restart();
         Optional<ArmAngles> position = m_armSubsystem.getPosition();
         if (position.isEmpty())
@@ -103,7 +103,7 @@ public class ArmTrajectoryCommand extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         if (m_trajectory == null)
             return;
         if (m_goalAngles == null)
@@ -208,7 +208,7 @@ public class ArmTrajectoryCommand extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_armSubsystem.set(0, 0);
         m_trajectory = null;
     }

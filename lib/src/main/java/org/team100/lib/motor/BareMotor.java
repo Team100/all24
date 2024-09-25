@@ -9,7 +9,6 @@ import org.team100.lib.dashboard.Glassy;
  */
 public interface BareMotor extends Glassy {
 
-    
     /**
      * Some motors allow torque limiting through current limiting.
      */
@@ -23,7 +22,7 @@ public interface BareMotor extends Glassy {
     void setDutyCycle(double output);
 
     /**
-     * Velocity control with acceleration and holding torque.
+     * Velocity feedback with friction, velocity, acceleration, and holding torque.
      * 
      * Could be open-loop (e.g. "kV") or closed-loop.
      * 
@@ -36,13 +35,17 @@ public interface BareMotor extends Glassy {
             double accelRad_S2,
             double torqueNm);
 
-    /** Motor shaft speed. */
+    /**
+     * Should be cached.
+     * 
+     * Motor shaft speed.
+     */
     double getVelocityRad_S();
 
     void setEncoderPositionRad(double positionRad);
 
     /**
-     * Position control with holding torque.
+     * Position feedback with friction and velocity feedforward, and holding torque.
      * 
      * Revolutions wind up; 0 != 2pi.
      * 
@@ -54,8 +57,6 @@ public interface BareMotor extends Glassy {
             double positionRad,
             double velocityRad_S,
             double torqueNm);
-
-    // TODO: add position output
 
     /**
      * Motor resistance in ohms, used to calculate voltage from desired torque
@@ -87,10 +88,5 @@ public interface BareMotor extends Glassy {
 
     /** For logging */
     void periodic();
-
-    @Override
-    default String getGlassName() {
-        return "BareMotor";
-    }
 
 }

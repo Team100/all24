@@ -6,6 +6,7 @@ import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.encoder.VelocityBareEncoder;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
@@ -42,7 +43,6 @@ public class AMSwerveModule100 extends SwerveModule100 {
 
     /** @param name like "front left" or whatever */
     public static AMSwerveModule100 get(
-            String name,
             SupplierLogger2 parent,
             double currentLimit,
             double statorLimit,
@@ -53,9 +53,8 @@ public class AMSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             PIDConstants pidConstants,
             Feedforward100 ff) {
-        SupplierLogger2 moduleLogger = parent.child(name);
         LinearVelocityServo driveServo = driveServo(
-                moduleLogger.child("Drive"),
+                parent.child("Drive"),
                 currentLimit,
                 statorLimit,
                 driveMotorCanId,
@@ -63,13 +62,13 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 ff);
 
         AngularPositionServo turningServo = turningServo(
-                moduleLogger.child("Turning"),
+                parent.child("Turning"),
                 turningMotorChannel,
                 turningEncoderChannel,
                 turningOffset,
                 kinodynamics);
 
-        return new AMSwerveModule100(name, driveServo, turningServo);
+        return new AMSwerveModule100(driveServo, turningServo);
     }
 
     private static LinearVelocityServo driveServo(
@@ -121,7 +120,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
                 0.5, // kP
                 0, // kI
                 0, // kD
-                dt);
+                TimedRobot100.LOOP_PERIOD_S);
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
@@ -137,10 +136,9 @@ public class AMSwerveModule100 extends SwerveModule100 {
     }
 
     private AMSwerveModule100(
-            String name,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
-        super(name, driveServo, turningServo);
+        super(driveServo, turningServo);
         //
     }
 

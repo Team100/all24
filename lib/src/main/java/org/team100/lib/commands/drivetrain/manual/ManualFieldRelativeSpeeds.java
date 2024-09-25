@@ -52,10 +52,4 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
     public void reset(Pose2d p) {
         //
     }
-
-    @Override
-    public String getGlassName() {
-        return "ManualFieldRelativeSpeeds";
-    }
-
 }

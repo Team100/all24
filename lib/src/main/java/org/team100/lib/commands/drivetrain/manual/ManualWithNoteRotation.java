@@ -5,11 +5,12 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.controller.State100;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -41,7 +42,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  */
 public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private static final double kBallVelocityM_S = 5;
-    private static final double kDtSec = 0.02;
     /**
      * Relative rotational speed. Use a moderate value to trade rotation for
      * translation
@@ -65,8 +65,8 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private final DoubleSupplierLogger2 m_log_omega_measurement;
     private final DoubleSupplierLogger2 m_log_omega_error;
     private final DoubleSupplierLogger2 m_log_omega_FB;
-    private final DoubleArraySupplierLogger2 m_log_target;
-    private final DoubleArraySupplierLogger2 m_log_ball;
+    private final FieldLogger.Log m_field_log;
+
 
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
@@ -74,7 +74,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private Pose2d m_prevPose;
 
     public ManualWithNoteRotation(
-            SupplierLogger2 fieldLogger,
+        FieldLogger.Log fieldLogger,
             SupplierLogger2 parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
@@ -82,6 +82,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
             PIDController thetaController,
             PIDController omegaController,
             BooleanSupplier trigger) {
+        m_field_log = fieldLogger;
         SupplierLogger2 child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;
@@ -102,8 +103,6 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         m_log_omega_measurement = child.doubleLogger(Level.TRACE, "omega/measurement");
         m_log_omega_error = child.doubleLogger(Level.TRACE, "omega/error");
         m_log_omega_FB = child.doubleLogger(Level.TRACE, "omega/fb");
-        m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
-        m_log_ball = fieldLogger.doubleArrayLogger(Level.TRACE, "ball");
     }
 
     public void reset(Pose2d currentPose) {
@@ -162,7 +161,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
 
         State100 goal = new State100(bearing.getRadians(), targetMotion);
 
-        m_thetaSetpoint = m_profile.calculate(kDtSec, m_thetaSetpoint, goal);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
@@ -181,8 +180,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        // this name needs to be exactly "/field/target" for glass.
-        m_log_target.log(() -> new double[] {
+        m_field_log.m_log_target.log(() -> new double[] {
                 target.get().getX(),
                 target.get().getY(),
                 0 });
@@ -191,13 +189,12 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         if (m_trigger.getAsBoolean()) {
             m_ball = currentTranslation;
             // correct for newtonian relativity
-            m_ballV = new Translation2d(kBallVelocityM_S * kDtSec, currentRotation)
+            m_ballV = new Translation2d(kBallVelocityM_S * TimedRobot100.LOOP_PERIOD_S, currentRotation)
                     .plus(FieldRelativeDelta.delta(m_prevPose, state.pose()).getTranslation());
         }
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
-            // this name needs to be exactly "/field/ball" for glass.
-            m_log_ball.log(() -> new double[] {
+            m_field_log.m_log_ball.log(() -> new double[] {
                     m_ball.getX(),
                     m_ball.getY(),
                     0 });
@@ -216,10 +213,4 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         // desaturate to feasibility
         return m_swerveKinodynamics.analyticDesaturation(withRot);
     }
-
-    @Override
-    public String getGlassName() {
-        return "ManualWithNoteRotation";
-    }
-
 }

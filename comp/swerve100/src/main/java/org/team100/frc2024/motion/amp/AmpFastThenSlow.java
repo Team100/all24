@@ -2,7 +2,6 @@ package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.controller.State100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -20,14 +19,12 @@ public class AmpFastThenSlow extends SequentialCommandGroup {
             kSlowAccelRad_S2, kTolerance);
 
     public AmpFastThenSlow(
-            SupplierLogger2 parent,
             AmpPivot pivot,
             double switchRad,
             double goalRad) {
         addCommands(
                 // first go fast to the switch point at the slow velocity
                 new AmpState(
-                        parent,
                         pivot,
                         new State100(
                                 switchRad,
@@ -38,7 +35,6 @@ public class AmpFastThenSlow extends SequentialCommandGroup {
                         false), // don't hold
                 // then go slow to the goal at rest
                 new AmpState(
-                        parent,
                         pivot,
                         new State100(goalRad, 0.0),
                         kSlowProfile,

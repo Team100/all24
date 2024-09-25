@@ -18,18 +18,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 /**
  * Feedforward and feedback control of a single module.
  */
-public class SwerveModule100 implements Glassy {
-    protected static final double dt = 0.02;
-
-    private final String m_name;
+public abstract class SwerveModule100 implements Glassy {
     private final LinearVelocityServo m_driveServo;
     private final AngularPositionServo m_turningServo;
 
-    public SwerveModule100(
-            String name,
+    protected SwerveModule100(
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
-        m_name = name;
         m_driveServo = driveServo;
         m_turningServo = turningServo;
     }
@@ -90,15 +85,6 @@ public class SwerveModule100 implements Glassy {
 
     public void close() {
         m_turningServo.close();
-    }
-
-    public String getName() {
-        return m_name;
-    }
-
-    @Override
-    public String getGlassName() {
-        return "SwerveModule100";
     }
 
     /////////////////////////////////////////////////////////////

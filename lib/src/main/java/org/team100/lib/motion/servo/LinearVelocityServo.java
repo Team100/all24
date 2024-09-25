@@ -34,9 +34,4 @@ public interface LinearVelocityServo extends Glassy {
     /** For logging */
     void periodic();
 
-    @Override
-    default String getGlassName() {
-        return "LinearVelocityServo";
-    }
-
 }

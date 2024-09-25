@@ -6,6 +6,7 @@ import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -36,13 +37,12 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
      * outboard.
      */
     private final PIDController m_controller;
-    private final double m_period;
 
     /**
      * Smooth out the feedback output.
      * TODO: is this really necessary?
      */
-    private final LinearFilter m_filter = LinearFilter.singlePoleIIR(0.02, 0.02);
+    private final LinearFilter m_filter;
 
     /** Profile may be updated at runtime. */
     private Profile100 m_profile = new NullProfile();
@@ -79,8 +79,9 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         m_positionSensor = positionSensor;
         m_maxVel = maxVel;
         m_controller = controller;
-        m_period = controller.getPeriod();
         m_controller.setIntegratorRange(0, 0.1);
+        m_filter = LinearFilter.singlePoleIIR(0.02, TimedRobot100.LOOP_PERIOD_S);
+
         m_log_goal = child.state100Logger(Level.TRACE, "goal (rad)");
         m_log_feedforward_torque = child.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
         m_log_measurement = child.state100Logger(Level.TRACE, "measurement (rad)");
@@ -150,7 +151,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
                 MathUtil.angleModulus(m_setpointRad.x() - measurementPositionRad) + measurementPositionRad,
                 m_setpointRad.v());
 
-        m_setpointRad = m_profile.calculate(m_period, m_setpointRad, m_goal);
+        m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad, m_goal);
 
         final double u_FB;
         if (Experiments.instance.enabled(Experiment.FilterFeedback)) {

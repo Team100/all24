@@ -47,12 +47,12 @@ public class Feedforward100 {
         return new Feedforward100(0.122, 0.000, 0.100, 0.065, 0.5);
     }
 
-    //TODO get the acurate numbers here
+    // TODO get the acurate numbers here
     public static Feedforward100 makeNeo550() {
         return new Feedforward100(0.32, 0, 0, .07, 0);
     }
-    
-  public static Feedforward100 makeArmPivot() {
+
+    public static Feedforward100 makeArmPivot() {
         return new Feedforward100(
                 0.09,
                 0.005,
@@ -73,8 +73,13 @@ public class Feedforward100 {
         return new Feedforward100(0.110, 0.000, 0.180, 0.010, 0.5);
     }
 
+    /**
+     * 9/24/04
+     * Voltage feedforward for steering motors in air.
+     * Tuned in air, not on carpet, so probably the velocity number is too low.
+     */
     public static Feedforward100 makeWCPSwerveTurningFalcon6() {
-        return new Feedforward100(0.160, 0.000, 0.080, 0.100, 3.5);
+        return new Feedforward100(0.150, 0.010, 0.080, 0.100, 0.5);
     }
 
     public static Feedforward100 makeWCPSwerveDriveFalcon() {

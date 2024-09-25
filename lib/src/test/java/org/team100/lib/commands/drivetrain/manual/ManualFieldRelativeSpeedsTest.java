@@ -17,7 +17,7 @@ class ManualFieldRelativeSpeedsTest {
 
     @Test
     void testTwistZero() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
         SwerveState s = new SwerveState();
@@ -29,7 +29,7 @@ class ManualFieldRelativeSpeedsTest {
 
     @Test
     void testTwistNonzero() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         ManualFieldRelativeSpeeds manual = new ManualFieldRelativeSpeeds(logger, limits);
         // these inputs are clipped and desaturated
         DriverControl.Velocity input = new DriverControl.Velocity(1, 2, 3);

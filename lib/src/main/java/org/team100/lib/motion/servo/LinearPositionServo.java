@@ -41,9 +41,4 @@ public interface LinearPositionServo extends Glassy {
     void stop();
 
     void close();
-
-    @Override
-    default String getGlassName() {
-        return "LinearPositionServo";
-    }
 }

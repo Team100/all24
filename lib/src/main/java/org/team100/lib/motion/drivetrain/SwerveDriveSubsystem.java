@@ -16,7 +16,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.util.CotemporalCache;
+import org.team100.lib.util.Memo;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -33,7 +33,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
     private final VisionData m_cameras;
-    private final CotemporalCache<SwerveState> m_stateSupplier;
+
+    // CACHES
+    private final Memo.CotemporalCache<SwerveState> m_stateSupplier;
+
     // LOGGERS
     private final SwerveStateLogger m_log_state;
     private final DoubleSupplierLogger2 m_log_turning;
@@ -55,7 +58,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;
         m_cameras = cameras;
-        m_stateSupplier = new CotemporalCache<>(this::update);
+        m_stateSupplier = Memo.of(this::update);
         stop();
         m_log_state = child.swerveStateLogger(Level.COMP, "state");
         m_log_turning = child.doubleLogger(Level.TRACE, "Tur Deg");
@@ -78,9 +81,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      * desaturator.
      * 
      * @param v      Field coordinate velocities in meters and radians per second.
-     * @param kDtSec time in the future for the setpoint generator to calculate
      */
-    public void driveInFieldCoords(FieldRelativeVelocity vIn, double kDtSec) {
+    public void driveInFieldCoords(FieldRelativeVelocity vIn) {
         m_log_input.log(() -> vIn);
 
         // scale for driver skill; default is half speed.
@@ -93,7 +95,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
                 v.y(),
                 v.theta(),
                 getState().pose().getRotation());
-        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_gyro.getYawRateNWU(), kDtSec);
+        m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
     /**
@@ -104,13 +106,13 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      * @return true if aligned
      * 
      */
-    public boolean steerAtRest(FieldRelativeVelocity twist, double kDtSec) {
+    public boolean steerAtRest(FieldRelativeVelocity twist) {
         ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 twist.x(),
                 twist.y(),
                 twist.theta(),
                 getState().pose().getRotation());
-        return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_gyro.getYawRateNWU(), kDtSec);
+        return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
     /**
@@ -120,18 +122,17 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      * desaturator.
      * 
      * @param speeds in robot coordinates
-     * @param kDtSec time increment for the setpoint generator
      */
-    public void setChassisSpeeds(ChassisSpeeds speeds, double kDtSec) {
+    public void setChassisSpeeds(ChassisSpeeds speeds) {
         // scale for driver skill; default is half speed.
         DriverSkill.Level driverSkillLevel = DriverSkill.level();
         m_log_skill.log(() -> driverSkillLevel);
         speeds = speeds.times(driverSkillLevel.scale());
-        m_swerveLocal.setChassisSpeeds(speeds, m_gyro.getYawRateNWU(), kDtSec);
+        m_swerveLocal.setChassisSpeeds(speeds, m_gyro.getYawRateNWU());
     }
 
-    public void setChassisSpeedsNormally(ChassisSpeeds speeds, double kDtSec) {
-        m_swerveLocal.setChassisSpeedsNormally(speeds, m_gyro.getYawRateNWU(), kDtSec);
+    public void setChassisSpeedsNormally(ChassisSpeeds speeds) {
+        m_swerveLocal.setChassisSpeedsNormally(speeds, m_gyro.getYawRateNWU());
     }
 
     /** Does not desaturate. */
@@ -187,8 +188,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     //
 
     /**
+     * Cached.
+     * 
      * SwerveState representing the drivetrain's field-relative pose, velocity, and
-     * acceleration. This is rate-limited and cached.
+     * acceleration.
      */
     public SwerveState getState() {
         return m_stateSupplier.get();
@@ -226,11 +229,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         });
         m_log_yaw_rate.log(m_gyro::getYawRateNWU);
         m_swerveLocal.periodic();
-    }
-
-    @Override
-    public String getGlassName() {
-        return "SwerveDriveSubsystem";
     }
 
     public void close() {

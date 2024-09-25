@@ -9,8 +9,7 @@ import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
@@ -21,7 +20,6 @@ import org.team100.lib.motion.servo.LinearVelocityServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
 import org.team100.lib.motion.servo.OutboardAngularPositionServo;
 import org.team100.lib.motion.servo.OutboardLinearVelocityServo;
-import org.team100.lib.motion.servo.SelectableAngularPositionServo;
 import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.Kraken6Motor;
 import org.team100.lib.motor.MotorPhase;
@@ -30,14 +28,18 @@ import org.team100.lib.profile.Profile100;
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
+    private static final boolean USE_OUTBOARD_STEERING = true;
     private static final double kSteeringSupplyLimit = 10;
     private static final double kSteeringStatorLimit = 20;
     /**
      * WCP calls this "rotation ratio" here, we use the "flipped belt" which is the
      * fastest steering ratio.
+     * 12t -> 24t
+     * 14t -> 72t
+     * = 72 / 7
      * https://docs.wcproducts.com/wcp-swervex/misc/other-configurations/ratio-options
      */
-    private static final double kSteeringRatio = 10.29;
+    private static final double kSteeringRatio = 10.28571429;
 
     /**
      * Flipped belt ratios.
@@ -60,7 +62,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static final double kWheelDiameterM = 0.0975; // 0.1015
 
     public static WCPSwerveModule100 get(
-            String name,
             SupplierLogger2 parent,
             double supplyLimitAmps,
             double statorLimitAmps,
@@ -73,25 +74,16 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
             MotorPhase motorPhase) {
-        SupplierLogger2 moduleLogger = parent.child(name);
-
-        // TODO: revisit these constants
-        PIDConstants drivePidConstants = new PIDConstants(.2); // .2
-        PIDConstants turningPidConstants = new PIDConstants(1.5); // 5
-        Feedforward100 turningFF = Feedforward100.makeWCPSwerveTurningFalcon6();
-        Feedforward100 driveFF = Feedforward100.makeWCPSwerveDriveFalcon6();
 
         LinearVelocityServo driveServo = driveServo(
-                moduleLogger.child("Drive"),
+                parent.child("Drive"),
                 supplyLimitAmps,
                 statorLimitAmps,
                 driveMotorCanId,
-                ratio,
-                drivePidConstants,
-                driveFF);
+                ratio);
 
         AngularPositionServo turningServo = turningServo(
-                moduleLogger.child("Turning"),
+                parent.child("Turning"),
                 encoderClass,
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -99,11 +91,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 kSteeringRatio,
                 kinodynamics,
                 drive,
-                motorPhase,
-                turningPidConstants,
-                turningFF);
+                motorPhase);
 
-        return new WCPSwerveModule100(name, driveServo, turningServo);
+        return new WCPSwerveModule100(driveServo, turningServo);
     }
 
     private static LinearVelocityServo driveServo(
@@ -111,16 +101,16 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double supplyLimit,
             double statorLimit,
             int driveMotorCanId,
-            DriveRatio ratio,
-            PIDConstants pidConstants,
-            Feedforward100 ff) {
+            DriveRatio ratio) {
+        Feedforward100 ff = Feedforward100.makeWCPSwerveDriveFalcon6();
+        PIDConstants pid = new PIDConstants(0.2);
         Kraken6Motor driveMotor = new Kraken6Motor(
                 parent,
                 driveMotorCanId,
                 MotorPhase.FORWARD,
                 supplyLimit,
                 statorLimit,
-                pidConstants,
+                pid,
                 ff);
         LinearMechanism mech = new SimpleLinearMechanism(
                 driveMotor,
@@ -141,9 +131,22 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double gearRatio,
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
-            MotorPhase motorPhase,
-            PIDConstants lowLevelPID,
-            Feedforward100 ff) {
+            MotorPhase motorPhase) {
+
+        PIDConstants lowLevelPID = null;
+        if (USE_OUTBOARD_STEERING) {
+            // Talon outboard positional PID
+            lowLevelPID = new PIDConstants(10.0, 0.0, 0.0);
+        } else {
+            // These parameters are handed to Talon outboard velocity PID
+            // this seems more likely to oscillate
+            // this is tuned in air, not on carpet, so it's probably too soft.
+            lowLevelPID = new PIDConstants(0.3, 0.0, 0.0);
+        }
+
+        // java uses this to calculate feedforward voltages from target velocities etc
+        Feedforward100 ff = Feedforward100.makeWCPSwerveTurningFalcon6();
+
         Falcon6Motor turningMotor = new Falcon6Motor(
                 parent,
                 turningMotorCanId,
@@ -152,6 +155,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 kSteeringStatorLimit,
                 lowLevelPID,
                 ff);
+
         RotaryPositionSensor turningEncoder = turningEncoder(
                 encoderClass,
                 parent,
@@ -161,26 +165,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         Profile100 profile = kinodynamics.getSteeringProfile();
 
-        AngularPositionServo turningServo = getTurningServo(
-                parent,
-                kinodynamics,
-                turningMotor,
-                turningEncoder,
-                gearRatio,
-                profile);
-
-        turningServo.reset();
-        return turningServo;
-    }
-
-    private static AngularPositionServo getTurningServo(
-            SupplierLogger2 parent,
-            SwerveKinodynamics kinodynamics,
-            Falcon6Motor turningMotor,
-            RotaryPositionSensor turningEncoder,
-            double turningGearRatio,
-            Profile100 profile) {
-
         Talon6Encoder builtInEncoder = new Talon6Encoder(
                 parent,
                 turningMotor);
@@ -189,25 +173,27 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 parent,
                 turningMotor,
                 builtInEncoder,
-                turningGearRatio);
+                gearRatio);
 
-        AngularPositionServo outboard = getOutboard(
-                parent,
-                turningEncoder,
-                profile,
-                mech);
+        if (USE_OUTBOARD_STEERING) {
+            AngularPositionServo turningServo = getOutboard(
+                    parent,
+                    turningEncoder,
+                    profile,
+                    mech);
+            turningServo.reset();
+            return turningServo;
+        }
 
-        AngularPositionServo onboard = getOnboard(
+        AngularPositionServo turningServo = getOnboard(
                 parent,
                 kinodynamics,
                 turningEncoder,
                 profile,
                 mech);
+        turningServo.reset();
+        return turningServo;
 
-        return new SelectableAngularPositionServo(
-                outboard,
-                outboard,
-                () -> Experiments.instance.enabled(Experiment.OutboardSteering));
     }
 
     private static AngularPositionServo getOutboard(
@@ -223,7 +209,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 parent,
                 mech,
                 combinedEncoder);
-
         servo.setProfile(profile);
         return servo;
     }
@@ -231,20 +216,24 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static AngularPositionServo getOnboard(
             SupplierLogger2 parent,
             SwerveKinodynamics kinodynamics,
-            RotaryPositionSensor turningEncoder, Profile100 profile, RotaryMechanism mech) {
-        PIDController turningPositionController = new PIDController(
+            RotaryPositionSensor turningEncoder,
+            Profile100 profile,
+            RotaryMechanism mech) {
+        // This is the top-level position controller
+        // this is tuned in air, not on carpet, so it's probably too soft.
+        PIDController onboardPositionController = new PIDController(
                 20, // kP
                 0, // kI
                 0, // kD
-                dt);
-        turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
-        turningPositionController.setTolerance(0.1, 0.1);
+                TimedRobot100.LOOP_PERIOD_S);
+        onboardPositionController.enableContinuousInput(-Math.PI, Math.PI);
+        onboardPositionController.setTolerance(0.02, 0.02);
         AngularPositionServo servo = new OnboardAngularPositionServo(
                 parent,
                 mech,
                 turningEncoder,
                 kinodynamics.getMaxSteeringVelocityRad_S(),
-                turningPositionController);
+                onboardPositionController);
         servo.setProfile(profile);
         return servo;
     }
@@ -274,10 +263,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private WCPSwerveModule100(
-            String name,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
-        super(name, driveServo, turningServo);
+        super(driveServo, turningServo);
         //
     }
 }

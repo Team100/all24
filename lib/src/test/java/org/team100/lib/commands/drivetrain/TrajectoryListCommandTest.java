@@ -53,12 +53,12 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
                 viz);
         c.initialize();
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
-        c.execute100(0);
+        c.execute();
         assertFalse(c.isFinished());
         // the trajectory takes a little over 2s
         for (double t = 0; t < 2.1; t += kDtS) {
             stepTime(kDtS);
-            c.execute100(kDtS);
+            c.execute();
             fixture.drive.periodic(); // for updateOdometry
         }
         // at goal; wide tolerance due to test timing
@@ -89,7 +89,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
                 fail("counter exceeded");
             stepTime(kDtS);
             fixture.drive.periodic();
-            command.execute100(kDtS);
+            command.execute();
             double measurement = fixture.drive.getSwerveLocal().states()[0].angle.get().getRadians();
             SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];

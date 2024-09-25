@@ -4,14 +4,15 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.team100.frc2024.motion.intake.Intake;
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -22,6 +23,7 @@ import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Creates a profile to the translation of a note and follows it.
@@ -33,8 +35,8 @@ import edu.wpi.first.math.geometry.Translation2d;
  * 
  * TODO: force the theta axis to finish first, so that the approach is correct.
  */
-public class DriveWithProfileNote extends Command100 {
-    private final SupplierLogger2 m_fieldLogger;
+public class DriveWithProfileNote extends Command implements Glassy  {
+    private final FieldLogger.Log m_field_log;
     private final Intake m_intake;
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
@@ -46,7 +48,6 @@ public class DriveWithProfileNote extends Command100 {
 
     // LOGGERS
     private final BooleanSupplierLogger2 m_log_note_detected;
-    private final DoubleArraySupplierLogger2 m_log_target;
 
     private Translation2d m_previousGoal;
     private State100 m_xSetpoint;
@@ -55,18 +56,16 @@ public class DriveWithProfileNote extends Command100 {
     private int m_count;
 
     public DriveWithProfileNote(
-            SupplierLogger2 fieldLogger,
+            FieldLogger.Log fieldLogger,
             SupplierLogger2 parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicDriveController100 controller,
             SwerveKinodynamics limits) {
-        super(parent);
-        m_fieldLogger = fieldLogger;
+        m_field_log = fieldLogger;
         SupplierLogger2 child = parent.child(this);
         m_log_note_detected = child.booleanLogger(Level.TRACE, "Note detected");
-        m_log_target = m_fieldLogger.doubleArrayLogger(Level.TRACE, "target");
 
         m_intake = intake;
         m_fieldRelativeGoal = fieldRelativeGoal;
@@ -94,7 +93,7 @@ public class DriveWithProfileNote extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_xSetpoint = m_swerve.getState().x();
         m_ySetpoint = m_swerve.getState().y();
         m_thetaSetpoint = m_swerve.getState().theta();
@@ -126,7 +125,7 @@ public class DriveWithProfileNote extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         // intake the whole time
         m_intake.intakeSmart();
 
@@ -142,22 +141,22 @@ public class DriveWithProfileNote extends Command100 {
         State100 xGoal = new State100(goal.getX(), 0, 0);
         State100 yGoal = new State100(goal.getY(), 0, 0);
 
-        m_xSetpoint = xProfile.calculate(dt, m_xSetpoint, xGoal);
-        m_ySetpoint = yProfile.calculate(dt, m_ySetpoint, yGoal);
+        m_xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_xSetpoint, xGoal);
+        m_ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_ySetpoint, yGoal);
         // make sure the setpoint uses the modulus close to the measurement.
         final double thetaMeasurement = m_swerve.getState().pose().getRotation().getRadians();
         m_thetaSetpoint = new State100(
                 Math100.getMinDistance(thetaMeasurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
-        m_thetaSetpoint = thetaProfile.calculate(dt, m_thetaSetpoint, thetaGoal);
+        m_thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, thetaGoal);
 
         SwerveState measurement = m_swerve.getState();
         SwerveState setpoint = new SwerveState(m_xSetpoint, m_ySetpoint, m_thetaSetpoint);
         FieldRelativeVelocity output = m_controller.calculate(measurement, setpoint);
 
-        m_swerve.driveInFieldCoords(output, dt);
+        m_swerve.driveInFieldCoords(output);
 
-        m_log_target.log(() -> new double[] { goal.getX(), goal.getY(), 0 });
+        m_field_log.m_log_target.log(() -> new double[] { goal.getX(), goal.getY(), 0 });
     }
 
     private static State100 getThetaGoalState(Pose2d pose, Translation2d goal) {
@@ -179,7 +178,7 @@ public class DriveWithProfileNote extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         //
     }
 }

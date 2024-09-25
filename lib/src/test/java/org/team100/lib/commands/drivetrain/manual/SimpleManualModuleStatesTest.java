@@ -17,7 +17,7 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testZero() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
         SwerveModuleState100[] ms = s.apply(input);
@@ -34,7 +34,7 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testAngle() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0.5);
         SwerveModuleState100[] ms = s.apply(input);
@@ -51,7 +51,7 @@ class SimpleManualModuleStatesTest {
 
     @Test
     void testDrive() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0.5, 0, 0);
         SwerveModuleState100[] ms = s.apply(input);

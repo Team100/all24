@@ -7,6 +7,7 @@ import org.team100.lib.controller.MinTimeController;
 import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -32,7 +33,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  */
 public class ManualWithMinTimeHeading implements FieldRelativeDriver {
-    private static final double kDtSec = 0.02;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
@@ -77,7 +77,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_latch = new HeadingLatch();
-        m_outputFilter = LinearFilter.singlePoleIIR(0.01, 0.02);
+        m_outputFilter = LinearFilter.singlePoleIIR(0.01, TimedRobot100.LOOP_PERIOD_S);
 
         // these parameters are total guesses
         m_controller = new MinTimeController(
@@ -127,8 +127,6 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      * 
      * Desaturation prefers the rotational profile completely in the snap case, and
      * normally in the non-snap case.
-     * 
-     * This uses a fixed dt = 0.02 for the profile.
      * 
      * @param state    current drivetrain state from the pose estimator
      * @param twist1_1 control units, [-1,1]
@@ -185,7 +183,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         State100 goalState = new State100(
                 Math100.getMinDistance(yawMeasurement, m_goal.getRadians()), 0);
 
-        m_thetaSetpoint = m_controller.calculate(kDtSec, state.theta(), goalState);
+        m_thetaSetpoint = m_controller.calculate(TimedRobot100.LOOP_PERIOD_S, state.theta(), goalState);
 
         // the snap overrides the user input for omega.
         final double thetaFF = getThetaFF();
@@ -227,10 +225,4 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         }
         return thetaFF;
     }
-
-    @Override
-    public String getGlassName() {
-        return "ManualWithMinTimeHeading";
-    }
-
 }

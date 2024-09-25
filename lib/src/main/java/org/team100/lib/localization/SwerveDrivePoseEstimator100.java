@@ -75,7 +75,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
     @Override
     public SwerveState get(double timestampSeconds) {
-        // System.out.println("pose estimator get " + timestampSeconds);
         return m_poseBuffer.get(timestampSeconds).m_state;
     }
 
@@ -245,11 +244,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_poseBuffer.put(
                 currentTimeS,
                 new InterpolationRecord(m_kinodynamics.getKinematics(), swerveState, gyroAngle, wheelPositions));
-    }
-
-    @Override
-    public String getGlassName() {
-        return "SwerveDrivePoseEstimator100";
     }
 
     ///////////////////////////////////////

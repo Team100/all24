@@ -272,9 +272,4 @@ public class VisionDataProvider24 implements VisionData, Glassy {
                 Double.MAX_VALUE };
     }
 
-    @Override
-    public String getGlassName() {
-        return "VisionDataProvider24";
-    }
-
 }
