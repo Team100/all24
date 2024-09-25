@@ -260,9 +260,5 @@ public class RobotContainerParkingLot implements Glassy {
         new Trigger(condition).whileTrue(command);
     }
 
-    @Override
-    public String getGlassName() {
-        return "RobotContainer";
-    }
 
 }

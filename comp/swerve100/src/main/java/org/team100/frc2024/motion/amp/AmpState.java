@@ -2,9 +2,12 @@ package org.team100.frc2024.motion.amp;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.profile.Profile100;
+
+import edu.wpi.first.wpilibj2.command.Command;
+
 import org.team100.lib.logging.SupplierLogger2;
 
 /**
@@ -14,7 +17,7 @@ import org.team100.lib.logging.SupplierLogger2;
  * a single motion: make the goal velocity of the first one equal to the cruise
  * velocity of the second, for example.
  */
-public class AmpState extends Command100 {
+public class AmpState extends Command implements Glassy  {
     private final AmpPivot m_pivot;
     private final State100 m_goal;
     private final Profile100 m_profile;
@@ -31,7 +34,6 @@ public class AmpState extends Command100 {
             double torqueLimit,
             double toleranceRad,
             boolean hold) {
-        super(parent);
         m_pivot = pivot;
         m_goal = goal;
         m_profile = profile;
@@ -42,7 +44,7 @@ public class AmpState extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         if (isFinished()) {
             return;
         }
@@ -52,7 +54,7 @@ public class AmpState extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         if (isFinished()) {
             // don't pulse the output if we're going to be "finished"
             return;

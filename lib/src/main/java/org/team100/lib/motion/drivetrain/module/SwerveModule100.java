@@ -89,11 +89,6 @@ public abstract class SwerveModule100 implements Glassy {
         m_turningServo.close();
     }
 
-    @Override
-    public String getGlassName() {
-        return "SwerveModule100";
-    }
-
     /////////////////////////////////////////////////////////////
     //
     // Package private for SwerveModuleCollection

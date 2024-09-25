@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Follow a fixed trajectory, using the new 254-derived trajectory and follower
@@ -26,7 +27,7 @@ import edu.wpi.first.wpilibj.Timer;
  * 
  * This is an experiment.
  */
-public class FancyTrajectory extends Command100 {
+public class FancyTrajectory extends Command implements Glassy  {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
 
@@ -42,7 +43,6 @@ public class FancyTrajectory extends Command100 {
             SwerveDriveSubsystem robotDrive,
             DriveMotionController controller,
             List<TimingConstraint> constraints) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_robotDrive = robotDrive;
@@ -52,7 +52,7 @@ public class FancyTrajectory extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         List<Pose2d> waypointsM = List.of(
                 new Pose2d(0, 0, Rotation2d.fromDegrees(90)),
                 new Pose2d(80, 80, Rotation2d.fromDegrees(0)));
@@ -78,13 +78,13 @@ public class FancyTrajectory extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         final double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_robotDrive.getState().pose();
         ChassisSpeeds currentSpeed = m_robotDrive.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         m_log_chassis_speeds.log(() -> output);
-        m_robotDrive.setChassisSpeeds(output, dt);
+        m_robotDrive.setChassisSpeeds(output, 0.02);
     }
 
     @Override

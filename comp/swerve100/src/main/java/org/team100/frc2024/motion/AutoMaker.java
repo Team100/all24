@@ -840,8 +840,5 @@ public class AutoMaker implements Glassy {
         return tuningTrajectory6();
     }
 
-    @Override
-    public String getGlassName() {
-        return "AutoMaker";
-    }
+
 }

@@ -235,11 +235,6 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         m_modules.periodic();
     }
 
-    @Override
-    public String getGlassName() {
-        return "SwerveLocal";
-    }
-
     /////////////////////////////////////////////////////////
 
     private void setChassisSpeedsWithSetpointGenerator(

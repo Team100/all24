@@ -3,8 +3,8 @@ package org.team100.lib.commands.drivetrain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -24,8 +24,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class DriveWithTrajectory extends Command100 {
+public class DriveWithTrajectory extends Command implements Glassy  {
     private static final double kMaxVel = 5;
     private static final double kMaxAcc = 5;
     private static final double kStartVel = 0;
@@ -46,7 +47,6 @@ public class DriveWithTrajectory extends Command100 {
             SwerveKinodynamics limits,
             String fileName,
             TrajectoryVisualization viz) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = drivetrain;
@@ -73,7 +73,7 @@ public class DriveWithTrajectory extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_viz.setViz(trajectory);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
@@ -81,7 +81,7 @@ public class DriveWithTrajectory extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
@@ -89,11 +89,11 @@ public class DriveWithTrajectory extends Command100 {
 
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, dt);
+        m_swerve.setChassisSpeeds(output, 0.02);
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
         m_viz.clear();
     }

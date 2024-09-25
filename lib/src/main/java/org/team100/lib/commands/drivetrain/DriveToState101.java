@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -23,12 +23,13 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToState101 extends Command100 {
+public class DriveToState101 extends Command implements Glassy  {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 4;
 
@@ -50,7 +51,6 @@ public class DriveToState101 extends Command100 {
             DriveMotionController controller,
             List<TimingConstraint> constraints,
             TrajectoryVisualization viz) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_goal = goal;
@@ -63,7 +63,7 @@ public class DriveToState101 extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         Translation2d toGoal = m_goal.getTranslation().minus(m_swerve.getState().pose().getTranslation());
         Transform2d transform = new Transform2d(toGoal, toGoal.getAngle()).inverse();
         Pose2d startPose = new Pose2d(m_swerve.getState().pose().getTranslation(), transform.getRotation());
@@ -97,14 +97,14 @@ public class DriveToState101 extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, dt);
+        m_swerve.setChassisSpeeds(output, 0.02);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class DriveToState101 extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
         m_viz.clear();
     }

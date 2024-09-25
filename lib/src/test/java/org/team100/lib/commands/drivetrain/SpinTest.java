@@ -21,7 +21,7 @@ class SpinTest extends Fixtured implements Timeless {
         command.initialize();
         stepTime(0.02);
         // starts from rest
-        command.execute100(0.02);
+        command.execute();
         assertEquals(0, command.m_center.getX(), kDelta);
         assertEquals(0, command.m_center.getY(), kDelta);
         assertEquals(0, command.m_initialRotation, kDelta);
@@ -30,8 +30,9 @@ class SpinTest extends Fixtured implements Timeless {
         assertEquals(0, fixture.drive.getSwerveLocal().getDesiredStates()[0].speedMetersPerSecond, kDelta);
         assertEquals(-0.785, fixture.drive.getSwerveLocal().getDesiredStates()[0].angle.get().getRadians(), 0.01);
 
-        stepTime(5);
-        command.execute100(5);
+        for (int i = 0; i < 273; ++i) {
+            command.execute();
+        }
         assertEquals(0, command.m_center.getX(), kDelta);
         assertEquals(0, command.m_center.getY(), kDelta);
         assertEquals(0, command.m_initialRotation, kDelta);

@@ -169,8 +169,4 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         m_ampAngleServo.periodic();
     }
 
-    @Override
-    public String getGlassName() {
-        return "Amp Pivot";
-    }
 }

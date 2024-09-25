@@ -246,11 +246,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 new InterpolationRecord(m_kinodynamics.getKinematics(), swerveState, gyroAngle, wheelPositions));
     }
 
-    @Override
-    public String getGlassName() {
-        return "SwerveDrivePoseEstimator100";
-    }
-
     ///////////////////////////////////////
 
     private void checkLength(SwerveModulePosition100[] modulePositions) {

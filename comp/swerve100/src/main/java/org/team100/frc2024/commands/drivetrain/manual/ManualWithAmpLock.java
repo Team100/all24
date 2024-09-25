@@ -189,9 +189,5 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         return twistWithLockM_S;
     }
 
-    @Override
-    public String getGlassName() {
-        return "ManualWithTargetLock";
-    }
 
 }

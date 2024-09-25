@@ -69,9 +69,4 @@ public class ClimberPosition extends Command implements Glassy {
         m_leftServo.stop();
         m_rightServo.stop();
     }
-
-    @Override
-    public String getGlassName() {
-        return "ClimberPosition";
-    }
 }

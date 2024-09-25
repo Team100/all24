@@ -141,10 +141,4 @@ public class DrivePIDFController implements DriveMotionController {
         // took more time, so it's gone.
         return m_iter != null && m_iter.isDone();
     }
-
-    @Override
-    public String getGlassName() {
-        return "DrivePIDFController";
-    }
-
 }

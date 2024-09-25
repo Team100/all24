@@ -81,9 +81,4 @@ public class SteeringRateLimiter implements Glassy {
         return min_s;
     }
 
-    @Override
-    public String getGlassName() {
-        return "SteeringRateLimiter";
-    }
-
 }

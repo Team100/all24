@@ -2,9 +2,9 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.Optional;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
@@ -22,6 +22,7 @@ import org.team100.lib.util.Util;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Drive from the current state to a field-relative goal.
@@ -34,7 +35,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  * If you want a holonomic trajectory follower, try the
  * {@link DriveMotionController} classes.
  */
-public class DriveToWaypoint3 extends Command100 {
+public class DriveToWaypoint3 extends Command implements Glassy  {
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final StraightLineTrajectory m_trajectories;
@@ -66,7 +67,6 @@ public class DriveToWaypoint3 extends Command100 {
             StraightLineTrajectory trajectories,
             HolonomicDriveController3 controller,
             TrajectoryVisualization viz) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_goal = goal;
         m_swerve = drivetrain;
@@ -80,7 +80,7 @@ public class DriveToWaypoint3 extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_controller.reset();
         m_trajectory = m_trajectories.apply(m_swerve.getState(), m_goal);
         m_iter = new TrajectoryTimeIterator(
@@ -90,7 +90,8 @@ public class DriveToWaypoint3 extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
+        double dt = 0.02;
         if (m_trajectory == null)
             return;
 
@@ -144,7 +145,7 @@ public class DriveToWaypoint3 extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
         m_viz.clear();
     }

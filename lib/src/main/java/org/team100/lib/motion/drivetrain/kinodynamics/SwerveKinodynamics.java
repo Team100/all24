@@ -536,9 +536,4 @@ public class SwerveKinodynamics implements Glassy {
         return m_kinematics;
     }
 
-    @Override
-    public String getGlassName() {
-        return "SwerveKinodynamics";
-    }
-
 }

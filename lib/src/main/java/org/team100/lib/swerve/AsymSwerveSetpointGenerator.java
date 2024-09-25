@@ -176,11 +176,6 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 kDtSec);
     }
 
-    @Override
-    public String getGlassName() {
-        return "AsymSwerveSetpointGenerator";
-    }
-
     ///////////////////////////////////////////////////////
 
     private double[] computeVx(SwerveModuleState100[] states) {

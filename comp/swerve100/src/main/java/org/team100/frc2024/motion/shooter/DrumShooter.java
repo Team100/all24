@@ -311,9 +311,4 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         m_log_right_velocity.log(rightRoller::getVelocity);
         m_log_pivot_angle.log(pivotServo::getPositionRad);
     }
-
-    @Override
-    public String getGlassName() {
-        return "DrumShooter";
-    }
 }

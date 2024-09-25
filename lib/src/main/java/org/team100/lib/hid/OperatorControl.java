@@ -71,9 +71,4 @@ public interface OperatorControl extends Glassy {
     default boolean testShoot() {
         return false;
     }
-
-    @Override
-    default String getGlassName() {
-        return "DriverControl";
-    }
 }

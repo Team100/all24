@@ -107,9 +107,4 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
         m_lowerArmEncoder.close();
         m_upperArmEncoder.close();
     }
-
-    @Override
-    public String getGlassName() {
-        return "Arm";
-    }
 }

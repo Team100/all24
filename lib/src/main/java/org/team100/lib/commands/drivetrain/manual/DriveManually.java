@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.Command100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -15,6 +15,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 /**
@@ -30,7 +32,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
  * Use the mode supplier to choose which mode to use, e.g. using a Sendable
  * Chooser.
  */
-public class DriveManually extends Command100 {
+public class DriveManually extends Command implements Glassy  {
 
     private static final SendableChooser<String> m_manualModeChooser = new NamedChooser<>("Manual Drive Mode") {
     };
@@ -50,7 +52,6 @@ public class DriveManually extends Command100 {
             SupplierLogger2 parent,
             Supplier<DriverControl.Velocity> twistSupplier,
             SwerveDriveSubsystem robotDrive) {
-        super(parent);
         m_mode = m_manualModeChooser::getSelected;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
@@ -61,7 +62,7 @@ public class DriveManually extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         // the setpoint generator remembers what it was doing before, but it might be
         // interrupted by some other command, so when we start, we have to tell it what
         // the real previous setpoint is.
@@ -78,7 +79,7 @@ public class DriveManually extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         String manualMode = m_mode.get();
         // System.out.println("manual mode " + manualMode);
         if (manualMode == null) {
@@ -100,12 +101,12 @@ public class DriveManually extends Command100 {
         // System.out.println("input" + input);
         SwerveState state = m_drive.getState();
         Driver d = m_drivers.getOrDefault(manualMode, m_defaultDriver);
-        d.apply(state, input, dt);
+        d.apply(state, input, 0.02);
 
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_drive.stop();
     }
 

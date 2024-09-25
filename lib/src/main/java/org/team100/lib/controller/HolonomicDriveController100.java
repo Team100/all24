@@ -184,10 +184,4 @@ public class HolonomicDriveController100 implements Glassy {
         pid.setTolerance(0.01); // 0.5 degrees
         return pid;
     }
-
-    @Override
-    public String getGlassName() {
-        return "HolonomicDriveController100";
-    }
-
 }

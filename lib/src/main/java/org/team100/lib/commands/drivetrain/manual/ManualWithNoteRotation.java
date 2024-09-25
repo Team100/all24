@@ -216,10 +216,4 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         // desaturate to feasibility
         return m_swerveKinodynamics.analyticDesaturation(withRot);
     }
-
-    @Override
-    public String getGlassName() {
-        return "ManualWithNoteRotation";
-    }
-
 }

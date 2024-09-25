@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -23,6 +23,7 @@ import org.team100.lib.util.Util;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Follow a list of trajectories.
@@ -32,7 +33,7 @@ import edu.wpi.first.math.geometry.Pose2d;
  * This just holds the starting rotation. If you want a holonomic trajectory
  * follower, try the {@link DriveMotionController} classes.
  */
-public class TrajectoryListCommand extends Command100 {
+public class TrajectoryListCommand extends Command implements Glassy  {
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;
@@ -51,7 +52,6 @@ public class TrajectoryListCommand extends Command100 {
             HolonomicFieldRelativeController controller,
             Function<Pose2d, List<Trajectory100>> trajectories,
             TrajectoryVisualization viz) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
         m_controller = controller;
@@ -62,7 +62,7 @@ public class TrajectoryListCommand extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_controller.reset();
         Pose2d currentPose = m_swerve.getState().pose();
         m_trajectoryIter = m_trajectories.apply(currentPose).iterator();
@@ -72,7 +72,8 @@ public class TrajectoryListCommand extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
+        double dt = 0.02;
         if (m_iter == null || m_iter.isDone()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
@@ -129,7 +130,7 @@ public class TrajectoryListCommand extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
         m_viz.clear();
     }

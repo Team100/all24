@@ -231,11 +231,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         m_swerveLocal.periodic();
     }
 
-    @Override
-    public String getGlassName() {
-        return "SwerveDriveSubsystem";
-    }
-
     public void close() {
         m_swerveLocal.close();
     }

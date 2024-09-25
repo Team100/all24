@@ -301,9 +301,5 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
     }
 
-    @Override
-    public String getGlassName() {
-        return "ManualWithShooterLock";
-    }
 
 }

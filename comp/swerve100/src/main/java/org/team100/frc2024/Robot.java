@@ -162,11 +162,6 @@ public class Robot extends TimedRobot100 implements Glassy {
     }
 
     @Override
-    public String getGlassName() {
-        return "Robot";
-    }
-
-    @Override
     public void autonomousPeriodic() {
         m_log_mode.log(() -> "autonomous");
     }

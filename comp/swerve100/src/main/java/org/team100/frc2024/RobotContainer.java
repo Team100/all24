@@ -514,8 +514,5 @@ public class RobotContainer implements Glassy {
         m_modules.close();
     }
 
-    @Override
-    public String getGlassName() {
-        return "RobotContainer";
-    }
+
 }

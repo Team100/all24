@@ -29,7 +29,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         // the first time we call execute, drive doesn't yet know it's at the goal
         stepTime(0.02);
         fixture.drive.periodic();
-        command.execute100(0.02);
+        command.execute();
         // initially steering
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.m_setpoint.v(), kDelta);
@@ -40,7 +40,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         // the second time, it knows, so we switch to driving.
         stepTime(0.02);
         fixture.drive.periodic();
-        command.execute100(0.02);
+        command.execute();
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
         assertEquals(0.02, command.m_setpoint.v(), kDelta);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
@@ -48,13 +48,14 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(0, swerve.getSwerveLocal().getDesiredStates()[0].angle.get().getRadians(), kDelta);
 
         // step through the driving phase
-        stepTime(2.5);
-        fixture.drive.periodic();
-        command.execute100(2.5);
+        for (int i = 0; i < 125; ++i) {
+            fixture.drive.periodic();
+            command.execute();
+        }
         // now we should be steering again
         stepTime(0.02);
         fixture.drive.periodic();
-        command.execute100(0.02);
+        command.execute();
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
@@ -76,7 +77,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
 
         fixture.drive.periodic();
-        command.execute100(0);
+        command.execute();
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.m_goal.getRadians(), kDelta);
 
@@ -84,9 +85,11 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         // at this point the speed is still zero
         assertEquals(0.0, fixture.drive.getSwerveLocal().states()[0].speedMetersPerSecond, 0.005);
         stepTime(0.1);
-        fixture.drive.periodic();
-        // this changes the speed
-        command.execute100(0.1);
+        for (int i = 0; i < 5; ++i) {
+            fixture.drive.periodic();
+            // this changes the speed
+            command.execute();
+        }
         // big jump in speed here since dt is so big
         // max accel is 1 so waiting 0.1s means 0.1m/s
         assertEquals(DriveInALittleSquare.DriveState.DRIVING, command.m_state);
@@ -102,7 +105,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         for (double t = 0; t < 1.9; t += 0.02) {
             stepTime(0.02);
             fixture.drive.periodic();
-            command.execute100(0.02);
+            command.execute();
             double speed = fixture.drive.getSwerveLocal().states()[0].speedMetersPerSecond;
             double distance = fixture.drive.getSwerveLocal().positions()[0].distanceMeters;
             DriveState state = command.m_state;
@@ -113,7 +116,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         // steer
         stepTime(0.02);
         fixture.drive.periodic();
-        command.execute100(0.02);
+        command.execute();
         assertEquals(DriveInALittleSquare.DriveState.STEERING, command.m_state);
         assertEquals(0, command.m_setpoint.v(), kDelta);
         assertEquals(Math.PI / 2, command.m_goal.getRadians(), kDelta);
@@ -124,7 +127,7 @@ class DriveInALittleSquareTest extends Fixtured implements Timeless {
         for (double t = 0; t < 0.5; t += 0.02) {
             stepTime(0.02);
             fixture.drive.periodic();
-            command.execute100(0.02);
+            command.execute();
             double measurement = fixture.drive.getSwerveLocal().states()[0].angle.get().getRadians();
             SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates()[0];
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];

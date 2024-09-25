@@ -266,10 +266,4 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
 
         return thetaFB;
     }
-
-    @Override
-    public String getGlassName() {
-        return "ManualWithProfiledHeading";
-    }
-
 }

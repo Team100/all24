@@ -2,8 +2,8 @@ package org.team100.frc2024.motion.drivetrain;
 
 import java.util.List;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
@@ -21,12 +21,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToWithAutoStart extends Command100 {
+public class DriveToWithAutoStart extends Command implements Glassy  {
 
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 5;
@@ -49,7 +50,6 @@ public class DriveToWithAutoStart extends Command100 {
             DriveMotionController controller,
             List<TimingConstraint> constraints,
             TrajectoryVisualization viz) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = swerve;
@@ -62,7 +62,7 @@ public class DriveToWithAutoStart extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         Pose2d startPose = m_swerve.getState().pose();
         Translation2d startTranslation = new Translation2d();
         Translation2d endTranslation = m_goalWaypoint.getTranslation();
@@ -98,7 +98,7 @@ public class DriveToWithAutoStart extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
@@ -106,7 +106,7 @@ public class DriveToWithAutoStart extends Command100 {
 
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeedsNormally(output, dt);
+        m_swerve.setChassisSpeedsNormally(output, 0.02);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class DriveToWithAutoStart extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
         m_viz.clear();
     }

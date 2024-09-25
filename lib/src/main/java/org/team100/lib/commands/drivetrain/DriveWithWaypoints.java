@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -24,8 +24,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class DriveWithWaypoints extends Command100 {
+public class DriveWithWaypoints extends Command implements Glassy  {
     private static final double max_vel = 5;
     private static final double max_acc = 5;
     private static final double start_vel = 0;
@@ -45,7 +46,6 @@ public class DriveWithWaypoints extends Command100 {
             DriveMotionController controller,
             SwerveKinodynamics limits,
             Supplier<List<Pose2d>> goal) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = drivetrain;
@@ -56,7 +56,7 @@ public class DriveWithWaypoints extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         final Pose2d start = m_swerve.getState().pose();
         List<Pose2d> newWaypointM = new ArrayList<>(m_goal.get());
         newWaypointM.add(0, start);
@@ -83,18 +83,18 @@ public class DriveWithWaypoints extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, dt);
+        m_swerve.setChassisSpeeds(output, 0.02);
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
     }
 

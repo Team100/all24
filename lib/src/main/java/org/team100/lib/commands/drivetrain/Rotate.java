@@ -1,8 +1,8 @@
 package org.team100.lib.commands.drivetrain;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.State100Logger;
@@ -18,13 +18,14 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Rotate in place to the specified angle.
  * 
  * Uses a profile with the holonomic drive controller.
  */
-public class Rotate extends Command100 {
+public class Rotate extends Command implements Glassy  {
 
     private static final double kXToleranceRad = 0.02;
     private static final double kVToleranceRad_S = 0.02;
@@ -57,7 +58,6 @@ public class Rotate extends Command100 {
             Gyro gyro,
             SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_robotDrive = drivetrain;
         // since we specify a different tolerance, use a new controller.
@@ -87,7 +87,7 @@ public class Rotate extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_controller.reset();
         resetRefTheta(0.02);
         m_profile = new TrapezoidProfile100(
@@ -106,8 +106,8 @@ public class Rotate extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
-
+    public void execute() {
+        double dt = 0.02;
         // reference
         refTheta = m_profile.calculate(dt, refTheta, m_goalState);
         m_finished = MathUtil.isNear(refTheta.x(), m_goalState.x(), kXToleranceRad)
@@ -153,7 +153,7 @@ public class Rotate extends Command100 {
     }
 
     @Override
-    public void end100(boolean isInterupted) {
+    public void end(boolean isInterupted) {
         m_robotDrive.stop();
     }
 }

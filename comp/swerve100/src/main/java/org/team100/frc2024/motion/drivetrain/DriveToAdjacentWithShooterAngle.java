@@ -3,8 +3,8 @@ package org.team100.frc2024.motion.drivetrain;
 import java.util.List;
 import java.util.Optional;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.DriveMotionController;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
@@ -24,12 +24,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToAdjacentWithShooterAngle extends Command100 {
+public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  {
     // inject these, make them the same as the kinematic limits, inside the
     // trajectory supplier.
     private static final double kMaxVelM_S = 4;
@@ -53,7 +54,6 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
             List<TimingConstraint> constraints,
             double shooterScale,
             TrajectoryVisualization viz) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = swerve;
@@ -66,7 +66,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
         if (!optionalAlliance.isPresent())
             return;
@@ -99,7 +99,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         double now = Timer.getFPGATimestamp();
         Pose2d currentPose = m_swerve.getState().pose();
         ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
@@ -107,7 +107,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
 
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);
-        m_swerve.setChassisSpeeds(output, dt);
+        m_swerve.setChassisSpeeds(output, 0.02);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class DriveToAdjacentWithShooterAngle extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
         m_viz.clear();
     }

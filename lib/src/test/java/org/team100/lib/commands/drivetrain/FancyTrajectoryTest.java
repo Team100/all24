@@ -34,7 +34,7 @@ class FancyTrajectoryTest extends Fixtured {
                 driveControllerFactory.fancyPIDF(PIDFlog),
                 constraints);
         command.initialize();
-        command.execute100(0.02);
+        command.execute();
 
         assertEquals(0, drive.getState().chassisSpeeds().vxMetersPerSecond, 0.001);
         assertEquals(0, drive.getState().chassisSpeeds().vyMetersPerSecond, 0.001);

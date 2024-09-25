@@ -105,9 +105,4 @@ public class IndexerSubsystem extends SubsystemBase implements Glassy {
     public OptionalDouble getVelocity() {
         return m_servo.getVelocity();
     }
-
-    @Override
-    public String getGlassName() {
-        return "Indexer";
-    }
 }

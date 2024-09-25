@@ -5,5 +5,7 @@ package org.team100.lib.dashboard;
  * keys the same, and we should use the same keys for simulation and prod.
  */
 public interface Glassy {
-    String getGlassName();
+    default String getGlassName() {
+        return this.getClass().getSimpleName();
+    }
 }

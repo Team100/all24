@@ -106,8 +106,4 @@ public class ShootSmart extends Command implements Glassy {
         m_feeder.stop();
     }
 
-    @Override
-    public String getGlassName() {
-        return "ShootSmart";
-    }
 }

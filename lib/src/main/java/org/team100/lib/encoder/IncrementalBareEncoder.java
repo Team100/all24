@@ -43,11 +43,6 @@ public interface IncrementalBareEncoder extends Glassy {
      */
     void close();
 
-    @Override
-    default String getGlassName() {
-        return "IncrementalBareEncoder";
-    }
-
     /** This is very slow, only use it on startup. */
     void setEncoderPositionRad(double motorPositionRad);
 

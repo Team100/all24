@@ -182,9 +182,4 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         m_log_left_velocity.log(m_left::getVelocityM_S);
         m_log_right_velocity.log(m_right::getVelocityM_S);
     }
-
-    @Override
-    public String getGlassName() {
-        return "Climber";
-    }
 }

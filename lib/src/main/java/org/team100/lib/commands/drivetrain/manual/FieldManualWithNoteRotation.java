@@ -211,10 +211,4 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         m_prevPose = state.pose();
         return twistWithLockM_S;
     }
-
-    @Override
-    public String getGlassName() {
-        return "FieldManualWithNoteRotation";
-    }
-
 }

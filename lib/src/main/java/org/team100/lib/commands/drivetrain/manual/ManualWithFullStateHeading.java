@@ -218,10 +218,4 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         }
         return thetaFB;
     }
-
-    @Override
-    public String getGlassName() {
-        return "ManualWithFullStateHeading";
-    }
-
 }

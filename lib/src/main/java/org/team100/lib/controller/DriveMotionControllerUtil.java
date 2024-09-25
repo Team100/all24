@@ -181,10 +181,4 @@ public class DriveMotionControllerUtil implements Glassy {
     static Twist2d getErrorTwist(Pose2d measurement, TimedPose setpoint) {
         return measurement.log(setpoint.state().getPose());
     }
-
-    @Override
-    public String getGlassName() {
-        return "DriveMotionControllerUtil";
-    }
-
 }

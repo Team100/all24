@@ -227,10 +227,4 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         }
         return thetaFF;
     }
-
-    @Override
-    public String getGlassName() {
-        return "ManualWithMinTimeHeading";
-    }
-
 }

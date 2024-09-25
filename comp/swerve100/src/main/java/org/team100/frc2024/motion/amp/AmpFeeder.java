@@ -45,8 +45,4 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
         ampDrive.stop();
     }
 
-    @Override
-    public String getGlassName() {
-        return "Amp Feeder";
-    }
 }

@@ -48,8 +48,4 @@ public class CompSensors implements SensorInterface, Glassy {
         return sensorState;
     }
 
-    @Override
-    public String getGlassName() {
-        return "CompSensors";
-    }
 }

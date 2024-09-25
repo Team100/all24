@@ -145,8 +145,5 @@ public class ShootPreload extends Command implements Glassy {
         return finished;
     }
 
-    @Override
-    public String getGlassName() {
-        return "ShootPreload";
-    }
+
 }

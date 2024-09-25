@@ -92,10 +92,6 @@ public class SteeringOverride implements Glassy {
         return min_s;
     }
 
-    @Override
-    public String getGlassName() {
-        return "SteeringOverride";
-    }
 
     /** Actual rotation required, taking flipping into account. */
     private OptionalDouble rotationRad(SwerveModuleState100 desiredModuleState, SwerveModuleState100 prevModuleState) {

@@ -3,9 +3,9 @@ package org.team100.lib.commands.drivetrain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -21,6 +21,7 @@ import org.team100.lib.visualization.TrajectoryVisualization;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Define a center point 1m to the left of the starting position, and circle
@@ -32,7 +33,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * 
  * https://www.desmos.com/calculator/3plby3pgqv
  */
-public class DriveInACircle extends Command100 {
+public class DriveInACircle extends Command implements Glassy {
     private static final double kRadiusM = 1.0;
     private static final double kMaxSpeed = 0.5;
     private static final double kAccel = 0.5;
@@ -70,7 +71,6 @@ public class DriveInACircle extends Command100 {
             HolonomicDriveController3 controller,
             double turnRatio,
             TrajectoryVisualization viz) {
-        super(parent);
         SupplierLogger2 child = parent.child(this);
         m_log_center = child.translation2dLogger(Level.TRACE, "center");
         m_log_angle = child.doubleLogger(Level.TRACE, "angle");
@@ -86,7 +86,7 @@ public class DriveInACircle extends Command100 {
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         m_controller.reset();
         Pose2d currentPose = m_swerve.getState().pose();
         m_initialRotation = currentPose.getRotation().getRadians();
@@ -97,7 +97,8 @@ public class DriveInACircle extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
+        double dt = 0.02;
         double accelRad_S_S = kAccel;
         m_speedRad_S += accelRad_S_S * dt;
         if (m_speedRad_S > kMaxSpeed) {
@@ -175,7 +176,7 @@ public class DriveInACircle extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
         m_viz.clear();
     }

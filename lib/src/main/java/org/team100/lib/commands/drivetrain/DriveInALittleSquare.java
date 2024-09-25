@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.Optional;
 
-import org.team100.lib.commands.Command100;
 import org.team100.lib.controller.State100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -13,6 +13,7 @@ import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Makes a little square, one meter on a side, forever.
@@ -26,7 +27,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * It sends the steering position servo fixed goals, so the servo profile is
  * used.
  */
-public class DriveInALittleSquare extends Command100 {
+public class DriveInALittleSquare extends Command implements Glassy  {
     enum DriveState {
         DRIVING,
         STEERING
@@ -51,14 +52,13 @@ public class DriveInALittleSquare extends Command100 {
     DriveState m_state;
 
     public DriveInALittleSquare(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
-        super(parent);
         m_swerve = swerve;
         m_driveProfile = new TrapezoidProfile100(kMaxVel, kMaxAccel, 0.05);
         addRequirements(m_swerve);
     }
 
     @Override
-    public void initialize100() {
+    public void initialize() {
         // First get the wheels pointing the right way.
         m_state = DriveState.STEERING;
         m_goal = GeometryUtil.kRotationZero;
@@ -67,7 +67,8 @@ public class DriveInALittleSquare extends Command100 {
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
+        double dt = 0.02;
         switch (m_state) {
             case DRIVING:
                 if (MathUtil.isNear(m_setpoint.x(), kGoal.x(), kXToleranceRad)
@@ -105,7 +106,7 @@ public class DriveInALittleSquare extends Command100 {
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_swerve.stop();
     }
 }

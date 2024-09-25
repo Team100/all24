@@ -30,9 +30,4 @@ public class CapsizeAccelerationLimiter implements Glassy {
         return s;
     }
 
-    @Override
-    public String getGlassName() {
-        return "CapsizeAccelerationLimiter";
-    }
-
 }
