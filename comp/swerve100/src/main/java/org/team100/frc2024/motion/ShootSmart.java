@@ -9,9 +9,6 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -19,14 +16,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootSmart extends Command implements Glassy {
-    public static class Log {
-        private final DoubleSupplierLogger2 m_log_pivot_error;
-
-        public Log(SupplierLogger2 log) {
-            m_log_pivot_error = log.doubleLogger(Level.TRACE, "pivot error (rad)");
-        }
-    }
-
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -34,19 +23,15 @@ public class ShootSmart extends Command implements Glassy {
     private final SwerveDriveSubsystem m_drive;
     private final boolean m_isPreload;
 
-    private final Log m_log;
-
     private boolean atVelocity;
 
     public ShootSmart(
-            Log log,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
-        m_log = log;
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;
@@ -66,18 +51,15 @@ public class ShootSmart extends Command implements Glassy {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
+
         Translation2d robotLocation = m_drive.getState().pose().getTranslation();
         Translation2d speakerLocation = ShooterUtil.getSpeakerTranslation(alliance.get());
+
         double rangeM = robotLocation.getDistance(speakerLocation);
-        double angleRad = ShooterUtil.getAngleRad(rangeM);
-        OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
-        if (shooterPivotPosition.isPresent()) {
-            double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
-            m_log.m_log_pivot_error.log(() -> errorRad);
-        }
+        double pivotSetpointRad = ShooterUtil.getAngleRad(rangeM);
 
         // no matter the note position, set the shooter angle and speed
-        m_shooter.setAngle(angleRad);
+        m_shooter.setAngle(pivotSetpointRad);
         m_shooter.forward();
 
         m_intake.runLowerIntake();
@@ -90,8 +72,9 @@ public class ShootSmart extends Command implements Glassy {
             // both sensors are dark, note is in position, wait for drums to spin up
             m_intake.stop();
             m_feeder.stop();
+            OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
             if (shooterPivotPosition.isPresent()) {
-                double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
+                double errorRad = shooterPivotPosition.getAsDouble() - pivotSetpointRad;
                 if (m_shooter.atVelocitySetpoint(m_isPreload) && Math.abs(errorRad) < 0.01) {
                     // latch ready
                     atVelocity = true;

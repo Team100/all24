@@ -30,6 +30,7 @@ import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
@@ -76,6 +77,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private final OptionalDoubleLogger m_log_left_velocity;
     private final OptionalDoubleLogger m_log_right_velocity;
     private final OptionalDoubleLogger m_log_pivot_angle;
+    private final DoubleSupplierLogger2 m_log_goal_err;
 
     public DrumShooter(
             SupplierLogger2 parent,
@@ -97,6 +99,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         SupplierLogger2 leftLogger = child.child("Left");
         SupplierLogger2 rightLogger = child.child("Right");
         SupplierLogger2 pivotLogger = child.child("Pivot");
+        m_log_goal_err = pivotLogger.doubleLogger(Level.TRACE, "goal err (rad)");
 
         // we use velocityvoltage control so the P value here is volts per rev/s of the
         // motor. Typical rev/s is 50, so typical error might be 5, and for that we'd
@@ -222,7 +225,16 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         // pivotServo.rezero();
     }
 
+    /**
+     * Pass the goal to the servo; also log the difference between goal and
+     * measurement.
+     */
     public void setAngle(double goalRad) {
+        OptionalDouble position = getPivotPosition();
+        if (position.isPresent()) {
+            double errorRad = position.getAsDouble() - goalRad;
+            m_log_goal_err.log(() -> errorRad);
+        }
         pivotServo.setPosition(goalRad);
     }
 
