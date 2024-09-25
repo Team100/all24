@@ -22,7 +22,7 @@ public interface BareMotor extends Glassy {
     void setDutyCycle(double output);
 
     /**
-     * Velocity control with acceleration and holding torque.
+     * Velocity feedback with friction, velocity, acceleration, and holding torque.
      * 
      * Could be open-loop (e.g. "kV") or closed-loop.
      * 
@@ -45,7 +45,7 @@ public interface BareMotor extends Glassy {
     void setEncoderPositionRad(double positionRad);
 
     /**
-     * Position control with holding torque.
+     * Position feedback with friction and velocity feedforward, and holding torque.
      * 
      * Revolutions wind up; 0 != 2pi.
      * 

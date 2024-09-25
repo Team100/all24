@@ -131,7 +131,7 @@ public abstract class Talon6Motor implements BareMotor {
 
     /**
      * Use VelocityVoltage outboard PID control to hold the given velocity, with
-     * acceleration and torque feedforwards.
+     * friction, velocity, acceleration, and torque feedforwards.
      */
     @Override
     public void setVelocity(double motorRad_S, double motorAccelRad_S2, double motorTorqueNm) {
@@ -164,7 +164,7 @@ public abstract class Talon6Motor implements BareMotor {
 
     /**
      * Use PositionVoltage outboard PID control to hold the given position, with
-     * velocity and torque feedforwards.
+     * friction, velocity, and torque feedforwards.
      * 
      * Motor revolutions wind up, so setting 0 revs and 1 rev are different.
      */

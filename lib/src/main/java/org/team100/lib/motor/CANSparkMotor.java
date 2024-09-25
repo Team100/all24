@@ -102,8 +102,8 @@ public abstract class CANSparkMotor implements BareMotor {
     }
 
     /**
-     * Use outboard PID control to hold the given velocty, with acceleration and
-     * torque feedforwards.
+     * Use outboard PID control to hold the given velocity, with velocity,
+     * acceleration, and torque feedforwards.
      */
     @Override
     public void setVelocity(double motorRad_S, double motorAccelRad_S2, double motorTorqueNm) {

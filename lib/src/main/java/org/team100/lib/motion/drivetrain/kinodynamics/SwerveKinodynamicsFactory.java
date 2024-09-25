@@ -29,14 +29,15 @@ public class SwerveKinodynamicsFactory {
                 // the comp bot uses the "fast" ratio and FOC falcons
                 // so should be a bit higher top speed and less acceleration.
                 // note these measurements were updated jun 24.
+                // 9/24/04, raised steering rate from 20 to 40, accel from 60 to 120.
                 return new SwerveKinodynamics(
                         parent,
                         5, // max vel m/s
                         10, // stall m/s/s
                         10, // max accel m/s/s
                         20, // max decel m/s/s
-                        20, // max module steering rate rad/s
-                        60, // max module steering accel rad/s/s
+                        40, // max module steering rate rad/s
+                        120, // max module steering accel rad/s/s
                         0.48, // front track m
                         0.43, // back track m
                         0.46, // wheelbase m
