@@ -19,6 +19,14 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShootSmart extends Command implements Glassy {
+    public static class Log {
+        private final DoubleSupplierLogger2 m_log_pivot_error;
+
+        public Log(SupplierLogger2 log) {
+            m_log_pivot_error = log.doubleLogger(Level.TRACE, "pivot error (rad)");
+        }
+    }
+
     private final Intake m_intake;
     private final SensorInterface m_sensor;
     private final FeederSubsystem m_feeder;
@@ -26,21 +34,19 @@ public class ShootSmart extends Command implements Glassy {
     private final SwerveDriveSubsystem m_drive;
     private final boolean m_isPreload;
 
-    // LOGGERS
-    private final DoubleSupplierLogger2 m_log_pivot_error;
+    private final Log m_log;
 
     private boolean atVelocity;
 
     public ShootSmart(
-            SupplierLogger2 parent,
+            Log log,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
-        SupplierLogger2 child = parent.child(this);
-        m_log_pivot_error = child.doubleLogger(Level.TRACE, "pivot error (rad)");
+        m_log = log;
         m_intake = intake;
         m_sensor = sensor;
         m_feeder = feeder;
@@ -67,7 +73,7 @@ public class ShootSmart extends Command implements Glassy {
         OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
         if (shooterPivotPosition.isPresent()) {
             double errorRad = shooterPivotPosition.getAsDouble() - angleRad;
-            m_log_pivot_error.log(() -> errorRad);
+            m_log.m_log_pivot_error.log(() -> errorRad);
         }
 
         // no matter the note position, set the shooter angle and speed

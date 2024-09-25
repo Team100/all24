@@ -13,8 +13,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.Gyro;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.telemetry.Telemetry.Level;
@@ -64,22 +64,21 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
     private final DoubleSupplierLogger2 m_log_omega_measurement;
     private final DoubleSupplierLogger2 m_log_omega_error;
     private final DoubleSupplierLogger2 m_log_omega_fb;
-    private final DoubleArraySupplierLogger2 m_log_target;
-    private final DoubleArraySupplierLogger2 m_log_ball;
+    private final FieldLogger.Log m_field_log;
+
 
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
 
     public ManualWithAmpLock(
-            SupplierLogger2 fieldLogger,
+            FieldLogger.Log fieldLogger,
             SupplierLogger2 parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             PIDController thetaController,
             PIDController omegaController) {
-        m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
-        m_log_ball = fieldLogger.doubleArrayLogger(Level.TRACE, "ball");
+        m_field_log = fieldLogger;
         SupplierLogger2 child = parent.child(this);
         m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
         m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
@@ -179,13 +178,11 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         // desaturate to feasibility by preferring the rotational velocity.
         twistWithLockM_S = m_swerveKinodynamics.preferRotation(twistWithLockM_S);
 
-        // this name needs to be exactly "/field/target" for glass.
-        m_log_target.log(() -> new double[] { target.getX(), target.getY(), 0 });
+        m_field_log.m_log_target.log(() -> new double[] { target.getX(), target.getY(), 0 });
 
         if (m_ball != null) {
             m_ball = m_ball.plus(m_ballV);
-            // this name needs to be exactly "/field/ball" for glass.
-            m_log_ball.log(() -> new double[] { m_ball.getX(), m_ball.getY(), 0 });
+            m_field_log.m_log_ball.log(() -> new double[] { m_ball.getX(), m_ball.getY(), 0 });
         }
         return twistWithLockM_S;
     }

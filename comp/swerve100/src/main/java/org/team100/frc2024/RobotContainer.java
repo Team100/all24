@@ -66,6 +66,7 @@ import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
@@ -114,7 +115,10 @@ public class RobotContainer implements Glassy {
         final Async async = asyncFactory.get();
         final Telemetry telemetry = Telemetry.instance();
         new TelemetryLevelPoller(async, telemetry::setLevel, Level.TRACE);
+
         final SupplierLogger2 fieldLogger = telemetry.fieldLogger;
+        final FieldLogger.Log fieldLog = new FieldLogger.Log(fieldLogger);
+
         final SupplierLogger2 logger = telemetry.rootLogger;
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
@@ -204,7 +208,9 @@ public class RobotContainer implements Glassy {
 
         // final FullStateDriveController fullStateController = new
         // FullStateDriveController();
-        final HolonomicDriveController100 dthetaController = new HolonomicDriveController100(logger);
+
+        // cartesian position, rotation full-state.
+        final HolonomicDriveController100 halfFullStateController = new HolonomicDriveController100(logger);
 
         final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
@@ -230,15 +236,15 @@ public class RobotContainer implements Glassy {
                         intake,
                         noteListener::getClosestTranslation2d,
                         m_drive,
-                        dthetaController,
+                        halfFullStateController,
                         swerveKinodynamics));
         whileTrue(driverControl::actualCircle,
                 new DriveInACircle(logger, m_drive, controller, -1, viz));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(
-                        logger,
                         m_drive,
+                        halfFullStateController,
                         swerveKinodynamics,
                         m_ampPivot,
                         m_ampFeeder,
@@ -303,7 +309,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("ROBOT_RELATIVE_FACING_NOTE", false,
                 new ManualWithNoteRotation(
-                        fieldLogger,
+                        fieldLog,
                         logger,
                         swerveKinodynamics,
                         gyro,
@@ -342,7 +348,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(
-                        fieldLogger,
+                        fieldLog,
                         logger,
                         swerveKinodynamics,
                         gyro,
@@ -353,7 +359,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("LOCKED", false,
                 new ManualWithTargetLock(
-                        fieldLogger,
+                        fieldLog,
                         logger,
                         swerveKinodynamics,
                         gyro,
@@ -364,7 +370,7 @@ public class RobotContainer implements Glassy {
 
         driveManually.register("SHOOTER_LOCK", false,
                 new ManualWithShooterLock(
-                        fieldLogger,
+                        fieldLog,
                         logger,
                         swerveKinodynamics,
                         gyro,
@@ -374,15 +380,16 @@ public class RobotContainer implements Glassy {
         final PIDController omega2Controller = new PIDController(0.5, 0, 0); // .5
 
         final ManualWithShooterLock shooterLock = new ManualWithShooterLock(
-                fieldLogger,
+                fieldLog,
                 logger,
                 swerveKinodynamics,
                 gyro,
                 thetaController,
                 omega2Controller);
 
+
         final ManualWithAmpLock ampLock = new ManualWithAmpLock(
-                fieldLogger,
+                fieldLog,
                 logger,
                 swerveKinodynamics,
                 gyro,
