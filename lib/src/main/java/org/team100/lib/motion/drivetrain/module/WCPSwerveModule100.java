@@ -28,7 +28,7 @@ import org.team100.lib.profile.Profile100;
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
-    private static final boolean USE_OUTBOARD_STEERING = true;
+    private static final boolean USE_OUTBOARD_STEERING = false;
     private static final double kSteeringSupplyLimit = 10;
     private static final double kSteeringStatorLimit = 20;
     /**
@@ -61,7 +61,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     // WCP 4 inch wheel
     private static final double kWheelDiameterM = 0.0975; // 0.1015
 
-    public static WCPSwerveModule100 get(
+    public static WCPSwerveModule100 getKrakenDrive(
             SupplierLogger2 parent,
             double supplyLimitAmps,
             double statorLimitAmps,
@@ -75,7 +75,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             EncoderDrive drive,
             MotorPhase motorPhase) {
 
-        LinearVelocityServo driveServo = driveServo(
+        LinearVelocityServo driveServo = driveKrakenServo(
                 parent.child("Drive"),
                 supplyLimitAmps,
                 statorLimitAmps,
@@ -96,7 +96,42 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new WCPSwerveModule100(driveServo, turningServo);
     }
 
-    private static LinearVelocityServo driveServo(
+    public static WCPSwerveModule100 getFalconDrive(
+            SupplierLogger2 parent,
+            double supplyLimitAmps,
+            double statorLimitAmps,
+            int driveMotorCanId,
+            DriveRatio ratio,
+            Class<? extends RotaryPositionSensor> encoderClass,
+            int turningMotorCanId,
+            int turningEncoderChannel,
+            double turningOffset,
+            SwerveKinodynamics kinodynamics,
+            EncoderDrive drive,
+            MotorPhase motorPhase) {
+
+        LinearVelocityServo driveServo = driveFalconServo(
+                parent.child("Drive"),
+                supplyLimitAmps,
+                statorLimitAmps,
+                driveMotorCanId,
+                ratio);
+
+        AngularPositionServo turningServo = turningServo(
+                parent.child("Turning"),
+                encoderClass,
+                turningMotorCanId,
+                turningEncoderChannel,
+                turningOffset,
+                kSteeringRatio,
+                kinodynamics,
+                drive,
+                motorPhase);
+
+        return new WCPSwerveModule100(driveServo, turningServo);
+    }
+
+    private static LinearVelocityServo driveKrakenServo(
             SupplierLogger2 parent,
             double supplyLimit,
             double statorLimit,
@@ -120,6 +155,32 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new OutboardLinearVelocityServo(
                 parent,
                 mech);
+    }
+
+    private static LinearVelocityServo driveFalconServo(
+        SupplierLogger2 parent,
+        double supplyLimit,
+        double statorLimit,
+        int driveMotorCanId,
+        DriveRatio ratio) {
+    Feedforward100 ff = Feedforward100.makeWCPSwerveDriveFalcon6();
+    PIDConstants pid = new PIDConstants(0.2);
+    Falcon6Motor driveMotor = new Falcon6Motor(
+            parent,
+            driveMotorCanId,
+            MotorPhase.FORWARD,
+            supplyLimit,
+            statorLimit,
+            pid,
+            ff);
+    LinearMechanism mech = new SimpleLinearMechanism(
+            driveMotor,
+            new Talon6Encoder(parent, driveMotor),
+            ratio.m_ratio,
+            kWheelDiameterM);
+    return new OutboardLinearVelocityServo(
+            parent,
+            mech);
     }
 
     private static AngularPositionServo turningServo(
