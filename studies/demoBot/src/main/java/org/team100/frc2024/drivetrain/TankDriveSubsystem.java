@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class TankDriveSubsystem extends SubsystemBase implements Glassy{
     private final SupplierLogger m_logger;
     private final TankModuleCollection m_modules;
-    private final double kMaxSpeedM_S = 0.5;
+    private final double kMaxSpeedM_S = 0.4;
 
     public TankDriveSubsystem(
             SupplierLogger parent,
