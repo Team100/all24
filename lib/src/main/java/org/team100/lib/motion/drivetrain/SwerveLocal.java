@@ -63,10 +63,10 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
             SwerveKinodynamics swerveKinodynamics,
             SwerveModuleCollection modules) {
         SupplierLogger2 child = parent.child(this);
-        m_log_desired = child.chassisSpeedsLogger(Level.TRACE, "desired chassis speed");
+        m_log_desired = child.chassisSpeedsLogger(Level.DEBUG, "desired chassis speed");
         m_log_setpoint_delta = child.chassisSpeedsLogger(Level.TRACE, "setpoint delta");
         m_log_prev_setpoint = child.chassisSpeedsLogger(Level.TRACE, "prevSetpoint chassis speed");
-        m_log_setpoint = child.chassisSpeedsLogger(Level.TRACE, "setpoint chassis speed");
+        m_log_setpoint = child.chassisSpeedsLogger(Level.DEBUG, "setpoint chassis speed");
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
         m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(child, m_swerveKinodynamics);

@@ -80,6 +80,7 @@ import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.telemetry.TelemetryLevelPoller;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
+import org.team100.lib.util.Util;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -114,7 +115,9 @@ public class RobotContainer implements Glassy {
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
         final Async async = asyncFactory.get();
         final Telemetry telemetry = Telemetry.instance();
-        new TelemetryLevelPoller(async, telemetry::setLevel, Level.TRACE);
+        final TelemetryLevelPoller poller = new TelemetryLevelPoller(async, telemetry::setLevel, Level.COMP);
+        Util.printf("Using log level %s\n", poller.getLevel().name());
+        Util.println("Do not use TRACE in comp, with NT logging, it will overrun");
 
         final SupplierLogger2 fieldLogger = telemetry.fieldLogger;
         final FieldLogger.Log fieldLog = new FieldLogger.Log(fieldLogger);
@@ -139,19 +142,19 @@ public class RobotContainer implements Glassy {
         final SupplierLogger2 driveLog = logger.child("Drive");
 
         m_modules = SwerveModuleCollection.get(
-            driveLog,
+                driveLog,
                 kDriveCurrentLimit,
                 kDriveStatorLimit,
                 swerveKinodynamics);
         final Gyro gyro = GyroFactory.get(
-            driveLog,
+                driveLog,
                 swerveKinodynamics,
                 m_modules,
                 asyncFactory);
 
         // ignores the rotation derived from vision.
         final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
-            driveLog,
+                driveLog,
                 gyro.getYawNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
@@ -159,7 +162,7 @@ public class RobotContainer implements Glassy {
 
         final AprilTagFieldLayoutWithCorrectOrientation m_layout = new AprilTagFieldLayoutWithCorrectOrientation();
         final VisionDataProvider24 visionDataProvider = new VisionDataProvider24(
-            driveLog,
+                driveLog,
                 m_layout,
                 poseEstimator);
 
@@ -181,7 +184,6 @@ public class RobotContainer implements Glassy {
         // SUBSYSTEMS
 
         final SupplierLogger2 sysLog = logger.child("Subsystems");
-
 
         final FeederSubsystem feeder = new FeederSubsystem(sysLog, m_sensors);
 

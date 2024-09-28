@@ -1,0 +1,16 @@
+{
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        ".",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "editor.minimap.enabled": false,
+    "editor.inlayHints.enabled": "off",
+    "workbench.colorTheme": "Default Light Modern",
+    "editor.detectIndentation": false,
+    "python.analysis.typeCheckingMode": "off"
+}

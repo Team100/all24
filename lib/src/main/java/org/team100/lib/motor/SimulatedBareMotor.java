@@ -18,8 +18,8 @@ public class SimulatedBareMotor implements BareMotor {
     public SimulatedBareMotor(SupplierLogger2 parent, double freeSpeedRad_S) {
         SupplierLogger2 child = parent.child(this);
         m_freeSpeedRad_S = freeSpeedRad_S;
-        m_log_duty = child.doubleLogger(Level.TRACE, "duty_cycle");
-        m_log_velocity = child.doubleLogger(Level.TRACE, "velocity (rad_s)");
+        m_log_duty = child.doubleLogger(Level.DEBUG, "duty_cycle");
+        m_log_velocity = child.doubleLogger(Level.DEBUG, "velocity (rad_s)");
     }
 
     @Override

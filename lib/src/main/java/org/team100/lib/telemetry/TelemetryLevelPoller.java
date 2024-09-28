@@ -25,6 +25,10 @@ public class TelemetryLevelPoller {
         async.addPeriodic(this::updateLevel, 1, "Telemetry");
     }
 
+    public Level getLevel() {
+        return m_levelChooser.getSelected();
+    }
+
     private void updateLevel() {
         Level selected = m_levelChooser.getSelected();
         if (selected == null)

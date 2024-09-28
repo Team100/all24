@@ -59,10 +59,10 @@ public class HolonomicDriveController100 implements Glassy {
         m_log_u_FB_x = child.doubleLogger(Level.TRACE, "u_FB/x");
         m_log_u_FB_y = child.doubleLogger(Level.TRACE, "u_FB/y");
         m_log_u_FB_theta = child.doubleLogger(Level.TRACE, "u_FB/theta");
-        m_log_measurement = child.swerveStateLogger(Level.TRACE, "measurement");
-        m_log_setpoint_x = child.doubleLogger(Level.TRACE, "setpoint/x");
-        m_log_setpoint_y = child.doubleLogger(Level.TRACE, "setpoint/y");
-        m_log_setpoint_theta = child.doubleLogger(Level.TRACE, "setpoint/theta");
+        m_log_measurement = child.swerveStateLogger(Level.DEBUG, "measurement");
+        m_log_setpoint_x = child.doubleLogger(Level.DEBUG, "setpoint/x");
+        m_log_setpoint_y = child.doubleLogger(Level.DEBUG, "setpoint/y");
+        m_log_setpoint_theta = child.doubleLogger(Level.DEBUG, "setpoint/theta");
         m_log_error_x = child.doubleLogger(Level.TRACE, "error/x");
         m_log_error_y = child.doubleLogger(Level.TRACE, "error/y");
         m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");

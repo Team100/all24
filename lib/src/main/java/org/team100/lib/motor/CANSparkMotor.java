@@ -72,18 +72,18 @@ public abstract class CANSparkMotor implements BareMotor {
         m_temp = Memo.ofDouble(m_motor::getMotorTemperature);
         // LOGGERS
         child.intLogger(Level.TRACE, "Device ID").log(m_motor::getDeviceId);
-        m_log_desired_position = child.doubleLogger(Level.TRACE, "desired position (rev)");
-        m_log_desired_speed = child.doubleLogger(Level.TRACE, "desired speed (rev_s)");
+        m_log_desired_position = child.doubleLogger(Level.DEBUG, "desired position (rev)");
+        m_log_desired_speed = child.doubleLogger(Level.DEBUG, "desired speed (rev_s)");
         m_log_desired_accel = child.doubleLogger(Level.TRACE, "desired accel (rev_s2)");
         m_log_friction_FF = child.doubleLogger(Level.TRACE, "friction feedforward (v)");
         m_log_velocity_FF = child.doubleLogger(Level.TRACE, "velocity feedforward (v)");
         m_log_accel_FF = child.doubleLogger(Level.TRACE, "accel feedforward (v)");
         m_log_torque_FF = child.doubleLogger(Level.TRACE, "torque feedforward (v)");
-        m_log_duty = child.doubleLogger(Level.TRACE, "Duty Cycle");
-        m_log_position = child.doubleLogger(Level.TRACE, "position (rev)");
-        m_log_velocity = child.doubleLogger(Level.TRACE, "velocity (rev_s)");
+        m_log_duty = child.doubleLogger(Level.DEBUG, "Duty Cycle");
+        m_log_position = child.doubleLogger(Level.DEBUG, "position (rev)");
+        m_log_velocity = child.doubleLogger(Level.DEBUG, "velocity (rev_s)");
         m_log_rpm = child.doubleLogger(Level.TRACE, "velocity (RPM)");
-        m_log_current = child.doubleLogger(Level.TRACE, "current (A)");
+        m_log_current = child.doubleLogger(Level.DEBUG, "current (A)");
         m_log_torque = child.doubleLogger(Level.TRACE, "torque (Nm)");
         m_log_temp = child.doubleLogger(Level.TRACE, "temperature (C)");
     }

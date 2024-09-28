@@ -22,9 +22,8 @@ public class ForceViz {
     private final DoubleObjArraySupplierLogger2 m_log_desired;
 
     public ForceViz(SupplierLogger2 fieldLogger) {
-        m_log_tactics = fieldLogger.doubleObjArrayLogger(Level.DEBUG, "tactics");
-        m_log_desired = fieldLogger.doubleObjArrayLogger(Level.DEBUG, "desired");
-
+        m_log_tactics = fieldLogger.doubleObjArrayLogger(Level.TRACE, "tactics");
+        m_log_desired = fieldLogger.doubleObjArrayLogger(Level.TRACE, "desired");
     }
 
     public void tactics(Translation2d p, FieldRelativeVelocity v) {
