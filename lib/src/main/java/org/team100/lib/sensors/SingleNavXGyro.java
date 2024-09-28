@@ -95,6 +95,7 @@ public class SingleNavXGyro implements Gyro {
         // much CPU?
         switch (Identity.instance) {
             case COMP_BOT:
+            case SWERVE_ONE:
                 m_ahrs = new AHRS(
                         SerialPort.Port.kUSB,
                         AHRS.SerialDataType.kProcessedData,

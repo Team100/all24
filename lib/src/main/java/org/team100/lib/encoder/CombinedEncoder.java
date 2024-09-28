@@ -115,5 +115,4 @@ public class CombinedEncoder implements RotaryPositionSensor {
         m_log_incremental_wrapped.log(() -> MathUtil.angleModulus(m_incremental.getPositionRad().getAsDouble()));
         m_log_combined.log(this::getPositionRad);
     }
-
 }
