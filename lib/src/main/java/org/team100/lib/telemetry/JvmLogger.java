@@ -31,9 +31,9 @@ public class JvmLogger implements Glassy {
         SupplierLogger2 child = parent.child(this);
         times = new HashMap<>();
         counts = new HashMap<>();
-        m_log_heap = child.longLogger(Level.COMP, "MemoryUsage/heap");
-        m_log_nonheap = child.longLogger(Level.COMP, "MemoryUsage/non-heap");
-        m_log_memory_total = child.longLogger(Level.COMP, "MemoryPool/total");
+        m_log_heap = child.longLogger(Level.DEBUG, "MemoryUsage/heap");
+        m_log_nonheap = child.longLogger(Level.TRACE, "MemoryUsage/non-heap");
+        m_log_memory_total = child.longLogger(Level.DEBUG, "MemoryPool/total");
         m_log_gc_time = child.longLogger(Level.TRACE, "GCTimeMS/total");
         m_log_gc_count = child.longLogger(Level.TRACE, "GCCounts/total");
     }

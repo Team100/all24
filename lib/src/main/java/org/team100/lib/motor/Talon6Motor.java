@@ -94,19 +94,19 @@ public abstract class Talon6Motor implements BareMotor {
         m_torque = Memo.ofDouble(() -> m_motor.getTorqueCurrent().refresh().getValueAsDouble());
 
         m_log_desired_duty = child.doubleLogger(Level.TRACE, "desired duty cycle [-1,1]");
-        m_log_desired_position = child.doubleLogger(Level.TRACE, "desired position (rev)");
-        m_log_desired_speed = child.doubleLogger(Level.TRACE, "desired speed (rev_s)");
+        m_log_desired_position = child.doubleLogger(Level.DEBUG, "desired position (rev)");
+        m_log_desired_speed = child.doubleLogger(Level.DEBUG, "desired speed (rev_s)");
         m_log_desired_accel = child.doubleLogger(Level.TRACE, "desired accel (rev_s2)");
         m_log_friction_FF = child.doubleLogger(Level.TRACE, "friction feedforward (v)");
         m_log_velocity_FF = child.doubleLogger(Level.TRACE, "velocity feedforward (v)");
         m_log_accel_FF = child.doubleLogger(Level.TRACE, "accel feedforward (v)");
         m_log_torque_FF = child.doubleLogger(Level.TRACE, "torque feedforward (v)");
 
-        m_log_position = child.doubleLogger(Level.TRACE, "position (rev)");
-        m_log_velocity = child.doubleLogger(Level.TRACE, "velocity (rev_s)");
-        m_log_output = child.doubleLogger(Level.TRACE, "output [-1,1]");
+        m_log_position = child.doubleLogger(Level.DEBUG, "position (rev)");
+        m_log_velocity = child.doubleLogger(Level.DEBUG, "velocity (rev_s)");
+        m_log_output = child.doubleLogger(Level.DEBUG, "output [-1,1]");
         m_log_error = child.doubleLogger(Level.TRACE, "error (rev_s)");
-        m_log_supply = child.doubleLogger(Level.TRACE, "supply current (A)");
+        m_log_supply = child.doubleLogger(Level.DEBUG, "supply current (A)");
         m_log_stator = child.doubleLogger(Level.TRACE, "stator current (A)");
         m_log_torque = child.doubleLogger(Level.TRACE, "torque (Nm)");
         m_log_temp = child.doubleLogger(Level.TRACE, "temperature (C)");

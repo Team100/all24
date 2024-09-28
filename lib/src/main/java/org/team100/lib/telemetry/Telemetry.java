@@ -71,7 +71,7 @@ public class Telemetry {
      */
     private Telemetry() {
         // this will be overridden by {@link TelemetryLevelPoller}
-        m_level = Level.TRACE;
+        m_level = Level.COMP;
 
         if (USE_UDP_LOGGING) {
             Util.warn("=======================================");

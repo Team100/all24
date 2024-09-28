@@ -134,10 +134,10 @@ public class SingleNavXGyro implements Gyro {
         m_log_heading_rate = child.doubleLogger(Level.TRACE, "Heading Rate NWU (rad_s)");
         m_log_pitch = child.doubleLogger(Level.TRACE, "Pitch NWU (rad)");
         m_log_roll = child.doubleLogger(Level.TRACE, "Roll NWU (rad)");
-        m_log_yaw_deg = child.doubleLogger(Level.TRACE, "Yaw NED (deg)");
+        m_log_yaw_deg = child.doubleLogger(Level.DEBUG, "Yaw NED (deg)");
         m_log_pitch_deg = child.doubleLogger(Level.TRACE, "Pitch (deg)");
         m_log_roll_deg = child.doubleLogger(Level.TRACE, "Roll (deg)");
-        m_log_yaw_rate_deg = child.doubleLogger(Level.TRACE, "Rate NED (deg_s)");
+        m_log_yaw_rate_deg = child.doubleLogger(Level.DEBUG, "Rate NED (deg_s)");
         m_log_connected = child.booleanLogger(Level.TRACE, "Connected");
 
     }

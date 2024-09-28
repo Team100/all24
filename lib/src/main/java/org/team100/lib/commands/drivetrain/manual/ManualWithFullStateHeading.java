@@ -80,10 +80,10 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, TimedRobot100.LOOP_PERIOD_S);
         m_log_mode = child.stringLogger(Level.TRACE, "mode");
-        m_log_goal_theta = child.doubleLogger(Level.TRACE, "goal/theta");
-        m_log_setpoint_theta = child.state100Logger(Level.TRACE, "setpoint/theta");
-        m_log_measurement_theta = child.doubleLogger(Level.TRACE, "measurement/theta");
-        m_log_measurement_omega = child.doubleLogger(Level.TRACE, "measurement/omega");
+        m_log_goal_theta = child.doubleLogger(Level.DEBUG, "goal/theta");
+        m_log_setpoint_theta = child.state100Logger(Level.DEBUG, "setpoint/theta");
+        m_log_measurement_theta = child.doubleLogger(Level.DEBUG, "measurement/theta");
+        m_log_measurement_omega = child.doubleLogger(Level.DEBUG, "measurement/omega");
         m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
         m_log_error_omega = child.doubleLogger(Level.TRACE, "error/omega");
         m_log_theta_FF = child.doubleLogger(Level.TRACE, "thetaFF");

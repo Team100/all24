@@ -35,10 +35,10 @@ public class DrivePIDFController implements DriveMotionController {
 
         public Log(SupplierLogger2 parent) {
             SupplierLogger2 log = parent.child("DrivePIDFController");
-            m_log_measurement = log.pose2dLogger(Level.TRACE, "measurement");
-            m_log_setpoint = log.timedPoseLogger(Level.TRACE, "setpoint");
+            m_log_measurement = log.pose2dLogger(Level.DEBUG, "measurement");
+            m_log_setpoint = log.timedPoseLogger(Level.DEBUG, "setpoint");
             m_log_is_mt = log.booleanLogger(Level.TRACE, "IS MT");
-            m_log_sample = log.trajectorySamplePointLogger(Level.TRACE, "sample point");
+            m_log_sample = log.trajectorySamplePointLogger(Level.DEBUG, "sample point");
         }
     }
 
