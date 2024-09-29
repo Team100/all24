@@ -28,7 +28,7 @@ import org.team100.lib.profile.Profile100;
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
-    private static final boolean USE_OUTBOARD_STEERING = false;
+    private static final boolean USE_OUTBOARD_STEERING = true;
     private static final double kSteeringSupplyLimit = 10;
     private static final double kSteeringStatorLimit = 20;
     /**
@@ -96,6 +96,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return new WCPSwerveModule100(driveServo, turningServo);
     }
 
+    /**
+     * MAKE SURE THAT THE BEVELS ON THE WHEELS FOR ZEROING GO TO THE LEFT
+     */
     public static WCPSwerveModule100 getFalconDrive(
             SupplierLogger2 parent,
             double supplyLimitAmps,

@@ -21,7 +21,7 @@ public class GyroFactory {
             AsyncFactory asyncFactory) {
         switch (Identity.instance) {
             case COMP_BOT:
-            case BETA_BOT:
+            case SWERVE_ONE:
                 try {
                     // the kauailabs library calls System.exit() in case
                     // it can't find this library, so check here first.
