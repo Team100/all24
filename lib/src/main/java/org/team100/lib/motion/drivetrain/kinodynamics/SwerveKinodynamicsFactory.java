@@ -57,10 +57,10 @@ public class SwerveKinodynamicsFactory {
                 return new SwerveKinodynamics(
                         4, // vel m/s
                         10, // stall m/s/s
-                        2, // accel m/s/s
-                        2, // decel m/s/s
-                        13, // steering rate rad/s
-                        20 * Math.PI, // steering accel rad/s/s
+                        10, // max accel m/s/s
+                        20, // max decel m/s/s
+                        40, // steering rate rad/s
+                        40 * Math.PI, // steering accel rad/s/s
                         0.449, // track m
                         0.464, // wheelbase m
                         .232, // front offset m
