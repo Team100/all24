@@ -3,7 +3,6 @@ package org.team100.lib.follower;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
-import org.team100.lib.controller.Lookahead;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.logging.SupplierLogger2;

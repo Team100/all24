@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 /**
  * A utility class for interpolating lookahead distance based on current speed.
