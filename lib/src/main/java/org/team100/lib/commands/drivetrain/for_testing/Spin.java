@@ -1,4 +1,4 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.lib.commands.drivetrain.for_testing;
 
 import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
@@ -69,7 +69,7 @@ public class Spin extends Command implements Glassy {
 
         SwerveState reference = new SwerveState(xState, yState, rotation);
 
-        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference);
         // force dx and dy to zero, clamp dtheta
         FieldRelativeVelocity clamped = new FieldRelativeVelocity(0, 0,
                 MathUtil.clamp(fieldRelativeTarget.theta(), -kMaxSpeed, kMaxSpeed));

@@ -105,6 +105,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
     public void execute() {
         if (m_trajectory == null)
             return;
+        SwerveState measurement = m_swerve.getState(); 
 
         if (m_steeringAligned) {
             Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(TimedRobot100.LOOP_PERIOD_S);
@@ -117,15 +118,13 @@ public class DriveToWaypoint3 extends Command implements Glassy {
 
             TimedPose desiredState = samplePoint.state();
             m_log.desired.log(() -> desiredState.state().getPose());
-            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
             // follow normally
             m_swerve.driveInFieldCoords(fieldRelativeTarget);
         } else {
             // not aligned yet, try aligning by *previewing* next point
-
             Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(TimedRobot100.LOOP_PERIOD_S);
             if (optSamplePoint.isEmpty()) {
                 Util.warn("broken trajectory, cancelling!");
@@ -136,16 +135,14 @@ public class DriveToWaypoint3 extends Command implements Glassy {
 
             TimedPose desiredState = samplePoint.state();
             m_log.desired.log(() -> desiredState.state().getPose());
-            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget);
         }
 
         m_log.aligned.log(() -> m_steeringAligned);
-
-        m_log.pose.log(() -> m_swerve.getState().pose());
+        m_log.pose.log(measurement::pose);
     }
 
     @Override

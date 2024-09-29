@@ -1,4 +1,4 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.lib.commands.drivetrain.for_testing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,7 +114,7 @@ public class DriveInACircle extends Command implements Glassy {
                 m_initialRotation,
                 m_turnRatio);
 
-        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState().pose(), reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference);
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
 
         m_log_center.log(() -> m_center);

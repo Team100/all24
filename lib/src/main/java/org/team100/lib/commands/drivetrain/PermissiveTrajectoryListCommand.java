@@ -97,10 +97,9 @@ public class PermissiveTrajectoryListCommand extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
             TimedPose desiredState = samplePoint.state();
 
-            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             m_log_reference.log(() -> reference);
-            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget);
         } else {
             // look just one loop ahead by *previewing* the next point
@@ -113,10 +112,9 @@ public class PermissiveTrajectoryListCommand extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
             TimedPose desiredState = samplePoint.state();
 
-            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             m_log_reference.log(() -> reference);
-            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget);
         }
     }

@@ -1,7 +1,6 @@
 package org.team100.lib.controller.drivetrain;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
@@ -18,7 +17,7 @@ import edu.wpi.first.math.geometry.Transform2d;
  * 
  * TODO: replace this with 3d full-state?
  */
-public class HolonomicDriveController100 implements Glassy {
+public class HolonomicDriveController100 implements HolonomicFieldRelativeController {
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
@@ -99,18 +98,15 @@ public class HolonomicDriveController100 implements Glassy {
     /**
      * Makes no attempt to coordinate the axes or provide feasible output.
      */
-    public FieldRelativeVelocity calculate(
-            SwerveState currentPose,
-            SwerveState desiredState) {
+    public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference) {
+        double xFF = reference.x().v(); // m/s
+        double yFF = reference.y().v(); // m/s
+        double thetaFF = reference.theta().v(); // rad/s
 
-        double xFF = desiredState.x().v(); // m/s
-        double yFF = desiredState.y().v(); // m/s
-        double thetaFF = desiredState.theta().v(); // rad/s
-
-        double xFB = m_xController.calculate(currentPose.x().x(), desiredState.x().x());
-        double yFB = m_yController.calculate(currentPose.y().x(), desiredState.y().x());
-        double thetaFB = m_thetaController.calculate(currentPose.theta().x(), desiredState.theta().x());
-        double omegaFB = m_omegaController.calculate(currentPose.theta().v(), desiredState.theta().v());
+        double xFB = m_xController.calculate(measurement.x().x(), reference.x().x());
+        double yFB = m_yController.calculate(measurement.y().x(), reference.y().x());
+        double thetaFB = m_thetaController.calculate(measurement.theta().x(), reference.theta().x());
+        double omegaFB = m_omegaController.calculate(measurement.theta().v(), reference.theta().v());
         double omega = thetaFF + thetaFB + omegaFB;
         m_log_u_FF_x.log(() -> xFF);
         m_log_u_FF_y.log(() -> yFF);
@@ -118,7 +114,7 @@ public class HolonomicDriveController100 implements Glassy {
         m_log_u_FB_x.log(() -> xFB);
         m_log_u_FB_y.log(() -> yFB);
         m_log_u_FB_theta.log(() -> thetaFB);
-        m_log_measurement.log(() -> currentPose);
+        m_log_measurement.log(() -> measurement);
 
         m_log_setpoint_x.log(m_xController::getSetpoint);
         m_log_setpoint_y.log(m_yController::getSetpoint);

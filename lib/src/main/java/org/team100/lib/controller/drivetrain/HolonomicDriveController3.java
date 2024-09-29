@@ -15,18 +15,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 
 /**
- * Drivetrain control with three independent PID controllers.
+ * Three independent PID controllers on position, with setpoint velocity
+ * feedforward.
  */
 public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
     // LOGGERS
-    private final SwerveStateLogger m_log_reference;
     private final DoubleSupplierLogger2 m_log_u_FB_x;
     private final DoubleSupplierLogger2 m_log_u_FB_y;
     private final DoubleSupplierLogger2 m_log_u_FB_theta;
-    private final Pose2dLogger m_log_measurement;
     private final DoubleSupplierLogger2 m_log_setpoint_x;
     private final DoubleSupplierLogger2 m_log_setpoint_y;
     private final DoubleSupplierLogger2 m_log_setpoint_theta;
@@ -47,11 +46,9 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_yController = yController;
         m_thetaController = thetaController;
         SupplierLogger2 child = parent.child(this);
-        m_log_reference = child.swerveStateLogger(Level.DEBUG, "reference");
         m_log_u_FB_x = child.doubleLogger(Level.TRACE, "u_FB/x");
         m_log_u_FB_y = child.doubleLogger(Level.TRACE, "u_FB/y");
         m_log_u_FB_theta = child.doubleLogger(Level.TRACE, "u_FB/theta");
-        m_log_measurement = child.pose2dLogger(Level.DEBUG, "measurement");
         m_log_setpoint_x = child.doubleLogger(Level.DEBUG, "setpoint/x");
         m_log_setpoint_y = child.doubleLogger(Level.DEBUG, "setpoint/y");
         m_log_setpoint_theta = child.doubleLogger(Level.DEBUG, "setpoint/theta");
@@ -90,25 +87,23 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
      * Makes no attempt to coordinate the axes or provide feasible output.
      */
     @Override
-    public FieldRelativeVelocity calculate(
-            Pose2d currentPose,
-            SwerveState desiredState) {
-
+    public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference) {
+        Pose2d currentPose = measurement.pose();
         Rotation2d currentRotation = currentPose.getRotation();
 
-        double xFF = desiredState.x().v(); // m/s
-        double yFF = desiredState.y().v(); // m/s
-        double thetaFF = desiredState.theta().v(); // rad/s
+        double xFF = reference.x().v(); // m/s
+        double yFF = reference.y().v(); // m/s
+        double thetaFF = reference.theta().v(); // rad/s
 
-        double xFB = m_xController.calculate(currentPose.getX(), desiredState.x().x());
-        double yFB = m_yController.calculate(currentPose.getY(), desiredState.y().x());
-        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
+        double xFB = m_xController.calculate(currentPose.getX(), reference.x().x());
+        double yFB = m_yController.calculate(currentPose.getY(), reference.y().x());
+        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), reference.theta().x());
 
-        m_log_reference.log(() -> desiredState);
+        m_log_reference.log(() -> reference);
         m_log_u_FB_x.log(() -> xFB);
         m_log_u_FB_y.log(() -> yFB);
         m_log_u_FB_theta.log(() -> thetaFB);
-        m_log_measurement.log(() -> currentPose);
+        m_log_measurement.log(() -> measurement);
 
         m_log_setpoint_x.log(m_xController::getSetpoint);
         m_log_setpoint_y.log(m_yController::getSetpoint);

@@ -113,15 +113,15 @@ public class Rotate extends Command implements Glassy {
         m_finished = MathUtil.isNear(refTheta.x(), m_goalState.x(), kXToleranceRad)
                 && MathUtil.isNear(refTheta.v(), m_goalState.v(), kVToleranceRad_S);
 
-        // measurement
-        Pose2d currentPose = m_robotDrive.getState().pose();
+        SwerveState measurement = m_robotDrive.getState();
+        Pose2d currentPose = measurement.pose();
 
         SwerveState reference = new SwerveState(
                 new State100(currentPose.getX(), 0, 0), // stationary at current pose
                 new State100(currentPose.getY(), 0, 0),
                 new State100(refTheta.x(), refTheta.v(), refTheta.a()));
 
-        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
         if (m_steeringAligned) {
             // steer normally.

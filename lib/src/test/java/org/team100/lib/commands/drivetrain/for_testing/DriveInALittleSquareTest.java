@@ -1,11 +1,11 @@
-package org.team100.lib.commands.drivetrain;
+package org.team100.lib.commands.drivetrain.for_testing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.commands.drivetrain.DriveInALittleSquare.DriveState;
+import org.team100.lib.commands.drivetrain.for_testing.DriveInALittleSquare.DriveState;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;

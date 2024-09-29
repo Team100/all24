@@ -9,9 +9,10 @@ import org.team100.lib.state.State100;
 import edu.wpi.first.math.MathUtil;
 
 /**
- * Proportional position and velocity control.
+ * Three independent axes of proportional position and velocity control, with
+ * setpoint velocity feedforward.
  */
-public class FullStateDriveController {
+public class FullStateDriveController implements HolonomicFieldRelativeController {
     private static final double kXK1 = 1;
     private static final double kXK2 = 1;
     private static final double kThetaK1 = 1;
@@ -23,14 +24,15 @@ public class FullStateDriveController {
 
     private boolean m_atSetpoint = false;
 
-    public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState setpoint) {
+    @Override
+    public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference) {
         m_atSetpoint = true;
         double dx = calculate(kXK1, kXK2, kXTolerance, kXDotTolerance,
-                measurement.x(), setpoint.x(), x -> x);
+                measurement.x(), reference.x(), x -> x);
         double dy = calculate(kXK1, kXK2, kXTolerance, kXDotTolerance,
-                measurement.y(), setpoint.y(), x -> x);
+                measurement.y(), reference.y(), x -> x);
         double dtheta = calculate(kThetaK1, kThetaK2, kThetaTolerance, kOmegaTolerance,
-                measurement.theta(), setpoint.theta(), MathUtil::angleModulus);
+                measurement.theta(), reference.theta(), MathUtil::angleModulus);
         return new FieldRelativeVelocity(dx, dy, dtheta);
     }
 
@@ -52,7 +54,13 @@ public class FullStateDriveController {
     }
 
     /** True if the most recent call to calculate() was at the setpoint. */
+    @Override
     public boolean atReference() {
         return m_atSetpoint;
+    }
+
+    @Override
+    public void reset() {
+        m_atSetpoint = false;
     }
 }

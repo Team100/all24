@@ -1,33 +1,30 @@
-package org.team100.lib.commands.drivetrain;
-
-import java.util.Optional;
+package org.team100.lib.commands.drivetrain.for_testing;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Drive back and forth forever, for calibration.
  * 
- * This version operates on module states directly.
+ * Uses the middle control levels through drive.setChassisSpeeds.
  * 
  * It uses minimum-time profiles, so the acceleration is a square wave (i.e.
  * infinite jerk), velocity is a triangle wave, so the resulting position should
  * be a piecewise parabolic curve that looks a lot like a sine wave, though it
  * is not one.
  */
-public class OscillateDirect extends Command implements Glassy  {
+public class Oscillate extends Command implements Glassy  {
     private static final double kAccel = 1;
     private static final double kMaxSpeed = 1;
     private static final double kPeriod = 4 * kMaxSpeed / kAccel;
@@ -49,7 +46,7 @@ public class OscillateDirect extends Command implements Glassy  {
 
     private SwerveState m_initial;
 
-    public OscillateDirect(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
+    public Oscillate(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
         SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
         m_square = new SquareWave(kAccel, kPeriod);
@@ -79,12 +76,7 @@ public class OscillateDirect extends Command implements Glassy  {
         double speedM_S = m_triangle.applyAsDouble(time);
         double positionM = m_parabola.applyAsDouble(time);
 
-        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero))
-        });
+        m_swerve.setChassisSpeeds(new ChassisSpeeds(speedM_S, 0, 0));
 
         m_log_period.log(() -> kPeriod);
         m_log_time.log(() -> time);
