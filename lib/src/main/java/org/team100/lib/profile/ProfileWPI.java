@@ -1,8 +1,10 @@
 package org.team100.lib.profile;
 
-import org.team100.lib.controller.State100;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+
+import org.team100.lib.state.State100;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /** Wrap the WPI profile. */

@@ -3,7 +3,6 @@ package org.team100.lib.commands.drivetrain.manual;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.HeadingLatch;
-import org.team100.lib.controller.State100;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
@@ -16,6 +15,7 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.Gyro;
+import org.team100.lib.state.State100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;

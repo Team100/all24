@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.commands.drivetrain.DriveInALittleSquare.DriveState;
-import org.team100.lib.controller.State100;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.state.State100;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.util.Util;
 

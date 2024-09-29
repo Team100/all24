@@ -2,8 +2,8 @@ package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.controller.State100;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
 /**

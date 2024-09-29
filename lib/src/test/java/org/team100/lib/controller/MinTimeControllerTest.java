@@ -7,6 +7,7 @@ import java.util.function.DoubleUnaryOperator;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.TestLogger;
+import org.team100.lib.state.State100;
 import org.team100.lib.logging.SupplierLogger2;
 
 import edu.wpi.first.math.MathUtil;

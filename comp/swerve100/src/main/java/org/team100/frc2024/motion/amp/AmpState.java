@@ -2,9 +2,9 @@ package org.team100.frc2024.motion.amp;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.controller.State100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.state.State100;
 
 import edu.wpi.first.wpilibj2.command.Command;
 

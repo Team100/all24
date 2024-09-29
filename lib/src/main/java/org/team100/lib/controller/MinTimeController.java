@@ -5,6 +5,7 @@ import java.util.function.DoubleUnaryOperator;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.state.State100;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 

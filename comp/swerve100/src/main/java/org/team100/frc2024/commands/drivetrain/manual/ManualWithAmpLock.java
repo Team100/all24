@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.lib.commands.drivetrain.manual.FieldRelativeDriver;
-import org.team100.lib.controller.State100;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
@@ -13,6 +12,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.Gyro;
+import org.team100.lib.state.State100;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
