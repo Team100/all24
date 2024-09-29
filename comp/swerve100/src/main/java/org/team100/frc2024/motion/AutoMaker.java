@@ -12,11 +12,11 @@ import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.RampShooter;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
-import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.field.FieldPoint2024;
+import org.team100.lib.follower.DrivePIDFFollower;
+import org.team100.lib.follower.DriveTrajectoryFollower;
+import org.team100.lib.follower.DriveTrajectoryFollowerFactory;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.timing.TimingConstraint;
@@ -41,7 +41,7 @@ public class AutoMaker implements Glassy {
     private static final double kMaxAccelM_S_S = 2;
 
     private final SwerveDriveSubsystem m_swerve;
-    private final DriveMotionController m_controller;
+    private final DriveTrajectoryFollower m_controller;
     private final SensorInterface m_sensors;
     private final List<TimingConstraint> m_constraints;
     private final Intake m_intake;
@@ -53,16 +53,16 @@ public class AutoMaker implements Glassy {
      * methods below. TODO: pass it to the factories?
      */
     private final SupplierLogger2 m_logger;
-    private final DrivePIDFController.Log m_log;
+    private final DrivePIDFFollower.Log m_log;
     private final TrajectoryCommand100.Log m_commandLog;
-    private final DriveMotionControllerFactory m_factory;
+    private final DriveTrajectoryFollowerFactory m_factory;
     private final TrajectoryVisualization m_viz;
 
     public AutoMaker(
             SupplierLogger2 parent,
             SwerveDriveSubsystem swerve,
-            DriveMotionControllerFactory factory,
-            DriveMotionController controller,
+            DriveTrajectoryFollowerFactory factory,
+            DriveTrajectoryFollower controller,
             double shooterScale,
             FeederSubsystem feeder,
             DrumShooter shooter,
@@ -80,7 +80,7 @@ public class AutoMaker implements Glassy {
         m_intake = intake;
         m_sensors = sensor;
         m_logger = parent.child(this);
-        m_log = new DrivePIDFController.Log(m_logger);
+        m_log = new DrivePIDFFollower.Log(m_logger);
         m_commandLog = new TrajectoryCommand100.Log(m_logger);
         m_viz = viz;
     }

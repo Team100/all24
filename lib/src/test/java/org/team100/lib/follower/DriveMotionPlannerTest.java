@@ -1,9 +1,8 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,13 +10,14 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.swerve.SwerveSetpoint;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimingUtil;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryGenerator100;
@@ -68,9 +68,9 @@ class DriveMotionPlannerTest {
                 start_vel,
                 end_vel);
 
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
-        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
-        DriveMotionController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
+        DrivePIDFFollower.Log PIDFlog = new DrivePIDFFollower.Log(logger);
+        DriveTrajectoryFollower controller = new DrivePIDFFollower(PIDFlog, util, false, 2.4, 2.4);
         TrajectoryTimeIterator traj_iterator = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(timed_trajectory));
         controller.setTrajectory(traj_iterator);
@@ -97,9 +97,9 @@ class DriveMotionPlannerTest {
 
     @Test
     void testAllTrajectories() {
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
-        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
-        DrivePIDFController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
+        DrivePIDFFollower.Log PIDFlog = new DrivePIDFFollower.Log(logger);
+        DrivePIDFFollower controller = new DrivePIDFFollower(PIDFlog, util, false, 2.4, 2.4);
         TrajectoryGenerator100 generator = new TrajectoryGenerator100();
         List<Trajectory100> trajectories = generator.getTrajectorySet().getAllTrajectories();
 

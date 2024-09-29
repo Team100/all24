@@ -1,12 +1,12 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.logging.TestLogger;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -41,7 +41,7 @@ class DriveMotionControllerUtilTest {
         // constant speed
         double acceleration = 0;
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         // feedforward should be straight ahead, no rotation.
         ChassisSpeeds speeds = util.feedforward(currentState, setpoint);
         assertEquals(1, speeds.vxMetersPerSecond, kDelta);
@@ -72,7 +72,7 @@ class DriveMotionControllerUtilTest {
         // constant speed
         double acceleration = 0;
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         // feedforward should be -y, robot relative, no rotation.
         ChassisSpeeds speeds = util.feedforward(currentState, setpoint);
         assertEquals(0, speeds.vxMetersPerSecond, kDelta);
@@ -103,7 +103,7 @@ class DriveMotionControllerUtilTest {
         // constant speed
         double acceleration = 0;
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         // feedforward should be ahead and rotating.
         ChassisSpeeds speeds = util.feedforward(currentState, setpoint);
         assertEquals(1, speeds.vxMetersPerSecond, kDelta);
@@ -136,7 +136,7 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
 
         // we're exactly on the setpoint so zero error
-        Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(
+        Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(
                 currentState, setpoint);
         assertEquals(0, errorTwist.dx, kDelta);
         assertEquals(0, errorTwist.dy, kDelta);
@@ -167,7 +167,7 @@ class DriveMotionControllerUtilTest {
         double acceleration = 0;
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
         // error is +x but robot is facing +y so error is -y
-        Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(
+        Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(
                 currentState, setpoint);
         assertEquals(0, errorTwist.dx, kDelta);
         assertEquals(-1, errorTwist.dy, kDelta);
@@ -200,7 +200,7 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
         // we're exactly on the setpoint so zero feedback
@@ -235,7 +235,7 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
         // setpoint should be negative y
@@ -270,7 +270,7 @@ class DriveMotionControllerUtilTest {
         // feedforward should be straight ahead, no rotation.
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
         // robot is on the setpoint in translation
@@ -306,7 +306,7 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
         // on target
@@ -340,7 +340,7 @@ class DriveMotionControllerUtilTest {
         TimedPose setpoint = new TimedPose(state, t, velocity, acceleration);
         double kPCart = 1.0;
         double kPTheta = 1.0;
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds speeds = util.feedback(
                 currentState, setpoint, kPCart, kPTheta);
         // feedback is -y field relative so -x robot relative
@@ -375,7 +375,7 @@ class DriveMotionControllerUtilTest {
 
         // on the setpoint: since we're facing 180, v is -x.
         ChassisSpeeds currentVelocity = new ChassisSpeeds(-1, 0, 0);
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds error = util.getVelocityError(currentState,
                 setpoint, currentVelocity);
         // we're exactly on the setpoint so zero error
@@ -410,7 +410,7 @@ class DriveMotionControllerUtilTest {
 
         // totally the wrong direction
         ChassisSpeeds currentVelocity = new ChassisSpeeds(0, 1, 0);
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds error = util.getVelocityError(currentState,
                 setpoint, currentVelocity);
         // error should include both components
@@ -448,7 +448,7 @@ class DriveMotionControllerUtilTest {
         double kPThetaV = 1.0;
         // motion is on setpoint
         ChassisSpeeds currentVelocity = new ChassisSpeeds(1, 0, 0);
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds speeds = util.fullFeedback(
                 currentState, setpoint,
                 kPCart, kPTheta,
@@ -489,7 +489,7 @@ class DriveMotionControllerUtilTest {
         double kPThetaV = 1.0;
         // motion is in the right direction but too slow
         ChassisSpeeds robotRelativeCurrentVelocity = new ChassisSpeeds(0, -0.5, 0);
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         ChassisSpeeds speeds = util.fullFeedback(
                 currentPose, setpoint,
                 kPCart, kPTheta,
@@ -530,7 +530,7 @@ class DriveMotionControllerUtilTest {
         double kPTheta = 1.0;
         double kPCartV = 1.0;
         double kPThetaV = 1.0;
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
         // motion is in the right direction but too slow
         ChassisSpeeds robotRelativeCurrentVelocity = new ChassisSpeeds(0, -0.5, 0);
         ChassisSpeeds positionFeedback = util.feedback(

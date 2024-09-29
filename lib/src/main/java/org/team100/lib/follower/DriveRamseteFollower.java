@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import java.util.Optional;
 
@@ -31,7 +31,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * This originated in DriveMotionPlanner, which included several
  * controllers.
  */
-public class DriveRamseteController implements DriveMotionController {
+public class DriveRamseteFollower implements DriveTrajectoryFollower {
     private static final double kThetaKp = 5.0; // Units are rad/s per rad of error.
     private static final double kBeta = 2.0; // >0.
     private static final double kZeta = 0.7; // Damping coefficient, [0, 1].
@@ -45,7 +45,7 @@ public class DriveRamseteController implements DriveMotionController {
     private TrajectoryTimeIterator m_iter;
     private double mLastTime = Double.POSITIVE_INFINITY;
 
-    public DriveRamseteController(SupplierLogger2 parent) {
+    public DriveRamseteFollower(SupplierLogger2 parent) {
         SupplierLogger2 child = parent.child(this);
         m_log_measurement = child.pose2dLogger(Level.TRACE, "current state");
         m_log_setpoint = child.timedPoseLogger(Level.TRACE, "setpoint");
@@ -115,7 +115,7 @@ public class DriveRamseteController implements DriveMotionController {
         // course_to_goal = course_to_field * field_to_goal
         Rotation2d course_to_goal = field_to_course.unaryMinus().rotateBy(maybe_field_to_goal.get());
 
-        Twist2d mErrorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, setpoint);
+        Twist2d mErrorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(measurement, setpoint);
         m_log_error.log(() -> mErrorTwist);
 
         // Rotate error to be aligned to current course.

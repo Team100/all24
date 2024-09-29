@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import java.util.Optional;
 
@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Follow a 254 trajectory using velocity feedforward with optional positional
  * feedback.
  */
-public class DrivePIDFController implements DriveMotionController {
+public class DrivePIDFFollower implements DriveTrajectoryFollower {
     private static final double kPCartV = 1.0;
     private static final double kPThetaV = 1.0;
 
@@ -46,15 +46,15 @@ public class DrivePIDFController implements DriveMotionController {
     private final boolean m_feedforwardOnly;
     private final double m_kPCart;
     private final double m_kPTheta;
-    private final DriveMotionControllerUtil m_util;
+    private final DriveTrajectoryFollowerUtil m_util;
 
     private TrajectoryTimeIterator m_iter;
     private double m_prevTimeS;
 
     /** Use the factory. */
-    DrivePIDFController(
+    DrivePIDFFollower(
             Log log,
-            DriveMotionControllerUtil util,
+            DriveTrajectoryFollowerUtil util,
             boolean feedforwardOnly,
             double kPCart,
             double kPTheta) {

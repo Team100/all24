@@ -17,12 +17,12 @@ import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.PermissiveTrajectoryListCommand;
 import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
-import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.DriveMotionControllerUtil;
-import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DrivePIDFFollower;
+import org.team100.lib.follower.DriveTrajectoryFollower;
+import org.team100.lib.follower.DriveTrajectoryFollowerFactory;
+import org.team100.lib.follower.DriveTrajectoryFollowerUtil;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -151,11 +151,11 @@ public class RobotContainerParkingLot implements Glassy {
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         // 254 PID follower
-        final DriveMotionControllerUtil util = new DriveMotionControllerUtil(driveLogger);
-        final DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
-        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(driveLogger);
+        final DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(driveLogger);
+        final DriveTrajectoryFollowerFactory driveControllerFactory = new DriveTrajectoryFollowerFactory(util);
+        DrivePIDFFollower.Log PIDFlog = new DrivePIDFFollower.Log(driveLogger);
 
-        DriveMotionController drivePID = driveControllerFactory.autoPIDF(PIDFlog);
+        DriveTrajectoryFollower drivePID = driveControllerFactory.autoPIDF(PIDFlog);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
                         driveLogger,
@@ -170,7 +170,7 @@ public class RobotContainerParkingLot implements Glassy {
 
         // 254 FF follower
 
-        DriveMotionController driveFF = driveControllerFactory.ffOnly(PIDFlog);
+        DriveTrajectoryFollower driveFF = driveControllerFactory.ffOnly(PIDFlog);
 
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
@@ -185,7 +185,7 @@ public class RobotContainerParkingLot implements Glassy {
         ///////////////////////
 
         // 254 Pursuit follower
-        DriveMotionController drivePP = DriveMotionControllerFactory.purePursuit(driveLogger, swerveKinodynamics);
+        DriveTrajectoryFollower drivePP = DriveTrajectoryFollowerFactory.purePursuit(driveLogger, swerveKinodynamics);
 
         whileTrue(driverControl::test,
                 new DriveToWaypoint100(
@@ -211,7 +211,7 @@ public class RobotContainerParkingLot implements Glassy {
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
-        DriveMotionController driveRam = DriveMotionControllerFactory.ramsete(driveLogger);
+        DriveTrajectoryFollower driveRam = DriveTrajectoryFollowerFactory.ramsete(driveLogger);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
                         driveLogger,

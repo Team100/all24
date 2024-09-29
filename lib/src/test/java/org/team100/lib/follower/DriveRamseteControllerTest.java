@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -24,16 +24,16 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-class DrivePIDControllerTest {
+class DriveRamseteControllerTest {
     boolean dump = false;
-
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
     private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test
-    void testPIDControl() {
+    void testRamsete() {
+
         // first right and then ahead
         List<Pose2d> waypoints = List.of(
                 new Pose2d(0, 0, Rotation2d.fromDegrees(270)),
@@ -64,16 +64,14 @@ class DrivePIDControllerTest {
         TrajectoryTimeSampler view = new TrajectoryTimeSampler(trajectory);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
-        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
-        DrivePIDFController controller = new DrivePIDFController(PIDFlog, util, false, 2.4, 2.4);
+
+        DriveRamseteFollower controller = new DriveRamseteFollower(logger);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
         // based on the trajectory itself.
 
         {
-
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new ChassisSpeeds());
@@ -81,7 +79,6 @@ class DrivePIDControllerTest {
         }
 
         {
-
             Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0, measurement, new ChassisSpeeds());
             // remember, facing +90, moving -90, so this should be like -1
@@ -96,13 +93,12 @@ class DrivePIDControllerTest {
             assertEquals(1, path_setpoint.velocityM_S(), 0.01);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
 
-            Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, path_setpoint);
+            Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(measurement, path_setpoint);
             assertEquals(0, errorTwist.dx, 0.05);
             assertEquals(0, errorTwist.dy, 0.05);
             assertEquals(0, errorTwist.dtheta, 0.05);
         }
         {
-
             Pose2d measurement = new Pose2d(new Translation2d(1.85, -7.11), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0, measurement, new ChassisSpeeds());
             verify(-0.96, -0.05, 0.18, output);
@@ -115,7 +111,7 @@ class DrivePIDControllerTest {
             assertEquals(1, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0, path_setpoint.acceleration(), 0.001);
 
-            Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, path_setpoint);
+            Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(measurement, path_setpoint);
             assertEquals(0, errorTwist.dx, 0.01);
             assertEquals(0, errorTwist.dy, 0.01);
             assertEquals(0, errorTwist.dtheta, 0.01);
@@ -127,4 +123,5 @@ class DrivePIDControllerTest {
         assertEquals(vy, output.vyMetersPerSecond, 0.05);
         assertEquals(omega, output.omegaRadiansPerSecond, 0.05);
     }
+
 }

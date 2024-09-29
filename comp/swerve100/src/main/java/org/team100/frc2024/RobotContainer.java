@@ -48,13 +48,13 @@ import org.team100.lib.commands.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.commands.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.commands.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.config.Identity;
-import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.DriveMotionControllerUtil;
-import org.team100.lib.controller.DrivePIDFController;
 import org.team100.lib.controller.HolonomicDriveController100;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DrivePIDFFollower;
+import org.team100.lib.follower.DriveTrajectoryFollower;
+import org.team100.lib.follower.DriveTrajectoryFollowerFactory;
+import org.team100.lib.follower.DriveTrajectoryFollowerUtil;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -234,9 +234,9 @@ public class RobotContainer implements Glassy {
 
         final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
-        final DriveMotionControllerUtil util = new DriveMotionControllerUtil(comLog);
-        final DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
-        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(comLog);
+        final DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(comLog);
+        final DriveTrajectoryFollowerFactory driveControllerFactory = new DriveTrajectoryFollowerFactory(util);
+        DrivePIDFFollower.Log PIDFlog = new DrivePIDFFollower.Log(comLog);
 
         whileTrue(driverControl::driveWithFancyTrajec,
                 new FancyTrajectory(
@@ -247,7 +247,7 @@ public class RobotContainer implements Glassy {
 
         // 254 PID follower
         final HolonomicDriveController3 controller = new HolonomicDriveController3(comLog);
-        final DriveMotionController drivePID = driveControllerFactory.goodPIDF(PIDFlog);
+        final DriveTrajectoryFollower drivePID = driveControllerFactory.goodPIDF(PIDFlog);
 
         whileTrue(driverControl::driveToNote,
                 new DriveWithProfileNote(

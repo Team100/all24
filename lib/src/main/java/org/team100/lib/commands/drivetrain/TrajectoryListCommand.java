@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * The list can be relative to the current pose.
  * 
  * This just holds the starting rotation. If you want a holonomic trajectory
- * follower, try the {@link DriveMotionController} classes.
+ * follower, try the {@link DriveTrajectoryFollower} classes.
  */
 public class TrajectoryListCommand extends Command implements Glassy {
     private final SwerveDriveSubsystem m_swerve;

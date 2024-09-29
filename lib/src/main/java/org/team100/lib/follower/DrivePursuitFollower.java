@@ -1,8 +1,9 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
 
+import org.team100.lib.controller.Lookahead;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.logging.SupplierLogger2;
@@ -40,7 +41,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * This originated in 254's DriveMotionPlanner, which included several
  * controllers.
  */
-public class DrivePursuitController implements DriveMotionController {
+public class DrivePursuitFollower implements DriveTrajectoryFollower {
     public static final double EPSILON = 1e-6;
 
     private static final double kPathLookaheadTime = 0.25;
@@ -76,7 +77,7 @@ public class DrivePursuitController implements DriveMotionController {
     private boolean useMinSpeed;
 
     /** Use the factory. */
-    DrivePursuitController(SupplierLogger2 parent, SwerveKinodynamics limits) {
+    DrivePursuitFollower(SupplierLogger2 parent, SwerveKinodynamics limits) {
         SupplierLogger2 child = parent.child(this);
         m_limits = limits;
         m_log_u_FF = child.chassisSpeedsLogger(Level.TRACE, "u_FF");
@@ -213,7 +214,7 @@ public class DrivePursuitController implements DriveMotionController {
                 0.0);
         m_log_u_FF.log(() -> u_FF);
 
-        Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(measurement, mSetpoint);
+        Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(measurement, mSetpoint);
         m_log_error.log(() -> errorTwist);
         ChassisSpeeds u_FB = new ChassisSpeeds(
                 kPositionkP * errorTwist.dx,

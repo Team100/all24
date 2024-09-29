@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -9,7 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 /**
  * Interface for multiple types of drivetrain trajectory followers.
  */
-public interface DriveMotionController extends Glassy {
+public interface DriveTrajectoryFollower extends Glassy {
 
     void setTrajectory(TrajectoryTimeIterator trajectory);
 

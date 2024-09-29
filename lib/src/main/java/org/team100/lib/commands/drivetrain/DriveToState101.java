@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -36,7 +36,7 @@ public class DriveToState101 extends Command implements Glassy  {
     private final Pose2d m_goal;
     private final FieldRelativeVelocity m_endVelocity;
     private final SwerveDriveSubsystem m_swerve;
-    private final DriveMotionController m_controller;
+    private final DriveTrajectoryFollower m_controller;
     private final List<TimingConstraint> m_constraints;
     private final TrajectoryVisualization m_viz;
 
@@ -48,7 +48,7 @@ public class DriveToState101 extends Command implements Glassy  {
             Pose2d goal,
             FieldRelativeVelocity endVelocity,
             SwerveDriveSubsystem drivetrain,
-            DriveMotionController controller,
+            DriveTrajectoryFollower controller,
             List<TimingConstraint> constraints,
             TrajectoryVisualization viz) {
         SupplierLogger2 child = parent.child(this);

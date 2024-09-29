@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -68,7 +68,7 @@ class DrivePursuitControllerTest {
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(view);
 
-        DrivePursuitController controller = new DrivePursuitController(logger, kSmoothKinematicLimits);
+        DrivePursuitFollower controller = new DrivePursuitFollower(logger, kSmoothKinematicLimits);
         controller.setTrajectory(iter);
 
         // this is a series of perfect trajectory following states,
@@ -106,7 +106,7 @@ class DrivePursuitControllerTest {
             // accel is back-emf limited here.
             assertEquals(0.988, path_setpoint.acceleration(), 0.001);
 
-            Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(current_state, path_setpoint);
+            Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(current_state, path_setpoint);
             assertEquals(0, errorTwist.dx, 0.05);
             assertEquals(0, errorTwist.dy, 0.05);
             assertEquals(0, errorTwist.dtheta, 0.05);
@@ -128,7 +128,7 @@ class DrivePursuitControllerTest {
             assertEquals(3.821, path_setpoint.velocityM_S(), 0.001);
             assertEquals(0.002, path_setpoint.acceleration(), 0.001);
 
-            Twist2d errorTwist = DriveMotionControllerUtil.getErrorTwist(current_state, path_setpoint);
+            Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(current_state, path_setpoint);
             assertEquals(0, errorTwist.dx, 0.05);
             assertEquals(0, errorTwist.dy, 0.01);
             assertEquals(0, errorTwist.dtheta, 0.01);
@@ -171,16 +171,16 @@ class DrivePursuitControllerTest {
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(sampler);
 
         // iter is at zero so time is zero
-        assertEquals(0, DrivePursuitController.previewDt(iter,
+        assertEquals(0, DrivePursuitFollower.previewDt(iter,
                 new Pose2d(0, 0, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
         // 0.828 is 1 second along the trajectory
-        assertEquals(1, DrivePursuitController.previewDt(iter,
+        assertEquals(1, DrivePursuitFollower.previewDt(iter,
                 new Pose2d(0.828, 0, GeometryUtil.kRotationZero)).getAsDouble(),
                 kDelta);
         // the whole trajectory takes 1.414 seconds, but the
         // preview finds the "off the end" time instead.
         // this seems like a bug.
-        assertEquals(2, DrivePursuitController.previewDt(iter,
+        assertEquals(2, DrivePursuitFollower.previewDt(iter,
                 new Pose2d(1, 0, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
 
     }
@@ -221,11 +221,11 @@ class DrivePursuitControllerTest {
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(sampler);
 
         // for a pose that isn't on the trajectory at all, it picks the nearest point
-        assertEquals(0, DrivePursuitController.previewDt(iter,
+        assertEquals(0, DrivePursuitFollower.previewDt(iter,
                 new Pose2d(0, 1, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
-        assertEquals(1, DrivePursuitController.previewDt(iter,
+        assertEquals(1, DrivePursuitFollower.previewDt(iter,
                 new Pose2d(0.828, 1, GeometryUtil.kRotationZero)).getAsDouble(), kDelta);
-        assertEquals(2, DrivePursuitController.previewDt(iter,
+        assertEquals(2, DrivePursuitFollower.previewDt(iter,
                 new Pose2d(1, 1, GeometryUtil.kRotation90)).getAsDouble(), kDelta);
     }
 

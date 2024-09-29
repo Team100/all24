@@ -5,15 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.follower.DrivePIDFFollower;
+import org.team100.lib.follower.DriveTrajectoryFollowerFactory;
+import org.team100.lib.follower.DriveTrajectoryFollowerUtil;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.DriveMotionControllerUtil;
-import org.team100.lib.controller.DrivePIDFController;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 
@@ -25,9 +25,9 @@ class FancyTrajectoryTest extends Fixtured {
         SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
         SwerveDriveSubsystem drive = fixture.drive;
         List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
-        DriveMotionControllerUtil util = new DriveMotionControllerUtil(logger);
-        DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
-        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(logger);
+        DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(logger);
+        DriveTrajectoryFollowerFactory driveControllerFactory = new DriveTrajectoryFollowerFactory(util);
+        DrivePIDFFollower.Log PIDFlog = new DrivePIDFFollower.Log(logger);
         FancyTrajectory command = new FancyTrajectory(
                 logger,
                 drive,

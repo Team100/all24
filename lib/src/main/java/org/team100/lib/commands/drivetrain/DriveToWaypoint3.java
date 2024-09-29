@@ -2,9 +2,9 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.Optional;
 
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.controller.HolonomicDriveController3;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
@@ -34,7 +34,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * a lot of error into the rotational controller.
  * 
  * If you want a holonomic trajectory follower, try the
- * {@link DriveMotionController} classes.
+ * {@link DriveTrajectoryFollower} classes.
  */
 public class DriveToWaypoint3 extends Command implements Glassy {
     /**

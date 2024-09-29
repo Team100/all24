@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.follower;
 
 import java.util.Optional;
 
@@ -16,8 +16,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
-/** Stateless (except for loggers) calculations for drive controllers. */
-public class DriveMotionControllerUtil implements Glassy {
+/** Stateless (except for loggers) calculations for trajectory followers. */
+public class DriveTrajectoryFollowerUtil implements Glassy {
     // LOGGERS
     private final ChassisSpeedsLogger m_log_u_FF;
     private final ChassisSpeedsLogger m_log_u_FB;
@@ -27,7 +27,7 @@ public class DriveMotionControllerUtil implements Glassy {
     private final DoubleSupplierLogger2 m_log_setpoint_velocity;
     private final Twist2dLogger m_log_position_error;
 
-    public DriveMotionControllerUtil(SupplierLogger2 parent) {
+    public DriveTrajectoryFollowerUtil(SupplierLogger2 parent) {
         SupplierLogger2 child = parent.child(this);
         m_log_u_FF = child.chassisSpeedsLogger(Level.TRACE, "u_FF");
         m_log_u_FB = child.chassisSpeedsLogger(Level.TRACE, "u_FB");
@@ -178,7 +178,7 @@ public class DriveMotionControllerUtil implements Glassy {
     /**
      * Returns robot-relative twist representing the position error
      */
-    static Twist2d getErrorTwist(Pose2d measurement, TimedPose setpoint) {
+    public static Twist2d getErrorTwist(Pose2d measurement, TimedPose setpoint) {
         return measurement.log(setpoint.state().getPose());
     }
 }
