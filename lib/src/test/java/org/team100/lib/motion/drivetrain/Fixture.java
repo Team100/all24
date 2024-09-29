@@ -1,6 +1,6 @@
 package org.team100.lib.motion.drivetrain;
 
-import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionData;

@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.team100.frc2024.motion.intake.Intake;
-import org.team100.lib.controller.HolonomicDriveController100;
+import org.team100.lib.controller.drivetrain.HolonomicDriveController100;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;

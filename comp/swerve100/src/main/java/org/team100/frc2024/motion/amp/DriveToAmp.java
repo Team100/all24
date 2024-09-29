@@ -5,7 +5,7 @@ import org.team100.frc2024.motion.FeederSubsystem;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.commands.drivetrain.DriveWithProfile2;
-import org.team100.lib.controller.HolonomicDriveController100;
+import org.team100.lib.controller.drivetrain.HolonomicDriveController100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;

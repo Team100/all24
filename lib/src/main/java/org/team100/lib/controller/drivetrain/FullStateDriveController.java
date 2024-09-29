@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.controller.drivetrain;
 
 import java.util.function.DoubleUnaryOperator;
 

@@ -1,4 +1,4 @@
-package org.team100.lib.controller;
+package org.team100.lib.controller.drivetrain;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveState;

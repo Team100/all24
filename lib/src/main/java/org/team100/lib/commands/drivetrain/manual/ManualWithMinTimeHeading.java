@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain.manual;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.drivetrain.HeadingLatch;
-import org.team100.lib.controller.MinTimeController;
+import org.team100.lib.controller.simple.MinTimeController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;

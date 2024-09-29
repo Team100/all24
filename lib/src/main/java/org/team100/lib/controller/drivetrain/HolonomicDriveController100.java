@@ -1,32 +1,36 @@
-package org.team100.lib.controller;
+package org.team100.lib.controller.drivetrain;
 
 import org.team100.lib.config.Identity;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
 import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 
 /**
- * Drivetrain control with three independent PID controllers.
+ * Cartesian PID on position and full-state on rotation.
+ * 
+ * TODO: replace this with 3d full-state?
  */
-public class HolonomicDriveController3 implements HolonomicFieldRelativeController {
+public class HolonomicDriveController100 implements Glassy {
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
+    private final PIDController m_omegaController;
     // LOGGERS
-    private final SwerveStateLogger m_log_reference;
+    private final DoubleSupplierLogger2 m_log_u_FF_x;
+    private final DoubleSupplierLogger2 m_log_u_FF_y;
+    private final DoubleSupplierLogger2 m_log_u_FF_theta;
     private final DoubleSupplierLogger2 m_log_u_FB_x;
     private final DoubleSupplierLogger2 m_log_u_FB_y;
     private final DoubleSupplierLogger2 m_log_u_FB_theta;
-    private final Pose2dLogger m_log_measurement;
+    private final SwerveStateLogger m_log_measurement;
     private final DoubleSupplierLogger2 m_log_setpoint_x;
     private final DoubleSupplierLogger2 m_log_setpoint_y;
     private final DoubleSupplierLogger2 m_log_setpoint_theta;
@@ -34,24 +38,28 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     private final DoubleSupplierLogger2 m_log_error_y;
     private final DoubleSupplierLogger2 m_log_error_theta;
 
-    public HolonomicDriveController3(SupplierLogger2 parent) {
-        this(parent, cartesian(), cartesian(), theta());
+    public HolonomicDriveController100(SupplierLogger2 parent) {
+        this(parent, cartesian(), cartesian(), theta(), omega());
     }
 
-    public HolonomicDriveController3(
+    public HolonomicDriveController100(
             SupplierLogger2 parent,
             PIDController xController,
             PIDController yController,
-            PIDController thetaController) {
+            PIDController thetaController,
+            PIDController omegaController) {
         m_xController = xController;
         m_yController = yController;
         m_thetaController = thetaController;
+        m_omegaController = omegaController;
         SupplierLogger2 child = parent.child(this);
-        m_log_reference = child.swerveStateLogger(Level.DEBUG, "reference");
+        m_log_u_FF_x = child.doubleLogger(Level.TRACE, "u_FF/x");
+        m_log_u_FF_y = child.doubleLogger(Level.TRACE, "u_FF/y");
+        m_log_u_FF_theta = child.doubleLogger(Level.TRACE, "u_FF/theta");
         m_log_u_FB_x = child.doubleLogger(Level.TRACE, "u_FB/x");
         m_log_u_FB_y = child.doubleLogger(Level.TRACE, "u_FB/y");
         m_log_u_FB_theta = child.doubleLogger(Level.TRACE, "u_FB/theta");
-        m_log_measurement = child.pose2dLogger(Level.DEBUG, "measurement");
+        m_log_measurement = child.swerveStateLogger(Level.DEBUG, "measurement");
         m_log_setpoint_x = child.doubleLogger(Level.DEBUG, "setpoint/x");
         m_log_setpoint_y = child.doubleLogger(Level.DEBUG, "setpoint/y");
         m_log_setpoint_theta = child.doubleLogger(Level.DEBUG, "setpoint/theta");
@@ -60,7 +68,7 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
     }
 
-    public static HolonomicDriveController3 withTolerance(
+    public static HolonomicDriveController100 withTolerance(
             SupplierLogger2 parent,
             double cartesianPosition,
             double cartesianVelocity,
@@ -72,10 +80,12 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         y.setTolerance(cartesianPosition, cartesianVelocity);
         PIDController theta = theta();
         theta.setTolerance(rotationPosition, rotationVelocity);
-        return new HolonomicDriveController3(parent, x, y, theta);
+        PIDController omega = omega();
+        // I don't think we really care about acceleration
+        omega.setTolerance(rotationVelocity, 100000000);
+        return new HolonomicDriveController100(parent, x, y, theta, omega);
     }
 
-    @Override
     public boolean atReference() {
         return m_xController.atSetpoint() && m_yController.atSetpoint() && m_thetaController.atSetpoint();
     }
@@ -89,22 +99,22 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     /**
      * Makes no attempt to coordinate the axes or provide feasible output.
      */
-    @Override
     public FieldRelativeVelocity calculate(
-            Pose2d currentPose,
+            SwerveState currentPose,
             SwerveState desiredState) {
-
-        Rotation2d currentRotation = currentPose.getRotation();
 
         double xFF = desiredState.x().v(); // m/s
         double yFF = desiredState.y().v(); // m/s
         double thetaFF = desiredState.theta().v(); // rad/s
 
-        double xFB = m_xController.calculate(currentPose.getX(), desiredState.x().x());
-        double yFB = m_yController.calculate(currentPose.getY(), desiredState.y().x());
-        double thetaFB = m_thetaController.calculate(currentRotation.getRadians(), desiredState.theta().x());
-
-        m_log_reference.log(() -> desiredState);
+        double xFB = m_xController.calculate(currentPose.x().x(), desiredState.x().x());
+        double yFB = m_yController.calculate(currentPose.y().x(), desiredState.y().x());
+        double thetaFB = m_thetaController.calculate(currentPose.theta().x(), desiredState.theta().x());
+        double omegaFB = m_omegaController.calculate(currentPose.theta().v(), desiredState.theta().v());
+        double omega = thetaFF + thetaFB + omegaFB;
+        m_log_u_FF_x.log(() -> xFF);
+        m_log_u_FF_y.log(() -> yFF);
+        m_log_u_FF_theta.log(() -> thetaFF);
         m_log_u_FB_x.log(() -> xFB);
         m_log_u_FB_y.log(() -> yFB);
         m_log_u_FB_theta.log(() -> thetaFB);
@@ -117,10 +127,9 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
         m_log_error_y.log(m_yController::getPositionError);
         m_log_error_theta.log(m_thetaController::getPositionError);
 
-        return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, thetaFF + thetaFB);
+        return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, omega);
     }
 
-    @Override
     public void reset() {
         m_xController.reset();
         m_yController.reset();
@@ -164,10 +173,17 @@ public class HolonomicDriveController3 implements HolonomicFieldRelativeControll
     }
 
     public static PIDController theta() {
-        PIDController pid = new PIDController(2, 0, 0);
+        PIDController pid = new PIDController(3.5, 0, 0);
         pid.setIntegratorRange(-0.01, 0.01);
         pid.setTolerance(0.01); // 0.5 degrees
         pid.enableContinuousInput(-1.0 * Math.PI, Math.PI);
+        return pid;
+    }
+
+    public static PIDController omega() {
+        PIDController pid = new PIDController(1.5, 0, 0);
+        pid.setIntegratorRange(-0.01, 0.01);
+        pid.setTolerance(0.01); // 0.5 degrees
         return pid;
     }
 }
