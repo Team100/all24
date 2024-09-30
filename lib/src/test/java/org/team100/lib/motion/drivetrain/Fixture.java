@@ -1,16 +1,17 @@
 package org.team100.lib.motion.drivetrain;
 
-import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionData;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.SimulatedGyro;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
 
 /**
  * A real swerve subsystem populated with simulated motors and encoders,
@@ -24,7 +25,7 @@ public class Fixture {
     public SwerveKinodynamics swerveKinodynamics;
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
-    public HolonomicDriveController3 controller;
+    public HolonomicFieldRelativeController controller;
     public SupplierLogger2 logger;
     public SupplierLogger2 fieldLogger;
 
@@ -55,7 +56,8 @@ public class Fixture {
                 swerveLocal,
                 v);
 
-        controller = new HolonomicDriveController3(logger);
+        controller = HolonomicDriveControllerFactory.get(
+                new HolonomicFieldRelativeController.Log(logger));
     }
 
     public void close() {

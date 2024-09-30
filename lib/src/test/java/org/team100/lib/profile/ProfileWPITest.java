@@ -3,7 +3,7 @@ package org.team100.lib.profile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.controller.State100;
+import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
 class ProfileWPITest {

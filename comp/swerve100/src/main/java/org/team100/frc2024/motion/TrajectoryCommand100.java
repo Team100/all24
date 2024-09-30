@@ -1,13 +1,13 @@
 package org.team100.frc2024.motion;
 
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -46,7 +46,7 @@ public class TrajectoryCommand100 extends Command implements Glassy  {
 
     private final Log m_log;
     private final SwerveDriveSubsystem m_robotDrive;
-    private final DriveMotionController m_controller;
+    private final DriveTrajectoryFollower m_controller;
     private final Trajectory100 m_trajectory;
     private final Pose2d m_goal;
     private final TrajectoryVisualization m_viz;
@@ -55,7 +55,7 @@ public class TrajectoryCommand100 extends Command implements Glassy  {
             Log log,
             SwerveDriveSubsystem robotDrive,
             Trajectory100 trajectory,
-            DriveMotionController controller,
+            DriveTrajectoryFollower controller,
             TrajectoryVisualization viz) {
         m_log = log;
         m_robotDrive = robotDrive;

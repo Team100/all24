@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.List;
 
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
@@ -32,7 +32,7 @@ public class FancyTrajectory extends Command implements Glassy  {
     private static final double kMaxAccelM_S_S = 2;
 
     private final SwerveDriveSubsystem m_robotDrive;
-    private final DriveMotionController m_controller;
+    private final DriveTrajectoryFollower m_controller;
     private final List<TimingConstraint> m_constraints;
 
     // LOGGERS
@@ -41,7 +41,7 @@ public class FancyTrajectory extends Command implements Glassy  {
     public FancyTrajectory(
             SupplierLogger2 parent,
             SwerveDriveSubsystem robotDrive,
-            DriveMotionController controller,
+            DriveTrajectoryFollower controller,
             List<TimingConstraint> constraints) {
         SupplierLogger2 child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");

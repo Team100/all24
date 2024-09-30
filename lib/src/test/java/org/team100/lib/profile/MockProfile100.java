@@ -1,6 +1,6 @@
 package org.team100.lib.profile;
 
-import org.team100.lib.controller.State100;
+import org.team100.lib.state.State100;
 
 public class MockProfile100 implements Profile100 {
     State100 result;

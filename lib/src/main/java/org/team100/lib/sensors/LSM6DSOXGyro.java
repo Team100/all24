@@ -58,4 +58,8 @@ public class LSM6DSOXGyro implements Gyro {
         return GeometryUtil.kRotationZero;
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
 }

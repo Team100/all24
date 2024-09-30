@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
 import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
 
 import edu.wpi.first.math.controller.PIDController;
 

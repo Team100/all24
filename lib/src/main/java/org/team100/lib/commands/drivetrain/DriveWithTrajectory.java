@@ -3,8 +3,8 @@ package org.team100.lib.commands.drivetrain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -33,7 +33,7 @@ public class DriveWithTrajectory extends Command implements Glassy  {
     private static final double kEndVel = 0;
 
     private final SwerveDriveSubsystem m_swerve;
-    private final DriveMotionController m_controller;
+    private final DriveTrajectoryFollower m_controller;
     private final Trajectory100 trajectory;
     private final TrajectoryVisualization m_viz;
 
@@ -43,7 +43,7 @@ public class DriveWithTrajectory extends Command implements Glassy  {
     public DriveWithTrajectory(
             SupplierLogger2 parent,
             SwerveDriveSubsystem drivetrain,
-            DriveMotionController controller,
+            DriveTrajectoryFollower controller,
             SwerveKinodynamics limits,
             String fileName,
             TrajectoryVisualization viz) {

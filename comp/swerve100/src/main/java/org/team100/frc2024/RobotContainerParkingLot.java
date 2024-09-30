@@ -7,22 +7,23 @@ import java.util.function.BooleanSupplier;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.drivetrain.CommandMaker;
-import org.team100.lib.commands.drivetrain.DrawSquare;
-import org.team100.lib.commands.drivetrain.DriveInACircle;
-import org.team100.lib.commands.drivetrain.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.DriveToState101;
 import org.team100.lib.commands.drivetrain.DriveToWaypoint100;
 import org.team100.lib.commands.drivetrain.FullStateTrajectoryListCommand;
-import org.team100.lib.commands.drivetrain.Oscillate;
 import org.team100.lib.commands.drivetrain.PermissiveTrajectoryListCommand;
-import org.team100.lib.commands.drivetrain.Spin;
 import org.team100.lib.commands.drivetrain.TrajectoryListCommand;
-import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.DriveMotionControllerFactory;
-import org.team100.lib.controller.DriveMotionControllerUtil;
-import org.team100.lib.controller.DrivePIDFController;
-import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.commands.drivetrain.for_testing.DrawSquare;
+import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
+import org.team100.lib.commands.drivetrain.for_testing.DriveInALittleSquare;
+import org.team100.lib.commands.drivetrain.for_testing.Oscillate;
+import org.team100.lib.commands.drivetrain.for_testing.Spin;
+import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DrivePIDFFollower;
+import org.team100.lib.follower.DriveTrajectoryFollower;
+import org.team100.lib.follower.DriveTrajectoryFollowerFactory;
+import org.team100.lib.follower.DriveTrajectoryFollowerUtil;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
@@ -121,8 +122,8 @@ public class RobotContainerParkingLot implements Glassy {
                 poseEstimator,
                 swerveLocal,
                 visionDataProvider);
-
-        HolonomicDriveController3 controller = new HolonomicDriveController3(driveLogger);
+        HolonomicFieldRelativeController.Log hlog = new HolonomicFieldRelativeController.Log(driveLogger);
+        HolonomicFieldRelativeController controller = HolonomicDriveControllerFactory.get(hlog);
 
         ///////////////////////
 
@@ -151,11 +152,11 @@ public class RobotContainerParkingLot implements Glassy {
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         // 254 PID follower
-        final DriveMotionControllerUtil util = new DriveMotionControllerUtil(driveLogger);
-        final DriveMotionControllerFactory driveControllerFactory = new DriveMotionControllerFactory(util);
-        DrivePIDFController.Log PIDFlog = new DrivePIDFController.Log(driveLogger);
+        final DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(driveLogger);
+        final DriveTrajectoryFollowerFactory driveControllerFactory = new DriveTrajectoryFollowerFactory(util);
+        DrivePIDFFollower.Log PIDFlog = new DrivePIDFFollower.Log(driveLogger);
 
-        DriveMotionController drivePID = driveControllerFactory.autoPIDF(PIDFlog);
+        DriveTrajectoryFollower drivePID = driveControllerFactory.autoPIDF(PIDFlog);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
                         driveLogger,
@@ -170,7 +171,7 @@ public class RobotContainerParkingLot implements Glassy {
 
         // 254 FF follower
 
-        DriveMotionController driveFF = driveControllerFactory.ffOnly(PIDFlog);
+        DriveTrajectoryFollower driveFF = driveControllerFactory.ffOnly(PIDFlog);
 
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
@@ -185,7 +186,7 @@ public class RobotContainerParkingLot implements Glassy {
         ///////////////////////
 
         // 254 Pursuit follower
-        DriveMotionController drivePP = DriveMotionControllerFactory.purePursuit(driveLogger, swerveKinodynamics);
+        DriveTrajectoryFollower drivePP = DriveTrajectoryFollowerFactory.purePursuit(driveLogger, swerveKinodynamics);
 
         whileTrue(driverControl::test,
                 new DriveToWaypoint100(
@@ -211,7 +212,7 @@ public class RobotContainerParkingLot implements Glassy {
 
         // 254 Ramsete follower
         // this one seems to have a pretty high tolerance?
-        DriveMotionController driveRam = DriveMotionControllerFactory.ramsete(driveLogger);
+        DriveTrajectoryFollower driveRam = DriveTrajectoryFollowerFactory.ramsete(driveLogger);
         whileTrue(driverControl::never,
                 new DriveToWaypoint100(
                         driveLogger,
@@ -247,8 +248,9 @@ public class RobotContainerParkingLot implements Glassy {
                         maker.permissiveSquare(), viz));
 
         // one-meter square with position and velocity feedback control
+        HolonomicFieldRelativeController fscontroller = HolonomicDriveControllerFactory.get(hlog);
         whileTrue(driverControl::never,
-                new FullStateTrajectoryListCommand(driveLogger, m_drive,
+                new FullStateTrajectoryListCommand(driveLogger, fscontroller, m_drive,
                         maker::square, viz));
 
         // this should be a field.

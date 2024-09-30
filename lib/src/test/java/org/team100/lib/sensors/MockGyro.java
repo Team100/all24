@@ -27,4 +27,9 @@ public class MockGyro implements Gyro {
     public Rotation2d getRollNWU() {
         return GeometryUtil.kRotationZero;
     }
+
+    @Override
+    public void periodic() {
+        //
+    }
 }

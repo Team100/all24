@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.controller.State100;
+import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
 /**

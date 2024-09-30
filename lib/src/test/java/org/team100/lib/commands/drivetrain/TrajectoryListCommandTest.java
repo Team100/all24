@@ -1,5 +1,4 @@
 package org.team100.lib.commands.drivetrain;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,13 +9,15 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.team100.lib.controller.HolonomicDriveController3;
-import org.team100.lib.controller.State100;
+import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.TestLogger;
+import org.team100.lib.motion.drivetrain.Fixtured;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.state.State100;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -44,7 +45,8 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     @Test
     void testSimple() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-        HolonomicDriveController3 control = new HolonomicDriveController3(logger);
+        HolonomicFieldRelativeController control = HolonomicDriveControllerFactory.get(
+                new HolonomicFieldRelativeController.Log(logger));
         TrajectoryListCommand c = new TrajectoryListCommand(
                 logger,
                 fixture.drive,
@@ -72,7 +74,8 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
      */
     @Test
     void testLowLevel() {
-        HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
+        HolonomicFieldRelativeController controller = HolonomicDriveControllerFactory.get(
+                new HolonomicFieldRelativeController.Log(logger));
         TrajectoryListCommand command = new TrajectoryListCommand(
                 logger,
                 fixture.drive,

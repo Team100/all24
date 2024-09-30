@@ -3,11 +3,11 @@ package org.team100.frc2024.motion.drivetrain;
 import java.util.List;
 import java.util.Optional;
 
-import org.team100.lib.controller.DriveMotionController;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
+import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
@@ -38,7 +38,7 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  
 
     private final SwerveDriveSubsystem m_swerve;
     private final Translation2d m_goalTranslation;
-    private final DriveMotionController m_controller;
+    private final DriveTrajectoryFollower m_controller;
     private final List<TimingConstraint> m_constraints;
     private final double kShooterScale;
     private final TrajectoryVisualization m_viz;
@@ -50,7 +50,7 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  
             SupplierLogger2 parent,
             SwerveDriveSubsystem swerve,
             Translation2d goalTranslation,
-            DriveMotionController controller,
+            DriveTrajectoryFollower controller,
             List<TimingConstraint> constraints,
             double shooterScale,
             TrajectoryVisualization viz) {

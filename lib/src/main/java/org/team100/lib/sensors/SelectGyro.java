@@ -51,4 +51,9 @@ public class SelectGyro implements Gyro {
         }
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
 }

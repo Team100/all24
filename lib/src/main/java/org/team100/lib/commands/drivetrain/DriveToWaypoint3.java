@@ -2,9 +2,9 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.Optional;
 
-import org.team100.lib.controller.DriveMotionController;
-import org.team100.lib.controller.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
@@ -34,7 +34,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * a lot of error into the rotational controller.
  * 
  * If you want a holonomic trajectory follower, try the
- * {@link DriveMotionController} classes.
+ * {@link DriveTrajectoryFollower} classes.
  */
 public class DriveToWaypoint3 extends Command implements Glassy {
     /**
@@ -56,7 +56,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final StraightLineTrajectory m_trajectories;
-    private final HolonomicDriveController3 m_controller;
+    private final HolonomicFieldRelativeController m_controller;
     private final TrajectoryVisualization m_viz;
     private final Log m_log;
 
@@ -79,7 +79,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             StraightLineTrajectory trajectories,
-            HolonomicDriveController3 controller,
+            HolonomicFieldRelativeController controller,
             TrajectoryVisualization viz) {
         m_log = log;
         m_goal = goal;
@@ -105,6 +105,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
     public void execute() {
         if (m_trajectory == null)
             return;
+        SwerveState measurement = m_swerve.getState(); 
 
         if (m_steeringAligned) {
             Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(TimedRobot100.LOOP_PERIOD_S);
@@ -117,15 +118,13 @@ public class DriveToWaypoint3 extends Command implements Glassy {
 
             TimedPose desiredState = samplePoint.state();
             m_log.desired.log(() -> desiredState.state().getPose());
-            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
             // follow normally
             m_swerve.driveInFieldCoords(fieldRelativeTarget);
         } else {
             // not aligned yet, try aligning by *previewing* next point
-
             Optional<TrajectorySamplePoint> optSamplePoint = m_iter.preview(TimedRobot100.LOOP_PERIOD_S);
             if (optSamplePoint.isEmpty()) {
                 Util.warn("broken trajectory, cancelling!");
@@ -136,16 +135,14 @@ public class DriveToWaypoint3 extends Command implements Glassy {
 
             TimedPose desiredState = samplePoint.state();
             m_log.desired.log(() -> desiredState.state().getPose());
-            Pose2d currentPose = m_swerve.getState().pose();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(currentPose, reference);
+            FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget);
         }
 
         m_log.aligned.log(() -> m_steeringAligned);
-
-        m_log.pose.log(() -> m_swerve.getState().pose());
+        m_log.pose.log(measurement::pose);
     }
 
     @Override

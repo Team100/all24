@@ -2,10 +2,10 @@ package org.team100.lib.motion.drivetrain;
 
 import java.util.Optional;
 
-import org.team100.lib.controller.State100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.state.State100;
 import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -53,6 +53,10 @@ public class SwerveState {
 
     public SwerveState() {
         this(new State100(), new State100(), new State100());
+    }
+
+    public SwerveState minus(SwerveState other) {
+        return new SwerveState(x().minus(other.x()), y().minus(other.y()), theta().minus(other.theta()));
     }
 
     public Pose2d pose() {

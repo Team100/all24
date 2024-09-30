@@ -2,7 +2,6 @@ package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.controller.State100;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
@@ -11,6 +10,7 @@ import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.logging.SupplierLogger2.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.state.State100;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
