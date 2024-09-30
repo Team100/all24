@@ -85,7 +85,7 @@ class CameraData:
                 "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
                 # "AwbEnable": False,
                 # "AeEnable": False,
-                "ExposureTime": 40000,
+                "ExposureTime": 300,
                 # "AnalogueGain": 1.0
             },
         )
@@ -146,8 +146,10 @@ class GamePieceFinder:
         self.serial = serial
         self.objects = []
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = (4,150, 100)
-        self.object_higher = (16, 255, 255)
+        self.object_lower = (0,150, 50)
+        self.object_lower2 = (178,150, 50)
+        self.object_higher = (8, 255, 255)
+        self.object_higher2 = (180, 255, 255)
         self.frame_time = 0
         self.theta = 0
         self.initialize_nt(camList)
@@ -190,8 +192,9 @@ class GamePieceFinder:
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
 
-        img_range = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
-
+        img_range1 = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
+        img_range2 = cv2.inRange(img_hsv, self.object_lower2, self.object_higher2)
+        img_range = cv2.bitwise_or(img_range1, img_range2)
         floodfill = img_range.copy()
         h, w = img_range.shape[:2]
         mask = np.zeros((h + 2, w + 2), np.uint8)
@@ -225,20 +228,21 @@ class GamePieceFinder:
 
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
-
-            yNormalized = (cY-height/2)/camera.mtx[1,1]
-            zNormalized = (width/2-cX)/camera.mtx[0,0]
+            
+            yNormalized = (height/2-cY)/camera.mtx[1,1]
+            xNormalized = (width/2-cX)/camera.mtx[0,0]
+            
             # pitchRad = math.atan(yNormalized)
             # yawRad = math.atan(zNormalized)
             # Puts up angle to the target from the POV of the camera
             # these are not extrinsic euler angles; this is wrong.
             # rotation = Rotation3d(0, pitchRad, yawRad)
             # the correct rotation is one that matches the normalized (x,y) coordinates
-            rotation = Rotation3d(initial=np.array([1, 0, 0]), final=np.array([1, yNormalized, zNormalized]))
+            rotation = Rotation3d(initial=np.array([1, 0, 0]), final=np.array([1, xNormalized, yNormalized]))
             self.objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
         img_output = cv2.resize(img_bgr, (269,162)) 
-        camera.output_stream.putFrame(img_output)
+        camera.output_stream.putFrame(img_range)
 
     def draw_result(self, img, cnt, cX, cY):
         # float_formatter = {"float_kind": lambda x: f"{x:4.1f}"}

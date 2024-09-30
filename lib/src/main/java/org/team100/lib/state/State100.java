@@ -48,6 +48,10 @@ public class State100 {
         return new State100(x() - other.x(), v() - other.v(), a() - other.a());
     }
 
+    public State100 mult(double scaler) {
+        return new State100(m_x * scaler, m_v * scaler, m_a * scaler);
+    }
+
     public boolean near(State100 other, double tolerance) {
         return MathUtil.isNear(m_x, other.m_x, tolerance) &&
                 MathUtil.isNear(m_v, other.m_v, tolerance);

@@ -43,9 +43,17 @@ public enum Camera {
      */
     GAME_PIECE("1000000013c9c96c",
             new Transform3d(
-                    new Translation3d(-0.1265, 0.03, 0.61),
-                    new Rotation3d(0, Math.toRadians(31.5), Math.PI))),
+                new Translation3d(-0.1265, 0.03, 0.61),
+                new Rotation3d(0, Math.toRadians(31.5), Math.PI))),
 
+    /**
+     * Camera bot intake
+     */
+    CAMERA_GAME_PIECE("364f07fb090a3bf7",
+            new Transform3d(
+                    new Translation3d(-0.0565, 0.03, 0.61),
+                    new Rotation3d(0, Math.toRadians(30), Math.PI))),
+                    
     TEST1("test1",
             new Transform3d(
                     new Translation3d(),

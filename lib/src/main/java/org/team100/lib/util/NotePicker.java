@@ -23,10 +23,11 @@ public class NotePicker {
         double bestNote = 1000000000;
         Optional<Translation2d> bestNoteTranslation = Optional.empty();
         for (Translation2d note : notes) {
-            if (note.getY() < -1 || note.getX() < -1 || note.getY() > 9.21 || note.getX() > 17.54) {
-                // ignore out-of-bounds
-                continue;
-            }
+            // if (note.getY() < -1 || note.getX() < -1 || note.getY() > 9.21 || note.getX() > 17.54) {
+            //     // ignore out-of-bounds
+            //     System.out.println()
+            //     continue;
+            // }
             double difference = Math.abs(note.minus(robotPose.getTranslation()).getNorm());
             if (difference < bestNote) {
                 bestNote = difference;
