@@ -1,6 +1,6 @@
 package org.team100.lib.commands.drivetrain;
 
-import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
@@ -16,7 +16,6 @@ import org.team100.lib.state.State100;
 import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,7 +43,7 @@ public class Rotate extends Command implements Glassy {
     private final DoubleSupplierLogger2 m_log_measurement_v;
     private final State100Logger m_log_reference;
 
-    final HolonomicDriveController3 m_controller;
+    final HolonomicFieldRelativeController m_controller;
 
     private boolean m_finished = false;
 
@@ -56,24 +55,13 @@ public class Rotate extends Command implements Glassy {
     public Rotate(
             SupplierLogger2 parent,
             SwerveDriveSubsystem drivetrain,
+            HolonomicFieldRelativeController controller,
             Gyro gyro,
             SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
         SupplierLogger2 child = parent.child(this);
         m_robotDrive = drivetrain;
-        // since we specify a different tolerance, use a new controller.
-
-        PIDController xc = HolonomicDriveController3.cartesian();
-        xc.setTolerance(0.1, 0.1);
-        PIDController yc = HolonomicDriveController3.cartesian();
-        yc.setTolerance(0.1, 0.1);
-        PIDController tc = HolonomicDriveController3.theta();
-        tc.setTolerance(kXToleranceRad, kVToleranceRad_S);
-        // in testing, the default theta p causes overshoot, but i think this isn't a
-        // real effect.
-        tc.setP(3.5);
-
-        m_controller = new HolonomicDriveController3(child, xc, yc, tc);
+        m_controller = controller;
         m_gyro = gyro;
         m_swerveKinodynamics = swerveKinodynamics;
         m_goalState = new State100(targetAngleRadians, 0);

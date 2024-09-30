@@ -1,185 +1,79 @@
 package org.team100.lib.controller.drivetrain;
 
-import org.team100.lib.config.Identity;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
+import java.rmi.server.UnicastRemoteObject;
+
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 
 /**
- * Cartesian PID on position and full-state on rotation.
- * 
- * TODO: replace this with 3d full-state?
+ * PID x, PID y, PID theta, and (optionally) PID omega.
  */
 public class HolonomicDriveController100 implements HolonomicFieldRelativeController {
     private final PIDController m_xController;
     private final PIDController m_yController;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
-    // LOGGERS
-    private final DoubleSupplierLogger2 m_log_u_FF_x;
-    private final DoubleSupplierLogger2 m_log_u_FF_y;
-    private final DoubleSupplierLogger2 m_log_u_FF_theta;
-    private final DoubleSupplierLogger2 m_log_u_FB_x;
-    private final DoubleSupplierLogger2 m_log_u_FB_y;
-    private final DoubleSupplierLogger2 m_log_u_FB_theta;
-    private final SwerveStateLogger m_log_measurement;
-    private final DoubleSupplierLogger2 m_log_setpoint_x;
-    private final DoubleSupplierLogger2 m_log_setpoint_y;
-    private final DoubleSupplierLogger2 m_log_setpoint_theta;
-    private final DoubleSupplierLogger2 m_log_error_x;
-    private final DoubleSupplierLogger2 m_log_error_y;
-    private final DoubleSupplierLogger2 m_log_error_theta;
+    private final boolean m_useOmega;
+    private final Log m_log;
 
-    public HolonomicDriveController100(SupplierLogger2 parent) {
-        this(parent, cartesian(), cartesian(), theta(), omega());
+    /**
+     * Use the factory.
+     * 
+     * @param useOmega include omega feedback
+     */
+    HolonomicDriveController100(Log log, boolean useOmega) {
+        m_xController = HolonomicDriveControllerFactory.cartesian();
+        m_yController = HolonomicDriveControllerFactory.cartesian();
+        m_thetaController = HolonomicDriveControllerFactory.theta();
+        m_omegaController = HolonomicDriveControllerFactory.omega();
+        m_useOmega = useOmega;
+        m_log = log;
     }
 
-    public HolonomicDriveController100(
-            SupplierLogger2 parent,
-            PIDController xController,
-            PIDController yController,
-            PIDController thetaController,
-            PIDController omegaController) {
-        m_xController = xController;
-        m_yController = yController;
-        m_thetaController = thetaController;
-        m_omegaController = omegaController;
-        SupplierLogger2 child = parent.child(this);
-        m_log_u_FF_x = child.doubleLogger(Level.TRACE, "u_FF/x");
-        m_log_u_FF_y = child.doubleLogger(Level.TRACE, "u_FF/y");
-        m_log_u_FF_theta = child.doubleLogger(Level.TRACE, "u_FF/theta");
-        m_log_u_FB_x = child.doubleLogger(Level.TRACE, "u_FB/x");
-        m_log_u_FB_y = child.doubleLogger(Level.TRACE, "u_FB/y");
-        m_log_u_FB_theta = child.doubleLogger(Level.TRACE, "u_FB/theta");
-        m_log_measurement = child.swerveStateLogger(Level.DEBUG, "measurement");
-        m_log_setpoint_x = child.doubleLogger(Level.DEBUG, "setpoint/x");
-        m_log_setpoint_y = child.doubleLogger(Level.DEBUG, "setpoint/y");
-        m_log_setpoint_theta = child.doubleLogger(Level.DEBUG, "setpoint/theta");
-        m_log_error_x = child.doubleLogger(Level.TRACE, "error/x");
-        m_log_error_y = child.doubleLogger(Level.TRACE, "error/y");
-        m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
-    }
-
-    public static HolonomicDriveController100 withTolerance(
-            SupplierLogger2 parent,
-            double cartesianPosition,
-            double cartesianVelocity,
-            double rotationPosition,
-            double rotationVelocity) {
-        PIDController x = cartesian();
-        x.setTolerance(cartesianPosition, cartesianVelocity);
-        PIDController y = cartesian();
-        y.setTolerance(cartesianPosition, cartesianVelocity);
-        PIDController theta = theta();
-        theta.setTolerance(rotationPosition, rotationVelocity);
-        PIDController omega = omega();
-        // I don't think we really care about acceleration
-        omega.setTolerance(rotationVelocity, 100000000);
-        return new HolonomicDriveController100(parent, x, y, theta, omega);
-    }
-
+    @Override
     public boolean atReference() {
-        return m_xController.atSetpoint() && m_yController.atSetpoint() && m_thetaController.atSetpoint();
-    }
-
-    public Transform2d error() {
-        return new Transform2d(m_xController.getPositionError(),
-                m_yController.getPositionError(),
-                new Rotation2d(m_thetaController.getPositionError()));
+        if (!m_xController.atSetpoint())
+            return false;
+        if (!m_yController.atSetpoint())
+            return false;
+        if (!m_thetaController.atSetpoint())
+            return false;
+        if (!m_useOmega)
+            return true;
+        return m_omegaController.atSetpoint();
     }
 
     /**
      * Makes no attempt to coordinate the axes or provide feasible output.
      */
+    @Override
     public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference) {
-        double xFF = reference.x().v(); // m/s
-        double yFF = reference.y().v(); // m/s
-        double thetaFF = reference.theta().v(); // rad/s
+        m_log.measurement.log(() -> measurement);
+        m_log.reference.log(() -> reference);
+        m_log.error.log(() -> reference.minus(measurement));
+
+        FieldRelativeVelocity u_FF = reference.velocity();
 
         double xFB = m_xController.calculate(measurement.x().x(), reference.x().x());
         double yFB = m_yController.calculate(measurement.y().x(), reference.y().x());
         double thetaFB = m_thetaController.calculate(measurement.theta().x(), reference.theta().x());
-        double omegaFB = m_omegaController.calculate(measurement.theta().v(), reference.theta().v());
-        double omega = thetaFF + thetaFB + omegaFB;
-        m_log_u_FF_x.log(() -> xFF);
-        m_log_u_FF_y.log(() -> yFF);
-        m_log_u_FF_theta.log(() -> thetaFF);
-        m_log_u_FB_x.log(() -> xFB);
-        m_log_u_FB_y.log(() -> yFB);
-        m_log_u_FB_theta.log(() -> thetaFB);
-        m_log_measurement.log(() -> measurement);
-
-        m_log_setpoint_x.log(m_xController::getSetpoint);
-        m_log_setpoint_y.log(m_yController::getSetpoint);
-        m_log_setpoint_theta.log(m_thetaController::getSetpoint);
-        m_log_error_x.log(m_xController::getPositionError);
-        m_log_error_y.log(m_yController::getPositionError);
-        m_log_error_theta.log(m_thetaController::getPositionError);
-
-        return new FieldRelativeVelocity(xFF + xFB, yFF + yFB, omega);
+        double omegaFB = 0.0;
+        if (m_useOmega) {
+            omegaFB = m_omegaController.calculate(measurement.theta().v(), reference.theta().v());
+        }
+        FieldRelativeVelocity u_FB = new FieldRelativeVelocity(xFB, yFB, thetaFB + omegaFB);
+        m_log.u_FB.log(() -> u_FB);
+        return u_FF.plus(u_FB);
     }
 
+    @Override
     public void reset() {
         m_xController.reset();
         m_yController.reset();
         m_thetaController.reset();
-    }
-
-    public static PIDController cartesian() {
-        PIDController pid;
-        switch (Identity.instance) {
-            case COMP_BOT:
-                pid = new PIDController(3, 2, 0);
-                pid.setIntegratorRange(-0.1, 0.1);
-                pid.setTolerance(0.01); // 1 cm
-                return pid;
-            case SWERVE_ONE:
-                pid = new PIDController(0.15, 0, 0);
-                pid.setIntegratorRange(-0.1, 0.1);
-                pid.setTolerance(0.01); // 1 cm
-                return pid;
-            case SWERVE_TWO:
-                pid = new PIDController(2, 0.1, 0.15);
-                pid.setIntegratorRange(-0.1, 0.1);
-                pid.setTolerance(0.01); // 1 cm
-                return pid;
-            case BETA_BOT:
-                pid = new PIDController(3, 2, 0);
-                pid.setIntegratorRange(-0.1, 0.1);
-                pid.setTolerance(0.01); // 1 cm
-                return pid;
-            case BLANK:
-                // for testing
-                pid = new PIDController(3, 1, 0);
-                pid.setIntegratorRange(-0.1, 0.1);
-                pid.setTolerance(0.01); // 1 cm
-                return pid;
-            default:
-                // these RoboRIO's are have no drivetrains
-                return new PIDController(1, 0.0, 0.0);
-        }
-
-    }
-
-    public static PIDController theta() {
-        PIDController pid = new PIDController(3.5, 0, 0);
-        pid.setIntegratorRange(-0.01, 0.01);
-        pid.setTolerance(0.01); // 0.5 degrees
-        pid.enableContinuousInput(-1.0 * Math.PI, Math.PI);
-        return pid;
-    }
-
-    public static PIDController omega() {
-        PIDController pid = new PIDController(1.5, 0, 0);
-        pid.setIntegratorRange(-0.01, 0.01);
-        pid.setTolerance(0.01); // 0.5 degrees
-        return pid;
+        if (m_useOmega)
+            m_omegaController.reset();
     }
 }

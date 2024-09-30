@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain.for_testing;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
@@ -41,7 +41,7 @@ public class DriveInACircle extends Command implements Glassy {
 
     private final SwerveDriveSubsystem m_swerve;
     private final double m_turnRatio;
-    private final HolonomicDriveController3 m_controller;
+    private final HolonomicFieldRelativeController m_controller;
     private final TrajectoryVisualization m_viz;
 
     // LOGGERS
@@ -69,7 +69,7 @@ public class DriveInACircle extends Command implements Glassy {
     public DriveInACircle(
             SupplierLogger2 parent,
             SwerveDriveSubsystem drivetrain,
-            HolonomicDriveController3 controller,
+            HolonomicFieldRelativeController controller,
             double turnRatio,
             TrajectoryVisualization viz) {
         SupplierLogger2 child = parent.child(this);

@@ -22,21 +22,38 @@ public class FullStateDriveController implements HolonomicFieldRelativeControlle
     private static final double kXDotTolerance = 0.01; // 1 cm/s
     private static final double kOmegaTolerance = 0.02; // 1 degree/s
 
+    private final Log m_log;
+
     private boolean m_atSetpoint = false;
+
+    /** Use the factory. */
+    FullStateDriveController(Log log) {
+        m_log = log;
+    }
 
     @Override
     public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference) {
+        m_log.measurement.log(() -> measurement);
+        m_log.reference.log(() -> reference);
+        m_log.error.log(() -> reference.minus(measurement));
+
+        FieldRelativeVelocity u_FF = reference.velocity();
+
         m_atSetpoint = true;
-        double dx = calculate(kXK1, kXK2, kXTolerance, kXDotTolerance,
+
+        double xFB = calculateFB(kXK1, kXK2, kXTolerance, kXDotTolerance,
                 measurement.x(), reference.x(), x -> x);
-        double dy = calculate(kXK1, kXK2, kXTolerance, kXDotTolerance,
+        double yFB = calculateFB(kXK1, kXK2, kXTolerance, kXDotTolerance,
                 measurement.y(), reference.y(), x -> x);
-        double dtheta = calculate(kThetaK1, kThetaK2, kThetaTolerance, kOmegaTolerance,
+        double thetaFB = calculateFB(kThetaK1, kThetaK2, kThetaTolerance, kOmegaTolerance,
                 measurement.theta(), reference.theta(), MathUtil::angleModulus);
-        return new FieldRelativeVelocity(dx, dy, dtheta);
+
+        FieldRelativeVelocity u_FB = new FieldRelativeVelocity(xFB, yFB, thetaFB);
+
+        return u_FF.plus(u_FB);
     }
 
-    private double calculate(
+    private double calculateFB(
             double k1,
             double k2,
             double xTolerance,
@@ -44,13 +61,11 @@ public class FullStateDriveController implements HolonomicFieldRelativeControlle
             State100 measurement,
             State100 setpoint,
             DoubleUnaryOperator modulus) {
-        double FF = setpoint.v();
         double xError = modulus.applyAsDouble(setpoint.x() - measurement.x());
         double xDotError = setpoint.v() - measurement.v();
         m_atSetpoint &= Math.abs(xError) < xTolerance
                 && Math.abs(xDotError) < xDotTolerance;
-        double FB = k1 * xError + k2 * xDotError;
-        return FF + FB;
+        return k1 * xError + k2 * xDotError;
     }
 
     /** True if the most recent call to calculate() was at the setpoint. */

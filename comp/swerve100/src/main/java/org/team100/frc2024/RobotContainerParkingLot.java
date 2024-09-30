@@ -17,7 +17,8 @@ import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
 import org.team100.lib.commands.drivetrain.for_testing.DriveInALittleSquare;
 import org.team100.lib.commands.drivetrain.for_testing.Oscillate;
 import org.team100.lib.commands.drivetrain.for_testing.Spin;
-import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.follower.DrivePIDFFollower;
 import org.team100.lib.follower.DriveTrajectoryFollower;
@@ -121,8 +122,8 @@ public class RobotContainerParkingLot implements Glassy {
                 poseEstimator,
                 swerveLocal,
                 visionDataProvider);
-
-        HolonomicDriveController3 controller = new HolonomicDriveController3(driveLogger);
+        HolonomicFieldRelativeController.Log hlog = new HolonomicFieldRelativeController.Log(driveLogger);
+        HolonomicFieldRelativeController controller = HolonomicDriveControllerFactory.get(hlog);
 
         ///////////////////////
 
@@ -247,8 +248,9 @@ public class RobotContainerParkingLot implements Glassy {
                         maker.permissiveSquare(), viz));
 
         // one-meter square with position and velocity feedback control
+        HolonomicFieldRelativeController fscontroller = HolonomicDriveControllerFactory.get(hlog);
         whileTrue(driverControl::never,
-                new FullStateTrajectoryListCommand(driveLogger, m_drive,
+                new FullStateTrajectoryListCommand(driveLogger, fscontroller, m_drive,
                         maker::square, viz));
 
         // this should be a field.

@@ -1,4 +1,5 @@
 package org.team100.lib.commands.drivetrain;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,7 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.logging.SupplierLogger2;
@@ -43,7 +45,8 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     @Test
     void testSimple() {
         Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
-        HolonomicDriveController3 control = new HolonomicDriveController3(logger);
+        HolonomicFieldRelativeController control = HolonomicDriveControllerFactory.get(
+                new HolonomicFieldRelativeController.Log(logger));
         TrajectoryListCommand c = new TrajectoryListCommand(
                 logger,
                 fixture.drive,
@@ -71,7 +74,8 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
      */
     @Test
     void testLowLevel() {
-        HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
+        HolonomicFieldRelativeController controller = HolonomicDriveControllerFactory.get(
+                new HolonomicFieldRelativeController.Log(logger));
         TrajectoryListCommand command = new TrajectoryListCommand(
                 logger,
                 fixture.drive,

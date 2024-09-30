@@ -2,7 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import java.util.Optional;
 
-import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.framework.TimedRobot100;
@@ -56,7 +56,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final StraightLineTrajectory m_trajectories;
-    private final HolonomicDriveController3 m_controller;
+    private final HolonomicFieldRelativeController m_controller;
     private final TrajectoryVisualization m_viz;
     private final Log m_log;
 
@@ -79,7 +79,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             StraightLineTrajectory trajectories,
-            HolonomicDriveController3 controller,
+            HolonomicFieldRelativeController controller,
             TrajectoryVisualization viz) {
         m_log = log;
         m_goal = goal;

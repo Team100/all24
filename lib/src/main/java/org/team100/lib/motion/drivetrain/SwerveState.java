@@ -55,6 +55,10 @@ public class SwerveState {
         this(new State100(), new State100(), new State100());
     }
 
+    public SwerveState minus(SwerveState other) {
+        return new SwerveState(x().minus(other.x()), y().minus(other.y()), theta().minus(other.theta()));
+    }
+
     public Pose2d pose() {
         return new Pose2d(m_x.x(), m_y.x(), new Rotation2d(m_theta.x()));
     }

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.team100.lib.controller.drivetrain.FullStateDriveController;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class FullStateTrajectoryListCommand extends Command implements Glassy {
     private final SwerveDriveSubsystem m_swerve;
-    private final FullStateDriveController m_controller;
+    private final HolonomicFieldRelativeController m_controller;
     private final Function<Pose2d, List<Trajectory100>> m_trajectories;
     private final TrajectoryVisualization m_viz;
 
@@ -44,12 +44,13 @@ public class FullStateTrajectoryListCommand extends Command implements Glassy {
 
     public FullStateTrajectoryListCommand(
             SupplierLogger2 parent,
+            HolonomicFieldRelativeController controller,
             SwerveDriveSubsystem swerve,
             Function<Pose2d, List<Trajectory100>> trajectories,
             TrajectoryVisualization viz) {
         SupplierLogger2 child = parent.child(this);
         m_swerve = swerve;
-        m_controller = new FullStateDriveController();
+        m_controller = controller;
         m_trajectories = trajectories;
         m_viz = viz;
         addRequirements(m_swerve);

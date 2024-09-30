@@ -44,6 +44,10 @@ public class State100 {
         return m_a;
     }
 
+    public State100 minus(State100 other) {
+        return new State100(x() - other.x(), v() - other.v(), a() - other.a());
+    }
+
     public boolean near(State100 other, double tolerance) {
         return MathUtil.isNear(m_x, other.m_x, tolerance) &&
                 MathUtil.isNear(m_v, other.m_v, tolerance);

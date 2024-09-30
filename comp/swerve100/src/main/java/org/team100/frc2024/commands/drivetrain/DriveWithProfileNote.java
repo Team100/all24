@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.team100.frc2024.motion.intake.Intake;
-import org.team100.lib.controller.drivetrain.HolonomicDriveController100;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -40,7 +40,7 @@ public class DriveWithProfileNote extends Command implements Glassy  {
     private final Intake m_intake;
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
-    private final HolonomicDriveController100 m_controller;
+    private final HolonomicFieldRelativeController m_controller;
     private final SwerveKinodynamics m_limits;
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
@@ -61,7 +61,7 @@ public class DriveWithProfileNote extends Command implements Glassy  {
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
-            HolonomicDriveController100 controller,
+            HolonomicFieldRelativeController controller,
             SwerveKinodynamics limits) {
         m_field_log = fieldLogger;
         SupplierLogger2 child = parent.child(this);

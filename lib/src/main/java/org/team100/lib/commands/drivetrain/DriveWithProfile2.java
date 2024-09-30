@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.team100.lib.controller.drivetrain.HolonomicDriveController100;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -31,7 +31,7 @@ public class DriveWithProfile2 extends Command implements Glassy  {
 
     private final Supplier<Optional<Pose2d>> m_fieldRelativeGoal;
     private final SwerveDriveSubsystem m_swerve;
-    private final HolonomicDriveController100 m_controller;
+    private final HolonomicFieldRelativeController m_controller;
     private final SwerveKinodynamics m_limits;
     private final TrapezoidProfile100 xProfile;
     private final TrapezoidProfile100 yProfile;
@@ -48,7 +48,7 @@ public class DriveWithProfile2 extends Command implements Glassy  {
     public DriveWithProfile2(
             Supplier<Optional<Pose2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
-            HolonomicDriveController100 controller,
+            HolonomicFieldRelativeController controller,
             SwerveKinodynamics limits) {
         m_fieldRelativeGoal = fieldRelativeGoal;
         m_swerve = drivetrain;

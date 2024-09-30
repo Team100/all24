@@ -1,6 +1,6 @@
 package org.team100.lib.commands.drivetrain.for_testing;
 
-import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -25,7 +25,7 @@ public class Spin extends Command implements Glassy {
     private static final double kAccel = 0.5;
 
     private final SwerveDriveSubsystem m_swerve;
-    private final HolonomicDriveController3 m_controller;
+    private final HolonomicFieldRelativeController m_controller;
 
     Translation2d m_center;
     double m_initialRotation;
@@ -34,7 +34,7 @@ public class Spin extends Command implements Glassy {
 
     public Spin(
             SwerveDriveSubsystem swerve,
-            HolonomicDriveController3 controller) {
+            HolonomicFieldRelativeController controller) {
         m_swerve = swerve;
         m_controller = controller;
         addRequirements(m_swerve);

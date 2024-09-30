@@ -8,18 +8,19 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
+import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -53,7 +54,8 @@ class DriveToWaypoint3Test extends Fixtured {
             }
         };
 
-        HolonomicDriveController3 controller = new HolonomicDriveController3(logger);
+        HolonomicFieldRelativeController controller = HolonomicDriveControllerFactory.get(
+                new HolonomicFieldRelativeController.Log(logger));
         DriveToWaypoint3.Log log = new DriveToWaypoint3.Log(logger);
         DriveToWaypoint3 command = new DriveToWaypoint3(
                 log,
@@ -86,7 +88,8 @@ class DriveToWaypoint3Test extends Fixtured {
         assertEquals(0.612, goal.getY(), kDelta);
         assertEquals(-1.047, goal.getRotation().getRadians(), kDelta);
 
-        HolonomicDriveController3 m_controller = new HolonomicDriveController3(logger);
+        HolonomicFieldRelativeController m_controller = HolonomicDriveControllerFactory.get(
+                new HolonomicFieldRelativeController.Log(logger));
         DriveToWaypoint3.Log log = new DriveToWaypoint3.Log(logger);
         DriveToWaypoint3 command = new DriveToWaypoint3(
                 log, goal, drivetrain, maker, m_controller, viz);

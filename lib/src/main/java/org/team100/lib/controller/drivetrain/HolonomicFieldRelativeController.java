@@ -2,6 +2,7 @@ package org.team100.lib.controller.drivetrain;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
 import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -10,15 +11,17 @@ import org.team100.lib.telemetry.Telemetry.Level;
 public interface HolonomicFieldRelativeController extends Glassy {
     /** Implementations can share log schema. */
     public static class Log {
-        private final SwerveStateLogger m_log_measurement;
-        private final SwerveStateLogger m_log_reference;
+        final SwerveStateLogger measurement;
+        final SwerveStateLogger reference; // ref v is FF
+        final SwerveStateLogger error;
+        final FieldRelativeVelocityLogger u_FB;
 
         public Log(SupplierLogger2 parent) {
             SupplierLogger2 child = parent.child("HolonomicFieldRelativeController");
-
-            m_log_reference = child.swerveStateLogger(Level.DEBUG, "reference");
-            m_log_measurement = child.swerveStateLogger(Level.DEBUG, "measurement");
-
+            reference = child.swerveStateLogger(Level.DEBUG, "reference");
+            measurement = child.swerveStateLogger(Level.DEBUG, "measurement");
+            error = child.swerveStateLogger(Level.DEBUG, "error");
+            u_FB = child.fieldRelativeVelocityLogger(Level.DEBUG, "u_FB");
         }
     }
 

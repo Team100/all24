@@ -48,8 +48,8 @@ import org.team100.lib.commands.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.commands.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.commands.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.config.Identity;
-import org.team100.lib.controller.drivetrain.HolonomicDriveController100;
-import org.team100.lib.controller.drivetrain.HolonomicDriveController3;
+import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
+import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.follower.DrivePIDFFollower;
 import org.team100.lib.follower.DriveTrajectoryFollower;
@@ -230,7 +230,8 @@ public class RobotContainer implements Glassy {
         // FullStateDriveController();
 
         // cartesian position, rotation full-state.
-        final HolonomicDriveController100 halfFullStateController = new HolonomicDriveController100(comLog);
+        HolonomicFieldRelativeController.Log hlog = new HolonomicFieldRelativeController.Log(comLog);
+        HolonomicFieldRelativeController halfFullStateController = HolonomicDriveControllerFactory.get(hlog);
 
         final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
@@ -245,8 +246,7 @@ public class RobotContainer implements Glassy {
                         driveControllerFactory.fancyPIDF(PIDFlog),
                         constraints));
 
-        // 254 PID follower
-        final HolonomicDriveController3 controller = new HolonomicDriveController3(comLog);
+        final HolonomicFieldRelativeController controller = HolonomicDriveControllerFactory.get(hlog);
         final DriveTrajectoryFollower drivePID = driveControllerFactory.goodPIDF(PIDFlog);
 
         whileTrue(driverControl::driveToNote,
