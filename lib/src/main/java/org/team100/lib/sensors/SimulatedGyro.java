@@ -57,4 +57,9 @@ public class SimulatedGyro implements Gyro {
         return GeometryUtil.kRotationZero;
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
 }

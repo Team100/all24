@@ -2,6 +2,7 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -85,6 +86,10 @@ public class SingleNavXGyro implements Gyro {
     private final DoubleSupplierLogger2 m_log_yaw_rate_deg;
     private final BooleanSupplierLogger2 m_log_connected;
 
+    /** To work around NavX badness, for now. */
+    private Rotation2d m_prevYawNWURad = null;
+    private double m_yawRateRad_S = 0;
+
     /**
      * NOTE: the async is just for logging, maybe don't use a whole thread for it.
      */
@@ -151,10 +156,25 @@ public class SingleNavXGyro implements Gyro {
     }
 
     @Override
+    public void periodic() {
+        // This is to work around NavX badness, for now.
+        // TODO: use a real rate.
+        Rotation2d yawNWURad = getYawNWU();
+        if (m_prevYawNWURad == null) {
+            m_prevYawNWURad = yawNWURad;
+            m_yawRateRad_S = 0;
+        }
+        Rotation2d dYawRad = yawNWURad.minus(m_prevYawNWURad);
+        m_yawRateRad_S = dYawRad.getRadians() / TimedRobot100.LOOP_PERIOD_S;
+    }
+
+    @Override
     public double getYawRateNWU() {
-        double currentHeadingRateNWU = Math.toRadians(getYawRateNEDDeg_s());
-        m_log_heading_rate.log(() -> currentHeadingRateNWU);
-        return currentHeadingRateNWU;
+        m_log_heading_rate.log(() -> m_yawRateRad_S);
+        return m_yawRateRad_S;
+        // double currentHeadingRateNWU = Math.toRadians(getYawRateNEDDeg_s());
+        // m_log_heading_rate.log(() -> currentHeadingRateNWU);
+        // return currentHeadingRateNWU;
     }
 
     @Override
@@ -225,6 +245,9 @@ public class SingleNavXGyro implements Gyro {
         // https://github.com/kauailabs/navxmxp/issues/69
         //
         // the recommended workaround is to use getRawGyroZ() instead.
+        // but note that the USB interface does not support both "raw" and "processed"
+        // inputs, you have to choose one or the other. And the MXP gyro seems
+        // like it worked for awhile, and then stopped working.
         return m_ahrs.getRawGyroZ();
         // float rateDeg_S = m_ahrs.getRawGyroZ();
 

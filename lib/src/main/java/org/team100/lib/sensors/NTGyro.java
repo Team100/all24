@@ -80,6 +80,11 @@ public class NTGyro implements Gyro {
         return new Rotation2d(m_roll.getValue());
     }
 
+    @Override
+    public void periodic() {
+        //
+    }
+
     ///////////////////////////////////
 
     /**
