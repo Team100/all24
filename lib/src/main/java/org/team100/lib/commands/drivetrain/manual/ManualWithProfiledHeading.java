@@ -34,6 +34,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  */
 public class ManualWithProfiledHeading implements FieldRelativeDriver {
+    private static final double OMEGA_FB_DEADBAND = 0.1;
+    private static final double THETA_FB_DEADBAND = 0.1;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
@@ -134,7 +136,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * @return feasible field-relative velocity in m/s and rad/s
      */
     public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity twist1_1) {
-        Pose2d currentPose = state.pose();
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
         // scale to max in both translation and rotation
@@ -143,12 +144,12 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        Rotation2d currentRotation = currentPose.getRotation();
-        double yawMeasurement = currentRotation.getRadians();
+        double yawMeasurement = state.theta().x();
+        // TODO: use the state instead
         double yawRate = getYawRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
+        m_goal = m_latch.latchedRotation(state.theta(), pov, twistM_S.theta());
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
@@ -250,7 +251,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
             omegaFB = m_outputFilter.calculate(omegaFB);
         }
         // deadband the output to prevent shivering.
-        if (Math.abs(omegaFB) < 0.1) {
+        if (Math.abs(omegaFB) < OMEGA_FB_DEADBAND) {
             omegaFB = 0;
         }
         return omegaFB;
@@ -258,10 +259,9 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
 
     private double getThetaFB(double headingMeasurement) {
         double thetaFB = m_thetaController.calculate(headingMeasurement, m_thetaSetpoint.x());
-        if (Math.abs(thetaFB) < 0.1) {
+        if (Math.abs(thetaFB) < THETA_FB_DEADBAND) {
             thetaFB = 0;
         }
-
         return thetaFB;
     }
 }

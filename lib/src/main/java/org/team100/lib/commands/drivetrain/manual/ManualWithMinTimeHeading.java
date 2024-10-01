@@ -133,8 +133,6 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      * @return feasible field-relative velocity in m/s and rad/s
      */
     public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity twist1_1) {
-        Pose2d currentPose = state.pose();
-
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
         // scale to max in both translation and rotation
@@ -143,14 +141,13 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
-        Rotation2d currentRotation = currentPose.getRotation();
         double yawMeasurement = state.theta().x();
-        // not sure which is better
+        // TODO: i think the state omega isn't right. find out.
         double yawRate = state.theta().v();
         // double yawRate = getYawRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(state.theta(), currentRotation, pov, twistM_S.theta());
+        m_goal = m_latch.latchedRotation(state.theta(), pov, twistM_S.theta());
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint

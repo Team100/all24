@@ -159,6 +159,7 @@ public class SingleNavXGyro implements Gyro {
     public void periodic() {
         // This is to work around NavX badness, for now.
         // TODO: use a real rate.
+        // TODO: replace this use of periodic with Memo.of(), if we're going to keep it more than a week.
         Rotation2d yawNWURad = getYawNWU();
         if (m_prevYawNWURad == null) {
             m_prevYawNWURad = yawNWURad;

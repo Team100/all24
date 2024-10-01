@@ -47,7 +47,7 @@ public class OscillateDirect extends Command implements Glassy  {
     private final DoubleSupplierLogger2 m_log_measurement_speed;
     private final DoubleSupplierLogger2 m_log_measurement_position;
 
-    private SwerveState m_initial;
+    SwerveState m_initial;
 
     public OscillateDirect(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
         SupplierLogger2 child = parent.child(this);
@@ -57,13 +57,13 @@ public class OscillateDirect extends Command implements Glassy  {
         m_parabola = new ParabolicWave(kMaxSpeed * kPeriod / 4, kPeriod);
         m_timer = new Timer();
         addRequirements(m_swerve);
-        m_log_period = child.doubleLogger(Level.TRACE, "period");
-        m_log_time = child.doubleLogger(Level.TRACE, "time");
-        m_log_setpoint_accel = child.doubleLogger(Level.TRACE, "setpoint/accel");
-        m_log_setpoint_speed = child.doubleLogger(Level.TRACE, "setpoint/speed");
-        m_log_setpoint_position = child.doubleLogger(Level.TRACE, "setpoint/position");
-        m_log_measurement_speed = child.doubleLogger(Level.TRACE, "measurement/speed");
-        m_log_measurement_position = child.doubleLogger(Level.TRACE, "measurement/position");
+        m_log_period = child.doubleLogger(Level.DEBUG, "period");
+        m_log_time = child.doubleLogger(Level.DEBUG, "time");
+        m_log_setpoint_accel = child.doubleLogger(Level.DEBUG, "setpoint/accel");
+        m_log_setpoint_speed = child.doubleLogger(Level.DEBUG, "setpoint/speed");
+        m_log_setpoint_position = child.doubleLogger(Level.DEBUG, "setpoint/position");
+        m_log_measurement_speed = child.doubleLogger(Level.DEBUG, "measurement/speed");
+        m_log_measurement_position = child.doubleLogger(Level.DEBUG, "measurement/position");
     }
 
     @Override

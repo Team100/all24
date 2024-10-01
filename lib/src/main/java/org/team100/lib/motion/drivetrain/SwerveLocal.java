@@ -210,6 +210,11 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         m_modules.close();
     }
 
+    public void reset() {
+        Util.warn("make sure resetting in SwerveLocal doesn't break anything");
+        m_modules.reset();
+    }
+
     public void resetSetpoint(SwerveSetpoint setpoint) {
         prevSetpoint = setpoint;
     }

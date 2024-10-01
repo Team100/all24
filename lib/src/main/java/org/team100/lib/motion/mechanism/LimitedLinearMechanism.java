@@ -88,26 +88,32 @@ public class LimitedLinearMechanism implements LinearMechanism {
         m_delegate.periodic();
     }
 
+    @Override
     public void setForceLimit(double forceN) {
         m_delegate.setForceLimit(forceN);
     }
 
+    @Override
     public OptionalDouble getVelocityM_S() {
         return m_delegate.getVelocityM_S();
     }
 
+    @Override
     public OptionalDouble getPositionM() {
         return m_delegate.getPositionM();
     }
 
+    @Override
     public void stop() {
         m_delegate.stop();
     }
 
+    @Override
     public void close() {
         m_delegate.close();
     }
 
+    @Override
     public void resetEncoderPosition() {
         m_delegate.resetEncoderPosition();
     }

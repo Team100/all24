@@ -17,7 +17,6 @@ public class HeadingLatch {
 
     public Rotation2d latchedRotation(
             State100 state,
-            Rotation2d currentRotation,
             Rotation2d pov,
             double inputOmega) {
         if (Math.abs(inputOmega) > unlatch) {
@@ -28,7 +27,7 @@ public class HeadingLatch {
             m_desiredRotation = pov;
         } else if (m_desiredRotation == null &&
                 Experiments.instance.enabled(Experiment.StickyHeading)) {
-            // if the driver is providing no input, and there's no sticky heading,
+            // if the driver is providing no input, and there's no pov,
             // then use the current heading as the sticky heading.
             // give the robot a chance to slow down to avoid overshoot.
             double t = Math.abs(state.v()) / maxARad_S2;

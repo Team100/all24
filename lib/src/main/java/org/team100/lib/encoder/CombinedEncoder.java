@@ -57,10 +57,10 @@ public class CombinedEncoder implements RotaryPositionSensor {
         SupplierLogger2 child = parent.child(this);
         m_absolute = absolute;
         m_incremental = incremental;
-        m_log_absolute = child.optionalDoubleLogger(Level.TRACE, "absolute (rad))");
+        m_log_absolute = child.optionalDoubleLogger(Level.DEBUG, "absolute (rad))");
         m_log_incremental = child.optionalDoubleLogger(Level.TRACE, "incremental (rad)");
         m_log_incremental_wrapped = child.doubleLogger(Level.TRACE, "incremental wrapped (rad)");
-        m_log_combined = child.optionalDoubleLogger(Level.TRACE, "combined (rad)");
+        m_log_combined = child.optionalDoubleLogger(Level.DEBUG, "combined (rad)");
 
         // the duty cycle encoder seems to produce slightly-wrong values immediately
         // upon startup, so wait a bit before doing the synchronization

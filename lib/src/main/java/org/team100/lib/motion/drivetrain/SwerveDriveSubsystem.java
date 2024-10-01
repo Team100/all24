@@ -17,6 +17,7 @@ import org.team100.lib.sensors.Gyro;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Memo;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -80,7 +81,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
      * Feasibility is enforced by the setpoint generator (if enabled) and the
      * desaturator.
      * 
-     * @param v      Field coordinate velocities in meters and radians per second.
+     * @param v Field coordinate velocities in meters and radians per second.
      */
     public void driveInFieldCoords(FieldRelativeVelocity vIn) {
         m_log_input.log(() -> vIn);
@@ -161,6 +162,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
 
     /** The effect won't be seen until the next cycle. */
     public void resetTranslation(Translation2d translation) {
+        Util.warn("Make sure resetting the swerve module collection doesn't break anything");
+        m_swerveLocal.reset();
         m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
                 m_swerveLocal.positions(),
@@ -170,6 +173,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
     }
 
     public void resetPose(Pose2d robotPose) {
+        Util.warn("Make sure resetting the swerve module collection doesn't break anything");
+        m_swerveLocal.reset();
         m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
                 m_swerveLocal.positions(),
