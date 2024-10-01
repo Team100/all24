@@ -35,6 +35,7 @@ import edu.wpi.first.wpilibj.GenericHID;
  * Left x is rotational speed
  * Left y is throttle, slow-med-fast.
  * Reset is "reset pose"
+ * Oscillate is "menu/select"
  * Left switch is medium speed.
  * Right switch is slow speed.
  */
@@ -81,6 +82,18 @@ public class RealFlight implements DriverControl {
         }
     }
 
+    @Override
+    public boolean fullCycle() {
+        return hid.getRawButton(4);
+    }
+
+    @Override
+    public boolean resetRotation0() {
+        return hid.getRawButton(1);
+    }
+
+    /////////////////////////////////////////
+
     private Speed speed() {
         // left
         if (hid.getRawButton(2))
@@ -89,16 +102,6 @@ public class RealFlight implements DriverControl {
         if (hid.getRawButton(3))
             return Speed.MEDIUM;
         return Speed.NORMAL;
-    }
-
-    /////////////////////////////////////////
-
-    public boolean leftSwitchOn() {
-        return hid.getRawButton(2);
-    }
-
-    public boolean rightSwitchOn() {
-        return hid.getRawButton(3);
     }
 
     /**
