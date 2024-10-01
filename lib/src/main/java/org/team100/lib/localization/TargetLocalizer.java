@@ -42,11 +42,6 @@ public class TargetLocalizer {
         // for it as of Jul 2024.
         // if (note.getY() < cameraInRobotCoordinates.getRotation().getY()) {
         //
-        if (note.getY() <= -1.0 * cameraInRobotCoordinates.getRotation().getY()) {
-            // filter out targets above the horizon. note that the function below also does
-            // this same filtering, so maybe don't do it twice?
-            return Optional.empty();
-        }
         Optional<Translation2d> robotRelative = TargetLocalizer
                 .sightToRobotRelative(cameraInRobotCoordinates, note);
         if (robotRelative.isEmpty()) {

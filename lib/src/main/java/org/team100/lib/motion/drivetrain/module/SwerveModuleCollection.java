@@ -135,7 +135,7 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 33,
                                 0,
-                                0.837662,
+                                0.46478,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE));
             case BETA_BOT:
