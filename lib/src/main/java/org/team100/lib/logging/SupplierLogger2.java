@@ -18,7 +18,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.state.State100;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 
@@ -36,6 +35,11 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 /**
  * This class should not be a member of any other class, it should be used in
  * constructors to create instances of the inner classes.
+ *
+ *  Use keys of the form "/foo/bar"; the slashes separate levels in the tree.
+ * 
+ * Don't use a slash for any other reason, e.g. for "meters per second" don't
+ * say "m/s" say "m_s"
  */
 public class SupplierLogger2 {
     private final Supplier<Level> m_level;

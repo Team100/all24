@@ -6,6 +6,7 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -14,7 +15,6 @@ import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.State100;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;

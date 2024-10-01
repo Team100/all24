@@ -11,10 +11,10 @@ import edu.wpi.first.hal.NotifierJNI;
 import java.util.PriorityQueue;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
  * Copy of {@link edu.wpi.first.wpilibj.TimedRobot} in an effort to improve
@@ -102,7 +102,7 @@ public class TimedRobot100 extends IterativeRobotBase implements Glassy {
 
     protected TimedRobot100() {
         super(LOOP_PERIOD_S);
-        m_robotLogger = Telemetry.instance().rootLogger.child(this);
+        m_robotLogger = Logging.instance().rootLogger.child(this);
         m_log_slack = m_robotLogger.doubleLogger(Level.COMP, "slack time (s)");
         m_startTime = Timer.getFPGATimestamp();
         addPeriodic(this::loopFunc, TimedRobot100.LOOP_PERIOD_S, "main loop");

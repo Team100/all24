@@ -1,4 +1,4 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.util;
 
 import java.util.HashSet;
 import java.util.Set;

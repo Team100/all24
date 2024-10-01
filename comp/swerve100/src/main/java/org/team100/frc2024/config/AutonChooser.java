@@ -1,7 +1,7 @@
 package org.team100.frc2024.config;
 
 import org.team100.frc2024.commands.AutonCommand;
-import org.team100.lib.telemetry.NamedChooser;
+import org.team100.lib.util.NamedChooser;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

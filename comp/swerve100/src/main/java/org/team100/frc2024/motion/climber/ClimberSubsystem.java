@@ -10,13 +10,13 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.LimitedLinearMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
 import org.team100.lib.motion.servo.LinearPositionServo;
 import org.team100.lib.motion.servo.OnboardLinearDutyCyclePositionServo;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;

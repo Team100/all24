@@ -2,10 +2,10 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.motor.BareMotor;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 /** encoder implementation that supports only velocity measurement. */
 public class VelocityBareEncoder implements IncrementalBareEncoder {

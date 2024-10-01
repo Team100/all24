@@ -7,14 +7,14 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.JvmLogger;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
-import org.team100.lib.telemetry.JvmLogger;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
@@ -82,7 +82,7 @@ public class Robot extends TimedRobot100 {
 
         // DataLogManager.start();
 
-        Util.printf("Total Logger Keys: %d\n", Telemetry.instance().keyCount());
+        Util.printf("Total Logger Keys: %d\n", Logging.instance().keyCount());
 
         // This reduces the allocated heap size, not just the used heap size, which
         // means more-frequent and smaller subsequent GC's.
@@ -111,7 +111,7 @@ public class Robot extends TimedRobot100 {
         m_jvmLogger.logMemoryPools();
         m_jvmLogger.logMemoryUsage();
 
-        Telemetry.instance().periodic();
+        Logging.instance().periodic();
 
         if (Experiments.instance.enabled(Experiment.FlushOften)) {
             Util.warn("FLUSHING EVERY LOOP, DO NOT USE IN COMP");

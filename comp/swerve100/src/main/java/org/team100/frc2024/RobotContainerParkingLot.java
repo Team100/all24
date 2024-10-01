@@ -33,6 +33,7 @@ import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
+import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
@@ -42,7 +43,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
-import org.team100.lib.telemetry.Telemetry;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
@@ -82,9 +82,9 @@ public class RobotContainerParkingLot implements Glassy {
      * @throws IOException
      */
     RobotContainerParkingLot(TimedRobot100 robot) throws IOException {
-        Telemetry telemetry = Telemetry.instance();
-        final SupplierLogger2 fieldLogger = telemetry.fieldLogger;
-        final SupplierLogger2 driveLogger = telemetry.rootLogger;
+        Logging logging = Logging.instance();
+        final SupplierLogger2 fieldLogger = logging.fieldLogger;
+        final SupplierLogger2 driveLogger = logging.rootLogger;
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
 
         final AsyncFactory asyncFactory = new AsyncFactory(robot);

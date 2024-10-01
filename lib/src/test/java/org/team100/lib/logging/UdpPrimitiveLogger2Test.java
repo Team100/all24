@@ -18,7 +18,6 @@ import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.Timer;
 

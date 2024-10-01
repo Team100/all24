@@ -2,8 +2,6 @@ package org.team100.lib.logging;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.telemetry.Telemetry.Level;
-
 public class FieldLogger extends SupplierLogger2 {
     /** Allow shared field logging. */
     public static class Log {

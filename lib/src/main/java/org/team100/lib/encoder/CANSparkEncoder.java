@@ -2,10 +2,10 @@ package org.team100.lib.encoder;
 
 import java.util.OptionalDouble;
 
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
 import org.team100.lib.motor.CANSparkMotor;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
  * The built-in encoder in Neo motors.

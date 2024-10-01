@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 
-import org.team100.lib.telemetry.NamedChooser;
+import org.team100.lib.util.NamedChooser;
 
 public class ExperimentChooser extends NamedChooser<BooleanSupplier> {
     private static final Map<String, ExperimentChooser> choosers = new ConcurrentHashMap<>();

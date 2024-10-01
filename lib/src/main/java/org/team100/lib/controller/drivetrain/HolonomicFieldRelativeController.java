@@ -1,12 +1,12 @@
 package org.team100.lib.controller.drivetrain;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
 import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 public interface HolonomicFieldRelativeController extends Glassy {
     /** Implementations can share log schema. */

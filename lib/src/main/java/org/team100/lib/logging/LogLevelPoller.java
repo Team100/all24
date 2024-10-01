@@ -1,28 +1,27 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 import java.util.function.Consumer;
 
 import org.team100.lib.async.Async;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/** Asynchronously looks for updates in telemetry level. */
-public class TelemetryLevelPoller {
+/** Asynchronously looks for updates in log level. */
+public class LogLevelPoller {
     private final SendableChooser<Level> m_levelChooser;
     private final Consumer<Level> m_consumer;
 
-    public TelemetryLevelPoller(Async async, Consumer<Level> consumer, Level defaultLevel) {
+    public LogLevelPoller(Async async, Consumer<Level> consumer, Level defaultLevel) {
         m_consumer = consumer;
-        m_levelChooser = TelemetryLevelChooser.get();
+        m_levelChooser = LogLevelChooser.get();
         for (Level level : Level.values()) {
             m_levelChooser.addOption(level.name(), level);
         }
         m_levelChooser.setDefaultOption(defaultLevel.name(), defaultLevel);
         SmartDashboard.putData(m_levelChooser);
         updateLevel();
-        async.addPeriodic(this::updateLevel, 1, "Telemetry");
+        async.addPeriodic(this::updateLevel, 1, "Logging");
     }
 
     public Level getLevel() {
