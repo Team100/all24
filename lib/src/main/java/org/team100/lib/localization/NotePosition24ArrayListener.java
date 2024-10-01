@@ -48,7 +48,6 @@ public class NotePosition24ArrayListener {
 
     public NotePosition24ArrayListener(Supplier<Pose2d> poseSupplier) {
         m_poseSupplier = poseSupplier;
-
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
         m_poller = new NetworkTableListenerPoller(inst);
         m_poller.addListener(

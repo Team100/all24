@@ -12,7 +12,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 
 public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
-    private final RotaryMechanism m_motor;
+    private final RotaryMechanism m_mechanism;
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_position;
     private final OptionalDoubleLogger m_log_rate;
@@ -24,7 +24,7 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
             SupplierLogger2 parent,
             RotaryMechanism motor) {
         SupplierLogger2 child = parent.child(this);
-        m_motor = motor;
+        m_mechanism = motor;
         m_log_position = child.doubleLogger(Level.TRACE, "position");
         m_log_rate = child.optionalDoubleLogger(Level.TRACE, "rate");
     }
@@ -34,7 +34,7 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
         double nowS = Timer.getFPGATimestamp();
         double dtS = nowS - m_timeS;
         // motor velocity is rad/s
-        OptionalDouble velocityRad_S = m_motor.getVelocityRad_S();
+        OptionalDouble velocityRad_S = m_mechanism.getVelocityRad_S();
         if (velocityRad_S.isEmpty())
             return OptionalDouble.empty();
         m_positionRad += velocityRad_S.getAsDouble() * dtS;
@@ -47,7 +47,7 @@ public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
     @Override
     public OptionalDouble getRateRad_S() {
         // motor velocity is rad/s
-        OptionalDouble m_rate = m_motor.getVelocityRad_S();
+        OptionalDouble m_rate = m_mechanism.getVelocityRad_S();
         if (m_rate.isEmpty())
             return OptionalDouble.empty();
         m_log_rate.log(() -> m_rate);

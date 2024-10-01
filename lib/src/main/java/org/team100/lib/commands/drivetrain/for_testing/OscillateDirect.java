@@ -47,7 +47,7 @@ public class OscillateDirect extends Command implements Glassy  {
     private final DoubleSupplierLogger2 m_log_measurement_speed;
     private final DoubleSupplierLogger2 m_log_measurement_position;
 
-    private SwerveState m_initial;
+    SwerveState m_initial;
 
     public OscillateDirect(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
         SupplierLogger2 child = parent.child(this);

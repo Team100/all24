@@ -61,6 +61,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     // WCP 4 inch wheel
     private static final double kWheelDiameterM = 0.0975; // 0.1015
 
+    /**
+     * MAKE SURE THAT THE BEVELS ON THE WHEELS FOR ZEROING GO TO THE RIGHT
+     */
     public static WCPSwerveModule100 getKrakenDrive(
             SupplierLogger2 parent,
             double supplyLimitAmps,
@@ -97,7 +100,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     /**
-     * MAKE SURE THAT THE BEVELS ON THE WHEELS FOR ZEROING GO TO THE LEFT
+     * MAKE SURE THAT THE BEVELS ON THE WHEELS FOR ZEROING GO TO THE RIGHT
      */
     public static WCPSwerveModule100 getFalconDrive(
             SupplierLogger2 parent,
