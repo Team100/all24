@@ -8,7 +8,7 @@ import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.State100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.State100Logger;
 
 /**
@@ -22,7 +22,7 @@ public class OutboardLinearPositionServo implements LinearPositionServo {
     private State100 m_setpoint = new State100(0, 0);
 
     private final State100Logger m_log_goal;
-    private final DoubleSupplierLogger2 m_log_ff_torque;
+    private final DoubleLogger m_log_ff_torque;
     private final State100Logger m_log_setpoint;
 
 

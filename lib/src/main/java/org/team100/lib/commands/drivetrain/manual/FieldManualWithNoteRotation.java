@@ -11,7 +11,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
@@ -57,15 +57,15 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     private final BooleanSupplier m_trigger;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_apparent_motion;
+    private final DoubleLogger m_log_apparent_motion;
     private final State100Logger m_log_theta_setpoint;
-    private final DoubleSupplierLogger2 m_log_theta_measurement;
-    private final DoubleSupplierLogger2 m_log_theta_error;
-    private final DoubleSupplierLogger2 m_log_theta_fb;
+    private final DoubleLogger m_log_theta_measurement;
+    private final DoubleLogger m_log_theta_error;
+    private final DoubleLogger m_log_theta_fb;
     private final State100Logger m_log_omega_reference;
-    private final DoubleSupplierLogger2 m_log_omega_measurement;
-    private final DoubleSupplierLogger2 m_log_omega_error;
-    private final DoubleSupplierLogger2 m_log_omega_fb;
+    private final DoubleLogger m_log_omega_measurement;
+    private final DoubleLogger m_log_omega_error;
+    private final DoubleLogger m_log_omega_fb;
     private final FieldLogger.Log m_field_log;
 
     private State100 m_thetaSetpoint;

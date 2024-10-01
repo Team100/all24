@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain.for_testing;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -27,13 +27,13 @@ public class OscillateFieldRelative extends Command implements Glassy {
     private final Timer m_timer;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_period;
-    private final DoubleSupplierLogger2 m_log_time;
-    private final DoubleSupplierLogger2 m_log_setpoint_accel;
-    private final DoubleSupplierLogger2 m_log_setpoint_speed;
-    private final DoubleSupplierLogger2 m_log_setpoint_position;
-    private final DoubleSupplierLogger2 m_log_measurement_speed;
-    private final DoubleSupplierLogger2 m_log_measurement_position;
+    private final DoubleLogger m_log_period;
+    private final DoubleLogger m_log_time;
+    private final DoubleLogger m_log_setpoint_accel;
+    private final DoubleLogger m_log_setpoint_speed;
+    private final DoubleLogger m_log_setpoint_position;
+    private final DoubleLogger m_log_measurement_speed;
+    private final DoubleLogger m_log_measurement_position;
 
     SwerveState m_initial;
 

@@ -5,7 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,7 +19,7 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
     private final SensorInterface m_sensors;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_speed;
+    private final DoubleLogger m_log_speed;
 
     public FeederSubsystem(LoggerFactory parent, SensorInterface sensors) {
         LoggerFactory child = parent.child(this);

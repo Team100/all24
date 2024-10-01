@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.util.Memo;
@@ -39,7 +39,7 @@ public class CombinedEncoder implements RotaryPositionSensor {
     // LOGGERS
     private final OptionalDoubleLogger m_log_absolute;
     private final OptionalDoubleLogger m_log_incremental;
-    private final DoubleSupplierLogger2 m_log_incremental_wrapped;
+    private final DoubleLogger m_log_incremental_wrapped;
     private final OptionalDoubleLogger m_log_combined;
     // for synchronization one-shot delayed task
     private final ScheduledExecutorService m_synchronizer;

@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.util.Util;
 
@@ -22,9 +22,9 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
     private final EncoderDrive m_drive;
     // LOGGERS
     private final OptionalDoubleLogger m_log_position;
-    private final DoubleSupplierLogger2 m_log_position_turns;
-    private final DoubleSupplierLogger2 m_log_position_turns_offset;
-    private final DoubleSupplierLogger2 m_log_rate;
+    private final DoubleLogger m_log_position_turns;
+    private final DoubleLogger m_log_position_turns_offset;
+    private final DoubleLogger m_log_rate;
 
     private Double m_prevAngleRad = null;
     private Double m_prevTimeS = null;

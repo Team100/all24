@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
@@ -31,7 +31,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
     // LOGGERS
     private final Rotation2dLogger m_log_offset;
-    private final DoubleSupplierLogger2 m_log_pose_x;
+    private final DoubleLogger m_log_pose_x;
 
     /**
      * maintained in resetPosition().

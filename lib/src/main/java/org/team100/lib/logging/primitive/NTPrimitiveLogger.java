@@ -4,14 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.team100.lib.logging.primitive.PrimitiveLogger.BooleanLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleArrayLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleObjArrayLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.IntLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.LongLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.StringLogger;
-
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -35,13 +27,13 @@ import edu.wpi.first.wpilibj.DataLogManager;
  * With a full load of logging this will overrun the 50hz loop very badly, so if
  * you use it, you'll need to turn off most of the logging.
  */
-public class NTPrimitiveLogger2 implements PrimitiveLogger {
+public class NTPrimitiveLogger implements PrimitiveLogger {
     private final NetworkTableInstance inst;
     // this is duplicative of the NT topic list, but the NT topics includes
     // other non-logging keys, so we keep our own list.
     private final Set<String> keys = new HashSet<>();
 
-    public NTPrimitiveLogger2() {
+    public NTPrimitiveLogger() {
         inst = NetworkTableInstance.getDefault();
         // Also log to disk
         DataLogManager.start();
@@ -52,7 +44,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger {
         return keys.size();
     }
 
-    public class NTBooleanLogger implements PrimitiveLogger.BooleanLogger {
+    public class NTBooleanLogger implements PrimitiveLogger.PrimitiveBooleanLogger {
         BooleanPublisher m_pub;
 
         public NTBooleanLogger(String label) {
@@ -68,7 +60,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger {
 
     }
 
-    public class NTDoubleLogger implements PrimitiveLogger.DoubleLogger {
+    public class NTDoubleLogger implements PrimitiveLogger.PrimitiveDoubleLogger {
         DoublePublisher m_pub;
 
         public NTDoubleLogger(String label) {
@@ -83,7 +75,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger {
         }
     }
 
-    public class NTIntLogger implements PrimitiveLogger.IntLogger {
+    public class NTIntLogger implements PrimitiveLogger.PrimitiveIntLogger {
         IntegerPublisher m_pub;
 
         public NTIntLogger(String label) {
@@ -98,7 +90,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger {
         }
     }
 
-    public class NTDoubleArrayLogger implements PrimitiveLogger.DoubleArrayLogger {
+    public class NTDoubleArrayLogger implements PrimitiveLogger.PrimitiveDoubleArrayLogger {
         DoubleArrayPublisher m_pub;
 
         public NTDoubleArrayLogger(String label) {
@@ -113,22 +105,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger {
         }
     }
 
-    public class NTDoubleObjArrayLogger implements PrimitiveLogger.DoubleObjArrayLogger {
-        DoubleArrayPublisher m_pub;
-
-        public NTDoubleObjArrayLogger(String label) {
-            DoubleArrayTopic t = inst.getDoubleArrayTopic(label);
-            m_pub = t.publish();
-            t.setRetained(true);
-        }
-
-        @Override
-        public void log(Double[] val) {
-            m_pub.set(Stream.of(val).mapToDouble(Double::doubleValue).toArray());
-        }
-    }
-
-    public class NTLongLogger implements PrimitiveLogger.LongLogger {
+    public class NTLongLogger implements PrimitiveLogger.PrimitiveLongLogger {
         IntegerPublisher m_pub;
 
         public NTLongLogger(String label) {
@@ -143,7 +120,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger {
         }
     }
 
-    public class NTStringLogger implements PrimitiveLogger.StringLogger {
+    public class NTStringLogger implements PrimitiveLogger.PrimitiveStringLogger {
         StringPublisher m_pub;
 
         public NTStringLogger(String label) {
@@ -159,43 +136,37 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger {
     }
 
     @Override
-    public BooleanLogger booleanLogger(String label) {
+    public PrimitiveBooleanLogger booleanLogger(String label) {
         keys.add(label);
         return new NTBooleanLogger(label);
     }
 
     @Override
-    public DoubleLogger doubleLogger(String label) {
+    public PrimitiveDoubleLogger doubleLogger(String label) {
         keys.add(label);
         return new NTDoubleLogger(label);
     }
 
     @Override
-    public IntLogger intLogger(String label) {
+    public PrimitiveIntLogger intLogger(String label) {
         keys.add(label);
         return new NTIntLogger(label);
     }
 
     @Override
-    public DoubleArrayLogger doubleArrayLogger(String label) {
+    public PrimitiveDoubleArrayLogger doubleArrayLogger(String label) {
         keys.add(label);
         return new NTDoubleArrayLogger(label);
     }
 
     @Override
-    public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
-        keys.add(label);
-        return new NTDoubleObjArrayLogger(label);
-    }
-
-    @Override
-    public LongLogger longLogger(String label) {
+    public PrimitiveLongLogger longLogger(String label) {
         keys.add(label);
         return new NTLongLogger(label);
     }
 
     @Override
-    public StringLogger stringLogger(String label) {
+    public PrimitiveStringLogger stringLogger(String label) {
         keys.add(label);
         return new NTStringLogger(label);
     }

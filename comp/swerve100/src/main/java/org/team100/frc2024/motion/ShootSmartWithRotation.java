@@ -14,7 +14,7 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -31,8 +31,8 @@ public class ShootSmartWithRotation extends Command implements Glassy  {
     private final Supplier<DriverControl.Velocity> m_twistSupplier;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_angle;
-    private final DoubleSupplierLogger2 m_log_realangle;
+    private final DoubleLogger m_log_angle;
+    private final DoubleLogger m_log_realangle;
 
     public ShootSmartWithRotation(
             LoggerFactory parent,

@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
@@ -49,14 +49,14 @@ public class ArmTrajectoryCommand extends Command implements Glassy  {
 
     // LOGGERS
 
-    private final DoubleSupplierLogger2 m_log_Lower_FF;
-    private final DoubleSupplierLogger2 m_log_Lower_Controller_Output;
-    private final DoubleSupplierLogger2 m_log_Upper_FF;
-    private final DoubleSupplierLogger2 m_log_Upper_Controller_Output;
-    private final DoubleSupplierLogger2 m_log_Lower_Ref;
-    private final DoubleSupplierLogger2 m_log_Upper_Ref;
-    private final DoubleSupplierLogger2 m_log_Output_Upper;
-    private final DoubleSupplierLogger2 m_log_Output_Lower;
+    private final DoubleLogger m_log_Lower_FF;
+    private final DoubleLogger m_log_Lower_Controller_Output;
+    private final DoubleLogger m_log_Upper_FF;
+    private final DoubleLogger m_log_Upper_Controller_Output;
+    private final DoubleLogger m_log_Lower_Ref;
+    private final DoubleLogger m_log_Upper_Ref;
+    private final DoubleLogger m_log_Output_Upper;
+    private final DoubleLogger m_log_Output_Lower;
 
     private Trajectory m_trajectory;
 

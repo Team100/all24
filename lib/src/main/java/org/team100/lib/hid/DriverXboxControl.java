@@ -7,7 +7,7 @@ import static org.team100.lib.hid.ControlUtil.expo;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.EnumLogger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -47,9 +47,9 @@ public class DriverXboxControl implements DriverControl {
     private static final double kSlow = 0.15;
 
     private final XboxController m_controller;
-    private final DoubleSupplierLogger2 m_log_right_y;
-    private final DoubleSupplierLogger2 m_log_right_x;
-    private final DoubleSupplierLogger2 m_log_left_x;
+    private final DoubleLogger m_log_right_y;
+    private final DoubleLogger m_log_right_x;
+    private final DoubleLogger m_log_left_x;
     private final EnumLogger m_log_speed;
 
     Rotation2d previousRotation = GeometryUtil.kRotationZero;

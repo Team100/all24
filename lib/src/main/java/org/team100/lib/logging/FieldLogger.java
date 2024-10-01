@@ -7,8 +7,8 @@ import org.team100.lib.logging.primitive.PrimitiveLogger;
 public class FieldLogger extends LoggerFactory {
     /** Allow shared field logging. */
     public static class Log {
-        public final DoubleArraySupplierLogger2 m_log_target;
-        public final DoubleArraySupplierLogger2 m_log_ball;
+        public final DoubleArrayLogger m_log_target;
+        public final DoubleArrayLogger m_log_ball;
 
         public Log(LoggerFactory log) {
             // Glass widget config remembers these names.

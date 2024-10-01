@@ -6,7 +6,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.IncrementalBareEncoder;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motor.BareMotor;
 
 import edu.wpi.first.math.MathUtil;
@@ -24,8 +24,8 @@ public class RotaryMechanism implements Glassy {
     private final IncrementalBareEncoder m_encoder;
     private final double m_gearRatio;
     // LOGGER
-    private DoubleSupplierLogger2 m_log_velocity;
-    private DoubleSupplierLogger2 m_log_position;
+    private DoubleLogger m_log_velocity;
+    private DoubleLogger m_log_position;
 
     public RotaryMechanism(
             LoggerFactory parent,

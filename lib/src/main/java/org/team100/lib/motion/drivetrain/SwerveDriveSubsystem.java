@@ -7,8 +7,8 @@ import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionData;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleArraySupplierLogger2;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.EnumLogger;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
@@ -40,10 +40,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
 
     // LOGGERS
     private final SwerveStateLogger m_log_state;
-    private final DoubleSupplierLogger2 m_log_turning;
-    private final DoubleArraySupplierLogger2 m_log_pose_array;
-    private final DoubleArraySupplierLogger2 m_log_field_robot;
-    private final DoubleSupplierLogger2 m_log_yaw_rate;
+    private final DoubleLogger m_log_turning;
+    private final DoubleArrayLogger m_log_pose_array;
+    private final DoubleArrayLogger m_log_field_robot;
+    private final DoubleLogger m_log_yaw_rate;
     private final EnumLogger m_log_skill;
     private final FieldRelativeVelocityLogger m_log_input;
 

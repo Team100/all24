@@ -9,7 +9,7 @@ import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.State100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.util.Util;
@@ -44,17 +44,17 @@ public class OnboardGravityServo implements GravityServoInterface {
     private final LinearFilter m_filter;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_u_FB;
-    private final DoubleSupplierLogger2 m_log_gravity;
-    private final DoubleSupplierLogger2 m_log_u_TOTAL;
-    private final DoubleSupplierLogger2 m_log_Measurement_position;
-    private final DoubleSupplierLogger2 m_log_Measurement_velocity;
+    private final DoubleLogger m_log_u_FB;
+    private final DoubleLogger m_log_gravity;
+    private final DoubleLogger m_log_u_TOTAL;
+    private final DoubleLogger m_log_Measurement_position;
+    private final DoubleLogger m_log_Measurement_velocity;
     private final State100Logger m_log_Goal;
     private final State100Logger m_log_Setpoint;
-    private final DoubleSupplierLogger2 m_log_Controller_Position_Error;
-    private final DoubleSupplierLogger2 m_log_Controller_Velocity_Error;
-    private final DoubleSupplierLogger2 m_log_periodic_Measurement_position;
-    private final DoubleSupplierLogger2 m_log_periodic_Measurement_velocity;
+    private final DoubleLogger m_log_Controller_Position_Error;
+    private final DoubleLogger m_log_Controller_Velocity_Error;
+    private final DoubleLogger m_log_periodic_Measurement_position;
+    private final DoubleLogger m_log_periodic_Measurement_velocity;
 
     /** Profile may be updated at runtime. */
     private Profile100 m_profile = new NullProfile();

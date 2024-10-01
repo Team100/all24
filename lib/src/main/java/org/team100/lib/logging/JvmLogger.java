@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.LoggerFactory.LongSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.LongLogger;
 
 /**
  * Logs stuff about the JVM. Inspired by Advantage Kit's
@@ -19,11 +19,11 @@ public class JvmLogger implements Glassy {
     private final Map<String, Long> times;
     private final Map<String, Long> counts;
     // LOGGERS
-    private final LongSupplierLogger2 m_log_heap;
-    private final LongSupplierLogger2 m_log_nonheap;
-    private final LongSupplierLogger2 m_log_memory_total;
-    private final LongSupplierLogger2 m_log_gc_time;
-    private final LongSupplierLogger2 m_log_gc_count;
+    private final LongLogger m_log_heap;
+    private final LongLogger m_log_nonheap;
+    private final LongLogger m_log_memory_total;
+    private final LongLogger m_log_gc_time;
+    private final LongLogger m_log_gc_count;
 
     public JvmLogger(LoggerFactory parent) {
         LoggerFactory child = parent.child(this);

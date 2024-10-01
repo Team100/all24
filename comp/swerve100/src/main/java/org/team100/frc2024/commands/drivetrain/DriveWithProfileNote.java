@@ -12,7 +12,7 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -47,7 +47,7 @@ public class DriveWithProfileNote extends Command implements Glassy  {
     private final TrapezoidProfile100 thetaProfile;
 
     // LOGGERS
-    private final BooleanSupplierLogger2 m_log_note_detected;
+    private final BooleanLogger m_log_note_detected;
 
     private Translation2d m_previousGoal;
     private State100 m_xSetpoint;

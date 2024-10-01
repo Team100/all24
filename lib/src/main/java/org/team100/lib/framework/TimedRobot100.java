@@ -14,7 +14,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 
 /**
  * Copy of {@link edu.wpi.first.wpilibj.TimedRobot} in an effort to improve
@@ -26,7 +26,7 @@ public class TimedRobot100 extends IterativeRobotBase implements Glassy {
         public Runnable func;
         public double period;
         public double expirationTime;
-        public DoubleSupplierLogger2 logger;
+        public DoubleLogger logger;
 
         /**
          * Construct a callback container.
@@ -98,7 +98,7 @@ public class TimedRobot100 extends IterativeRobotBase implements Glassy {
 
     private final PriorityQueue<Callback> m_callbacks = new PriorityQueue<>();
 
-    private final DoubleSupplierLogger2 m_log_slack;
+    private final DoubleLogger m_log_slack;
 
     protected TimedRobot100() {
         super(LOOP_PERIOD_S);

@@ -5,7 +5,7 @@ import java.util.function.DoubleSupplier;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,8 +16,8 @@ public class ClimberDefault extends Command implements Glassy {
     private final DoubleSupplier m_right;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_left_manual;
-    private final DoubleSupplierLogger2 m_log_right_manual;
+    private final DoubleLogger m_log_left_manual;
+    private final DoubleLogger m_log_right_manual;
 
     public ClimberDefault(
             LoggerFactory logger,
@@ -45,7 +45,7 @@ public class ClimberDefault extends Command implements Glassy {
     }
 
     private void manual(
-            DoubleSupplierLogger2 log,
+            DoubleLogger log,
             DoubleSupplier inputSupplier,
             LinearMechanism mech) {
         double input = inputSupplier.getAsDouble();

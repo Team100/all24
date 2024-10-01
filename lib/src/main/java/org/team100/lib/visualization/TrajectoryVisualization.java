@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleArraySupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPoint;
 
@@ -17,7 +17,7 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 public class TrajectoryVisualization {
     private static final String kTrajectory = "trajectory";
 
-    private final DoubleArraySupplierLogger2 m_log_trajectory;
+    private final DoubleArrayLogger m_log_trajectory;
 
     public TrajectoryVisualization(LoggerFactory fieldLogger) {
         m_log_trajectory = fieldLogger.doubleArrayLogger(Level.TRACE, kTrajectory);

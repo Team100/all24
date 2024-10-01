@@ -7,7 +7,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ArmAnglesLogger;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
@@ -40,10 +40,10 @@ public class CartesianManualPositionalArm extends Command implements Glassy  {
     private final ArmAnglesLogger m_log_setpoint;
     private final ArmAnglesLogger m_log_measurement;
     private final Translation2dLogger m_log_cartesian_measurement;
-    private final DoubleSupplierLogger2 m_log_output_u1;
-    private final DoubleSupplierLogger2 m_log_output_u2;
-    private final DoubleSupplierLogger2 m_log_error_e1;
-    private final DoubleSupplierLogger2 m_log_error_e2;
+    private final DoubleLogger m_log_output_u1;
+    private final DoubleLogger m_log_output_u2;
+    private final DoubleLogger m_log_error_e1;
+    private final DoubleLogger m_log_error_e2;
 
     public CartesianManualPositionalArm(
             LoggerFactory parent,

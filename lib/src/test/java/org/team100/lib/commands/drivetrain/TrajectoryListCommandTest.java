@@ -14,7 +14,7 @@ import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -32,7 +32,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
     boolean dump = false;
     private static final double kDelta = 0.001;
     private static final double kDtS = 0.02;
-    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
     private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
     List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).allGood();

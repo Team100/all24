@@ -12,7 +12,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -29,7 +29,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 class ManualWithFullStateHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
-    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
 

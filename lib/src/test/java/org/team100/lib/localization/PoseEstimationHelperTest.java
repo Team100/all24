@@ -7,7 +7,7 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -155,7 +155,7 @@ class PoseEstimationHelperTest {
                         new Rotation3d(0, 0, 0)));
 
         Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d();
-        LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
+        LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
         PoseEstimationHelper helper = new PoseEstimationHelper(logger);
         Pose3d robotPoseInFieldCoords = helper.getRobotPoseInFieldCoords(
                 cameraInRobotCoords,

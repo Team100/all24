@@ -9,7 +9,7 @@ import org.team100.lib.follower.DrivePIDFFollower;
 import org.team100.lib.follower.DriveTrajectoryFollowerFactory;
 import org.team100.lib.follower.DriveTrajectoryFollowerUtil;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -19,7 +19,7 @@ import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 
 class FancyTrajectoryTest extends Fixtured {
-    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testSimple() {

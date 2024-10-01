@@ -6,7 +6,7 @@ import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
@@ -34,8 +34,8 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     // LOGGERS
     private final State100Logger m_log_goal;
-    private final DoubleSupplierLogger2 m_log_ff_torque;
-    private final DoubleSupplierLogger2 m_log_measurement;
+    private final DoubleLogger m_log_ff_torque;
+    private final DoubleLogger m_log_measurement;
     private final State100Logger m_log_setpoint;
     private final OptionalDoubleLogger m_log_position;
 

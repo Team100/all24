@@ -40,13 +40,13 @@ import java.nio.charset.StandardCharsets;
  * These operations used to use offsets but the only use cases are
  * sequential, so i converted them all to relative.
  */
-public class UdpPrimitiveProtocol2 {
+public class UdpPrimitiveProtocol {
     public static class ProtocolException extends Exception {
     }
 
     private final ByteBuffer m_buffer;
 
-    public UdpPrimitiveProtocol2(int bufferSize) {
+    public UdpPrimitiveProtocol(int bufferSize) {
         // direct buffer goes slightly faster out the network
         m_buffer = ByteBuffer.allocateDirect(bufferSize);
         // big-endian is the default, but just to make it clear...
@@ -54,7 +54,7 @@ public class UdpPrimitiveProtocol2 {
         m_buffer.putLong(UdpMetadataProtocol.timestamp); // timetstamp = 8 bytes
     }
 
-    public UdpPrimitiveProtocol2() {
+    public UdpPrimitiveProtocol() {
         this(UdpSender.MTU);
     }
 

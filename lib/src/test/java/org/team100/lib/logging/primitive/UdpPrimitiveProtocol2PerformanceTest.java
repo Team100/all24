@@ -15,7 +15,7 @@ class UdpPrimitiveProtocol2PerformanceTest {
         final int BUFFER_SIZE = 10000000;
 
         // huge buffer for this test; we're testing the encoding.
-        UdpPrimitiveProtocol2 p = new UdpPrimitiveProtocol2(BUFFER_SIZE);
+        UdpPrimitiveProtocol p = new UdpPrimitiveProtocol(BUFFER_SIZE);
 
         {
             p.clear();

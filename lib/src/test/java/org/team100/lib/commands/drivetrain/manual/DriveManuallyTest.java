@@ -6,17 +6,17 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestSupplierLogger;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.testing.Timeless;
 
 class DriveManuallyTest extends Fixtured implements Timeless {
-    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     String desiredMode = null;
     DriverControl.Velocity desiredTwist = new DriverControl.Velocity(1, 0, 0);

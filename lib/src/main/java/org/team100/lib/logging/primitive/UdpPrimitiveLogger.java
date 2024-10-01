@@ -10,13 +10,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.team100.lib.logging.primitive.PrimitiveLogger.BooleanLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleArrayLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleObjArrayLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.IntLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.LongLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger.StringLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -32,7 +25,7 @@ import edu.wpi.first.wpilibj.Timer;
  * This logger accepts inputs only one value per key per flush period; the
  * newest value wins.
  */
-public class UdpPrimitiveLogger2 implements PrimitiveLogger {
+public class UdpPrimitiveLogger implements PrimitiveLogger {
     /** if false, throw when a duplicate logger is created. */
     private static final boolean ALLOW_DUPLICATES = true;
 
@@ -54,7 +47,6 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     private final List<UdpDoubleLogger> doubleLoggers = new ArrayList<>();
     private final List<UdpIntLogger> integerLoggers = new ArrayList<>();
     private final List<UdpDoubleArrayLogger> doubleArrayLoggers = new ArrayList<>();
-    private final List<UdpDoubleObjArrayLogger> doubleObjArrayLoggers = new ArrayList<>();
     private final List<UdpLongLogger> longLoggers = new ArrayList<>();
     private final List<UdpStringLogger> stringLoggers = new ArrayList<>();
 
@@ -68,14 +60,13 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     private final Map<String, UdpDoubleLogger> doubleIdx = new HashMap<>();
     private final Map<String, UdpIntLogger> intIdx = new HashMap<>();
     private final Map<String, UdpDoubleArrayLogger> doubleArrayIdx = new HashMap<>();
-    private final Map<String, UdpDoubleObjArrayLogger> doubleObjArrayIdx = new HashMap<>();
     private final Map<String, UdpLongLogger> longIdx = new HashMap<>();
     private final Map<String, UdpStringLogger> stringIdx = new HashMap<>();
     private final Consumer<ByteBuffer> m_bufferSink;
     private final Consumer<ByteBuffer> m_metadataSink;
 
     // keep the output buffers forever because allocating it is slow.
-    private final UdpPrimitiveProtocol2 m_dataProtocol;
+    private final UdpPrimitiveProtocol m_dataProtocol;
     private final UdpMetadataProtocol m_metadataProtocol;
 
     /** Current offset of label dumper */
@@ -83,12 +74,12 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
 
     private double flushTime;
 
-    public UdpPrimitiveLogger2(
+    public UdpPrimitiveLogger(
             Consumer<ByteBuffer> dataSink,
             Consumer<ByteBuffer> metadataSink) {
         m_bufferSink = dataSink;
         m_metadataSink = metadataSink;
-        m_dataProtocol = new UdpPrimitiveProtocol2();
+        m_dataProtocol = new UdpPrimitiveProtocol();
         m_metadataProtocol = new UdpMetadataProtocol();
         flushTime = 0;
     }
@@ -155,13 +146,12 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
         flushDouble();
         flushInteger();
         flushDoubleArray();
-        flushDoubleObjArray();
         flushLong();
         flushString();
         m_bufferSink.accept(m_dataProtocol.trim());
     }
 
-    public class UdpBooleanLogger implements PrimitiveLogger.BooleanLogger {
+    public class UdpBooleanLogger implements PrimitiveLogger.PrimitiveBooleanLogger {
         private final int m_key;
         private boolean m_val;
         private boolean m_dirty;
@@ -178,7 +168,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
         }
     }
 
-    public class UdpDoubleLogger implements PrimitiveLogger.DoubleLogger {
+    public class UdpDoubleLogger implements PrimitiveLogger.PrimitiveDoubleLogger {
         private final int m_key;
         private double m_val;
         private boolean m_dirty;
@@ -196,7 +186,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
 
     }
 
-    public class UdpIntLogger implements PrimitiveLogger.IntLogger {
+    public class UdpIntLogger implements PrimitiveLogger.PrimitiveIntLogger {
         private final int m_key;
         private int m_val;
         private boolean m_dirty;
@@ -213,7 +203,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
         }
     }
 
-    public class UdpDoubleArrayLogger implements PrimitiveLogger.DoubleArrayLogger {
+    public class UdpDoubleArrayLogger implements PrimitiveLogger.PrimitiveDoubleArrayLogger {
         private final int m_key;
         private double[] m_val;
         private boolean m_dirty;
@@ -230,24 +220,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
         }
     }
 
-    public class UdpDoubleObjArrayLogger implements PrimitiveLogger.DoubleObjArrayLogger {
-        private final int m_key;
-        private double[] m_val;
-        private boolean m_dirty;
-
-        public UdpDoubleObjArrayLogger(String label) {
-            m_key = getKey(UdpType.DOUBLE_ARRAY, label);
-            doubleObjArrayLoggers.add(this);
-        }
-
-        @Override
-        public void log(Double[] val) {
-            m_val = Stream.of(val).mapToDouble(Double::doubleValue).toArray();
-            m_dirty = true;
-        }
-    }
-
-    public class UdpLongLogger implements PrimitiveLogger.LongLogger {
+    public class UdpLongLogger implements PrimitiveLogger.PrimitiveLongLogger {
         private final int m_key;
         private long m_val;
         private boolean m_dirty;
@@ -265,7 +238,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
 
     }
 
-    public class UdpStringLogger implements PrimitiveLogger.StringLogger {
+    public class UdpStringLogger implements PrimitiveLogger.PrimitiveStringLogger {
         private final int m_key;
         private String m_val;
         private boolean m_dirty;
@@ -332,15 +305,6 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
         }
     }
 
-    private void flushDoubleObjArray() {
-        for (UdpDoubleObjArrayLogger logger : doubleObjArrayLoggers) {
-            if (logger.m_dirty) {
-                putAndMaybeSend(() -> m_dataProtocol.putDoubleArray(logger.m_key, logger.m_val));
-                logger.m_dirty = false;
-            }
-        }
-    }
-
     private void flushLong() {
         for (UdpLongLogger logger : longLoggers) {
             if (logger.m_dirty) {
@@ -360,7 +324,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     }
 
     @Override
-    public BooleanLogger booleanLogger(String label) {
+    public PrimitiveBooleanLogger booleanLogger(String label) {
         if (booleanIdx.containsKey(label)) {
             if (ALLOW_DUPLICATES) {
                 Util.warn("duplicate label " + label);
@@ -375,7 +339,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     }
 
     @Override
-    public DoubleLogger doubleLogger(String label) {
+    public PrimitiveDoubleLogger doubleLogger(String label) {
         if (doubleIdx.containsKey(label)) {
             if (ALLOW_DUPLICATES) {
                 Util.warn("duplicate label " + label);
@@ -390,7 +354,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     }
 
     @Override
-    public IntLogger intLogger(String label) {
+    public PrimitiveIntLogger intLogger(String label) {
         if (intIdx.containsKey(label)) {
             if (ALLOW_DUPLICATES) {
                 Util.warn("duplicate label " + label);
@@ -405,7 +369,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     }
 
     @Override
-    public DoubleArrayLogger doubleArrayLogger(String label) {
+    public PrimitiveDoubleArrayLogger doubleArrayLogger(String label) {
         if (doubleArrayIdx.containsKey(label)) {
             if (ALLOW_DUPLICATES) {
                 Util.warn("duplicate label " + label);
@@ -420,22 +384,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     }
 
     @Override
-    public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
-        if (doubleObjArrayIdx.containsKey(label)) {
-            if (ALLOW_DUPLICATES) {
-                Util.warn("duplicate label " + label);
-                return doubleObjArrayIdx.get(label);
-            } else {
-                throw new IllegalArgumentException("duplicate label " + label);
-            }
-        }
-        UdpDoubleObjArrayLogger x = new UdpDoubleObjArrayLogger(label);
-        doubleObjArrayIdx.put(label, x);
-        return x;
-    }
-
-    @Override
-    public LongLogger longLogger(String label) {
+    public PrimitiveLongLogger longLogger(String label) {
         if (longIdx.containsKey(label)) {
             if (ALLOW_DUPLICATES) {
                 Util.warn("duplicate label " + label);
@@ -450,7 +399,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     }
 
     @Override
-    public StringLogger stringLogger(String label) {
+    public PrimitiveStringLogger stringLogger(String label) {
         if (stringIdx.containsKey(label)) {
             if (ALLOW_DUPLICATES) {
                 Util.warn("duplicate label " + label);

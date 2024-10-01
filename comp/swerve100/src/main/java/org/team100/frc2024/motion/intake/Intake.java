@@ -7,7 +7,7 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.servo.LimitedLinearVelocityServo;
 import org.team100.lib.motion.servo.ServoFactory;
@@ -32,9 +32,9 @@ public class Intake extends SubsystemBase implements Glassy {
     private final LimitedLinearVelocityServo superRollers;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_lower;
+    private final DoubleLogger m_log_lower;
     private final OptionalDoubleLogger m_log_upper;
-    private final DoubleSupplierLogger2 m_log_centering;
+    private final DoubleLogger m_log_centering;
 
     private int count = 0;
     private int currentCount = 0;

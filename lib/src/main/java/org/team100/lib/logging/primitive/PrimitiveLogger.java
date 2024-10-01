@@ -1,58 +1,51 @@
 package org.team100.lib.logging.primitive;
 
 /**
- * This should not be used by client code. Use {@link SupplierLogger} instead.
+ * This should not be used by client code. Use {@link LoggerFactory} instead.
  */
 public interface PrimitiveLogger {
 
     int keyCount();
 
     @FunctionalInterface
-    interface BooleanLogger {
+    interface PrimitiveBooleanLogger {
         void log(boolean val);
     }
 
-    BooleanLogger booleanLogger(String label);
+    PrimitiveBooleanLogger booleanLogger(String label);
 
     @FunctionalInterface
-    interface DoubleLogger {
+    interface PrimitiveDoubleLogger {
         void log(double val);
     }
 
-    DoubleLogger doubleLogger(String label);
+    PrimitiveDoubleLogger doubleLogger(String label);
 
     @FunctionalInterface
-    interface IntLogger {
+    interface PrimitiveIntLogger {
         void log(int val);
     }
 
-    IntLogger intLogger(String label);
+    PrimitiveIntLogger intLogger(String label);
 
     @FunctionalInterface
-    interface DoubleArrayLogger {
+    interface PrimitiveDoubleArrayLogger {
         void log(double[] val);
     }
 
-    DoubleArrayLogger doubleArrayLogger(String label);
+    PrimitiveDoubleArrayLogger doubleArrayLogger(String label);
 
     @FunctionalInterface
-    interface DoubleObjArrayLogger {
-        void log(Double[] val);
-    }
-
-    DoubleObjArrayLogger doubleObjArrayLogger(String label);
-
-    @FunctionalInterface
-    interface LongLogger {
+    interface PrimitiveLongLogger {
         void log(long val);
     }
 
-    LongLogger longLogger(String label);
+    PrimitiveLongLogger longLogger(String label);
 
     @FunctionalInterface
-    interface StringLogger {
+    interface PrimitiveStringLogger {
         void log(String val);
     }
 
-    StringLogger stringLogger(String label);
+    PrimitiveStringLogger stringLogger(String label);
 }

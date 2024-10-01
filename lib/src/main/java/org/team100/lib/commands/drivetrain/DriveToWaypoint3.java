@@ -8,7 +8,7 @@ import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -43,7 +43,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
      */
     public static class Log {
         private final Pose2dLogger desired;
-        private final BooleanSupplierLogger2 aligned;
+        private final BooleanLogger aligned;
         private final Pose2dLogger pose;
         public Log(LoggerFactory parent) {
             LoggerFactory log = parent.child("DriveToWaypoint3");

@@ -5,8 +5,8 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.util.Util;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -76,15 +76,15 @@ public class SingleNavXGyro implements Gyro {
     private final float m_yawScaleFactor;
     private final float m_yawRateScaleFactor;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_heading;
-    private final DoubleSupplierLogger2 m_log_heading_rate;
-    private final DoubleSupplierLogger2 m_log_pitch;
-    private final DoubleSupplierLogger2 m_log_roll;
-    private final DoubleSupplierLogger2 m_log_yaw_deg;
-    private final DoubleSupplierLogger2 m_log_pitch_deg;
-    private final DoubleSupplierLogger2 m_log_roll_deg;
-    private final DoubleSupplierLogger2 m_log_yaw_rate_deg;
-    private final BooleanSupplierLogger2 m_log_connected;
+    private final DoubleLogger m_log_heading;
+    private final DoubleLogger m_log_heading_rate;
+    private final DoubleLogger m_log_pitch;
+    private final DoubleLogger m_log_roll;
+    private final DoubleLogger m_log_yaw_deg;
+    private final DoubleLogger m_log_pitch_deg;
+    private final DoubleLogger m_log_roll_deg;
+    private final DoubleLogger m_log_yaw_rate_deg;
+    private final BooleanLogger m_log_connected;
 
     /** To work around NavX badness, for now. */
     private Rotation2d m_prevYawNWURad = null;

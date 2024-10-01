@@ -5,7 +5,7 @@ import java.util.function.DoubleUnaryOperator;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.StringSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.StringLogger;
 import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
@@ -120,7 +120,7 @@ public class MinTimeController implements Glassy {
     private final double m_switchingAcceleration;
     private final double m_tolerance;
 
-    private final StringSupplierLogger2 m_log_mode;
+    private final StringLogger m_log_mode;
 
     /**
      * @param modulus        for angle wrapping

@@ -11,7 +11,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
@@ -56,15 +56,15 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private final TrapezoidProfile100 m_profile;
     private final BooleanSupplier m_trigger;
 
-    private final DoubleSupplierLogger2 m_log_apparent_motion;
+    private final DoubleLogger m_log_apparent_motion;
     private final State100Logger m_log_theta_setpoint;
-    private final DoubleSupplierLogger2 m_log_theta_measurement;
-    private final DoubleSupplierLogger2 m_log_theta_error;
-    private final DoubleSupplierLogger2 m_log_theta_FB;
+    private final DoubleLogger m_log_theta_measurement;
+    private final DoubleLogger m_log_theta_error;
+    private final DoubleLogger m_log_theta_FB;
     private final State100Logger m_log_omega_reference;
-    private final DoubleSupplierLogger2 m_log_omega_measurement;
-    private final DoubleSupplierLogger2 m_log_omega_error;
-    private final DoubleSupplierLogger2 m_log_omega_FB;
+    private final DoubleLogger m_log_omega_measurement;
+    private final DoubleLogger m_log_omega_error;
+    private final DoubleLogger m_log_omega_FB;
     private final FieldLogger.Log m_field_log;
 
 

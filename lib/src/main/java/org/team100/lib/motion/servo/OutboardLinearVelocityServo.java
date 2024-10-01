@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.util.Util;
@@ -14,8 +14,8 @@ import edu.wpi.first.wpilibj.Timer;
 public class OutboardLinearVelocityServo implements LinearVelocityServo {
     private final LinearMechanism m_mechanism;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_setpoint_v;
-    private final DoubleSupplierLogger2 m_log_setpoint_a;
+    private final DoubleLogger m_log_setpoint_v;
+    private final DoubleLogger m_log_setpoint_a;
     private final OptionalDoubleLogger m_log_velocity;
     private final OptionalDoubleLogger m_log_position;
 

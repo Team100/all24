@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -681,7 +681,7 @@ class PanTiltOffsetTest {
         Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(0, 0, -3.0 * Math.PI / 4.0);
 
         // CALCULATIONS
-        LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
+        LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
         PoseEstimationHelper helper = new PoseEstimationHelper(logger);
         Pose3d robotInFieldCoords = helper.getRobotPoseInFieldCoords(
                 cameraInRobotCoords,

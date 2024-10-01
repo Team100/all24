@@ -2,7 +2,7 @@ package org.team100.lib.motor;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 
@@ -13,8 +13,8 @@ public class BareMotorController100 implements BareMotor {
      */
     private static final double velocityFFDutyCycle_Rad_S = 0.0016;
     private final MotorController m_motor;
-    private final DoubleSupplierLogger2 m_log_duty;
-    private final DoubleSupplierLogger2 m_log_reported;
+    private final DoubleLogger m_log_duty;
+    private final DoubleLogger m_log_reported;
 
     public BareMotorController100(
             LoggerFactory parent,

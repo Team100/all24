@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -23,7 +23,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public class SimpleManualModuleStates implements ModuleStateDriver {
     private final SwerveKinodynamics m_swerveKinodynamics;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_speed;
+    private final DoubleLogger m_log_speed;
     private final Rotation2dLogger m_log_angle;
 
     public SimpleManualModuleStates(LoggerFactory parent, SwerveKinodynamics swerveKinodynamics) {

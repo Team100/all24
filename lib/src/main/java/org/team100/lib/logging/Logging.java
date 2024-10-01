@@ -1,9 +1,9 @@
 package org.team100.lib.logging;
 
 import org.team100.lib.logging.primitive.DummySender;
-import org.team100.lib.logging.primitive.NTPrimitiveLogger2;
+import org.team100.lib.logging.primitive.NTPrimitiveLogger;
 import org.team100.lib.logging.primitive.PrimitiveLogger;
-import org.team100.lib.logging.primitive.UdpPrimitiveLogger2;
+import org.team100.lib.logging.primitive.UdpPrimitiveLogger;
 import org.team100.lib.logging.primitive.UdpSender;
 import org.team100.lib.util.Util;
 
@@ -16,7 +16,7 @@ public class Logging {
 
     private static final Logging instance = new Logging();
 
-    private UdpPrimitiveLogger2 udpLogger;
+    private UdpPrimitiveLogger udpLogger;
     private PrimitiveLogger ntLogger;
     private Level m_level;
 
@@ -39,18 +39,18 @@ public class Logging {
             Util.warn("You must have a log listener connected!");
             Util.warn("=======================================");
             if (USE_REAL_UDP) {
-                udpLogger = new UdpPrimitiveLogger2(
+                udpLogger = new UdpPrimitiveLogger(
                         UdpSender.data(),
                         UdpSender.meta());
             } else {
-                udpLogger = new UdpPrimitiveLogger2(
+                udpLogger = new UdpPrimitiveLogger(
                         new DummySender(),
                         new DummySender());
             }
             fieldLogger = new LoggerFactory(() -> m_level, "field", udpLogger);
             rootLogger = new LoggerFactory(() -> m_level, "log", udpLogger);
         } else {
-            ntLogger = new NTPrimitiveLogger2();
+            ntLogger = new NTPrimitiveLogger();
             fieldLogger = new LoggerFactory(() -> m_level, "field", ntLogger);
             rootLogger = new LoggerFactory(() -> m_level, "log", ntLogger);
         }

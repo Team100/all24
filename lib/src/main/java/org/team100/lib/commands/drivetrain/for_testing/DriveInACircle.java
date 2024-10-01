@@ -9,7 +9,7 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
@@ -46,7 +46,7 @@ public class DriveInACircle extends Command implements Glassy {
 
     // LOGGERS
     private final Translation2dLogger m_log_center;
-    private final DoubleSupplierLogger2 m_log_angle;
+    private final DoubleLogger m_log_angle;
     private final SwerveStateLogger m_log_reference;
     private final FieldRelativeVelocityLogger m_log_target;
 

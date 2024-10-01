@@ -5,7 +5,7 @@ import java.util.function.DoubleSupplier;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
@@ -24,7 +24,7 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
     // CACHES
     private final DoubleSupplier m_duty;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_duty;
+    private final DoubleLogger m_log_duty;
 
     protected DutyCycleRotaryPositionSensor(
             LoggerFactory parent,

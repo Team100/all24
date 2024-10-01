@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.primitive.UdpPrimitiveProtocol2.ProtocolException;
+import org.team100.lib.logging.primitive.UdpPrimitiveProtocol.ProtocolException;
 
 class UdpPrimitiveProtocol2Test {
 
@@ -23,7 +23,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        int len = UdpPrimitiveProtocol.encodeBoolean(bb, 16, true);
         assertEquals(4, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -35,7 +35,7 @@ class UdpPrimitiveProtocol2Test {
 
         bb.rewind();
         bb.position(2);
-        int key = UdpPrimitiveProtocol2.decodeKey(bb);
+        int key = UdpPrimitiveProtocol.decodeKey(bb);
         assertEquals(4, bb.position());
         assertEquals(16, key);
     }
@@ -46,7 +46,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        int len = UdpPrimitiveProtocol.encodeBoolean(bb, 16, true);
         assertEquals(4, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -58,7 +58,7 @@ class UdpPrimitiveProtocol2Test {
 
         bb.rewind();
         bb.position(4);
-        UdpType type = UdpPrimitiveProtocol2.decodeType(bb);
+        UdpType type = UdpPrimitiveProtocol.decodeType(bb);
         assertEquals(5, bb.position());
         assertEquals(UdpType.BOOLEAN, type);
     }
@@ -69,7 +69,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        int len = UdpPrimitiveProtocol.encodeBoolean(bb, 16, true);
         assertEquals(4, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -81,7 +81,7 @@ class UdpPrimitiveProtocol2Test {
 
         bb.rewind();
         bb.position(5);
-        boolean v = UdpPrimitiveProtocol2.decodeBoolean(bb);
+        boolean v = UdpPrimitiveProtocol.decodeBoolean(bb);
         assertEquals(6, bb.position());
         assertTrue(v);
     }
@@ -92,7 +92,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeDouble(bb, 16, 15);
+        int len = UdpPrimitiveProtocol.encodeDouble(bb, 16, 15);
         assertEquals(11, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -111,7 +111,7 @@ class UdpPrimitiveProtocol2Test {
 
         bb.rewind();
         bb.position(5);
-        double v = UdpPrimitiveProtocol2.decodeDouble(bb);
+        double v = UdpPrimitiveProtocol.decodeDouble(bb);
         assertEquals(13, bb.position());
         assertEquals(15, v);
     }
@@ -120,8 +120,8 @@ class UdpPrimitiveProtocol2Test {
     void testDoubleBounds() {
         byte[] b = new byte[5];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        assertThrows(UdpPrimitiveProtocol2.ProtocolException.class,
-                () -> UdpPrimitiveProtocol2.decodeDouble(bb));
+        assertThrows(UdpPrimitiveProtocol.ProtocolException.class,
+                () -> UdpPrimitiveProtocol.decodeDouble(bb));
     }
 
     @Test
@@ -130,7 +130,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeInt(bb, 16, 15);
+        int len = UdpPrimitiveProtocol.encodeInt(bb, 16, 15);
         assertEquals(7, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -145,7 +145,7 @@ class UdpPrimitiveProtocol2Test {
 
         bb.rewind();
         bb.position(5);
-        int v = UdpPrimitiveProtocol2.decodeInt(bb);
+        int v = UdpPrimitiveProtocol.decodeInt(bb);
         assertEquals(9, bb.position());
         assertEquals(15, v);
     }
@@ -156,7 +156,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
+        int len = UdpPrimitiveProtocol.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
         assertEquals(20, len); // key (2) length (1) data (2*8)
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -185,7 +185,7 @@ class UdpPrimitiveProtocol2Test {
 
         bb.rewind();
         bb.position(5);
-        double[] v = UdpPrimitiveProtocol2.decodeDoubleArray(bb);
+        double[] v = UdpPrimitiveProtocol.decodeDoubleArray(bb);
         assertEquals(22, bb.position());
         assertArrayEquals(new double[] { 1.0, 2.0 }, v);
     }
@@ -196,7 +196,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeLong(bb, 16, 15);
+        int len = UdpPrimitiveProtocol.encodeLong(bb, 16, 15);
         assertEquals(11, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -215,7 +215,7 @@ class UdpPrimitiveProtocol2Test {
 
         bb.rewind();
         bb.position(5);
-        long v = UdpPrimitiveProtocol2.decodeLong(bb);
+        long v = UdpPrimitiveProtocol.decodeLong(bb);
         assertEquals(13, bb.position());
         assertEquals(15, v);
 
@@ -227,7 +227,7 @@ class UdpPrimitiveProtocol2Test {
         ByteBuffer bb = ByteBuffer.wrap(b);
         // encoder doesn't start at the beginning
         bb.position(2);
-        int len = UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
+        int len = UdpPrimitiveProtocol.encodeString(bb, 16, "hello");
         assertEquals(9, len);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]);
@@ -244,7 +244,7 @@ class UdpPrimitiveProtocol2Test {
 
         bb.rewind();
         bb.position(5);
-        String v = UdpPrimitiveProtocol2.decodeString(bb);
+        String v = UdpPrimitiveProtocol.decodeString(bb);
         assertEquals(11, bb.position());
         assertEquals("hello", v);
     }
@@ -255,7 +255,7 @@ class UdpPrimitiveProtocol2Test {
 
     @Test
     void testStateful() {
-        UdpPrimitiveProtocol2 p = new UdpPrimitiveProtocol2();
+        UdpPrimitiveProtocol p = new UdpPrimitiveProtocol();
         assertTrue(p.putString(16, "hello"));
         // 2 for type, 2 for key, 1 for length, string length 5 = 10 bytes
         assertEquals(17, p.buffer().position());
@@ -298,7 +298,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[10];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        int len = UdpPrimitiveProtocol.encodeBoolean(bb, 16, true);
         assertEquals(0, len);
     }
 
@@ -307,7 +307,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[10];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeInt(bb, 16, 2);
+        int len = UdpPrimitiveProtocol.encodeInt(bb, 16, 2);
         assertEquals(0, len);
     }
 
@@ -316,7 +316,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[12];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeLong(bb, 16, 2);
+        int len = UdpPrimitiveProtocol.encodeLong(bb, 16, 2);
         assertEquals(0, len);
     }
 
@@ -325,7 +325,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[10];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeDouble(bb, 16, 2);
+        int len = UdpPrimitiveProtocol.encodeDouble(bb, 16, 2);
         assertEquals(0, len);
     }
 
@@ -334,7 +334,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[10];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
+        int len = UdpPrimitiveProtocol.encodeDoubleArray(bb, 16, new double[] { 1.0, 2.0 });
         assertEquals(0, len);
     }
 
@@ -343,7 +343,7 @@ class UdpPrimitiveProtocol2Test {
         byte[] b = new byte[12];
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(8);
-        int len = UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
+        int len = UdpPrimitiveProtocol.encodeString(bb, 16, "hello");
         assertEquals(0, len);
     }
 
@@ -361,7 +361,7 @@ class UdpPrimitiveProtocol2Test {
     void testDanglingKeyBoolean() {
         byte[] b = new byte[2]; // just room for the key
         ByteBuffer bb = ByteBuffer.wrap(b);
-        UdpPrimitiveProtocol2.encodeBoolean(bb, 16, true);
+        UdpPrimitiveProtocol.encodeBoolean(bb, 16, true);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]); // << make sure the key is not here
     }
@@ -370,7 +370,7 @@ class UdpPrimitiveProtocol2Test {
     void testDanglingKeyDouble() {
         byte[] b = new byte[5];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        UdpPrimitiveProtocol2.encodeDouble(bb, 16, 15);
+        UdpPrimitiveProtocol.encodeDouble(bb, 16, 15);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]); // << make sure the key is not here
         assertEquals((byte) 0, b[2]); //
@@ -382,7 +382,7 @@ class UdpPrimitiveProtocol2Test {
     void testDanglingKeyInt() {
         byte[] b = new byte[5];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        UdpPrimitiveProtocol2.encodeInt(bb, 16, 1);
+        UdpPrimitiveProtocol.encodeInt(bb, 16, 1);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]); // << make sure the key is not here
         assertEquals((byte) 0, b[2]); //
@@ -394,7 +394,7 @@ class UdpPrimitiveProtocol2Test {
     void testDanglingKeyDoubleArray() {
         byte[] b = new byte[5];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        UdpPrimitiveProtocol2.encodeDoubleArray(bb, 16, new double[] { 1.0 });
+        UdpPrimitiveProtocol.encodeDoubleArray(bb, 16, new double[] { 1.0 });
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]); // << make sure the key is not here
         assertEquals((byte) 0, b[2]); //
@@ -406,7 +406,7 @@ class UdpPrimitiveProtocol2Test {
     void testDanglingKeyLong() {
         byte[] b = new byte[5];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        UdpPrimitiveProtocol2.encodeLong(bb, 16, 1);
+        UdpPrimitiveProtocol.encodeLong(bb, 16, 1);
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]); // << make sure the key is not here
         assertEquals((byte) 0, b[2]); //
@@ -418,7 +418,7 @@ class UdpPrimitiveProtocol2Test {
     void testDanglingKeyString() {
         byte[] b = new byte[5];
         ByteBuffer bb = ByteBuffer.wrap(b);
-        UdpPrimitiveProtocol2.encodeString(bb, 16, "hello");
+        UdpPrimitiveProtocol.encodeString(bb, 16, "hello");
         assertEquals((byte) 0, b[0]);
         assertEquals((byte) 0, b[1]); // << make sure the key is not here
         assertEquals((byte) 0, b[2]); //

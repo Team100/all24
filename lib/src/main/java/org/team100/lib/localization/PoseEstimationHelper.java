@@ -4,7 +4,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.StringSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.StringLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Translation3d;
  */
 public class PoseEstimationHelper implements Glassy {
 
-    private final StringSupplierLogger2 m_log_rotation_source;
+    private final StringLogger m_log_rotation_source;
 
     public PoseEstimationHelper(LoggerFactory parent) {
         LoggerFactory child = parent.child(this);

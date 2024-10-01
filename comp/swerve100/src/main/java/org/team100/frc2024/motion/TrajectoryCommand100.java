@@ -4,9 +4,9 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.trajectory.Trajectory100;
@@ -32,8 +32,8 @@ public class TrajectoryCommand100 extends Command implements Glassy  {
     public static class Log {
         private final Pose2dLogger m_log_goal;
         private final ChassisSpeedsLogger m_log_chassis_speeds;
-        private final DoubleSupplierLogger2 m_log_THETA_ERROR;
-        private final BooleanSupplierLogger2 m_log_FINSIHED;
+        private final DoubleLogger m_log_THETA_ERROR;
+        private final BooleanLogger m_log_FINSIHED;
 
         public Log(LoggerFactory parent) {
             LoggerFactory log = parent.child("TrajectoryCommand100");

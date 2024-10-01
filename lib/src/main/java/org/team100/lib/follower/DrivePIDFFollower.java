@@ -6,7 +6,7 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
 import org.team100.lib.logging.LoggerFactory.TimedPoseLogger;
 import org.team100.lib.logging.LoggerFactory.TrajectorySamplePointLogger;
@@ -30,7 +30,7 @@ public class DrivePIDFFollower implements DriveTrajectoryFollower {
     public static class Log {
         private final Pose2dLogger m_log_measurement;
         private final TimedPoseLogger m_log_setpoint;
-        private final BooleanSupplierLogger2 m_log_is_mt;
+        private final BooleanLogger m_log_is_mt;
         private final TrajectorySamplePointLogger m_log_sample;
 
         public Log(LoggerFactory parent) {

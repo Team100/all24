@@ -31,7 +31,7 @@ import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.util.Util;
 
@@ -77,7 +77,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private final OptionalDoubleLogger m_log_left_velocity;
     private final OptionalDoubleLogger m_log_right_velocity;
     private final OptionalDoubleLogger m_log_pivot_angle;
-    private final DoubleSupplierLogger2 m_log_goal_err;
+    private final DoubleLogger m_log_goal_err;
 
     public DrumShooter(
             LoggerFactory parent,

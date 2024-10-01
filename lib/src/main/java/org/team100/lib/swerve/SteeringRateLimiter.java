@@ -6,7 +6,7 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,7 +23,7 @@ public class SteeringRateLimiter implements Glassy {
 
     private final SwerveKinodynamics m_limits;
     // LOGGER
-    private final DoubleSupplierLogger2 m_log_s;
+    private final DoubleLogger m_log_s;
 
     public SteeringRateLimiter(LoggerFactory parent, SwerveKinodynamics limits) {
         LoggerFactory child = parent.child(this);

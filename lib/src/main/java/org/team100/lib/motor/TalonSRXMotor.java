@@ -2,8 +2,8 @@ package org.team100.lib.motor;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
-import org.team100.lib.logging.LoggerFactory.IntSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.IntLogger;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -95,10 +95,10 @@ public class TalonSRXMotor implements BareMotor {
 
     private final WPI_TalonSRX m_motor;
     // LOGGERS
-    private final IntSupplierLogger2 m_log_id;
-    private final DoubleSupplierLogger2 m_log_encoder;
-    private final DoubleSupplierLogger2 m_log_velocity;
-    private final DoubleSupplierLogger2 m_log_output;
+    private final IntLogger m_log_id;
+    private final DoubleLogger m_log_encoder;
+    private final DoubleLogger m_log_velocity;
+    private final DoubleLogger m_log_output;
 
     public TalonSRXMotor(LoggerFactory parent, int channel) {
         m_motor = new WPI_TalonSRX(channel);

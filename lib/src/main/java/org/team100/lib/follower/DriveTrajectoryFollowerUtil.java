@@ -6,7 +6,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
-import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
 import org.team100.lib.logging.LoggerFactory.Twist2dLogger;
 import org.team100.lib.timing.TimedPose;
@@ -24,7 +24,7 @@ public class DriveTrajectoryFollowerUtil implements Glassy {
     private final ChassisSpeedsLogger m_log_velocity_error;
     private final ChassisSpeedsLogger m_log_u_VFB;
     private final Rotation2dLogger m_log_motion_direction;
-    private final DoubleSupplierLogger2 m_log_setpoint_velocity;
+    private final DoubleLogger m_log_setpoint_velocity;
     private final Twist2dLogger m_log_position_error;
 
     public DriveTrajectoryFollowerUtil(LoggerFactory parent) {
