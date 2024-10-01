@@ -28,7 +28,7 @@ import org.team100.lib.profile.Profile100;
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
-    private static final boolean USE_OUTBOARD_STEERING = true;
+    private static final boolean USE_OUTBOARD_STEERING = false;
     private static final double kSteeringSupplyLimit = 10;
     private static final double kSteeringStatorLimit = 20;
     /**

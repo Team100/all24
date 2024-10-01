@@ -37,6 +37,8 @@ import org.team100.lib.commands.FullCycle;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
+import org.team100.lib.commands.drivetrain.for_testing.Oscillate;
+import org.team100.lib.commands.drivetrain.for_testing.OscillateDirect;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.commands.drivetrain.manual.ManualChassisSpeeds;
@@ -272,9 +274,13 @@ public class RobotContainer implements Glassy {
                         m_shooter,
                         feeder));
 
+        // for testing odometry
         whileTrue(driverControl::fullCycle,
-                new RepeatCommand(
-                        new FullCycle(comLog, m_drive, controller, viz)));
+                new OscillateDirect(comLog, m_drive));
+        // new Oscillate(comLog, m_drive));
+
+        // new RepeatCommand(
+        // new FullCycle(comLog, m_drive, controller, viz)));
 
         whileTrue(operatorControl::intake,
                 new RunIntakeAndAmpFeeder(intake, feeder, m_ampFeeder));
