@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.motion.drivetrain.Fixture;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 
@@ -170,4 +171,40 @@ class SwerveUtilTest {
         // hm, how to get the motor model in here?
     }
 
+    @Test
+    void testGetMaxVelStep2() {
+        // this is to figure out why the Oscillate test isn't returning
+        // exactly the right result
+        SwerveKinodynamics limits = new Fixture().swerveKinodynamics;
+        assertEquals(1, limits.getMaxDriveAccelerationM_S2(), kDelta);
+        double maxVelStep = SwerveUtil.getMaxVelStep(limits, 0.92, 0, 0.94, 0);
+        assertEquals(0.016, maxVelStep, kDelta);
+    }
+
+    @Test
+    void testGetAccelLimit() {
+        // this is to figure out why the Oscillate test isn't returning
+        // exactly the right result
+        SwerveKinodynamics limits = new Fixture().swerveKinodynamics;
+        assertEquals(1, limits.getMaxDriveAccelerationM_S2(), kDelta);
+        double accelLimit = SwerveUtil.getAccelLimit(limits, 0.92, 0, 0.94, 0);
+        assertEquals(0.8, accelLimit, kDelta);
+    }
+
+    @Test
+    void testMinAccel() {
+        // this is to figure out why the Oscillate test isn't returning
+        // exactly the right result
+        SwerveKinodynamics limits = new Fixture().swerveKinodynamics;
+        // the test asks for 1 m/s/s
+        assertEquals(1, limits.getMaxDriveAccelerationM_S2(), kDelta);
+        // the problem is that the maximum possible velocity is right at the
+        // maximum commanded velocity, so the motor can't execute the constant
+        // accel command.
+        assertEquals(1, limits.getMaxDriveVelocityM_S(), kDelta);
+        assertEquals(10, limits.getStallAccelerationM_S2(), kDelta);
+        // this returns 0.8 which is wrong
+        double accelLimit = SwerveUtil.minAccel(limits, 0.92);
+        assertEquals(0.8, accelLimit, kDelta);
+    }
 }

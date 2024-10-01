@@ -49,7 +49,7 @@ public class SwerveKinodynamicsFactory {
                         2, // decel m/s/s
                         13, // steering rate rad/s
                         20 * Math.PI, // steering accel rad/s/s
-                        0.380, // track m 
+                        0.380, // track m
                         0.445, // wheelbase m
                         0.2225, // front offset m
                         0.3); // vcg m
@@ -139,13 +139,14 @@ public class SwerveKinodynamicsFactory {
                 0.3); // vcg m
     }
 
-    public static SwerveKinodynamics forTestWithSlip() {
+    /** Faster maximum speed/accel, for tests that want to go 1 m/s. */
+    public static SwerveKinodynamics forRealisticTest() {
         return new SwerveKinodynamics(
-                1, // vel m/s
+                5, // vel m/s
                 10, // stall m/s/s
-                1, // accel m/s/s
-                1, // decel m/s/s
-                20 * Math.PI, // steering rate rad/s
+                10, // accel m/s/s
+                20, // decel m/s/s
+                20 * Math.PI,
                 20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // wheelbase m

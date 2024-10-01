@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.motion.drivetrain.RealisticFixtured;
 import org.team100.lib.testing.Timeless;
 
-class OscillateDirectTest extends RealisticFixtured implements Timeless {
+class OscillateFieldRelativeTest extends RealisticFixtured implements Timeless {
     private static final double kDelta = 0.001;
 
     @Test
     void testPosition() {
-        OscillateDirect od = new OscillateDirect(fixture.logger, fixture.drive);
+        OscillateFieldRelative od = new OscillateFieldRelative(fixture.logger, fixture.drive);
         od.initialize();
         assertEquals(0, od.m_initial.x().x(), kDelta);
         assertEquals(0, fixture.drive.getState().x().x(), kDelta);
