@@ -1,9 +1,9 @@
 package org.team100.lib.motor;
 
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;

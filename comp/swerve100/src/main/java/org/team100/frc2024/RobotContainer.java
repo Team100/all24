@@ -33,11 +33,9 @@ import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
-import org.team100.lib.commands.FullCycle;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
-import org.team100.lib.commands.drivetrain.for_testing.Oscillate;
 import org.team100.lib.commands.drivetrain.for_testing.OscillateDirect;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
@@ -69,6 +67,9 @@ import org.team100.lib.localization.NotePosition24ArrayListener;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.logging.FieldLogger;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LogLevelPoller;
+import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
@@ -77,9 +78,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
-import org.team100.lib.telemetry.Telemetry;
-import org.team100.lib.telemetry.Telemetry.Level;
-import org.team100.lib.telemetry.TelemetryLevelPoller;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.util.Util;
@@ -92,7 +90,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -116,15 +113,15 @@ public class RobotContainer implements Glassy {
     public RobotContainer(TimedRobot100 robot) throws IOException {
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
         final Async async = asyncFactory.get();
-        final Telemetry telemetry = Telemetry.instance();
-        final TelemetryLevelPoller poller = new TelemetryLevelPoller(async, telemetry::setLevel, Level.COMP);
+        final Logging logging = Logging.instance();
+        final LogLevelPoller poller = new LogLevelPoller(async, logging::setLevel, Level.COMP);
         Util.printf("Using log level %s\n", poller.getLevel().name());
         Util.println("Do not use TRACE in comp, with NT logging, it will overrun");
 
-        final SupplierLogger2 fieldLogger = telemetry.fieldLogger;
+        final SupplierLogger2 fieldLogger = logging.fieldLogger;
         final FieldLogger.Log fieldLog = new FieldLogger.Log(fieldLogger);
 
-        final SupplierLogger2 logger = telemetry.rootLogger;
+        final SupplierLogger2 logger = logging.rootLogger;
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(logger, async);

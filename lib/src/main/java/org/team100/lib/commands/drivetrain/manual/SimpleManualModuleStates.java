@@ -3,11 +3,11 @@ package org.team100.lib.commands.drivetrain.manual;
 import java.util.Optional;
 
 import org.team100.lib.hid.DriverControl;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Rotation2d;

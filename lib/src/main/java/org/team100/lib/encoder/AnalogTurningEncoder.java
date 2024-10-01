@@ -3,9 +3,9 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
 
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Memo;
 
 import edu.wpi.first.wpilibj.AnalogInput;

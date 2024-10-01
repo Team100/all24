@@ -6,10 +6,10 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.State100;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.State100Logger;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
  * Position control using the feedback controller in the motor controller hardware

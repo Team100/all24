@@ -6,6 +6,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
@@ -15,7 +16,6 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.state.State100;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.swerve.SwerveSetpoint;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 

@@ -6,10 +6,10 @@ import java.util.OptionalDouble;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;

@@ -21,6 +21,9 @@ import edu.wpi.first.wpilibj.DataLogManager;
  * This is a sort of back-up option for logging directly to a local network
  * tables server.
  * 
+ * Logged items are "retained" which means they persist even after the logging
+ * stops; this means you should see the latest values after disabling the robot.
+ * 
  * With a full load of logging this will overrun the 50hz loop very badly, so if
  * you use it, you'll need to turn off most of the logging.
  */

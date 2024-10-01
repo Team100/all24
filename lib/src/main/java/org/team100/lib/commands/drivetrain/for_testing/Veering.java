@@ -1,11 +1,11 @@
 package org.team100.lib.commands.drivetrain.for_testing;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.SquareWave;
 
 import edu.wpi.first.wpilibj.Timer;

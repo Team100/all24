@@ -3,10 +3,10 @@ package org.team100.lib.commands.drivetrain.for_testing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.Fixtured;
+import org.team100.lib.motion.drivetrain.RealisticFixtured;
 import org.team100.lib.testing.Timeless;
 
-class OscillateTest extends Fixtured implements Timeless {
+class OscillateTest extends RealisticFixtured implements Timeless {
     private static final double kDelta = 0.001;
 
     @Test

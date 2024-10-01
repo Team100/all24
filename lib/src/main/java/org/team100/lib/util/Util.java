@@ -20,7 +20,7 @@ public class Util {
     }
 
     /**
-     * Print to the console regardless of telemetry level.
+     * Print to the console.
      */
     public static void warn(String s) {
         System.out.println("WARNING: " + s);

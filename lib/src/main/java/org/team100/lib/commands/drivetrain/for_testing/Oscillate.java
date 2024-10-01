@@ -1,11 +1,11 @@
 package org.team100.lib.commands.drivetrain.for_testing;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;
@@ -76,7 +76,7 @@ public class Oscillate extends Command implements Glassy  {
         double speedM_S = m_triangle.applyAsDouble(time);
         double positionM = m_parabola.applyAsDouble(time);
 
-        m_swerve.setChassisSpeedsNormally(new ChassisSpeeds(speedM_S, 0, 0));
+        m_swerve.setChassisSpeeds(new ChassisSpeeds(speedM_S, 0, 0));
 
         m_log_period.log(() -> kPeriod);
         m_log_time.log(() -> time);

@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
@@ -11,7 +12,6 @@ import org.team100.lib.logging.SupplierLogger2.Translation2dLogger;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;

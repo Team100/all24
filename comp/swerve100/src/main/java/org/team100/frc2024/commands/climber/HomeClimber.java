@@ -4,10 +4,10 @@ import java.util.OptionalDouble;
 
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.motion.mechanism.LimitedLinearMechanism;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Timer100;
 import org.team100.lib.util.Util;
 

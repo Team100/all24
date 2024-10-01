@@ -17,7 +17,7 @@ import org.team100.lib.sensors.SimulatedGyro;
  * A real swerve subsystem populated with simulated motors and encoders,
  * for testing.
  */
-public class Fixture {
+public class RealisticFixture {
     public SwerveModuleCollection collection;
     public Gyro gyro;
     public SwerveDrivePoseEstimator100 poseEstimator;
@@ -28,10 +28,10 @@ public class Fixture {
     public SupplierLogger2 logger;
     public SupplierLogger2 fieldLogger;
 
-    public Fixture() {
+    public RealisticFixture() {
         logger = new TestLogger().getSupplierLogger();
         fieldLogger = new TestLogger().getSupplierLogger();
-        swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
+        swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
         gyro = new SimulatedGyro(swerveKinodynamics, collection);
         swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);

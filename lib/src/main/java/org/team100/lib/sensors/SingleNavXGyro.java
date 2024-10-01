@@ -3,10 +3,10 @@ package org.team100.lib.sensors;
 import org.team100.lib.async.Async;
 import org.team100.lib.config.Identity;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.telemetry.Telemetry.Level;
 import org.team100.lib.util.Util;
 
 import com.kauailabs.navx.frc.AHRS;

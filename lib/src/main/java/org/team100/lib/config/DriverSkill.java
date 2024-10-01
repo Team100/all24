@@ -1,6 +1,6 @@
 package org.team100.lib.config;
 
-import org.team100.lib.telemetry.NamedChooser;
+import org.team100.lib.util.NamedChooser;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

@@ -1,4 +1,4 @@
-package org.team100.lib.telemetry;
+package org.team100.lib.logging;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -9,9 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger2;
-import org.team100.lib.telemetry.Telemetry.Level;
 
 /**
  * Logs stuff about the JVM. Inspired by Advantage Kit's
