@@ -8,10 +8,12 @@ import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
 import org.team100.lib.motion.servo.OutboardLinearVelocityServo;
 import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
+
 
 class LinearVelocityServoTest {
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
 
     @Test
     void testSimple() {

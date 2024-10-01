@@ -1,31 +1,27 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import java.util.Arrays;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.team100.lib.util.Util;
 
 /** Prints logs to stdout. */
-public class TestLogger implements PrimitiveLogger2 {
+public class TestPrimitiveLogger implements PrimitiveLogger2 {
     private final boolean m_print;
     private final Set<String> keys = new HashSet<>();
 
-    public TestLogger(boolean print) {
+    public TestPrimitiveLogger(boolean print) {
         m_print = print;
     }
 
-    public TestLogger() {
+    public TestPrimitiveLogger() {
         this(false);
     }
 
     @Override
     public int keyCount() {
         return keys.size();
-    }
-
-    public SupplierLogger2 getSupplierLogger() {
-        return new SupplierLogger2(() -> Level.TRACE, "test", this);
     }
 
     @Override

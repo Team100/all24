@@ -8,9 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
+import org.team100.lib.motion.drivetrain.SwerveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -23,7 +24,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 class VisionDataProviderPerformanceTest {
     private static final double kDelta = 0.01;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
 
     // uncomment this to run it. it consumes all the CPU.
     // @Test

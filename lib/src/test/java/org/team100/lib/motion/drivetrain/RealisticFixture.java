@@ -6,7 +6,8 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionData;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -29,8 +30,8 @@ public class RealisticFixture {
     public SupplierLogger2 fieldLogger;
 
     public RealisticFixture() {
-        logger = new TestLogger().getSupplierLogger();
-        fieldLogger = new TestLogger().getSupplierLogger();
+        logger = new TestSupplierLogger(new TestPrimitiveLogger());
+        fieldLogger = new TestSupplierLogger(new TestPrimitiveLogger());
         swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
         gyro = new SimulatedGyro(swerveKinodynamics, collection);

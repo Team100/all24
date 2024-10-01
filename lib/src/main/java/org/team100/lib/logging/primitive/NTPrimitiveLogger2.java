@@ -1,8 +1,16 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import org.team100.lib.logging.primitive.PrimitiveLogger2.BooleanLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleArrayLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleObjArrayLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.IntLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.LongLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.StringLogger;
 
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanTopic;

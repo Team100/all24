@@ -1,5 +1,10 @@
 package org.team100.lib.logging;
 
+import org.team100.lib.logging.primitive.DummySender;
+import org.team100.lib.logging.primitive.NTPrimitiveLogger2;
+import org.team100.lib.logging.primitive.PrimitiveLogger2;
+import org.team100.lib.logging.primitive.UdpPrimitiveLogger2;
+import org.team100.lib.logging.primitive.UdpSender;
 import org.team100.lib.util.Util;
 
 import com.ctre.phoenix6.SignalLogger;

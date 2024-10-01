@@ -6,9 +6,10 @@ import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.TestLogger;
 import org.team100.lib.state.State100;
 import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -20,7 +21,7 @@ import edu.wpi.first.math.MathUtil;
 @SuppressWarnings("java:S2699") // no assertions here
 class MinTimeControllerTest {
     private static final double kDt = 0.02;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
 
     private final Random rand = new Random();
 

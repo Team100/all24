@@ -1,4 +1,4 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +10,13 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.team100.lib.logging.primitive.PrimitiveLogger2.BooleanLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleArrayLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleObjArrayLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.IntLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.LongLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.StringLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.Timer;

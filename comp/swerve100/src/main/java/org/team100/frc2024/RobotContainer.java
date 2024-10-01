@@ -68,7 +68,7 @@ import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.LogLevelPoller;
+import org.team100.lib.logging.LevelPoller;
 import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
@@ -114,7 +114,7 @@ public class RobotContainer implements Glassy {
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
         final Async async = asyncFactory.get();
         final Logging logging = Logging.instance();
-        final LogLevelPoller poller = new LogLevelPoller(async, logging::setLevel, Level.COMP);
+        final LevelPoller poller = new LevelPoller(async, logging::setLevel, Level.COMP);
         Util.printf("Using log level %s\n", poller.getLevel().name());
         Util.println("Do not use TRACE in comp, with NT logging, it will overrun");
 

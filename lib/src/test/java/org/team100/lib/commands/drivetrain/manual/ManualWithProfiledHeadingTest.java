@@ -12,7 +12,8 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.TestSupplierLogger;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -29,7 +30,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 class ManualWithProfiledHeadingTest {
     // a bit coarser because SimHooks.stepTiming is kinda coarse.
     private static final double kDelta = 0.01;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
 
     private Rotation2d desiredRotation = GeometryUtil.kRotationZero;
 

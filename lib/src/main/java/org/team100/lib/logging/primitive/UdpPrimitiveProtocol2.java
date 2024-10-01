@@ -1,4 +1,4 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;

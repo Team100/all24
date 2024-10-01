@@ -1,4 +1,4 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,9 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.PrimitiveLogger2.BooleanLogger;
-import org.team100.lib.logging.PrimitiveLogger2.IntLogger;
-import org.team100.lib.logging.PrimitiveLogger2.StringLogger;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.SupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.DoubleObjArraySupplierLogger2;
@@ -18,6 +17,9 @@ import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger2;
 import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.BooleanLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.IntLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger2.StringLogger;
 
 import edu.wpi.first.wpilibj.Timer;
 

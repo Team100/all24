@@ -1,4 +1,4 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 /**
  * This should not be used by client code. Use {@link SupplierLogger} instead.

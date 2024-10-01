@@ -1,4 +1,4 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.UdpPrimitiveProtocol2.ProtocolException;
+import org.team100.lib.logging.primitive.UdpPrimitiveProtocol2.ProtocolException;
 
 class UdpPrimitiveProtocol2Test {
 
