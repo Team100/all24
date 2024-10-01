@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -33,7 +33,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveMotionPlannerTest {
-    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test

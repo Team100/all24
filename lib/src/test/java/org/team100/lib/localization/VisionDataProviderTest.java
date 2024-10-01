@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 class VisionDataProviderTest implements Timeless {
     private static final double kDelta = 0.01;
-    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
 
     @Test
     void testEstimateRobotPose() throws IOException {

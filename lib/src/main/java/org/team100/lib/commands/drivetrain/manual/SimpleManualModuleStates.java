@@ -4,9 +4,9 @@ import java.util.Optional;
 
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Rotation2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
@@ -26,8 +26,8 @@ public class SimpleManualModuleStates implements ModuleStateDriver {
     private final DoubleSupplierLogger2 m_log_speed;
     private final Rotation2dLogger m_log_angle;
 
-    public SimpleManualModuleStates(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
-        SupplierLogger2 child = parent.child(this);
+    public SimpleManualModuleStates(LoggerFactory parent, SwerveKinodynamics swerveKinodynamics) {
+        LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_log_speed = child.doubleLogger(Level.TRACE, "speed m_s");
         m_log_angle = child.rotation2dLogger(Level.TRACE, "angle rad");

@@ -8,11 +8,11 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
-import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
-import org.team100.lib.logging.SupplierLogger2.Translation2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
+import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
+import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -67,12 +67,12 @@ public class DriveInACircle extends Command implements Glassy {
      * 
      */
     public DriveInACircle(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicFieldRelativeController controller,
             double turnRatio,
             TrajectoryVisualization viz) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_center = child.translation2dLogger(Level.TRACE, "center");
         m_log_angle = child.doubleLogger(Level.TRACE, "angle");
         m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");

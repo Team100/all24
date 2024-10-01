@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.timing.TimedPose;
@@ -17,7 +17,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveMotionControllerUtilTest {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
 
     @Test
     void testFeedForwardAhead() {

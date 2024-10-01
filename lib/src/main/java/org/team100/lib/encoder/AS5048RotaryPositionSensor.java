@@ -1,6 +1,6 @@
 package org.team100.lib.encoder;
 
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 
 /**
  * Implements max and min duty cycle to address the PWM output's "init" and
@@ -22,7 +22,7 @@ import org.team100.lib.logging.SupplierLogger2;
 public class AS5048RotaryPositionSensor extends DutyCycleRotaryPositionSensor {
 
     public AS5048RotaryPositionSensor(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int channel,
             double inputOffset,
             EncoderDrive drive) {

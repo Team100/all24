@@ -6,7 +6,7 @@ import java.util.List;
 import org.team100.frc2024.motion.AmpUtil;
 import org.team100.lib.commands.drivetrain.DriveWithWaypoints;
 import org.team100.lib.follower.DriveTrajectoryFollower;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class Amp extends SequentialCommandGroup {
     public Amp(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveDriveSubsystem m_swerve,
             DriveTrajectoryFollower controller,
             SwerveKinodynamics limits) {

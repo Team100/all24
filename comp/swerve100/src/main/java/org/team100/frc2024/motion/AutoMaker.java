@@ -17,7 +17,7 @@ import org.team100.lib.field.FieldPoint2024;
 import org.team100.lib.follower.DrivePIDFFollower;
 import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.follower.DriveTrajectoryFollowerFactory;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
@@ -52,14 +52,14 @@ public class AutoMaker implements Glassy {
      * This is an exception to the no-member rule; this is used by the factory
      * methods below. TODO: pass it to the factories?
      */
-    private final SupplierLogger2 m_logger;
+    private final LoggerFactory m_logger;
     private final DrivePIDFFollower.Log m_log;
     private final TrajectoryCommand100.Log m_commandLog;
     private final DriveTrajectoryFollowerFactory m_factory;
     private final TrajectoryVisualization m_viz;
 
     public AutoMaker(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveDriveSubsystem swerve,
             DriveTrajectoryFollowerFactory factory,
             DriveTrajectoryFollower controller,

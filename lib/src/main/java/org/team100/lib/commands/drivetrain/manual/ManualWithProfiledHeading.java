@@ -8,10 +8,10 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
+import org.team100.lib.logging.LoggerFactory.StringSupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -75,13 +75,13 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * @param omegaController
      */
     public ManualWithProfiledHeading(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController,
             PIDController omegaController) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;
         m_desiredRotation = desiredRotation;

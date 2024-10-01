@@ -5,8 +5,8 @@ import java.util.Optional;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -49,8 +49,8 @@ public class OscillateDirect extends Command implements Glassy  {
 
     SwerveState m_initial;
 
-    public OscillateDirect(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
-        SupplierLogger2 child = parent.child(this);
+    public OscillateDirect(LoggerFactory parent, SwerveDriveSubsystem swerve) {
+        LoggerFactory child = parent.child(this);
         m_swerve = swerve;
         m_square = new SquareWave(kAccel, kPeriod);
         m_triangle = new TriangleWave(kMaxSpeed, kPeriod);

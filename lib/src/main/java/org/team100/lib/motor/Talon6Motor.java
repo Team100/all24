@@ -5,8 +5,8 @@ import java.util.function.DoubleSupplier;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
 import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
@@ -61,14 +61,14 @@ public abstract class Talon6Motor implements BareMotor {
     private final DoubleSupplierLogger2 m_log_temp;
 
     protected Talon6Motor(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int canId,
             MotorPhase motorPhase,
             double supplyLimit,
             double statorLimit,
             PIDConstants lowLevelVelocityConstants,
             Feedforward100 ff) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_motor = new TalonFX(canId);
         m_ff = ff;
         m_supplyLimit = supplyLimit;

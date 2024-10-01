@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
@@ -25,7 +25,7 @@ class AngularPositionProfileTest implements Timeless {
 
     boolean dump = false;
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
 
     private final MockBareMotor motor;
     private final RotaryMechanism mech;

@@ -6,7 +6,7 @@ import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.timing.ConstantConstraint;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -27,7 +27,7 @@ public class FullCycle extends SequentialCommandGroup implements Glassy {
     private static final Pose2d waypoint1 = new Pose2d(2, 2, GeometryUtil.kRotationZero);
 
     public FullCycle(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicFieldRelativeController controller,
             TrajectoryVisualization viz) {

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleObjArraySupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleObjArraySupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,7 +21,7 @@ public class ForceViz {
     private final DoubleObjArraySupplierLogger2 m_log_tactics;
     private final DoubleObjArraySupplierLogger2 m_log_desired;
 
-    public ForceViz(SupplierLogger2 fieldLogger) {
+    public ForceViz(LoggerFactory fieldLogger) {
         m_log_tactics = fieldLogger.doubleObjArrayLogger(Level.TRACE, "tactics");
         m_log_desired = fieldLogger.doubleObjArrayLogger(Level.TRACE, "desired");
     }

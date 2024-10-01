@@ -16,19 +16,19 @@ import org.team100.lib.motion.servo.OutboardLinearVelocityServo;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Neo550CANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 
 public class Neo550Factory {
 
     public static LinearMechanism getNEO550LinearMechanism(
             String name,
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int currentLimit,
             int canID,
             double gearRatio,
             MotorPhase motorPhase,
             double wheelDiameterM) {
-        SupplierLogger2 moduleLogger = parent.child(name);
+        LoggerFactory moduleLogger = parent.child(name);
         Neo550CANSparkMotor motor = new Neo550CANSparkMotor(
                 moduleLogger,
                 canID,
@@ -45,12 +45,12 @@ public class Neo550Factory {
 
     public static RotaryMechanism getNEO550RotaryMechanism(
             String name,
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int currentLimit,
             int canID,
             double gearRatio,
             MotorPhase motorPhase) {
-        SupplierLogger2 moduleLogger = parent.child(name);
+        LoggerFactory moduleLogger = parent.child(name);
         Neo550CANSparkMotor motor = new Neo550CANSparkMotor(
                 moduleLogger,
                 canID,
@@ -67,12 +67,12 @@ public class Neo550Factory {
 
     public static OutboardGravityServo getNEO550GravityServo(
             String name,
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int currentLimit,
             int canID,
             double gearRatio,
             MotorPhase motorPhase) {
-        SupplierLogger2 moduleLogger = parent.child(name);
+        LoggerFactory moduleLogger = parent.child(name);
         Neo550CANSparkMotor driveMotor = new Neo550CANSparkMotor(moduleLogger, canID, motorPhase, currentLimit,
                 Feedforward100.makeNeo550(), new PIDConstants(0.0001));
         RotaryMechanism rotaryMechanism = new RotaryMechanism(moduleLogger, driveMotor,
@@ -91,13 +91,13 @@ public class Neo550Factory {
 
     public static LinearVelocityServo getNEO550VelocityServo(
             String name,
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int currentLimit,
             int canID,
             double gearRatio,
             MotorPhase motorPhase,
             double wheelDiameterM) {
-        SupplierLogger2 moduleLogger = parent.child(name);
+        LoggerFactory moduleLogger = parent.child(name);
         return new OutboardLinearVelocityServo(moduleLogger, getNEO550LinearMechanism(name,
                 moduleLogger,
                 currentLimit,
@@ -107,13 +107,13 @@ public class Neo550Factory {
                 wheelDiameterM));
     }
 
-    public static OutboardLinearVelocityServo simulatedDriveServo(SupplierLogger2 parent) {
+    public static OutboardLinearVelocityServo simulatedDriveServo(LoggerFactory parent) {
         return new OutboardLinearVelocityServo(
                 parent,
                 simulatedLinearMechanism(parent));
     }
 
-    public static OutboardGravityServo simulatedGravityServo(SupplierLogger2 parent) {
+    public static OutboardGravityServo simulatedGravityServo(LoggerFactory parent) {
         SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
         RotaryMechanism rotaryMechanism = new RotaryMechanism(parent, driveMotor,
                 new SimulatedBareEncoder(parent, driveMotor), 1);
@@ -129,12 +129,12 @@ public class Neo550Factory {
                 1);
     }
 
-    public static RotaryMechanism simulatedRotaryMechanism(SupplierLogger2 parent) {
+    public static RotaryMechanism simulatedRotaryMechanism(LoggerFactory parent) {
         SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
         return new RotaryMechanism(parent, driveMotor, new SimulatedBareEncoder(parent, driveMotor), 1);
     }
 
-    public static LinearMechanism simulatedLinearMechanism(SupplierLogger2 parent) {
+    public static LinearMechanism simulatedLinearMechanism(LoggerFactory parent) {
         // simulated drive motor free speed is 5 m/s
         SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
         // simulated gearing is 2 meter wheel, 1:1, so rad/s and m/s are the same.

@@ -14,7 +14,7 @@ import org.team100.lib.motion.servo.GravityServoInterface;
 
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 
@@ -22,7 +22,7 @@ import edu.wpi.first.math.controller.PIDController;
 
 class GravityServoTest implements Timeless2024 {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
 
     @Test
     void testSetPosition() {

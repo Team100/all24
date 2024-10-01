@@ -4,9 +4,9 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.State100;
@@ -35,11 +35,11 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
     private State100 m_setpoint = new State100(0, 0);
 
     public OnboardLinearDutyCyclePositionServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             LinearMechanism mechanism,
             PIDController controller,
             Profile100 profile) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_mechanism = mechanism;
         m_controller = controller;
         m_profile = profile;

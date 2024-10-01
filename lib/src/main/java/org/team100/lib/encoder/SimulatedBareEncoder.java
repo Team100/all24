@@ -3,8 +3,8 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motor.BareMotor;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -19,9 +19,9 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
     private OptionalDoubleLogger m_log_velocity;
 
     public SimulatedBareEncoder(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             BareMotor motor) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_motor = motor;
         m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (rad)");
         m_log_velocity = child.optionalDoubleLogger(Level.TRACE, "velocity (rad_s)");

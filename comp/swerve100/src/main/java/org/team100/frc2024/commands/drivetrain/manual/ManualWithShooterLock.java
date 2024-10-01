@@ -19,11 +19,11 @@ import org.team100.lib.sensors.Gyro;
 import org.team100.lib.state.State100;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Rotation2dLogger;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
-import org.team100.lib.logging.SupplierLogger2.Translation2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
+import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 
@@ -92,13 +92,13 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
 
     public ManualWithShooterLock(
             FieldLogger.Log fieldLogger,
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             PIDController thetaController,
             PIDController omegaController) {
         m_field_log = fieldLogger;
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
 
         m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
         m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");

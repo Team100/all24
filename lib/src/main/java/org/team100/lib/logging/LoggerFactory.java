@@ -12,7 +12,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.localization.Blip24;
-import org.team100.lib.logging.primitive.PrimitiveLogger2;
+import org.team100.lib.logging.primitive.PrimitiveLogger;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
@@ -34,23 +34,28 @@ import edu.wpi.first.math.spline.PoseWithCurvature;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 
 /**
- * This class should not be a member of any other class, it should be used in
- * constructors to create instances of the inner classes.
- *
- *  Use keys of the form "/foo/bar"; the slashes separate levels in the tree.
+ * This is the logger factory class.
  * 
- * Don't use a slash for any other reason, e.g. for "meters per second" don't
- * say "m/s" say "m_s"
+ * The use pattern is:
+ * 
+ * * pass this through the tree of constructors
+ * * in each class, make a "child" -- the logger tree follows the instantiation tree.
+ * * use the child to create logger instances as members
+ * * use the member logger instances at whatever site you want
+ * 
+ * In general you shouldn't keep references to this factory; let the top level container keep the root reference.
+ * 
+ * Don't use slashes in names, it confuses Glass.
  */
-public class SupplierLogger2 {
+public class LoggerFactory {
     private final Supplier<Level> m_level;
     private final String m_root;
-    private final PrimitiveLogger2 m_pLogger;
+    private final PrimitiveLogger m_pLogger;
 
-    public SupplierLogger2(
+    public LoggerFactory(
             Supplier<Level> level,
             String root,
-            PrimitiveLogger2 primitiveLoggerA) {
+            PrimitiveLogger primitiveLoggerA) {
         if (root.startsWith("/"))
             throw new IllegalArgumentException("don't lead with a slash");
         m_level = level;
@@ -64,8 +69,8 @@ public class SupplierLogger2 {
      * 
      * Each child level is separated by slashes, to make a tree in glass.
      */
-    public SupplierLogger2 child(String stem) {
-        return new SupplierLogger2(m_level, m_root + "/" + stem, m_pLogger);
+    public LoggerFactory child(String stem) {
+        return new LoggerFactory(m_level, m_root + "/" + stem, m_pLogger);
     }
 
     /**
@@ -73,7 +78,7 @@ public class SupplierLogger2 {
      * thing, using the stable glass name (i.e. interface names, not implementation
      * names, where possible).
      */
-    public SupplierLogger2 child(Glassy obj) {
+    public LoggerFactory child(Glassy obj) {
         return child(obj.getGlassName());
     }
 
@@ -98,7 +103,7 @@ public class SupplierLogger2 {
 
     public class BooleanSupplierLogger2 {
         private final Level m_level;
-        private final PrimitiveLogger2.BooleanLogger m_primitiveLogger;
+        private final PrimitiveLogger.BooleanLogger m_primitiveLogger;
 
         BooleanSupplierLogger2(Level level, String leaf) {
             m_level = level;
@@ -119,7 +124,7 @@ public class SupplierLogger2 {
 
     public class DoubleSupplierLogger2 {
         private final Level m_level;
-        private final PrimitiveLogger2.DoubleLogger m_primitiveLogger;
+        private final PrimitiveLogger.DoubleLogger m_primitiveLogger;
 
         DoubleSupplierLogger2(Level level, String leaf) {
             m_level = level;
@@ -147,7 +152,7 @@ public class SupplierLogger2 {
 
     public class IntSupplierLogger2 {
         private final Level m_level;
-        private final PrimitiveLogger2.IntLogger m_primitiveLogger;
+        private final PrimitiveLogger.IntLogger m_primitiveLogger;
 
         IntSupplierLogger2(Level level, String leaf) {
             m_level = level;
@@ -168,7 +173,7 @@ public class SupplierLogger2 {
 
     public class DoubleArraySupplierLogger2 {
         private final Level m_level;
-        private final PrimitiveLogger2.DoubleArrayLogger m_primitiveLogger;
+        private final PrimitiveLogger.DoubleArrayLogger m_primitiveLogger;
 
         DoubleArraySupplierLogger2(Level level, String leaf) {
             m_level = level;
@@ -189,7 +194,7 @@ public class SupplierLogger2 {
 
     public class DoubleObjArraySupplierLogger2 {
         private final Level m_level;
-        private final PrimitiveLogger2.DoubleObjArrayLogger m_primitiveLogger;
+        private final PrimitiveLogger.DoubleObjArrayLogger m_primitiveLogger;
 
         DoubleObjArraySupplierLogger2(Level level, String leaf) {
             m_level = level;
@@ -210,7 +215,7 @@ public class SupplierLogger2 {
 
     public class LongSupplierLogger2 {
         private final Level m_level;
-        private final PrimitiveLogger2.LongLogger m_primitiveLogger;
+        private final PrimitiveLogger.LongLogger m_primitiveLogger;
 
         LongSupplierLogger2(Level level, String leaf) {
             m_level = level;
@@ -231,7 +236,7 @@ public class SupplierLogger2 {
 
     public class StringSupplierLogger2 {
         private final Level m_level;
-        private final PrimitiveLogger2.StringLogger m_primitiveLogger;
+        private final PrimitiveLogger.StringLogger m_primitiveLogger;
 
         StringSupplierLogger2(Level level, String leaf) {
             m_level = level;
@@ -252,7 +257,7 @@ public class SupplierLogger2 {
 
     public class OptionalDoubleLogger {
         private final Level m_level;
-        private final PrimitiveLogger2.DoubleLogger m_primitiveLogger;
+        private final PrimitiveLogger.DoubleLogger m_primitiveLogger;
 
         OptionalDoubleLogger(Level level, String leaf) {
             m_level = level;
@@ -275,7 +280,7 @@ public class SupplierLogger2 {
 
     public class EnumLogger {
         private final Level m_level;
-        private final PrimitiveLogger2.StringLogger m_primitiveLogger;
+        private final PrimitiveLogger.StringLogger m_primitiveLogger;
 
         EnumLogger(Level level, String leaf) {
             m_level = level;

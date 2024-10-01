@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 
@@ -155,7 +155,7 @@ class PoseEstimationHelperTest {
                         new Rotation3d(0, 0, 0)));
 
         Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d();
-        SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+        LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
         PoseEstimationHelper helper = new PoseEstimationHelper(logger);
         Pose3d robotPoseInFieldCoords = helper.getRobotPoseInFieldCoords(
                 cameraInRobotCoords,

@@ -1,10 +1,10 @@
 package org.team100.lib.logging;
 
-import org.team100.lib.logging.primitive.PrimitiveLogger2;
+import org.team100.lib.logging.primitive.PrimitiveLogger;
 
-public class TestSupplierLogger extends SupplierLogger2 {
+public class TestSupplierLogger extends LoggerFactory {
 
-    public TestSupplierLogger(PrimitiveLogger2 primitiveLogger) {
+    public TestSupplierLogger(PrimitiveLogger primitiveLogger) {
         super(() -> Level.TRACE, "test", primitiveLogger);
     }
 

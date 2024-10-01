@@ -6,8 +6,8 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
@@ -25,8 +25,8 @@ public class SteeringOverride implements Glassy {
     // LOGGERS
     private final DoubleSupplierLogger2 m_log_s;
 
-    public SteeringOverride(SupplierLogger2 parent, SwerveKinodynamics limits) {
-        SupplierLogger2 child = parent.child(this);
+    public SteeringOverride(LoggerFactory parent, SwerveKinodynamics limits) {
+        LoggerFactory child = parent.child(this);
         m_limits = limits;
         m_log_s = child.doubleLogger(Level.TRACE, "s");
     }

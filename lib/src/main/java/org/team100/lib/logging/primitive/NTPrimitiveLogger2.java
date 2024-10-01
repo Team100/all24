@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.team100.lib.logging.primitive.PrimitiveLogger2.BooleanLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleArrayLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleObjArrayLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.IntLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.LongLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.StringLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.BooleanLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleArrayLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleObjArrayLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.IntLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.LongLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.StringLogger;
 
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanTopic;
@@ -35,7 +35,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
  * With a full load of logging this will overrun the 50hz loop very badly, so if
  * you use it, you'll need to turn off most of the logging.
  */
-public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
+public class NTPrimitiveLogger2 implements PrimitiveLogger {
     private final NetworkTableInstance inst;
     // this is duplicative of the NT topic list, but the NT topics includes
     // other non-logging keys, so we keep our own list.
@@ -52,7 +52,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
         return keys.size();
     }
 
-    public class NTBooleanLogger implements PrimitiveLogger2.BooleanLogger {
+    public class NTBooleanLogger implements PrimitiveLogger.BooleanLogger {
         BooleanPublisher m_pub;
 
         public NTBooleanLogger(String label) {
@@ -68,7 +68,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
 
     }
 
-    public class NTDoubleLogger implements PrimitiveLogger2.DoubleLogger {
+    public class NTDoubleLogger implements PrimitiveLogger.DoubleLogger {
         DoublePublisher m_pub;
 
         public NTDoubleLogger(String label) {
@@ -83,7 +83,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class NTIntLogger implements PrimitiveLogger2.IntLogger {
+    public class NTIntLogger implements PrimitiveLogger.IntLogger {
         IntegerPublisher m_pub;
 
         public NTIntLogger(String label) {
@@ -98,7 +98,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class NTDoubleArrayLogger implements PrimitiveLogger2.DoubleArrayLogger {
+    public class NTDoubleArrayLogger implements PrimitiveLogger.DoubleArrayLogger {
         DoubleArrayPublisher m_pub;
 
         public NTDoubleArrayLogger(String label) {
@@ -113,7 +113,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class NTDoubleObjArrayLogger implements PrimitiveLogger2.DoubleObjArrayLogger {
+    public class NTDoubleObjArrayLogger implements PrimitiveLogger.DoubleObjArrayLogger {
         DoubleArrayPublisher m_pub;
 
         public NTDoubleObjArrayLogger(String label) {
@@ -128,7 +128,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class NTLongLogger implements PrimitiveLogger2.LongLogger {
+    public class NTLongLogger implements PrimitiveLogger.LongLogger {
         IntegerPublisher m_pub;
 
         public NTLongLogger(String label) {
@@ -143,7 +143,7 @@ public class NTPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class NTStringLogger implements PrimitiveLogger2.StringLogger {
+    public class NTStringLogger implements PrimitiveLogger.StringLogger {
         StringPublisher m_pub;
 
         public NTStringLogger(String label) {

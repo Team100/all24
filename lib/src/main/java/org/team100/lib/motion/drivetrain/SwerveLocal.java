@@ -7,8 +7,8 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
@@ -59,10 +59,10 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
     private SwerveSetpoint prevSetpoint;
 
     public SwerveLocal(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             SwerveModuleCollection modules) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_desired = child.chassisSpeedsLogger(Level.DEBUG, "desired chassis speed");
         m_log_setpoint_delta = child.chassisSpeedsLogger(Level.TRACE, "setpoint delta");
         m_log_prev_setpoint = child.chassisSpeedsLogger(Level.TRACE, "prevSetpoint chassis speed");

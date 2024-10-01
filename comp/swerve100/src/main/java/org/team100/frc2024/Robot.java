@@ -10,11 +10,11 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.JvmLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.Logging;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.IntSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.StringSupplierLogger2;
 import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
@@ -42,7 +42,7 @@ public class Robot extends TimedRobot100 {
     private RobotContainer m_robotContainer;
 
     public Robot() {
-        SupplierLogger2 dsLog = m_robotLogger.child("DriverStation");
+        LoggerFactory dsLog = m_robotLogger.child("DriverStation");
         m_log_ds_MatchTime = dsLog.doubleLogger(Level.TRACE, "MatchTime");
         m_log_ds_AutonomousEnabled = dsLog.booleanLogger(Level.TRACE, "AutonomousEnabled");
         m_log_ds_TeleopEnabled = dsLog.booleanLogger(Level.TRACE, "TeleopEnabled");

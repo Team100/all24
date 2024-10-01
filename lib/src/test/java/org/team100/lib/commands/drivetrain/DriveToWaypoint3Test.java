@@ -14,7 +14,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.Target;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
@@ -37,7 +37,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class DriveToWaypoint3Test extends Fixtured {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
     private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
     SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();

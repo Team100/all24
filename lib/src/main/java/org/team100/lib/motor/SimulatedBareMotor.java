@@ -1,8 +1,8 @@
 package org.team100.lib.motor;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -15,8 +15,8 @@ public class SimulatedBareMotor implements BareMotor {
 
     private double m_velocity = 0;
 
-    public SimulatedBareMotor(SupplierLogger2 parent, double freeSpeedRad_S) {
-        SupplierLogger2 child = parent.child(this);
+    public SimulatedBareMotor(LoggerFactory parent, double freeSpeedRad_S) {
+        LoggerFactory child = parent.child(this);
         m_freeSpeedRad_S = freeSpeedRad_S;
         m_log_duty = child.doubleLogger(Level.DEBUG, "duty_cycle");
         m_log_velocity = child.doubleLogger(Level.DEBUG, "velocity (rad_s)");

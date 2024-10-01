@@ -7,9 +7,9 @@ import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.State100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
 
 /**
  * Position control using the feedback controller in the motor controller hardware
@@ -28,10 +28,10 @@ public class OutboardLinearPositionServo implements LinearPositionServo {
 
 
     public OutboardLinearPositionServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             LinearMechanism mechanism,
             Profile100 profile) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_mechanism = mechanism;
         m_profile = profile;
         m_log_goal = child.state100Logger(Level.TRACE, "goal (rad)");

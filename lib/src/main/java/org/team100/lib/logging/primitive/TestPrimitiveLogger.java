@@ -7,7 +7,7 @@ import java.util.Set;
 import org.team100.lib.util.Util;
 
 /** Prints logs to stdout. */
-public class TestPrimitiveLogger implements PrimitiveLogger2 {
+public class TestPrimitiveLogger implements PrimitiveLogger {
     private final boolean m_print;
     private final Set<String> keys = new HashSet<>();
 

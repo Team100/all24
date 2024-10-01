@@ -5,8 +5,8 @@ import java.util.function.DoubleSupplier;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
 import org.team100.lib.util.Memo;
 
 import com.revrobotics.CANSparkBase;
@@ -44,14 +44,14 @@ public abstract class CANSparkMotor implements BareMotor {
     private final DoubleSupplierLogger2 m_log_temp;
 
     protected CANSparkMotor(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             CANSparkBase motor,
             MotorPhase motorPhase,
             int currentLimit,
             Feedforward100 ff,
             PIDConstants pid) {
         m_motor = motor;
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_ff = ff;
         // make config synchronous so we can see the errors
         Rev100.crash(() -> m_motor.setCANTimeout(500));

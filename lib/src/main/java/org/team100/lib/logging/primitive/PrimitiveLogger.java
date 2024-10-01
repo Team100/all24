@@ -3,7 +3,7 @@ package org.team100.lib.logging.primitive;
 /**
  * This should not be used by client code. Use {@link SupplierLogger} instead.
  */
-public interface PrimitiveLogger2 {
+public interface PrimitiveLogger {
 
     int keyCount();
 

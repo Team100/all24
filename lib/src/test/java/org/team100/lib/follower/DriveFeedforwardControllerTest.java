@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -29,7 +29,7 @@ class DriveFeedforwardControllerTest {
     boolean dump = false;
     private static final double kMaxVel = 1.0;
     private static final double kMaxAccel = 1.0;
-    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
 
     @Test

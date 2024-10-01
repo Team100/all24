@@ -5,11 +5,11 @@ import java.util.Optional;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
-import org.team100.lib.logging.SupplierLogger2.TimedPoseLogger;
-import org.team100.lib.logging.SupplierLogger2.TrajectorySamplePointLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
+import org.team100.lib.logging.LoggerFactory.TimedPoseLogger;
+import org.team100.lib.logging.LoggerFactory.TrajectorySamplePointLogger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -33,8 +33,8 @@ public class DrivePIDFFollower implements DriveTrajectoryFollower {
         private final BooleanSupplierLogger2 m_log_is_mt;
         private final TrajectorySamplePointLogger m_log_sample;
 
-        public Log(SupplierLogger2 parent) {
-            SupplierLogger2 log = parent.child("DrivePIDFController");
+        public Log(LoggerFactory parent) {
+            LoggerFactory log = parent.child("DrivePIDFController");
             m_log_measurement = log.pose2dLogger(Level.DEBUG, "measurement");
             m_log_setpoint = log.timedPoseLogger(Level.DEBUG, "setpoint");
             m_log_is_mt = log.booleanLogger(Level.TRACE, "IS MT");

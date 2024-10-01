@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
@@ -47,14 +47,14 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  
     private final ChassisSpeedsLogger m_log_chassis_speeds; 
 
     public DriveToAdjacentWithShooterAngle(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveDriveSubsystem swerve,
             Translation2d goalTranslation,
             DriveTrajectoryFollower controller,
             List<TimingConstraint> constraints,
             double shooterScale,
             TrajectoryVisualization viz) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = swerve;
         m_goalTranslation = goalTranslation;

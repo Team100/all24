@@ -7,10 +7,10 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
@@ -69,12 +69,12 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
      * TODO: remove maxVel.
      */
     public OnboardAngularPositionServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             RotaryMechanism mech,
             RotaryPositionSensor positionSensor,
             double maxVel,
             PIDController controller) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_mechanism = mech;
         m_positionSensor = positionSensor;
         m_maxVel = maxVel;

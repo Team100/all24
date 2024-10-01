@@ -3,8 +3,8 @@ package org.team100.lib.visualization;
 import java.util.List;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleArraySupplierLogger2;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPoint;
 
@@ -19,7 +19,7 @@ public class TrajectoryVisualization {
 
     private final DoubleArraySupplierLogger2 m_log_trajectory;
 
-    public TrajectoryVisualization(SupplierLogger2 fieldLogger) {
+    public TrajectoryVisualization(LoggerFactory fieldLogger) {
         m_log_trajectory = fieldLogger.doubleArrayLogger(Level.TRACE, kTrajectory);
     }
 

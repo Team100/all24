@@ -7,8 +7,8 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ArmAnglesLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 
 import edu.wpi.first.math.MathUtil;
@@ -42,12 +42,12 @@ public class ArmSubsystem extends SubsystemBase implements Glassy {
      * @param upperEncoder Upper arm angle (radians), 0 up, positive forward.
      */
     ArmSubsystem(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             RotaryMechanism lowerMotor,
             RotaryPositionSensor lowerEncoder,
             RotaryMechanism upperMotor,
             RotaryPositionSensor upperEncoder) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_position = child.armAnglesLogger(Level.TRACE, "position");
         m_log_velocity = child.armAnglesLogger(Level.TRACE, "velocity");
 

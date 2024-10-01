@@ -10,8 +10,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.StringSupplierLogger2;
 
 import edu.wpi.first.math.interpolation.Interpolatable;
 
@@ -35,8 +35,8 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
     private final StringSupplierLogger2 m_log_bottom;
     private final StringSupplierLogger2 m_log_top;
 
-    public TimeInterpolatableBuffer100(SupplierLogger2 parent, double historyS, double timeS, T initialValue) {
-        SupplierLogger2 child = parent.child(this);
+    public TimeInterpolatableBuffer100(LoggerFactory parent, double historyS, double timeS, T initialValue) {
+        LoggerFactory child = parent.child(this);
         m_historyS = historyS;
         // no lock needed in constructor
         m_pastSnapshots.put(timeS, initialValue);

@@ -10,13 +10,13 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.team100.lib.logging.primitive.PrimitiveLogger2.BooleanLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleArrayLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.DoubleObjArrayLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.IntLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.LongLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.StringLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.BooleanLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleArrayLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.DoubleObjArrayLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.IntLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.LongLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.StringLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj.Timer;
  * This logger accepts inputs only one value per key per flush period; the
  * newest value wins.
  */
-public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
+public class UdpPrimitiveLogger2 implements PrimitiveLogger {
     /** if false, throw when a duplicate logger is created. */
     private static final boolean ALLOW_DUPLICATES = true;
 
@@ -161,7 +161,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         m_bufferSink.accept(m_dataProtocol.trim());
     }
 
-    public class UdpBooleanLogger implements PrimitiveLogger2.BooleanLogger {
+    public class UdpBooleanLogger implements PrimitiveLogger.BooleanLogger {
         private final int m_key;
         private boolean m_val;
         private boolean m_dirty;
@@ -178,7 +178,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class UdpDoubleLogger implements PrimitiveLogger2.DoubleLogger {
+    public class UdpDoubleLogger implements PrimitiveLogger.DoubleLogger {
         private final int m_key;
         private double m_val;
         private boolean m_dirty;
@@ -196,7 +196,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     }
 
-    public class UdpIntLogger implements PrimitiveLogger2.IntLogger {
+    public class UdpIntLogger implements PrimitiveLogger.IntLogger {
         private final int m_key;
         private int m_val;
         private boolean m_dirty;
@@ -213,7 +213,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class UdpDoubleArrayLogger implements PrimitiveLogger2.DoubleArrayLogger {
+    public class UdpDoubleArrayLogger implements PrimitiveLogger.DoubleArrayLogger {
         private final int m_key;
         private double[] m_val;
         private boolean m_dirty;
@@ -230,7 +230,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class UdpDoubleObjArrayLogger implements PrimitiveLogger2.DoubleObjArrayLogger {
+    public class UdpDoubleObjArrayLogger implements PrimitiveLogger.DoubleObjArrayLogger {
         private final int m_key;
         private double[] m_val;
         private boolean m_dirty;
@@ -247,7 +247,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
         }
     }
 
-    public class UdpLongLogger implements PrimitiveLogger2.LongLogger {
+    public class UdpLongLogger implements PrimitiveLogger.LongLogger {
         private final int m_key;
         private long m_val;
         private boolean m_dirty;
@@ -265,7 +265,7 @@ public class UdpPrimitiveLogger2 implements PrimitiveLogger2 {
 
     }
 
-    public class UdpStringLogger implements PrimitiveLogger2.StringLogger {
+    public class UdpStringLogger implements PrimitiveLogger.StringLogger {
         private final int m_key;
         private String m_val;
         private boolean m_dirty;

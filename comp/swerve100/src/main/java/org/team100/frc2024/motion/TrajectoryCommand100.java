@@ -3,11 +3,11 @@ package org.team100.frc2024.motion;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -35,8 +35,8 @@ public class TrajectoryCommand100 extends Command implements Glassy  {
         private final DoubleSupplierLogger2 m_log_THETA_ERROR;
         private final BooleanSupplierLogger2 m_log_FINSIHED;
 
-        public Log(SupplierLogger2 parent) {
-            SupplierLogger2 log = parent.child("TrajectoryCommand100");
+        public Log(LoggerFactory parent) {
+            LoggerFactory log = parent.child("TrajectoryCommand100");
             m_log_goal = log.pose2dLogger(Level.TRACE, "goal");
             m_log_chassis_speeds = log.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
             m_log_THETA_ERROR = log.doubleLogger(Level.TRACE, "THETA ERROR");

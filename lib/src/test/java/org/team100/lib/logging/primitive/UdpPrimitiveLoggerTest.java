@@ -9,21 +9,21 @@ import java.util.HexFormat;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleObjArraySupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.BooleanLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.IntLogger;
-import org.team100.lib.logging.primitive.PrimitiveLogger2.StringLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleArraySupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleObjArraySupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.IntSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.LongSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.StringSupplierLogger2;
+import org.team100.lib.logging.primitive.PrimitiveLogger.BooleanLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.IntLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.StringLogger;
 
 import edu.wpi.first.wpilibj.Timer;
 
-class UdpPrimitiveLogger2Test {
+class UdpPrimitiveLoggerTest {
 
     ByteBuffer bb; // data
     ByteBuffer mb; // metadata
@@ -32,7 +32,7 @@ class UdpPrimitiveLogger2Test {
     @Test
     void testSendingLocally() {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
-        SupplierLogger2 logger = new SupplierLogger2(() -> Level.COMP, "root", udpLogger);
+        LoggerFactory logger = new LoggerFactory(() -> Level.COMP, "root", udpLogger);
         BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
         IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
@@ -142,7 +142,7 @@ class UdpPrimitiveLogger2Test {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
-        SupplierLogger2 logger = new SupplierLogger2(() -> Level.COMP, "root", udpLogger);
+        LoggerFactory logger = new LoggerFactory(() -> Level.COMP, "root", udpLogger);
         BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
         DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
         IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
@@ -199,10 +199,7 @@ class UdpPrimitiveLogger2Test {
     @Test
     void testAWholeLotLocally() throws InterruptedException {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
-        SupplierLogger2 logger = new SupplierLogger2(
-                () -> Level.COMP,
-                "root",
-                udpLogger);
+        LoggerFactory logger = new LoggerFactory(() -> Level.COMP, "root", udpLogger);
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
@@ -243,10 +240,7 @@ class UdpPrimitiveLogger2Test {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
-        SupplierLogger2 logger = new SupplierLogger2(
-                () -> Level.COMP,
-                "root",
-                udpLogger);
+        LoggerFactory logger = new LoggerFactory(() -> Level.COMP, "root", udpLogger);
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
@@ -295,7 +289,7 @@ class UdpPrimitiveLogger2Test {
         UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
                 dataSink,
                 metadataSink);
-        SupplierLogger2 logger = new SupplierLogger2(
+        LoggerFactory logger = new LoggerFactory(
                 () -> Level.COMP,
                 "root",
                 udpLogger);

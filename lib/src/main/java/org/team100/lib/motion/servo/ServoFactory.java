@@ -7,7 +7,7 @@ import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
@@ -24,7 +24,7 @@ import edu.wpi.first.math.controller.PIDController;
 public class ServoFactory {
 
     public static LimitedLinearVelocityServo limitedNeoVelocityServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -60,7 +60,7 @@ public class ServoFactory {
     }
 
     public static LimitedLinearVelocityServo limitedSimulatedVelocityServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             double gearRatio,
             double wheelDiameterM,
             double maxVelocity,
@@ -87,7 +87,7 @@ public class ServoFactory {
      * Velocity control using outboard SparkMax controller.
      */
     public static AngularPositionServo neoVortexAngleServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int canId,
             MotorPhase motorPhase,
             int currentLimit,
@@ -121,7 +121,7 @@ public class ServoFactory {
     }
 
     public static AngularPositionServo simulatedAngleServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             double maxVelocity,
             double maxAccel,
             PIDController controller) {

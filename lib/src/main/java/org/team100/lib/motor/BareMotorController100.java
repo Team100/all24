@@ -1,8 +1,8 @@
 package org.team100.lib.motor;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 
@@ -17,11 +17,11 @@ public class BareMotorController100 implements BareMotor {
     private final DoubleSupplierLogger2 m_log_reported;
 
     public BareMotorController100(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             MotorController motorController) {
         m_motor = motorController;
         m_motor.setInverted(true);
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_duty = child.doubleLogger(Level.TRACE, "duty cycle");
         m_log_reported = child.doubleLogger(Level.TRACE, "duty cycle reported");
     }

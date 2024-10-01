@@ -5,8 +5,8 @@ import java.util.OptionalDouble;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.encoder.IncrementalBareEncoder;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
 import org.team100.lib.motor.BareMotor;
 
 import edu.wpi.first.math.MathUtil;
@@ -28,11 +28,11 @@ public class RotaryMechanism implements Glassy {
     private DoubleSupplierLogger2 m_log_position;
 
     public RotaryMechanism(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             BareMotor motor,
             IncrementalBareEncoder encoder,
             double gearRatio) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_motor = motor;
         m_encoder = encoder;
         m_gearRatio = gearRatio;

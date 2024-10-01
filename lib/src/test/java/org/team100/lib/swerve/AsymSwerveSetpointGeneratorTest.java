@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestSupplierLogger;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.util.Util;
@@ -23,7 +23,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 class AsymSwerveSetpointGeneratorTest {
     private static final double kDelta = 0.001;
     private final static double kDt = 0.02; // s
-    private static final SupplierLogger2 logger = new TestSupplierLogger(new TestPrimitiveLogger());
+    private static final LoggerFactory logger = new TestSupplierLogger(new TestPrimitiveLogger());
     private final static SwerveKinodynamics kKinematicLimits = SwerveKinodynamicsFactory.limiting();
 
     private final static double kMaxSteeringVelocityError = Math.toRadians(2.0); // rad/s

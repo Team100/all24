@@ -11,8 +11,8 @@ import org.team100.lib.motor.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.LimitedLinearMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
 import org.team100.lib.motion.servo.LinearPositionServo;
@@ -95,8 +95,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
     private final OptionalDoubleLogger m_log_left_velocity;
     private final OptionalDoubleLogger m_log_right_velocity;
 
-    public ClimberSubsystem(SupplierLogger2 parent, int leftClimberID, int rightClimberID) {
-        SupplierLogger2 child = parent.child(this);
+    public ClimberSubsystem(LoggerFactory parent, int leftClimberID, int rightClimberID) {
+        LoggerFactory child = parent.child(this);
         m_log_left_position = child.optionalDoubleLogger(Level.TRACE, "left position (m)");
         m_log_right_position = child.optionalDoubleLogger(Level.TRACE, "right position (m)");
         m_log_left_velocity = child.optionalDoubleLogger(Level.TRACE, "left velocity (m_s)");
@@ -105,8 +105,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         Util.warn("**** Uncalibrated climber current limit!!!  FIX THIS FOR COMP! ****");
         Util.warn("**** Uncalibrated climber polarity!!!  FIX THIS FOR COMP! ****");
         Util.warn("**** Uncalibrated climber PID!!!  FIX THIS FOR COMP! ****");
-        SupplierLogger2 leftLogger = child.child("left");
-        SupplierLogger2 rightLogger = child.child("right");
+        LoggerFactory leftLogger = child.child("left");
+        LoggerFactory rightLogger = child.child("right");
         switch (Identity.instance) {
             case COMP_BOT -> {
                 m_left = comp(leftLogger, leftClimberID, MotorPhase.REVERSE);
@@ -137,7 +137,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
         return new ClimberPosition(kDownPositionM, this);
     }
 
-    private static LimitedLinearMechanism comp(SupplierLogger2 logger, int id, MotorPhase phase) {
+    private static LimitedLinearMechanism comp(LoggerFactory logger, int id, MotorPhase phase) {
         Feedforward100 ff = Feedforward100.makeNeoVortex();
         /** The PID constants units are duty cycle per RPM, so very small numbers. */
         PIDConstants pid = new PIDConstants(0, 0, 0);
@@ -162,7 +162,7 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
      * 
      * https://docs.revrobotics.com/brushless/neo/vortex
      */
-    private static LimitedLinearMechanism simulated(SupplierLogger2 logger) {
+    private static LimitedLinearMechanism simulated(LoggerFactory logger) {
         SimulatedBareMotor vs2 = new SimulatedBareMotor(logger, 710);
         SimpleLinearMechanism lm = new SimpleLinearMechanism(
                 vs2,

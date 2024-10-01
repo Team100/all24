@@ -5,10 +5,10 @@ import java.util.function.DoubleSupplier;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ArmAnglesLogger;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Translation2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ArmAnglesLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.arm.ArmKinematics;
 import org.team100.lib.motion.arm.ArmSubsystem;
@@ -46,12 +46,12 @@ public class CartesianManualPositionalArm extends Command implements Glassy  {
     private final DoubleSupplierLogger2 m_log_error_e2;
 
     public CartesianManualPositionalArm(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             ArmSubsystem arm,
             ArmKinematics kinematics,
             DoubleSupplier x,
             DoubleSupplier y) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_input = child.translation2dLogger(Level.TRACE, "input");
         m_log_setpoint = child.armAnglesLogger(Level.TRACE, "setpoint");
         m_log_measurement = child.armAnglesLogger(Level.TRACE, "measurement");

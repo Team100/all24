@@ -10,9 +10,9 @@ import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -75,7 +75,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
     public FieldManualWithNoteRotation(
             FieldLogger.Log fieldLogger,
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             Supplier<Optional<Translation2d>> target,
@@ -83,7 +83,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
             PIDController omegaController,
             BooleanSupplier trigger) {
         m_field_log = fieldLogger;
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
         m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
         m_log_theta_measurement = child.doubleLogger(Level.TRACE, "theta/measurement");
