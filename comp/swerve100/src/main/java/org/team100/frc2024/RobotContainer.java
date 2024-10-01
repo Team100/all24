@@ -68,9 +68,9 @@ import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.LogLevelPoller;
+import org.team100.lib.logging.LevelPoller;
 import org.team100.lib.logging.Logging;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -114,14 +114,14 @@ public class RobotContainer implements Glassy {
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
         final Async async = asyncFactory.get();
         final Logging logging = Logging.instance();
-        final LogLevelPoller poller = new LogLevelPoller(async, logging::setLevel, Level.COMP);
+        final LevelPoller poller = new LevelPoller(async, logging::setLevel, Level.COMP);
         Util.printf("Using log level %s\n", poller.getLevel().name());
         Util.println("Do not use TRACE in comp, with NT logging, it will overrun");
 
-        final SupplierLogger2 fieldLogger = logging.fieldLogger;
+        final LoggerFactory fieldLogger = logging.fieldLogger;
         final FieldLogger.Log fieldLog = new FieldLogger.Log(fieldLogger);
 
-        final SupplierLogger2 logger = logging.rootLogger;
+        final LoggerFactory logger = logging.rootLogger;
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         final DriverControl driverControl = new DriverControlProxy(logger, async);
@@ -138,7 +138,7 @@ public class RobotContainer implements Glassy {
         // DRIVETRAIN
         //
 
-        final SupplierLogger2 driveLog = logger.child("Drive");
+        final LoggerFactory driveLog = logger.child("Drive");
 
         m_modules = SwerveModuleCollection.get(
                 driveLog,
@@ -182,7 +182,7 @@ public class RobotContainer implements Glassy {
         //
         // SUBSYSTEMS
 
-        final SupplierLogger2 sysLog = logger.child("Subsystems");
+        final LoggerFactory sysLog = logger.child("Subsystems");
 
         final FeederSubsystem feeder = new FeederSubsystem(sysLog, m_sensors);
 
@@ -215,7 +215,7 @@ public class RobotContainer implements Glassy {
 
         // NOTE: you should generally try to avoid logging in commands, it's
         // easier for subsystems to do it
-        final SupplierLogger2 comLog = logger.child("Commands");
+        final LoggerFactory comLog = logger.child("Commands");
 
         // RESET ZERO
         // on xbox this is "back"
@@ -323,7 +323,7 @@ public class RobotContainer implements Glassy {
         final PIDController omegaController = new PIDController(0.1, 0, 0); // .5
 
         final DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
-        final SupplierLogger2 manLog = comLog.child(driveManually);
+        final LoggerFactory manLog = comLog.child(driveManually);
         driveManually.register("MODULE_STATE", false,
                 new SimpleManualModuleStates(manLog, swerveKinodynamics));
 

@@ -6,9 +6,9 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.servo.LimitedLinearVelocityServo;
 import org.team100.lib.motion.servo.ServoFactory;
 import org.team100.lib.motor.MotorPhase;
@@ -32,15 +32,15 @@ public class Intake extends SubsystemBase implements Glassy {
     private final LimitedLinearVelocityServo superRollers;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_lower;
+    private final DoubleLogger m_log_lower;
     private final OptionalDoubleLogger m_log_upper;
-    private final DoubleSupplierLogger2 m_log_centering;
+    private final DoubleLogger m_log_centering;
 
     private int count = 0;
     private int currentCount = 0;
 
-    public Intake(SupplierLogger2 parent, SensorInterface sensors) {
-        SupplierLogger2 child = parent.child(this);
+    public Intake(LoggerFactory parent, SensorInterface sensors) {
+        LoggerFactory child = parent.child(this);
         m_log_lower = child.doubleLogger(Level.TRACE, "lower");
         m_log_upper = child.optionalDoubleLogger(Level.TRACE, "upper");
         m_log_centering = child.doubleLogger(Level.TRACE, "centering");

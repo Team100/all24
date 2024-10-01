@@ -7,7 +7,7 @@ import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.encoder.VelocityBareEncoder;
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
@@ -43,7 +43,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
 
     /** @param name like "front left" or whatever */
     public static AMSwerveModule100 get(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -72,7 +72,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
     }
 
     private static LinearVelocityServo driveServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             double currentLimit,
             double statorLimit,
             int driveMotorCanId,
@@ -97,7 +97,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
     }
 
     private static AngularPositionServo turningServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int turningMotorChannel,
             int turningEncoderChannel,
             double turningOffset,

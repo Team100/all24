@@ -7,10 +7,10 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
@@ -52,29 +52,29 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     // LOGGERS
     private final State100Logger m_log_goal;
-    private final DoubleSupplierLogger2 m_log_feedforward_torque;
+    private final DoubleLogger m_log_feedforward_torque;
     private final State100Logger m_log_measurement;
     private final State100Logger m_log_setpoint;
-    private final DoubleSupplierLogger2 m_log_u_FB;
-    private final DoubleSupplierLogger2 m_log_u_FF;
-    private final DoubleSupplierLogger2 m_log_u_TOTAL;
-    private final DoubleSupplierLogger2 m_log_error;
-    private final DoubleSupplierLogger2 m_log_velocity_error;
-    private final DoubleSupplierLogger2 m_log_position_tolerance;
-    private final DoubleSupplierLogger2 m_log_velocity_tolerance;
-    private final BooleanSupplierLogger2 m_log_at_setpoint;
+    private final DoubleLogger m_log_u_FB;
+    private final DoubleLogger m_log_u_FF;
+    private final DoubleLogger m_log_u_TOTAL;
+    private final DoubleLogger m_log_error;
+    private final DoubleLogger m_log_velocity_error;
+    private final DoubleLogger m_log_position_tolerance;
+    private final DoubleLogger m_log_velocity_tolerance;
+    private final BooleanLogger m_log_at_setpoint;
 
     /**
      * Don't forget to set a profile.
      * TODO: remove maxVel.
      */
     public OnboardAngularPositionServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             RotaryMechanism mech,
             RotaryPositionSensor positionSensor,
             double maxVel,
             PIDController controller) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_mechanism = mech;
         m_positionSensor = positionSensor;
         m_maxVel = maxVel;

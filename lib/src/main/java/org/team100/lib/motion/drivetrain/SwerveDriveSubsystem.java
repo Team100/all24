@@ -6,12 +6,12 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionData;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.EnumLogger;
-import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
-import org.team100.lib.logging.SupplierLogger2.SwerveStateLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.EnumLogger;
+import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
+import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.sensors.Gyro;
@@ -40,21 +40,21 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
 
     // LOGGERS
     private final SwerveStateLogger m_log_state;
-    private final DoubleSupplierLogger2 m_log_turning;
-    private final DoubleArraySupplierLogger2 m_log_pose_array;
-    private final DoubleArraySupplierLogger2 m_log_field_robot;
-    private final DoubleSupplierLogger2 m_log_yaw_rate;
+    private final DoubleLogger m_log_turning;
+    private final DoubleArrayLogger m_log_pose_array;
+    private final DoubleArrayLogger m_log_field_robot;
+    private final DoubleLogger m_log_yaw_rate;
     private final EnumLogger m_log_skill;
     private final FieldRelativeVelocityLogger m_log_input;
 
     public SwerveDriveSubsystem(
-            SupplierLogger2 fieldLogger,
-            SupplierLogger2 parent,
+            LoggerFactory fieldLogger,
+            LoggerFactory parent,
             Gyro gyro,
             SwerveDrivePoseEstimator100 poseEstimator,
             SwerveLocal swerveLocal,
             VisionData cameras) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_gyro = gyro;
         m_poseEstimator = poseEstimator;
         m_swerveLocal = swerveLocal;

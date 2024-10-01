@@ -3,8 +3,8 @@ package org.team100.lib.swerve;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 /**
@@ -12,10 +12,10 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
  */
 public class CapsizeAccelerationLimiter implements Glassy {
     private final SwerveKinodynamics m_limits;
-    private final DoubleSupplierLogger2 m_log_s;
+    private final DoubleLogger m_log_s;
 
-    public CapsizeAccelerationLimiter(SupplierLogger2 parent, SwerveKinodynamics limits) {
-        SupplierLogger2 child = parent.child(this);
+    public CapsizeAccelerationLimiter(LoggerFactory parent, SwerveKinodynamics limits) {
+        LoggerFactory child = parent.child(this);
         m_limits = limits;
         m_log_s = child.doubleLogger(Level.TRACE, "s");
     }

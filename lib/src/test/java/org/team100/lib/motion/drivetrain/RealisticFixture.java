@@ -5,8 +5,9 @@ import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionData;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
@@ -25,12 +26,12 @@ public class RealisticFixture {
     public SwerveLocal swerveLocal;
     public SwerveDriveSubsystem drive;
     public HolonomicFieldRelativeController controller;
-    public SupplierLogger2 logger;
-    public SupplierLogger2 fieldLogger;
+    public LoggerFactory logger;
+    public LoggerFactory fieldLogger;
 
     public RealisticFixture() {
-        logger = new TestLogger().getSupplierLogger();
-        fieldLogger = new TestLogger().getSupplierLogger();
+        logger = new TestLoggerFactory(new TestPrimitiveLogger());
+        fieldLogger = new TestLoggerFactory(new TestPrimitiveLogger());
         swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
         gyro = new SimulatedGyro(swerveKinodynamics, collection);

@@ -30,9 +30,9 @@ import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -77,16 +77,16 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private final OptionalDoubleLogger m_log_left_velocity;
     private final OptionalDoubleLogger m_log_right_velocity;
     private final OptionalDoubleLogger m_log_pivot_angle;
-    private final DoubleSupplierLogger2 m_log_goal_err;
+    private final DoubleLogger m_log_goal_err;
 
     public DrumShooter(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int leftID,
             int rightID,
             int pivotID,
             double supplyLimit,
             double statorLimit) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_left_velocity = child.optionalDoubleLogger(Level.TRACE, "left velocity");
         m_log_right_velocity = child.optionalDoubleLogger(Level.TRACE, "right velocity");
         m_log_pivot_angle = child.optionalDoubleLogger(Level.TRACE, "pivot angle (rad)");
@@ -96,9 +96,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         pivotController.setIntegratorRange(0, 0.1);
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
 
-        SupplierLogger2 leftLogger = child.child("Left");
-        SupplierLogger2 rightLogger = child.child("Right");
-        SupplierLogger2 pivotLogger = child.child("Pivot");
+        LoggerFactory leftLogger = child.child("Left");
+        LoggerFactory rightLogger = child.child("Right");
+        LoggerFactory pivotLogger = child.child("Pivot");
         m_log_goal_err = pivotLogger.doubleLogger(Level.TRACE, "goal err (rad)");
 
         // we use velocityvoltage control so the P value here is volts per rev/s of the

@@ -2,9 +2,9 @@ package org.team100.lib.logging.receiver;
 
 import java.nio.ByteBuffer;
 
-import org.team100.lib.logging.UdpPrimitiveProtocol2;
-import org.team100.lib.logging.UdpType;
-import org.team100.lib.logging.UdpPrimitiveProtocol2.ProtocolException;
+import org.team100.lib.logging.primitive.UdpPrimitiveProtocol;
+import org.team100.lib.logging.primitive.UdpType;
+import org.team100.lib.logging.primitive.UdpPrimitiveProtocol.ProtocolException;
 
 public class UdpDataDecoder {
     private static final int kFlushFrequency = 50;
@@ -21,7 +21,7 @@ public class UdpDataDecoder {
      * @throws ProtocolException 
      */
     public boolean validateTimestamp(ByteBuffer buf) throws ProtocolException {
-        long timestamp = UdpPrimitiveProtocol2.decodeLong(buf);
+        long timestamp = UdpPrimitiveProtocol.decodeLong(buf);
         return m_consumers.validateTimestamp(timestamp);
     }
 
@@ -30,31 +30,31 @@ public class UdpDataDecoder {
      * Flushes the consumers at the end.
      */
     public void decode(ByteBuffer buf) throws ProtocolException {
-        int key = UdpPrimitiveProtocol2.decodeKey(buf);
-        UdpType type = UdpPrimitiveProtocol2.decodeType(buf);
+        int key = UdpPrimitiveProtocol.decodeKey(buf);
+        UdpType type = UdpPrimitiveProtocol.decodeType(buf);
         switch (type) {
             case BOOLEAN -> {
-                boolean v = UdpPrimitiveProtocol2.decodeBoolean(buf);
+                boolean v = UdpPrimitiveProtocol.decodeBoolean(buf);
                 m_consumers.acceptBoolean(key, v);
             }
             case DOUBLE -> {
-                double v = UdpPrimitiveProtocol2.decodeDouble(buf);
+                double v = UdpPrimitiveProtocol.decodeDouble(buf);
                 m_consumers.acceptDouble(key, v);
             }
             case INT -> {
-                int v = UdpPrimitiveProtocol2.decodeInt(buf);
+                int v = UdpPrimitiveProtocol.decodeInt(buf);
                 m_consumers.acceptInt(key, v);
             }
             case DOUBLE_ARRAY -> {
-                double[] v = UdpPrimitiveProtocol2.decodeDoubleArray(buf);
+                double[] v = UdpPrimitiveProtocol.decodeDoubleArray(buf);
                 m_consumers.acceptDoubleArray(key, v);
             }
             case LONG -> {
-                long v = UdpPrimitiveProtocol2.decodeLong(buf);
+                long v = UdpPrimitiveProtocol.decodeLong(buf);
                 m_consumers.acceptInt(key, (int) v);
             }
             case STRING -> {
-                String v = UdpPrimitiveProtocol2.decodeString(buf);
+                String v = UdpPrimitiveProtocol.decodeString(buf);
                 m_consumers.acceptString(key, v);
             }
             default -> System.out.println("unknown data decoder type");

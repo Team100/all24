@@ -1,6 +1,6 @@
 package org.team100.lib.logging.receiver;
 
-import org.team100.lib.logging.UdpType;
+import org.team100.lib.logging.primitive.UdpType;
 
 public interface UdpConsumersInterface {
 

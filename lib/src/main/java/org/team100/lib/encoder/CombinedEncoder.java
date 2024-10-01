@@ -6,9 +6,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.util.Memo;
 
@@ -39,7 +39,7 @@ public class CombinedEncoder implements RotaryPositionSensor {
     // LOGGERS
     private final OptionalDoubleLogger m_log_absolute;
     private final OptionalDoubleLogger m_log_incremental;
-    private final DoubleSupplierLogger2 m_log_incremental_wrapped;
+    private final DoubleLogger m_log_incremental_wrapped;
     private final OptionalDoubleLogger m_log_combined;
     // for synchronization one-shot delayed task
     private final ScheduledExecutorService m_synchronizer;
@@ -51,10 +51,10 @@ public class CombinedEncoder implements RotaryPositionSensor {
      * @param incremental incremental sensor that needs to be "zeroed"
      */
     public CombinedEncoder(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             RotaryPositionSensor absolute,
             RotaryMechanism incremental) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_absolute = absolute;
         m_incremental = incremental;
         m_log_absolute = child.optionalDoubleLogger(Level.DEBUG, "absolute (rad))");

@@ -1,21 +1,21 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import java.util.Arrays;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.team100.lib.util.Util;
 
 /** Prints logs to stdout. */
-public class TestLogger implements PrimitiveLogger2 {
+public class TestPrimitiveLogger implements PrimitiveLogger {
     private final boolean m_print;
     private final Set<String> keys = new HashSet<>();
 
-    public TestLogger(boolean print) {
+    public TestPrimitiveLogger(boolean print) {
         m_print = print;
     }
 
-    public TestLogger() {
+    public TestPrimitiveLogger() {
         this(false);
     }
 
@@ -24,14 +24,10 @@ public class TestLogger implements PrimitiveLogger2 {
         return keys.size();
     }
 
-    public SupplierLogger2 getSupplierLogger() {
-        return new SupplierLogger2(() -> Level.TRACE, "test", this);
-    }
-
     @Override
-    public BooleanLogger booleanLogger(String label) {
+    public PrimitiveBooleanLogger booleanLogger(String label) {
         keys.add(label);
-        return new BooleanLogger() {
+        return new PrimitiveBooleanLogger() {
             @Override
             public void log(boolean val) {
                 if (m_print)
@@ -41,9 +37,9 @@ public class TestLogger implements PrimitiveLogger2 {
     }
 
     @Override
-    public DoubleLogger doubleLogger(String label) {
+    public PrimitiveDoubleLogger doubleLogger(String label) {
         keys.add(label);
-        return new DoubleLogger() {
+        return new PrimitiveDoubleLogger() {
             @Override
             public void log(double val) {
                 if (m_print)
@@ -53,9 +49,9 @@ public class TestLogger implements PrimitiveLogger2 {
     }
 
     @Override
-    public IntLogger intLogger(String label) {
+    public PrimitiveIntLogger intLogger(String label) {
         keys.add(label);
-        return new IntLogger() {
+        return new PrimitiveIntLogger() {
             @Override
             public void log(int val) {
                 if (m_print)
@@ -65,9 +61,9 @@ public class TestLogger implements PrimitiveLogger2 {
     }
 
     @Override
-    public DoubleArrayLogger doubleArrayLogger(String label) {
+    public PrimitiveDoubleArrayLogger doubleArrayLogger(String label) {
         keys.add(label);
-        return new DoubleArrayLogger() {
+        return new PrimitiveDoubleArrayLogger() {
             @Override
             public void log(double[] val) {
                 if (m_print)
@@ -77,21 +73,9 @@ public class TestLogger implements PrimitiveLogger2 {
     }
 
     @Override
-    public DoubleObjArrayLogger doubleObjArrayLogger(String label) {
+    public PrimitiveLongLogger longLogger(String label) {
         keys.add(label);
-        return new DoubleObjArrayLogger() {
-            @Override
-            public void log(Double[] val) {
-                if (m_print)
-                    Util.printf("%s/%s\n", label, Arrays.toString(val));
-            }
-        };
-    }
-
-    @Override
-    public LongLogger longLogger(String label) {
-        keys.add(label);
-        return new LongLogger() {
+        return new PrimitiveLongLogger() {
             @Override
             public void log(long val) {
                 if (m_print)
@@ -101,9 +85,9 @@ public class TestLogger implements PrimitiveLogger2 {
     }
 
     @Override
-    public StringLogger stringLogger(String label) {
+    public PrimitiveStringLogger stringLogger(String label) {
         keys.add(label);
-        return new StringLogger() {
+        return new PrimitiveStringLogger() {
             @Override
             public void log(String val) {
                 if (m_print)

@@ -8,12 +8,13 @@ import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 
 class ManualFieldRelativeSpeedsTest {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testTwistZero() {

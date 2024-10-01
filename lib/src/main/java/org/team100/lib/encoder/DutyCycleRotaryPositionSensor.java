@@ -4,8 +4,8 @@ import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
@@ -24,15 +24,15 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
     // CACHES
     private final DoubleSupplier m_duty;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_duty;
+    private final DoubleLogger m_log_duty;
 
     protected DutyCycleRotaryPositionSensor(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             int channel,
             double inputOffset,
             EncoderDrive drive) {
         super(parent, inputOffset, drive);
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_channel = channel;
         m_digitalInput = new DigitalInput(channel);
         m_dutyCycle = new DutyCycle(m_digitalInput);

@@ -4,7 +4,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
@@ -41,15 +41,15 @@ public class SwerveModuleCollection {
      * Creates collections according to Identity.
      */
     public static SwerveModuleCollection get(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             double currentLimit,
             double statorLimit,
             SwerveKinodynamics kinodynamics) {
-        SupplierLogger2 collectionLogger = parent.child(kSwerveModules);
-        SupplierLogger2 frontLeftLogger = collectionLogger.child(kFrontLeft);
-        SupplierLogger2 frontRightLogger = collectionLogger.child(kFrontRight);
-        SupplierLogger2 rearLeftLogger = collectionLogger.child(kRearLeft);
-        SupplierLogger2 rearRightLogger = collectionLogger.child(kRearRight);
+        LoggerFactory collectionLogger = parent.child(kSwerveModules);
+        LoggerFactory frontLeftLogger = collectionLogger.child(kFrontLeft);
+        LoggerFactory frontRightLogger = collectionLogger.child(kFrontRight);
+        LoggerFactory rearLeftLogger = collectionLogger.child(kRearLeft);
+        LoggerFactory rearRightLogger = collectionLogger.child(kRearRight);
 
         switch (Identity.instance) {
             case COMP_BOT:

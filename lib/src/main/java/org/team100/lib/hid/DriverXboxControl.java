@@ -6,9 +6,9 @@ import static org.team100.lib.hid.ControlUtil.expo;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.EnumLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.EnumLogger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
@@ -47,16 +47,16 @@ public class DriverXboxControl implements DriverControl {
     private static final double kSlow = 0.15;
 
     private final XboxController m_controller;
-    private final DoubleSupplierLogger2 m_log_right_y;
-    private final DoubleSupplierLogger2 m_log_right_x;
-    private final DoubleSupplierLogger2 m_log_left_x;
+    private final DoubleLogger m_log_right_y;
+    private final DoubleLogger m_log_right_x;
+    private final DoubleLogger m_log_left_x;
     private final EnumLogger m_log_speed;
 
     Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
-    public DriverXboxControl(SupplierLogger2 parent) {
+    public DriverXboxControl(LoggerFactory parent) {
         m_controller = new XboxController(0);
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_right_y = child.doubleLogger(Level.TRACE, "Xbox/right y");
         m_log_right_x = child.doubleLogger(Level.TRACE, "Xbox/right x");
         m_log_left_x = child.doubleLogger(Level.TRACE, "Xbox/left x");

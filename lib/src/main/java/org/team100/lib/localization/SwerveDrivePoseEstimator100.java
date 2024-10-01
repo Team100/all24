@@ -6,9 +6,9 @@ import java.util.Map.Entry;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Rotation2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
@@ -31,7 +31,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
     // LOGGERS
     private final Rotation2dLogger m_log_offset;
-    private final DoubleSupplierLogger2 m_log_pose_x;
+    private final DoubleLogger m_log_pose_x;
 
     /**
      * maintained in resetPosition().
@@ -47,13 +47,13 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      * @param initialPoseMeters The starting pose estimate.
      */
     public SwerveDrivePoseEstimator100(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveKinodynamics kinodynamics,
             Rotation2d gyroAngle,
             SwerveModulePosition100[] modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
         m_poseBuffer = new TimeInterpolatableBuffer100<>(

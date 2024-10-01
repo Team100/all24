@@ -4,7 +4,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.VeeringCorrection;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -416,7 +416,7 @@ public class SwerveKinodynamics implements Glassy {
     }
 
     public SwerveDrivePoseEstimator100 newPoseEstimator(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             Rotation2d gyroAngle,
             SwerveModulePosition100[] modulePositions,
             Pose2d initialPoseMeters,

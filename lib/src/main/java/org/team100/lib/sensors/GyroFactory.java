@@ -4,7 +4,7 @@ import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.util.Util;
@@ -15,7 +15,7 @@ import org.team100.lib.util.Util;
 public class GyroFactory {
 
     public static Gyro get(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveKinodynamics kinodynamics,
             SwerveModuleCollection collection,
             AsyncFactory asyncFactory) {

@@ -9,14 +9,15 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-import org.team100.lib.logging.TestLogger;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TestLoggerFactory;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
 class SteeringOverrideTest {
     private static final double kDelta = 0.001;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testUnconstrained() {

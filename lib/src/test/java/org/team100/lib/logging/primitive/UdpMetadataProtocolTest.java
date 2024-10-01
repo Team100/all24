@@ -1,4 +1,4 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

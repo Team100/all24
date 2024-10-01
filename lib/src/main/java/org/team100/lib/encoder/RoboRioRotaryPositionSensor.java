@@ -3,9 +3,9 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -22,18 +22,18 @@ public abstract class RoboRioRotaryPositionSensor implements RotaryPositionSenso
     private final EncoderDrive m_drive;
     // LOGGERS
     private final OptionalDoubleLogger m_log_position;
-    private final DoubleSupplierLogger2 m_log_position_turns;
-    private final DoubleSupplierLogger2 m_log_position_turns_offset;
-    private final DoubleSupplierLogger2 m_log_rate;
+    private final DoubleLogger m_log_position_turns;
+    private final DoubleLogger m_log_position_turns_offset;
+    private final DoubleLogger m_log_rate;
 
     private Double m_prevAngleRad = null;
     private Double m_prevTimeS = null;
 
     protected RoboRioRotaryPositionSensor(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             double inputOffset,
             EncoderDrive drive) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_positionOffset = Util.inRange(inputOffset, 0.0, 1.0);
         m_drive = drive;
         m_log_position = child.optionalDoubleLogger(Level.TRACE, "position (rad)");

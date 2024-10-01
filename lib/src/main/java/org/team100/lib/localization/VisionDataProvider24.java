@@ -10,8 +10,8 @@ import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.EnumLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.EnumLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -91,10 +91,10 @@ public class VisionDataProvider24 implements VisionData, Glassy {
      * @throws IOException
      */
     public VisionDataProvider24(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             AprilTagFieldLayoutWithCorrectOrientation layout,
             PoseEstimator100 poseEstimator) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_layout = layout;
         m_helper = new PoseEstimationHelper(child);
         m_poseEstimator = poseEstimator;

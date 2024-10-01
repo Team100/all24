@@ -8,7 +8,7 @@ import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class AmpFeeder extends SubsystemBase implements Glassy {
     private final BareMotor ampDrive;
 
-    public AmpFeeder(SupplierLogger2 parent) {
-        SupplierLogger2 child = parent.child(this);
+    public AmpFeeder(LoggerFactory parent) {
+        LoggerFactory child = parent.child(this);
         switch (Identity.instance) {
             case COMP_BOT:
                 Feedforward100 ff = Feedforward100.makeNeo();

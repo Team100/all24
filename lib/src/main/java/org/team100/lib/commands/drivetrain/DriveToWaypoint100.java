@@ -5,8 +5,8 @@ import java.util.List;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.trajectory.Trajectory100;
@@ -48,14 +48,14 @@ public class DriveToWaypoint100 extends Command implements Glassy  {
     private Trajectory100 m_trajectory = new Trajectory100();
 
     public DriveToWaypoint100(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             DriveTrajectoryFollower controller,
             List<TimingConstraint> constraints,
             double timeBuffer,
             TrajectoryVisualization viz) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_goal = goal;
         m_swerve = drivetrain;

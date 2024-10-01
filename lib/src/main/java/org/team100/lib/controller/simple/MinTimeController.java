@@ -4,8 +4,8 @@ import java.util.function.DoubleUnaryOperator;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.StringLogger;
 import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
@@ -120,7 +120,7 @@ public class MinTimeController implements Glassy {
     private final double m_switchingAcceleration;
     private final double m_tolerance;
 
-    private final StringSupplierLogger2 m_log_mode;
+    private final StringLogger m_log_mode;
 
     /**
      * @param modulus        for angle wrapping
@@ -138,7 +138,7 @@ public class MinTimeController implements Glassy {
      * @param k              full-state gains
      */
     public MinTimeController(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             DoubleUnaryOperator modulus,
             double maxVel,
             double switchingAccel,
@@ -155,7 +155,7 @@ public class MinTimeController implements Glassy {
         m_tolerance = tolerance;
         m_finish = finish;
         m_k = k;
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_mode = child.stringLogger(Level.TRACE, "mode");
     }
 

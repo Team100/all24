@@ -4,9 +4,9 @@ import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -37,10 +37,10 @@ public class Rotate extends Command implements Glassy {
     private final State100 m_goalState;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_error_x;
-    private final DoubleSupplierLogger2 m_log_error_v;
-    private final DoubleSupplierLogger2 m_log_measurement_x;
-    private final DoubleSupplierLogger2 m_log_measurement_v;
+    private final DoubleLogger m_log_error_x;
+    private final DoubleLogger m_log_error_v;
+    private final DoubleLogger m_log_measurement_x;
+    private final DoubleLogger m_log_measurement_v;
     private final State100Logger m_log_reference;
 
     final HolonomicFieldRelativeController m_controller;
@@ -53,13 +53,13 @@ public class Rotate extends Command implements Glassy {
     private boolean m_steeringAligned;
 
     public Rotate(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicFieldRelativeController controller,
             Gyro gyro,
             SwerveKinodynamics swerveKinodynamics,
             double targetAngleRadians) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_robotDrive = drivetrain;
         m_controller = controller;
         m_gyro = gyro;

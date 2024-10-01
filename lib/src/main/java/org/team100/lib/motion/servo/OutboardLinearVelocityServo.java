@@ -3,9 +3,9 @@ package org.team100.lib.motion.servo;
 import java.util.OptionalDouble;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.util.Util;
 
@@ -14,8 +14,8 @@ import edu.wpi.first.wpilibj.Timer;
 public class OutboardLinearVelocityServo implements LinearVelocityServo {
     private final LinearMechanism m_mechanism;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_setpoint_v;
-    private final DoubleSupplierLogger2 m_log_setpoint_a;
+    private final DoubleLogger m_log_setpoint_v;
+    private final DoubleLogger m_log_setpoint_a;
     private final OptionalDoubleLogger m_log_velocity;
     private final OptionalDoubleLogger m_log_position;
 
@@ -24,8 +24,8 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     private double prevTime;
     private double m_setpoint;
 
-    public OutboardLinearVelocityServo(SupplierLogger2 parent, LinearMechanism mechanism) {
-        SupplierLogger2 child = parent.child(this);
+    public OutboardLinearVelocityServo(LoggerFactory parent, LinearMechanism mechanism) {
+        LoggerFactory child = parent.child(this);
         m_mechanism = mechanism;
         m_log_setpoint_v = child.doubleLogger(Level.TRACE, "setpoint v (m_s)");
         m_log_setpoint_a = child.doubleLogger(Level.TRACE, "setpoint a (m_s2)");

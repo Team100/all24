@@ -8,8 +8,9 @@ import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.TestLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -19,7 +20,7 @@ import org.team100.lib.testing.Timeless;
 
 class RotateTest extends Fixtured implements Timeless {
     private static final double kDelta = 0.02;
-    private static final SupplierLogger2 logger = new TestLogger().getSupplierLogger();
+    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testRotate() {

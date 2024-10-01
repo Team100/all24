@@ -5,8 +5,8 @@ import java.util.OptionalDouble;
 import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.mechanism.LimitedLinearMechanism;
 import org.team100.lib.util.Timer100;
 import org.team100.lib.util.Util;
@@ -52,13 +52,13 @@ public class HomeClimber extends Command implements Glassy {
     private final Timer100 m_rightDone;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_left_start_timer_s;
-    private final DoubleSupplierLogger2 m_log_right_start_timer_s;
-    private final DoubleSupplierLogger2 m_log_left_done_timer_s;
-    private final DoubleSupplierLogger2 m_log_right_done_timer_s;
+    private final DoubleLogger m_log_left_start_timer_s;
+    private final DoubleLogger m_log_right_start_timer_s;
+    private final DoubleLogger m_log_left_done_timer_s;
+    private final DoubleLogger m_log_right_done_timer_s;
 
-    public HomeClimber(SupplierLogger2 logger, ClimberSubsystem climber) {
-        SupplierLogger2 child = logger.child(this);
+    public HomeClimber(LoggerFactory logger, ClimberSubsystem climber) {
+        LoggerFactory child = logger.child(this);
         m_log_left_start_timer_s = child.doubleLogger(Level.TRACE, "left start timer (s)");
         m_log_right_start_timer_s = child.doubleLogger(Level.TRACE, "right start timer (s)");
         m_log_left_done_timer_s = child.doubleLogger(Level.TRACE, "left done timer (s)");
@@ -91,8 +91,8 @@ public class HomeClimber extends Command implements Glassy {
     }
 
     private void oneSide(
-            DoubleSupplierLogger2 start_timer_s,
-            DoubleSupplierLogger2 done_timer_s,
+            DoubleLogger start_timer_s,
+            DoubleLogger done_timer_s,
             Timer100 start,
             Timer100 done,
             LimitedLinearMechanism mech) {

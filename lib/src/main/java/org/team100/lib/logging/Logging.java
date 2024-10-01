@@ -1,5 +1,10 @@
 package org.team100.lib.logging;
 
+import org.team100.lib.logging.primitive.DummySender;
+import org.team100.lib.logging.primitive.NTPrimitiveLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger;
+import org.team100.lib.logging.primitive.UdpPrimitiveLogger;
+import org.team100.lib.logging.primitive.UdpSender;
 import org.team100.lib.util.Util;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -11,16 +16,16 @@ public class Logging {
 
     private static final Logging instance = new Logging();
 
-    private UdpPrimitiveLogger2 udpLogger;
-    private PrimitiveLogger2 ntLogger;
+    private UdpPrimitiveLogger udpLogger;
+    private PrimitiveLogger ntLogger;
     private Level m_level;
 
     /**
      * root is "field", with a ".type"->"Field2d" entry as required by glass.
      */
-    public final SupplierLogger2 fieldLogger;
+    public final LoggerFactory fieldLogger;
     /** root is "log". */
-    public final SupplierLogger2 rootLogger;
+    public final LoggerFactory rootLogger;
 
     /**
      * Clients should use the static instance, not the constructor.
@@ -34,20 +39,20 @@ public class Logging {
             Util.warn("You must have a log listener connected!");
             Util.warn("=======================================");
             if (USE_REAL_UDP) {
-                udpLogger = new UdpPrimitiveLogger2(
+                udpLogger = new UdpPrimitiveLogger(
                         UdpSender.data(),
                         UdpSender.meta());
             } else {
-                udpLogger = new UdpPrimitiveLogger2(
+                udpLogger = new UdpPrimitiveLogger(
                         new DummySender(),
                         new DummySender());
             }
-            fieldLogger = new SupplierLogger2(() -> m_level, "field", udpLogger);
-            rootLogger = new SupplierLogger2(() -> m_level, "log", udpLogger);
+            fieldLogger = new LoggerFactory(() -> m_level, "field", udpLogger);
+            rootLogger = new LoggerFactory(() -> m_level, "log", udpLogger);
         } else {
-            ntLogger = new NTPrimitiveLogger2();
-            fieldLogger = new SupplierLogger2(() -> m_level, "field", ntLogger);
-            rootLogger = new SupplierLogger2(() -> m_level, "log", ntLogger);
+            ntLogger = new NTPrimitiveLogger();
+            fieldLogger = new LoggerFactory(() -> m_level, "field", ntLogger);
+            rootLogger = new LoggerFactory(() -> m_level, "log", ntLogger);
         }
 
         fieldLogger.stringLogger(Level.COMP, ".type").log(() -> "Field2d");

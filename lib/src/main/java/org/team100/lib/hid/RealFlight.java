@@ -5,8 +5,8 @@ import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.EnumLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.EnumLogger;
 
 import edu.wpi.first.wpilibj.GenericHID;
 
@@ -48,9 +48,9 @@ public class RealFlight implements DriverControl {
     private final GenericHID hid;
     private final EnumLogger m_log_speed;
 
-    public RealFlight(SupplierLogger2 parent) {
+    public RealFlight(LoggerFactory parent) {
         hid = new GenericHID(0);
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_speed = child.enumLogger(Level.TRACE, "control_speed");
     }
 

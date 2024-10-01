@@ -10,11 +10,11 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.JvmLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.Logging;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.IntLogger;
+import org.team100.lib.logging.LoggerFactory.StringLogger;
 import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
@@ -29,20 +29,20 @@ public class Robot extends TimedRobot100 {
     private static final String kOrange = "\033[38:5:214m";
     private static final String kReset = "\033[0m";
 
-    private final DoubleSupplierLogger2 m_log_ds_MatchTime;
-    private final BooleanSupplierLogger2 m_log_ds_AutonomousEnabled;
-    private final BooleanSupplierLogger2 m_log_ds_TeleopEnabled;
-    private final BooleanSupplierLogger2 m_log_ds_FMSAttached;
-    private final StringSupplierLogger2 m_log_mode;
-    private final IntSupplierLogger2 m_log_key_list_size;
-    private final StringSupplierLogger2 m_log_active_auton_routine;
-    private final DoubleSupplierLogger2 m_log_voltage;
+    private final DoubleLogger m_log_ds_MatchTime;
+    private final BooleanLogger m_log_ds_AutonomousEnabled;
+    private final BooleanLogger m_log_ds_TeleopEnabled;
+    private final BooleanLogger m_log_ds_FMSAttached;
+    private final StringLogger m_log_mode;
+    private final IntLogger m_log_key_list_size;
+    private final StringLogger m_log_active_auton_routine;
+    private final DoubleLogger m_log_voltage;
     private final JvmLogger m_jvmLogger;
 
     private RobotContainer m_robotContainer;
 
     public Robot() {
-        SupplierLogger2 dsLog = m_robotLogger.child("DriverStation");
+        LoggerFactory dsLog = m_robotLogger.child("DriverStation");
         m_log_ds_MatchTime = dsLog.doubleLogger(Level.TRACE, "MatchTime");
         m_log_ds_AutonomousEnabled = dsLog.booleanLogger(Level.TRACE, "AutonomousEnabled");
         m_log_ds_TeleopEnabled = dsLog.booleanLogger(Level.TRACE, "TeleopEnabled");

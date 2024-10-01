@@ -1,6 +1,6 @@
 package org.team100.lib.follower;
 
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 /**
@@ -48,11 +48,11 @@ public class DriveTrajectoryFollowerFactory {
         return new DrivePIDFFollower(log, m_util, true, 2.4, 1.3);
     }
 
-    public static DriveTrajectoryFollower purePursuit(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
+    public static DriveTrajectoryFollower purePursuit(LoggerFactory parent, SwerveKinodynamics swerveKinodynamics) {
         return new DrivePursuitFollower(parent, swerveKinodynamics);
     }
 
-    public static DriveTrajectoryFollower ramsete(SupplierLogger2 parent) {
+    public static DriveTrajectoryFollower ramsete(LoggerFactory parent) {
         return new DriveRamseteFollower(parent);
     }
 

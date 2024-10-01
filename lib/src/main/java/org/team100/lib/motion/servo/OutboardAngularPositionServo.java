@@ -5,10 +5,10 @@ import java.util.OptionalDouble;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.State100;
@@ -34,8 +34,8 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     // LOGGERS
     private final State100Logger m_log_goal;
-    private final DoubleSupplierLogger2 m_log_ff_torque;
-    private final DoubleSupplierLogger2 m_log_measurement;
+    private final DoubleLogger m_log_ff_torque;
+    private final DoubleLogger m_log_measurement;
     private final State100Logger m_log_setpoint;
     private final OptionalDoubleLogger m_log_position;
 
@@ -47,10 +47,10 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     /** Don't forget to set a profile. */
     public OutboardAngularPositionServo(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             RotaryMechanism mech,
             CombinedEncoder encoder) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_mechanism = mech;
         m_encoder = encoder;
         m_log_goal = child.state100Logger(Level.TRACE, "goal (rad)");

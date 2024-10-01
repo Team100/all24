@@ -6,7 +6,7 @@ import org.team100.lib.commands.drivetrain.DriveToWaypoint3;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.logging.SupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.timing.ConstantConstraint;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -33,7 +33,7 @@ public class DrawSquare extends SequentialCommandGroup implements Glassy {
      * .Y...2---1/5
      */
     public DrawSquare(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveDriveSubsystem drivetrain,
             HolonomicFieldRelativeController controller,
             TrajectoryVisualization viz) {

@@ -1,9 +1,9 @@
 package org.team100.lib.motor;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.IntLogger;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -95,12 +95,12 @@ public class TalonSRXMotor implements BareMotor {
 
     private final WPI_TalonSRX m_motor;
     // LOGGERS
-    private final IntSupplierLogger2 m_log_id;
-    private final DoubleSupplierLogger2 m_log_encoder;
-    private final DoubleSupplierLogger2 m_log_velocity;
-    private final DoubleSupplierLogger2 m_log_output;
+    private final IntLogger m_log_id;
+    private final DoubleLogger m_log_encoder;
+    private final DoubleLogger m_log_velocity;
+    private final DoubleLogger m_log_output;
 
-    public TalonSRXMotor(SupplierLogger2 parent, int channel) {
+    public TalonSRXMotor(LoggerFactory parent, int channel) {
         m_motor = new WPI_TalonSRX(channel);
         m_motor.configFactoryDefault();
         m_motor.setNeutralMode(NeutralMode.Brake);
@@ -138,7 +138,7 @@ public class TalonSRXMotor implements BareMotor {
 
         m_motor.setSensorPhase(true);
 
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_id = child.intLogger(Level.TRACE, "Device ID");
         m_log_encoder = child.doubleLogger(Level.TRACE, "Encoder Value");
         m_log_velocity = child.doubleLogger(Level.TRACE, "Velocity Value");

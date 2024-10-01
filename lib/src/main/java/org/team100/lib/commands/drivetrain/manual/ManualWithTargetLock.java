@@ -8,9 +8,9 @@ import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -55,15 +55,15 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     private final BooleanSupplier m_trigger;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_apparent_motion;
+    private final DoubleLogger m_log_apparent_motion;
     private final State100Logger m_log_theta_setpoint;
-    private final DoubleSupplierLogger2 m_log_theta_measurement;
-    private final DoubleSupplierLogger2 m_log_theta_error;
-    private final DoubleSupplierLogger2 m_log_theta_FB;
+    private final DoubleLogger m_log_theta_measurement;
+    private final DoubleLogger m_log_theta_error;
+    private final DoubleLogger m_log_theta_FB;
     private final State100Logger m_log_omega_reference;
-    private final DoubleSupplierLogger2 m_log_omega_measurement;
-    private final DoubleSupplierLogger2 m_log_omega_error;
-    private final DoubleSupplierLogger2 m_log_omega_FB;
+    private final DoubleLogger m_log_omega_measurement;
+    private final DoubleLogger m_log_omega_error;
+    private final DoubleLogger m_log_omega_FB;
     private final FieldLogger.Log m_field_log;
 
     private State100 m_thetaSetpoint;
@@ -73,7 +73,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
 
     public ManualWithTargetLock(
             FieldLogger.Log fieldLogger,
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             Supplier<Translation2d> target,
@@ -81,7 +81,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
             PIDController omegaController,
             BooleanSupplier trigger) {
         m_field_log = fieldLogger;
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;
         m_target = target;

@@ -1,4 +1,4 @@
-package org.team100.lib.logging;
+package org.team100.lib.logging.primitive;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,20 +8,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.PrimitiveLogger2.BooleanLogger;
-import org.team100.lib.logging.PrimitiveLogger2.IntLogger;
-import org.team100.lib.logging.PrimitiveLogger2.StringLogger;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleArraySupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleObjArraySupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.IntSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.LongSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.IntLogger;
+import org.team100.lib.logging.LoggerFactory.LongLogger;
+import org.team100.lib.logging.LoggerFactory.StringLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.PrimitiveBooleanLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.PrimitiveIntLogger;
+import org.team100.lib.logging.primitive.PrimitiveLogger.PrimitiveStringLogger;
 
 import edu.wpi.first.wpilibj.Timer;
 
-class UdpPrimitiveLogger2Test {
+class UdpPrimitiveLoggerTest {
 
     ByteBuffer bb; // data
     ByteBuffer mb; // metadata
@@ -29,29 +30,26 @@ class UdpPrimitiveLogger2Test {
     /** Send some examples. */
     @Test
     void testSendingLocally() {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
-        SupplierLogger2 logger = new SupplierLogger2(() -> Level.COMP, "root", udpLogger);
-        BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
-        DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
-        IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
-        DoubleArraySupplierLogger2 doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
-        DoubleObjArraySupplierLogger2 doubleObjArrayLogger = logger.doubleObjArrayLogger(Level.COMP,
-                "doubleobjarraykey");
-        LongSupplierLogger2 longLogger = logger.longLogger(Level.COMP, "longkey");
-        StringSupplierLogger2 stringLogger = logger.stringLogger(Level.COMP, "stringkey");
+        UdpPrimitiveLogger udpLogger = new UdpPrimitiveLogger(x -> bb = x, x -> mb = x);
+        LoggerFactory logger = new LoggerFactory(() -> Level.COMP, "root", udpLogger);
+        BooleanLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
+        DoubleLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
+        IntLogger intLogger = logger.intLogger(Level.COMP, "intkey");
+        DoubleArrayLogger doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
+        LongLogger longLogger = logger.longLogger(Level.COMP, "longkey");
+        StringLogger stringLogger = logger.stringLogger(Level.COMP, "stringkey");
 
         for (int i = 0; i < 100; ++i) {
             booleanLogger.log(() -> true);
             doubleLogger.log(() -> 100.0);
             intLogger.log(() -> 100);
             doubleArrayLogger.log(() -> new double[] { 1.0, 2.0 });
-            doubleObjArrayLogger.log(() -> new Double[] { 1.0, 2.0 });
             longLogger.log(() -> (long) 100);
             stringLogger.log(() -> "value");
         }
 
         udpLogger.flush();
-        assertEquals(90, bb.remaining());
+        assertEquals(70, bb.remaining());
 
         HexFormat hex = HexFormat.of();
         String expectedStr = // omit "0000000000000000" // timestamp
@@ -70,34 +68,28 @@ class UdpPrimitiveLogger2Test {
                         + "3ff0000000000000" // value
                         + "4000000000000000"// value
                         + "0005" // key
-                        + "04" // type = double array
-                        + "02" // length = 2
-                        + "3ff0000000000000" // value
-                        + "4000000000000000"// value
-                        + "0006" // key
                         + "05" // type = long
                         + "0000000000000064" // value
-                        + "0007" // key
+                        + "0006" // key
                         + "06" // type = string
                         + "05" // length = 5
                         + hex.formatHex("value".getBytes());
         byte[] expectedBB = hex.parseHex(expectedStr);
-        byte[] actualBB = new byte[82];
+        byte[] actualBB = new byte[62];
         bb.get(new byte[8]); // skip
         bb.get(actualBB);
         assertArrayEquals(expectedBB, actualBB);
 
-        assertEquals(7, udpLogger.metadata.size());
+        assertEquals(6, udpLogger.metadata.size());
         assertEquals("root/boolkey", udpLogger.metadata.get(0).label());
         assertEquals("root/doublekey", udpLogger.metadata.get(1).label());
         assertEquals("root/intkey", udpLogger.metadata.get(2).label());
         assertEquals("root/doublearraykey", udpLogger.metadata.get(3).label());
-        assertEquals("root/doubleobjarraykey", udpLogger.metadata.get(4).label());
-        assertEquals("root/longkey", udpLogger.metadata.get(5).label());
-        assertEquals("root/stringkey", udpLogger.metadata.get(6).label());
+        assertEquals("root/longkey", udpLogger.metadata.get(4).label());
+        assertEquals("root/stringkey", udpLogger.metadata.get(5).label());
 
         udpLogger.dumpLabels();
-        assertEquals(140, mb.remaining());
+        assertEquals(114, mb.remaining());
 
         expectedStr = // skip "\00\00\00\00\00\00\00\00" // timestamp
                 "\00\01" // key
@@ -117,19 +109,15 @@ class UdpPrimitiveLogger2Test {
                         + "\23" // 1 49 length
                         + "root/doublearraykey" // 20 69 label
                         + "\00\05" // key
-                        + "\04" // type
-                        + "\26" // 1 70 length
-                        + "root/doubleobjarraykey" // 23 93 label
-                        + "\00\06" // key
                         + "\05" // type
                         + "\14" // 1 94 length
                         + "root/longkey" // 13 107 label
-                        + "\00\07" // key
+                        + "\00\06" // key
                         + "\06" // type
                         + "\16" // 1 108 length
                         + "root/stringkey"; // 15 123 label
         expectedBB = expectedStr.getBytes(StandardCharsets.US_ASCII);
-        actualBB = new byte[132];
+        actualBB = new byte[106];
         mb.get(new byte[8]); // skip
         mb.get(actualBB);
         assertArrayEquals(expectedBB, actualBB);
@@ -137,18 +125,16 @@ class UdpPrimitiveLogger2Test {
 
     @Test
     void testSendingViaUDP() {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
+        UdpPrimitiveLogger udpLogger = new UdpPrimitiveLogger(
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
-        SupplierLogger2 logger = new SupplierLogger2(() -> Level.COMP, "root", udpLogger);
-        BooleanSupplierLogger2 booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
-        DoubleSupplierLogger2 doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
-        IntSupplierLogger2 intLogger = logger.intLogger(Level.COMP, "intkey");
-        DoubleArraySupplierLogger2 doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
-        DoubleObjArraySupplierLogger2 doubleObjArrayLogger = logger.doubleObjArrayLogger(Level.COMP,
-                "doubleobjarraykey");
-        LongSupplierLogger2 longLogger = logger.longLogger(Level.COMP, "longkey");
-        StringSupplierLogger2 stringLogger = logger.stringLogger(Level.COMP, "stringkey");
+        LoggerFactory logger = new LoggerFactory(() -> Level.COMP, "root", udpLogger);
+        BooleanLogger booleanLogger = logger.booleanLogger(Level.COMP, "boolkey");
+        DoubleLogger doubleLogger = logger.doubleLogger(Level.COMP, "doublekey");
+        IntLogger intLogger = logger.intLogger(Level.COMP, "intkey");
+        DoubleArrayLogger doubleArrayLogger = logger.doubleArrayLogger(Level.COMP, "doublearraykey");
+        LongLogger longLogger = logger.longLogger(Level.COMP, "longkey");
+        StringLogger stringLogger = logger.stringLogger(Level.COMP, "stringkey");
 
         udpLogger.dumpLabels();
 
@@ -157,19 +143,17 @@ class UdpPrimitiveLogger2Test {
             doubleLogger.log(() -> 100.0);
             intLogger.log(() -> 100);
             doubleArrayLogger.log(() -> new double[] { 1.0, 2.0 });
-            doubleObjArrayLogger.log(() -> new Double[] { 1.0, 2.0 });
             longLogger.log(() -> (long) 100);
             stringLogger.log(() -> "value");
         }
         udpLogger.flush();
-        assertEquals(7, udpLogger.metadata.size());
+        assertEquals(6, udpLogger.metadata.size());
         assertEquals("root/boolkey", udpLogger.metadata.get(0).label());
         assertEquals("root/doublekey", udpLogger.metadata.get(1).label());
         assertEquals("root/intkey", udpLogger.metadata.get(2).label());
         assertEquals("root/doublearraykey", udpLogger.metadata.get(3).label());
-        assertEquals("root/doubleobjarraykey", udpLogger.metadata.get(4).label());
-        assertEquals("root/longkey", udpLogger.metadata.get(5).label());
-        assertEquals("root/stringkey", udpLogger.metadata.get(6).label());
+        assertEquals("root/longkey", udpLogger.metadata.get(4).label());
+        assertEquals("root/stringkey", udpLogger.metadata.get(5).label());
     }
 
     /**
@@ -196,18 +180,15 @@ class UdpPrimitiveLogger2Test {
      */
     @Test
     void testAWholeLotLocally() throws InterruptedException {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
-        SupplierLogger2 logger = new SupplierLogger2(
-                () -> Level.COMP,
-                "root",
-                udpLogger);
+        UdpPrimitiveLogger udpLogger = new UdpPrimitiveLogger(x -> bb = x, x -> mb = x);
+        LoggerFactory logger = new LoggerFactory(() -> Level.COMP, "root", udpLogger);
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
         final double total_time = 2;
         final int keys = 5000;
         final double expected_keys_per_sec = keys / interval;
-        DoubleSupplierLogger2[] loggers = new DoubleSupplierLogger2[keys];
+        DoubleLogger[] loggers = new DoubleLogger[keys];
         for (int j = 0; j < keys; ++j) {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }
@@ -238,13 +219,10 @@ class UdpPrimitiveLogger2Test {
      */
     @Test
     void testAWholeLotViaUDPAt50Hz() throws InterruptedException {
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
+        UdpPrimitiveLogger udpLogger = new UdpPrimitiveLogger(
                 new UdpSender(UdpSender.kPort),
                 new UdpSender(UdpSender.kmetadataPort));
-        SupplierLogger2 logger = new SupplierLogger2(
-                () -> Level.COMP,
-                "root",
-                udpLogger);
+        LoggerFactory logger = new LoggerFactory(() -> Level.COMP, "root", udpLogger);
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
@@ -253,7 +231,7 @@ class UdpPrimitiveLogger2Test {
         final int KEYS = 5000;
         final int ITERATIONS = (int) (total_time / interval);
 
-        DoubleSupplierLogger2[] loggers = new DoubleSupplierLogger2[KEYS];
+        DoubleLogger[] loggers = new DoubleLogger[KEYS];
         for (int j = 0; j < KEYS; ++j) {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }
@@ -290,10 +268,10 @@ class UdpPrimitiveLogger2Test {
         // DummySender dataSink = new DummySender();
         UdpSender dataSink = new UdpSender(UdpSender.kPort);
         UdpSender metadataSink = new UdpSender(UdpSender.kmetadataPort);
-        UdpPrimitiveLogger2 udpLogger = new UdpPrimitiveLogger2(
+        UdpPrimitiveLogger udpLogger = new UdpPrimitiveLogger(
                 dataSink,
                 metadataSink);
-        SupplierLogger2 logger = new SupplierLogger2(
+        LoggerFactory logger = new LoggerFactory(
                 () -> Level.COMP,
                 "root",
                 udpLogger);
@@ -301,7 +279,7 @@ class UdpPrimitiveLogger2Test {
         final int KEYS = 20000;
         final int ITERATIONS = 10000;
 
-        DoubleSupplierLogger2[] loggers = new DoubleSupplierLogger2[KEYS];
+        DoubleLogger[] loggers = new DoubleLogger[KEYS];
         for (int j = 0; j < KEYS; ++j) {
             loggers[j] = logger.doubleLogger(Level.COMP, "doublekey" + j);
         }
@@ -326,8 +304,8 @@ class UdpPrimitiveLogger2Test {
 
     @Test
     void testStringToBuffer() {
-        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
-        StringLogger s = l.stringLogger("label");
+        UdpPrimitiveLogger l = new UdpPrimitiveLogger(x -> bb = x, x -> mb = x);
+        PrimitiveStringLogger s = l.stringLogger("label");
         s.log("hello");
         l.flush();
         assertEquals(17, bb.remaining());
@@ -367,9 +345,9 @@ class UdpPrimitiveLogger2Test {
 
     @Test
     void testBooleanToBuffer() {
-        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2(x -> bb = x, x -> mb = x);
-        BooleanLogger b16 = l.booleanLogger("b16");
-        BooleanLogger b17 = l.booleanLogger("b17");
+        UdpPrimitiveLogger l = new UdpPrimitiveLogger(x -> bb = x, x -> mb = x);
+        PrimitiveBooleanLogger b16 = l.booleanLogger("b16");
+        PrimitiveBooleanLogger b17 = l.booleanLogger("b17");
         b16.log(true); // overwritten
         b16.log(false);
         b17.log(true); // overwritten
@@ -413,10 +391,10 @@ class UdpPrimitiveLogger2Test {
 
     @Test
     void testMultiToBuffer() {
-        UdpPrimitiveLogger2 l = new UdpPrimitiveLogger2((x) -> bb = x, x -> mb = x);
-        StringLogger s = l.stringLogger("label");
+        UdpPrimitiveLogger l = new UdpPrimitiveLogger((x) -> bb = x, x -> mb = x);
+        PrimitiveStringLogger s = l.stringLogger("label");
         s.log("hello");
-        IntLogger i = l.intLogger("foo");
+        PrimitiveIntLogger i = l.intLogger("foo");
         i.log(1);
         l.flush();
         assertEquals(24, bb.remaining());

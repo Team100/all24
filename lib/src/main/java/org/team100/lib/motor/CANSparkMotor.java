@@ -5,8 +5,8 @@ import java.util.function.DoubleSupplier;
 import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.util.Memo;
 
 import com.revrobotics.CANSparkBase;
@@ -28,30 +28,30 @@ public abstract class CANSparkMotor implements BareMotor {
     private final DoubleSupplier m_output;
     private final DoubleSupplier m_temp;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_desired_position;
-    private final DoubleSupplierLogger2 m_log_desired_speed;
-    private final DoubleSupplierLogger2 m_log_desired_accel;
-    private final DoubleSupplierLogger2 m_log_friction_FF;
-    private final DoubleSupplierLogger2 m_log_velocity_FF;
-    private final DoubleSupplierLogger2 m_log_accel_FF;
-    private final DoubleSupplierLogger2 m_log_torque_FF;
-    private final DoubleSupplierLogger2 m_log_duty;
-    private final DoubleSupplierLogger2 m_log_position;
-    private final DoubleSupplierLogger2 m_log_velocity;
-    private final DoubleSupplierLogger2 m_log_rpm;
-    private final DoubleSupplierLogger2 m_log_current;
-    private final DoubleSupplierLogger2 m_log_torque;
-    private final DoubleSupplierLogger2 m_log_temp;
+    private final DoubleLogger m_log_desired_position;
+    private final DoubleLogger m_log_desired_speed;
+    private final DoubleLogger m_log_desired_accel;
+    private final DoubleLogger m_log_friction_FF;
+    private final DoubleLogger m_log_velocity_FF;
+    private final DoubleLogger m_log_accel_FF;
+    private final DoubleLogger m_log_torque_FF;
+    private final DoubleLogger m_log_duty;
+    private final DoubleLogger m_log_position;
+    private final DoubleLogger m_log_velocity;
+    private final DoubleLogger m_log_rpm;
+    private final DoubleLogger m_log_current;
+    private final DoubleLogger m_log_torque;
+    private final DoubleLogger m_log_temp;
 
     protected CANSparkMotor(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             CANSparkBase motor,
             MotorPhase motorPhase,
             int currentLimit,
             Feedforward100 ff,
             PIDConstants pid) {
         m_motor = motor;
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_ff = ff;
         // make config synchronous so we can see the errors
         Rev100.crash(() -> m_motor.setCANTimeout(500));

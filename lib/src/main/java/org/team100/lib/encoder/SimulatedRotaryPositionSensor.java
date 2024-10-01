@@ -3,9 +3,9 @@ package org.team100.lib.encoder;
 import java.util.OptionalDouble;
 
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.OptionalDoubleLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 
 import edu.wpi.first.math.MathUtil;
@@ -14,16 +14,16 @@ import edu.wpi.first.wpilibj.Timer;
 public class SimulatedRotaryPositionSensor implements RotaryPositionSensor {
     private final RotaryMechanism m_mechanism;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_position;
+    private final DoubleLogger m_log_position;
     private final OptionalDoubleLogger m_log_rate;
 
     private double m_positionRad = 0;
     private double m_timeS = Timer.getFPGATimestamp();
 
     public SimulatedRotaryPositionSensor(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             RotaryMechanism motor) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_mechanism = motor;
         m_log_position = child.doubleLogger(Level.TRACE, "position");
         m_log_rate = child.optionalDoubleLogger(Level.TRACE, "rate");

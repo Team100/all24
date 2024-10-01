@@ -2,8 +2,8 @@ package org.team100.lib.swerve;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.Math100;
 
@@ -15,12 +15,12 @@ public class DriveAccelerationLimiter implements Glassy {
 
     private final SwerveKinodynamics m_limits;
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_max_step;
-    private final DoubleSupplierLogger2 m_log_s;
+    private final DoubleLogger m_log_max_step;
+    private final DoubleLogger m_log_s;
 
-    public DriveAccelerationLimiter(SupplierLogger2 parent, SwerveKinodynamics limits) {
+    public DriveAccelerationLimiter(LoggerFactory parent, SwerveKinodynamics limits) {
         m_limits = limits;
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_max_step = child.doubleLogger(Level.TRACE, "max_vel_step");
         m_log_s = child.doubleLogger(Level.TRACE, "s");
     }

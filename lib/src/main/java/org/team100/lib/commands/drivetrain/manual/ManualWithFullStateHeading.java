@@ -8,10 +8,10 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.State100Logger;
-import org.team100.lib.logging.SupplierLogger2.StringSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.State100Logger;
+import org.team100.lib.logging.LoggerFactory.StringLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -41,17 +41,17 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
     private final double[] m_K;
     private final LinearFilter m_outputFilter;
 
-    private final StringSupplierLogger2 m_log_mode;
-    private final DoubleSupplierLogger2 m_log_goal_theta;
+    private final StringLogger m_log_mode;
+    private final DoubleLogger m_log_goal_theta;
     private final State100Logger m_log_setpoint_theta;
-    private final DoubleSupplierLogger2 m_log_measurement_theta;
-    private final DoubleSupplierLogger2 m_log_measurement_omega;
-    private final DoubleSupplierLogger2 m_log_error_theta;
-    private final DoubleSupplierLogger2 m_log_error_omega;
-    private final DoubleSupplierLogger2 m_log_theta_FF;
-    private final DoubleSupplierLogger2 m_log_theta_FB;
-    private final DoubleSupplierLogger2 m_log_omega_FB;
-    private final DoubleSupplierLogger2 m_log_output_omega;
+    private final DoubleLogger m_log_measurement_theta;
+    private final DoubleLogger m_log_measurement_omega;
+    private final DoubleLogger m_log_error_theta;
+    private final DoubleLogger m_log_error_omega;
+    private final DoubleLogger m_log_theta_FF;
+    private final DoubleLogger m_log_theta_FB;
+    private final DoubleLogger m_log_omega_FB;
+    private final DoubleLogger m_log_output_omega;
 
     // package private for testing
     Rotation2d m_goal = null;
@@ -67,12 +67,12 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      * @param k                  full state gains
      */
     public ManualWithFullStateHeading(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             double[] k) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
         m_gyro = gyro;
         m_desiredRotation = desiredRotation;

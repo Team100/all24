@@ -4,11 +4,11 @@ import java.util.Optional;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Rotation2dLogger;
-import org.team100.lib.logging.SupplierLogger2.Twist2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
+import org.team100.lib.logging.LoggerFactory.Twist2dLogger;
 import org.team100.lib.timing.TimedPose;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,11 +24,11 @@ public class DriveTrajectoryFollowerUtil implements Glassy {
     private final ChassisSpeedsLogger m_log_velocity_error;
     private final ChassisSpeedsLogger m_log_u_VFB;
     private final Rotation2dLogger m_log_motion_direction;
-    private final DoubleSupplierLogger2 m_log_setpoint_velocity;
+    private final DoubleLogger m_log_setpoint_velocity;
     private final Twist2dLogger m_log_position_error;
 
-    public DriveTrajectoryFollowerUtil(SupplierLogger2 parent) {
-        SupplierLogger2 child = parent.child(this);
+    public DriveTrajectoryFollowerUtil(LoggerFactory parent) {
+        LoggerFactory child = parent.child(this);
         m_log_u_FF = child.chassisSpeedsLogger(Level.TRACE, "u_FF");
         m_log_u_FB = child.chassisSpeedsLogger(Level.TRACE, "u_FB");
         m_log_velocity_error = child.chassisSpeedsLogger(Level.TRACE, "velocityError");

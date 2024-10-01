@@ -6,13 +6,13 @@ import java.util.OptionalDouble;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
-import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
-import org.team100.lib.logging.SupplierLogger2.TimedPoseLogger;
-import org.team100.lib.logging.SupplierLogger2.TrajectorySamplePointLogger;
-import org.team100.lib.logging.SupplierLogger2.Translation2dLogger;
-import org.team100.lib.logging.SupplierLogger2.Twist2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
+import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
+import org.team100.lib.logging.LoggerFactory.TimedPoseLogger;
+import org.team100.lib.logging.LoggerFactory.TrajectorySamplePointLogger;
+import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
+import org.team100.lib.logging.LoggerFactory.Twist2dLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
@@ -76,8 +76,8 @@ public class DrivePursuitFollower implements DriveTrajectoryFollower {
     private boolean useMinSpeed;
 
     /** Use the factory. */
-    DrivePursuitFollower(SupplierLogger2 parent, SwerveKinodynamics limits) {
-        SupplierLogger2 child = parent.child(this);
+    DrivePursuitFollower(LoggerFactory parent, SwerveKinodynamics limits) {
+        LoggerFactory child = parent.child(this);
         m_limits = limits;
         m_log_u_FF = child.chassisSpeedsLogger(Level.TRACE, "u_FF");
         m_log_u_FB = child.chassisSpeedsLogger(Level.TRACE, "u_FB");

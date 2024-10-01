@@ -2,9 +2,9 @@ package org.team100.lib.logging.receiver;
 
 import java.nio.ByteBuffer;
 
-import org.team100.lib.logging.UdpPrimitiveProtocol2;
-import org.team100.lib.logging.UdpType;
-import org.team100.lib.logging.UdpPrimitiveProtocol2.ProtocolException;
+import org.team100.lib.logging.primitive.UdpPrimitiveProtocol;
+import org.team100.lib.logging.primitive.UdpType;
+import org.team100.lib.logging.primitive.UdpPrimitiveProtocol.ProtocolException;
 
 public class UdpMetaDecoder {
     private static final int kFlushFrequency = 50;
@@ -22,15 +22,15 @@ public class UdpMetaDecoder {
      * @throws ProtocolException 
      */
     public boolean validateTimestamp(ByteBuffer buf) throws ProtocolException {
-        long timestamp = UdpPrimitiveProtocol2.decodeLong(buf);
+        long timestamp = UdpPrimitiveProtocol.decodeLong(buf);
         return m_consumers.validateTimestamp(timestamp);
     }
 
     /** Starts at buf.position() */
     public void decode(ByteBuffer buf) throws ProtocolException {
-        int key = UdpPrimitiveProtocol2.decodeKey(buf);
-        UdpType type = UdpPrimitiveProtocol2.decodeType(buf);
-        String v = UdpPrimitiveProtocol2.decodeString(buf);
+        int key = UdpPrimitiveProtocol.decodeKey(buf);
+        UdpType type = UdpPrimitiveProtocol.decodeType(buf);
+        String v = UdpPrimitiveProtocol.decodeString(buf);
         m_consumers.acceptMeta(key, type, v);
         if (flushCounter++ > kFlushFrequency) {
             m_consumers.flush();

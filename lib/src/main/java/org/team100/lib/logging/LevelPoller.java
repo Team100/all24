@@ -8,13 +8,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Asynchronously looks for updates in log level. */
-public class LogLevelPoller {
+public class LevelPoller {
     private final SendableChooser<Level> m_levelChooser;
     private final Consumer<Level> m_consumer;
 
-    public LogLevelPoller(Async async, Consumer<Level> consumer, Level defaultLevel) {
+    public LevelPoller(Async async, Consumer<Level> consumer, Level defaultLevel) {
         m_consumer = consumer;
-        m_levelChooser = LogLevelChooser.get();
+        m_levelChooser = LevelChooser.get();
         for (Level level : Level.values()) {
             m_levelChooser.addOption(level.name(), level);
         }

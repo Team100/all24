@@ -13,8 +13,8 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -31,18 +31,18 @@ public class ShootSmartWithRotation extends Command implements Glassy  {
     private final Supplier<DriverControl.Velocity> m_twistSupplier;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_angle;
-    private final DoubleSupplierLogger2 m_log_realangle;
+    private final DoubleLogger m_log_angle;
+    private final DoubleLogger m_log_realangle;
 
     public ShootSmartWithRotation(
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             SwerveDriveSubsystem drive,
             DrumShooter shooter,
             FeederSubsystem feeder,
             Intake intake,
             ManualWithShooterLock driver,
             Supplier<DriverControl.Velocity> twistSupplier) {
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_angle = child.doubleLogger(Level.TRACE, "angle");
         m_log_realangle = child.doubleLogger(Level.TRACE, "realangle");
         m_shooter = shooter;

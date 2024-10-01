@@ -4,8 +4,8 @@ import org.team100.frc2024.SensorInterface;
 import org.team100.lib.config.Identity;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.DoubleSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,10 +19,10 @@ public class FeederSubsystem extends SubsystemBase implements Glassy {
     private final SensorInterface m_sensors;
 
     // LOGGERS
-    private final DoubleSupplierLogger2 m_log_speed;
+    private final DoubleLogger m_log_speed;
 
-    public FeederSubsystem(SupplierLogger2 parent, SensorInterface sensors) {
-        SupplierLogger2 child = parent.child(this);
+    public FeederSubsystem(LoggerFactory parent, SensorInterface sensors) {
+        LoggerFactory child = parent.child(this);
         m_log_speed = child.doubleLogger(Level.TRACE, "speed");
         switch (Identity.instance) {
             case COMP_BOT:

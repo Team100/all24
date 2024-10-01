@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain.manual;
 
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.ChassisSpeedsLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.DriveUtil;
@@ -22,8 +22,8 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver {
     // LOGGERS
     private final ChassisSpeedsLogger m_log_chassis_speeds;
 
-    public ManualChassisSpeeds(SupplierLogger2 parent, SwerveKinodynamics swerveKinodynamics) {
-        SupplierLogger2 child = parent.child(this);
+    public ManualChassisSpeeds(LoggerFactory parent, SwerveKinodynamics swerveKinodynamics) {
+        LoggerFactory child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerveKinodynamics = swerveKinodynamics;
     }

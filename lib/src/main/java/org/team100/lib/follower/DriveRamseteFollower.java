@@ -5,11 +5,11 @@ import java.util.Optional;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.Pose2dLogger;
-import org.team100.lib.logging.SupplierLogger2.TimedPoseLogger;
-import org.team100.lib.logging.SupplierLogger2.TrajectorySamplePointLogger;
-import org.team100.lib.logging.SupplierLogger2.Twist2dLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
+import org.team100.lib.logging.LoggerFactory.TimedPoseLogger;
+import org.team100.lib.logging.LoggerFactory.TrajectorySamplePointLogger;
+import org.team100.lib.logging.LoggerFactory.Twist2dLogger;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -45,8 +45,8 @@ public class DriveRamseteFollower implements DriveTrajectoryFollower {
     private TrajectoryTimeIterator m_iter;
     private double mLastTime = Double.POSITIVE_INFINITY;
 
-    public DriveRamseteFollower(SupplierLogger2 parent) {
-        SupplierLogger2 child = parent.child(this);
+    public DriveRamseteFollower(LoggerFactory parent) {
+        LoggerFactory child = parent.child(this);
         m_log_measurement = child.pose2dLogger(Level.TRACE, "current state");
         m_log_setpoint = child.timedPoseLogger(Level.TRACE, "setpoint");
         m_log_error = child.twist2dLogger(Level.TRACE, "error");

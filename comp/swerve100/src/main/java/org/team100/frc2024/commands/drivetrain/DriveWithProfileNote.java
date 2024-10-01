@@ -11,8 +11,8 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.BooleanSupplierLogger2;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -47,7 +47,7 @@ public class DriveWithProfileNote extends Command implements Glassy  {
     private final TrapezoidProfile100 thetaProfile;
 
     // LOGGERS
-    private final BooleanSupplierLogger2 m_log_note_detected;
+    private final BooleanLogger m_log_note_detected;
 
     private Translation2d m_previousGoal;
     private State100 m_xSetpoint;
@@ -57,14 +57,14 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
     public DriveWithProfileNote(
             FieldLogger.Log fieldLogger,
-            SupplierLogger2 parent,
+            LoggerFactory parent,
             Intake intake,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicFieldRelativeController controller,
             SwerveKinodynamics limits) {
         m_field_log = fieldLogger;
-        SupplierLogger2 child = parent.child(this);
+        LoggerFactory child = parent.child(this);
         m_log_note_detected = child.booleanLogger(Level.TRACE, "Note detected");
 
         m_intake = intake;

@@ -2,8 +2,8 @@ package org.team100.lib.commands.drivetrain.for_testing;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
-import org.team100.lib.logging.SupplierLogger2;
-import org.team100.lib.logging.SupplierLogger2.FieldRelativeVelocityLogger;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.util.SquareWave;
@@ -25,8 +25,8 @@ public class Veering extends Command implements Glassy  {
     private final Timer m_timer;
     private final FieldRelativeVelocityLogger m_log_input;
 
-    public Veering(SupplierLogger2 parent, SwerveDriveSubsystem swerve) {
-        SupplierLogger2 child = parent.child(this);
+    public Veering(LoggerFactory parent, SwerveDriveSubsystem swerve) {
+        LoggerFactory child = parent.child(this);
         m_swerve = swerve;
         m_square = new SquareWave(kAmplitude, kPeriod);
         m_timer = new Timer();
