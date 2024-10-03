@@ -80,10 +80,10 @@ public class OscillateDirect extends Command implements Glassy  {
         double positionM = m_parabola.applyAsDouble(time);
 
         m_swerve.setRawModuleStates(new SwerveModuleState100[] {
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90))
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero))
         });
 
         m_log_period.log(() -> kPeriod);
