@@ -37,6 +37,7 @@ import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
 import org.team100.lib.commands.drivetrain.for_testing.OscillateDirect;
+import org.team100.lib.commands.drivetrain.for_testing.OscillatePosition;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.commands.drivetrain.manual.ManualChassisSpeeds;
@@ -78,8 +79,11 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
+import org.team100.lib.timing.ConstantConstraint;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
+import org.team100.lib.trajectory.StraightLineTrajectory;
+import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
@@ -90,6 +94,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -272,10 +278,16 @@ public class RobotContainer implements Glassy {
                         feeder));
 
         // for testing odometry
+        TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(1.0, 1.0)));
+        StraightLineTrajectory maker = new StraightLineTrajectory(true, tmaker);
         whileTrue(driverControl::fullCycle,
-                new OscillateDirect(comLog, m_drive));
-        // new Oscillate(comLog, m_drive));
+                new RepeatCommand(
+                        new SequentialCommandGroup(
+                                new OscillatePosition(m_drive, maker, controller, 1),
+                                new OscillatePosition(m_drive, maker, controller, -1))));
 
+        // new OscillateDirect(comLog, m_drive));
+        // new Oscillate(comLog, m_drive));
         // new RepeatCommand(
         // new FullCycle(comLog, m_drive, controller, viz)));
 

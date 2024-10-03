@@ -127,7 +127,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 statorLimitAmps,
                 driveMotorCanId,
                 ratio);
-
         AngularPositionServo turningServo = turningServo(
                 parent.child("Turning"),
                 encoderClass,
@@ -139,7 +138,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 drive,
                 motorPhase,
                 useOutboardSteering);
-
         return new WCPSwerveModule100(driveServo, turningServo);
     }
 
@@ -150,6 +148,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             DriveRatio ratio) {
         Feedforward100 ff = Feedforward100.makeWCPSwerveDriveFalcon6();
+        // note (10/2/24) 0.4 produces oscillation, on carpet.
         PIDConstants pid = new PIDConstants(0.3);
         Kraken6Motor driveMotor = new Kraken6Motor(
                 parent,
@@ -209,10 +208,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         PIDConstants lowLevelPID = null;
         if (useOutboardSteering) {
-            // Talon outboard positional PID
+            // Talon outboard POSITION PID
+            // 10/2/24 drive torque produces about a 0.5 degree deviation so maybe
+            // this is too low.
             lowLevelPID = new PIDConstants(10.0, 0.0, 0.0);
         } else {
-            // These parameters are handed to Talon outboard velocity PID
+            // These parameters are handed to Talon outboard VELOCITY PID
             // this seems more likely to oscillate
             // this is tuned in air, not on carpet, so it's probably too soft.
             lowLevelPID = new PIDConstants(0.3, 0.0, 0.0);
@@ -267,7 +268,6 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 mech);
         turningServo.reset();
         return turningServo;
-
     }
 
     private static AngularPositionServo getOutboard(

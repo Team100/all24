@@ -48,6 +48,10 @@ public class State100 {
         return new State100(x() - other.x(), v() - other.v(), a() - other.a());
     }
 
+    public State100 plus(State100 other) {
+        return new State100(x() + other.x(), v() + other.v(), a() + other.a());
+    }
+
     public State100 mult(double scaler) {
         return new State100(m_x * scaler, m_v * scaler, m_a * scaler);
     }

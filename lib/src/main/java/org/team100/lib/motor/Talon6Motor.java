@@ -152,6 +152,8 @@ public abstract class Talon6Motor implements BareMotor {
                 m_velocityVoltage
                         .withVelocity(motorRev_S)
                         .withFeedForward(kFFVolts)));
+                        
+        // without feedforward
         // Phoenix100.warn(() -> m_motor.setControl(
         //         m_velocityVoltage
         //                 .withVelocity(motorRev_S)));
