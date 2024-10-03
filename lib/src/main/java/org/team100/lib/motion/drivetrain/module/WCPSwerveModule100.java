@@ -28,7 +28,6 @@ import org.team100.lib.profile.Profile100;
 import edu.wpi.first.math.controller.PIDController;
 
 public class WCPSwerveModule100 extends SwerveModule100 {
-    private static final boolean USE_OUTBOARD_STEERING = false;
     private static final double kSteeringSupplyLimit = 10;
     private static final double kSteeringStatorLimit = 20;
     /**
@@ -77,14 +76,16 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
             MotorPhase motorPhase) {
-
+        //
+        // note the outboard steering setting!
+        //
+        final boolean useOutboardSteering = true;
         LinearVelocityServo driveServo = driveKrakenServo(
                 parent.child("Drive"),
                 supplyLimitAmps,
                 statorLimitAmps,
                 driveMotorCanId,
                 ratio);
-
         AngularPositionServo turningServo = turningServo(
                 parent.child("Turning"),
                 encoderClass,
@@ -94,7 +95,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 kSteeringRatio,
                 kinodynamics,
                 drive,
-                motorPhase);
+                motorPhase,
+                useOutboardSteering);
 
         return new WCPSwerveModule100(driveServo, turningServo);
     }
@@ -115,7 +117,10 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
             MotorPhase motorPhase) {
-
+        //
+        // note the outboard steering setting!
+        //
+        final boolean useOutboardSteering = false;
         LinearVelocityServo driveServo = driveFalconServo(
                 parent.child("Drive"),
                 supplyLimitAmps,
@@ -132,7 +137,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 kSteeringRatio,
                 kinodynamics,
                 drive,
-                motorPhase);
+                motorPhase,
+                useOutboardSteering);
 
         return new WCPSwerveModule100(driveServo, turningServo);
     }
@@ -144,7 +150,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             int driveMotorCanId,
             DriveRatio ratio) {
         Feedforward100 ff = Feedforward100.makeWCPSwerveDriveFalcon6();
-        PIDConstants pid = new PIDConstants(0.2);
+        PIDConstants pid = new PIDConstants(0.3);
         Kraken6Motor driveMotor = new Kraken6Motor(
                 parent,
                 driveMotorCanId,
@@ -164,29 +170,29 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private static LinearVelocityServo driveFalconServo(
-        LoggerFactory parent,
-        double supplyLimit,
-        double statorLimit,
-        int driveMotorCanId,
-        DriveRatio ratio) {
-    Feedforward100 ff = Feedforward100.makeWCPSwerveDriveFalcon6();
-    PIDConstants pid = new PIDConstants(0.2);
-    Falcon6Motor driveMotor = new Falcon6Motor(
-            parent,
-            driveMotorCanId,
-            MotorPhase.FORWARD,
-            supplyLimit,
-            statorLimit,
-            pid,
-            ff);
-    LinearMechanism mech = new SimpleLinearMechanism(
-            driveMotor,
-            new Talon6Encoder(parent, driveMotor),
-            ratio.m_ratio,
-            kWheelDiameterM);
-    return new OutboardLinearVelocityServo(
-            parent,
-            mech);
+            LoggerFactory parent,
+            double supplyLimit,
+            double statorLimit,
+            int driveMotorCanId,
+            DriveRatio ratio) {
+        Feedforward100 ff = Feedforward100.makeWCPSwerveDriveFalcon6();
+        PIDConstants pid = new PIDConstants(0.2);
+        Falcon6Motor driveMotor = new Falcon6Motor(
+                parent,
+                driveMotorCanId,
+                MotorPhase.FORWARD,
+                supplyLimit,
+                statorLimit,
+                pid,
+                ff);
+        LinearMechanism mech = new SimpleLinearMechanism(
+                driveMotor,
+                new Talon6Encoder(parent, driveMotor),
+                ratio.m_ratio,
+                kWheelDiameterM);
+        return new OutboardLinearVelocityServo(
+                parent,
+                mech);
     }
 
     private static AngularPositionServo turningServo(
@@ -198,10 +204,11 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double gearRatio,
             SwerveKinodynamics kinodynamics,
             EncoderDrive drive,
-            MotorPhase motorPhase) {
+            MotorPhase motorPhase,
+            boolean useOutboardSteering) {
 
         PIDConstants lowLevelPID = null;
-        if (USE_OUTBOARD_STEERING) {
+        if (useOutboardSteering) {
             // Talon outboard positional PID
             lowLevelPID = new PIDConstants(10.0, 0.0, 0.0);
         } else {
@@ -242,7 +249,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 builtInEncoder,
                 gearRatio);
 
-        if (USE_OUTBOARD_STEERING) {
+        if (useOutboardSteering) {
             AngularPositionServo turningServo = getOutboard(
                     parent,
                     turningEncoder,
