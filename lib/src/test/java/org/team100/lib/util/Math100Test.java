@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleUnaryOperator;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,6 +38,49 @@ class Math100Test {
     void testSolveQuadraticZero() {
         List<Double> roots = Math100.solveQuadratic(1, 0, 1);
         assertEquals(0, roots.size());
+    }
+
+    @Test
+    void testFindRoot1dLinear() {
+        double x_0 = -1;
+        double f_0 = -1;
+        double x_1 = 1;
+        double f_1 = 1;
+        int max_iterations = 1000;
+
+        DoubleUnaryOperator func = (x) -> {
+            return x;
+        };
+
+        // make sure we're passing the right bounds
+        assertEquals(f_0, func.applyAsDouble(x_0), kDelta);
+        assertEquals(f_1, func.applyAsDouble(x_1), kDelta);
+
+        double s = Math100.findRoot(func, x_0, f_0, x_1, f_1, kDelta, max_iterations);
+
+        // between -1 and 1 the zero is half way
+        assertEquals(0.5, s, kDelta);
+    }
+
+    @Test
+    void testFindRoot1dLinear2() {
+        double x_0 = -1;
+        double f_0 = -2;
+        double x_1 = 1;
+        double f_1 = 0;
+        int max_iterations = 1000;
+
+        DoubleUnaryOperator func = (x) -> {
+            return x-1;
+        };
+
+        // make sure we're passing the right bounds
+        assertEquals(f_0, func.applyAsDouble(x_0), kDelta);
+        assertEquals(f_1, func.applyAsDouble(x_1), kDelta);
+
+        double s = Math100.findRoot(func, x_0, f_0, x_1, f_1, kDelta, max_iterations);
+
+        assertEquals(1, s, kDelta);
     }
 
     @Test
