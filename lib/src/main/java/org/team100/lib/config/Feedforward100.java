@@ -112,7 +112,7 @@ public class Feedforward100 {
 
     public double frictionFFVolts(double currentMotorRev_S, double desiredMotorRev_S) {
         double direction = Math.signum(desiredMotorRev_S);
-        if (currentMotorRev_S < staticFrictionSpeedLimit) {
+        if (Math.abs(currentMotorRev_S) < staticFrictionSpeedLimit) {
             return kSS * direction;
         }
         return kDS * direction;
