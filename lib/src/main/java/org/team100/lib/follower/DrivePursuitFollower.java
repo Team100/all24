@@ -118,8 +118,8 @@ public class DrivePursuitFollower implements DriveTrajectoryFollower {
     @Override
     public ChassisSpeeds update(double timestamp, Pose2d measurement, ChassisSpeeds current_velocity) {
         if (m_iter == null) {
-            Util.warn("Null iter!");
-            return null;
+            Util.warn("Null iter! Stop!");
+            return new ChassisSpeeds();
         }
 
         m_log_measurement.log(() -> measurement);

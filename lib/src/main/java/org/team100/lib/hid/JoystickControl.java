@@ -35,6 +35,11 @@ public abstract class JoystickControl implements DriverControl {
     }
 
     @Override
+    public boolean fullCycle() {
+        return button(1);
+    }
+
+    @Override
     public boolean test() {
         return button(3);
     }

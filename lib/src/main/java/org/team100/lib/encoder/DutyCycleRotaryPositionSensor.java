@@ -26,6 +26,10 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
     // LOGGERS
     private final DoubleLogger m_log_duty;
 
+    // if the encoder becomes disconnected, don't break, return the most-recent
+    // value.
+    private double m_dutyIfDisconnected;
+
     protected DutyCycleRotaryPositionSensor(
             LoggerFactory parent,
             int channel,
@@ -47,15 +51,20 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
         m_digitalInput.close();
     }
 
-    /** Cached, almost. */
+    /**
+     * Cached, almost.
+     * If the encoder becomes disconnected, this returns the most-recent value until
+     * the encoder becomes reconnected.
+     */
     @Override
     protected OptionalDouble getRatio() {
         if (!isConnected()) {
-            Util.warn(String.format("encoder %d not connected", m_channel));
-            return OptionalDouble.empty();
+            Util.warn(String.format("*** encoder %d not connected, returning previous value ***", m_channel));
+            return OptionalDouble.of(m_dutyIfDisconnected);
         }
         double dutyCycle = m_duty.getAsDouble();
         m_log_duty.log(() -> dutyCycle);
+        m_dutyIfDisconnected = dutyCycle;
         return OptionalDouble.of(dutyCycle);
     }
 

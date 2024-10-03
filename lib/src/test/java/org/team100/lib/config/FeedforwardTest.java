@@ -35,8 +35,27 @@ class FeedforwardTest {
     void test100() {
         // behaves the same as the naive model above, ignoring friction.
         Feedforward100 ff100 = new Feedforward100(1, 1, 0, 0, 0);
-        assertEquals(1, ff100.velocityFFVolts(1),kDelta);
-        assertEquals(1, ff100.accelFFVolts(1),kDelta);
+        assertEquals(1, ff100.velocityFFVolts(1), kDelta);
+        assertEquals(1, ff100.accelFFVolts(1), kDelta);
+    }
+
+    /** I forgot an abs() in the friction term, so this verifies it. */
+    @Test
+    void testFriction() {
+        // static friction = 2, dynamic friction = 1
+        Feedforward100 ff100 = new Feedforward100(1, 1, 2, 1, 1);
+        // under the static friction limit, so this is static
+        assertEquals(2, ff100.frictionFFVolts(0.5, 0.5), kDelta);
+        // over the static friction limit, so sliding
+        assertEquals(1, ff100.frictionFFVolts(2, 2), kDelta);
+        // under the static friction limit, so this is static
+        assertEquals(-2, ff100.frictionFFVolts(-0.5, -0.5), kDelta);
+        // over the static friction limit, so sliding
+        assertEquals(-1, ff100.frictionFFVolts(-2, -2), kDelta);
+        // moving positive, want to go negative, get negative
+        assertEquals(-2, ff100.frictionFFVolts(0.5, -0.5), kDelta);
+        // moving positive, want to go negative, get negative
+        assertEquals(-1, ff100.frictionFFVolts(2, -2), kDelta);
     }
 
 }

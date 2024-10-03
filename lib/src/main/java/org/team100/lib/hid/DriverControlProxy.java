@@ -61,7 +61,7 @@ public class DriverControlProxy implements DriverControl {
         if (name.startsWith("Logitech Extreme")) {
             return new LogitechExtremeJoystick();
         }
-        if (name.startsWith("Great Planes")) {
+        if (name.startsWith("GP Controller")) {
             return new RealFlight(parent);
         }
         if (name.equals("Team 100 Pilot")) {

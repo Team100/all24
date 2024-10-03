@@ -127,6 +127,8 @@ public class DriveUtil {
         for (int i = 0; i < start.length; i++) {
             SwerveModulePosition100 startModule = start[i];
             SwerveModulePosition100 endModule = end[i];
+            // these positions might be null, if the encoder has failed (which can seem to
+            // happen if the robot is *severely* overrunning).
             double deltaM = endModule.distanceMeters - startModule.distanceMeters;
             if (startModule.angle.isPresent() && endModule.angle.isPresent()) {
                 newPositions[i] = new SwerveModulePosition100(

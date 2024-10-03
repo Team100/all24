@@ -65,8 +65,10 @@ public class DriveRamseteFollower implements DriveTrajectoryFollower {
      */
     @Override
     public ChassisSpeeds update(double timestamp, Pose2d measurement, ChassisSpeeds measurementV) {
-        if (m_iter == null)
-            return null;
+        if (m_iter == null) {
+            Util.warn("Null iter! Stop!");
+            return new ChassisSpeeds();
+        }
 
         m_log_measurement.log(() -> measurement);
         if (isDone()) {

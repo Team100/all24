@@ -29,12 +29,12 @@ public class StraightLineTrajectory {
         if (m_useInitialVelocity)
             return movingToRest(startState, end);
         else
-            return m_maker.restToRest(startState.translation(), end.getTranslation());
+            return m_maker.restToRest(startState.pose(), end);
     }
 
     private Trajectory100 movingToRest(SwerveState startState, Pose2d end) {
         if (Math.abs(startState.velocity().x()) < 1e-6 && Math.abs(startState.velocity().y()) < 1e-6)
-            return m_maker.restToRest(startState.translation(), end.getTranslation());
+            return m_maker.restToRest(startState.pose(), end);
 
         Translation2d currentTranslation = startState.translation();
         FieldRelativeVelocity currentSpeed = startState.velocity();
@@ -55,7 +55,7 @@ public class StraightLineTrajectory {
                             new Pose2d(
                                     goalTranslation,
                                     angleToGoal)),
-                    List.of(new Rotation2d(), new Rotation2d()),
+                    List.of(startState.pose().getRotation(), end.getRotation()),
                     m_maker.m_constraints,
                     currentSpeed.norm(),
                     0,
