@@ -3,6 +3,7 @@ package org.team100.lib.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleUnaryOperator;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -73,6 +74,51 @@ public class Math100 {
      */
     public static double getMinDistance(double measurement, double x) {
         return MathUtil.angleModulus(x - measurement) + measurement;
+    }
+
+    /**
+     * One-dimensional root-finding. Unlike the 2d version below, this uses simple
+     * bisection.
+     * 
+     * @param func            to be solved
+     * @param x_0             lower bound
+     * @param f_0             f(x_0)
+     * @param x_1             upper bound
+     * @param f_1             f(x_1)
+     * @param iterations_left iterations to go
+     * @return s parameter
+     */
+    public static double findRoot(
+            DoubleUnaryOperator func,
+            double x_0,
+            double f_0,
+            double x_1,
+            double f_1,
+            double tolerance,
+            int iterations_left) {
+        if (iterations_left < 0) {
+            return 1.0;
+        }
+        if (Math.abs(f_0 - f_1) <= tolerance) {
+            return 1.0;
+        }
+        final double s_guess = 0.5;
+
+        double x_guess = (x_1 - x_0) * s_guess + x_0;
+        double f_guess = func.applyAsDouble(x_guess);
+
+        if (Math.abs(f_guess) < tolerance) {
+            return s_guess;
+        }
+
+        if (Math.signum(f_0) == Math.signum(f_guess)) {
+            // 0 and guess on same side of root, so use upper bracket.
+            return s_guess
+                    + (1.0 - s_guess) * findRoot(func, x_guess, f_guess, x_1, f_1, tolerance, iterations_left - 1);
+        } else {
+            // Use lower bracket.
+            return s_guess * findRoot(func, x_0, f_0, x_guess, f_guess, tolerance, iterations_left - 1);
+        }
     }
 
     /**

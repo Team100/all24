@@ -9,5 +9,10 @@ public class NullProfile implements Profile100 {
     public State100 calculate(double dt, State100 initial, State100 goal) {
         return initial;
     }
-    
+
+    @Override
+    public ResultWithETA calculateWithETA(double dt, State100 initial, State100 goal) {
+        return new ResultWithETA(initial, 0);
+    }
+
 }

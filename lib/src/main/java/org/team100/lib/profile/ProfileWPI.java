@@ -22,4 +22,11 @@ public class ProfileWPI implements Profile100 {
         State result = m_profile.calculate(dt, new State(initial.x(), initial.v()), new State(goal.x(), goal.v()));
         return new State100(result.position, result.velocity, 0);
     }
+
+    @Override
+    public ResultWithETA calculateWithETA(double dt, State100 initial, State100 goal) {
+        State100 result100 = calculate(dt, initial, goal);
+        double eta = m_profile.totalTime();
+        return new ResultWithETA(result100, eta);
+    }
 }
