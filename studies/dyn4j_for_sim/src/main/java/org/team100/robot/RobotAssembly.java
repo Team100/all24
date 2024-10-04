@@ -18,7 +18,9 @@ import org.team100.commands.ShootCommand;
 import org.team100.commands.Tactics;
 import org.team100.commands.Tolerance;
 import org.team100.control.Pilot;
-import org.team100.sim.ForceViz;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.planner.ForceViz;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 import org.team100.subsystems.CameraSubsystem;
@@ -50,6 +52,7 @@ public class RobotAssembly {
     public Note m_indexerShooterHandoff;
 
     public RobotAssembly(
+            SwerveKinodynamics swerveKinodynamics,
             Function<RobotAssembly, Pilot> pilotFn,
             RobotBody robotBody,
             ForceViz viz,
@@ -84,6 +87,7 @@ public class RobotAssembly {
                         debug));
         whileTrue(m_pilot::driveToNote,
                 new DriveToNote(
+                        swerveKinodynamics,
                         m_indexer,
                         m_drive,
                         m_camera,
@@ -91,38 +95,41 @@ public class RobotAssembly {
                         debug));
         whileTrue(m_pilot::driveToCorner,
                 new DriveToPose(
+                        swerveKinodynamics,
                         m_drive,
                         m_pilot::cornerLocation,
                         () -> 0.0,
-                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        new Tactics(m_drive, m_camera, viz, true, true, true, debug),
                         new Tolerance(1, 1, 0.25),
                         viz,
                         debug));
         whileTrue(m_pilot::driveToSource,
                 new DriveToSource(
+                        swerveKinodynamics,
                         m_drive,
                         m_camera,
                         robotBody::sourcePosition,
                         robotBody::yBias,
-                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        new Tactics(m_drive, m_camera, viz, true, true, true, debug),
                         viz,
                         debug));
         whileTrue(m_pilot::driveToStaged,
                 new GoToStaged(
+                        swerveKinodynamics,
                         m_pilot,
-                        m_indexer,
                         m_drive,
                         m_camera,
-                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        new Tactics(m_drive, m_camera, viz, true, true, true, debug),
                         debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
                         // here the lane accuracy issue is no problem
                         new DriveToPose(
+                                swerveKinodynamics,
                                 m_drive,
                                 m_pilot::shootingLocation,
                                 robotBody::yBias,
-                                new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                                new Tactics(m_drive, m_camera, viz, true, true, true, debug),
                                 new Tolerance(1, 1, 0.25),
                                 viz,
                                 debug),
@@ -137,19 +144,21 @@ public class RobotAssembly {
                 Commands.sequence(
                         // first go approximately there, in the "lane"
                         new DriveToPose(
+                                swerveKinodynamics,
                                 m_drive,
                                 robotBody::ampPosition,
                                 robotBody::yBias,
-                                new Tactics(m_drive, m_camera, viz,true, false, true, debug),
+                                new Tactics(m_drive, m_camera, viz, true, false, true, debug),
                                 new Tolerance(0.5, 0.5, 0.5),
                                 viz,
                                 debug),
                         // then go exactly there, position is important
                         new DriveToPose(
+                                swerveKinodynamics,
                                 m_drive,
                                 robotBody::ampPosition,
                                 () -> 0.0,
-                                new Tactics(m_drive, m_camera, viz,false, false, false, debug),
+                                new Tactics(m_drive, m_camera, viz, false, false, false, debug),
                                 new Tolerance(0.05, 0.05, 0.05),
                                 viz,
                                 debug),
@@ -158,10 +167,11 @@ public class RobotAssembly {
                 Commands.sequence(
                         // location can be pretty approximate
                         new DriveToPose(
+                                swerveKinodynamics,
                                 m_drive,
                                 robotBody::passingPosition,
                                 () -> 0.0,
-                                new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                                new Tactics(m_drive, m_camera, viz, true, true, true, debug),
                                 new Tolerance(0.3, 0.3, 0.1),
                                 viz,
                                 debug),
@@ -198,7 +208,7 @@ public class RobotAssembly {
         m_drive.setState(x, y, theta, vx, vy);
     }
 
-    public DriveSubsystem getDrive() {
+    public DriveSubsystemInterface getDrive() {
         return m_drive;
     }
 

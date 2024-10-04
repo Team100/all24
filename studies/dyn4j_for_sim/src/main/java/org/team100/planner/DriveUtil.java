@@ -6,20 +6,28 @@ import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.subsystems.IndexerSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
-public class Drive {
+public class DriveUtil {
     private static final int kAngularP = 5;
     private static final int kCartesianP = 5;
 
+    private final SwerveKinodynamics m_swerveKinodynamics;
+    private final boolean m_debug;
+
+    public DriveUtil(SwerveKinodynamics swerveKinodynamics, boolean debug) {
+        m_swerveKinodynamics = swerveKinodynamics;
+        m_debug = debug;
+    }
+
     /** Proportional feedback with a limiter. */
-    public static FieldRelativeVelocity goToGoal(Pose2d pose, Pose2d m_goal, boolean debug) {
-        if (debug)
+    public FieldRelativeVelocity goToGoal(Pose2d pose, Pose2d m_goal) {
+        if (m_debug)
             System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
                     pose.getX(), pose.getY(), m_goal.getX(), m_goal.getY());
         FieldRelativeDelta transform = FieldRelativeDelta.delta(pose, m_goal);
@@ -28,15 +36,14 @@ public class Drive {
         Vector2 cartesianU_FB = positionError.product(kCartesianP);
         double angularU_FB = rotationError * kAngularP;
         return new FieldRelativeVelocity(cartesianU_FB.x, cartesianU_FB.y, angularU_FB)
-                .clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+                .clamp(m_swerveKinodynamics.getMaxDriveVelocityM_S(), m_swerveKinodynamics.getMaxAngleSpeedRad_S());
     }
 
-    public static FieldRelativeVelocity goToGoalAligned(
+    public FieldRelativeVelocity goToGoalAligned(
             Tactics m_tactics,
-            IndexerSubsystem m_indexer,
+            double angleToleranceRad,
             Pose2d pose,
-            Translation2d targetFieldRelative,
-            boolean m_debug) {
+            Translation2d targetFieldRelative) {
 
         if (m_debug)
             System.out.printf(" pose (%5.2f, %5.2f) target (%5.2f, %5.2f)",
@@ -50,11 +57,12 @@ public class Drive {
         double angleError = MathUtil.angleModulus(
                 robotToTargetAngleFieldRelative.minus(intakeAngleFieldRelative).getRadians());
 
-        boolean aligned = m_indexer.aligned(angleError);
+        boolean aligned = Math.abs(angleError) < angleToleranceRad;
 
-        Translation2d cartesianU_FB = m_indexer.getCartesianError(
+        Translation2d cartesianU_FB = getCartesianError(
                 robotToTargetFieldRelative,
-                aligned).times(kCartesianP);
+                aligned,
+                m_debug).times(kCartesianP);
 
         double angleU_FB = angleError * kAngularP;
 
@@ -72,7 +80,33 @@ public class Drive {
         return m_tactics.finish(desired);
     }
 
-    private Drive() {
-        //
+    // this was originally in IndexerSubsystem because it's about the alignment
+    // tolerance
+    // of the indexer, but i (maybe temporarily?) put it here in order to separate
+    // it from the simulator ("RobotBody" etc) stuff
+    public static Translation2d getCartesianError(
+            Translation2d robotToTargetFieldRelative,
+            boolean aligned,
+            boolean debug) {
+        // Go this far from the note until rotated correctly.
+        final double kPickRadius = 1;
+        // Correct center-to-center distance for picking.
+        final double kMinPickDistanceM = 0.437;
+        double distance = robotToTargetFieldRelative.getNorm();
+        if (distance < kMinPickDistanceM || !aligned) {
+            // target distance is lower than the tangent point: we ran the note
+            // over without picking it, so back up.
+            // also back up if not aligned.
+            if (debug)
+                System.out.print(" unaligned");
+            double targetDistance = distance - kPickRadius;
+            return robotToTargetFieldRelative.times(targetDistance);
+        }
+        if (debug)
+            System.out.print(" aligned");
+
+        // aligned, drive over the note
+        return robotToTargetFieldRelative;
     }
+
 }

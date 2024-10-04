@@ -1,15 +1,16 @@
 package org.team100.commands;
 
 import java.util.Map.Entry;
-import java.util.function.Supplier;
 import java.util.NavigableMap;
+import java.util.function.Supplier;
 
 import org.dyn4j.geometry.Vector2;
-import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.sim.ForceViz;
+import org.team100.lib.planner.ForceViz;
+import org.team100.lib.util.Debug;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
 import org.team100.subsystems.DriveSubsystem;
@@ -43,7 +44,7 @@ public class DefendSource extends Command {
      * the defense quickness.
      */
     private final double m_skill;
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final CameraSubsystem m_camera;
     private final Supplier<Pose2d> m_position;
     private final Supplier<Pose2d> m_source;
@@ -87,7 +88,7 @@ public class DefendSource extends Command {
                 m_source.get(),
                 m_camera.recentSightings());
         if (m_debug)
-            m_viz.desired(pose, desired);
+            m_viz.desired(pose.getTranslation(), desired);
         if (m_debug)
             System.out.printf(" desired %s", desired);
         FieldRelativeVelocity v = m_tactics.apply(desired);

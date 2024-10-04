@@ -1,21 +1,21 @@
 package org.team100.control.auto;
 
 import org.team100.control.AutoPilot;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
+import org.team100.lib.util.Arg;
 import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
-import org.team100.util.Arg;
 
 /**
  * Pick up notes at the source and lob them to the scoring corner.
  */
 public class Passer extends AutoPilot {
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
 
     public Passer(
-            DriveSubsystem drive,
+            DriveSubsystemInterface drive,
             CameraSubsystem camera,
             IndexerSubsystem indexer) {
         Arg.nonnull(drive);

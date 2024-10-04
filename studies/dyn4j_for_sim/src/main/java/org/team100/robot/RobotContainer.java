@@ -4,8 +4,10 @@ import org.team100.alliance.Alliance;
 import org.team100.alliance.Blue;
 import org.team100.alliance.Red;
 import org.team100.field.Scorekeeper;
-import org.team100.lib.telemetry.FieldLogger;
-import org.team100.sim.ForceViz;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.planner.ForceViz;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,11 +21,12 @@ public class RobotContainer {
     private final Alliance m_red;
     private final ForceViz m_viz;
 
-    public RobotContainer(FieldLogger fieldLogger, SimWorld world) {
+    public RobotContainer(LoggerFactory fieldLogger, SimWorld world) {
         m_world = world;
         m_viz = new ForceViz(fieldLogger);
-        m_blue = new Blue(m_world, m_viz);
-        m_red = new Red(m_world, m_viz);
+        final SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.get();
+        m_blue = new Blue(m_world, m_viz, swerveKinodynamics);
+        m_red = new Red(m_world, m_viz, swerveKinodynamics);
         SmartDashboard.putData(CommandScheduler.getInstance());
     }
 

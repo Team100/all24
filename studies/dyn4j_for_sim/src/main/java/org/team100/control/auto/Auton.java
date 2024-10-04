@@ -5,11 +5,11 @@ import java.util.Optional;
 
 import org.team100.control.AutoPilot;
 import org.team100.field.StagedNote;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
+import org.team100.lib.util.Arg;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
-import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
-import org.team100.util.Arg;
 import org.team100.util.Latch;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -37,7 +37,7 @@ public class Auton extends AutoPilot {
     // tolerance for go-to-staged-note paths.
     private static final double kStageTolerance = 0.6;
 
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
     private final Pose2d m_shooting;
@@ -58,7 +58,7 @@ public class Auton extends AutoPilot {
     private int m_goalNoteIdx;
 
     public Auton(
-            DriveSubsystem drive,
+            DriveSubsystemInterface drive,
             CameraSubsystem camera,
             IndexerSubsystem indexer,
             Pose2d shooting,

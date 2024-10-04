@@ -1,6 +1,6 @@
 package org.team100.commands;
 
-import org.team100.Debug;
+import org.team100.lib.util.Debug;
 import org.team100.subsystems.IndexerSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;

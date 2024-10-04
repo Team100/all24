@@ -13,7 +13,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class ForceViz {
-    // see simgui.json for these names
     private static final double kScale = 0.5;
 
     private final List<Double> m_tactics = new ArrayList<>();

@@ -6,12 +6,13 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 
 import org.dyn4j.geometry.Vector2;
-import org.team100.Debug;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.sim.ForceViz;
+import org.team100.lib.planner.ForceViz;
+import org.team100.lib.planner.Tactic;
+import org.team100.lib.util.Debug;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
-import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,7 +25,7 @@ public class SteerAroundRobots implements Tactic {
     private static final double kRobotSteer = 8;
     private static final double kMaxTargetVelocity = 4;
 
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final CameraSubsystem m_camera;
     private final ForceViz m_viz;
     private final Heuristics m_heuristics;
@@ -35,7 +36,7 @@ public class SteerAroundRobots implements Tactic {
      * @param camera provides robot sightings
      */
     public SteerAroundRobots(
-            DriveSubsystem drive,
+            DriveSubsystemInterface drive,
             CameraSubsystem camera,
             ForceViz viz,
             boolean debug) {
@@ -102,7 +103,7 @@ public class SteerAroundRobots implements Tactic {
                         mostRecentPosition.getX(), mostRecentPosition.getY(), force.x, force.y);
             FieldRelativeVelocity robotSteer = new FieldRelativeVelocity(force.x, force.y, 0);
             if (m_debug)
-                m_viz.tactics(myPosition, robotSteer);
+                m_viz.tactics(myPosition.getTranslation(), robotSteer);
             v = v.plus(robotSteer);
         }
         return v;

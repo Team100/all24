@@ -2,20 +2,21 @@ package org.team100.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
-import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.planner.AvoidEdges;
+import org.team100.lib.planner.AvoidEdges;
+import org.team100.lib.planner.ForceViz;
+import org.team100.lib.planner.Tactic;
+import org.team100.lib.util.Debug;
 import org.team100.planner.AvoidSubwoofers;
 import org.team100.planner.ObstacleRepulsion;
 import org.team100.planner.RobotRepulsion;
 import org.team100.planner.SteerAroundObstacles;
 import org.team100.planner.SteerAroundRobots;
-import org.team100.planner.Tactic;
-import org.team100.sim.ForceViz;
 import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
 
 /**
  * Low level drive motion heuristics that can be used by any command.
@@ -23,8 +24,8 @@ import org.team100.subsystems.DriveSubsystem;
  * Pointwise repulsive forces are inversely proportional to distance, like
  * gravity or electrostatics in two dimensions.
  */
-public class Tactics {
-    private final DriveSubsystem m_drive;
+public class Tactics implements UnaryOperator<FieldRelativeVelocity> {
+    private final DriveSubsystemInterface m_drive;
     private final CameraSubsystem m_camera;
     private final List<Tactic> m_tactics;
     private final ForceViz m_viz;
@@ -42,7 +43,7 @@ public class Tactics {
      * @param debug
      */
     public Tactics(
-            DriveSubsystem drive,
+            DriveSubsystemInterface drive,
             CameraSubsystem camera,
             ForceViz viz,
             boolean avoidObstacles,
@@ -58,7 +59,7 @@ public class Tactics {
             m_tactics.add(new ObstacleRepulsion(m_drive, viz, debug));
         }
         if (avoidEdges) {
-            m_tactics.add(new AvoidEdges(m_drive, viz, debug));
+            m_tactics.add(new AvoidEdges(m_drive::getPose, viz, debug));
             m_tactics.add(new AvoidSubwoofers(m_drive, viz, debug));
         }
         if (avoidRobots) {
@@ -71,7 +72,7 @@ public class Tactics {
     /** add tactics to desired. */
     public FieldRelativeVelocity finish(FieldRelativeVelocity desired) {
         if (m_debug)
-            m_viz.desired(m_drive.getPose(), desired);
+            m_viz.desired(m_drive.getPose().getTranslation(), desired);
         if (m_debug)
             System.out.printf(" desire %s", desired);
         FieldRelativeVelocity v = apply(desired);
@@ -83,6 +84,7 @@ public class Tactics {
     }
 
     /** Output is clamped to feasible v and omega. */
+    @Override
     public FieldRelativeVelocity apply(FieldRelativeVelocity desired) {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         for (Tactic t : m_tactics) {

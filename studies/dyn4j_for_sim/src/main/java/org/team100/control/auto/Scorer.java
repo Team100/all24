@@ -3,10 +3,10 @@ package org.team100.control.auto;
 import java.util.function.Supplier;
 
 import org.team100.control.AutoPilot;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
+import org.team100.lib.util.Arg;
 import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
-import org.team100.util.Arg;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
@@ -25,7 +25,7 @@ public class Scorer extends AutoPilot {
         ToAmp
     }
 
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final CameraSubsystem m_camera;
     private final IndexerSubsystem m_indexer;
     private final Supplier<Boolean> m_amplified;
@@ -34,7 +34,7 @@ public class Scorer extends AutoPilot {
     private State m_state;
 
     public Scorer(
-            DriveSubsystem drive,
+            DriveSubsystemInterface drive,
             CameraSubsystem camera,
             IndexerSubsystem indexer,
             Supplier<Boolean> amplified,

@@ -2,9 +2,10 @@ package org.team100.commands;
 
 import java.util.function.Supplier;
 
-import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.util.Debug;
 import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.MathUtil;
@@ -22,7 +23,7 @@ public class RotateToShoot extends Command {
     private static final double kOmegaP = 1;
     private static final double kVelocityP = 1;
     private final Supplier<Translation2d> m_speakerPosition;
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final Tolerance m_tolerance;
     private final boolean m_debug;
 

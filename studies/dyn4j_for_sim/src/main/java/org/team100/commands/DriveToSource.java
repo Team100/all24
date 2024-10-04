@@ -2,14 +2,16 @@ package org.team100.commands;
 
 import java.util.function.Supplier;
 
-import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.planner.Drive;
-import org.team100.sim.ForceViz;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.planner.ForceViz;
+import org.team100.lib.util.Arg;
+import org.team100.lib.util.Debug;
+import org.team100.planner.DriveUtil;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
-import org.team100.util.Arg;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,14 +21,16 @@ import edu.wpi.first.wpilibj2.command.Command;
  * command can be very approximate.
  */
 public class DriveToSource extends Command {
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final Supplier<Pose2d> m_goal;
     private final Supplier<Double> m_yBias;
     private final boolean m_debug;
     private final Tactics m_tactics;
     private final ForceViz m_viz;
+    private final DriveUtil m_driveUtil;
 
     public DriveToSource(
+            SwerveKinodynamics swerveKinodynamics,
             DriveSubsystem drive,
             CameraSubsystem camera,
             Supplier<Pose2d> goal,
@@ -42,6 +46,7 @@ public class DriveToSource extends Command {
         m_debug = debug && Debug.enable();
         m_tactics = tactics;
         m_viz = viz;
+        m_driveUtil = new DriveUtil(swerveKinodynamics, m_debug);
         addRequirements(drive);
     }
 
@@ -52,11 +57,11 @@ public class DriveToSource extends Command {
         Pose2d pose = m_drive.getPose();
         if (m_debug)
             System.out.printf(" pose (%5.2f,%5.2f)", pose.getX(), pose.getY());
-        FieldRelativeVelocity desired = Drive.goToGoal(pose, m_goal.get(), m_debug);
+        FieldRelativeVelocity desired = m_driveUtil.goToGoal(pose, m_goal.get());
         // provide "lanes"
         desired = desired.plus(new FieldRelativeVelocity(0, m_yBias.get(), 0));
         if (m_debug)
-            m_viz.desired(pose, desired);
+            m_viz.desired(pose.getTranslation(), desired);
         if (m_debug)
             System.out.printf(" desired %s", desired);
         FieldRelativeVelocity v = m_tactics.apply(desired);

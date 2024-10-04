@@ -8,9 +8,10 @@ import org.team100.control.auto.Auton;
 import org.team100.control.auto.Defender;
 import org.team100.control.auto.ShootPreload;
 import org.team100.control.auto.SpeakerCycler;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.planner.ForceViz;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
-import org.team100.sim.ForceViz;
 import org.team100.sim.Friend;
 import org.team100.sim.Player;
 import org.team100.sim.SimWorld;
@@ -35,10 +36,11 @@ public class Blue implements Alliance {
     private final RobotAssembly friend2;
     private final Source source;
 
-    public Blue(SimWorld world, ForceViz viz) {
+    public Blue(SimWorld world, ForceViz viz, SwerveKinodynamics swerveKinodynamics) {
         // upper far 3
         if (kRealPlayer) {
             player = new RobotAssembly(
+                    swerveKinodynamics,
                     x -> SelectorPilot.autonSelector(
                             new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
                                     new Pose2d(3.0, 7.5, new Rotation2d(-2.75)), false,
@@ -51,6 +53,7 @@ public class Blue implements Alliance {
             // player = new PilotAssembly(x -> new ManualPilot(), playerBody, kSpeaker);
         } else {
             player = new RobotAssembly(
+                    swerveKinodynamics,
                     x -> SelectorPilot.autonSelector(
                             new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
                                     new Pose2d(3.0, 7.5, new Rotation2d(-2.75)), false,
@@ -65,6 +68,7 @@ public class Blue implements Alliance {
 
         // do nothing
         friend1 = new RobotAssembly(
+                swerveKinodynamics,
                 x -> SelectorPilot.autonSelector(
                         new ShootPreload(x.getDrive()::getPose),
                         new SpeakerCycler(x.getDrive(), x.getCamera(), x.getIndexer(),
@@ -77,6 +81,7 @@ public class Blue implements Alliance {
 
         // near 3
         friend2 = new RobotAssembly(
+                swerveKinodynamics,
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(3.0, 5.5, new Rotation2d(Math.PI)), false,

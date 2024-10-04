@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 
-import org.team100.Debug;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.sim.ForceViz;
+import org.team100.lib.planner.ForceViz;
+import org.team100.lib.planner.Tactic;
+import org.team100.lib.util.Debug;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.RobotSighting;
-import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -22,7 +23,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 public class RobotRepulsion implements Tactic {
     private static final double kRobotRepulsion = 8;
 
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final CameraSubsystem m_camera;
     private final ForceViz m_viz;
     private final boolean m_debug;
@@ -32,7 +33,7 @@ public class RobotRepulsion implements Tactic {
      * @param camera provides robot sightings
      */
     public RobotRepulsion(
-            DriveSubsystem drive,
+            DriveSubsystemInterface drive,
             CameraSubsystem camera,
             ForceViz viz,
             boolean debug) {
@@ -83,7 +84,7 @@ public class RobotRepulsion implements Tactic {
                 if (myVelocity.dot(robotRepel) < 0) {
                     // don't bother repelling if we're heading away
                     if (m_debug)
-                        m_viz.tactics(myPosition, robotRepel);
+                        m_viz.tactics(myPosition.getTranslation(), robotRepel);
                     v = v.plus(robotRepel);
                 }
             }

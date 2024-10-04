@@ -23,6 +23,7 @@
       "/SmartDashboard/FullStateTrajectoryFollower": "String Chooser",
       "/SmartDashboard/HeedVision": "String Chooser",
       "/SmartDashboard/LimitBatterySag": "String Chooser",
+      "/SmartDashboard/Log Level": "String Chooser",
       "/SmartDashboard/OscillateDirect": "String Chooser",
       "/SmartDashboard/OscillateTheta": "String Chooser",
       "/SmartDashboard/Scheduler": "Scheduler",
@@ -35,9 +36,15 @@
       "/SmartDashboard/UseExecutorAsync": "String Chooser",
       "/SmartDashboard/UseInitialVelocity": "String Chooser",
       "/SmartDashboard/UseSetpointGenerator": "String Chooser",
-      "/field": "Field2d"
+      "/field": "Field2d",
+      "field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Log Level": {
+        "window": {
+          "visible": true
+        }
+      },
       "/field": {
         "Foe": {
           "arrowSize": 21,
@@ -144,6 +151,17 @@
         "window": {
           "visible": true
         }
+      },
+      "field": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
       }
     }
   },
@@ -159,6 +177,9 @@
         "double[]##v_/field/ball": {
           "open": true
         },
+        "open": true
+      },
+      "log": {
         "open": true
       }
     },

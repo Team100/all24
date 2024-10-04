@@ -67,14 +67,13 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private final DoubleLogger m_log_omega_FB;
     private final FieldLogger.Log m_field_log;
 
-
     private State100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
     private Pose2d m_prevPose;
 
     public ManualWithNoteRotation(
-        FieldLogger.Log fieldLogger,
+            FieldLogger.Log fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             Gyro gyro,

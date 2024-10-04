@@ -1,35 +1,40 @@
 package org.team100.commands;
 
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
-import org.team100.Debug;
-import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.planner.Drive;
-import org.team100.sim.ForceViz;
-import org.team100.subsystems.DriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.planner.ForceViz;
+import org.team100.lib.util.Debug;
+import org.team100.planner.DriveUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class DriveToPose extends Command {
-    private final DriveSubsystem m_drive;
+    private final SwerveKinodynamics m_swerveKinodynamics;
+    private final DriveSubsystemInterface m_drive;
     private final Supplier<Pose2d> m_goal;
     private final Supplier<Double> m_yBias;
-    private final Tactics m_tactics;
+    private final UnaryOperator<FieldRelativeVelocity> m_tactics;
     private final Tolerance m_tolerance;
     private final ForceViz m_viz;
     private final boolean m_debug;
+    private final DriveUtil m_driveUtil;
 
     public DriveToPose(
-            DriveSubsystem drive,
+            SwerveKinodynamics swerveKinodynamics,
+            DriveSubsystemInterface drive,
             Supplier<Pose2d> goal,
             Supplier<Double> yBias,
-            Tactics tactics,
+            UnaryOperator<FieldRelativeVelocity> tactics,
             Tolerance tolerance,
             ForceViz viz,
             boolean debug) {
+        m_swerveKinodynamics = swerveKinodynamics;
         m_drive = drive;
         m_goal = goal;
         m_yBias = yBias;
@@ -37,6 +42,7 @@ public class DriveToPose extends Command {
         m_tolerance = tolerance;
         m_viz = viz;
         m_debug = debug && Debug.enable();
+        m_driveUtil = new DriveUtil(swerveKinodynamics, m_debug);
         addRequirements(drive);
     }
 
@@ -44,18 +50,18 @@ public class DriveToPose extends Command {
     public void execute() {
         if (m_debug)
             System.out.print("DriveToPose");
-        FieldRelativeVelocity desired = Drive.goToGoal(m_drive.getPose(), m_goal.get(), m_debug);
+        FieldRelativeVelocity desired = m_driveUtil.goToGoal(m_drive.getPose(), m_goal.get());
         // provide "lanes"
         desired = desired.plus(new FieldRelativeVelocity(0, m_yBias.get(), 0));
         if (m_debug)
-            m_viz.desired(m_drive.getPose(), desired);
+            m_viz.desired(m_drive.getPose().getTranslation(), desired);
         if (m_debug)
             System.out.printf(" desired v %s", desired);
         FieldRelativeVelocity v = m_tactics.apply(desired);
         if (m_debug)
             System.out.printf(" tactics v %s", v);
         v = v.plus(desired);
-        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+        v = v.clamp(m_swerveKinodynamics.getMaxDriveVelocityM_S(), m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         if (m_debug)
             System.out.printf(" total v %s", v);
         m_drive.drive(v);

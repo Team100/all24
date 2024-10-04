@@ -3,6 +3,8 @@ package org.team100.util;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
 
+import org.team100.lib.util.Arg;
+
 /** Counts positive edges of the supplier. */
 public class Counter implements IntSupplier {
 

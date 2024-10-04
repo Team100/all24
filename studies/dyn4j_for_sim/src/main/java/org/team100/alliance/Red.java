@@ -7,10 +7,11 @@ import org.team100.control.auto.Defender;
 import org.team100.control.auto.Passer;
 import org.team100.control.auto.Scorer;
 import org.team100.control.auto.ShootPreload;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.planner.ForceViz;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
 import org.team100.sim.Foe;
-import org.team100.sim.ForceViz;
 import org.team100.sim.SimWorld;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,9 +32,10 @@ public class Red implements Alliance {
     private final RobotAssembly defender;
     private final Source source;
 
-    public Red(SimWorld world, ForceViz viz) {
+    public Red(SimWorld world, ForceViz viz, SwerveKinodynamics swerveKinodynamics) {
         // near 3
         scorer = new RobotAssembly(
+                swerveKinodynamics,
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(14, 7, new Rotation2d(-0.5)), false,
@@ -53,6 +55,7 @@ public class Red implements Alliance {
 
         // lower far 3
         passer = new RobotAssembly(
+                swerveKinodynamics,
                 x -> SelectorPilot.autonSelector(
                         new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
                                 new Pose2d(13.5, 3.4, new Rotation2d(0.5)), false,
@@ -66,6 +69,7 @@ public class Red implements Alliance {
 
         // do nothing
         defender = new RobotAssembly(
+                swerveKinodynamics,
                 x -> SelectorPilot.autonSelector(
                         new ShootPreload(x.getDrive()::getPose),
                         new Defender()),

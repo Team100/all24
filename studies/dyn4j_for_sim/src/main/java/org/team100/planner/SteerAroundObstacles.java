@@ -1,11 +1,12 @@
 package org.team100.planner;
 
 import org.dyn4j.geometry.Vector2;
-import org.team100.Debug;
 import org.team100.field.FieldMap;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.sim.ForceViz;
-import org.team100.subsystems.DriveSubsystem;
+import org.team100.lib.planner.ForceViz;
+import org.team100.lib.planner.Tactic;
+import org.team100.lib.util.Debug;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,7 +17,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 public class SteerAroundObstacles implements Tactic {
     private static final double kObstacleSteer = 1;
 
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final ForceViz m_viz;
     private final Heuristics m_heuristics;
     private final boolean m_debug;
@@ -25,7 +26,7 @@ public class SteerAroundObstacles implements Tactic {
      * @param drive provides pose
      */
     public SteerAroundObstacles(
-            DriveSubsystem drive,
+            DriveSubsystemInterface drive,
             ForceViz viz,
             boolean debug) {
         m_drive = drive;
@@ -62,7 +63,7 @@ public class SteerAroundObstacles implements Tactic {
                         force.y);
             FieldRelativeVelocity steering = new FieldRelativeVelocity(force.x, force.y, 0);
             if (m_debug)
-                m_viz.tactics(pose, steering);
+                m_viz.tactics(pose.getTranslation(), steering);
             v = v.plus(steering);
         }
         return v;

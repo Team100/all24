@@ -1,16 +1,9 @@
 package org.team100.control;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-
 import org.team100.field.FieldMap;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.sim.ForceViz;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
-import org.team100.subsystems.IndexerSubsystem;
-import org.team100.util.Arg;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -19,13 +12,13 @@ import edu.wpi.first.wpilibj.XboxController;
 /** A human driver/operator */
 public class ManualPilot implements Pilot {
     private final XboxController m_controller = new XboxController(0);
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private static final double kSubwooferRepulsion = 5;
     private static final double kObstacleRepulsion = 10;
 
     boolean m_debug = true;
 
-    public ManualPilot(DriveSubsystem drive) {
+    public ManualPilot(DriveSubsystemInterface drive) {
         m_drive = drive;
     }
 

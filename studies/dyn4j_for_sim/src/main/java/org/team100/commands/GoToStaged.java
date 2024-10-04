@@ -2,43 +2,46 @@ package org.team100.commands;
 
 import java.util.Optional;
 
-import org.team100.Debug;
 import org.team100.control.Pilot;
 import org.team100.field.StagedNote;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.planner.Drive;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.util.Arg;
+import org.team100.lib.util.Debug;
+import org.team100.planner.DriveUtil;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.DriveSubsystem;
-import org.team100.subsystems.IndexerSubsystem;
-import org.team100.util.Arg;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** Drive to a staged note location */
 public class GoToStaged extends Command {
+    /** Alignment tolerance for the intake */
+    public static final double kIntakeAdmittanceRad = 0.2;
+
     private final Pilot m_pilot;
-    private final IndexerSubsystem m_indexer;
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final boolean m_debug;
     private final Tactics m_tactics;
+    private final DriveUtil m_driveUtil;
 
     public GoToStaged(
+            SwerveKinodynamics swerveKinodynamics,
             Pilot pilot,
-            IndexerSubsystem indexer,
             DriveSubsystem drive,
             CameraSubsystem camera,
             Tactics tactics,
             boolean debug) {
         Arg.nonnull(pilot);
-        Arg.nonnull(indexer);
         Arg.nonnull(drive);
         Arg.nonnull(camera);
         m_pilot = pilot;
-        m_indexer = indexer;
         m_drive = drive;
         m_debug = debug && Debug.enable();
         m_tactics = tactics;
+        m_driveUtil = new DriveUtil(swerveKinodynamics, m_debug);
         addRequirements(drive);
     }
 
@@ -56,12 +59,11 @@ public class GoToStaged extends Command {
         if (n.isEmpty())
             return;
 
-        FieldRelativeVelocity desired = Drive.goToGoalAligned(
+        FieldRelativeVelocity desired = m_driveUtil.goToGoalAligned(
                 m_tactics,
-                m_indexer,
+                kIntakeAdmittanceRad,
                 pose,
-                n.get().getLocation(),
-                m_debug);
+                n.get().getLocation());
         m_drive.drive(desired);
     }
 }

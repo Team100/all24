@@ -1,4 +1,4 @@
-package org.team100.util;
+package org.team100.lib.util;
 
 public class Arg {
     /** Throws if o is null. */

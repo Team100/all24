@@ -1,7 +1,7 @@
 package org.team100.planner;
 
 import org.dyn4j.geometry.Vector2;
-import org.team100.Debug;
+import org.team100.lib.util.Debug;
 
 public class Heuristics {
 

@@ -1,13 +1,15 @@
 package org.team100.commands;
 
-import org.team100.Debug;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.planner.Drive;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.util.Arg;
+import org.team100.lib.util.Debug;
+import org.team100.planner.DriveUtil;
 import org.team100.subsystems.CameraSubsystem;
 import org.team100.subsystems.CameraSubsystem.NoteSighting;
 import org.team100.subsystems.DriveSubsystem;
 import org.team100.subsystems.IndexerSubsystem;
-import org.team100.util.Arg;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,13 +23,18 @@ import edu.wpi.first.wpilibj2.command.Command;
  * This never finishes; run it with an Intake command as the deadline.
  */
 public class DriveToNote extends Command {
+    /** Alignment tolerance for the intake */
+    public static final double kIntakeAdmittanceRad = 0.2;
+
     private final IndexerSubsystem m_indexer;
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final CameraSubsystem m_camera;
     private final boolean m_debug;
     private final Tactics m_tactics;
+    private final DriveUtil m_driveUtil;
 
     public DriveToNote(
+            SwerveKinodynamics swerveKinodynamics,
             IndexerSubsystem indexer,
             DriveSubsystem drive,
             CameraSubsystem camera,
@@ -41,6 +48,7 @@ public class DriveToNote extends Command {
         m_camera = camera;
         m_debug = debug && Debug.enable();
         m_tactics = tactics;
+        m_driveUtil = new DriveUtil(swerveKinodynamics, m_debug);
         addRequirements(drive);
     }
 
@@ -76,12 +84,11 @@ public class DriveToNote extends Command {
 
         // found a note
 
-        FieldRelativeVelocity desired = Drive.goToGoalAligned(
+        FieldRelativeVelocity desired = m_driveUtil.goToGoalAligned(
                 m_tactics,
-                m_indexer,
+                kIntakeAdmittanceRad,
                 pose,
-                closestSighting.position(),
-                m_debug);
+                closestSighting.position());
 
         m_drive.drive(desired);
     }
