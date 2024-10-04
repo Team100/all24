@@ -1,4 +1,4 @@
-package org.team100.field;
+package org.team100.lib.field;
 
 import java.util.Map;
 import static java.util.Map.entry;
@@ -7,8 +7,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
-/** Stage post obstacles */
-public class FieldMap {
+/**
+ * Stage post obstacles.
+ * This is used by the dyn4j simulator.
+ */
+public class FieldMap2024 {
 
     /**
      * Each post is a 30 cm square.
@@ -37,7 +40,7 @@ public class FieldMap {
 
     public static final Map<Integer, Translation2d> notes = Map.ofEntries();
 
-    private FieldMap() {
+    private FieldMap2024() {
         //
     }
 }

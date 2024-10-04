@@ -1,6 +1,6 @@
-package org.team100.control;
+package org.team100.lib.pilot;
 
-/** Autopilot implements enablement. */
+/** Autopilot implements enablement, which is used by the simulator. */
 public class AutoPilot implements Pilot {
     private boolean m_enabled = false;
 

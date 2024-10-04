@@ -1,4 +1,4 @@
-package org.team100.commands;
+package org.team100.lib.util;
 
 public record Tolerance(
         double kTranslationTolerance,

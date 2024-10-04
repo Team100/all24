@@ -2,12 +2,13 @@ package org.team100.alliance;
 
 import org.team100.commands.SourceDefault;
 import org.team100.control.SelectorPilot;
-import org.team100.control.auto.Auton;
-import org.team100.control.auto.Defender;
-import org.team100.control.auto.Passer;
-import org.team100.control.auto.Scorer;
-import org.team100.control.auto.ShootPreload;
+import org.team100.lib.camera.NoteSighting;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.pilot.Auton;
+import org.team100.lib.pilot.Defender;
+import org.team100.lib.pilot.Passer;
+import org.team100.lib.pilot.Scorer;
+import org.team100.lib.pilot.ShootPreload;
 import org.team100.lib.planner.ForceViz;
 import org.team100.robot.RobotAssembly;
 import org.team100.robot.Source;
@@ -37,13 +38,16 @@ public class Red implements Alliance {
         scorer = new RobotAssembly(
                 swerveKinodynamics,
                 x -> SelectorPilot.autonSelector(
-                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                        new Auton(x.getDrive()::getPose,
+                                () -> x.getCamera().recentNoteSightings().values().stream().map(NoteSighting::position)
+                                        .toList(),
+                                x.getIndexer()::full,
                                 new Pose2d(14, 7, new Rotation2d(-0.5)), false,
                                 11, 10, 9),
                         new Scorer(
-                                x.getDrive(),
-                                x.getCamera(),
-                                x.getIndexer(),
+                                x.getDrive()::getPose,
+                                x.getCamera()::noteNearby,
+                                x.getIndexer()::full,
                                 () -> world.getScorekeeper().redAmplified() > 0,
                                 new Pose2d(13.5, 5.5, new Rotation2d()),
                                 new Pose2d(14, 7, new Rotation2d()))),
@@ -57,10 +61,17 @@ public class Red implements Alliance {
         passer = new RobotAssembly(
                 swerveKinodynamics,
                 x -> SelectorPilot.autonSelector(
-                        new Auton(x.getDrive(), x.getCamera(), x.getIndexer(),
+                        new Auton(
+                                x.getDrive()::getPose,
+                                () -> x.getCamera().recentNoteSightings().values().stream().map(NoteSighting::position)
+                                        .toList(),
+                                x.getIndexer()::full,
                                 new Pose2d(13.5, 3.4, new Rotation2d(0.5)), false,
                                 4, 5, 6),
-                        new Passer(x.getDrive(), x.getCamera(), x.getIndexer())),
+                        new Passer(
+                                x.getDrive()::getPose,
+                                x.getCamera()::noteNearby,
+                                x.getIndexer()::full)),
                 new Foe("red passer", world, 0, false),
                 viz,
                 false);

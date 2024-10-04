@@ -6,13 +6,14 @@ import java.util.function.Supplier;
 
 import org.dyn4j.geometry.Vector2;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.camera.RobotSighting;
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.planner.ForceViz;
 import org.team100.lib.util.Debug;
+import org.team100.planner.Tactics;
 import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.CameraSubsystem.RobotSighting;
 import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;

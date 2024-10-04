@@ -1,8 +1,6 @@
-package org.team100.control.auto;
+package org.team100.lib.pilot;
 
 import java.util.function.Supplier;
-
-import org.team100.control.AutoPilot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 

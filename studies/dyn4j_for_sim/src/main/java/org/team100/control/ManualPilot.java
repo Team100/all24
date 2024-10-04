@@ -1,9 +1,10 @@
 package org.team100.control;
 
-import org.team100.field.FieldMap;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.field.FieldMap2024;
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.pilot.Pilot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -38,7 +39,7 @@ public class ManualPilot implements Pilot {
         Pose2d myPosition = m_drive.getPose();
         final double maxDistance = 1.5;
         FieldRelativeVelocity v = desired;
-        for (Pose2d pose : FieldMap.stagePosts.values()) {
+        for (Pose2d pose : FieldMap2024.stagePosts.values()) {
             Translation2d target = pose.getTranslation();
             Translation2d robotRelativeToTarget = myPosition.getTranslation().minus(target);
             double norm = robotRelativeToTarget.getNorm();

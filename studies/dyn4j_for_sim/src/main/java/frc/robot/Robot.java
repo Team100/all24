@@ -27,7 +27,7 @@ public class Robot extends TimedRobot100 {
         final Async async = asyncFactory.get();
 
         final Logging logging = Logging.instance();
-        final LevelPoller poller = new LevelPoller(async, logging::setLevel, Level.COMP);
+        final LevelPoller poller = new LevelPoller(async, logging::setLevel, Level.TRACE);
         Util.printf("Using log level %s\n", poller.getLevel().name());
         final LoggerFactory fieldLogger = logging.fieldLogger;
 

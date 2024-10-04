@@ -1,6 +1,4 @@
-package org.team100.control.auto;
-
-import org.team100.control.AutoPilot;
+package org.team100.lib.pilot;
 
 public class Defender extends AutoPilot {
     private boolean enabled = false;

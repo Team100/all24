@@ -5,9 +5,6 @@ import java.util.function.Function;
 
 import org.team100.commands.AmpCommand;
 import org.team100.commands.DefendSource;
-import org.team100.commands.DriveToNote;
-import org.team100.commands.DriveToPose;
-import org.team100.commands.DriveToSource;
 import org.team100.commands.GoToStaged;
 import org.team100.commands.Intake;
 import org.team100.commands.LobCommand;
@@ -15,12 +12,15 @@ import org.team100.commands.Outtake;
 import org.team100.commands.PilotDrive;
 import org.team100.commands.RotateToShoot;
 import org.team100.commands.ShootCommand;
-import org.team100.commands.Tactics;
-import org.team100.commands.Tolerance;
-import org.team100.control.Pilot;
+import org.team100.lib.commands.semiauto.DriveToNote;
+import org.team100.lib.commands.semiauto.DriveToPose;
+import org.team100.lib.commands.semiauto.DriveToSource;
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.pilot.Pilot;
 import org.team100.lib.planner.ForceViz;
+import org.team100.lib.util.Tolerance;
+import org.team100.planner.Tactics;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 import org.team100.subsystems.CameraSubsystem;
@@ -88,10 +88,10 @@ public class RobotAssembly {
         whileTrue(m_pilot::driveToNote,
                 new DriveToNote(
                         swerveKinodynamics,
-                        m_indexer,
                         m_drive,
-                        m_camera,
+                        m_camera::findClosestNoteTranslation,
                         new Tactics(m_drive, m_camera, viz, true, true, true, debug),
+                        viz,
                         debug));
         whileTrue(m_pilot::driveToCorner,
                 new DriveToPose(
@@ -107,7 +107,6 @@ public class RobotAssembly {
                 new DriveToSource(
                         swerveKinodynamics,
                         m_drive,
-                        m_camera,
                         robotBody::sourcePosition,
                         robotBody::yBias,
                         new Tactics(m_drive, m_camera, viz, true, true, true, debug),
@@ -120,6 +119,7 @@ public class RobotAssembly {
                         m_drive,
                         m_camera,
                         new Tactics(m_drive, m_camera, viz, true, true, true, debug),
+                        viz,
                         debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(

@@ -1,6 +1,7 @@
 package org.team100.control;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.pilot.Pilot;
 
 /**
  * Proxy allows the actual pilot to be changed on the fly.

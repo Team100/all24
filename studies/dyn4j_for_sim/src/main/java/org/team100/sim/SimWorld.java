@@ -11,10 +11,10 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
 import org.dyn4j.world.listener.StepListener;
-import org.team100.field.FieldMap;
 import org.team100.field.Score;
 import org.team100.field.Scorekeeper;
 import org.team100.field.StagedNote;
+import org.team100.lib.field.FieldMap2024;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
@@ -320,7 +320,7 @@ public class SimWorld {
     private void setUpStages() {
         // these are from the onshape cad,
         // adjusted a tiny bit to line up with the background image.
-        for (Map.Entry<String, Pose2d> post : FieldMap.stagePosts.entrySet()) {
+        for (Map.Entry<String, Pose2d> post : FieldMap2024.stagePosts.entrySet()) {
             String name = post.getKey();
             Pose2d pose = post.getValue();
             addPost(name, pose.getX(), pose.getY(), pose.getRotation().getRadians());

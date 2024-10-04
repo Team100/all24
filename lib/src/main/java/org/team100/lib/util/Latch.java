@@ -1,8 +1,6 @@
-package org.team100.util;
+package org.team100.lib.util;
 
 import java.util.function.BooleanSupplier;
-
-import org.team100.lib.util.Arg;
 
 /** Observe a supplier, return true once per positive edge. */
 public class Latch implements BooleanSupplier {

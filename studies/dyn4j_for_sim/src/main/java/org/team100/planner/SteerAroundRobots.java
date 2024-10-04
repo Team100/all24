@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.function.Supplier;
 
 import org.dyn4j.geometry.Vector2;
-import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
+import org.team100.lib.camera.RobotSighting;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.planner.ForceViz;
 import org.team100.lib.planner.Tactic;
 import org.team100.lib.util.Debug;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.CameraSubsystem.RobotSighting;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,19 +24,19 @@ public class SteerAroundRobots implements Tactic {
     private static final double kRobotSteer = 8;
     private static final double kMaxTargetVelocity = 4;
 
-    private final DriveSubsystemInterface m_drive;
-    private final CameraSubsystem m_camera;
+    private final Supplier<Pose2d> m_drive;
+    private final Supplier<NavigableMap<Double, RobotSighting>> m_camera;
     private final ForceViz m_viz;
     private final Heuristics m_heuristics;
     private final boolean m_debug;
 
     /**
      * @param drive  provides pose
-     * @param camera provides robot sightings
+     * @param camera provides timestamped robot sightings
      */
     public SteerAroundRobots(
-            DriveSubsystemInterface drive,
-            CameraSubsystem camera,
+            Supplier<Pose2d> drive,
+            Supplier<NavigableMap<Double, RobotSighting>> camera,
             ForceViz viz,
             boolean debug) {
         m_drive = drive;
@@ -49,8 +48,8 @@ public class SteerAroundRobots implements Tactic {
 
     @Override
     public FieldRelativeVelocity apply(FieldRelativeVelocity myVelocity) {
-        Pose2d myPosition = m_drive.getPose();
-        NavigableMap<Double, RobotSighting> recentSightings = m_camera.recentSightings();
+        Pose2d myPosition = m_drive.get();
+        NavigableMap<Double, RobotSighting> recentSightings = m_camera.get();
         // only look at robots less than 1 second away.
         final double maxDistance = myVelocity.norm();
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);

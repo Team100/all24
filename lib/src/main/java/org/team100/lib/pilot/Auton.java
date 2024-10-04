@@ -1,16 +1,14 @@
-package org.team100.control.auto;
+package org.team100.lib.pilot;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
-import org.team100.control.AutoPilot;
 import org.team100.field.StagedNote;
-import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.util.Arg;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.CameraSubsystem.NoteSighting;
-import org.team100.subsystems.IndexerSubsystem;
-import org.team100.util.Latch;
+import org.team100.lib.util.Latch;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -34,12 +32,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 public class Auton extends AutoPilot {
     private static final double kBeliefUpdateTolerance = 0.1;
 
+    /** Ignore note sightings further away than this. */
+    public static final double kMaxNoteDistance = 5;
+
     // tolerance for go-to-staged-note paths.
     private static final double kStageTolerance = 0.6;
 
-    private final DriveSubsystemInterface m_drive;
-    private final CameraSubsystem m_camera;
-    private final IndexerSubsystem m_indexer;
+    private final Supplier<Pose2d> m_drive;
+    private final Supplier<Collection<Translation2d>> m_camera;
+    private final BooleanSupplier m_indexer;
     private final Pose2d m_shooting;
     private final boolean m_debug;
     /** List of note id's we should go get. */
@@ -58,9 +59,9 @@ public class Auton extends AutoPilot {
     private int m_goalNoteIdx;
 
     public Auton(
-            DriveSubsystemInterface drive,
-            CameraSubsystem camera,
-            IndexerSubsystem indexer,
+            Supplier<Pose2d> drive,
+            Supplier<Collection<Translation2d>> camera,
+            BooleanSupplier indexer,
             Pose2d shooting,
             boolean debug,
             Integer... agenda) {
@@ -82,26 +83,26 @@ public class Auton extends AutoPilot {
         // the first index is 0 so the starting index is -1
         // m_noteIndex.set(-1);
         m_goalNoteIdx = -1;
-        m_picked = new Latch(m_indexer::full);
+        m_picked = new Latch(m_indexer);
     }
 
     // first go to the right place, ignoring nearby notes on the way.
     @Override
     public boolean driveToStaged() {
-        return enabled() && !m_indexer.full();
+        return enabled() && !m_indexer.getAsBoolean();
     }
 
     // ... and intake it
     @Override
     public boolean intake() {
-        return enabled() && nearGoal() && !m_indexer.full();
+        return enabled() && nearGoal() && !m_indexer.getAsBoolean();
     }
 
     // if we have one, go score it.
     // there needs to be room for multiple scorers
     @Override
     public boolean scoreSpeaker() {
-        return enabled() && m_indexer.full();
+        return enabled() && m_indexer.getAsBoolean();
     }
 
     @Override
@@ -111,7 +112,7 @@ public class Auton extends AutoPilot {
 
     @Override
     public int goalNote() {
-        if (m_indexer.full()) {
+        if (m_indexer.getAsBoolean()) {
             // no goal if we already have one
             return 0;
         }
@@ -167,11 +168,11 @@ public class Auton extends AutoPilot {
         if (m_debug)
             System.out.printf("idx %d\n", m_goalNoteIdx);
         // System.out.printf("idx %d\n", m_noteIndex.getAsInt());
-        Pose2d robotPose = m_drive.getPose();
+        Pose2d robotPose = m_drive.get();
         if (m_debug)
             System.out.printf("pose %5.3f %5.3f\n", robotPose.getX(), robotPose.getY());
         // make this smaller to account for lag
-        double visionRadiusM = CameraSubsystem.kMaxNoteDistance - 1;
+        double visionRadiusM = kMaxNoteDistance - 1;
         // left-join the agenda to the sightings.
         for (int i = 0; i < m_agenda.length; ++i) {
             int noteId = m_agenda[i];
@@ -233,11 +234,11 @@ public class Auton extends AutoPilot {
     private void findit(int i, Translation2d noteLocation) {
         if (m_debug)
             System.out.printf("trying to find location %5.3f %5.3f\n", noteLocation.getX(), noteLocation.getY());
-        for (NoteSighting sighting : m_camera.recentNoteSightings().values()) {
+        for (Translation2d sighting : m_camera.get()) {
             if (m_debug)
-                System.out.printf("sighting %5.3f %5.3f\n", sighting.position().getX(), sighting.position().getY());
+                System.out.printf("sighting %5.3f %5.3f\n", sighting.getX(), sighting.getY());
             // can we see it?
-            if (noteLocation.getDistance(sighting.position()) < kBeliefUpdateTolerance) {
+            if (noteLocation.getDistance(sighting) < kBeliefUpdateTolerance) {
                 // found it!
                 if (m_debug)
                     System.out.printf("found note %d\n", i);
@@ -252,7 +253,7 @@ public class Auton extends AutoPilot {
     }
 
     private boolean nearGoal() {
-        Pose2d pose = m_drive.getPose();
+        Pose2d pose = m_drive.get();
         // int idx = m_noteIndex.getAsInt();
         int idx = m_goalNoteIdx;
         if (idx < 0) {

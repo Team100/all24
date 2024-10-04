@@ -1,7 +1,7 @@
 package org.team100.planner;
 
 import org.dyn4j.geometry.Vector2;
-import org.team100.field.FieldMap;
+import org.team100.lib.field.FieldMap2024;
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.planner.ForceViz;
@@ -42,7 +42,7 @@ public class SteerAroundObstacles implements Tactic {
         // only look at obstacles less than 1 second away.
         final double maxDistance = velocity.norm();
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
-        for (Pose2d pose : FieldMap.stagePosts.values()) {
+        for (Pose2d pose : FieldMap2024.stagePosts.values()) {
             Translation2d obstacleLocation = pose.getTranslation();
             double distance = myPosition.getTranslation().getDistance(obstacleLocation);
             if (distance > maxDistance) // ignore far-away obstacles

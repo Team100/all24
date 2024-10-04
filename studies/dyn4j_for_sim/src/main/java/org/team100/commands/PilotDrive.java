@@ -1,6 +1,6 @@
 package org.team100.commands;
 
-import org.team100.control.Pilot;
+import org.team100.lib.pilot.Pilot;
 import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;

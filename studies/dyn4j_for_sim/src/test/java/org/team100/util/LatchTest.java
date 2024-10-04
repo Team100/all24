@@ -3,6 +3,7 @@ package org.team100.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.util.Latch;
 
 class LatchTest {
     boolean value = false;

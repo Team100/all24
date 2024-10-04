@@ -6,6 +6,7 @@ import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.util.Debug;
+import org.team100.lib.util.Tolerance;
 import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.MathUtil;

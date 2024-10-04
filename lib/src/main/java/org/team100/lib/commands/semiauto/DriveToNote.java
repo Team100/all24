@@ -1,17 +1,18 @@
-package org.team100.commands;
+package org.team100.lib.commands.semiauto;
+
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.planner.DriveUtil;
+import org.team100.lib.planner.ForceViz;
 import org.team100.lib.util.Arg;
 import org.team100.lib.util.Debug;
-import org.team100.planner.DriveUtil;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.CameraSubsystem.NoteSighting;
-import org.team100.subsystems.DriveSubsystem;
-import org.team100.subsystems.IndexerSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -26,29 +27,36 @@ public class DriveToNote extends Command {
     /** Alignment tolerance for the intake */
     public static final double kIntakeAdmittanceRad = 0.2;
 
-    private final IndexerSubsystem m_indexer;
     private final DriveSubsystemInterface m_drive;
-    private final CameraSubsystem m_camera;
+    private final Function<Pose2d, Translation2d> m_camera;
     private final boolean m_debug;
-    private final Tactics m_tactics;
     private final DriveUtil m_driveUtil;
 
+    /**
+     * 
+     * @param swerveKinodynamics
+     * @param drive
+     * @param camera             given the robot pose, return the field-relative
+     *                           position of the closest note, or null if none
+     *                           nearby
+     * @param tactics            given the desired velocity, return avoidance
+     *                           velocity
+     * @param viz
+     * @param debug
+     */
     public DriveToNote(
             SwerveKinodynamics swerveKinodynamics,
-            IndexerSubsystem indexer,
-            DriveSubsystem drive,
-            CameraSubsystem camera,
-            Tactics tactics,
+            DriveSubsystemInterface drive,
+            Function<Pose2d, Translation2d> camera,
+            UnaryOperator<FieldRelativeVelocity> tactics,
+            ForceViz viz,
             boolean debug) {
-        Arg.nonnull(indexer);
         Arg.nonnull(drive);
         Arg.nonnull(camera);
-        m_indexer = indexer;
         m_drive = drive;
         m_camera = camera;
         m_debug = debug && Debug.enable();
-        m_tactics = tactics;
-        m_driveUtil = new DriveUtil(swerveKinodynamics, m_debug);
+        m_driveUtil = new DriveUtil(swerveKinodynamics, drive, viz, tactics, m_debug);
         addRequirements(drive);
     }
 
@@ -75,20 +83,19 @@ public class DriveToNote extends Command {
         // TODO: remember and prefer the previous fixation, unless some new sighting is
         // much better.
 
-        NoteSighting closestSighting = m_camera.findClosestNote(pose);
+        Translation2d closestSighting = m_camera.apply(pose);
         if (closestSighting == null) {
             // no nearby note, no need to move
-            m_drive.drive(m_tactics.finish(new FieldRelativeVelocity(0, 0, 0)));
+            m_drive.drive(m_driveUtil.finish(new FieldRelativeVelocity(0, 0, 0)));
             return;
         }
 
         // found a note
 
         FieldRelativeVelocity desired = m_driveUtil.goToGoalAligned(
-                m_tactics,
                 kIntakeAdmittanceRad,
                 pose,
-                closestSighting.position());
+                closestSighting);
 
         m_drive.drive(desired);
     }

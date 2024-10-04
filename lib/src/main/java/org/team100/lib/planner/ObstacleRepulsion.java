@@ -2,12 +2,9 @@ package org.team100.lib.planner;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.field.PracticeField;
-import org.team100.lib.geometry.Ellipse2d;
+import org.team100.lib.field.FieldMap2024;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
-// TODO: 2025 version
-// import edu.wpi.first.math.geometry.Ellipse2d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -38,8 +35,8 @@ public class ObstacleRepulsion implements Tactic {
         Pose2d myPosition = m_poseSupplier.get();
         final double maxDistance = 1.5;
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
-        for (Ellipse2d obstacle : PracticeField.obstacles) {
-            Translation2d target = obstacle.findNearestPoint(myPosition.getTranslation());
+        for (Pose2d pose : FieldMap2024.stagePosts.values()) {
+            Translation2d target = pose.getTranslation();
             Translation2d robotRelativeToTarget = myPosition.getTranslation().minus(target);
             double norm = robotRelativeToTarget.getNorm();
             if (norm < maxDistance) {

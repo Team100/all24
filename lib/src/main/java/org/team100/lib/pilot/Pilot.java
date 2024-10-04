@@ -1,4 +1,4 @@
-package org.team100.control;
+package org.team100.lib.pilot;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 

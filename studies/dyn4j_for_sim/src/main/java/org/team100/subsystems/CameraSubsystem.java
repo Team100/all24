@@ -5,6 +5,8 @@ import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.dyn4j.geometry.Vector2;
+import org.team100.lib.camera.NoteSighting;
+import org.team100.lib.camera.RobotSighting;
 import org.team100.sim.Body100;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
@@ -20,12 +22,6 @@ public class CameraSubsystem extends SubsystemBase {
     public static final double kMaxNoteDistance = 5;
     /** Ignore robot sightings further away than this. */
     private static final double kMaxRobotDistance = 5;
-
-    public static record RobotSighting(boolean friend, Translation2d position) {
-    }
-
-    public static record NoteSighting(Translation2d position) {
-    }
 
     /**
      * how old can sightings be and still be trusted?
@@ -58,6 +54,14 @@ public class CameraSubsystem extends SubsystemBase {
         lookForRobots();
         lookForNotes();
         trimSightings();
+    }
+
+    /** @return field-relative translation closest to pose */
+    public Translation2d findClosestNoteTranslation(Pose2d pose) {
+        NoteSighting s = findClosestNote(pose);
+        if (s == null)
+            return null;
+        return s.position();
     }
 
     public NoteSighting findClosestNote(Pose2d pose) {

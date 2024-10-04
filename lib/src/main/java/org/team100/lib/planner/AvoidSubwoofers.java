@@ -1,12 +1,10 @@
-package org.team100.planner;
+package org.team100.lib.planner;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
-import org.team100.field.FieldMap;
-import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
+import org.team100.lib.field.FieldMap2024;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.planner.ForceViz;
-import org.team100.lib.planner.Tactic;
 import org.team100.lib.util.Debug;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,7 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 public class AvoidSubwoofers implements Tactic {
     private static final double kSubwooferRepulsion = 5;
 
-    private final DriveSubsystemInterface m_drive;
+    private final Supplier<Pose2d> m_drive;
     private final ForceViz m_viz;
     private final boolean m_debug;
 
@@ -26,7 +24,7 @@ public class AvoidSubwoofers implements Tactic {
      * @param drive provides pose
      */
     public AvoidSubwoofers(
-            DriveSubsystemInterface drive,
+            Supplier<Pose2d> drive,
             ForceViz viz,
             boolean debug) {
         m_drive = drive;
@@ -36,10 +34,10 @@ public class AvoidSubwoofers implements Tactic {
 
     @Override
     public FieldRelativeVelocity apply(FieldRelativeVelocity desired) {
-        Pose2d pose = m_drive.getPose();
+        Pose2d pose = m_drive.get();
         final double maxDistance = 3;
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
-        for (Map.Entry<String, Pose2d> entry : FieldMap.subwoofers.entrySet()) {
+        for (Map.Entry<String, Pose2d> entry : FieldMap2024.subwoofers.entrySet()) {
             Translation2d target = entry.getValue().getTranslation();
             Translation2d robotRelativeToTarget = pose.getTranslation().minus(target);
             double norm = robotRelativeToTarget.getNorm();

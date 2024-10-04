@@ -1,17 +1,12 @@
-package org.team100.planner;
+package org.team100.lib.planner;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.NavigableMap;
+import java.util.function.Supplier;
 
-import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.planner.ForceViz;
-import org.team100.lib.planner.Tactic;
 import org.team100.lib.util.Debug;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.CameraSubsystem.RobotSighting;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,8 +18,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 public class RobotRepulsion implements Tactic {
     private static final double kRobotRepulsion = 8;
 
-    private final DriveSubsystemInterface m_drive;
-    private final CameraSubsystem m_camera;
+    private final Supplier<Pose2d> m_drive;
+    private final Supplier<Collection<Translation2d>> m_camera;
     private final ForceViz m_viz;
     private final boolean m_debug;
 
@@ -33,8 +28,8 @@ public class RobotRepulsion implements Tactic {
      * @param camera provides robot sightings
      */
     public RobotRepulsion(
-            DriveSubsystemInterface drive,
-            CameraSubsystem camera,
+            Supplier<Pose2d> drive,
+            Supplier<Collection<Translation2d>> camera,
             ForceViz viz,
             boolean debug) {
         m_drive = drive;
@@ -46,28 +41,24 @@ public class RobotRepulsion implements Tactic {
 
     @Override
     public FieldRelativeVelocity apply(FieldRelativeVelocity myVelocity) {
-        Pose2d myPosition = m_drive.getPose();
-        NavigableMap<Double, RobotSighting> recentSightings = m_camera.recentSightings();
+        Pose2d myPosition = m_drive.get();
         final double maxDistance = 3;
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         List<Translation2d> nearby = new ArrayList<>();
         // look at entries in order of decreasing timestamp
-        for (Entry<Double, RobotSighting> mostRecent : recentSightings.entrySet()) {
-            RobotSighting mostRecentSighting = mostRecent.getValue();
-            Translation2d mostRecentPosition = mostRecentSighting.position();
+        for (Translation2d mostRecent : m_camera.get()) {
             if (!nearby.isEmpty()) {
-                Translation2d nearest = mostRecentPosition.nearest(nearby);
-                if (mostRecentPosition.getDistance(nearest) < 1) {
+                Translation2d nearest = mostRecent.nearest(nearby);
+                if (mostRecent.getDistance(nearest) < 1) {
                     // ignore near-duplicates
                     continue;
                 }
             }
-            nearby.add(mostRecentPosition);
-            double distance = myPosition.getTranslation().getDistance(mostRecentPosition);
+            nearby.add(mostRecent);
+            double distance = myPosition.getTranslation().getDistance(mostRecent);
             if (distance > 4) // don't react to far-away obstacles
                 continue;
-            Translation2d target = mostRecent.getValue().position();
-            Translation2d robotRelativeToTarget = myPosition.getTranslation().minus(target);
+            Translation2d robotRelativeToTarget = myPosition.getTranslation().minus(mostRecent);
             double norm = robotRelativeToTarget.getNorm();
             if (norm < maxDistance) {
                 // unit vector in the direction of the force
@@ -79,7 +70,7 @@ public class RobotRepulsion implements Tactic {
                 Translation2d force = normalized.times(scale);
                 if (m_debug)
                     System.out.printf(" robotRepulsion target (%5.2f, %5.2f) range %5.2f F (%5.2f, %5.2f)",
-                            target.getX(), target.getY(), norm, force.getX(), force.getY());
+                            mostRecent.getX(), mostRecent.getY(), norm, force.getX(), force.getY());
                 FieldRelativeVelocity robotRepel = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
                 if (myVelocity.dot(robotRepel) < 0) {
                     // don't bother repelling if we're heading away

@@ -1,10 +1,10 @@
-package org.team100.control.auto;
+package org.team100.lib.pilot;
 
-import org.team100.control.AutoPilot;
-import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
 import org.team100.lib.util.Arg;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.IndexerSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
@@ -19,16 +19,22 @@ import edu.wpi.first.math.geometry.Pose2d;
  * subsystem is constructed.
  */
 public class SpeakerCycler extends AutoPilot {
-    private final DriveSubsystemInterface m_drive;
-    private final CameraSubsystem m_camera;
-    private final IndexerSubsystem m_indexer;
+    private final Supplier<Pose2d> m_drive;
+    private final Predicate<Pose2d> m_camera;
+    private final BooleanSupplier m_indexer;
     private final Pose2d m_shooting;
 
-    // todo: make these into observers not subsystems.
+    /**
+     * 
+     * @param drive    the current robot pose
+     * @param camera   true if there's a note nearby the supplied pose.
+     * @param indexer  true if the indexes is full
+     * @param shooting configuration, red and blue are different.
+     */
     public SpeakerCycler(
-            DriveSubsystemInterface drive,
-            CameraSubsystem camera,
-            IndexerSubsystem indexer,
+            Supplier<Pose2d> drive,
+            Predicate<Pose2d> camera,
+            BooleanSupplier indexer,
             Pose2d shooting) {
         Arg.nonnull(drive);
         Arg.nonnull(camera);
@@ -42,25 +48,25 @@ public class SpeakerCycler extends AutoPilot {
     // drive to the speaker if there's a note in the indexer.
     @Override
     public boolean scoreSpeaker() {
-        return enabled() && m_indexer.full();
+        return enabled() && m_indexer.getAsBoolean();
     }
 
     // drive to the source if there's no note nearby and no note in the indexer.
     @Override
     public boolean driveToSource() {
-        return enabled() && !m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
+        return enabled() && !m_camera.test(m_drive.get()) && !m_indexer.getAsBoolean();
     }
 
     // intake if there's a note nearby and none in the indexer.
     @Override
     public boolean intake() {
-        return enabled() && m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
+        return enabled() && m_camera.test(m_drive.get()) && !m_indexer.getAsBoolean();
     }
 
     // drive to the note if there's one nearby and no note in the indexer.
     @Override
     public boolean driveToNote() {
-        return enabled() && m_camera.noteNearby(m_drive.getPose()) && !m_indexer.full();
+        return enabled() && m_camera.test(m_drive.get()) && !m_indexer.getAsBoolean();
     }
 
     @Override

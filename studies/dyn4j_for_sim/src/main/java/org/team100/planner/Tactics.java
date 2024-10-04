@@ -1,22 +1,24 @@
-package org.team100.commands;
+package org.team100.planner;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.camera.RobotSighting;
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.planner.AvoidEdges;
+import org.team100.lib.planner.AvoidSubwoofers;
 import org.team100.lib.planner.ForceViz;
+import org.team100.lib.planner.ObstacleRepulsion;
+import org.team100.lib.planner.RobotRepulsion;
 import org.team100.lib.planner.Tactic;
 import org.team100.lib.util.Debug;
-import org.team100.planner.AvoidSubwoofers;
-import org.team100.planner.ObstacleRepulsion;
-import org.team100.planner.RobotRepulsion;
-import org.team100.planner.SteerAroundObstacles;
-import org.team100.planner.SteerAroundRobots;
 import org.team100.subsystems.CameraSubsystem;
+
+import edu.wpi.first.math.geometry.Translation2d;
 
 /**
  * Low level drive motion heuristics that can be used by any command.
@@ -56,15 +58,20 @@ public class Tactics implements UnaryOperator<FieldRelativeVelocity> {
         m_tactics = new ArrayList<>();
         if (avoidObstacles) {
             m_tactics.add(new SteerAroundObstacles(m_drive, viz, debug));
-            m_tactics.add(new ObstacleRepulsion(m_drive, viz, debug));
+            m_tactics.add(new ObstacleRepulsion(m_drive::getPose, viz, debug));
         }
         if (avoidEdges) {
             m_tactics.add(new AvoidEdges(m_drive::getPose, viz, debug));
-            m_tactics.add(new AvoidSubwoofers(m_drive, viz, debug));
+            m_tactics.add(new AvoidSubwoofers(m_drive::getPose, viz, debug));
         }
         if (avoidRobots) {
-            m_tactics.add(new SteerAroundRobots(m_drive, m_camera, viz, debug));
-            m_tactics.add(new RobotRepulsion(m_drive, m_camera, viz, debug));
+            m_tactics.add(new SteerAroundRobots(
+                    m_drive::getPose,
+                    m_camera::recentSightings,
+                    viz, debug));
+            m_tactics.add(new RobotRepulsion(m_drive::getPose,
+                    () -> m_camera.recentSightings().values().stream().map(RobotSighting::position).toList(),
+                    viz, debug));
         }
         m_debug = debug && Debug.enable();
     }
