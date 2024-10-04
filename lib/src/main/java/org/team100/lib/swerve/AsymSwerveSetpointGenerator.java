@@ -173,6 +173,14 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
     ///////////////////////////////////////////////////////
 
+    /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     */
     private double[] computeVx(SwerveModuleState100[] states) {
         double[] vx = new double[states.length];
         for (int i = 0; i < states.length; ++i) {
@@ -186,6 +194,14 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         return vx;
     }
 
+    /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     */
     private double[] computeVy(SwerveModuleState100[] states) {
         double[] vy = new double[states.length];
         for (int i = 0; i < states.length; ++i) {
@@ -201,6 +217,13 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
     /**
      * Which way each module is actually going, taking speed polarity into account.
+     * 
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
      * 
      * @return elements are nullable.
      */
@@ -221,6 +244,13 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
     /**
      * Which way each module is actually going, taking speed polarity into account.
+     * 
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
      */
     private double[] computeHeadingVelocity(SwerveModuleState100[] states) {
         double[] heading = new double[states.length];
@@ -312,6 +342,14 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         }
     }
 
+    /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     */
     private void flipIfRequired(SwerveModuleState100[] prevStates, SwerveModuleState100[] setpointStates) {
         for (int i = 0; i < prevStates.length; ++i) {
             if (setpointStates[i].angle.isEmpty() || prevStates[i].angle.isEmpty()) {

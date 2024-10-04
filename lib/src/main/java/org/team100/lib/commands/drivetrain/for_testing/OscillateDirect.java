@@ -14,6 +14,7 @@ import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -27,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * be a piecewise parabolic curve that looks a lot like a sine wave, though it
  * is not one.
  */
-public class OscillateDirect extends Command implements Glassy  {
+public class OscillateDirect extends Command implements Glassy {
     private static final double kAccel = 1;
     private static final double kMaxSpeed = 1;
     private static final double kPeriod = 4 * kMaxSpeed / kAccel;
@@ -79,12 +80,16 @@ public class OscillateDirect extends Command implements Glassy  {
         double speedM_S = m_triangle.applyAsDouble(time);
         double positionM = m_parabola.applyAsDouble(time);
 
-        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)),
-                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero))
-        });
+
+        // straight ahead
+        straight(speedM_S);
+
+        // straight ahead but with the right side inverted, to see what happens.
+        // skew(speedM_S);
+
+        // go in a circle by putting the wheels at 45 degrees; the "positive" rolling
+        // direction is a negative spin.
+        // spin(speedM_S);
 
         m_log_period.log(() -> kPeriod);
         m_log_time.log(() -> time);
@@ -94,6 +99,33 @@ public class OscillateDirect extends Command implements Glassy  {
         SwerveState swerveState = m_swerve.getState();
         m_log_measurement_speed.log(() -> swerveState.x().v());
         m_log_measurement_position.log(() -> swerveState.x().x() - m_initial.x().x());
+    }
+
+    void straight(double speedM_S) {
+        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)), // FL
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)), // FR
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)), // RL
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)) // RR
+        });
+    }
+
+    void skew(double speedM_S) {
+        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)), // FL
+                new SwerveModuleState100(-speedM_S, Optional.of(GeometryUtil.kRotation180)), // FR
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)), // RL
+                new SwerveModuleState100(-speedM_S, Optional.of(GeometryUtil.kRotation180)) // RR
+        });
+    }
+
+    void spin(double speedM_S) {
+        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
+                new SwerveModuleState100(speedM_S, Optional.of(new Rotation2d(-Math.PI / 4))), // FL
+                new SwerveModuleState100(speedM_S, Optional.of(new Rotation2d(-3 * Math.PI / 4))), // FR
+                new SwerveModuleState100(speedM_S, Optional.of(new Rotation2d(Math.PI / 4))), // RL
+                new SwerveModuleState100(speedM_S, Optional.of(new Rotation2d(3 * Math.PI / 4))) // RR
+        });
     }
 
     @Override

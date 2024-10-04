@@ -136,7 +136,16 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         m_swerveLocal.setChassisSpeedsNormally(speeds, m_gyro.getYawRateNWU());
     }
 
-    /** Does not desaturate. */
+    /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     * 
+     * Does not desaturate.
+     */
     public void setRawModuleStates(SwerveModuleState100[] states) {
         m_swerveLocal.setRawModuleStates(states);
     }

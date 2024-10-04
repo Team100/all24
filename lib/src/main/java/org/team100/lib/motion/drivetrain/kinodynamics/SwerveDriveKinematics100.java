@@ -253,6 +253,13 @@ public class SwerveDriveKinematics100 {
 
     /**
      * Scale wheel speeds to limit maximum.
+     * 
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
      *
      * @param states        WILL BE MUTATED!
      * @param maxSpeedM_s   Max module speed
