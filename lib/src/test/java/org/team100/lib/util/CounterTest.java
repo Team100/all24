@@ -1,4 +1,4 @@
-package org.team100.util;
+package org.team100.lib.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

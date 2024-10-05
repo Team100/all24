@@ -1,4 +1,4 @@
-package org.team100.field;
+package org.team100.lib.field;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 /**
  * These locations match the background image, ~2 cm different from CAD.
  */
-public enum StagedNote {
+public enum StagedNote2024 {
     // blue side
     NOTE1(1, 2.890, 4.10),
     NOTE2(2, 2.890, 5.56),
@@ -27,15 +27,15 @@ public enum StagedNote {
     NOTE10(10, 13.657, 5.56),
     NOTE11(11, 13.657, 7.01);
 
-    private static final Map<Integer, StagedNote> stagedNotes = new HashMap<>();
+    private static final Map<Integer, StagedNote2024> stagedNotes = new HashMap<>();
 
     static {
-        for (StagedNote n : StagedNote.values()) {
+        for (StagedNote2024 n : StagedNote2024.values()) {
             stagedNotes.put(n.m_id, n);
         }
     }
 
-    public static Optional<StagedNote> get(int id) {
+    public static Optional<StagedNote2024> get(int id) {
         if (stagedNotes.containsKey(id)) {
             return Optional.of(stagedNotes.get(id));
         }
@@ -45,7 +45,7 @@ public enum StagedNote {
     private final int m_id;
     private final Translation2d m_location;
 
-    private StagedNote(int id, double x, double y) {
+    private StagedNote2024(int id, double x, double y) {
         m_id = id;
         m_location = new Translation2d(x, y);
     }

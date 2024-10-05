@@ -1,20 +1,17 @@
-package org.team100.commands;
+package org.team100.lib.commands.semiauto;
 
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.function.Supplier;
 
-import org.dyn4j.geometry.Vector2;
-import org.team100.kinodynamics.Kinodynamics;
 import org.team100.lib.camera.RobotSighting;
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.planner.ForceViz;
+import org.team100.lib.planner.Tactics;
 import org.team100.lib.util.Debug;
-import org.team100.planner.Tactics;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -40,13 +37,15 @@ public class DefendSource extends Command {
     /** try very hard stay between the opponent and the corner */
     private static final double kCorner = 50;
 
+    private final SwerveKinodynamics m_swerveKinodynamics;
+
     /**
      * it is easy for good defense to shut down the game completely; this discounts
      * the defense quickness.
      */
     private final double m_skill;
     private final DriveSubsystemInterface m_drive;
-    private final CameraSubsystem m_camera;
+    private final Supplier<NavigableMap<Double, RobotSighting>> m_camera;
     private final Supplier<Pose2d> m_position;
     private final Supplier<Pose2d> m_source;
     private final boolean m_debug;
@@ -56,14 +55,16 @@ public class DefendSource extends Command {
     private int m_pinCounter = 0;
 
     public DefendSource(
+            SwerveKinodynamics swerveKinodynamics,
             double skill,
-            DriveSubsystem drive,
-            CameraSubsystem camera,
+            DriveSubsystemInterface drive,
+            Supplier<NavigableMap<Double, RobotSighting>> camera,
             Supplier<Pose2d> position,
             Supplier<Pose2d> source,
             Tactics tactics,
             ForceViz viz,
             boolean debug) {
+        m_swerveKinodynamics = swerveKinodynamics;
         m_skill = skill;
         m_drive = drive;
         m_camera = camera;
@@ -87,7 +88,7 @@ public class DefendSource extends Command {
                 pose,
                 m_position.get(),
                 m_source.get(),
-                m_camera.recentSightings());
+                m_camera.get());
         if (m_debug)
             m_viz.desired(pose.getTranslation(), desired);
         if (m_debug)
@@ -96,7 +97,7 @@ public class DefendSource extends Command {
         if (m_debug)
             System.out.printf(" tactics %s", v);
         v = v.plus(desired);
-        v = v.clamp(Kinodynamics.kMaxVelocity, Kinodynamics.kMaxOmega);
+        v = v.clamp(m_swerveKinodynamics.getMaxDriveVelocityM_S(), m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         if (m_debug)
             System.out.printf(" final %s\n", v);
         m_drive.drive(v);
@@ -113,8 +114,6 @@ public class DefendSource extends Command {
             Pose2d opponentSourcePosition,
             NavigableMap<Double, RobotSighting> recentSightings) {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
-
-        Vector2 myPosition = new Vector2(pose.getX(), pose.getY());
 
         // attract to the waiting spot but only if nothing else is happening
         FieldRelativeDelta toWaitingSpot = FieldRelativeDelta.delta(pose, defenderPosition)
@@ -180,11 +179,10 @@ public class DefendSource extends Command {
             if (m_debug)
                 System.out.printf(" foe (%5.2f, %5.2f)", foe.getX(), foe.getY());
             // drive towards the opponent
-            Vector2 toOpponent = myPosition.to(
-                    new Vector2(foe.getX(), foe.getY()));
-            Vector2 force = toOpponent.product(
-                    m_skill * kDefensePushing / toOpponent.getMagnitudeSquared());
-            FieldRelativeVelocity push = new FieldRelativeVelocity(force.x, force.y, 0);
+            Translation2d toOpponent = foe.minus(pose.getTranslation());
+            Translation2d force = toOpponent.times(
+                    m_skill * kDefensePushing / Math.pow(toOpponent.getNorm(), 2));
+            FieldRelativeVelocity push = new FieldRelativeVelocity(force.getX(), force.getY(), 0);
             if (m_debug)
                 System.out.printf(" push %s", push);
             // v = v.plus(push);

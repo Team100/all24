@@ -2,8 +2,8 @@ package org.team100.commands;
 
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.planner.Tactics;
 import org.team100.lib.util.Debug;
-import org.team100.planner.Tactics;
 import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;

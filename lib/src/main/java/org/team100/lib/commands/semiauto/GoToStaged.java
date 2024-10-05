@@ -1,19 +1,17 @@
-package org.team100.commands;
+package org.team100.lib.commands.semiauto;
 
 import java.util.Optional;
 
-import org.team100.field.StagedNote;
+import org.team100.lib.field.StagedNote2024;
 import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.pilot.Pilot;
 import org.team100.lib.planner.DriveUtil;
 import org.team100.lib.planner.ForceViz;
+import org.team100.lib.planner.Tactics;
 import org.team100.lib.util.Arg;
 import org.team100.lib.util.Debug;
-import org.team100.planner.Tactics;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,14 +29,12 @@ public class GoToStaged extends Command {
     public GoToStaged(
             SwerveKinodynamics swerveKinodynamics,
             Pilot pilot,
-            DriveSubsystem drive,
-            CameraSubsystem camera,
+            DriveSubsystemInterface drive,
             Tactics tactics,
             ForceViz viz,
             boolean debug) {
         Arg.nonnull(pilot);
         Arg.nonnull(drive);
-        Arg.nonnull(camera);
         m_pilot = pilot;
         m_drive = drive;
         m_debug = debug && Debug.enable();
@@ -56,7 +52,7 @@ public class GoToStaged extends Command {
         int goalNoteId = m_pilot.goalNote();
         if (goalNoteId == 0)
             return;
-        Optional<StagedNote> n = StagedNote.get(goalNoteId);
+        Optional<StagedNote2024> n = StagedNote2024.get(goalNoteId);
         if (n.isEmpty())
             return;
 

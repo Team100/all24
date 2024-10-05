@@ -1,4 +1,4 @@
-package frc.robot;
+package org.team100.lib.geometry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

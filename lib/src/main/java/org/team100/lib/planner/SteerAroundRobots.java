@@ -1,4 +1,4 @@
-package org.team100.planner;
+package org.team100.lib.planner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,11 +6,8 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.function.Supplier;
 
-import org.dyn4j.geometry.Vector2;
 import org.team100.lib.camera.RobotSighting;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.planner.ForceViz;
-import org.team100.lib.planner.Tactic;
 import org.team100.lib.util.Debug;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -89,18 +86,18 @@ public class SteerAroundRobots implements Tactic {
                 continue;
 
             // treat the target as a fixed obstacle.
-            Vector2 steer = m_heuristics.steerToAvoid(
-                    new Vector2(myPosition.getX(), myPosition.getY()),
-                    new Vector2(myVelocity.x(), myVelocity.y()),
-                    new Vector2(mostRecentPosition.getX(), mostRecentPosition.getY()),
+            FieldRelativeVelocity steer = m_heuristics.steerToAvoid(
+                    myPosition.getTranslation(),
+                    myVelocity,
+                    mostRecentPosition,
                     1.0);
-            if (steer.getMagnitude() < 1e-3)
+            if (steer.norm() < 1e-3)
                 continue;
-            Vector2 force = steer.product(kRobotSteer);
+            FieldRelativeVelocity force = steer.times(kRobotSteer);
             if (m_debug)
                 System.out.printf(" steerAroundRobots target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
-                        mostRecentPosition.getX(), mostRecentPosition.getY(), force.x, force.y);
-            FieldRelativeVelocity robotSteer = new FieldRelativeVelocity(force.x, force.y, 0);
+                        mostRecentPosition.getX(), mostRecentPosition.getY(), force.x(), force.y());
+            FieldRelativeVelocity robotSteer = new FieldRelativeVelocity(force.x(), force.y(), 0);
             if (m_debug)
                 m_viz.tactics(myPosition.getTranslation(), robotSteer);
             v = v.plus(robotSteer);

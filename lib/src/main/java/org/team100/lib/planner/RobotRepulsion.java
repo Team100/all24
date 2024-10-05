@@ -1,10 +1,11 @@
 package org.team100.lib.planner;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.NavigableMap;
 import java.util.function.Supplier;
 
+import org.team100.lib.camera.RobotSighting;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.util.Debug;
 
@@ -19,7 +20,7 @@ public class RobotRepulsion implements Tactic {
     private static final double kRobotRepulsion = 8;
 
     private final Supplier<Pose2d> m_drive;
-    private final Supplier<Collection<Translation2d>> m_camera;
+    private final Supplier<NavigableMap<Double, RobotSighting>> m_camera;
     private final ForceViz m_viz;
     private final boolean m_debug;
 
@@ -29,7 +30,7 @@ public class RobotRepulsion implements Tactic {
      */
     public RobotRepulsion(
             Supplier<Pose2d> drive,
-            Supplier<Collection<Translation2d>> camera,
+            Supplier<NavigableMap<Double, RobotSighting>> camera,
             ForceViz viz,
             boolean debug) {
         m_drive = drive;
@@ -46,7 +47,9 @@ public class RobotRepulsion implements Tactic {
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
         List<Translation2d> nearby = new ArrayList<>();
         // look at entries in order of decreasing timestamp
-        for (Translation2d mostRecent : m_camera.get()) {
+        NavigableMap<Double, RobotSighting> recentSightings = m_camera.get();
+        for (RobotSighting sight : recentSightings.values()) {
+            Translation2d mostRecent = sight.position();
             if (!nearby.isEmpty()) {
                 Translation2d nearest = mostRecent.nearest(nearby);
                 if (mostRecent.getDistance(nearest) < 1) {

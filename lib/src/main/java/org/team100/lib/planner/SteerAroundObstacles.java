@@ -1,11 +1,9 @@
-package org.team100.planner;
+package org.team100.lib.planner;
 
-import org.dyn4j.geometry.Vector2;
+import java.util.function.Supplier;
+
 import org.team100.lib.field.FieldMap2024;
-import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.planner.ForceViz;
-import org.team100.lib.planner.Tactic;
 import org.team100.lib.util.Debug;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,7 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 public class SteerAroundObstacles implements Tactic {
     private static final double kObstacleSteer = 1;
 
-    private final DriveSubsystemInterface m_drive;
+    private final Supplier<Pose2d> m_drive;
     private final ForceViz m_viz;
     private final Heuristics m_heuristics;
     private final boolean m_debug;
@@ -26,7 +24,7 @@ public class SteerAroundObstacles implements Tactic {
      * @param drive provides pose
      */
     public SteerAroundObstacles(
-            DriveSubsystemInterface drive,
+            Supplier<Pose2d> drive,
             ForceViz viz,
             boolean debug) {
         m_drive = drive;
@@ -38,7 +36,7 @@ public class SteerAroundObstacles implements Tactic {
 
     @Override
     public FieldRelativeVelocity apply(FieldRelativeVelocity velocity) {
-        Pose2d myPosition = m_drive.getPose();
+        Pose2d myPosition = m_drive.get();
         // only look at obstacles less than 1 second away.
         final double maxDistance = velocity.norm();
         FieldRelativeVelocity v = new FieldRelativeVelocity(0, 0, 0);
@@ -47,21 +45,21 @@ public class SteerAroundObstacles implements Tactic {
             double distance = myPosition.getTranslation().getDistance(obstacleLocation);
             if (distance > maxDistance) // ignore far-away obstacles
                 continue;
-            Vector2 steer = m_heuristics.steerToAvoid(
-                    new Vector2(myPosition.getX(), myPosition.getY()),
-                    new Vector2(velocity.x(), velocity.y()),
-                    new Vector2(obstacleLocation.getX(), obstacleLocation.getY()),
+            FieldRelativeVelocity steer = m_heuristics.steerToAvoid(
+                    myPosition.getTranslation(),
+                    velocity,
+                    obstacleLocation,
                     1.0);
-            if (steer.getMagnitude() < 1e-3)
+            if (steer.norm() < 1e-3)
                 continue;
-            Vector2 force = steer.product(kObstacleSteer);
+            FieldRelativeVelocity force = steer.times(kObstacleSteer);
             if (m_debug)
                 System.out.printf(" steerAroundObstacles target (%5.2f, %5.2f) F (%5.2f, %5.2f)",
                         obstacleLocation.getX(),
                         obstacleLocation.getY(),
-                        force.x,
-                        force.y);
-            FieldRelativeVelocity steering = new FieldRelativeVelocity(force.x, force.y, 0);
+                        force.x(),
+                        force.y());
+            FieldRelativeVelocity steering = new FieldRelativeVelocity(force.x(), force.y(), 0);
             if (m_debug)
                 m_viz.tactics(pose.getTranslation(), steering);
             v = v.plus(steering);

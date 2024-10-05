@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.team100.field.StagedNote;
+import org.team100.lib.field.StagedNote2024;
 import org.team100.lib.util.Arg;
 import org.team100.lib.util.Latch;
 
@@ -176,7 +176,7 @@ public class Auton extends AutoPilot {
         // left-join the agenda to the sightings.
         for (int i = 0; i < m_agenda.length; ++i) {
             int noteId = m_agenda[i];
-            Optional<StagedNote> n = StagedNote.get(noteId);
+            Optional<StagedNote2024> n = StagedNote2024.get(noteId);
             if (n.isEmpty())
                 continue;
             Translation2d noteLocation = n.get().getLocation();
@@ -267,7 +267,7 @@ public class Auton extends AutoPilot {
             return false;
         }
         Integer noteId = m_agenda[idx];
-        Optional<StagedNote> n = StagedNote.get(noteId);
+        Optional<StagedNote2024> n = StagedNote2024.get(noteId);
         if (n.isEmpty()) {
             if (m_debug)
                 System.out.printf("bad id");

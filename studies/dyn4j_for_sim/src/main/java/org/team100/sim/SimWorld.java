@@ -13,8 +13,8 @@ import org.dyn4j.world.World;
 import org.dyn4j.world.listener.StepListener;
 import org.team100.field.Score;
 import org.team100.field.Scorekeeper;
-import org.team100.field.StagedNote;
 import org.team100.lib.field.FieldMap2024;
+import org.team100.lib.field.StagedNote2024;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
@@ -355,7 +355,7 @@ public class SimWorld {
     }
 
     private void setUpNotes(boolean debug) {
-        for (StagedNote n : StagedNote.values()) {
+        for (StagedNote2024 n : StagedNote2024.values()) {
             Translation2d loc = n.getLocation();
             addNote(loc.getX(), loc.getY(), debug);
         }
