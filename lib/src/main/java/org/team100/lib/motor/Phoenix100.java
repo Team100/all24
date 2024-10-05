@@ -16,11 +16,20 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 /** Utilities for CTRE Phoenix motors: Falcon, Kraken. */
 public class Phoenix100 {
+    // TODO: this should be false for comp, so alert somehow
+    private static final boolean ACTUALLY_CRASH = false;
+    /**
+     * The default is 0.05, so this is double, to eliminate unnecessary config
+     * failures.
+     */
+    private static final double TIMEOUT_SEC = 0.3;
 
     public static void crash(Supplier<StatusCode> s) {
         StatusCode statusCode = s.get();
         if (statusCode.isError()) {
-            throw new IllegalStateException(statusCode.toString());
+            if (ACTUALLY_CRASH)
+                throw new IllegalStateException(statusCode.toString());
+            Util.warn(statusCode.toString());
         }
     }
 
@@ -33,7 +42,7 @@ public class Phoenix100 {
 
     public static void baseConfig(TalonFXConfigurator conf) {
         TalonFXConfiguration base = new TalonFXConfiguration();
-        crash(() -> conf.apply(base));
+        crash(() -> conf.apply(base, TIMEOUT_SEC));
     }
 
     public static void motorConfig(TalonFXConfigurator conf, MotorPhase phase) {
@@ -44,7 +53,7 @@ public class Phoenix100 {
         } else {
             motorConfigs.Inverted = InvertedValue.Clockwise_Positive;
         }
-        crash(() -> conf.apply(motorConfigs));
+        crash(() -> conf.apply(motorConfigs, TIMEOUT_SEC));
     }
 
     /**
@@ -57,7 +66,7 @@ public class Phoenix100 {
         currentConfigs.SupplyCurrentLimitEnable = true;
         currentConfigs.StatorCurrentLimit = stator;
         currentConfigs.StatorCurrentLimitEnable = true;
-        crash(() -> conf.apply(currentConfigs));
+        crash(() -> conf.apply(currentConfigs, TIMEOUT_SEC));
     }
 
     /**
@@ -71,7 +80,7 @@ public class Phoenix100 {
         slot0Configs.kP = pid.getP();
         slot0Configs.kI = pid.getI();
         slot0Configs.kD = pid.getD();
-        crash(() -> conf.apply(slot0Configs));
+        crash(() -> conf.apply(slot0Configs, TIMEOUT_SEC));
     }
 
     private Phoenix100() {

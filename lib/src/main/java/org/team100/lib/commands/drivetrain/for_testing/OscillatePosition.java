@@ -5,6 +5,9 @@ import java.util.Optional;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -15,7 +18,7 @@ import org.team100.lib.trajectory.TrajectorySamplePoint;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
 import org.team100.lib.trajectory.TrajectoryTimeSampler;
 import org.team100.lib.util.Util;
-
+import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,21 +38,30 @@ public class OscillatePosition extends Command implements Glassy {
     private final StraightLineTrajectory m_trajectories;
     private final HolonomicFieldRelativeController m_controller;
     private final double m_offsetM;
+    private final DoubleLogger m_log_trajecX;
+    private final DoubleLogger m_log_trajecY;
 
     private Trajectory100 m_trajectory;
     private TrajectoryTimeIterator m_iter;
+    private final TrajectoryVisualization m_viz;
 
     private boolean m_steeringAligned;
 
     public OscillatePosition(
+            LoggerFactory parent,
             SwerveDriveSubsystem drivetrain,
             StraightLineTrajectory trajectories,
             HolonomicFieldRelativeController controller,
-            double offsetM) {
+            double offsetM,
+            TrajectoryVisualization viz) {
+        LoggerFactory child = parent.child(this);
         m_swerve = drivetrain;
         m_trajectories = trajectories;
         m_controller = controller;
+        m_viz = viz;
         m_offsetM = offsetM;
+        m_log_trajecX = child.doubleLogger(Level.TRACE, "Trajec X");
+        m_log_trajecY = child.doubleLogger(Level.TRACE, "Trajec Y");
         addRequirements(m_swerve);
     }
 
@@ -63,6 +75,7 @@ public class OscillatePosition extends Command implements Glassy {
         m_trajectory = m_trajectories.apply(start, endPose);
         m_iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(m_trajectory));
         m_steeringAligned = false;
+        m_viz.setViz(m_trajectory);
     }
 
     @Override
@@ -83,6 +96,8 @@ public class OscillatePosition extends Command implements Glassy {
             TimedPose desiredState = samplePoint.state();
             SwerveState reference = SwerveState.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
+            m_log_trajecX.log(() -> desiredState.state().getPose().getX());
+            m_log_trajecY.log(() -> desiredState.state().getPose().getY());
 
             // follow normally
             m_swerve.driveInFieldCoords(fieldRelativeTarget);

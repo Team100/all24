@@ -19,6 +19,7 @@ public class TrajectoryPlanner {
     private static final double kMaxDy = 0.0127; // m
     private static final double kMaxDTheta = Math.toRadians(1.0);
 
+    // TODO: get rid of max_vel and max_accel, use constraints instead.
     public static Trajectory100 generateTrajectory(
             List<Pose2d> waypoints,
             List<Rotation2d> headings,

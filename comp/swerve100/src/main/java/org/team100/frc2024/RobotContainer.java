@@ -34,9 +34,9 @@ import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
+import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
-import org.team100.lib.commands.drivetrain.for_testing.OscillateDirect;
 import org.team100.lib.commands.drivetrain.for_testing.OscillatePosition;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
@@ -70,8 +70,8 @@ import org.team100.lib.localization.VisionDataProvider24;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LevelPoller;
-import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.Logging;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -225,7 +225,8 @@ public class RobotContainer implements Glassy {
 
         // RESET ZERO
         // on xbox this is "back"
-        onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // RESET 180
         // on xbox this is "start"
@@ -279,12 +280,12 @@ public class RobotContainer implements Glassy {
 
         // for testing odometry
         TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(1.0, 1.0)));
-        StraightLineTrajectory maker = new StraightLineTrajectory(true, tmaker);
+        StraightLineTrajectory maker = new StraightLineTrajectory(false, tmaker);
         whileTrue(driverControl::fullCycle,
                 new RepeatCommand(
                         new SequentialCommandGroup(
-                                new OscillatePosition(m_drive, maker, controller, 1),
-                                new OscillatePosition(m_drive, maker, controller, -1))));
+                                new OscillatePosition(driveLog, m_drive, maker, controller, 1, viz),
+                                new OscillatePosition(driveLog, m_drive, maker, controller, -1, viz))));
 
         // new OscillateDirect(comLog, m_drive));
         // new Oscillate(comLog, m_drive));

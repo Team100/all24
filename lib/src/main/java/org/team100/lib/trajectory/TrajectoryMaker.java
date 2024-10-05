@@ -69,8 +69,8 @@ public class TrajectoryMaker {
                     m_constraints,
                     0.0,
                     0.0,
-                    10,
-                    10);// guess
+                    1,
+                    1);
         } catch (TrajectoryGenerationException e) {
             return null;
         }

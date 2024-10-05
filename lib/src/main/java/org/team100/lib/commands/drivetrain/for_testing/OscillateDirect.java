@@ -82,10 +82,10 @@ public class OscillateDirect extends Command implements Glassy {
 
 
         // straight ahead
-        straight(speedM_S);
+        //straight(speedM_S);
 
         // straight ahead but with the right side inverted, to see what happens.
-        // skew(speedM_S);
+        skew(speedM_S);
 
         // go in a circle by putting the wheels at 45 degrees; the "positive" rolling
         // direction is a negative spin.

@@ -17,7 +17,7 @@ import edu.wpi.first.math.MathUtil;
 
 /**
  * Passthrough to outboard closed-loop angular control, using a profile with
- * velocity feedforward, also extra torque (e.g. for gravity).  There's no
+ * velocity feedforward, also extra torque (e.g. for gravity). There's no
  * feedback at this level, and no feedforward calculation either, that's
  * delegated to the mechanism.
  * 
@@ -41,8 +41,9 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     /** Profile may be updated at runtime. */
     private Profile100 m_profile;
-
+    /** Remember that the outboard goal "winds up" i.e. it's not in [-pi,pi] */
     private State100 m_goal = new State100(0, 0);
+    /** Remember that the outboard setpoint "winds up" i.e. it's not in [-pi,pi] */
     private State100 m_setpoint = new State100(0, 0);
 
     /** Don't forget to set a profile. */
@@ -81,14 +82,13 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
     /** The outboard measurement does not wrap, but the goal does */
     @Override
-
     public void setPositionWithVelocity(double wrappedGoalRad, double goalVelocity, double feedForwardTorqueNm) {
         // goal is [-pi,pi]
         // but measurement is [-inf,inf]
 
         OptionalDouble positionRad = m_encoder.getPositionRad();
         m_log_position.log(() -> positionRad);
- 
+
         if (positionRad.isEmpty())
             return;
 
@@ -146,28 +146,29 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         OptionalDouble positionRad = getPosition();
         if (positionRad.isEmpty())
             return false;
-        double positionMeasurementRad = MathUtil.angleModulus(positionRad.getAsDouble());
+        double positionMeasurementRad = positionRad.getAsDouble();
         OptionalDouble velocityRad_S = getVelocity();
         if (velocityRad_S.isEmpty())
             return false;
         double velocityMeasurementRad_S = velocityRad_S.getAsDouble();
-        double positionError = m_setpoint.x() - positionMeasurementRad;
+        double positionError = MathUtil.angleModulus(m_setpoint.x() - positionMeasurementRad);
         double velocityError = m_setpoint.v() - velocityMeasurementRad_S;
+        // System.out.println("position error " + positionError + " velocity error " + velocityError);
+        return Math.abs(positionError) < kPositionTolerance
+                && Math.abs(velocityError) < kVelocityTolerance;
+    }
+
+    private boolean setpointAtGoal() {
+        double positionError = MathUtil.angleModulus(m_goal.x() - m_setpoint.x());
+        double velocityError = m_goal.v() - m_setpoint.v();
+        // System.out.println("goal position error " + positionError + " velocity " + velocityError);
         return Math.abs(positionError) < kPositionTolerance
                 && Math.abs(velocityError) < kVelocityTolerance;
     }
 
     @Override
     public boolean atGoal() {
-        return atSetpoint()
-                && MathUtil.isNear(
-                        m_goal.x(),
-                        m_setpoint.x(),
-                        kPositionTolerance)
-                && MathUtil.isNear(
-                        m_goal.v(),
-                        m_setpoint.v(),
-                        kVelocityTolerance);
+        return atSetpoint() && setpointAtGoal();
     }
 
     @Override
