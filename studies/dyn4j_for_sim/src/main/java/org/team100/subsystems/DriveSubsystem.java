@@ -2,10 +2,11 @@ package org.team100.subsystems;
 
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Vector2;
-import org.team100.Debug;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.util.Debug;
 import org.team100.sim.RobotBody;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -13,7 +14,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Contains the sim body. */
-public class DriveSubsystem extends SubsystemBase {
+public class DriveSubsystem extends SubsystemBase implements DriveSubsystemInterface {
     private static final double kMaxAccel = 10; // m/s/s
     private static final double kMaxAlpha = 10; // rad/s/s
     private final RobotBody m_robotBody;
@@ -43,6 +44,7 @@ public class DriveSubsystem extends SubsystemBase {
         m_robotBody.setLinearVelocity(new Vector2(vx, vy));
     }
 
+    @Override
     public void drive(FieldRelativeVelocity setpoint) {
         final double dtSec = dt();
         // please provide feasible inputs
@@ -67,10 +69,12 @@ public class DriveSubsystem extends SubsystemBase {
         m_robotBody.applyTorque(inertia * accel.theta());
     }
 
+    @Override
     public Pose2d getPose() {
         return m_robotBody.getPose();
     }
 
+    @Override
     public FieldRelativeVelocity getVelocity() {
         return m_robotBody.getVelocity();
     }

@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.pilot.Pilot;
 
 import edu.wpi.first.wpilibj.RobotController;
 

@@ -157,6 +157,13 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
      * You had better know what you're doing if you call this method.
      * Resets the kinematics headings, which affects what
      * kinematics.toSwerveModuleStates does when the desired speed is zero.
+     * 
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
      */
     public void setRawModuleStates(SwerveModuleState100[] targetModuleStates) {
         m_modules.setRawDesiredStates(targetModuleStates);
@@ -253,7 +260,16 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         prevSetpoint = setpoint;
     }
 
-    /** Desaturation mutates states. */
+    /**
+     * Desaturation mutates states.
+     * 
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     */
     private void setModuleStates(SwerveModuleState100[] states) {
         SwerveDriveKinematics100.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxDriveAccelerationM_S2(), m_swerveKinodynamics.getMaxDriveDecelerationM_S2(),

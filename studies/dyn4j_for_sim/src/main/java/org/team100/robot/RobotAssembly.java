@@ -4,21 +4,23 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import org.team100.commands.AmpCommand;
-import org.team100.commands.DefendSource;
-import org.team100.commands.DriveToNote;
-import org.team100.commands.DriveToPose;
-import org.team100.commands.DriveToSource;
-import org.team100.commands.GoToStaged;
 import org.team100.commands.Intake;
 import org.team100.commands.LobCommand;
 import org.team100.commands.Outtake;
 import org.team100.commands.PilotDrive;
 import org.team100.commands.RotateToShoot;
 import org.team100.commands.ShootCommand;
-import org.team100.commands.Tactics;
-import org.team100.commands.Tolerance;
-import org.team100.control.Pilot;
-import org.team100.sim.ForceViz;
+import org.team100.lib.commands.semiauto.DefendSource;
+import org.team100.lib.commands.semiauto.DriveToNote;
+import org.team100.lib.commands.semiauto.DriveToPose;
+import org.team100.lib.commands.semiauto.DriveToSource;
+import org.team100.lib.commands.semiauto.GoToStaged;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.pilot.Pilot;
+import org.team100.lib.planner.ForceViz;
+import org.team100.lib.planner.Tactics;
+import org.team100.lib.util.Tolerance;
 import org.team100.sim.Note;
 import org.team100.sim.RobotBody;
 import org.team100.subsystems.CameraSubsystem;
@@ -50,6 +52,7 @@ public class RobotAssembly {
     public Note m_indexerShooterHandoff;
 
     public RobotAssembly(
+            SwerveKinodynamics swerveKinodynamics,
             Function<RobotAssembly, Pilot> pilotFn,
             RobotBody robotBody,
             ForceViz viz,
@@ -74,55 +77,66 @@ public class RobotAssembly {
                 new Intake(m_indexer, debug));
         whileTrue(m_pilot::defend,
                 new DefendSource(
+                        swerveKinodynamics,
                         0.1,
                         m_drive,
-                        m_camera,
+                        m_camera::recentSightings,
                         robotBody::defenderPosition,
                         robotBody::opponentSourcePosition,
-                        new Tactics(m_drive, m_camera, viz, false, true, false, debug),
+                        new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, false, true,
+                                false, debug),
                         viz,
                         debug));
         whileTrue(m_pilot::driveToNote,
                 new DriveToNote(
-                        m_indexer,
+                        swerveKinodynamics,
                         m_drive,
-                        m_camera,
-                        new Tactics(m_drive, m_camera, viz, true, true, true, debug),
+                        m_camera::findClosestNoteTranslation,
+                        new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, true, true,
+                                true, debug),
+                        viz,
                         debug));
         whileTrue(m_pilot::driveToCorner,
                 new DriveToPose(
+                        swerveKinodynamics,
                         m_drive,
                         m_pilot::cornerLocation,
                         () -> 0.0,
-                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, true, true,
+                                true, debug),
                         new Tolerance(1, 1, 0.25),
                         viz,
                         debug));
         whileTrue(m_pilot::driveToSource,
                 new DriveToSource(
+                        swerveKinodynamics,
                         m_drive,
-                        m_camera,
                         robotBody::sourcePosition,
                         robotBody::yBias,
-                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, true, true,
+                                true, debug),
                         viz,
                         debug));
         whileTrue(m_pilot::driveToStaged,
                 new GoToStaged(
+                        swerveKinodynamics,
                         m_pilot,
-                        m_indexer,
                         m_drive,
-                        m_camera,
-                        new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                        new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, true, true,
+                                true, debug),
+                        viz,
                         debug));
         whileTrue(m_pilot::scoreSpeaker,
                 Commands.sequence(
                         // here the lane accuracy issue is no problem
                         new DriveToPose(
+                                swerveKinodynamics,
                                 m_drive,
                                 m_pilot::shootingLocation,
                                 robotBody::yBias,
-                                new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                                new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, true,
+                                        true, true,
+                                        debug),
                                 new Tolerance(1, 1, 0.25),
                                 viz,
                                 debug),
@@ -137,19 +151,25 @@ public class RobotAssembly {
                 Commands.sequence(
                         // first go approximately there, in the "lane"
                         new DriveToPose(
+                                swerveKinodynamics,
                                 m_drive,
                                 robotBody::ampPosition,
                                 robotBody::yBias,
-                                new Tactics(m_drive, m_camera, viz,true, false, true, debug),
+                                new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, true,
+                                        false, true,
+                                        debug),
                                 new Tolerance(0.5, 0.5, 0.5),
                                 viz,
                                 debug),
                         // then go exactly there, position is important
                         new DriveToPose(
+                                swerveKinodynamics,
                                 m_drive,
                                 robotBody::ampPosition,
                                 () -> 0.0,
-                                new Tactics(m_drive, m_camera, viz,false, false, false, debug),
+                                new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, false,
+                                        false, false,
+                                        debug),
                                 new Tolerance(0.05, 0.05, 0.05),
                                 viz,
                                 debug),
@@ -158,10 +178,13 @@ public class RobotAssembly {
                 Commands.sequence(
                         // location can be pretty approximate
                         new DriveToPose(
+                                swerveKinodynamics,
                                 m_drive,
                                 robotBody::passingPosition,
                                 () -> 0.0,
-                                new Tactics(m_drive, m_camera, viz,true, true, true, debug),
+                                new Tactics(swerveKinodynamics, m_drive::getPose, m_camera::recentSightings, viz, true,
+                                        true, true,
+                                        debug),
                                 new Tolerance(0.3, 0.3, 0.1),
                                 viz,
                                 debug),
@@ -198,7 +221,7 @@ public class RobotAssembly {
         m_drive.setState(x, y, theta, vx, vy);
     }
 
-    public DriveSubsystem getDrive() {
+    public DriveSubsystemInterface getDrive() {
         return m_drive;
     }
 

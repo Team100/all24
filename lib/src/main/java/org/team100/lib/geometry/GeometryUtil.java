@@ -35,6 +35,14 @@ public class GeometryUtil {
     private GeometryUtil() {
     }
 
+    public static double dot(Translation2d a, Translation2d b) {
+        return a.getX() * b.getX() + a.getY() * b.getY();
+    }
+
+    public static double dot(Translation2d a, FieldRelativeVelocity b) {
+        return a.getX() * b.x() + a.getY() * b.y();
+    }
+
     public static Twist2d discretize(ChassisSpeeds continuous, double dt) {
         ChassisSpeeds speeds = ChassisSpeeds.discretize(continuous, dt);
         return new Twist2d(
@@ -233,7 +241,8 @@ public class GeometryUtil {
     public static Translation3d xForwardToZForward(Translation3d xForward) {
         return new Translation3d(-xForward.getY(), -xForward.getZ(), xForward.getX());
     }
-     /**
+
+    /**
      * Transform the NWU coordinates rotation to camera-coordinates.
      * 
      * @param xForward rotation in WPI coordinates, x-forward

@@ -9,8 +9,20 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Just like ChassisSpeeds, but field-relative, to avoid mixing them up.
  */
 public record FieldRelativeVelocity(double x, double y, double theta) {
+
+    public static FieldRelativeVelocity zero() {
+        return new FieldRelativeVelocity(0, 0, 0);
+    }
+
     public double norm() {
         return Math.hypot(x, y);
+    }
+
+    public FieldRelativeVelocity normalize() {
+        double norm = norm();
+        if (norm < 1e-6)
+            return zero();
+        return new FieldRelativeVelocity(x, y, theta).times(1.0 / norm);
     }
 
     public Optional<Rotation2d> angle() {
@@ -23,6 +35,7 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
         return new FieldRelativeVelocity(x + other.x, y + other.y, theta + other.theta);
     }
 
+    /** The return type here isn't really right. */
     public FieldRelativeVelocity minus(FieldRelativeVelocity other) {
         return new FieldRelativeVelocity(x - other.x, y - other.y, theta - other.theta);
     }

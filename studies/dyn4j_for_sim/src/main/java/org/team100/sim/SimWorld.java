@@ -1,6 +1,7 @@
 package org.team100.sim;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,12 +11,13 @@ import org.dyn4j.geometry.Vector2;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
 import org.dyn4j.world.listener.StepListener;
-import org.team100.field.FieldMap;
 import org.team100.field.Score;
 import org.team100.field.Scorekeeper;
-import org.team100.field.StagedNote;
-import org.team100.lib.telemetry.FieldLogger;
-import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.field.FieldMap2024;
+import org.team100.lib.field.StagedNote2024;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -43,7 +45,8 @@ public class SimWorld {
     private static final double ampHeight = 1.207;
     static final double allianceWallHeightM = 1.983;
 
-    private final FieldLogger m_fieldLogger;
+    private final DoubleArrayLogger m_log_force;
+    private final Map<Class<?>, DoubleArrayLogger> m_log_bodies = new HashMap<>();
     private final Score m_blue;
     private final Score m_red;
     private final World<Body100> world;
@@ -51,8 +54,15 @@ public class SimWorld {
     // this is a copy of the obstacle translations since we use this all the time.
     private final List<Translation2d> obstacles;
 
-    public SimWorld(FieldLogger fieldLogger, Score blueScore, Score redScore) {
-        m_fieldLogger = fieldLogger;
+    public SimWorld(LoggerFactory fieldLogger,
+            Score blueScore,
+            Score redScore) {
+        m_log_force = fieldLogger.doubleArrayLogger(Level.DEBUG, "Force");
+        for (Class<?> type : Body100.types()) {
+            m_log_bodies.put(
+                    type,
+                    fieldLogger.doubleArrayLogger(Level.DEBUG, type.getSimpleName()));
+        }
         m_blue = blueScore;
         m_red = redScore;
         world = new World<>();
@@ -143,15 +153,9 @@ public class SimWorld {
                     }
                 }
             }
-            m_fieldLogger.logDoubleObjArray(
-                    Level.DEBUG,
-                    type.getSimpleName(),
-                    () -> poses.toArray(new Double[0]));
+            m_log_bodies.get(type).log(() -> poses.stream().mapToDouble(Double::doubleValue).toArray());
         }
-        m_fieldLogger.logDoubleObjArray(
-                Level.DEBUG,
-                "Force",
-                () -> forces.toArray(new Double[0]));
+        m_log_force.log(() -> forces.stream().mapToDouble(Double::doubleValue).toArray());
     }
 
     /** Speakers and amp pockets are sensors. */
@@ -316,7 +320,7 @@ public class SimWorld {
     private void setUpStages() {
         // these are from the onshape cad,
         // adjusted a tiny bit to line up with the background image.
-        for (Map.Entry<String, Pose2d> post : FieldMap.stagePosts.entrySet()) {
+        for (Map.Entry<String, Pose2d> post : FieldMap2024.stagePosts.entrySet()) {
             String name = post.getKey();
             Pose2d pose = post.getValue();
             addPost(name, pose.getX(), pose.getY(), pose.getRotation().getRadians());
@@ -351,7 +355,7 @@ public class SimWorld {
     }
 
     private void setUpNotes(boolean debug) {
-        for (StagedNote n : StagedNote.values()) {
+        for (StagedNote2024 n : StagedNote2024.values()) {
             Translation2d loc = n.getLocation();
             addNote(loc.getX(), loc.getY(), debug);
         }

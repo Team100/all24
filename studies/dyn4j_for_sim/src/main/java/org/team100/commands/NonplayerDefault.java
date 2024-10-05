@@ -1,13 +1,15 @@
 package org.team100.commands;
 
-import org.team100.Debug;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.planner.Tactics;
+import org.team100.lib.util.Debug;
 import org.team100.subsystems.DriveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class NonplayerDefault extends Command {
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private final Tactics m_tactics;
     private final boolean m_debug;
 

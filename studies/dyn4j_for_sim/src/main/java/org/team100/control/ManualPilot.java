@@ -1,16 +1,10 @@
 package org.team100.control;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-
-import org.team100.field.FieldMap;
 import org.team100.kinodynamics.Kinodynamics;
+import org.team100.lib.field.FieldMap2024;
+import org.team100.lib.motion.drivetrain.DriveSubsystemInterface;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.sim.ForceViz;
-import org.team100.subsystems.CameraSubsystem;
-import org.team100.subsystems.DriveSubsystem;
-import org.team100.subsystems.IndexerSubsystem;
-import org.team100.util.Arg;
+import org.team100.lib.pilot.Pilot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -19,13 +13,13 @@ import edu.wpi.first.wpilibj.XboxController;
 /** A human driver/operator */
 public class ManualPilot implements Pilot {
     private final XboxController m_controller = new XboxController(0);
-    private final DriveSubsystem m_drive;
+    private final DriveSubsystemInterface m_drive;
     private static final double kSubwooferRepulsion = 5;
     private static final double kObstacleRepulsion = 10;
 
     boolean m_debug = true;
 
-    public ManualPilot(DriveSubsystem drive) {
+    public ManualPilot(DriveSubsystemInterface drive) {
         m_drive = drive;
     }
 
@@ -45,7 +39,7 @@ public class ManualPilot implements Pilot {
         Pose2d myPosition = m_drive.getPose();
         final double maxDistance = 1.5;
         FieldRelativeVelocity v = desired;
-        for (Pose2d pose : FieldMap.stagePosts.values()) {
+        for (Pose2d pose : FieldMap2024.stagePosts.values()) {
             Translation2d target = pose.getTranslation();
             Translation2d robotRelativeToTarget = myPosition.getTranslation().minus(target);
             double norm = robotRelativeToTarget.getNorm();

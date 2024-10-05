@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.pilot.Pilot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;

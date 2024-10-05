@@ -224,6 +224,14 @@ public class SwerveModuleCollection {
     // Actuators
     //
 
+    /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     */
     public void setDesiredStates(SwerveModuleState100[] swerveModuleStates) {
         m_frontLeft.setDesiredState(swerveModuleStates[0]);
         m_frontRight.setDesiredState(swerveModuleStates[1]);
@@ -231,6 +239,14 @@ public class SwerveModuleCollection {
         m_rearRight.setDesiredState(swerveModuleStates[3]);
     }
 
+    /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     */
     public void setRawDesiredStates(SwerveModuleState100[] swerveModuleStates) {
         m_frontLeft.setRawDesiredState(swerveModuleStates[0]);
         m_frontRight.setRawDesiredState(swerveModuleStates[1]);

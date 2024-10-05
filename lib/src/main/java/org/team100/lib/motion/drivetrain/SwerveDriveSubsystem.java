@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * There are four mutually exclusive drive methods.
  * We depend on CommandScheduler to enforce the mutex.
  */
-public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
+public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, DriveSubsystemInterface {
     private final Gyro m_gyro;
     private final SwerveDrivePoseEstimator100 m_poseEstimator;
     private final SwerveLocal m_swerveLocal;
@@ -136,7 +136,16 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
         m_swerveLocal.setChassisSpeedsNormally(speeds, m_gyro.getYawRateNWU());
     }
 
-    /** Does not desaturate. */
+    /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     * 
+     * Does not desaturate.
+     */
     public void setRawModuleStates(SwerveModuleState100[] states) {
         m_swerveLocal.setRawModuleStates(states);
     }
@@ -252,5 +261,20 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy {
                 m_swerveLocal.positions());
         m_cameras.update();
         return m_poseEstimator.get(now);
+    }
+
+    @Override
+    public void drive(FieldRelativeVelocity setpoint) {
+        driveInFieldCoords(setpoint);
+    }
+
+    @Override
+    public Pose2d getPose() {
+        return getState().pose();
+    }
+
+    @Override
+    public FieldRelativeVelocity getVelocity() {
+        return getState().velocity();
     }
 }
