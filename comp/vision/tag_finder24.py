@@ -93,7 +93,7 @@ class CameraData:
             # 3 buffers => high latency (50-70 ms), mid fps (20-23)
             # robot goes at 50 fps, so roughly a frame every other loop
             # fps doesn't matter much, so minimize latency
-            buffer_count=2,
+            buffer_count=5,
             main={
                 "format": "YUV420",
                 "size": (fullwidth, fullheight),
@@ -106,7 +106,7 @@ class CameraData:
                 # "AnalogueGain": 8.0,
                 # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
                 # 3/23/24, reduced to 2ms, even less blur.
-                "ExposureTime": 3000,
+                "ExposureTime": 300,
                 "AnalogueGain": 8,
                 # "AeEnable": True,
                 # limit auto: go as fast as possible but no slower than 30fps
