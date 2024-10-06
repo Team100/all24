@@ -49,11 +49,28 @@ public enum Camera {
     /**
      * Camera bot intake
      */
-    CAMERA_GAME_PIECE("364f07fb090a3bf7",
+    GLOBAL_GAME_PIECE("364f07fb090a3bf7",
             new Transform3d(
-                    new Translation3d(-0.0565, 0.03, 0.61),
+                    new Translation3d(-0.0565, 0, 0.381),
                     new Rotation3d(0, Math.toRadians(30), Math.PI))),
-                    
+                   
+     /**
+     * Camera bot right april tag detector
+     */
+    GLOBAL_RIGHT("d44649628c20d4d4",
+            new Transform3d(
+                    new Translation3d(0.1905, -0.095, 0.381),
+                    new Rotation3d(0, Math.toRadians(-20), Math.toRadians(-30)))),
+                   
+     /**
+     * Camera bot left april tag detector
+     */
+    GLOBAL_LEFT("06ece53b019a5c2e",
+            new Transform3d(
+                    new Translation3d(0.1905, 0.095, 0.381),
+                    new Rotation3d(0, Math.toRadians(-25), Math.toRadians(20)))),
+                   
+    
     TEST1("test1",
             new Transform3d(
                     new Translation3d(),
