@@ -85,6 +85,7 @@ public class AutoMaker implements Glassy {
         m_viz = viz;
     }
 
+    /** This encodes knowledge about how to approach each field point. */
     private Pose2d getPose(Alliance alliance, FieldPoint2024 point) {
         Translation2d translation = FieldPoint2024.getTranslation(alliance, point);
         Rotation2d heading = new Rotation2d(Math.PI);
@@ -164,7 +165,10 @@ public class AutoMaker implements Glassy {
         Pose2d endPose = getPose(alliance, noteB);
 
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), Rotation2d.fromDegrees(170));
-        Pose2d betweenWaypoint = new Pose2d(waypoint, waypoint2.minus(waypoint).getAngle());
+        // at this point the spline should be parallel to the line between the
+        // surrounding points.
+        Translation2d toTarget = waypoint2.minus(startWaypoint.getTranslation());
+        Pose2d betweenWaypoint = new Pose2d(waypoint, toTarget.getAngle());
         Pose2d midWaypoint = new Pose2d(waypoint2, endPose.getTranslation().minus(waypoint2).getAngle());
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endPose.getRotation().plus(new Rotation2d(Math.PI)));
 
@@ -684,7 +688,7 @@ public class AutoMaker implements Glassy {
 
         return new SequentialCommandGroup(
                 new PrintCommand("FOUR NOTE AUTO"),
-                new ShootPreload(sensor, m_shooter, m_intake, m_feeder, m_swerve, true),
+                new ShootPreload(m_logger, sensor, m_shooter, m_intake, m_feeder, m_swerve, true),
                 new ParallelRaceGroup(driveToStageBase(alliance, FieldPoint2024.STARTSUBWOOFER, FieldPoint2024.NOTE3),
                         new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
 
@@ -739,50 +743,65 @@ public class AutoMaker implements Glassy {
         }
     }
 
+    // all this extra printing is to troubleshoot the simulator
     public SequentialCommandGroup citrus(Alliance alliance) {
         if (alliance == Alliance.Red) {
             return new SequentialCommandGroup(
-                    new ShootPreload(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+                    new PrintCommand("red citrus 1"),
+                    new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+                    new PrintCommand("red citrus 2"),
                     new ParallelDeadlineGroup(
                             driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, Math.PI / 4,
                                     0, 4, 3),
                             new ChangeIntakeState(m_intake, m_sensors)),
+                    new PrintCommand("red citrus 3"),
                     new ParallelRaceGroup(driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
                             Math.toRadians(180), Math.toRadians(245), 4, 3), new RampShooter(m_shooter)),
+                    new PrintCommand("red citrus 4"),
                     new ParallelRaceGroup(
                             new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                             new WaitCommand(1.5)),
+                    new PrintCommand("red citrus 5"),
                     new ParallelDeadlineGroup(
                             throughStage(alliance, FieldPoint2024.COMPLEMENTSHOOT, FieldPoint2024.NOTE6),
                             new ChangeIntakeState(m_intake, m_sensors)),
+                    new PrintCommand("red citrus 6"),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.NOTE6, FieldPoint2024.COMPLEMENTSHOOT2, Math.PI,
                                     Math.toRadians(-135), 4, 3),
                             new RampShooter(m_shooter)),
+                    new PrintCommand("red citrus 7"),
                     new ParallelRaceGroup(
                             new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                             new WaitCommand(1.5)));
         } else {
             return new SequentialCommandGroup(
-                    new ShootPreload(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+                    new PrintCommand("blue citrus 1"),
+                    new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+                    new PrintCommand("blue citrus 2"),
                     new ParallelDeadlineGroup(
                             driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
                                     3 * Math.PI / 2, 0, 4,
                                     3),
                             new ChangeIntakeState(m_intake, m_sensors)),
+                    new PrintCommand("blue citrus 3"),
                     new ParallelRaceGroup(driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
                             Math.toRadians(180), Math.toRadians(245.0 - 180), 4, 3),
                             new RampShooter(m_shooter)),
+                    new PrintCommand("blue citrus 4"),
                     new ParallelRaceGroup(
                             new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                             new WaitCommand(1.5)),
+                    new PrintCommand("blue citrus 5"),
                     new ParallelDeadlineGroup(
                             throughStage(alliance, FieldPoint2024.COMPLEMENTSHOOT, FieldPoint2024.NOTE6),
                             new ChangeIntakeState(m_intake, m_sensors)),
+                    new PrintCommand("blue citrus 6"),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.NOTE6, FieldPoint2024.COMPLEMENTSHOOT2, Math.PI,
                                     Math.toRadians(140), 4, 3),
                             new RampShooter(m_shooter)),
+                    new PrintCommand("blue citrus 7"),
                     new ParallelRaceGroup(
                             new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                             new WaitCommand(1.5)));
@@ -802,14 +821,14 @@ public class AutoMaker implements Glassy {
                                     Math.toRadians(180),
                                     Math.toRadians(245), 4, 2),
                             new RampShooter(m_shooter)),
-                    new ShootPreload(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+                    new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelRaceGroup(
                             aroundStage(alliance, FieldPoint2024.COMPLEMENTSHOOT, FieldPoint2024.NOTE5),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(
                             aroundStage(alliance, FieldPoint2024.NOTE5, FieldPoint2024.COMPLEMENTSHOOT),
                             new RampShooter(m_shooter)),
-                    new ShootPreload(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false));
+                    new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false));
         } else {
             return new SequentialCommandGroup(
                     new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
@@ -823,7 +842,7 @@ public class AutoMaker implements Glassy {
                                     Math.toRadians(180),
                                     Math.toRadians(245.0 - 180), 4, 2),
                             new RampShooter(m_shooter)),
-                    new ShootPreload(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
+                    new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelRaceGroup(
                             aroundStage(alliance, FieldPoint2024.COMPLEMENTSHOOT, FieldPoint2024.NOTE5,
                                     Rotation2d.fromDegrees(200)),
@@ -832,7 +851,7 @@ public class AutoMaker implements Glassy {
                             aroundStage(alliance, FieldPoint2024.NOTE5, FieldPoint2024.COMPLEMENTSHOOT,
                                     Math.toRadians(200)),
                             new RampShooter(m_shooter)),
-                    new ShootPreload(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false));
+                    new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false));
         }
     }
 

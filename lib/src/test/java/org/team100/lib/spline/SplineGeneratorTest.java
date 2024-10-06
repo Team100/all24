@@ -17,7 +17,7 @@ class SplineGeneratorTest {
     @Test
     void test() {
         Pose2d p1 = new Pose2d(new Translation2d(0, 0), GeometryUtil.kRotationZero);
-        Pose2d p2 = new Pose2d(new Translation2d(15, 10), new Rotation2d(1, -5));
+        Pose2d p2 = new Pose2d(new Translation2d(15, 10), new Rotation2d(1, 5));
         HolonomicSpline s = new HolonomicSpline(
                 p1, p2, new Rotation2d(), new Rotation2d());
 
@@ -35,7 +35,7 @@ class SplineGeneratorTest {
 
         assertEquals(15.0, cur_pose.getTranslation().getX(), 0.001);
         assertEquals(10.0, cur_pose.getTranslation().getY(), 0.001);
-        assertEquals(-78.690, cur_pose.getCourse().get().getDegrees(), 0.001);
-        assertEquals(23.202, arclength, 0.001);
+        assertEquals(78.690, cur_pose.getCourse().get().getDegrees(), 0.001);
+        assertEquals(20.416, arclength, 0.001);
     }
 }

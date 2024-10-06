@@ -7,7 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.timing.CentripetalAccelerationConstraint;
+import org.team100.lib.timing.ConstantConstraint;
+import org.team100.lib.timing.SwerveDriveDynamicsConstraint;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.YawRateConstraint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -43,12 +50,43 @@ class TrajectoryPlannerTest {
         double end_vel = 0;
         double max_vel = 1;
         double max_accel = 1;
-        Trajectory100 t = TrajectoryPlanner.generateTrajectory(waypoints, headings, constraints, start_vel, end_vel,
+        Trajectory100 t = TrajectoryPlanner.generateTrajectory(
+                waypoints, headings, constraints, start_vel, end_vel,
                 max_vel, max_accel);
         assertEquals(80, t.m_points.size());
         TrajectoryPoint p = t.getPoint(40);
         assertEquals(0.5, p.state().state().getPose().getX(), kDelta);
         assertEquals(0, p.state().state().getHeadingRate(), kDelta);
+    }
+
+    @Test
+    void testBackingUp() {
+        List<Pose2d> waypoints = List.of(
+                new Pose2d(0, 0, new Rotation2d(Math.PI)),
+                new Pose2d(1, 0, GeometryUtil.kRotationZero));
+        List<Rotation2d> headings = List.of(
+                GeometryUtil.kRotationZero,
+                GeometryUtil.kRotationZero);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+
+        // these are the same as StraightLineTrajectoryTest.
+        List<TimingConstraint> constraints = // new ArrayList<>();
+                List.of(
+                        new ConstantConstraint(limits.getMaxDriveVelocityM_S(), limits.getMaxDriveAccelerationM_S2()),
+                        new SwerveDriveDynamicsConstraint(limits),
+                        new YawRateConstraint(limits, 0.2),
+                        new CentripetalAccelerationConstraint(limits, 0.2));
+        double start_vel = 1;
+        double end_vel = 0;
+        double max_vel = 1000;
+        double max_accel = 1000;
+        Trajectory100 t = TrajectoryPlanner.generateTrajectory(
+                waypoints,
+                headings, constraints, start_vel, end_vel,
+                max_vel, max_accel);
+        // u-turn trajectories are not allowed.
+        assertTrue(t.isEmpty());
+
     }
 
     /**
@@ -57,7 +95,7 @@ class TrajectoryPlannerTest {
      */
     @Test
     void testPerformance() {
-        List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d(1, 1, new Rotation2d(Math.PI/2)));
+        List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d(1, 1, new Rotation2d(Math.PI / 2)));
         List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d());
         List<TimingConstraint> constraints = new ArrayList<>();
         double start_vel = 0;
@@ -68,7 +106,8 @@ class TrajectoryPlannerTest {
         Trajectory100 t = new Trajectory100();
         final int iterations = 100;
         for (int i = 0; i < iterations; ++i) {
-            t = TrajectoryPlanner.generateTrajectory(waypoints, headings, constraints, start_vel, end_vel,
+            t = TrajectoryPlanner.generateTrajectory(
+                    waypoints, headings, constraints, start_vel, end_vel,
                     max_vel, max_accel);
         }
         long endTimeNs = System.nanoTime();

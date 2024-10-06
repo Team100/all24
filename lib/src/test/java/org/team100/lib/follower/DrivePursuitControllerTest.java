@@ -33,7 +33,7 @@ class DrivePursuitControllerTest {
     private static final double kMaxVelM_S = 4;
     private static final double kMaxAccelM_S_S = 2;
     private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
-    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.get();
+    private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest3();
 
     @Test
     void testPursuit() {
@@ -81,7 +81,7 @@ class DrivePursuitControllerTest {
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new ChassisSpeeds());
             // I turned on minimum speed so it's not zero.
-            assertEquals(-2, output.vxMetersPerSecond, 0.05);
+            assertEquals(-1, output.vxMetersPerSecond, 0.05);
             assertEquals(0, output.vyMetersPerSecond, 0.05);
             // omega is NaN, i think pursuit ignores omega, it uses feedforward only.
             // assertEquals(0, output.omegaRadiansPerSecond, 0.001);
@@ -96,16 +96,16 @@ class DrivePursuitControllerTest {
             // remember, facing +90, moving -90, so this should be like -1
             // turning slowly to the left
             // i think pure pursuit might ignore omega
-            verify(-3.75, -0.43, 0, output);
+            verify(-1.95, -0.15, 0, output);
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(0.25, path_setpoint.state().getPose().getX(), 0.01);
             assertEquals(-3.5, path_setpoint.state().getPose().getY(), 0.05);
             assertEquals(1.69, path_setpoint.state().getHeading().getRadians(), 0.01);
-            assertEquals(1.87, path_setpoint.getTimeS(), 0.05);
-            assertEquals(3.60, path_setpoint.velocityM_S(), 0.01);
+            assertEquals(2.34, path_setpoint.getTimeS(), 0.05);
+            assertEquals(1.96, path_setpoint.velocityM_S(), 0.01);
             // accel is back-emf limited here.
-            assertEquals(0.988, path_setpoint.acceleration(), 0.001);
+            assertEquals(-0.034, path_setpoint.acceleration(), 0.001);
 
             Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(current_state, path_setpoint);
             assertEquals(0, errorTwist.dx, 0.05);
@@ -119,15 +119,15 @@ class DrivePursuitControllerTest {
                     current_state,
                     new ChassisSpeeds());
             // this is more Y than PID because it looks ahead
-            verify(-3.764, -0.43, 0, output);
+            verify(-1.90, -0.14, 0, output);
 
             TimedPose path_setpoint = controller.getSetpoint(current_state).get();
             assertEquals(1.85, path_setpoint.state().getPose().getX(), 0.05);
             assertEquals(-7.11, path_setpoint.state().getPose().getY(), 0.01);
             assertEquals(2.22, path_setpoint.state().getHeading().getRadians(), 0.01);
-            assertEquals(2.88, path_setpoint.getTimeS(), 0.05);
-            assertEquals(3.821, path_setpoint.velocityM_S(), 0.001);
-            assertEquals(0.002, path_setpoint.acceleration(), 0.001);
+            assertEquals(4.41, path_setpoint.getTimeS(), 0.05);
+            assertEquals(1.91, path_setpoint.velocityM_S(), 0.001);
+            assertEquals(0.00, path_setpoint.acceleration(), 0.001);
 
             Twist2d errorTwist = DriveTrajectoryFollowerUtil.getErrorTwist(current_state, path_setpoint);
             assertEquals(0, errorTwist.dx, 0.05);
@@ -138,7 +138,7 @@ class DrivePursuitControllerTest {
 
     @Test
     void testPreviewDt() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3();
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
@@ -188,7 +188,7 @@ class DrivePursuitControllerTest {
 
     @Test
     void testNearPreviewDt() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3();
         Pose2d start = GeometryUtil.kPoseZero;
         double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));

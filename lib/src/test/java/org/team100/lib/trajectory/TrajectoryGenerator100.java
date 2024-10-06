@@ -2,7 +2,8 @@ package org.team100.lib.trajectory;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
+import java.util.HashMap;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.VelocityLimitRegionConstraint;
 
@@ -37,7 +38,7 @@ public class TrajectoryGenerator100 {
         public final Trajectory100 redNCPCubeScoringPositionToFarSideDockWithPickup;
         public final Trajectory100 redNCPCubeScoringPositionToThirdCube;
         public final Trajectory100 redCPLeftScoringPositionToCPFirstPickup;
-        public final Trajectory100 CPFirstPickupToFarSideDock;
+        // public final Trajectory100 CPFirstPickupToFarSideDock;
         public final Trajectory100 ncpScoringToCubePickup;
         public final Trajectory100 ncpThirdScoreToBackoff;
 
@@ -56,9 +57,9 @@ public class TrajectoryGenerator100 {
         public final VelocityLimitRegionConstraint center_outbound_charging_station_constraint;
         public final VelocityLimitRegionConstraint center_inbound_charging_station_constraint;
 
-        private List<Trajectory100> allTrajectories;
+        private Map<String, Trajectory100> allTrajectories;
 
-        public List<Trajectory100> getAllTrajectories() {
+        public Map<String, Trajectory100> getAllTrajectories() {
             return allTrajectories;
         }
 
@@ -74,53 +75,53 @@ public class TrajectoryGenerator100 {
                     new Translation2d(4.5, 1.27),
                     1.25);
 
-            allTrajectories = new ArrayList<>();
+            allTrajectories = new HashMap<>();
             testTrajectory = getTestTrajectory();
-            allTrajectories.add(testTrajectory);
+            allTrajectories.put("testTrajectory", testTrajectory);
             testTrajectory2 = getTestTrajectory2();
-            allTrajectories.add(testTrajectory2);
+            allTrajectories.put("testTrajectory2", testTrajectory2);
             coopLinkStartToCoopFirstPickup = getCoopLinkStartToCoopFirstPickup();
-            allTrajectories.add(coopLinkStartToCoopFirstPickup);
+            allTrajectories.put("coopLinkStartToCoopFirstPickup", coopLinkStartToCoopFirstPickup);
             coopFirstPickupToCoopSecondScore = getCoopFirstPickupToCoopSecondScore();
-            allTrajectories.add(coopFirstPickupToCoopSecondScore);
+            allTrajectories.put("coopFirstPickupToCoopSecondScore", coopFirstPickupToCoopSecondScore);
             coopFirstScoreToDock = getCoopFirstScoreToDock();
-            allTrajectories.add(coopFirstScoreToDock);
+            allTrajectories.put("coopFirstScoreToDock", coopFirstScoreToDock);
             coopSecondScoreToDock = getCoopSecondScoreToDock();
-            allTrajectories.add(coopSecondScoreToDock);
+            allTrajectories.put("coopSecondScoreToDock", coopSecondScoreToDock);
             redNCPCubeScoringPositionToFarSideDockWithPickup = getRedNCPCubeScoringPositionToFarSideDockWithPickup();
-            allTrajectories.add(redNCPCubeScoringPositionToFarSideDockWithPickup);
+            allTrajectories.put("redNCPCubeScoringPositionToFarSideDockWithPickup", redNCPCubeScoringPositionToFarSideDockWithPickup);
             redNCPCubeScoringPositionToThirdCube = getRedNCPCubeScoringPositionToThirdCube();
-            allTrajectories.add(redNCPCubeScoringPositionToThirdCube);
+            allTrajectories.put("redNCPCubeScoringPositionToThirdCube", redNCPCubeScoringPositionToThirdCube);
             redCPLeftScoringPositionToCPFirstPickup = getRedCPLeftScoringPositionToCPFirstPickup();
-            allTrajectories.add(redCPLeftScoringPositionToCPFirstPickup);
-            CPFirstPickupToFarSideDock = getCPFirstPickupToFarSideDock();
-            allTrajectories.add(CPFirstPickupToFarSideDock);
+            allTrajectories.put("redCPLeftScoringPositionToCPFirstPickup", redCPLeftScoringPositionToCPFirstPickup);
+            // CPFirstPickupToFarSideDock = getCPFirstPickupToFarSideDock();
+            // allTrajectories.put("CPFirstPickupToFarSideDock", CPFirstPickupToFarSideDock);
             ncpScoringToCubePickup = getNCPScoringtoCubePickup();
-            allTrajectories.add(ncpScoringToCubePickup);
+            allTrajectories.put("ncpScoringToCubePickup", ncpScoringToCubePickup);
             cpFirstScoreToOutsidePickup = getCPFirstScoreToOutsidePickup();
-            allTrajectories.add(cpFirstScoreToOutsidePickup);
+            allTrajectories.put("cpFirstScoreToOutsidePickup", cpFirstScoreToOutsidePickup);
             cpFirstScoreToInsidePickup = getCPFirstScoreToInsidePickup();
-            allTrajectories.add(cpFirstScoreToInsidePickup);
+            allTrajectories.put("cpFirstScoreToInsidePickup", cpFirstScoreToInsidePickup);
             cpOutsidePickupToSecondAlign = getCPOutsidePickupToSecondAlign();
-            allTrajectories.add(cpOutsidePickupToSecondAlign);
+            allTrajectories.put("cpOutsidePickupToSecondAlign", cpOutsidePickupToSecondAlign);
             cpInsidePickupToSecondAlign = getCPInsidePickupToSecondAlign();
-            allTrajectories.add(cpInsidePickupToSecondAlign);
+            allTrajectories.put("cpInsidePickupToSecondAlign", cpInsidePickupToSecondAlign);
             cpSecondScoreToInsidePickup = getCPSecondScoreToInsidePickup();
-            allTrajectories.add(cpSecondScoreToInsidePickup);
+            allTrajectories.put("cpSecondScoreToInsidePickup", cpSecondScoreToInsidePickup);
             cpSecondScoreToOutsidePickup = getCPSecondScoreToOutsidePickup();
-            allTrajectories.add(cpSecondScoreToOutsidePickup);
+            allTrajectories.put("cpSecondScoreToOutsidePickup", cpSecondScoreToOutsidePickup);
             cpInsidePickupToDock = getCPInsidePickupToDock();
-            allTrajectories.add(cpInsidePickupToDock);
+            allTrajectories.put("cpInsidePickupToDock", cpInsidePickupToDock);
             cpOutsidePickupToDock = getCPOutsidePickupToDock();
-            allTrajectories.add(cpOutsidePickupToDock);
+            allTrajectories.put("cpOutsidePickupToDock", cpOutsidePickupToDock);
             cpInsidePickupToThirdScore = getCPInsidePickupToThirdScore();
-            allTrajectories.add(cpInsidePickupToThirdScore);
+            allTrajectories.put("cpInsidePickupToThirdScore", cpInsidePickupToThirdScore);
             cpOutsidePickupToThirdScore = getCPOutsidePickupToThirdScore();
-            allTrajectories.add(cpOutsidePickupToThirdScore);
+            allTrajectories.put("cpOutsidePickupToThirdScore", cpOutsidePickupToThirdScore);
             cpThirdScoreToBackoff = getCPThirdScoreToBackoff();
-            allTrajectories.add(cpThirdScoreToBackoff);
+            allTrajectories.put("cpThirdScoreToBackoff", cpThirdScoreToBackoff);
             ncpThirdScoreToBackoff = getNcpThirdScoreToBackoff();
-            allTrajectories.add(ncpThirdScoreToBackoff);
+            allTrajectories.put("ncpThirdScoreToBackoff", ncpThirdScoreToBackoff);
         }
 
         private Trajectory100 getTestTrajectory() {
@@ -507,14 +508,14 @@ public class TrajectoryGenerator100 {
             return generate(waypoints, headings, List.of(), 0.5, 1.0);
         }
 
-        private Trajectory100 getCPFirstPickupToFarSideDock() {
-            List<Pose2d> waypoints = new ArrayList<>();
-            List<Rotation2d> headings = new ArrayList<>();
-            waypoints.add(new Pose2d(5.334, -0.254, Rotation2d.fromDegrees(180.0)));
-            headings.add(Rotation2d.fromDegrees(0.0));
-            waypoints.add(new Pose2d(4.191, -2.032, Rotation2d.fromDegrees(0.0)));
-            headings.add(Rotation2d.fromDegrees(0.0));
-            return generate(waypoints, headings, List.of(), 0.5, 1.0);
-        }
+        // private Trajectory100 getCPFirstPickupToFarSideDock() {
+        // List<Pose2d> waypoints = new ArrayList<>();
+        // List<Rotation2d> headings = new ArrayList<>();
+        // waypoints.add(new Pose2d(5.334, -0.254, Rotation2d.fromDegrees(180.0)));
+        // headings.add(Rotation2d.fromDegrees(0.0));
+        // waypoints.add(new Pose2d(4.191, -2.032, Rotation2d.fromDegrees(0.0)));
+        // headings.add(Rotation2d.fromDegrees(0.0));
+        // return generate(waypoints, headings, List.of(), 0.5, 1.0);
+        // }
     }
 }

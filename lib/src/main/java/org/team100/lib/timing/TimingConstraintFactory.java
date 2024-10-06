@@ -24,7 +24,7 @@ public class TimingConstraintFactory {
     }
 
     /**
-     * Use absolute max as the constraints.  Shouldn't be used on a real robot.
+     * Use absolute max as the constraints. Shouldn't be used on a real robot.
      */
     public List<TimingConstraint> forTest() {
         return scaled(1.0, 1.0);
@@ -32,6 +32,7 @@ public class TimingConstraintFactory {
 
     private List<TimingConstraint> scaled(double centripetalScale, double yawRateScale) {
         return List.of(
+                new ConstantConstraint(m_limits.getMaxDriveVelocityM_S(), m_limits.getMaxDriveAccelerationM_S2()),
                 new SwerveDriveDynamicsConstraint(m_limits),
                 new YawRateConstraint(m_limits, yawRateScale),
                 new CentripetalAccelerationConstraint(m_limits, centripetalScale));

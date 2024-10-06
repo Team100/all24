@@ -168,6 +168,20 @@ public class SwerveKinodynamicsFactory {
                 0.6); // vcg m
     }
 
+    public static SwerveKinodynamics forTest3() {
+        return new SwerveKinodynamics(
+                2, // vel m/s
+                5, // stall m/s/s
+                2, // accel m/s/s
+                2, // decel m/s/s
+                1, // steering rate rad/s
+                20 * Math.PI, // steering accel rad/s/s
+                0.5, // track m
+                0.5, // wheelbase m
+                .25, // front offset m
+                0.6); // vcg m
+    }
+
     public static SwerveKinodynamics forWPITest() {
         return new SwerveKinodynamics(
                 1, // vel m/s

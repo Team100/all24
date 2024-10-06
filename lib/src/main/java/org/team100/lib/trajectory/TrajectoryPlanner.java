@@ -6,6 +6,7 @@ import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingUtil;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,7 +20,9 @@ public class TrajectoryPlanner {
     private static final double kMaxDy = 0.0127; // m
     private static final double kMaxDTheta = Math.toRadians(1.0);
 
-    // TODO: get rid of max_vel and max_accel, use constraints instead.
+    /**
+     * If you want a max velocity or max accel constraint, use ConstantConstraint.
+     */
     public static Trajectory100 generateTrajectory(
             List<Pose2d> waypoints,
             List<Rotation2d> headings,
@@ -42,6 +45,9 @@ public class TrajectoryPlanner {
                     end_vel);
         } catch (IllegalArgumentException e) {
             // catches various kinds of malformed input, returns a no-op.
+            // this should never actually happen.
+            Util.warn("Bad trajectory input!!");
+            e.printStackTrace();
             return new Trajectory100();
         }
     }
