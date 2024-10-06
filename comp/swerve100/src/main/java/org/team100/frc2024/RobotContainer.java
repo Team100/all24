@@ -37,7 +37,7 @@ import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
-import org.team100.lib.commands.drivetrain.for_testing.OscillatePosition;
+import org.team100.lib.commands.drivetrain.for_testing.OscillateProfile;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.commands.drivetrain.manual.ManualChassisSpeeds;
@@ -49,6 +49,7 @@ import org.team100.lib.commands.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.commands.drivetrain.manual.ManualWithTargetLock;
 import org.team100.lib.commands.drivetrain.manual.SimpleManualModuleStates;
 import org.team100.lib.config.Identity;
+import org.team100.lib.controller.drivetrain.FullStateDriveController;
 import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
@@ -77,11 +78,10 @@ import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
+import org.team100.lib.profile.HolonomicProfile;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
 import org.team100.lib.timing.ConstantConstraint;
-import org.team100.lib.timing.TimingConstraint;
-import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
@@ -240,7 +240,6 @@ public class RobotContainer implements Glassy {
         HolonomicFieldRelativeController.Log hlog = new HolonomicFieldRelativeController.Log(comLog);
         HolonomicFieldRelativeController halfFullStateController = HolonomicDriveControllerFactory.get(hlog);
 
-
         final DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(comLog);
         final DriveTrajectoryFollowerFactory driveControllerFactory = new DriveTrajectoryFollowerFactory(util);
         DrivePIDFFollower.Log PIDFlog = new DrivePIDFFollower.Log(comLog);
@@ -281,11 +280,19 @@ public class RobotContainer implements Glassy {
         // for testing odometry
         TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(1.0, 1.0)));
         StraightLineTrajectory maker = new StraightLineTrajectory(false, tmaker);
+        HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1, 0.01, 1, 1, 0.01);
+        FullStateDriveController hcontroller = new FullStateDriveController(hlog);
+
         whileTrue(driverControl::fullCycle,
                 new RepeatCommand(
                         new SequentialCommandGroup(
-                                new OscillatePosition(driveLog, m_drive, maker, controller, 1, viz),
-                                new OscillatePosition(driveLog, m_drive, maker, controller, -1, viz))));
+                                new OscillateProfile(m_drive, hp, controller, 1),
+                                new OscillateProfile(m_drive, hp, controller, -1))));
+
+        // new RepeatCommand(
+        // new SequentialCommandGroup(
+        // new OscillatePosition(driveLog, m_drive, maker, controller, 1, viz),
+        // new OscillatePosition(driveLog, m_drive, maker, controller, -1, viz))));
 
         // new OscillateDirect(comLog, m_drive));
         // new Oscillate(comLog, m_drive));

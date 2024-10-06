@@ -62,7 +62,6 @@ public class Robot extends TimedRobot100 {
         RobotController.setBrownoutVoltage(5.5);
         banner();
 
-
         // By default, LiveWindow turns off the CommandScheduler in test mode,
         // but we don't want that.
         enableLiveWindowInTest(false);
@@ -184,6 +183,11 @@ public class Robot extends TimedRobot100 {
     @Override
     public void testPeriodic() {
         m_log_mode.log(() -> "test");
+    }
+
+    @Override
+    public void simulationInit() {
+        DriverStation.silenceJoystickConnectionWarning(true);
     }
 
     private void banner() {

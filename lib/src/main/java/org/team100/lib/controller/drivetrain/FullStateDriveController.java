@@ -26,8 +26,7 @@ public class FullStateDriveController implements HolonomicFieldRelativeControlle
 
     private boolean m_atSetpoint = false;
 
-    /** Use the factory. */
-    FullStateDriveController(Log log) {
+    public FullStateDriveController(Log log) {
         m_log = log;
     }
 

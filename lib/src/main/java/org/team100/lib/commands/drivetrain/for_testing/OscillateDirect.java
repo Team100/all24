@@ -115,6 +115,15 @@ public class OscillateDirect extends Command implements Glassy {
         });
     }
 
+    void sideways(double speedM_S) {
+        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)), // FL
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)), // FR
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)), // RL
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)) // RR
+        });
+    }
+
     void back(double speedM_S) {
         m_swerve.setRawModuleStates(new SwerveModuleState100[] {
                 new SwerveModuleState100(-speedM_S, Optional.of(GeometryUtil.kRotation180)), // FL

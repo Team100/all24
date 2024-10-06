@@ -63,6 +63,12 @@ public class SwerveState {
         return new SwerveState(x().plus(other.x()), y().plus(other.y()), theta().plus(other.theta()));
     }
 
+    public boolean near(SwerveState other, double tolerance) {
+        return x().near(other.x(), tolerance)
+                && y().near(other.y(), tolerance)
+                && theta().near(other.theta(), tolerance);
+    }
+
     public Pose2d pose() {
         return new Pose2d(m_x.x(), m_y.x(), new Rotation2d(m_theta.x()));
     }
