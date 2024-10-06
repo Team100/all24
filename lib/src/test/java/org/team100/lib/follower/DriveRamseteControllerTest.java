@@ -27,8 +27,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DriveRamseteControllerTest {
     boolean dump = false;
-    private static final double kMaxVel = 1.0;
-    private static final double kMaxAccel = 1.0;
     private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
 
@@ -46,18 +44,13 @@ class DriveRamseteControllerTest {
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).fast();
 
-        double start_vel = 0;
-        double end_vel = 0;
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(
                 waypoints,
                 headings,
-                constraints,
-                start_vel,
-                end_vel,
-                kMaxVel,
-                kMaxAccel);
+                constraints);
 
         // why is this so large?
         assertEquals(1300, trajectory.length());

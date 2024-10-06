@@ -61,16 +61,12 @@ public class TrajectoryMaker {
         Translation2d translationToGoal = goalTranslation.minus(currentTranslation);
         Rotation2d angleToGoal = translationToGoal.getAngle();
         try {
-            return TrajectoryPlanner.generateTrajectory(
+            return TrajectoryPlanner.restToRest(
                     List.of(
                             new Pose2d(currentTranslation, angleToGoal),
                             new Pose2d(goalTranslation, angleToGoal)),
                     List.of(start.getRotation(), end.getRotation()),
-                    m_constraints,
-                    0.0,
-                    0.0,
-                    1000,
-                    1000);
+                    m_constraints);
         } catch (TrajectoryGenerationException e) {
             return null;
         }

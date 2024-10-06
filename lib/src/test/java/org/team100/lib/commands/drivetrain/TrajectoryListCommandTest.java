@@ -58,8 +58,8 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
         assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
         c.execute();
         assertFalse(c.isFinished());
-        // the trajectory takes a little over 2s
-        for (double t = 0; t < 2.1; t += kDtS) {
+        // the trajectory takes a little over 3s
+        for (double t = 0; t < 3.1; t += kDtS) {
             stepTime(kDtS);
             c.execute();
             fixture.drive.periodic(); // for updateOdometry

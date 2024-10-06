@@ -33,7 +33,7 @@ class StraightLineTrajectoryTest {
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         System.out.println(traj);
-        assertEquals(1, traj.getTotalTimeSeconds(), kDelta);
+        assertEquals(1.414, traj.getTotalTimeSeconds(), kDelta);
         double maxDriveVelocityM_S = swerveKinodynamics.getMaxDriveVelocityM_S();
         double maxDriveAccelerationM_S2 = swerveKinodynamics.getMaxDriveAccelerationM_S2();
         assertEquals(4, maxDriveVelocityM_S);
@@ -53,7 +53,7 @@ class StraightLineTrajectoryTest {
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         System.out.println(traj);
-        assertEquals(0.811, traj.getTotalTimeSeconds(), kDelta);
+        assertEquals(1.081, traj.getTotalTimeSeconds(), kDelta);
     }
 
     @Test
@@ -74,6 +74,6 @@ class StraightLineTrajectoryTest {
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         System.out.println(traj);
-        assertEquals(1.397, traj.getTotalTimeSeconds(), kDelta);
+        assertEquals(1.672, traj.getTotalTimeSeconds(), kDelta);
     }
 }

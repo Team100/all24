@@ -20,6 +20,18 @@ public class TrajectoryPlanner {
     private static final double kMaxDy = 0.0127; // m
     private static final double kMaxDTheta = Math.toRadians(1.0);
 
+    public static Trajectory100 restToRest(
+            List<Pose2d> waypoints,
+            List<Rotation2d> headings,
+            List<TimingConstraint> constraints) {
+        return generateTrajectory(
+                waypoints,
+                headings,
+                constraints,
+                0.0,
+                0.0);
+    }
+
     /**
      * If you want a max velocity or max accel constraint, use ConstantConstraint.
      */
@@ -28,16 +40,14 @@ public class TrajectoryPlanner {
             List<Rotation2d> headings,
             List<TimingConstraint> constraints,
             double start_vel,
-            double end_vel,
-            double max_vel,
-            double max_accel) {
+            double end_vel) {
         try {
             // Create a path from splines.
             Path100 path = TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
                     waypoints, headings, kMaxDx, kMaxDy, kMaxDTheta);
             // Generate the timed trajectory.
             var view = new PathDistanceSampler(path);
-            TimingUtil u = new TimingUtil(constraints, max_vel, max_accel);
+            TimingUtil u = new TimingUtil(constraints);
             return u.timeParameterizeTrajectory(
                     view,
                     kMaxDx,

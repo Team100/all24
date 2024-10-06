@@ -30,14 +30,7 @@ class TrajectoryPlannerTest {
         List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d());
         List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d());
         List<TimingConstraint> constraints = new ArrayList<>();
-        double start_vel = 0;
-        double end_vel = 0;
-        double max_vel = 1;
-        double max_accel = 1;
-
-        Trajectory100 t = TrajectoryPlanner.generateTrajectory(
-                waypoints, headings, constraints, start_vel, end_vel,
-                max_vel, max_accel);
+        Trajectory100 t = TrajectoryPlanner.restToRest(waypoints, headings, constraints);
         assertTrue(t.isEmpty());
     }
 
@@ -46,13 +39,7 @@ class TrajectoryPlannerTest {
         List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d(1, 0, new Rotation2d()));
         List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d());
         List<TimingConstraint> constraints = new ArrayList<>();
-        double start_vel = 0;
-        double end_vel = 0;
-        double max_vel = 1;
-        double max_accel = 1;
-        Trajectory100 t = TrajectoryPlanner.generateTrajectory(
-                waypoints, headings, constraints, start_vel, end_vel,
-                max_vel, max_accel);
+        Trajectory100 t = TrajectoryPlanner.restToRest(waypoints, headings, constraints);
         assertEquals(80, t.m_points.size());
         TrajectoryPoint p = t.getPoint(40);
         assertEquals(0.5, p.state().state().getPose().getX(), kDelta);
@@ -78,12 +65,9 @@ class TrajectoryPlannerTest {
                         new CentripetalAccelerationConstraint(limits, 0.2));
         double start_vel = 1;
         double end_vel = 0;
-        double max_vel = 1000;
-        double max_accel = 1000;
         Trajectory100 t = TrajectoryPlanner.generateTrajectory(
                 waypoints,
-                headings, constraints, start_vel, end_vel,
-                max_vel, max_accel);
+                headings, constraints, start_vel, end_vel);
         // u-turn trajectories are not allowed.
         assertTrue(t.isEmpty());
 
@@ -92,23 +76,22 @@ class TrajectoryPlannerTest {
     /**
      * Is trajectory planning fast enough to run every loop?
      * This computes a single spline, and makes a schedule along it.
+     * 
+     * On my desktop machine, that takes about 0.5 ms, or 3% of the budget. On the
+     * RIO it's probably several times slower, but still maybe 10% of the budget.
+     * so, yeah, you can do a spline every loop.
      */
     @Test
     void testPerformance() {
         List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d(1, 1, new Rotation2d(Math.PI / 2)));
         List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d());
         List<TimingConstraint> constraints = new ArrayList<>();
-        double start_vel = 0;
-        double end_vel = 0;
-        double max_vel = 2;
-        double max_accel = 2;
         long startTimeNs = System.nanoTime();
         Trajectory100 t = new Trajectory100();
         final int iterations = 100;
         for (int i = 0; i < iterations; ++i) {
-            t = TrajectoryPlanner.generateTrajectory(
-                    waypoints, headings, constraints, start_vel, end_vel,
-                    max_vel, max_accel);
+            t = TrajectoryPlanner.restToRest(
+                    waypoints, headings, constraints);
         }
         long endTimeNs = System.nanoTime();
         double totalDurationMs = (endTimeNs - startTimeNs) / 1000000.0;
@@ -128,13 +111,7 @@ class TrajectoryPlannerTest {
         List<Pose2d> waypoints = List.of(new Pose2d(), new Pose2d());
         List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d(1));
         List<TimingConstraint> constraints = new ArrayList<>();
-        double start_vel = 0;
-        double end_vel = 0;
-        double max_vel = 1;
-        double max_accel = 1;
-        Trajectory100 t = TrajectoryPlanner.generateTrajectory(
-                waypoints, headings, constraints, start_vel, end_vel,
-                max_vel, max_accel);
+        Trajectory100 t = TrajectoryPlanner.restToRest(waypoints, headings, constraints);
         assertTrue(t.isEmpty());
     }
 

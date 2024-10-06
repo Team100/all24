@@ -8,7 +8,9 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -27,11 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToWithAutoStart extends Command implements Glassy  {
-
-    private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 5;
-
+public class DriveToWithAutoStart extends Command implements Glassy {
     private final SwerveDriveSubsystem m_swerve;
     private final Pose2d m_goalWaypoint;
     private final Rotation2d m_goalHeading;
@@ -40,7 +38,7 @@ public class DriveToWithAutoStart extends Command implements Glassy  {
     private final TrajectoryVisualization m_viz;
 
     // LOGGERS
-    private final ChassisSpeedsLogger m_log_chassis_speeds; 
+    private final ChassisSpeedsLogger m_log_chassis_speeds;
 
     public DriveToWithAutoStart(
             LoggerFactory parent,
@@ -48,7 +46,7 @@ public class DriveToWithAutoStart extends Command implements Glassy  {
             Pose2d goalWaypoint,
             Rotation2d goalHeading,
             DriveTrajectoryFollower controller,
-            List<TimingConstraint> constraints,
+            SwerveKinodynamics swerveKinodynamics,
             TrajectoryVisualization viz) {
         LoggerFactory child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
@@ -56,7 +54,7 @@ public class DriveToWithAutoStart extends Command implements Glassy  {
         m_goalWaypoint = goalWaypoint;
         m_goalHeading = goalHeading;
         m_controller = controller;
-        m_constraints = constraints;
+        m_constraints = new TimingConstraintFactory(swerveKinodynamics).fast();
         m_viz = viz;
         addRequirements(m_swerve);
     }
@@ -75,14 +73,7 @@ public class DriveToWithAutoStart extends Command implements Glassy  {
         List<Rotation2d> headings = List.of(
                 startPose.getRotation(),
                 m_goalHeading);
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_constraints);
 
         if (trajectory.length() == 0) {
             end(false);

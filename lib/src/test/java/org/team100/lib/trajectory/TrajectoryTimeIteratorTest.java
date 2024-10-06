@@ -18,17 +18,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 class TrajectoryTimeIteratorTest {
     private static final double kDelta = 0.001;
-    private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 2;
 
     @Test
     void testPreviewAndAdvance() {
-
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
         Pose2d start = GeometryUtil.kPoseZero;
-        double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
-        double endVelocity = 0;
 
         Translation2d currentTranslation = start.getTranslation();
         Translation2d goalTranslation = end.getTranslation();
@@ -42,16 +37,9 @@ class TrajectoryTimeIteratorTest {
                 start.getRotation(),
                 end.getRotation());
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
 
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                constraints,
-                startVelocity,
-                endVelocity,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, constraints);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 

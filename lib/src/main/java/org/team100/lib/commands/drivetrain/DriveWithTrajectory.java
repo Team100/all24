@@ -26,12 +26,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class DriveWithTrajectory extends Command implements Glassy  {
-    private static final double kMaxVel = 5;
-    private static final double kMaxAcc = 5;
-    private static final double kStartVel = 0;
-    private static final double kEndVel = 0;
-
+public class DriveWithTrajectory extends Command implements Glassy {
     private final SwerveDriveSubsystem m_swerve;
     private final DriveTrajectoryFollower m_controller;
     private final Trajectory100 trajectory;
@@ -55,20 +50,12 @@ public class DriveWithTrajectory extends Command implements Glassy  {
         PathArrays trajectoryList = JSONParser.getTrajectoryList(fileName);
         trajectoryList.removeLastIndex();
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).allGood();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
         List<Pose2d> poses = getWaypoints(trajectoryList.getPoseArray());
         List<Rotation2d> headings = trajectoryList.getRotationArray();
 
-        trajectory = TrajectoryPlanner.generateTrajectory(
-                poses,
-                headings,
-                constraints,
-                kStartVel,
-                kEndVel,
-                kMaxVel,
-                kMaxAcc);
+        trajectory = TrajectoryPlanner.restToRest(poses, headings, constraints);
         m_viz = viz;
-
         addRequirements(m_swerve);
     }
 

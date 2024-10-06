@@ -225,7 +225,8 @@ public class RobotContainer implements Glassy {
 
         // RESET ZERO
         // on xbox this is "back"
-        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive, GeometryUtil.kRotationZero));
+        // onTrue(driverControl::resetRotation0, new SetRotation(m_drive,
+        // GeometryUtil.kRotationZero));
         onTrue(driverControl::resetRotation0, new ResetPose(m_drive, 0, 0, 0));
 
         // RESET 180
@@ -239,7 +240,6 @@ public class RobotContainer implements Glassy {
         HolonomicFieldRelativeController.Log hlog = new HolonomicFieldRelativeController.Log(comLog);
         HolonomicFieldRelativeController halfFullStateController = HolonomicDriveControllerFactory.get(hlog);
 
-        final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         final DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(comLog);
         final DriveTrajectoryFollowerFactory driveControllerFactory = new DriveTrajectoryFollowerFactory(util);
@@ -250,7 +250,7 @@ public class RobotContainer implements Glassy {
                         comLog,
                         m_drive,
                         driveControllerFactory.fancyPIDF(PIDFlog),
-                        constraints));
+                        swerveKinodynamics));
 
         final HolonomicFieldRelativeController controller = HolonomicDriveControllerFactory.get(hlog);
         final DriveTrajectoryFollower drivePID = driveControllerFactory.goodPIDF(PIDFlog);
@@ -441,10 +441,11 @@ public class RobotContainer implements Glassy {
                 m_shooter,
                 intake,
                 m_sensors,
-                constraints,
+                swerveKinodynamics,
                 viz);
 
-        whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
+        // whileTrue(driverControl::test, m_AutoMaker.citrus(Alliance.Blue));
+        whileTrue(driverControl::test, m_AutoMaker.fourNoteAuto(Alliance.Blue, m_sensors));
 
         whileTrue(driverControl::ampLock,
                 new AmpLockCommand(ampLock, driverControl::velocity, m_drive));

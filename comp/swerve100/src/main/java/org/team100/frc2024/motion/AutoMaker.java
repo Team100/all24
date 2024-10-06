@@ -19,7 +19,9 @@ import org.team100.lib.follower.DriveTrajectoryFollower;
 import org.team100.lib.follower.DriveTrajectoryFollowerFactory;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.visualization.TrajectoryVisualization;
@@ -37,25 +39,21 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class AutoMaker implements Glassy {
     private static final double kIntakeOffset = 0;
-    private static final double kMaxVelM_S = 2;
-    private static final double kMaxAccelM_S_S = 2;
 
     private final SwerveDriveSubsystem m_swerve;
     private final DriveTrajectoryFollower m_controller;
     private final SensorInterface m_sensors;
-    private final List<TimingConstraint> m_constraints;
+    private final List<TimingConstraint> m_slow;
+    private final List<TimingConstraint> m_fast;
     private final Intake m_intake;
     private final DrumShooter m_shooter;
     private final FeederSubsystem m_feeder;
     private final double kShooterScale;
-    /**
-     * This is an exception to the no-member rule; this is used by the factory
-     * methods below. TODO: pass it to the factories?
-     */
     private final LoggerFactory m_logger;
     private final DrivePIDFFollower.Log m_log;
     private final TrajectoryCommand100.Log m_commandLog;
     private final DriveTrajectoryFollowerFactory m_factory;
+    private final SwerveKinodynamics m_swerveKinodynamics;
     private final TrajectoryVisualization m_viz;
 
     public AutoMaker(
@@ -68,17 +66,20 @@ public class AutoMaker implements Glassy {
             DrumShooter shooter,
             Intake intake,
             SensorInterface sensor,
-            List<TimingConstraint> constraints,
+            SwerveKinodynamics swerveKinodynamics,
             TrajectoryVisualization viz) {
         m_swerve = swerve;
         m_factory = factory;
         m_controller = controller;
-        m_constraints = constraints;
+        TimingConstraintFactory constraints = new TimingConstraintFactory(swerveKinodynamics);
+        m_slow = constraints.allGood();
+        m_fast = constraints.fast();
         kShooterScale = shooterScale;
         m_feeder = feeder;
         m_shooter = shooter;
         m_intake = intake;
         m_sensors = sensor;
+        m_swerveKinodynamics = swerveKinodynamics;
         m_logger = parent.child(this);
         m_log = new DrivePIDFFollower.Log(m_logger);
         m_commandLog = new TrajectoryCommand100.Log(m_logger);
@@ -142,14 +143,7 @@ public class AutoMaker implements Glassy {
                 startPose.getRotation(),
                 betweenHeading,
                 endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
@@ -158,9 +152,7 @@ public class AutoMaker implements Glassy {
             FieldPoint2024 noteA,
             Translation2d waypoint,
             Translation2d waypoint2,
-            FieldPoint2024 noteB,
-            double maxVel,
-            double maxAcc) {
+            FieldPoint2024 noteB) {
         Pose2d startPose = getPose(alliance, noteA);
         Pose2d endPose = getPose(alliance, noteB);
 
@@ -185,14 +177,7 @@ public class AutoMaker implements Glassy {
                 betweenHeading,
                 betweenHeading,
                 endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                maxVel,
-                maxAcc);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_slow);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_factory.goodPIDF(m_log),
                 m_viz);
     }
@@ -201,25 +186,18 @@ public class AutoMaker implements Glassy {
         Pose2d endPose = getPose(alliance, note);
         Rotation2d endRotation = new Rotation2d(Math.PI / 2);
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), endRotation);
-        return new DriveToWithAutoStart(m_logger, m_swerve, endWaypoint, endPose.getRotation(), m_controller,
-                m_constraints, m_viz);
+        return new DriveToWithAutoStart(
+                m_logger, m_swerve,
+                endWaypoint, endPose.getRotation(), m_controller,
+                m_swerveKinodynamics, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory1() {
         List<Pose2d> waypointsM = List.of(
                 new Pose2d(2, 2, new Rotation2d()),
                 new Pose2d(5, 2, new Rotation2d()));
-        List<Rotation2d> headings = List.of(
-                new Rotation2d(Math.PI),
-                new Rotation2d(Math.PI));
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new Rotation2d(Math.PI));
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
@@ -227,17 +205,8 @@ public class AutoMaker implements Glassy {
         List<Pose2d> waypointsM = List.of(
                 new Pose2d(0, 0, Rotation2d.fromDegrees(45)),
                 new Pose2d(1, 1, Rotation2d.fromDegrees(45)));
-        List<Rotation2d> headings = List.of(
-                Rotation2d.fromDegrees(0),
-                Rotation2d.fromDegrees(0));
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        List<Rotation2d> headings = List.of(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0));
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
@@ -245,53 +214,22 @@ public class AutoMaker implements Glassy {
         List<Pose2d> waypointsM = List.of(
                 new Pose2d(5, 2, new Rotation2d(Math.PI)),
                 new Pose2d(2, 2, new Rotation2d(Math.PI)));
-        List<Rotation2d> headings = List.of(
-                new Rotation2d(Math.PI),
-                new Rotation2d(Math.PI));
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new Rotation2d(Math.PI));
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory3() {
-        List<Pose2d> waypointsM = List.of(
-                new Pose2d(),
-                new Pose2d());
-        List<Rotation2d> headings = List.of(
-                new Rotation2d(Math.PI),
-                new Rotation2d());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        List<Pose2d> waypointsM = List.of(new Pose2d(), new Pose2d());
+        List<Rotation2d> headings = List.of(new Rotation2d(Math.PI), new Rotation2d());
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
     public TrajectoryCommand100 tuningTrajectory4() {
-        List<Pose2d> waypointsM = List.of(
-                new Pose2d(),
-                new Pose2d());
-        List<Rotation2d> headings = List.of(
-                new Rotation2d(),
-                new Rotation2d(Math.PI));
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        List<Pose2d> waypointsM = List.of(new Pose2d(), new Pose2d());
+        List<Rotation2d> headings = List.of(new Rotation2d(), new Rotation2d(Math.PI));
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
@@ -314,14 +252,7 @@ public class AutoMaker implements Glassy {
                 startPose.getRotation(),
                 endPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                2,
-                2); // kNote
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.stageBase(m_log), m_viz);
     }
@@ -349,14 +280,7 @@ public class AutoMaker implements Glassy {
                 startPose.getRotation(),
                 endPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                4,
-                2);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_log), m_viz);
     }
@@ -381,14 +305,7 @@ public class AutoMaker implements Glassy {
                 startPose.getRotation(),
                 endPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                2,
-                2);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_slow);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_log), m_viz);
     }
@@ -414,14 +331,7 @@ public class AutoMaker implements Glassy {
                 startPose.getRotation(),
                 heading,
                 heading);
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                2,
-                2);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_slow);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_log), m_viz);
     }
@@ -447,20 +357,12 @@ public class AutoMaker implements Glassy {
                 new Rotation2d(begHeading),
                 endPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                2,
-                2);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_slow);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_log), m_viz);
     }
 
-    public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end, int maxAcc,
-            int maxVel) {
+    public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end) {
         Pose2d startPose = getPose(alliance, start);
         Pose2d endPose = getPose(alliance, end);
 
@@ -474,20 +376,17 @@ public class AutoMaker implements Glassy {
         List<Rotation2d> headings = List.of(
                 startPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                maxVel,
-                maxAcc);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.straightPIDF(m_log), m_viz);
     }
 
-    public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end, int maxAcc,
-            int maxVel, Rotation2d begHeading, Rotation2d endHeading) {
+    public TrajectoryCommand100 driveStraight(
+            Alliance alliance,
+            FieldPoint2024 start,
+            FieldPoint2024 end,
+            Rotation2d begHeading,
+            Rotation2d endHeading) {
         Pose2d startPose = getPose(alliance, start);
         Pose2d endPose = getPose(alliance, end);
 
@@ -495,44 +394,28 @@ public class AutoMaker implements Glassy {
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), angleToGoal);
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
 
-        List<Pose2d> waypointsM = List.of(startWaypoint,
-                endWaypoint);
-        List<Rotation2d> headings = List.of(begHeading,
-                endHeading);
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                maxVel,
-                maxAcc);
+        List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
+        List<Rotation2d> headings = List.of(begHeading, endHeading);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.straightPIDF(m_log), m_viz);
     }
 
-    public TrajectoryCommand100 driveStraight(Alliance alliance, FieldPoint2024 start, FieldPoint2024 end,
-            double splineStartDirection, double endingSplineDirection, int maxVel, int maxAcc) {
+    public TrajectoryCommand100 driveStraight(
+            Alliance alliance,
+            FieldPoint2024 start,
+            FieldPoint2024 end,
+            double splineStartDirection,
+            double endingSplineDirection) {
         Pose2d startPose = getPose(alliance, start);
         Pose2d endPose = getPose(alliance, end);
 
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), new Rotation2d(splineStartDirection));
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), new Rotation2d(endingSplineDirection));
 
-        List<Pose2d> waypointsM = List.of(
-                startWaypoint,
-                endWaypoint);
-        List<Rotation2d> headings = List.of(
-                startPose.getRotation(),
-                endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                maxVel,
-                maxAcc);
+        List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
+        List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation());
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.complementPIDF(m_log), m_viz);
     }
@@ -550,20 +433,9 @@ public class AutoMaker implements Glassy {
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), angleToGoal);
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
 
-        List<Pose2d> waypointsM = List.of(
-                startWaypoint,
-                endWaypoint);
-        List<Rotation2d> headings = List.of(
-                startPose.getRotation(),
-                endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                4,
-                3);
+        List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
+        List<Rotation2d> headings = List.of(startPose.getRotation(), endPose.getRotation());
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(
                 m_commandLog,
                 m_swerve,
@@ -582,23 +454,12 @@ public class AutoMaker implements Glassy {
 
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), angleToGoal);
         Pose2d endWaypoint = new Pose2d(endPose.getTranslation(), angleToGoal);
-        List<Pose2d> waypointsM = List.of(
-                startWaypoint,
-                endWaypoint);
+        List<Pose2d> waypointsM = List.of(startWaypoint, endWaypoint);
 
         Rotation2d startHeading = startPose.getRotation();
         Rotation2d endHeading = new Rotation2d(Math.PI);
-        List<Rotation2d> headings = List.of(
-                startHeading,
-                endHeading);
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                4,
-                2);
+        List<Rotation2d> headings = List.of(startHeading, endHeading);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory,
                 m_factory.newNewPIDF(m_log), m_viz);
     }
@@ -628,14 +489,7 @@ public class AutoMaker implements Glassy {
                 startPose.getRotation(),
                 betweenPose.getRotation(),
                 endPose.getRotation());
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_fast);
         return new TrajectoryCommand100(m_commandLog, m_swerve, trajectory, m_controller, m_viz);
     }
 
@@ -657,8 +511,8 @@ public class AutoMaker implements Glassy {
     }
 
     public DriveToWaypoint100 driveToStraight(Alliance alliance, FieldPoint2024 point) {
-        return new DriveToWaypoint100(m_logger, getPose(alliance, point), m_swerve, m_controller, m_constraints, 1,
-                m_viz);
+        return new DriveToWaypoint100(m_logger, getPose(alliance, point), m_swerve, m_controller, m_swerveKinodynamics,
+                1, m_viz);
     }
 
     public SequentialCommandGroup eightNoteAuto(Alliance alliance) {
@@ -691,21 +545,19 @@ public class AutoMaker implements Glassy {
                 new ShootPreload(m_logger, sensor, m_shooter, m_intake, m_feeder, m_swerve, true),
                 new ParallelRaceGroup(driveToStageBase(alliance, FieldPoint2024.STARTSUBWOOFER, FieldPoint2024.NOTE3),
                         new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
-
                 new ParallelDeadlineGroup(
-                        test(alliance, FieldPoint2024.NOTE3,
+                        test(alliance,
+                                FieldPoint2024.NOTE3,
                                 FieldPoint2024.forAlliance(new Translation2d(1.99, 5.5583), alliance),
                                 FieldPoint2024.forAlliance(new Translation2d(2.3, 5.5583), alliance),
-                                FieldPoint2024.NOTE2, 3,
-                                2),
+                                FieldPoint2024.NOTE2),
                         new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
-
                 new ParallelDeadlineGroup(
-                        test(alliance, FieldPoint2024.NOTE2,
+                        test(alliance,
+                                FieldPoint2024.NOTE2,
                                 FieldPoint2024.forAlliance(new Translation2d(1.95, 6.47), alliance),
                                 FieldPoint2024.forAlliance(new Translation2d(2.307, 6.67), alliance),
-                                FieldPoint2024.NOTE1, 3,
-                                2),
+                                FieldPoint2024.NOTE1),
                         new ShootSmart(sensor, m_shooter, m_intake, m_feeder, m_swerve, false)),
                 new ParallelDeadlineGroup(
                         driveStraightWithWaypoints(
@@ -730,14 +582,14 @@ public class AutoMaker implements Glassy {
             return new SequentialCommandGroup(
                     new ParallelDeadlineGroup(
                             driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
-                                    -Math.toRadians(70), 0, 4, 3),
+                                    -Math.toRadians(70), 0),
                             new ChangeIntakeState(m_intake, m_sensors)),
-                    driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.NOTE8, 4, 4));
+                    driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.NOTE8, 3.5, 3.5));
         } else {
             return new SequentialCommandGroup(
                     new ParallelDeadlineGroup(
                             driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
-                                    Math.toRadians(70), 0, 4, 3),
+                                    Math.toRadians(70), 0),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.NOTE8, 4, 4));
         }
@@ -752,11 +604,11 @@ public class AutoMaker implements Glassy {
                     new PrintCommand("red citrus 2"),
                     new ParallelDeadlineGroup(
                             driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, Math.PI / 4,
-                                    0, 4, 3),
+                                    0),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new PrintCommand("red citrus 3"),
                     new ParallelRaceGroup(driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
-                            Math.toRadians(180), Math.toRadians(245), 4, 3), new RampShooter(m_shooter)),
+                            Math.toRadians(180), Math.toRadians(245)), new RampShooter(m_shooter)),
                     new PrintCommand("red citrus 4"),
                     new ParallelRaceGroup(
                             new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
@@ -768,7 +620,7 @@ public class AutoMaker implements Glassy {
                     new PrintCommand("red citrus 6"),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.NOTE6, FieldPoint2024.COMPLEMENTSHOOT2, Math.PI,
-                                    Math.toRadians(-135), 4, 3),
+                                    Math.toRadians(-135)),
                             new RampShooter(m_shooter)),
                     new PrintCommand("red citrus 7"),
                     new ParallelRaceGroup(
@@ -781,12 +633,11 @@ public class AutoMaker implements Glassy {
                     new PrintCommand("blue citrus 2"),
                     new ParallelDeadlineGroup(
                             driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
-                                    3 * Math.PI / 2, 0, 4,
-                                    3),
+                                    3 * Math.PI / 2, 0),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new PrintCommand("blue citrus 3"),
                     new ParallelRaceGroup(driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
-                            Math.toRadians(180), Math.toRadians(245.0 - 180), 4, 3),
+                            Math.toRadians(180), Math.toRadians(245.0 - 180)),
                             new RampShooter(m_shooter)),
                     new PrintCommand("blue citrus 4"),
                     new ParallelRaceGroup(
@@ -799,7 +650,7 @@ public class AutoMaker implements Glassy {
                     new PrintCommand("blue citrus 6"),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.NOTE6, FieldPoint2024.COMPLEMENTSHOOT2, Math.PI,
-                                    Math.toRadians(140), 4, 3),
+                                    Math.toRadians(140)),
                             new RampShooter(m_shooter)),
                     new PrintCommand("blue citrus 7"),
                     new ParallelRaceGroup(
@@ -814,12 +665,12 @@ public class AutoMaker implements Glassy {
                     new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4, Math.PI / 4,
-                                    0, 4, 3),
+                                    0),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
                                     Math.toRadians(180),
-                                    Math.toRadians(245), 4, 2),
+                                    Math.toRadians(245)),
                             new RampShooter(m_shooter)),
                     new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelRaceGroup(
@@ -834,13 +685,12 @@ public class AutoMaker implements Glassy {
                     new ShootSmart(m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.COMPLEMENTBEGIN, FieldPoint2024.NOTE4,
-                                    3 * Math.PI / 2, 0, 4,
-                                    3),
+                                    3 * Math.PI / 2, 0),
                             new ChangeIntakeState(m_intake, m_sensors)),
                     new ParallelRaceGroup(
                             driveStraight(alliance, FieldPoint2024.NOTE4, FieldPoint2024.COMPLEMENTSHOOT,
                                     Math.toRadians(180),
-                                    Math.toRadians(245.0 - 180), 4, 2),
+                                    Math.toRadians(245.0 - 180)),
                             new RampShooter(m_shooter)),
                     new ShootPreload(m_logger, m_sensors, m_shooter, m_intake, m_feeder, m_swerve, false),
                     new ParallelRaceGroup(

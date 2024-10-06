@@ -16,19 +16,14 @@ import org.team100.lib.util.Util;
  */
 public class TimingUtil {
     private static final double kEpsilon = 1e-6;
+    /** this is the default, in order to make the constraints set the actual */
+    private static final double HIGH_ACCEL = 1000;
 
     private final List<TimingConstraint> m_constraints;
-    private final double m_velocityLimit;
-    private final double m_absAccelerationLimit;
 
     /** If you want a max velocity or accel constraint, use ConstantConstraint. */
-    public TimingUtil(
-            List<TimingConstraint> constraints,
-            double velocityLimit,
-            double absAccelerationLimit) {
+    public TimingUtil(List<TimingConstraint> constraints) {
         m_constraints = constraints;
-        m_velocityLimit = velocityLimit;
-        m_absAccelerationLimit = absAccelerationLimit;
     }
 
     /**
@@ -85,8 +80,8 @@ public class TimingUtil {
     private List<ConstrainedState> forwardPass(List<Pose2dWithMotion> samples, double start_vel) {
         ConstrainedState predecessor = new ConstrainedState(samples.get(0), 0);
         predecessor.setVel(start_vel);
-        // predecessor.min_acceleration = -m_absAccelerationLimit;
-        // predecessor.max_acceleration = m_absAccelerationLimit;
+        predecessor.setMin_acceleration(-HIGH_ACCEL);
+        predecessor.setMax_acceleration(HIGH_ACCEL);
 
         // work forward through the samples
         List<ConstrainedState> constrainedStates = new ArrayList<>(samples.size());
@@ -110,12 +105,11 @@ public class TimingUtil {
         while (true) {
             // first try the previous state accel to get the new state velocity
             double v1 = v1(s0.getVel(), s0.getMax_acceleration(), ds);
-            // s1.setVel(Math.min(m_velocityLimit, v1));
             s1.setVel(v1);
 
             // also use max accels for the new state accels
-            // s1.min_acceleration = -m_absAccelerationLimit;
-            // s1.max_acceleration = m_absAccelerationLimit;
+            s1.setMin_acceleration(-HIGH_ACCEL);
+            s1.setMax_acceleration(HIGH_ACCEL);
 
             // reduce velocity according to constraints
             s1.clampVelocity(m_constraints);
@@ -154,8 +148,8 @@ public class TimingUtil {
         ConstrainedState endState = constrainedStates.get(constrainedStates.size() - 1);
         ConstrainedState successor = new ConstrainedState(lastState, endState.getDistance());
         successor.setVel(end_velocity);
-        successor.setMin_acceleration(-m_absAccelerationLimit);
-        successor.setMax_acceleration(m_absAccelerationLimit);
+        successor.setMin_acceleration(-HIGH_ACCEL);
+        successor.setMax_acceleration(HIGH_ACCEL);
 
         // work backwards through the states list
         for (int i = constrainedStates.size() - 1; i >= 0; --i) {
@@ -187,7 +181,6 @@ public class TimingUtil {
                 return;
             }
             // s0 v is too fast, turn it down to obey v1 min accel.
-            // System.out.println("min v0 " + v0);
             s0.setVel(v0);
 
             s0.clampAccel(m_constraints);
@@ -280,7 +273,7 @@ public class TimingUtil {
          */
         double d = v0 * v0 + 2.0 * a * ds;
         double sqrt = Math.sqrt(d);
-        return sqrt;        
+        return sqrt;
     }
 
     /**

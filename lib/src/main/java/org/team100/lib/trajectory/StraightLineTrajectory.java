@@ -65,9 +65,7 @@ public class StraightLineTrajectory {
                             end.getRotation()),
                     m_maker.m_constraints,
                     currentSpeed.norm(),
-                    0,
-                    1000, // guess
-                    1000); // guess
+                    0);
         } catch (TrajectoryGenerationException e) {
             Util.warn("Trajectory Generation Exception");
             return new Trajectory100();

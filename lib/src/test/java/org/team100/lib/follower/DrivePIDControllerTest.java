@@ -27,9 +27,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 class DrivePIDControllerTest {
     boolean dump = false;
-
-    private static final double kMaxVel = 1.0;
-    private static final double kMaxAccel = 1.0;
     private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest();
 
@@ -46,21 +43,16 @@ class DrivePIDControllerTest {
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).fast();
 
-        double start_vel = 0;
-        double end_vel = 0;
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(
                 waypoints,
                 headings,
-                constraints,
-                start_vel,
-                end_vel,
-                kMaxVel,
-                kMaxAccel);
+                constraints);
 
         // why is this so large?
         assertEquals(1300, trajectory.length());
+        System.out.println(trajectory);
 
         TrajectoryTimeSampler view = new TrajectoryTimeSampler(trajectory);
 
@@ -87,7 +79,7 @@ class DrivePIDControllerTest {
             ChassisSpeeds output = controller.update(4.0, measurement, new ChassisSpeeds());
             // remember, facing +90, moving -90, so this should be like -1
             // turning slowly to the left
-            verify(-0.863, -0.1, 0.1, output);
+            verify(-0.863, -0.064, 0.064, output);
 
             TimedPose path_setpoint = controller.getSetpoint(4).get();
             assertEquals(0.24, path_setpoint.state().getPose().getX(), 0.01);

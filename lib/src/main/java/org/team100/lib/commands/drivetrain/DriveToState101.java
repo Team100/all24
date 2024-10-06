@@ -9,7 +9,9 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -29,10 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToState101 extends Command implements Glassy  {
-    private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 4;
-
+public class DriveToState101 extends Command implements Glassy {
     private final Pose2d m_goal;
     private final FieldRelativeVelocity m_endVelocity;
     private final SwerveDriveSubsystem m_swerve;
@@ -49,7 +48,7 @@ public class DriveToState101 extends Command implements Glassy  {
             FieldRelativeVelocity endVelocity,
             SwerveDriveSubsystem drivetrain,
             DriveTrajectoryFollower controller,
-            List<TimingConstraint> constraints,
+            SwerveKinodynamics swerveKinodynamics,
             TrajectoryVisualization viz) {
         LoggerFactory child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
@@ -57,7 +56,7 @@ public class DriveToState101 extends Command implements Glassy  {
         m_endVelocity = endVelocity;
         m_swerve = drivetrain;
         m_controller = controller;
-        m_constraints = constraints;
+        m_constraints = new TimingConstraintFactory(swerveKinodynamics).fast();
         m_viz = viz;
         addRequirements(m_swerve);
     }
@@ -81,9 +80,7 @@ public class DriveToState101 extends Command implements Glassy  {
                 headings,
                 m_constraints,
                 Math.hypot(startVelocity.x(), startVelocity.y()),
-                Math.hypot(m_endVelocity.x(), m_endVelocity.y()),
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+                Math.hypot(m_endVelocity.x(), m_endVelocity.y()));
 
         if (trajectory.length() == 0) {
             cancel();

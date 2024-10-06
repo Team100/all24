@@ -29,9 +29,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 class DrivePursuitControllerTest {
     boolean dump = false;
     private static final double kDelta = 0.001;
-
-    private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 2;
     private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
     private static final SwerveKinodynamics kSmoothKinematicLimits = SwerveKinodynamicsFactory.forTest3();
 
@@ -49,18 +46,9 @@ class DrivePursuitControllerTest {
         // so this trajectory is actually (robot-relative) -x the whole way, more or
         // less.
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).forTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(kSmoothKinematicLimits).fast();
 
-        double start_vel = 0;
-        double end_vel = 0;
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypoints,
-                headings,
-                constraints,
-                start_vel,
-                end_vel,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypoints, headings, constraints);
 
         // why is this so large?
         assertEquals(1300, trajectory.length());
@@ -140,9 +128,7 @@ class DrivePursuitControllerTest {
     void testPreviewDt() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3();
         Pose2d start = GeometryUtil.kPoseZero;
-        double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
-        double endVelocity = 0;
 
         Translation2d currentTranslation = start.getTranslation();
         Translation2d goalTranslation = end.getTranslation();
@@ -156,16 +142,9 @@ class DrivePursuitControllerTest {
                 start.getRotation(),
                 end.getRotation());
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
 
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                constraints,
-                startVelocity,
-                endVelocity,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, constraints);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 
@@ -190,9 +169,7 @@ class DrivePursuitControllerTest {
     void testNearPreviewDt() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3();
         Pose2d start = GeometryUtil.kPoseZero;
-        double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
-        double endVelocity = 0;
 
         Translation2d currentTranslation = start.getTranslation();
         Translation2d goalTranslation = end.getTranslation();
@@ -206,16 +183,9 @@ class DrivePursuitControllerTest {
                 start.getRotation(),
                 end.getRotation());
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
 
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                constraints,
-                startVelocity,
-                endVelocity,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, constraints);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
 

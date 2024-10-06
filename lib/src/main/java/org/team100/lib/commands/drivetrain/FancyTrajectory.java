@@ -9,7 +9,9 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -27,10 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * This is an experiment.
  */
-public class FancyTrajectory extends Command implements Glassy  {
-    private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 2;
-
+public class FancyTrajectory extends Command implements Glassy {
     private final SwerveDriveSubsystem m_robotDrive;
     private final DriveTrajectoryFollower m_controller;
     private final List<TimingConstraint> m_constraints;
@@ -42,12 +41,12 @@ public class FancyTrajectory extends Command implements Glassy  {
             LoggerFactory parent,
             SwerveDriveSubsystem robotDrive,
             DriveTrajectoryFollower controller,
-            List<TimingConstraint> constraints) {
+            SwerveKinodynamics swerveKinodynamics) {
         LoggerFactory child = parent.child(this);
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_robotDrive = robotDrive;
         m_controller = controller;
-        m_constraints = constraints;
+        m_constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
         addRequirements(m_robotDrive);
     }
 
@@ -61,16 +60,7 @@ public class FancyTrajectory extends Command implements Glassy  {
                 GeometryUtil.fromDegrees(0),
                 GeometryUtil.fromDegrees(0));
 
-        double start_vel = 0;
-        double end_vel = 0;
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                start_vel,
-                end_vel,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_constraints);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(new TrajectoryTimeSampler(trajectory));
 

@@ -1,7 +1,5 @@
 package org.team100.frc2024.motion;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.team100.frc2024.MockSensors;
 import org.team100.frc2024.SensorInterface;
@@ -25,8 +23,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.SimulatedGyro;
-import org.team100.lib.timing.TimingConstraint;
-import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -85,7 +81,6 @@ class AutoMakerTest {
         final FeederSubsystem feeder = new FeederSubsystem(logger, m_sensors);
 
         Intake intake = new Intake(logger, m_sensors);
-        final List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
@@ -99,7 +94,7 @@ class AutoMakerTest {
                 m_shooter,
                 intake,
                 m_sensors,
-                constraints,
+                swerveKinodynamics,
                 viz);
 
         m_AutoMaker.fourNoteAuto(Alliance.Red, m_sensors);
