@@ -1,10 +1,11 @@
 package org.team100.lib.swerve;
 
 import java.util.function.DoubleBinaryOperator;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
@@ -98,8 +99,8 @@ public class SwerveUtil {
             int max_iterations) {
         f_1 = SwerveUtil.unwrapAngle(f_0, f_1);
 
-        double diff = f_1-f_0;
-        
+        double diff = f_1 - f_0;
+
         if (Math.abs(diff) <= max_deviation) {
             // Can go all the way to s=1.
             return 1.0;

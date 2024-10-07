@@ -20,16 +20,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 class TrajectoryTimeSamplerTest {
     private static final double kDelta = 0.001;
 
-    private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 2;
-
     @Test
     void testSample() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3();
         Pose2d start = GeometryUtil.kPoseZero;
-        double startVelocity = 0;
         Pose2d end = start.plus(new Transform2d(1, 0, GeometryUtil.kRotationZero));
-        double endVelocity = 0;
 
         Translation2d currentTranslation = start.getTranslation();
         Translation2d goalTranslation = end.getTranslation();
@@ -43,20 +38,13 @@ class TrajectoryTimeSamplerTest {
                 start.getRotation(),
                 end.getRotation());
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).forTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
 
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                constraints,
-                startVelocity,
-                endVelocity,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, constraints);
 
         TrajectoryTimeSampler sampler = new TrajectoryTimeSampler(trajectory);
         assertEquals(0, sampler.getStartS(), kDelta);
-        assertEquals(1.414, sampler.getEndS(), kDelta);
+        assertEquals(1.415, sampler.getEndS(), kDelta);
         TrajectorySamplePoint sample = sampler.sample(0).get();
         assertEquals(0, sample.state().state().getPose().getX(), kDelta);
         sample = sampler.sample(1).get();

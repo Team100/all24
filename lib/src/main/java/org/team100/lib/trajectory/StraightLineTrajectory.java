@@ -13,6 +13,9 @@ import edu.wpi.first.math.trajectory.TrajectoryParameterizer.TrajectoryGeneratio
 
 /** Make straight lines, rest-to-rest. */
 public class StraightLineTrajectory {
+    // if we try to start a trajectory while respecting initial velocity, but the
+    // initial velocity is less than 0.01 m/s, just treat it as rest-to-rest.
+    private static final double VELOCITY_EPSILON = 1e-2;
     private final boolean m_useInitialVelocity;
     private final TrajectoryMaker m_maker;
 
@@ -33,8 +36,10 @@ public class StraightLineTrajectory {
     }
 
     private Trajectory100 movingToRest(SwerveState startState, Pose2d end) {
-        if (Math.abs(startState.velocity().x()) < 1e-6 && Math.abs(startState.velocity().y()) < 1e-6)
+        if (Math.abs(startState.velocity().norm()) < VELOCITY_EPSILON) {
+            // System.out.println("not actually moving, use rest-to-rest");
             return m_maker.restToRest(startState.pose(), end);
+        }
 
         Translation2d currentTranslation = startState.translation();
         FieldRelativeVelocity currentSpeed = startState.velocity();
@@ -55,12 +60,12 @@ public class StraightLineTrajectory {
                             new Pose2d(
                                     goalTranslation,
                                     angleToGoal)),
-                    List.of(startState.pose().getRotation(), end.getRotation()),
+                    List.of(
+                            startState.pose().getRotation(),
+                            end.getRotation()),
                     m_maker.m_constraints,
                     currentSpeed.norm(),
-                    0,
-                    1, // guess
-                    1); // guess
+                    0);
         } catch (TrajectoryGenerationException e) {
             Util.warn("Trajectory Generation Exception");
             return new Trajectory100();

@@ -20,7 +20,7 @@ public class CentripetalAccelerationConstraint implements TimingConstraint {
      *               sharp curves, which makes odometry more accurate and reduces
      *               the effect of steering lag.
      */
-    CentripetalAccelerationConstraint(SwerveKinodynamics limits, double scale) {
+    public CentripetalAccelerationConstraint(SwerveKinodynamics limits, double scale) {
         mMaxCentripetalAccel = limits.getMaxCapsizeAccelM_S2() * scale;
     }
 

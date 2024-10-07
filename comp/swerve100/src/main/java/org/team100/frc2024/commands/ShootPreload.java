@@ -9,6 +9,10 @@ import org.team100.frc2024.motion.drivetrain.ShooterUtil;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.dashboard.Glassy;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -26,16 +30,25 @@ public class ShootPreload extends Command implements Glassy {
     private final SwerveDriveSubsystem m_drive;
     private final boolean m_isPreload;
 
+    private final BooleanLogger m_log_at_speed;
+    private final DoubleLogger m_log_timer;
+    private final DoubleLogger m_log_pivot_error;
+
     private boolean atVelocity = false;
     private boolean finished = false;
 
     public ShootPreload(
+            LoggerFactory parent,
             SensorInterface sensor,
             DrumShooter shooter,
             Intake intake,
             FeederSubsystem feeder,
             SwerveDriveSubsystem drive,
             boolean isPreload) {
+        LoggerFactory child = parent.child(this);
+        m_log_at_speed = child.booleanLogger(Level.TRACE, "at speed");
+        m_log_timer = child.doubleLogger(Level.TRACE, "timer");
+        m_log_pivot_error = child.doubleLogger(Level.TRACE, "pivot error");
         m_sensor = sensor;
         m_shooter = shooter;
         m_intake = intake;
@@ -51,14 +64,6 @@ public class ShootPreload extends Command implements Glassy {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         if (!alliance.isPresent())
             return;
-
-        double distance = m_drive.getState().pose().getTranslation()
-                .getDistance(ShooterUtil.getSpeakerTranslation(alliance.get()));
-        m_timer.reset();
-        m_shooter.forward();
-        // if(m_pivotOverride == -1){
-        m_shooter.setAngle(ShooterUtil.getAngleRad(distance));
-
         m_timer.reset();
     }
 
@@ -75,6 +80,7 @@ public class ShootPreload extends Command implements Glassy {
         double pivotSetpointRad = ShooterUtil.getAngleRad(rangeM);
 
         m_shooter.setAngle(pivotSetpointRad);
+        m_shooter.forward();
 
         if (!m_sensor.getFeederSensor() && !m_sensor.getIntakeSensor()) {
             m_intake.stop();
@@ -82,6 +88,7 @@ public class ShootPreload extends Command implements Glassy {
             OptionalDouble shooterPivotPosition = m_shooter.getPivotPosition();
             if (shooterPivotPosition.isPresent()) {
                 double error = shooterPivotPosition.getAsDouble() - pivotSetpointRad;
+                m_log_pivot_error.log(() -> error);
                 if (m_shooter.atVelocitySetpoint(m_isPreload)
                         && Math.abs(error) < 0.01) {
                     atVelocity = true;
@@ -98,6 +105,9 @@ public class ShootPreload extends Command implements Glassy {
                 finished = true;
             }
         }
+
+        m_log_at_speed.log(() -> atVelocity);
+        m_log_timer.log(m_timer::get);
     }
 
     @Override

@@ -80,9 +80,14 @@ public class OscillateDirect extends Command implements Glassy {
         double speedM_S = m_triangle.applyAsDouble(time);
         double positionM = m_parabola.applyAsDouble(time);
 
-
         // straight ahead
         straight(speedM_S);
+
+        // straight ahead but running motors in reverse
+        // note the unit test doesn't like this because the steering is concurrent with
+        // the driving, which is a real effect; we could fix it with some sort of "steer
+        // at rest" function.
+        // back(speedM_S);
 
         // straight ahead but with the right side inverted, to see what happens.
         // skew(speedM_S);
@@ -107,6 +112,24 @@ public class OscillateDirect extends Command implements Glassy {
                 new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)), // FR
                 new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)), // RL
                 new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotationZero)) // RR
+        });
+    }
+
+    void sideways(double speedM_S) {
+        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)), // FL
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)), // FR
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)), // RL
+                new SwerveModuleState100(speedM_S, Optional.of(GeometryUtil.kRotation90)) // RR
+        });
+    }
+
+    void back(double speedM_S) {
+        m_swerve.setRawModuleStates(new SwerveModuleState100[] {
+                new SwerveModuleState100(-speedM_S, Optional.of(GeometryUtil.kRotation180)), // FL
+                new SwerveModuleState100(-speedM_S, Optional.of(GeometryUtil.kRotation180)), // FR
+                new SwerveModuleState100(-speedM_S, Optional.of(GeometryUtil.kRotation180)), // RL
+                new SwerveModuleState100(-speedM_S, Optional.of(GeometryUtil.kRotation180)) // RR
         });
     }
 

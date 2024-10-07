@@ -26,12 +26,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class DriveWithWaypoints extends Command implements Glassy  {
-    private static final double max_vel = 5;
-    private static final double max_acc = 5;
-    private static final double start_vel = 0;
-    private static final double end_vel = 0;
-
+public class DriveWithWaypoints extends Command implements Glassy {
     private final SwerveDriveSubsystem m_swerve;
     private final DriveTrajectoryFollower m_controller;
     private final List<TimingConstraint> constraints;
@@ -50,7 +45,7 @@ public class DriveWithWaypoints extends Command implements Glassy  {
         m_log_chassis_speeds = child.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerve = drivetrain;
         m_controller = controller;
-        constraints = new TimingConstraintFactory(limits).allGood();
+        constraints = new TimingConstraintFactory(limits).fast();
         m_goal = goal;
         addRequirements(m_swerve);
     }
@@ -68,14 +63,7 @@ public class DriveWithWaypoints extends Command implements Glassy  {
 
         newWaypointM = getWaypointsList(newWaypointM);
 
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                newWaypointM,
-                headings,
-                constraints,
-                start_vel,
-                end_vel,
-                max_vel,
-                max_acc);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(newWaypointM, headings, constraints);
 
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));

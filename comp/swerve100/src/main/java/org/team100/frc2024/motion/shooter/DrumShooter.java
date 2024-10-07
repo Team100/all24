@@ -13,6 +13,11 @@ import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
@@ -29,10 +34,6 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.logging.Level;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -78,6 +79,11 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     private final OptionalDoubleLogger m_log_right_velocity;
     private final OptionalDoubleLogger m_log_pivot_angle;
     private final DoubleLogger m_log_goal_err;
+    private final BooleanLogger m_log_at_setpoint;
+    private final DoubleLogger m_log_left_ratio;
+    private final DoubleLogger m_log_right_ratio;
+    private final DoubleLogger m_log_left_error;
+    private final DoubleLogger m_log_right_error;
 
     public DrumShooter(
             LoggerFactory parent,
@@ -90,6 +96,11 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         m_log_left_velocity = child.optionalDoubleLogger(Level.TRACE, "left velocity");
         m_log_right_velocity = child.optionalDoubleLogger(Level.TRACE, "right velocity");
         m_log_pivot_angle = child.optionalDoubleLogger(Level.TRACE, "pivot angle (rad)");
+        m_log_at_setpoint = child.booleanLogger(Level.TRACE, "at setpoint");
+        m_log_left_ratio = child.doubleLogger(Level.TRACE, "left ratio");
+        m_log_right_ratio = child.doubleLogger(Level.TRACE, "right ratio");
+        m_log_left_error = child.doubleLogger(Level.TRACE, "left error");
+        m_log_right_error = child.doubleLogger(Level.TRACE, "right error");
 
         PIDController pivotController = new PIDController(4.5, 0.0, 0.000, TimedRobot100.LOOP_PERIOD_S);
         pivotController.setTolerance(0.02);
@@ -288,25 +299,36 @@ public class DrumShooter extends SubsystemBase implements Glassy {
      *             exactly what the speed is. otherwise, use very narrow tolerance.
      */
     public boolean atVelocitySetpoint(boolean wide) {
-        OptionalDouble leftVelocity = leftRoller.getVelocity();
-        OptionalDouble rightVelocity = rightRoller.getVelocity();
-        if (leftVelocity.isEmpty() || rightVelocity.isEmpty()) {
+        OptionalDouble leftVelocityM_S = leftRoller.getVelocity();
+        OptionalDouble rightVelocityM_S = rightRoller.getVelocity();
+        if (leftVelocityM_S.isEmpty() || rightVelocityM_S.isEmpty()) {
             // using signal-space for error condition, so warn
             Util.warn("no velocity measurement available");
             return false;
         }
         if (wide) {
-            double leftRatio = leftVelocity.getAsDouble() / kLeftRollerVelocity;
-            double rightRatio = rightVelocity.getAsDouble() / kRightRollerVelocity;
-            return (leftRatio > 0.5) && (rightRatio > 0.5);
+            double leftRatio = leftVelocityM_S.getAsDouble() / kLeftRollerVelocity;
+            double rightRatio = rightVelocityM_S.getAsDouble() / kRightRollerVelocity;
+            m_log_left_ratio.log(() -> leftRatio);
+            m_log_right_ratio.log(() -> rightRatio);
+            boolean b = (leftRatio > 0.5) && (rightRatio > 0.5);
+            m_log_at_setpoint.log(() -> b);
+            return b;
         }
-        double leftError = leftVelocity.getAsDouble() - kLeftRollerVelocity;
-        double rightError = rightVelocity.getAsDouble() - kRightRollerVelocity;
-        return (Math.abs(leftError) < 0.5) && (Math.abs(rightError) < 0.5);
+        double leftError = leftVelocityM_S.getAsDouble() - kLeftRollerVelocity;
+        double rightError = rightVelocityM_S.getAsDouble() - kRightRollerVelocity;
+        m_log_left_error.log(() -> leftError);
+        m_log_right_error.log(() -> rightError);
+        boolean b = (Math.abs(leftError) < 0.5) && (Math.abs(rightError) < 0.5);
+        m_log_at_setpoint.log(() -> b);
+        return b;
     }
 
     @Override
     public void periodic() {
+        leftRoller.periodic();
+        rightRoller.periodic();
+        pivotServo.periodic();
         m_log_left_velocity.log(leftRoller::getVelocity);
         m_log_right_velocity.log(rightRoller::getVelocity);
         m_log_pivot_angle.log(pivotServo::getPositionRad);

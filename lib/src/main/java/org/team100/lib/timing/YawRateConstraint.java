@@ -27,7 +27,7 @@ public class YawRateConstraint implements TimingConstraint {
      *               never useful for trajectories. A good number to try here might
      *               be 0.2.
      */
-    YawRateConstraint(SwerveKinodynamics limits, double scale) {
+    public YawRateConstraint(SwerveKinodynamics limits, double scale) {
         m_maxOmegaRad_S = limits.getMaxAngleSpeedRad_S() * scale;
     }
 

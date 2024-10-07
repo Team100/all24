@@ -8,6 +8,7 @@ import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,6 +26,8 @@ import edu.wpi.first.math.geometry.Twist2d;
  * motion; that's not true here.
  */
 public class HolonomicSpline {
+    /** spline control points need to be not too close to a u-turn. */
+    private static final double MIN_ANGLE = 2 * Math.PI / 3;
     private static final double kEpsilon = 1e-5;
     private static final double kStepSize = 1.0;
     private static final double kMinDelta = 0.001;
@@ -37,13 +40,17 @@ public class HolonomicSpline {
     private final Rotation2d r0;
 
     /**
+     * Note: the p0 direction needs to be within 90 degrees of p1-p0, and vice
+     * versa, to prevent "bad" trajectories, where the robot ends up accelerating
+     * away from the target. If you really want a u-turn, add a stopping point.
+     * 
      * @param p0 The starting point and direction of the spline
      * @param p1 The ending point and direction of the spline
      * @param r0 The starting heading
      * @param r1 The ending heading
      */
     public HolonomicSpline(Pose2d p0, Pose2d p1, Rotation2d r0, Rotation2d r1) {
-
+        checkBounds(p0, p1);
         // the 1.2 here is a magic number that makes the spline look nice.
         double scale = 1.2 * GeometryUtil.distance(p0.getTranslation(), p1.getTranslation());
         double x0 = p0.getTranslation().getX();
@@ -64,6 +71,21 @@ public class HolonomicSpline {
         this.r0 = r0;
         double delta = r0.unaryMinus().rotateBy(r1).getRadians();
         theta = Spline1d.newSpline1d(0.0, delta, 0, 0, 0, 0);
+    }
+
+    static void checkBounds(Pose2d p0, Pose2d p1) {
+        Translation2d toTarget = p1.getTranslation().minus(p0.getTranslation());
+        Rotation2d angle = toTarget.getAngle();
+        double p0Angle = Math.abs(MathUtil.angleModulus(p0.getRotation().minus(angle).getRadians()));
+        if (p0Angle > MIN_ANGLE)
+            throw new IllegalArgumentException(
+                    String.format("p0 direction, %.3f is too far from course to p1, %.3f -- P0 %s P1 %s",
+                            p0.getRotation().getRadians(), angle.getRadians(), p0, p1));
+        double p1Angle = Math.abs(MathUtil.angleModulus(p1.getRotation().minus(angle).getRadians()));
+        if (p1Angle > MIN_ANGLE)
+            throw new IllegalArgumentException(
+                    String.format("p1 direction, %.3f is too far from course from p0, %.3f -- P0 %s P1 %s",
+                            p1.getRotation().getRadians(), angle.getRadians(), p0, p1));
     }
 
     private HolonomicSpline(
@@ -211,7 +233,7 @@ public class HolonomicSpline {
         return new Translation2d(x.getPosition(t), y.getPosition(t));
     }
 
-    private double dx(double t) {
+    double dx(double t) {
         return x.getVelocity(t);
     }
 
@@ -219,7 +241,7 @@ public class HolonomicSpline {
         return y.getVelocity(t);
     }
 
-    private double ddx(double t) {
+    double ddx(double t) {
         return x.getAcceleration(t);
     }
 
@@ -247,6 +269,7 @@ public class HolonomicSpline {
      * Curvature is the change in motion direction per distance traveled.
      * rad/m.
      * Note the denominator is distance in this case, not the parameter, p.
+     * but the argument to this function *is* the parameter, p. :-)
      */
     protected double getCurvature(double t) {
         return (dx(t) * ddy(t) - ddx(t) * dy(t))
@@ -274,10 +297,30 @@ public class HolonomicSpline {
         return num * num / (dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2);
     }
 
+    /** integrate curvature over the length of the spline. */
+    double maxCurvature() {
+        double dt = 1.0 / kSamples;
+        double maxC = 0;
+        for (double t = 0; t < 1.0; t += dt) {
+            maxC = Math.max(maxC, getCurvature(t));
+        }
+        return maxC;
+    }
+
+    /** integrate curvature over the length of the spline. */
+    double sumCurvature() {
+        double dt = 1.0 / kSamples;
+        double sum = 0;
+        for (double t = 0; t < 1.0; t += dt) {
+            sum += (dt * getCurvature(t));
+        }
+        return sum;
+    }
+
     /**
      * @return integral of dCurvature^2 over the length of the spline
      */
-    private double sumDCurvature2() {
+    double sumDCurvature2() {
         double dt = 1.0 / kSamples;
         double sum = 0;
         for (double t = 0; t < 1.0; t += dt) {
@@ -289,7 +332,7 @@ public class HolonomicSpline {
     /**
      * @return integral of dCurvature^2 over the length of multiple splines
      */
-    private static double sumDCurvature2(List<HolonomicSpline> splines) {
+    static double sumDCurvature2(List<HolonomicSpline> splines) {
         double sum = 0;
         for (HolonomicSpline s : splines) {
             sum += s.sumDCurvature2();
@@ -313,6 +356,7 @@ public class HolonomicSpline {
     private static void runOptimizationIteration(List<HolonomicSpline> splines) {
         // can't optimize anything with less than 2 splines
         if (splines.size() <= 1) {
+            Util.warn("runOptimizationIteration: nothing to optimize");
             return;
         }
 

@@ -2,6 +2,12 @@ package org.team100.lib.timing;
 
 import org.team100.lib.geometry.Pose2dWithMotion;
 
+/**
+ * Timing constraints govern the assignment of a schedule to a path, creating a
+ * trajectory. Different implementations focus on different aspects, e.g.
+ * tippiness, wheel slip, etc. Different maneuvers may want different
+ * constraints, e.g. some should be slow and precise, others fast and risky.
+ */
 public interface TimingConstraint {
     /**
      * Maximum allowed velocity m/s.

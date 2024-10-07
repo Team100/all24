@@ -209,6 +209,8 @@ public class ClimberSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
+        m_left.periodic();
+        m_right.periodic();
         m_log_left_position.log(m_left::getPositionM);
         m_log_right_position.log(m_right::getPositionM);
         m_log_left_velocity.log(m_left::getVelocityM_S);

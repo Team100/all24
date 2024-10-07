@@ -51,7 +51,7 @@ class FullStateDriveControllerTest {
                         new State100(0, 0, 0),
                         new State100(0, 0, 0)));
         // 1m error so dx should be K*e = 1
-        assertEquals(1, t.x(), kDelta);
+        assertEquals(4, t.x(), kDelta);
         assertEquals(0, t.y(), kDelta);
         assertEquals(0, t.theta(), kDelta);
         assertFalse(c.atReference());
@@ -72,8 +72,7 @@ class FullStateDriveControllerTest {
                         new State100(0, 0, 0)));
         // position err is zero but velocity error is 1 and feedforward is also 1 so dx
         // should be FF + K*e = 2
-        System.out.println(t);
-        assertEquals(2, t.x(), kDelta);
+        assertEquals(1.25, t.x(), kDelta);
         assertEquals(0, t.y(), kDelta);
         assertEquals(0, t.theta(), kDelta);
         assertFalse(c.atReference());
@@ -93,7 +92,7 @@ class FullStateDriveControllerTest {
                         new State100(0, 0, 0),
                         new State100(0, 0, 0)));
         // position and velocity controls are opposite, so just cruise
-        assertEquals(0, t.x(), kDelta);
+        assertEquals(-3.375, t.x(), kDelta);
         assertEquals(0, t.y(), kDelta);
         assertEquals(0, t.theta(), kDelta);
         assertFalse(c.atReference());
@@ -113,9 +112,9 @@ class FullStateDriveControllerTest {
                         new State100(2, 0, 0),
                         new State100(3, 0, 0)));
         // 1m error so dx should be K*e = 1
-        assertEquals(1, t.x(), kDelta);
-        assertEquals(2, t.y(), kDelta);
-        assertEquals(3, t.theta(), kDelta);
+        assertEquals(4, t.x(), kDelta);
+        assertEquals(8, t.y(), kDelta);
+        assertEquals(12, t.theta(), kDelta);
         assertFalse(c.atReference());
     }
 

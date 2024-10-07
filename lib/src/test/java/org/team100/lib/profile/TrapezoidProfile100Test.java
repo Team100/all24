@@ -77,6 +77,14 @@ class TrapezoidProfile100Test {
         s = TrapezoidProfile100.solveForSlowerETA(1, 1, 0.01, 0.02, initial, goal, 8, kDelta);
         assertEquals(0.053, s, kDelta);
     }
+    @Test
+    void testETASolveStationary() {
+        State100 initial = new State100(0, 0);
+        State100 goal = new State100(0, 0);
+        // this this is the default eta above, so s = 1.0.
+        double s = TrapezoidProfile100.solveForSlowerETA(1, 1, 0.01, 0.02, initial, goal, 2, kDelta);
+        assertEquals(1.0, s, kDelta);
+    }
 
     /** ETA is not a trivial function of V and A */
     @Test

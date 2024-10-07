@@ -13,10 +13,11 @@ import edu.wpi.first.math.MathUtil;
  * setpoint velocity feedforward.
  */
 public class FullStateDriveController implements HolonomicFieldRelativeController {
-    private static final double kXK1 = 1;
-    private static final double kXK2 = 1;
-    private static final double kThetaK1 = 1;
-    private static final double kThetaK2 = 1;
+    // TODO: make these parameters not constants
+    private static final double kXK1 = 4; // position
+    private static final double kXK2 = 0.25; // velocity
+    private static final double kThetaK1 = 4; // position
+    private static final double kThetaK2 = 0.25; // velocity
     private static final double kXTolerance = 0.01; // 1 cm
     private static final double kThetaTolerance = 0.02; // 1 degree
     private static final double kXDotTolerance = 0.01; // 1 cm/s
@@ -26,8 +27,7 @@ public class FullStateDriveController implements HolonomicFieldRelativeControlle
 
     private boolean m_atSetpoint = false;
 
-    /** Use the factory. */
-    FullStateDriveController(Log log) {
+    public FullStateDriveController(Log log) {
         m_log = log;
     }
 
@@ -49,6 +49,7 @@ public class FullStateDriveController implements HolonomicFieldRelativeControlle
                 measurement.theta(), reference.theta(), MathUtil::angleModulus);
 
         FieldRelativeVelocity u_FB = new FieldRelativeVelocity(xFB, yFB, thetaFB);
+        m_log.u_FB.log(() -> u_FB);
 
         return u_FF.plus(u_FB);
     }

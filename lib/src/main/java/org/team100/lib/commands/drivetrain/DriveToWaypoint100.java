@@ -8,7 +8,9 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -27,12 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToWaypoint100 extends Command implements Glassy  {
-    // inject these, make them the same as the kinematic limits, inside the
-    // trajectory supplier.
-    private static final double kMaxVelM_S = 2;
-    private static final double kMaxAccelM_S_S = 2;
-
+public class DriveToWaypoint100 extends Command implements Glassy {
     private final Pose2d m_goal;
     private final SwerveDriveSubsystem m_swerve;
     private final DriveTrajectoryFollower m_controller;
@@ -52,7 +49,7 @@ public class DriveToWaypoint100 extends Command implements Glassy  {
             Pose2d goal,
             SwerveDriveSubsystem drivetrain,
             DriveTrajectoryFollower controller,
-            List<TimingConstraint> constraints,
+            SwerveKinodynamics swerveKinodynamics,
             double timeBuffer,
             TrajectoryVisualization viz) {
         LoggerFactory child = parent.child(this);
@@ -60,7 +57,7 @@ public class DriveToWaypoint100 extends Command implements Glassy  {
         m_goal = goal;
         m_swerve = drivetrain;
         m_controller = controller;
-        m_constraints = constraints;
+        m_constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
         m_timeBuffer = timeBuffer;
         m_viz = viz;
         addRequirements(m_swerve);
@@ -69,36 +66,26 @@ public class DriveToWaypoint100 extends Command implements Glassy  {
     @Override
     public void initialize() {
         final Pose2d start = m_swerve.getState().pose();
-        final double startVelocity = 0;
         Pose2d end = m_goal;
-        final double endVelocity = 0;
         m_timer.reset();
         m_timer.start();
 
         List<Pose2d> waypointsM = getWaypoints(start, end);
+        List<Rotation2d> headings = List.of(start.getRotation(), end.getRotation());
 
-        List<Rotation2d> headings = List.of(
-                start.getRotation(),
-                end.getRotation());
-
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
+        m_trajectory = TrajectoryPlanner.restToRest(
                 waypointsM,
                 headings,
-                m_constraints,
-                startVelocity,
-                endVelocity,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
-        m_trajectory = trajectory;
+                m_constraints);
 
-        m_viz.setViz(trajectory);
+        m_viz.setViz(m_trajectory);
 
-        if (trajectory.isEmpty()) {
+        if (m_trajectory.isEmpty()) {
             end(false);
             return;
         }
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
-                new TrajectoryTimeSampler(trajectory));
+                new TrajectoryTimeSampler(m_trajectory));
 
         m_controller.setTrajectory(iter);
     }

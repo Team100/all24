@@ -48,7 +48,7 @@ public class TimingUtilTest {
             double end_vel,
             double max_vel,
             double max_acc) {
-        TimingUtil u = new TimingUtil(constraints, max_vel, max_acc);
+        TimingUtil u = new TimingUtil(constraints);
         Trajectory100 timed_traj = u.timeParameterizeTrajectory(
                 dist_view,
                 step_size,

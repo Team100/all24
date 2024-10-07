@@ -9,7 +9,9 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.timing.TimingConstraint;
+import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.Trajectory100;
 import org.team100.lib.trajectory.TrajectoryPlanner;
 import org.team100.lib.trajectory.TrajectoryTimeIterator;
@@ -30,12 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * A copy of DriveToWaypoint to explore the new holonomic trajectory classes we
  * cribbed from 254.
  */
-public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  {
-    // inject these, make them the same as the kinematic limits, inside the
-    // trajectory supplier.
-    private static final double kMaxVelM_S = 4;
-    private static final double kMaxAccelM_S_S = 4;
-
+public class DriveToAdjacentWithShooterAngle extends Command implements Glassy {
     private final SwerveDriveSubsystem m_swerve;
     private final Translation2d m_goalTranslation;
     private final DriveTrajectoryFollower m_controller;
@@ -44,14 +41,14 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  
     private final TrajectoryVisualization m_viz;
 
     // LOGGERS
-    private final ChassisSpeedsLogger m_log_chassis_speeds; 
+    private final ChassisSpeedsLogger m_log_chassis_speeds;
 
     public DriveToAdjacentWithShooterAngle(
             LoggerFactory parent,
             SwerveDriveSubsystem swerve,
             Translation2d goalTranslation,
             DriveTrajectoryFollower controller,
-            List<TimingConstraint> constraints,
+            SwerveKinodynamics swerveKinodynamics,
             double shooterScale,
             TrajectoryVisualization viz) {
         LoggerFactory child = parent.child(this);
@@ -59,7 +56,7 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  
         m_swerve = swerve;
         m_goalTranslation = goalTranslation;
         m_controller = controller;
-        m_constraints = constraints;
+        m_constraints = new TimingConstraintFactory(swerveKinodynamics).fast();
         kShooterScale = shooterScale;
         m_viz = viz;
         addRequirements(m_swerve);
@@ -85,14 +82,7 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy  
                 ShooterUtil.getRobotRotationToSpeaker(
                         optionalAlliance.get(), startPose.getTranslation(), kShooterScale),
                 endHeading);
-        Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
-                waypointsM,
-                headings,
-                m_constraints,
-                0.0,
-                0.0,
-                kMaxVelM_S,
-                kMaxAccelM_S_S);
+        Trajectory100 trajectory = TrajectoryPlanner.restToRest(waypointsM, headings, m_constraints);
         TrajectoryTimeIterator iter = new TrajectoryTimeIterator(
                 new TrajectoryTimeSampler(trajectory));
         m_controller.setTrajectory(iter);

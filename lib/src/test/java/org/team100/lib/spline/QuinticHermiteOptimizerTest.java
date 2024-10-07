@@ -30,15 +30,15 @@ class QuinticHermiteOptimizerTest {
 
         Pose2d d = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(90));
         Pose2d e = new Pose2d(new Translation2d(0, 50), Rotation2d.fromDegrees(0));
-        Pose2d f = new Pose2d(new Translation2d(100, 0), Rotation2d.fromDegrees(90));
-        Pose2d g = new Pose2d(new Translation2d(100, 100), Rotation2d.fromDegrees(0));
+        Pose2d f = new Pose2d(new Translation2d(100, 50), Rotation2d.fromDegrees(-90));
+        Pose2d g = new Pose2d(new Translation2d(100, 0), Rotation2d.fromDegrees(-180));
 
         List<HolonomicSpline> splines1 = new ArrayList<>();
         splines1.add(new HolonomicSpline(d, e, new Rotation2d(), new Rotation2d()));
         splines1.add(new HolonomicSpline(e, f, new Rotation2d(), new Rotation2d()));
         splines1.add(new HolonomicSpline(f, g, new Rotation2d(), new Rotation2d()));
 
-        assertTrue(HolonomicSpline.optimizeSpline(splines1) < 0.16);
+        assertEquals(0.54, HolonomicSpline.optimizeSpline(splines1), 0.01);
 
         Pose2d h = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
         Pose2d i = new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0));
@@ -74,15 +74,15 @@ class QuinticHermiteOptimizerTest {
 
         Pose2d d = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(90));
         Pose2d e = new Pose2d(new Translation2d(0, 50), Rotation2d.fromDegrees(0));
-        Pose2d f = new Pose2d(new Translation2d(100, 0), Rotation2d.fromDegrees(90));
-        Pose2d g = new Pose2d(new Translation2d(100, 100), Rotation2d.fromDegrees(0));
+        Pose2d f = new Pose2d(new Translation2d(100, 50), Rotation2d.fromDegrees(-90));
+        Pose2d g = new Pose2d(new Translation2d(100, 0), Rotation2d.fromDegrees(-180));
 
         List<HolonomicSpline> splines1 = new ArrayList<>();
         splines1.add(new HolonomicSpline(d, e, r0, r1));
         splines1.add(new HolonomicSpline(e, f, r1, r2));
         splines1.add(new HolonomicSpline(f, g, r0, r2));
 
-        assertTrue(HolonomicSpline.optimizeSpline(splines1) < 0.16);
+        assertEquals(0.54, HolonomicSpline.optimizeSpline(splines1), 0.01);
 
         Pose2d h = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0));
         Pose2d i = new Pose2d(new Translation2d(50, 0), Rotation2d.fromDegrees(0));

@@ -23,7 +23,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     private final SwerveKinodynamics m_limits;
 
     /** Use the factory. */
-    SwerveDriveDynamicsConstraint(SwerveKinodynamics limits) {
+    public SwerveDriveDynamicsConstraint(SwerveKinodynamics limits) {
         m_limits = limits;
     }
 
@@ -67,8 +67,13 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
      */
     @Override
     public MinMaxAcceleration getMinMaxAcceleration(Pose2dWithMotion state, double velocity) {
+        if (Double.isNaN(velocity))
+            throw new IllegalArgumentException();
+        // min accel is stronger than max accel
+        double minAccel = -m_limits.getMaxDriveDecelerationM_S2();
+        double maxAccel = SwerveUtil.minAccel(m_limits, velocity);
         return new MinMaxAcceleration(
-                -m_limits.getMaxDriveDecelerationM_S2(),
-                SwerveUtil.minAccel(m_limits, velocity));
+                minAccel,
+                maxAccel);
     }
 }

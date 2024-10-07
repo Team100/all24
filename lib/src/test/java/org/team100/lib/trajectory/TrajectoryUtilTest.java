@@ -8,8 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.follower.DriveTrajectoryFollowerUtil;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathPoint;
 import org.team100.lib.path.PathSamplePoint;
@@ -138,6 +142,22 @@ class TrajectoryUtilTest {
         assertEquals(1, p.state().getPose().getX(), kDelta);
         assertEquals(0, p.state().getPose().getRotation().getRadians(), kDelta);
         assertEquals(0, p.state().getHeadingRate(), kDelta);
+    }
+
+    @Test
+    void testBackingUp() {
+        List<Pose2d> waypoints = List.of(
+                new Pose2d(0, 0, new Rotation2d(Math.PI)),
+                new Pose2d(1, 0, GeometryUtil.kRotationZero));
+        List<Rotation2d> headings = List.of(
+                GeometryUtil.kRotationZero,
+                GeometryUtil.kRotationZero);
+        assertThrows(IllegalArgumentException.class, () -> TrajectoryUtil100.trajectoryFromWaypointsAndHeadings(
+                waypoints,
+                headings,
+                0.0127,
+                0.0127,
+                Math.toRadians(1.0)));
     }
 
     /**
