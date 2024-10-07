@@ -1,6 +1,15 @@
-# Python Deployment
+# Raspberry Pi
 
-This is an experiment to make multi-file python work better with the Raspberry Pi's, without creating a bunch of complexity.
+Team 100 uses Raspberry Pis for coprocessing, with several different workloads:
+
+* AprilTag vision
+* Game piece vision
+* Friend/foe vision
+* Gyroscope
+* Logging UDP listener
+* Localization using GTSAM
+
+All these different workloads use the same deployed artifact, built out of this directory, using the board identity to select behavior.
 
 The key is that python can load modules out of zip files, so you zip up the source directory and upload it. There's also a very short python script, runapp.py, that runs the zip file -- you just upload this one time.
 
