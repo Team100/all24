@@ -1,5 +1,7 @@
 # Raspberry Pi
 
+This is for the 2025 season, not ready yet.
+
 Team 100 uses Raspberry Pis for coprocessing, with several different workloads:
 
 * AprilTag vision

@@ -20,7 +20,7 @@ Mat = NDArray[np.uint8]
 
 
 class Display:
-    def __init__(self, width: int, height: int, id: str) -> None:
+    def __init__(self, width: int, height: int, camera_num: str) -> None:
         print("width ", width)
         print("height ", height)
         if system() == "Windows":
@@ -31,7 +31,7 @@ class Display:
             self.server.add_stream(self.stream)
             self.server.start()
         else:
-            self.cvsource = CameraServer.putVideo(id, 416, 308)
+            self.cvsource = CameraServer.putVideo(camera_num, 416, 308)
 
     def draw_result(
         self, image: Mat, result_item: AprilTagDetection, pose: Transform3d
