@@ -277,16 +277,25 @@ public class RobotContainer implements Glassy {
                         m_shooter,
                         feeder));
 
+        ///////////////////////
+        //
         // for testing odometry
+        //
         TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(1.0, 1.0)));
         StraightLineTrajectory maker = new StraightLineTrajectory(false, tmaker);
         // slow, will not work for high-speed entry
-        // HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1, 0.01, 1, 1, 0.01);
+        // HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1,
+        // 0.01, 1, 1, 0.01);
         // high cruise but also moderate accel
         HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 4, 4, 0.01, 3, 3, 0.01);
         FullStateDriveController hcontroller = new FullStateDriveController(hlog);
 
         whileTrue(driverControl::fullCycle,
+                // new RepeatCommand(
+                // new SequentialCommandGroup(
+                // new OscillateForceField(m_drive, hcontroller, 1),
+                // new OscillateForceField(m_drive, hcontroller, -1))));
+
                 new RepeatCommand(
                         new SequentialCommandGroup(
                                 new OscillateProfile(m_drive, hp, hcontroller, 1),

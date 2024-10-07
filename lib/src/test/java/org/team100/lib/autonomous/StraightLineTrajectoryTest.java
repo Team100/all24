@@ -32,7 +32,6 @@ class StraightLineTrajectoryTest {
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
-        System.out.println(traj);
         assertEquals(1.414, traj.getTotalTimeSeconds(), kDelta);
         double maxDriveVelocityM_S = swerveKinodynamics.getMaxDriveVelocityM_S();
         double maxDriveAccelerationM_S2 = swerveKinodynamics.getMaxDriveAccelerationM_S2();
@@ -52,7 +51,6 @@ class StraightLineTrajectoryTest {
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
-        System.out.println(traj);
         assertEquals(1.081, traj.getTotalTimeSeconds(), kDelta);
     }
 
@@ -62,7 +60,6 @@ class StraightLineTrajectoryTest {
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(-1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
-        System.out.println(traj);
         // u-turn trajectories are not allowed.
         assertTrue(traj.isEmpty());
     }
@@ -73,7 +70,6 @@ class StraightLineTrajectoryTest {
         SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 1, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
-        System.out.println(traj);
         assertEquals(1.672, traj.getTotalTimeSeconds(), kDelta);
     }
 }

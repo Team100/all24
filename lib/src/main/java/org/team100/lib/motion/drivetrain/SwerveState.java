@@ -55,6 +55,10 @@ public class SwerveState {
         this(new State100(), new State100(), new State100());
     }
 
+    public SwerveState withTheta(double theta) {
+        return new SwerveState(m_x, m_y, new State100(theta, m_theta.v(), m_theta.a()));
+    }
+
     public SwerveState minus(SwerveState other) {
         return new SwerveState(x().minus(other.x()), y().minus(other.y()), theta().minus(other.theta()));
     }

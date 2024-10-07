@@ -52,7 +52,7 @@ class DrivePIDControllerTest {
 
         // why is this so large?
         assertEquals(1300, trajectory.length());
-        System.out.println(trajectory);
+        // System.out.println(trajectory);
 
         TrajectoryTimeSampler view = new TrajectoryTimeSampler(trajectory);
 
@@ -66,7 +66,6 @@ class DrivePIDControllerTest {
         // based on the trajectory itself.
 
         {
-
             ChassisSpeeds output = controller.update(0,
                     new Pose2d(new Translation2d(0, 0), Rotation2d.fromRadians(1.57079632679)),
                     new ChassisSpeeds());
@@ -74,7 +73,6 @@ class DrivePIDControllerTest {
         }
 
         {
-
             Pose2d measurement = new Pose2d(new Translation2d(0.25, -3.5), Rotation2d.fromRadians(1.69));
             ChassisSpeeds output = controller.update(4.0, measurement, new ChassisSpeeds());
             // remember, facing +90, moving -90, so this should be like -1
@@ -95,7 +93,6 @@ class DrivePIDControllerTest {
             assertEquals(0, errorTwist.dtheta, 0.05);
         }
         {
-
             Pose2d measurement = new Pose2d(new Translation2d(1.74, -6.97), Rotation2d.fromRadians(2.22));
             ChassisSpeeds output = controller.update(8.0, measurement, new ChassisSpeeds());
             verify(-0.952, -0.05, 0.098, output);

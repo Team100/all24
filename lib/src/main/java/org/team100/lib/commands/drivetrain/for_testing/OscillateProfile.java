@@ -45,7 +45,8 @@ public class OscillateProfile extends Command implements Glassy {
         // don't rotate
         Pose2d endPose = startPose.plus(new Transform2d(m_offsetM, 0, new Rotation2d()));
         // spin 180 between the endpoints
-        // Pose2d endPose = startPose.plus(new Transform2d(m_offsetM, 0, GeometryUtil.kRotation180));
+        // Pose2d endPose = startPose.plus(new Transform2d(m_offsetM, 0,
+        // GeometryUtil.kRotation180));
         m_goal = new SwerveState(endPose);
         m_setpoint = start;
         m_profile.solve(m_setpoint, m_goal);
@@ -54,6 +55,13 @@ public class OscillateProfile extends Command implements Glassy {
     @Override
     public void execute() {
         SwerveState measurement = m_swerve.getState();
+        // TODO: make this actually work
+        // adjust the rotation in the goal so that it points at the setpoint
+        // the idea is to arrive at the goal facing it.
+        // m_goal = m_goal.withTheta(m_goal.translation().minus(m_setpoint.translation()).getAngle().getRadians());
+        // this will change the profile, though, since rotation can be the slowest part.
+        // m_profile.solve(m_setpoint, m_goal);
+
         m_setpoint = m_profile.calculate(m_setpoint, m_goal);
         // System.out.println("measurement " + measurement + " setpoint " + m_setpoint);
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, m_setpoint);
