@@ -1,4 +1,12 @@
-# pylint: disable=import-error
+"""
+This is a video streaming server to be used for testing in Windows.
+
+It's a slightly modified version of
+
+github.com/egeakman/mjpeg-streamer
+"""
+
+# pylint: disable=E1101,R0902
 
 import asyncio
 import threading
@@ -8,7 +16,7 @@ from typing import List, Optional, Tuple, Union
 
 import aiohttp
 import cv2
-# import netifaces
+
 import numpy as np
 from aiohttp import MultipartWriter, web
 from aiohttp.web_runner import GracefulExit

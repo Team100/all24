@@ -1,12 +1,9 @@
-""" Interface spec for camera types.
+"""
+Interface spec for camera types.
 
 To learn about Protocols for interface specification, see
 https://typing.readthedocs.io/en/latest/spec/protocol.html
 """
-
-
-# pylint: disable=too-few-public-methods
-
 
 from mmap import mmap
 from contextlib import AbstractContextManager
@@ -41,5 +38,3 @@ class Camera(Protocol):
     def get_size(self) -> Size: ...
     def get_intrinsic(self) -> Mat: ...
     def get_dist(self) -> Mat: ...
-
-

@@ -17,4 +17,20 @@ The key is that python can load modules out of zip files, so you zip up the sour
 
 To best use this idea, install the vscode Gradle extension (from Microsoft). It will make available a Gradle "activity" which includes the task "distribution/distZip". Click the little play button, and it will produce a "zip" file containing the "app" code. To make it easier to find, you can "pin" the task.
 
+# How to deploy
+
 Find the zip file in build/distributions/app.zip. Upload it to the RPi, next to runapp.py.
+
+# How to run the tests
+
+There are two ways to run the tests:
+
+Install the vscode python extension, and a little Erlenmeyer flask will appear in the toolbar on the left; this scans the source tree for test methods, and makes a little list of them.  You can run all of them, or individual ones.
+
+The same extension also puts a little marker in the file editor, on the left side of each test method, and provides test output there too, in case of failures.
+
+You can also run all the tests from the command line from the raspberry_pi directory:
+
+```
+python3 runtests.py
+```

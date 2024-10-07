@@ -1,4 +1,8 @@
-# pylint: disable=too-few-public-methods
+"""
+This is a clock that works on both Raspberry Pi and on Windows, for testing.
+"""
+
+# pylint: disable=R0903
 
 try:
     # this is the linux/raspberry pi version.

@@ -1,6 +1,9 @@
-""" Annotate and show the captured image through the CameraServer. """
+"""
+Annotate and show the captured image through the CameraServer.
+"""
 
-# pylint: disable=no-name-in-module
+# pylint: disable=E0611
+
 
 from platform import system
 import numpy as np
@@ -20,7 +23,7 @@ Mat = NDArray[np.uint8]
 
 
 class Display:
-    def __init__(self, width: int, height: int, camera_num: str) -> None:
+    def __init__(self, width: int, height: int, camera_num: int) -> None:
         print("width ", width)
         print("height ", height)
         if system() == "Windows":
@@ -31,7 +34,7 @@ class Display:
             self.server.add_stream(self.stream)
             self.server.start()
         else:
-            self.cvsource = CameraServer.putVideo(camera_num, 416, 308)
+            self.cvsource = CameraServer.putVideo(str(camera_num), 416, 308)
 
     def draw_result(
         self, image: Mat, result_item: AprilTagDetection, pose: Transform3d
@@ -77,7 +80,7 @@ class Display:
         # self.output_stream.putFrame(np.ascontiguousarray(img))
         #
         # shrink the driver view to avoid overloading the radio
-#
+        #
         # for now put big images
         # TODO: turn this off for prod!!
         img_out = resize(img, (416, 308))
