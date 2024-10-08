@@ -63,18 +63,15 @@ class Model(Enum):
 
 
 class RealCamera(Camera):
-    def __init__(self, identity: Identity, id: int) -> None:
-        if (id == None):
-            self.cam: Picamera2 = Picamera2()
-        else:
-            self.cam: Picamera2 = Picamera2(id)
+    def __init__(self, identity: Identity, camera_num: int) -> None:
+        self.cam: Picamera2 = Picamera2(camera_num)
         self.setup(identity)
 
     def setup(self, identity: Identity) -> None:
         model: Model = Model.get(self.cam)
         self.size: Size = RealCamera.__size_from_model(model)
         self.camera_config: dict[str, Any] = RealCamera.__get_config(
-            self.cam, self.size
+            identity, self.cam, self.size
         )
         self.mtx = RealCamera.__mtx_from_model(model)
         self.dist = RealCamera.__dist_from_model(model)
@@ -128,7 +125,7 @@ class RealCamera(Camera):
                 return Size(fullwidth=100, fullheight=100, width=100, height=100)
 
     @staticmethod
-    def __get_config(cam: Picamera2, size: Size) -> dict[str, Any]:
+    def __get_config(identity: Identity, cam: Picamera2, size: Size) -> dict[str, Any]:
         camera_config: dict[str, Any] = cam.create_still_configuration(
             # more buffers seem to make the pipeline a little smoother
             buffer_count=5,
@@ -141,13 +138,7 @@ class RealCamera(Camera):
             },
             lores={"format": "YUV420", "size": (size.width, size.height)},
             controls={
-                # these manual controls are useful sometimes but turn them off for now
-                # because auto mode seems fine
-                # fast shutter means more gain
-                # "AnalogueGain": 8.0,
-                # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
-                # 3/23/24, reduced to 2ms, even less blur.
-                "ExposureTime": 3000,
+                "ExposureTime": RealCamera.__get_exposure_time(identity),
                 "AnalogueGain": 8,
                 # limit auto: go as fast as possible but no slower than 30fps
                 # without a duration limit, we slow down in the dark, which is fine
@@ -158,6 +149,15 @@ class RealCamera(Camera):
             },
         )
         return camera_config
+
+    @staticmethod
+    def __get_exposure_time(identity: Identity) -> int:
+        """exposure time in microseconds"""
+        match identity:
+            case Identity.GLOBAL_RIGHT | Identity.GLOBAL_LEFT:
+                return 300 # from b5879a6, works with GS cameras
+            case _:
+                return 3000 # the old value, works with v2 cameras
 
     @staticmethod
     def __mtx_from_model(model: Model) -> Mat:

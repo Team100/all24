@@ -21,13 +21,30 @@ except FileNotFoundError:
 
 @unique
 class Identity(Enum):
-    """Keep this synchronized with java team100.config.Camera."""
+    """
+    Represents the Raspberry Pi identity, used to select configuration.
 
+    Don't put anything in this class about the actual configuration, use a different class for that.
+
+    Keep this synchronized with java team100.config.Camera.
+    """
+
+    # TODO: what is this?
+    C = "10000000a7c673d9"
+
+    # 2024 comp bot cameras
     SHOOTER = "10000000a7a892c0"
     RIGHTAMP = "10000000caeaae82"
     LEFTAMP = "100000004e0a1fb9"
     GAME_PIECE = "1000000013c9c96c"
-    DEV = "10000000a7c673d9" # rpi4 used for development
+
+    # camera-bot cameras
+    GLOBAL_GAME_PIECE = "364f07fb090a3bf7"
+    GLOBAL_RIGHT = "d44649628c20d4d4"
+    GLOBAL_LEFT = "06ece53b019a5c2e"
+
+    # for testing
+    DEV = "10000000a7c673d9"  # rpi4 used for development
     DEV2 = "06ece53b019a5c2e"
     FLIPPED = "flipme"  # example for per-identity config
     UNKNOWN = "unknown"
@@ -36,28 +53,6 @@ class Identity(Enum):
     def _missing_(cls, value: object) -> Any:
         return Identity.UNKNOWN
 
-    @staticmethod
-    def getNumCameras(identity: 'Identity') -> int: 
-        match identity:
-            case Identity.RIGHTAMP:
-                return 1
-            case Identity.LEFTAMP:
-                return 1
-            case Identity.SHOOTER:
-                return 1
-            case Identity.GAME_PIECE:
-                return 1
-            case Identity.DEV:
-                return 0
-            case Identity.DEV2:
-                return 1
-            case Identity.FLIPPED:
-                return 0  # Changed from None to 0
-            case Identity.UNKNOWN:
-                return 0  # Changed from None to 0
-            case _:
-                raise ValueError(f"Unknown identity: {identity}")
- 
     @staticmethod
     def get() -> "Identity":
         serial = _SERIAL
