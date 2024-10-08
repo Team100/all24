@@ -1,4 +1,5 @@
 package org.team100.lib.swerve;
+
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
