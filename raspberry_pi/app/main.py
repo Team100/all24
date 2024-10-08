@@ -2,17 +2,23 @@
 
 It takes data from the camera and the gyro, and publishes it
 on network tables.
+
+You can't run this from the command line.  To run the app,
+use the script called "runapp.py" in the raspberry_pi directory
+(one level above this one).
 """
 
-from app.camera import Camera, Size
-from app.camera_factory import CameraFactory
-from app.display import Display
-from app.gyro import Gyro
-from app.gyro_factory import GyroFactory
-from config.identity import Identity
-from app.network import Network
-from app.tag_detector import TagDetector
-from app.timer import Timer
+# pylint: disable=R0914
+
+from app.camera.camera_factory import CameraFactory
+from app.camera.camera_protocol import Camera, Size
+from app.config.identity import Identity
+from app.dashboard.display import Display
+from app.localization.network import Network
+from app.localization.tag_detector import TagDetector
+from app.sensors.gyro_protocol import Gyro
+from app.sensors.gyro_factory import GyroFactory
+from app.util.timer import Timer
 
 
 def main() -> None:

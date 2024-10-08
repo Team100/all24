@@ -3,10 +3,10 @@
 # pylint: disable=0903
 
 from adafruit_platformdetect import Detector  # type:ignore
-from app.gyro import Gyro
-from app.fake_gyro import FakeGyro
-from app.network import Network
-from app.real_gyro import RealGyro
+from app.sensors.gyro_protocol import Gyro
+from app.sensors.fake_gyro import FakeGyro
+from app.localization.network import Network
+from app.sensors.real_gyro import RealGyro
 
 
 class GyroFactory:

@@ -17,6 +17,19 @@ The key is that python can load modules out of zip files, so you zip up the sour
 
 To best use this idea, install the vscode Gradle extension (from Microsoft). It will make available a Gradle "activity" which includes the task "distribution/distZip". Click the little play button, and it will produce a "zip" file containing the "app" code. To make it easier to find, you can "pin" the task.
 
+# How to run locally
+
+From the command line in the raspberry_pi directory:
+
+```
+python3 runapp.py
+```
+
+Then look at http://localhost:1181/
+
+And you should see the test image being processed over and over.
+
+
 # How to deploy
 
 Find the zip file in build/distributions/app.zip. Upload it to the RPi, next to runapp.py.

@@ -25,9 +25,9 @@ python3 -m pip install adafruit-circuitpython-lsm6ds
 import board  # type:ignore
 from adafruit_lsm6ds import Rate  # type:ignore
 from adafruit_lsm6ds.lsm6dsox import LSM6DSOX  # type:ignore
-from app.gyro import Gyro
-from app.network import Network
-from app.timer import Timer
+from app.sensors.gyro_protocol import Gyro
+from app.localization.network import Network
+from app.util.timer import Timer
 
 # this is just experimentally measured.
 # TODO: automatic calibration at startup

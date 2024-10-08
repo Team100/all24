@@ -1,10 +1,10 @@
-"""Choose a camera implementation based on identity."""
+""" Choose a camera implementation based on identity.
+"""
 
-# pylint: disable=import-outside-toplevel
-# pylint: disable=too-few-public-methods
+# pylint: disable=C0415
 
 from app.config.identity import Identity
-from app.camera import Camera
+from app.camera.camera_protocol import Camera
 
 
 class CameraFactory:
@@ -12,13 +12,13 @@ class CameraFactory:
     def get(identity: Identity) -> list[Camera]:
         try:
             # this will fail if we're not running on a Raspberry Pi.
-            from app.real_camera import RealCamera
+            from app.camera.real_camera import RealCamera
 
             num_cameras: int = CameraFactory.get_num_cameras(identity)
             return [RealCamera(identity, x) for x in range(num_cameras)]
 
         except ImportError:
-            from app.fake_camera import FakeCamera
+            from app.camera.fake_camera import FakeCamera
 
             return [FakeCamera()]
 

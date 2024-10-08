@@ -1,6 +1,8 @@
-""" This is a camera for desktop testing. """
+""" This is a camera for desktop testing.
+"""
 
-# pylint: disable=consider-using-with,no-member
+# pylint: disable=E1101
+
 from mmap import mmap
 from pathlib import Path
 from contextlib import AbstractContextManager, nullcontext
@@ -11,8 +13,8 @@ import numpy as np
 import cv2
 from numpy.typing import NDArray
 
-from app.camera import Camera, Request, Size
-from app.timer import Timer
+from app.camera.camera_protocol import Camera, Request, Size
+from app.util.timer import Timer
 
 Mat = NDArray[np.uint8]
 
@@ -37,7 +39,7 @@ class FakeRequest(Request):
         return nullcontext(self.mmap)
 
     def metadata(self) -> dict[str, Any]:
-        return {"SensorTimestamp": Timer.time_ns()}
+        return {"SensorTimestamp": Timer.time_ns(), "FrameDuration": 300}
 
 
 class FakeCamera(Camera):
@@ -45,7 +47,7 @@ class FakeCamera(Camera):
         # this image is from https://berndpfrommer.github.io/tagslam_web/making_tags/
         p = Path(__file__).with_name("tag_and_board.png")
         self.pathstr: str = str(p)
-        print(f"Using fake camera with file {self.pathstr}")
+        # print(f"Using fake camera with file {self.pathstr}")
 
     def capture_request(self) -> FakeRequest:
         return FakeRequest(self.pathstr)

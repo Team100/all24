@@ -1,5 +1,4 @@
-"""
-Represents the Raspberry Pi identity, used to select configuration.
+""" Represents the Raspberry Pi identity, used to select configuration.
 
 Don't put anything in this class about the actual configuration, use a different class for that.
 
@@ -52,7 +51,7 @@ class Identity(Enum):
     @staticmethod
     def get() -> "Identity":
         serial = _SERIAL
-        print(f"Coprocessor serial: {serial}")
+        # print(f"Coprocessor serial: {serial}")
         identity: Identity = Identity(serial)
-        print(f"Coprocessor identity: {identity.name}")
+        # print(f"Coprocessor identity: {identity.name}")
         return identity

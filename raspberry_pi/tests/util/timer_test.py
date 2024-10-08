@@ -1,7 +1,7 @@
 import time
 import unittest
 
-from app.timer import Timer
+from app.util.timer import Timer
 
 
 class TimerTest(unittest.TestCase):

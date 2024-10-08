@@ -1,8 +1,7 @@
-"""
-This is a wrapper for network tables.
+""" This is a wrapper for network tables.
 """
 
-# pylint: disable=R0902
+# pylint: disable=R0902,W0212
 
 import dataclasses
 import ntcore

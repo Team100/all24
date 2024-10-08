@@ -1,6 +1,6 @@
 import unittest
 
-from app.note_detector import NoteDetector
+from app.localization.note_detector import NoteDetector
 
 
 class NoteDetectorTest(unittest.TestCase):

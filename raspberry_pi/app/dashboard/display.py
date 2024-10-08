@@ -1,5 +1,4 @@
-"""
-Annotate and show the captured image through the CameraServer.
+""" Annotate and show the captured image through the CameraServer.
 """
 
 # pylint: disable=E0611
@@ -13,7 +12,7 @@ from robotpy_apriltag import AprilTagDetection
 from cv2 import circle, line, putText, resize, FONT_HERSHEY_SIMPLEX
 from wpimath.geometry import Transform3d
 
-from app.mjpeg_streamer import MjpegServer, Stream
+from app.dashboard.mjpeg_streamer import MjpegServer, Stream
 
 FONT = FONT_HERSHEY_SIMPLEX
 BLACK = (0, 0, 0)
@@ -24,10 +23,10 @@ Mat = NDArray[np.uint8]
 
 class Display:
     def __init__(self, width: int, height: int, camera_num: int) -> None:
-        print("width ", width)
-        print("height ", height)
+        # print("width ", width)
+        # print("height ", height)
         if system() == "Windows":
-            print("Windows")
+            # print("Windows")
             # on windows, cvsource breaks with cvnp contiguous-array error
             self.stream = Stream("Processed", (width, height), quality=50, fps=30)
             self.server = MjpegServer("localhost", 1181)

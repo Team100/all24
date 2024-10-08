@@ -12,11 +12,11 @@ import ntcore
 
 from cv2 import undistortImagePoints
 from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
-from app.camera import Camera, Request
-from app.display import Display
+from app.camera.camera_protocol import Camera, Request
+from app.dashboard.display import Display
 from app.config.identity import Identity
-from app.network import Blip24, Network
-from app.timer import Timer
+from app.localization.network import Blip24, Network
+from app.util.timer import Timer
 
 Mat = NDArray[np.uint8]
 

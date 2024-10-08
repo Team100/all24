@@ -1,5 +1,4 @@
-"""
-This is a video streaming server to be used for testing in Windows.
+""" This is a video streaming server to be used for testing in Windows.
 
 It's a slightly modified version of
 

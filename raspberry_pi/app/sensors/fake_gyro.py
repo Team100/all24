@@ -3,8 +3,8 @@
 # pylint: disable=too-few-public-methods
 import math
 import time
-from app.gyro import Gyro
-from app.network import Network
+from app.sensors.gyro_protocol import Gyro
+from app.localization.network import Network
 
 
 class FakeGyro(Gyro):

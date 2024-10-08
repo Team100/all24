@@ -1,5 +1,4 @@
-"""
-This is a wrapper for the note detector.
+""" This is a wrapper for the note detector.
 
 TODO: add an implementation
 """

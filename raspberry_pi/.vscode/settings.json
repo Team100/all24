@@ -14,5 +14,13 @@
     "mypy-type-checker.args": [
         "--strict",
     ],
-    "editor.minimap.enabled": false
+    "editor.minimap.enabled": false,
+    "markdown.validate.enabled": true,
+    "tidyMarkdown.disableFormatter": true,
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.gradle": true,
+        "**/.mypy_cache": true,
+        "**/*.pyc": true
+    }
 }

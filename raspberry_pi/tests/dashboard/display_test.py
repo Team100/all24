@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from numpy.typing import NDArray
 
-from app.display import Display
+from app.dashboard.display import Display
 
 Mat = NDArray[np.uint8]
 

@@ -22,8 +22,8 @@ from numpy.typing import NDArray
 
 from picamera2 import Picamera2, CompletedRequest  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
-from app.camera import Camera, Request, Size
-from config.identity import Identity
+from app.camera.camera_protocol import Camera, Request, Size
+from app.config.identity import Identity
 
 Mat = NDArray[np.uint8]
 
@@ -155,9 +155,9 @@ class RealCamera(Camera):
         """exposure time in microseconds"""
         match identity:
             case Identity.GLOBAL_RIGHT | Identity.GLOBAL_LEFT:
-                return 300 # from b5879a6, works with GS cameras
+                return 300  # from b5879a6, works with GS cameras
             case _:
-                return 3000 # the old value, works with v2 cameras
+                return 3000  # the old value, works with v2 cameras
 
     @staticmethod
     def __mtx_from_model(model: Model) -> Mat:

@@ -1,5 +1,4 @@
-"""
-Interface spec for camera types.
+""" Interface spec for camera types.
 
 To learn about Protocols for interface specification, see
 https://typing.readthedocs.io/en/latest/spec/protocol.html
