@@ -221,10 +221,6 @@ public class Ellipse2d implements ProtobufSerializable, StructSerializable {
    * Solves the equation of an ellipse from the given point. This is a helper function used to
    * determine if that point lies inside of or on an ellipse.
    *
-   * <pre>
-   * (x - h)²/a² + (y - k)²/b² = 1
-   * </pre>
-   *
    * @param point The point to solve for.
    * @return < 1.0 if the point lies inside the ellipse, == 1.0 if a point lies on the ellipse, and
    *     > 1.0 if the point lies outsides the ellipse.
