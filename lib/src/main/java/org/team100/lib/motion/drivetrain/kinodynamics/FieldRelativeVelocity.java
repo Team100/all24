@@ -44,6 +44,10 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
         return new FieldRelativeVelocity(x * scalar, y * scalar, theta * scalar);
     }
 
+    public FieldRelativeVelocity div(double scalar) {
+        return new FieldRelativeVelocity(x / scalar, y / scalar, theta / scalar);
+    }
+
     public FieldRelativeVelocity times(double cartesian, double angular) {
         return new FieldRelativeVelocity(x * cartesian, y * cartesian, theta * angular);
     }
