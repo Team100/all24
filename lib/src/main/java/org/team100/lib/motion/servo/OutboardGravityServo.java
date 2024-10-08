@@ -54,6 +54,11 @@ public class OutboardGravityServo implements GravityServoInterface {
     }
 
     @Override
+    public void setEncoderPosition(double positionRad) {
+        m_servo.setEncoderPosition(positionRad);
+    }
+
+    @Override
     public void setProfile(Profile100 profile) {
         m_servo.setProfile(profile);
     }

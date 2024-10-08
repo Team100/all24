@@ -79,6 +79,11 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
+    public double yAxis() {
+        return m_driverControl.yAxis();
+    }
+
+    @Override
     public Velocity velocity() {
         return m_driverControl.velocity();
     }

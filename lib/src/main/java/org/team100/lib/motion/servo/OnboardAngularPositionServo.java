@@ -219,6 +219,11 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     }
 
     @Override
+    public void setEncoderPosition(double positionRad) {
+        m_mechanism.setEncoderPosition(positionRad);
+    }
+
+    @Override
     public boolean atGoal() {
         return atSetpoint()
                 && MathUtil.isNear(
