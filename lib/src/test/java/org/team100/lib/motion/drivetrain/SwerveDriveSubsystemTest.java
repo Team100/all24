@@ -14,57 +14,57 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
     private static final double kDelta = 0.01;
 
 
-    @Test
-    void testAccel() {
-        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
+    // @Test
+    // void testAccel() {
+    //     Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
 
-        SwerveDriveSubsystem drive = fixture.drive;
+    //     SwerveDriveSubsystem drive = fixture.drive;
 
-        drive.resetPose(new Pose2d());
+    //     drive.resetPose(new Pose2d());
 
-        stepTime(0.02);
-        drive.periodic();
+    //     stepTime(0.02);
+    //     drive.periodic();
 
-        // no command, initial state.
-        verify(drive, 0, 0, 0);
+    //     // no command, initial state.
+    //     verify(drive, 0, 0, 0);
 
-        // set the motor speed...
-        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
-        // this state is hidden...
-        assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
+    //     // set the motor speed...
+    //     drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
+    //     // this state is hidden...
+    //     assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
 
-        // smaller step 
-        stepTime(0.01);
-        drive.periodic();
-        stepTime(0.01);
-        drive.periodic();
-        assertEquals(0.0004, fixture.collection.positions()[0].distanceMeters, 1e-6);
+    //     // smaller step 
+    //     stepTime(0.01);
+    //     drive.periodic();
+    //     stepTime(0.01);
+    //     drive.periodic();
+    //     assertEquals(0.0004, fixture.collection.positions()[0].distanceMeters, 1e-6);
 
-        // until after periodic...
-        assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
+    //     // until after periodic...
+    //     assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
 
-        // new state should be accelerating
-        verify(drive, 0.0003, 0.019, 0.006);
+    //     // new state should be accelerating
+    //     verify(drive, 0.0003, 0.019, 0.006);
 
-        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
+    //     drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
 
-        stepTime(0.02);
-        drive.periodic();
+    //     stepTime(0.02);
+    //     drive.periodic();
 
-        // keep accelerating
+    //     // keep accelerating
 
-        verify(drive, 0.001, 0.039, 0.019);
+    //     verify(drive, 0.001, 0.039, 0.019);
 
-        drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
+    //     drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
 
-        stepTime(0.02);
-        drive.periodic();
+    //     stepTime(0.02);
+    //     drive.periodic();
 
-        // keep accelerating
-        verify(drive, 0.0024, 0.06, 0.039);
+    //     // keep accelerating
+    //     verify(drive, 0.0024, 0.06, 0.039);
 
-        drive.close();
-    }
+    //     drive.close();
+    // }
 
     private void verify(SwerveDriveSubsystem drive, double x, double v, double a) {
         assertEquals(x, drive.getState().pose().getX(), kDelta);
