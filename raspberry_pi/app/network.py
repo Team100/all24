@@ -13,12 +13,20 @@ from app.identity import Identity
 @wpistruct.make_wpistruct
 @dataclasses.dataclass
 class Blip24:
+    """AprilTag target pose used in 2024"""
     id: int
     pose: Transform3d
 
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
+class Blip25:
+    """AprilTag target for 2025, includes pixel coordinates, for GTSAM."""
+    id: int
+
+    pose: Transform3d
 
 class Network:
-    def __init__(self, identity: Identity, id: str) -> None:
+    def __init__(self, identity: Identity, camera_num: str) -> None:
         # TODO: use identity.name instead
         self.serial: str = identity.value
         self.inst: ntcore.NetworkTableInstance = (
@@ -31,7 +39,7 @@ class Network:
         # roboRio address. windows machines can impersonate this for simulation.
         # also localhost for testing
         self.inst.setServer(["10.1.0.2", "127.0.0.1"])
-        topic_name: str = "vision/" + self.serial + id
+        topic_name: str = "vision/" + self.serial + camera_num
         self.vision_capture_time_ms: ntcore.DoublePublisher = self.inst.getDoubleTopic(
             topic_name + "/capture_time_ms"
         ).publish()
