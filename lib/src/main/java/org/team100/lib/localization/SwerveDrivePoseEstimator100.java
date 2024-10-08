@@ -16,6 +16,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.util.DriveUtil;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -190,6 +191,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 currentTimeS, velocityDtS);
 
         if (consistentPair.isEmpty()) {
+            Util.println("CONSISTENT PAIR IS EMPTY");
             // We're at the beginning. There's nothing to apply the wheel position delta to.
             // This should never happen.
             return;
@@ -231,12 +233,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
             double t0 = lowerEntry.getKey() - earlierEntry.getKey();
             SwerveState earlierPose = earlierEntry.getValue().m_state;
-            FieldRelativeDelta earlierTransform = FieldRelativeDelta.delta(
-                    earlierPose.pose(), previousPose.pose()).div(t0);
+            FieldRelativeVelocity earlierTransform = velocity.minus(earlierPose.velocity()).div(t0);
             accel = new FieldRelativeAcceleration(
-                    earlierTransform.getX(),
-                    earlierTransform.getY(),
-                    earlierTransform.getRotation().getRadians());
+                    earlierTransform.x(),
+                    earlierTransform.y(),
+                    earlierTransform.theta());
         }
 
         SwerveState swerveState = new SwerveState(newPose, velocity, accel);
