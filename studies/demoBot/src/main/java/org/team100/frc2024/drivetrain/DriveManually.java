@@ -4,12 +4,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import org.team100.lib.commands.Command100;
+import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.telemetry.SupplierLogger;
-import org.team100.lib.telemetry.NamedChooser;
+import org.team100.lib.util.NamedChooser;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Manual drivetrain control.
@@ -24,8 +25,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Use the mode supplier to choose which mode to use, e.g. using a Sendable
  * Chooser.
  */
-public class DriveManually extends Command100 {
-
+public class DriveManually extends Command implements Glassy {
+ 
     private static final SendableChooser<String> m_manualModeChooser = new NamedChooser<>("Manual Drive Mode") {
     };
 
@@ -41,10 +42,8 @@ public class DriveManually extends Command100 {
     String currentManualMode = null;
 
     public DriveManually(
-            SupplierLogger parent,
             Supplier<DriverControl.Velocity> twistSupplier,
             TankDriveSubsystem robotDrive) {
-        super(parent);
         m_mode = m_manualModeChooser::getSelected;
         m_twistSupplier = twistSupplier;
         m_drive = robotDrive;
@@ -56,14 +55,14 @@ public class DriveManually extends Command100 {
         m_drivers.put(
             "Manual",
                 new TankDriver() {
-                    public void apply(DriverControl.Velocity t, double dt) {
+                    public void apply(DriverControl.Velocity t) {
                         m_drive.set(t.x(), t.theta());
                     }
         });
     }
 
     @Override
-    public void execute100(double dt) {
+    public void execute() {
         String manualMode = m_mode.get();
         if (manualMode == null) {
             return;
@@ -76,12 +75,12 @@ public class DriveManually extends Command100 {
         // input in [-1,1] control units
         DriverControl.Velocity input = m_twistSupplier.get();
         TankDriver d = m_drivers.getOrDefault(manualMode, m_defaultDriver);
-        d.apply(input, dt);
+        d.apply(input);
 
     }
 
     @Override
-    public void end100(boolean interrupted) {
+    public void end(boolean interrupted) {
         m_drive.stop();
     }
 
@@ -98,7 +97,7 @@ public class DriveManually extends Command100 {
 
     private TankDriver stop() {
         return new TankDriver() {
-            public void apply(DriverControl.Velocity t, double dt) {
+            public void apply(DriverControl.Velocity t) {
                 m_drive.stop();
             }
         };

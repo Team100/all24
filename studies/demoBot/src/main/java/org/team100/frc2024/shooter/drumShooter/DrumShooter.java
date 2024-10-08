@@ -4,9 +4,10 @@ import java.util.OptionalDouble;
 
 import org.ejml.simple.UnsupportedOperation;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.LinearVelocityServo;
-import org.team100.lib.telemetry.SupplierLogger;
-import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.motion.servo.LinearVelocityServo;
 
 /**
  * Direct-drive shooter with left and right drums.
@@ -20,7 +21,8 @@ import org.team100.lib.telemetry.Telemetry.Level;
  */
 public class DrumShooter implements Glassy {
 
-    private final SupplierLogger m_logger;
+    private final DoubleLogger m_leftlogger;
+    private final DoubleLogger m_rightlogger;
 
     private final LinearVelocityServo m_leftRoller;
     private final LinearVelocityServo m_rightRoller;
@@ -29,10 +31,12 @@ public class DrumShooter implements Glassy {
     private double currentDesiredRightVelocity = 0;
 
     public DrumShooter(
-            SupplierLogger parent,
+            LoggerFactory parent,
             LinearVelocityServo leftRoller,
             LinearVelocityServo rightRoller) {
-        m_logger = parent.child(this);
+        LoggerFactory loggerFactory = parent.child(this);
+        m_leftlogger = loggerFactory.doubleLogger(Level.TRACE, "Left Shooter Desired");
+        m_rightlogger = loggerFactory.doubleLogger(Level.TRACE, "Right Shooter Desired");
         m_leftRoller = leftRoller;
         m_rightRoller = rightRoller;
     }
@@ -42,8 +46,8 @@ public class DrumShooter implements Glassy {
         m_rightRoller.setVelocityM_S(velocityM_S);
         currentDesiredLeftVelocity = velocityM_S;
         currentDesiredRightVelocity = velocityM_S;
-        m_logger.logDouble(Level.TRACE, "Left Shooter Desired",()-> velocityM_S);
-        m_logger.logDouble(Level.TRACE, "Right Shooter Desired",()-> velocityM_S);
+        m_leftlogger.log(()-> velocityM_S);
+        m_rightlogger.log(()-> velocityM_S);
     }
 
     public void setIndividual(double leftVelocityM_S, double rightVelocityM_S) {
@@ -51,8 +55,8 @@ public class DrumShooter implements Glassy {
         m_rightRoller.setVelocityM_S(rightVelocityM_S);
         currentDesiredLeftVelocity = leftVelocityM_S;
         currentDesiredRightVelocity = rightVelocityM_S;
-        m_logger.logDouble(Level.TRACE, "Left Shooter Desired",()-> rightVelocityM_S);
-        m_logger.logDouble(Level.TRACE, "Right Shooter Desired",()-> leftVelocityM_S);
+        m_leftlogger.log(()-> rightVelocityM_S);
+        m_rightlogger.log(()-> leftVelocityM_S);
     }
 
     /** Returns the average of the two rollers */

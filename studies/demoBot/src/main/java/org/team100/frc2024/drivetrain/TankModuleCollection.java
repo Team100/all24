@@ -3,9 +3,9 @@ package org.team100.frc2024.drivetrain;
 import java.util.OptionalDouble;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.motion.components.OutboardLinearVelocityServo;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.motion.servo.OutboardLinearVelocityServo;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Neo550Factory;
 import org.team100.lib.util.Util;
 
@@ -28,9 +28,9 @@ public class TankModuleCollection {
      * Creates collections according to Identity.
      */
     public static TankModuleCollection get(
-            SupplierLogger parent,
+            LoggerFactory parent,
             int currentLimit) {
-        SupplierLogger collectionLogger = parent.child(kSwerveModules);
+        LoggerFactory collectionLogger = parent.child(kSwerveModules);
         switch (Identity.instance) {
             case DEMO_BOT:
                 Util.println("************** Custom Tank Module Modules, using in built encoders? **************");

@@ -2,10 +2,11 @@ package org.team100.frc2024.shooter;
 
 import org.team100.frc2024.shooter.drumShooter.DrumShooter;
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.components.LinearVelocityServo;
-import org.team100.lib.motion.components.OutboardGravityServo;
-import org.team100.lib.telemetry.SupplierLogger;
-import org.team100.lib.telemetry.Telemetry.Level;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.motion.servo.LinearVelocityServo;
+import org.team100.lib.motion.servo.OutboardGravityServo;
 
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ShooterWithVerticalPivot extends SubsystemBase implements Glassy{
     
     private final DrumShooter m_shooter;
-    private final SupplierLogger m_logger;
+    private final BooleanLogger m_logger;
     private final OutboardGravityServo m_pivot;
     private final Servo m_indexer;
 
@@ -22,12 +23,13 @@ public class ShooterWithVerticalPivot extends SubsystemBase implements Glassy{
     private static final double shooterVelocity = 30;
 
     public ShooterWithVerticalPivot(
-            SupplierLogger parent,
+            LoggerFactory parent,
             ShooterCollection shooterCollection) {
-        m_logger = parent.child(this);
+        LoggerFactory logger = parent.child(this);
+        m_logger = logger.booleanLogger(Level.TRACE, "At velocity");
         m_indexer = shooterCollection.getIndexer();
         LinearVelocityServo[] shooter = shooterCollection.getShooters();
-        m_shooter = new DrumShooter(m_logger, shooter[0], shooter[1]);
+        m_shooter = new DrumShooter(logger, shooter[0], shooter[1]);
         m_pivot = shooterCollection.getPivot();
     }
 
@@ -63,7 +65,7 @@ public class ShooterWithVerticalPivot extends SubsystemBase implements Glassy{
     @Override
     public void periodic() {
         atVelocity = m_shooter.atVeloctity();
-        m_logger.logBoolean(Level.TRACE, "At velocity", () -> atVelocity);
+        m_logger.log(() -> atVelocity);
     }
 
     @Override

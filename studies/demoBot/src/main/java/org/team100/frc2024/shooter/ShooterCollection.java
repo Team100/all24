@@ -1,10 +1,10 @@
 package org.team100.frc2024.shooter;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.motion.components.LinearVelocityServo;
-import org.team100.lib.motion.components.OutboardGravityServo;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.motion.servo.LinearVelocityServo;
+import org.team100.lib.motion.servo.OutboardGravityServo;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.telemetry.SupplierLogger;
 import org.team100.lib.util.Neo550Factory;
 import edu.wpi.first.wpilibj.Servo;
 
@@ -29,9 +29,9 @@ public class ShooterCollection {
     }
 
     public static ShooterCollection get(
-        SupplierLogger parent,
+        LoggerFactory parent,
         int currentLimit) {
-            SupplierLogger collectionLogger = parent.child(kShooter);
+            LoggerFactory collectionLogger = parent.child(kShooter);
             double shooterWheelDiameterM = .33;
             switch (Identity.instance) {
                 case DEMO_BOT:
