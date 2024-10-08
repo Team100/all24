@@ -1,5 +1,6 @@
 package org.team100.lib.localization;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.team100.lib.motion.drivetrain.SwerveState;
@@ -118,7 +119,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     @Override
     public String toString() {
         return "InterpolationRecord [m_poseMeters=" + m_state + ", m_gyroAngle=" + m_gyroAngle
-                + ", m_wheelPositions=" + m_wheelPositions + "]";
+                + ", m_wheelPositions=" + Arrays.toString(m_wheelPositions) + "]";
     }
 
 }
