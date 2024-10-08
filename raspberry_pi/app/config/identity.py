@@ -1,3 +1,11 @@
+"""
+Represents the Raspberry Pi identity, used to select configuration.
+
+Don't put anything in this class about the actual configuration, use a different class for that.
+
+Keep this synchronized with java team100.config.Camera.
+"""
+
 from enum import unique, Enum
 from typing import Any
 
@@ -21,17 +29,6 @@ except FileNotFoundError:
 
 @unique
 class Identity(Enum):
-    """
-    Represents the Raspberry Pi identity, used to select configuration.
-
-    Don't put anything in this class about the actual configuration, use a different class for that.
-
-    Keep this synchronized with java team100.config.Camera.
-    """
-
-    # TODO: what is this?
-    C = "10000000a7c673d9"
-
     # 2024 comp bot cameras
     SHOOTER = "10000000a7a892c0"
     RIGHTAMP = "10000000caeaae82"
@@ -45,7 +42,6 @@ class Identity(Enum):
 
     # for testing
     DEV = "10000000a7c673d9"  # rpi4 used for development
-    DEV2 = "06ece53b019a5c2e"
     FLIPPED = "flipme"  # example for per-identity config
     UNKNOWN = "unknown"
 

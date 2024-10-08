@@ -24,10 +24,10 @@ import edu.wpi.first.wpilibj.GenericHID;
  * right y: axis 1
  * remember buttons are one-based
  * "reset/cancel": button 1
- * "menu/select": button 4
  * left switch: button 2
  * right switch: button 3
- * name: "Great Planes GP Controller"
+ * "menu/select": button 4
+ * name: "GP Controller"
  * 
  * MAPPINGS
  * 
