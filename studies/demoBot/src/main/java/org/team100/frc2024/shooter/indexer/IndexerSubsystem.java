@@ -3,22 +3,22 @@ package org.team100.frc2024.shooter.indexer;
 import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.motion.LinearMechanism;
-import org.team100.lib.motion.components.OutboardLinearPositionServo;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.motion.mechanism.LinearMechanism;
+import org.team100.lib.motion.servo.OutboardLinearPositionServo;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.telemetry.SupplierLogger;
 
 public class IndexerSubsystem implements Glassy {
 
     private final double kIndexerVelocityM_S;
     private final double m_objectLength;
 
-    private final SupplierLogger m_logger;
+    private final LoggerFactory m_logger;
     private final OutboardLinearPositionServo m_indexer;
     private final LinearMechanism m_linearMechanism;
 
     
-    public IndexerSubsystem(SupplierLogger parent, LinearMechanism linearMechanism, double maxAccel, double objectLengthM, double indexVelocityM_S) {
+    public IndexerSubsystem(LoggerFactory parent, LinearMechanism linearMechanism, double maxAccel, double objectLengthM, double indexVelocityM_S) {
         m_logger = parent.child(this);
         m_objectLength = objectLengthM;
         kIndexerVelocityM_S = indexVelocityM_S;
