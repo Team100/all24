@@ -82,6 +82,10 @@ public class Feedforward100 {
         return new Feedforward100(0.150, 0.010, 0.080, 0.100, 0.5);
     }
 
+    public static Feedforward100 makeKrakenTurret() {
+        return new Feedforward100(0.150, 0.010, 0.080, 0.100, 0.5);
+    }
+
     public static Feedforward100 makeWCPSwerveDriveFalcon() {
         return new Feedforward100(0.110, 0.000, 0.375, 0.270, 0.5);
     }
