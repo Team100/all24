@@ -1,7 +1,7 @@
 # pylint: disable=missing-class-docstring,missing-function-docstring,missing-module-docstring,invalid-name
 import unittest
 import numpy as np
-import blip_serializer
+import old.blip_serializer as blip_serializer
 
 
 class FakeResult:
