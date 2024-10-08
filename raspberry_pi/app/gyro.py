@@ -1,6 +1,8 @@
-""" This is a wrapper for the gyro. """
+"""
+This is a wrapper for the gyro.
+"""
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=R0903
 
 from typing import Protocol
 

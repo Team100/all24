@@ -3,6 +3,7 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 import java.util.Optional;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -12,6 +13,11 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
 
     public static FieldRelativeVelocity zero() {
         return new FieldRelativeVelocity(0, 0, 0);
+    }
+
+    public static FieldRelativeVelocity velocity(Pose2d start, Pose2d end, double dt) {
+        FieldRelativeDelta d = FieldRelativeDelta.delta(start, end);
+        return new FieldRelativeVelocity(d.getX(), d.getY(), d.getRotation().getRadians()).div(dt);
     }
 
     public double norm() {
@@ -38,6 +44,11 @@ public record FieldRelativeVelocity(double x, double y, double theta) {
     /** The return type here isn't really right. */
     public FieldRelativeVelocity minus(FieldRelativeVelocity other) {
         return new FieldRelativeVelocity(x - other.x, y - other.y, theta - other.theta);
+    }
+
+    public FieldRelativeAcceleration accel(FieldRelativeVelocity previous, double dt) {
+        FieldRelativeVelocity v = minus(previous).div(dt);
+        return new FieldRelativeAcceleration(v.x(), v.y(), v.theta());
     }
 
     public FieldRelativeVelocity times(double scalar) {
