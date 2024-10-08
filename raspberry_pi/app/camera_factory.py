@@ -3,7 +3,7 @@
 # pylint: disable=import-outside-toplevel
 # pylint: disable=too-few-public-methods
 
-from app.identity import Identity
+from app.config.identity import Identity
 from app.camera import Camera
 
 
@@ -30,7 +30,6 @@ class CameraFactory:
                 | Identity.LEFTAMP
                 | Identity.SHOOTER
                 | Identity.GAME_PIECE
-                | Identity.DEV2
             ):
                 return 1
             case Identity.DEV | Identity.FLIPPED | Identity.UNKNOWN:

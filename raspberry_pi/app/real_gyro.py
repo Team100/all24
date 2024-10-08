@@ -20,7 +20,7 @@ python3 -m pip install adafruit-blinka
 python3 -m pip install adafruit-circuitpython-lsm6ds
  """
 
-# pylint: disable=import-error, too-few-public-methods, no-member
+#pylint: disable=E1101
 
 import board  # type:ignore
 from adafruit_lsm6ds import Rate  # type:ignore

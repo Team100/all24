@@ -10,8 +10,8 @@ distributions {
             from ('app') {
                 into('/app')
             }
-            from ('app2') {
-                into('/app2')
+            from ('app/config') {
+                into('/app/config')
             }
             exclude '**/__pycache__'
         }
