@@ -11,6 +11,7 @@ import org.team100.frc2024.shooter.commands.ShootOne;
 import org.team100.frc2024.shooter.drumShooter.DrumShooter;
 import org.team100.frc2024.shooter.drumShooter.ShooterCollection;
 import org.team100.frc2024.shooter.indexer.Indexer;
+import org.team100.frc2024.shooter.indexer.IndexerCollection;
 import org.team100.frc2024.shooter.pivot.PivotCollection;
 import org.team100.frc2024.shooter.pivot.PivotSubsystem;
 import org.team100.frc2024.shooter.pivot.commands.PivotDefault;
@@ -62,7 +63,7 @@ public class RobotContainer {
         m_pivot = new PivotSubsystem(sysLog, PivotCollection.get(sysLog, 20));
         m_pivot.setDefaultCommand(new PivotDefault(driverControl::yAxis, m_pivot));
 
-        m_indexer = new Indexer(0);
+        m_indexer = IndexerCollection.get(sysLog);
 
         whileTrue(driverControl::ampLock, new Shoot(m_shooter, m_indexer));
         whileTrue(driverControl::fullCycle, new ShootOne(m_shooter, m_indexer));
