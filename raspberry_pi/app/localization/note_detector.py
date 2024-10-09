@@ -1,7 +1,7 @@
 """ This is a wrapper for the note detector.
 """
 
-# pylint: disable=E1101
+# pylint: disable=E1101,R0914
 
 from mmap import mmap
 from typing import Any

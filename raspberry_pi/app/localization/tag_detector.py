@@ -1,6 +1,6 @@
 """ This is a wrapper for the AprilTag detector. """
 
-# pylint: disable=E0611,R0902,R0913
+# pylint: disable=E0611,R0902,R0913,R0914
 
 from mmap import mmap
 from typing import Any

@@ -20,7 +20,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from picamera2 import Picamera2, CompletedRequest  # type: ignore
+from picamera2 import CompletedRequest, Picamera2  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
 from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
