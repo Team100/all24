@@ -25,7 +25,7 @@ from picamera2 import Picamera2
 
 
 class LEDFinder:
-    def __init__(self, width, height):
+    def __init__(self, width, height) -> None:
         self.width = width
         self.height = height
 
@@ -55,7 +55,7 @@ class LEDFinder:
     #            self.analyze(mapped_array.array)
 
     # def analyze(self, buffer):
-    def analyze(self, request):
+    def analyze(self, request) -> None:
         buffer = request.make_buffer("lores")
         #        buffer = request.make_buffer("main")
         metadata = request.get_metadata()
@@ -96,7 +96,7 @@ class LEDFinder:
             GPIO.output(37, 0)
 
 
-def main():
+def main() -> None:
     print("main")
 
     GPIO.setmode(GPIO.BOARD)

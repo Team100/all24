@@ -11,7 +11,7 @@ class Blip24:
     id: int
     pose: Transform3d
 
-def main():
+def main() -> None:
     inst = ntcore.NetworkTableInstance.getDefault()
     inst.startClient4("struct_demo")
 #    inst.setServer("10.1.0.2")

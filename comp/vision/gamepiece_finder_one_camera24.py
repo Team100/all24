@@ -1,4 +1,5 @@
-import dataclasses
+# pylint: disable=C0114,C0115
+
 import math
 import sys
 import time
@@ -16,9 +17,7 @@ from wpimath.geometry import Rotation3d
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
-    # TODO get correct serial numbers for Delta
-    # A = "10000000caeaae82"  # "BETA FRONT"
-    # B = "1000000013c9c96c"  # "BETA BACK"
+
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
     SHOOTER = "10000000a7a892c0"  # "DELTA SHOOTER"
     RIGHTAMP = "10000000caeaae82"  # "DELTA AMP-PLACER"
@@ -33,21 +32,21 @@ class Camera(Enum):
 
 
 class GamePieceFinder:
-    def __init__(self, serial, width, height, model):
+    def __init__(self, serial: str, width: int, height: int, model: str) -> None:
         self.serial = serial
         self.width = width
         self.height = height
         self.model = model
 
         # opencv hue values are 0-180, half the usual number
-        #for light
+        # for light
         lower_value_bound = 190
         lower_saturation_bound = 10
-        self.object_lower = (0,lower_saturation_bound, lower_value_bound)
+        self.object_lower = (0, lower_saturation_bound, lower_value_bound)
         self.object_higher = (15, 255, 255)
-        self.secobject_lower = (165,lower_saturation_bound, lower_value_bound)
+        self.secobject_lower = (165, lower_saturation_bound, lower_value_bound)
         self.secobject_higher = (180, 255, 255)
-        #for darkness
+        # for darkness
         # self.object_lower = (4,150, 100)
         # self.object_higher = (16, 255, 255)
         self.frame_time = 0
@@ -95,7 +94,7 @@ class GamePieceFinder:
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
-    def initialize_nt(self):
+    def initialize_nt(self) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = NetworkTableInstance.getDefault()
         self.inst.startClient4("gamepiece_finder24")
@@ -110,21 +109,21 @@ class GamePieceFinder:
         ).publish()
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Rotation3d).publish().set(
-            Rotation3d(0,0,0)
+            Rotation3d(0, 0, 0)
         )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
             topic_name + "/Rotation3d", Rotation3d
         ).publish(nt.PubSubOptions(keepDuplicates=True))
 
-    def find_object(self, img_yuv):
+    def find_object(self, img_yuv) -> list[Rotation3d]:
         # this says YUV->RGB but it actually makes BGR.
         # github.com/raspberrypi/picamera2/issues/848
         img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
-        serial = getserial()
+        serial: str = getserial()
         identity = Camera(serial)
         if identity == Camera.GAME_PIECE:
-            img_bgr = img_bgr[65:583,:,:]
+            img_bgr = img_bgr[65:583, :, :]
 
         img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
@@ -154,7 +153,7 @@ class GamePieceFinder:
             if cnt_width > self.width / 2 or cnt_height > self.height / 2:
                 continue
 
-            if (cnt_height < 20 or cnt_width < 20) and cnt_width/cnt_height < 3:
+            if (cnt_height < 20 or cnt_width < 20) and cnt_width / cnt_height < 3:
                 continue
 
             mmnts = cv2.moments(c)
@@ -167,29 +166,32 @@ class GamePieceFinder:
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
 
-            yNormalized = (cY-self.height/2)/self.mtx[1,1]
-            zNormalized = (self.width/2-cX)/self.mtx[0,0]
+            yNormalized = (cY - self.height / 2) / self.mtx[1, 1]
+            zNormalized = (self.width / 2 - cX) / self.mtx[0, 0]
             # pitchRad = math.atan(yNormalized)
             # yawRad = math.atan(zNormalized)
             # Puts up angle to the target from the POV of the camera
             # these are not extrinsic euler angles; this is wrong.
             # rotation = Rotation3d(0, pitchRad, yawRad)
             # the correct rotation is one that matches the normalized (x,y) coordinates
-            rotation = Rotation3d(initial=np.array([1, 0, 0]), final=np.array([1, yNormalized, zNormalized]))
+            rotation = Rotation3d(
+                initial=np.array([1, 0, 0]),
+                final=np.array([1, yNormalized, zNormalized]),
+            )
             objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
-        img_output = cv2.resize(img_bgr, (269,162)) 
+        img_output = cv2.resize(img_bgr, (269, 162))
         self.output_stream.putFrame(img_output)
         return objects
 
-    def draw_result(self, img, cnt, cX, cY):
+    def draw_result(self, img, cnt, cX, cY) -> None:
         # float_formatter = {"float_kind": lambda x: f"{x:4.1f}"}
         cv2.drawContours(img, [cnt], -1, (0, 255, 0), 2)
         cv2.circle(img, (int(cX), int(cY)), 7, (0, 0, 0), -1)
         # cv2.putText(img, f"t: {np.array2string(wpi_t.flatten(), formatter=float_formatter)}", (int(cX) - 20, int(cY) - 20),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-    def analyze(self, request):
+    def analyze(self, request) -> None:
         img_yuv = request.make_array("lores")
         metadata = request.get_metadata()
 
@@ -212,7 +214,7 @@ class GamePieceFinder:
         self.inst.flush()
 
 
-def getserial():
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
@@ -220,7 +222,7 @@ def getserial():
     return ""
 
 
-def main():
+def main() -> None:
     print("main")
 
     camera = Picamera2()
@@ -247,7 +249,7 @@ def main():
     elif model == "imx296":
         print("GS Camera")
         # full frame, 2x2, to set the detector mode to widest angle possible
-        fullwidth = 1408   # slightly larger than the detector, to match stride
+        fullwidth = 1408  # slightly larger than the detector, to match stride
         fullheight = 1088
         # medium detection resolution, compromise speed vs range
         width = 1408
@@ -279,7 +281,7 @@ def main():
         },
     )
 
-    serial = getserial()
+    serial: str = getserial()
     identity = Camera(serial)
 
     print("\nREQUESTED CONFIG")

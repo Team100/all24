@@ -46,7 +46,7 @@ class Camera(Enum):
         return Camera.UNKNOWN
 
 class TagFinder:
-    def __init__(self, serial, width, height, model):
+    def __init__(self, serial: str, width: int, height: int, model: str) -> None:
         self.frame_time = time.time()
         # the cpu serial number
         self.serial = serial
@@ -112,7 +112,7 @@ class TagFinder:
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
-    def analyze(self, request):
+    def analyze(self, request) -> None:
         # potentialTags = self.estimatedTagPose.get()
         # potentialArray = []
         # z = []
@@ -199,7 +199,7 @@ class TagFinder:
         img_output = cv2.resize(img, (416,308)) 
         self.output_stream.putFrame(img_output)
 
-    def draw_result(self, image, result_item, pose: Transform3d):
+    def draw_result(self, image, result_item, pose: Transform3d) -> None:
         color = (255, 255, 255)
 
         # Draw lines around the tag
@@ -225,14 +225,14 @@ class TagFinder:
             )
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc):
+    def draw_text(self, image, msg, loc) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
     def accept(self, estimatedTagPose):
         print("ay" + str(estimatedTagPose.readQueue()))
 
-    def initialize_nt(self):
+    def initialize_nt(self) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
@@ -261,7 +261,7 @@ class TagFinder:
 
 
 
-def getserial():
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
@@ -269,7 +269,7 @@ def getserial():
     return ""
 
 
-def main():
+def main() -> None:
 
     camera = Picamera2()
 
@@ -338,7 +338,7 @@ def main():
     )
     print("SENSOR MODES AVAILABLE")
     pprint.pprint(camera.sensor_modes)
-    serial = getserial()
+    serial: str = getserial()
     identity = Camera(serial)
     # if identity == Camera.FRONT:
     #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)

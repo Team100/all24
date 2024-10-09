@@ -12,7 +12,7 @@ import math
     
 class GamePieceFinder:
 
-    def __init__(self, topic_name, camera_params):
+    def __init__(self, topic_name, camera_params) -> None:
         self.purple_lower = (150, 100, 0)
         self.purple_higher = (190, 255, 255)
         self.yellow_lower = (15, 100, 0)
@@ -27,7 +27,7 @@ class GamePieceFinder:
         self.initialize_nt()
         self.output_stream = CameraServer.putVideo("Processed", self.width, self.height)
 
-    def initialize_nt(self):
+    def initialize_nt(self) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         inst = NetworkTableInstance.getDefault()
         inst.startClient4("retro-finder")
@@ -136,7 +136,7 @@ class GamePieceFinder:
         self.output_stream.putFrame(img_rgb)
         return cones
 
-    def draw_result(self, img, cnt, cX, cY, piece):
+    def draw_result(self, img, cnt, cX, cY, piece) -> None:
         float_formatter = {"float_kind": lambda x: f"{x:4.1f}"}
         wpi_t = np.array([piece[2], -piece[0], -piece[1]])
         cv2.drawContours(img, [cnt], -1, (0, 255, 0), 2)
@@ -144,7 +144,7 @@ class GamePieceFinder:
         cv2.putText(img, f"t: {np.array2string(wpi_t.flatten(), formatter=float_formatter)}", (int(cX) - 20, int(cY) - 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-    def analyze(self, request):
+    def analyze(self, request) -> None:
         buffer = request.make_array("lores")
         # img = np.frombuffer(buffer, dtype=np.uint8)
         img = buffer
@@ -173,7 +173,7 @@ class GamePieceFinder:
 
         self.vision_nt_msgpack.set(posebytes)
 
-def main():
+def main() -> None:
     print("main")
     fullwidth = 1664
     fullheight = 1232

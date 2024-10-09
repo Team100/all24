@@ -28,7 +28,7 @@ from wpimath.geometry import Transform3d
 
 
 class TagFinder:
-    def __init__(self, width, height, model):
+    def __init__(self, width, height, model) -> None:
         self.width = width
         self.height = height
         self.model = model
@@ -80,7 +80,7 @@ class TagFinder:
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
-    def analyze(self, request):
+    def analyze(self, request) -> None:
         buffer = request.make_buffer("lores")
 
         y_len = self.width * self.height
@@ -105,7 +105,7 @@ class TagFinder:
 
         self.output_stream.putFrame(img)
 
-    def draw_result(self, image, result_item, pose: Transform3d):
+    def draw_result(self, image, result_item, pose: Transform3d) -> None:
         color = (255, 255, 255)
 
         # Draw lines around the tag
@@ -132,12 +132,12 @@ class TagFinder:
             )
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc):
+    def draw_text(self, image, msg, loc) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
 
-def main():
+def main() -> None:
     camera = Picamera2()
 
     model = camera.camera_properties["Model"]

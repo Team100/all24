@@ -1,10 +1,10 @@
-import dataclasses
+# pylint: disable=C0115,C0116,R0902,R0915
+
 import math
 import sys
 import time
 from enum import Enum
 
-import cscore
 import cv2
 import libcamera
 import ntcore as nt
@@ -17,9 +17,7 @@ from wpimath.geometry import Rotation3d
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
-    # TODO get correct serial numbers for Delta
-    # A = "10000000caeaae82"  # "BETA FRONT"
-    # B = "1000000013c9c96c"  # "BETA BACK"
+
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
     SHOOTER = "10000000a7a892c0"  # "DELTA SHOOTER"
     RIGHTAMP = "10000000caeaae82"  # "DELTA AMP-PLACER"
@@ -32,10 +30,11 @@ class Camera(Enum):
     def _missing_(cls, value):
         return Camera.UNKNOWN
 
+
 class CameraData:
-    def __init__(self, id):
+    def __init__(self, id) -> None:
         self.camera = Picamera2(id)
-        model = self.camera.camera_properties["Model"]
+        model: str = self.camera.camera_properties["Model"]
         print("\nMODEL " + model)
         self.id = id
         if model == "imx708_wide":
@@ -57,7 +56,7 @@ class CameraData:
         elif model == "imx296":
             print("GS Camera")
             # full frame, 2x2, to set the detector mode to widest angle possible
-            fullwidth = 1408   # slightly larger than the detector, to match stride
+            fullwidth = 1408  # slightly larger than the detector, to match stride
             fullheight = 1088
             # medium detection resolution, compromise speed vs range
             self.width = 1408
@@ -120,7 +119,7 @@ class CameraData:
             fy = 1680
             cx = 704
             cy = 544
-            k1 = 0 
+            k1 = 0
             k2 = 0
         else:
             print("UNKNOWN CAMERA MODEL")
@@ -133,15 +132,16 @@ class CameraData:
         self.fps = 0
         self.camera.start()
         self.frame_time = time.time()
-    
+
     def setFPSPublisher(self, FPSPublisher):
         self.FPSPublisher = FPSPublisher
 
     def setLatencyPublisher(self, LatencyPublisher):
         self.LatencyPublisher = LatencyPublisher
 
+
 class GamePieceFinder:
-    def __init__(self, serial, camList):
+    def __init__(self, serial, camList) -> None:
         self.serial = serial
         self.objects = []
         # opencv hue values are 0-180, half the usual number
@@ -151,7 +151,7 @@ class GamePieceFinder:
         self.theta = 0
         self.initialize_nt(camList)
 
-    def initialize_nt(self, camList):
+    def initialize_nt(self, camList) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = NetworkTableInstance.getDefault()
         self.inst.startClient4("gamepiece_finder24")
@@ -162,14 +162,18 @@ class GamePieceFinder:
         topic_name = "noteVision/" + self.serial
         for camera in camList:
             camera.setFPSPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/fps").publish()
+                self.inst.getDoubleTopic(
+                    topic_name + "/" + str(camera.id) + "/fps"
+                ).publish()
             )
             camera.setLatencyPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/latency").publish()
+                self.inst.getDoubleTopic(
+                    topic_name + "/" + str(camera.id) + "/latency"
+                ).publish()
             )
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Rotation3d).publish().set(
-            Rotation3d(0,0,0)
+            Rotation3d(0, 0, 0)
         )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
@@ -180,12 +184,12 @@ class GamePieceFinder:
         # this says YUV->RGB but it actually makes BGR.
         # github.com/raspberrypi/picamera2/issues/848
         img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
-        serial = getserial()
+        serial: str = getserial()
         identity = Camera(serial)
         if identity == Camera.GAME_PIECE:
-            img_bgr = img_bgr[65:583,:,:]
+            img_bgr = img_bgr[65:583, :, :]
 
-        img_bgr = cv2.undistort(img_bgr, camera.mtx,camera.dist)
+        img_bgr = cv2.undistort(img_bgr, camera.mtx, camera.dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
 
@@ -225,23 +229,23 @@ class GamePieceFinder:
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
 
-            pitchRad = math.atan((cY-height/2)/camera.mtx[1,1])
-            yawRad = math.atan((width/2-cX)/camera.mtx[0,0])
+            pitchRad = math.atan((cY - height / 2) / camera.mtx[1, 1])
+            yawRad = math.atan((width / 2 - cX) / camera.mtx[0, 0])
             # Puts up angle to the target from the POV of the camera
             rotation = Rotation3d(0, pitchRad, yawRad)
             self.objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
-        img_output = cv2.resize(img_bgr, (269,162)) 
+        img_output = cv2.resize(img_bgr, (269, 162))
         camera.output_stream.putFrame(img_range)
 
-    def draw_result(self, img, cnt, cX, cY):
+    def draw_result(self, img, cnt, cX, cY) -> None:
         # float_formatter = {"float_kind": lambda x: f"{x:4.1f}"}
         cv2.drawContours(img, [cnt], -1, (0, 255, 0), 2)
         cv2.circle(img, (int(cX), int(cY)), 7, (0, 0, 0), -1)
         # cv2.putText(img, f"t: {np.array2string(wpi_t.flatten(), formatter=float_formatter)}", (int(cX) - 20, int(cY) - 20),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-    def analyze(self, request, camera):
+    def analyze(self, request, camera) -> None:
         img_yuv = request.make_array("lores")
         metadata = request.get_metadata()
 
@@ -264,23 +268,24 @@ class GamePieceFinder:
         self.inst.flush()
 
 
-def getserial():
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
                 return line[10:26]
     return ""
 
-def main():
+
+def main() -> None:
     print("main")
     print(Picamera2.global_camera_info())
     camList = []
-    if (len(Picamera2.global_camera_info()) == 0):
+    if len(Picamera2.global_camera_info()) == 0:
         print("NO CAMERAS DETECTED, PLEASE TURN OFF PI AND CHECK CAMERA PORT(S)")
     for cameraData in Picamera2.global_camera_info():
         camera = CameraData(cameraData["Num"])
         camList.append(camera)
-    serial = getserial()
+    serial: str = getserial()
     print(serial)
     output = GamePieceFinder(serial, camList)
     try:
@@ -296,4 +301,6 @@ def main():
     finally:
         for camera in camList:
             camera.camera.stop()
+
+
 main()

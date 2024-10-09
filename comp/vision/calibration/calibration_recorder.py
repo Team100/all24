@@ -21,7 +21,7 @@ from picamera2 import Picamera2
 class TagFinder:
     IMAGE_DIR = 'images'
 
-    def __init__(self, width, height):
+    def __init__(self, width, height) -> None:
         self.width = width
         self.height = height
 
@@ -36,7 +36,7 @@ class TagFinder:
         # to keep track of images to write
         self.img_ts_sec = 0
 
-    def analyze(self, request):
+    def analyze(self, request) -> None:
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
 
@@ -74,7 +74,7 @@ class TagFinder:
             cv2.imwrite(filename, img)
 
 
-def main():
+def main() -> None:
 
     camera = Picamera2()
 

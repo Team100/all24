@@ -13,6 +13,7 @@ import ntcore
 import os
 
 from cscore import CameraServer
+
 # from ntcore import NetworkTableInstance
 from picamera2 import Picamera2
 from pupil_apriltags import Detector
@@ -21,10 +22,10 @@ from pupil_apriltags import Detector
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
 
-    FRONT = "1000000013c9c96c" # "2"
-    REAR = "100000004e0a1fb9" # "1"
-    LEFT = "10000000a7c673d9" # "4"
-    RIGHT = "10000000a7a892c0" # "3"
+    FRONT = "1000000013c9c96c"  # "2"
+    REAR = "100000004e0a1fb9"  # "1"
+    LEFT = "10000000a7c673d9"  # "4"
+    RIGHT = "10000000a7a892c0"  # "3"
     UNKNOWN = None
 
     @classmethod
@@ -33,8 +34,9 @@ class Camera(Enum):
 
 
 class TagFinder:
-    IMAGE_DIR = 'images'
-    def __init__(self, topic_name, width, height):
+    IMAGE_DIR = "images"
+
+    def __init__(self, topic_name, width, height) -> None:
         self.frame_time = time.time()
         # each camera has its own topic
         self.topic_name = topic_name
@@ -76,7 +78,7 @@ class TagFinder:
         # to keep track of images to write
         self.img_ts_sec = 0
 
-    def analyze(self, request):
+    def analyze(self, request) -> None:
         buffer = request.make_buffer("lores")
         # buffer = request.make_buffer("main")
         # metadata = request.get_metadata()
@@ -152,14 +154,14 @@ class TagFinder:
 
         fps = 1 / total_et
         self.frame_time = current_time
-        #self.draw_text(img, f"analysis ET(ms) {1000*analysis_et:.0f}", (5, 25))
-        #self.draw_text(img, f"total ET(ms) {1000*total_et:.0f}", (5, 65))
-        #self.draw_text(img, f"fps {fps:.1f}", (5, 105))
+        # self.draw_text(img, f"analysis ET(ms) {1000*analysis_et:.0f}", (5, 25))
+        # self.draw_text(img, f"total ET(ms) {1000*total_et:.0f}", (5, 65))
+        # self.draw_text(img, f"fps {fps:.1f}", (5, 105))
         self.draw_text(img, f"fps {fps:.1f}", (5, 65))
 
         # write the current timestamp on the image
         # this timestamp is attached to the NT payloads, see getAtomic()
-        now_us = ntcore._now() #pylint:disable=W0212
+        now_us = ntcore._now()  # pylint:disable=W0212
         self.draw_text(img, f"time(us) {now_us}", (5, 105))
 
         # shrink the driver view to avoid overloading the radio
@@ -178,8 +180,7 @@ class TagFinder:
         #     filename = TagFinder.IMAGE_DIR + "/img" + str(now_s) + ".png"
         #     cv2.imwrite(filename, img)
 
-
-    def draw_result(self, image, result):
+    def draw_result(self, image, result) -> None:
         for result_item in result:
             if result_item.hamming > 0:
                 continue
@@ -265,11 +266,11 @@ class TagFinder:
                 # )
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc):
+    def draw_text(self, image, msg, loc) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-    def initialize_nt(self):
+    def initialize_nt(self) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startClient4("tag-finder")
@@ -296,7 +297,7 @@ class TagFinder:
     #     inst.startClient4("tag-finder")
 
 
-def getserial():
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
@@ -304,7 +305,7 @@ def getserial():
     return ""
 
 
-def main():
+def main() -> None:
     print("main")
 
     # full frame, 2x2, to set the detector mode
@@ -365,7 +366,7 @@ def main():
         },
     )
 
-    topic_name = getserial()  # was: topic_name = "tags"
+    topic_name: str = getserial()  # was: topic_name = "tags"
     identity = Camera(topic_name)
     if identity == Camera.REAR or identity == Camera.FRONT:
         camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)

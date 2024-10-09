@@ -1,7 +1,5 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=import-error
+# pylint: disable=C0103,C0114,C0115,C0116,R0902,W0201
+
 import dataclasses
 import time
 import pprint
@@ -31,9 +29,7 @@ class Blip24:
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
 
-    # TODO get correct serial numbers for Delta
     A = "10000000caeaae82"  # "BETA FRONT"
-    # B = "1000000013c9c96c"  # "BETA BACK"
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
 
     SHOOTER = "10000000a7a892c0"  # "DELTA SHOOTER"
@@ -50,7 +46,7 @@ class Camera(Enum):
 
 
 class CameraData:
-    def __init__(self, id):
+    def __init__(self, id) -> None:
         self.camera = Picamera2(id)
         model = self.camera.camera_properties["Model"]
         print("\nMODEL " + model)
@@ -78,7 +74,7 @@ class CameraData:
             fullwidth = 1408  # slightly larger than the detector, to match stride
             fullheight = 1088
             # medium detection resolution, compromise speed vs range
-            self.width = 1408 
+            self.width = 1408
             self.height = 1088
         else:
             print("UNKNOWN CAMERA: " + model)
@@ -175,26 +171,27 @@ class CameraData:
         self.camera.start()
         self.frame_time = time.time()
 
-    def setFPSPublisher(self, FPSPublisher):
+    def setFPSPublisher(self, FPSPublisher: ntcore.DoublePublisher) -> None:
         self.FPSPublisher = FPSPublisher
 
-    def setLatencyPublisher(self, LatencyPublisher):
+    def setLatencyPublisher(self, LatencyPublisher: ntcore.DoublePublisher) -> None:
         self.LatencyPublisher = LatencyPublisher
 
+
 class TagFinder:
-    def __init__(self, serial, camList):
+    def __init__(self, serial: str, camList: list[CameraData]) -> None:
         # the cpu serial number
         self.serial = serial
         self.initialize_nt(camList)
         self.blips = []
         self.at_detector = robotpy_apriltag.AprilTagDetector()
-        
+
         config = self.at_detector.Config()
         config.numThreads = 4
         self.at_detector.setConfig(config)
         self.at_detector.addFamily("tag36h11")
 
-    def analyze(self, request, camera):
+    def analyze(self, request, camera): list[CameraData] -> None:
         # potentialTags = self.estimatedTagPose.get()
         # potentialArray = []
         # z = []
@@ -216,11 +213,11 @@ class TagFinder:
         #         and point2D[0][0][1] > 0
         #         and point2D[0][0][1] < 1088
         #     ):
-                # print(Blip24s.id)
-                # print(object_points)
-                # print(point2D[0][0])
-                # z.append(translation.Z())
-                # potentialArray.append(point2D[0][0])
+        # print(Blip24s.id)
+        # print(object_points)
+        # print(point2D[0][0])
+        # z.append(translation.Z())
+        # potentialArray.append(point2D[0][0])
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
 
@@ -300,7 +297,7 @@ class TagFinder:
         img_output = cv2.resize(img, (416, 308))
         camera.output_stream.putFrame(img_output)
 
-    def draw_result(self, image, result_item, pose: Transform3d):
+    def draw_result(self, image, result_item, pose: Transform3d) -> None:
         color = (255, 255, 255)
 
         # Draw lines around the tag
@@ -326,14 +323,14 @@ class TagFinder:
             )
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc):
+    def draw_text(self, image, msg: str, loc) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
     def accept(self, estimatedTagPose):
         print("ay" + str(estimatedTagPose.readQueue()))
 
-    def initialize_nt(self, camList):
+    def initialize_nt(self, camList: list[CameraData]) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
@@ -343,10 +340,14 @@ class TagFinder:
         topic_name = "vision/" + self.serial
         for camera in camList:
             camera.setFPSPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/fps").publish()
+                self.inst.getDoubleTopic(
+                    topic_name + "/" + str(camera.id) + "/fps"
+                ).publish()
             )
             camera.setLatencyPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/latency").publish()
+                self.inst.getDoubleTopic(
+                    topic_name + "/" + str(camera.id) + "/latency"
+                ).publish()
             )
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
@@ -371,16 +372,16 @@ def getserial():
     return ""
 
 
-def main():
+def main() -> None:
     print("main")
     print(Picamera2.global_camera_info())
-    camList = []
+    camList: list[CameraData] = []
     if len(Picamera2.global_camera_info()) == 0:
         print("NO CAMERAS DETECTED, PLEASE TURN OFF PI AND CHECK CAMERA PORT(S)")
     for cameraData in Picamera2.global_camera_info():
         camera = CameraData(cameraData["Num"])
         camList.append(camera)
-    serial = getserial()
+    serial: str = getserial()
     print(serial)
     output = TagFinder(serial, camList)
     # output.startListening()
@@ -397,4 +398,6 @@ def main():
     finally:
         for camera in camList:
             camera.camera.stop()
+
+
 main()

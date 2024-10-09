@@ -1,3 +1,5 @@
+# pylint disable=C0103,C0115,C0116,E0401
+
 import dataclasses
 import pprint
 import sys
@@ -25,9 +27,7 @@ class Blip24:
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
 
-    # TODO get correct serial numbers for Delta
     A = "10000000caeaae82"  # "BETA FRONT"
-    # B = "1000000013c9c96c"  # "BETA BACK"
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
 
     SHOOTER = "10000000a7a892c0"  # "DELTA SHOOTER"
@@ -44,9 +44,9 @@ class Camera(Enum):
 
 
 class CameraData:
-    def __init__(self, id):
+    def __init__(self, id) -> None:
         self.camera = Picamera2(id)
-        model = self.camera.camera_properties["Model"]
+        model: str = self.camera.camera_properties["Model"]
         print("\nMODEL " + model)
         self.id = id
 
@@ -172,13 +172,14 @@ class CameraData:
     def setLatencyPublisher(self, LatencyPublisher):
         self.LatencyPublisher = LatencyPublisher
 
+
 class Test:
-    def __init__(self, serial, camList):
+    def __init__(self, serial, camList: list[CameraData]) -> None:
         # the cpu serial number
         self.serial = serial
         self.initialize_nt(camList)
 
-    def initialize_nt(self, camList):
+    def initialize_nt(self, camList: list[CameraData]) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
@@ -188,10 +189,14 @@ class Test:
         topic_name = "vision/" + self.serial
         for camera in camList:
             camera.setFPSPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/fps").publish()
+                self.inst.getDoubleTopic(
+                    topic_name + "/" + str(camera.id) + "/fps"
+                ).publish()
             )
             camera.setLatencyPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/latency").publish()
+                self.inst.getDoubleTopic(
+                    topic_name + "/" + str(camera.id) + "/latency"
+                ).publish()
             )
 
         # work around https://github.com/robotpy/mostrobotpy/issues/60
@@ -207,7 +212,7 @@ class Test:
             topic_name + "/estimatedTagPose", Blip24
         ).subscribe([], ntcore.PubSubOptions())
 
-    def analyze(self, request, camera):
+    def analyze(self, request, camera) -> None:
         buffer = request.make_buffer("lores")
         metadata = request.get_metadata()
 
@@ -242,11 +247,12 @@ class Test:
         camera.output_stream.putFrame(img_output)
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc):
+    def draw_text(self, image, msg, loc) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-def getserial():
+
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
@@ -254,16 +260,16 @@ def getserial():
     return ""
 
 
-def main():
+def main() -> None:
     print("main")
     print(Picamera2.global_camera_info())
-    camList = []
+    camList: list[CameraData] = []
     if len(Picamera2.global_camera_info()) == 0:
         print("NO CAMERAS DETECTED, PLEASE TURN OFF PI AND CHECK CAMERA PORT(S)")
     for cameraData in Picamera2.global_camera_info():
         camera = CameraData(cameraData["Num"])
         camList.append(camera)
-    serial = getserial()
+    serial: str = getserial()
     print(serial)
     output = Test(serial, camList)
     try:
@@ -277,4 +283,6 @@ def main():
     finally:
         for camera in camList:
             camera.camera.stop()
+
+
 main()
