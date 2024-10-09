@@ -8,27 +8,27 @@ It uses 20% scaled tags 33.02 mm
 Force f_x and f_y to be the same
 """
 
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=import-error
+# pylint: disable=C0115,C0116,E1101
 
+
+import math
+import sys
+from typing import Any, cast
 
 import cv2
-import sys
-import libcamera
 import numpy as np
-import math
-
 import robotpy_apriltag
-
 from cscore import CameraServer
-from picamera2 import Picamera2
+from numpy.typing import NDArray
+from picamera2 import CompletedRequest, Picamera2  # type: ignore
+from robotpy_apriltag import AprilTagDetection
 from wpimath.geometry import Transform3d
+
+Mat = NDArray[np.uint8]
 
 
 class TagFinder:
-    def __init__(self, width, height, model) -> None:
+    def __init__(self, width: int, height: int, model: str) -> None:
         self.width = width
         self.height = height
         self.model = model
@@ -47,7 +47,7 @@ class TagFinder:
             k1 = 0.01
             k2 = -0.0365
         elif self.model == "imx219":
-            # from testing on 3/22/24, k1 and k2 only 
+            # from testing on 3/22/24, k1 and k2 only
             # this is a particular camera, their c_x and c_y probably vary so
             # TODO: test each one, keep track via pi serial number.
             # see https://docs.google.com/spreadsheets/d/1hroyVK2Vg2H-gPxu4nAX5R5qa46zbWO7TYqaq_pViE8
@@ -80,8 +80,8 @@ class TagFinder:
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
-    def analyze(self, request) -> None:
-        buffer = request.make_buffer("lores")
+    def analyze(self, request: CompletedRequest) -> None:
+        buffer: NDArray[np.uint8] = request.make_buffer("lores")  # type: ignore
 
         y_len = self.width * self.height
 
@@ -103,9 +103,11 @@ class TagFinder:
             pose = self.estimator.estimate(result_item)
             self.draw_result(img, result_item, pose)
 
-        self.output_stream.putFrame(img)
+        self.output_stream.putFrame(img)  # type: ignore
 
-    def draw_result(self, image, result_item, pose: Transform3d) -> None:
+    def draw_result(
+        self, image: Mat, result_item: AprilTagDetection, pose: Transform3d
+    ) -> None:
         color = (255, 255, 255)
 
         # Draw lines around the tag
@@ -117,22 +119,23 @@ class TagFinder:
 
         (c_x, c_y) = (int(result_item.getCenter().x), int(result_item.getCenter().y))
         cv2.circle(image, (c_x, c_y), 10, (255, 255, 255), -1)
-        self.draw_text(image, f"cx {c_x} cy {c_y}", (20,40)) #(c_x, c_y))
-        fx = self.mtx[0,0]
-        cx = self.mtx[0,2]
+        self.draw_text(image, f"cx {c_x} cy {c_y}", (20, 40))  # (c_x, c_y))
+        fx = self.mtx[0, 0]
+        cx = self.mtx[0, 2]
         oppo = c_x - cx
         angle = math.degrees(math.atan2(oppo, fx))
-        self.draw_text(image, f"deg {angle:6.2f}", (20, 80)) # (c_x, c_y + 40))
-        if pose is not None:
-            t = pose.translation()
-            self.draw_text(
-                image,
-                f"t {t.x:5.2f},{t.y:5.2f},{t.z:5.2f}",
-                (20, 120), # (c_x, c_y + 80),
-            )
+        self.draw_text(image, f"deg {angle:6.2f}", (20, 80))  # (c_x, c_y + 40))
+        t = pose.translation()
+        self.draw_text(
+            image,
+            f"t {t.x:5.2f},{t.y:5.2f},{t.z:5.2f}",
+            (20, 120),  # (c_x, c_y + 80),
+        )
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc) -> None:
+    def draw_text(
+        self, image: NDArray[np.uint8], msg: str, loc: tuple[int, int]
+    ) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
@@ -140,7 +143,7 @@ class TagFinder:
 def main() -> None:
     camera = Picamera2()
 
-    model = camera.camera_properties["Model"]
+    model = cast(str, camera.camera_properties["Model"])  # type:ignore
     print("\nMODEL " + model)
 
     if model == "imx708_wide":
@@ -163,7 +166,7 @@ def main() -> None:
         print("UNKNOWN CAMERA MODEL: " + model)
         sys.exit()
 
-    camera_config = camera.create_still_configuration(
+    camera_config: dict[str, Any] = camera.create_still_configuration(  # type:ignore
         # 2 buffers => low latency (32-48 ms), low fps (15-20)
         # 5 buffers => mid latency (40-55 ms), high fps (22-28)
         # 3 buffers => high latency (50-70 ms), mid fps (20-23)
@@ -186,25 +189,25 @@ def main() -> None:
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
-            "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            "NoiseReductionMode": 0,  # libcamera.controls.draft.NoiseReductionModeEnum.Off,
         },
     )
 
     print("\nREQUESTED CONFIG")
-    print(camera_config)
-    camera.align_configuration(camera_config)
+    print(camera_config)  # type: ignore
+    camera.align_configuration(camera_config)  # type: ignore
     print("\nALIGNED CONFIG")
-    print(camera_config)
-    camera.configure(camera_config)
+    print(camera_config)  # type: ignore
+    camera.configure(camera_config)  # type: ignore
     print("\nCONTROLS")
-    print(camera.camera_controls)
+    print(camera.camera_controls)  # type: ignore
     output = TagFinder(width, height, model)
 
-    camera.start()
+    camera.start()  # type: ignore
     try:
         while True:
             # the most recent completed frame, from the recent past
-            request = camera.capture_request()
+            request: CompletedRequest = camera.capture_request()  # type: ignore
             try:
                 output.analyze(request)
             finally:

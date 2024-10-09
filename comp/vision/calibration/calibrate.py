@@ -12,12 +12,15 @@ and I waved it around near each of the cameras, a v2 and a v3 wide.
 
 """
 
+# pylint: disable=C0103
+
 import os
 import math
 import pprint
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 
 print(os.getcwd())
 
@@ -54,16 +57,19 @@ for im in images:
     # plt.imshow(img)
     # plt.show()
 
-    charucoCorners, charucoIds, markerCorners, markerIds = charuco_detector.detectBoard(
-        img
-    )
+    result = charuco_detector.detectBoard(img)
+
+    charucoCorners = result[0]
+    charucoIds = result[1]
+    markerCorners = result[2]
+    markerIds = result[3]
 
     # img2 = cv2.aruco.drawDetectedMarkers(img.copy(), markerCorners, markerIds)
     # plt.imshow(img2)
     # plt.show()
 
     # img3 = cv2.aruco.drawDetectedCornersCharuco(
-        # img.copy(), charucoCorners, charucoIds, (255, 0, 0)
+    # img.copy(), charucoCorners, charucoIds, (255, 0, 0)
     # )
     # plt.imshow(img3)
     # plt.show()
@@ -93,7 +99,7 @@ ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
     (camera_img_w, camera_img_h),
     None,
     None,
-    flags=cv2.CALIB_RATIONAL_MODEL ,
+    flags=cv2.CALIB_RATIONAL_MODEL,
 )
 
 # pprint.pprint(tvecs)

@@ -4,6 +4,9 @@ import numpy as np
 import old.blip_serializer as blip_serializer
 
 
+# pylint: disable=R0903
+
+
 class FakeResult:
     def __init__(self) -> None:
         self.hamming = 0
@@ -13,15 +16,15 @@ class FakeResult:
 
 
 class TestBlipSerializer(unittest.TestCase):
-    def test_serialize_empty(self):
+    def test_serialize_empty(self) -> None:
         result = []
-        serialized_result = blip_serializer.serialize(result)
+        serialized_result = blip_serializer.serialize(result) # type: ignore
         self.assertEqual("81a47461677390", serialized_result.hex())
 
-    def test_serialize_normal(self):
+    def test_serialize_normal(self) -> None:
         result = []
-        result.append(FakeResult())
-        serialized_result = blip_serializer.serialize(result)
+        result.append(FakeResult()) # type: ignore
+        serialized_result = blip_serializer.serialize(result) # type: ignore
         # this is just copied from whatever the serializer produced.
         self.assertEqual(
             (

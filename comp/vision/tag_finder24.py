@@ -1,25 +1,28 @@
-# pylint: disable=C0103,C0114,C0115,C0116,R0902,W0201
+# pylint: disable=C0103,C0114,C0115,C0116,R0902,R0914,R0915,W0201
 
 import dataclasses
-import time
 import pprint
-
-from enum import Enum
-
 import sys
-import cv2
-import libcamera
-import numpy as np
-import ntcore
-import robotpy_apriltag
+import time
+from enum import Enum
+from typing import Any, cast
 
+import cv2
+import ntcore
+import numpy as np
+import robotpy_apriltag
 from cscore import CameraServer
-from picamera2 import Picamera2
+from cv2.typing import MatLike
+from numpy.typing import NDArray
+from picamera2 import CompletedRequest, Picamera2  # type: ignore
+from robotpy_apriltag import AprilTagDetection
 from wpimath.geometry import Transform3d
 from wpiutil import wpistruct
 
+Mat = NDArray[np.uint8]
 
-@wpistruct.make_wpistruct
+
+@wpistruct.make_wpistruct  # type:ignore
 @dataclasses.dataclass
 class Blip24:
     id: int
@@ -41,16 +44,17 @@ class Camera(Enum):
     UNKNOWN = None
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: object) -> "Camera":
         return Camera.UNKNOWN
 
 
 class CameraData:
-    def __init__(self, id) -> None:
-        self.camera = Picamera2(id)
-        model = self.camera.camera_properties["Model"]
+    def __init__(self, camera_num: int) -> None:
+        self.camera = Picamera2(camera_num)
+        model: str = cast(str, self.camera.camera_properties["Model"])  # type: ignore
         print("\nMODEL " + model)
-        self.id = id
+        self.id = camera_num
+        self.fps: float = 0
 
         if model == "imx708_wide":
             print("V3 Wide Camera")
@@ -83,49 +87,58 @@ class CameraData:
             self.width = 100
             self.height = 100
 
-        camera_config = self.camera.create_still_configuration(
-            # 2 buffers => low latency (32-48 ms), low fps (15-20)
-            # 5 buffers => mid latency (40-55 ms), high fps (22-28)
-            # 3 buffers => high latency (50-70 ms), mid fps (20-23)
-            # robot goes at 50 fps, so roughly a frame every other loop
-            # fps doesn't matter much, so minimize latency
-            buffer_count=5,
-            main={
-                "format": "YUV420",
-                "size": (fullwidth, fullheight),
-            },
-            lores={"format": "YUV420", "size": (self.width, self.height)},
-            controls={
-                # these manual controls are useful sometimes but turn them off for now
-                # because auto mode seems fine
-                # fast shutter means more gain
-                # "AnalogueGain": 8.0,
-                # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
-                # 3/23/24, reduced to 2ms, even less blur.
-                "ExposureTime": 300,
-                "AnalogueGain": 8,
-                # "AeEnable": True,
-                # limit auto: go as fast as possible but no slower than 30fps
-                # without a duration limit, we slow down in the dark, which is fine
-                # "FrameDurationLimits": (5000, 33333),  # 41 fps
-                # noise reduction takes time, don't need it.
-                "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-                # "ScalerCrop":(0,0,width/2,height/2),
-            },
+        camera_config: dict[str, Any] = (
+            self.camera.create_still_configuration(  # type:ignore
+                # 2 buffers => low latency (32-48 ms), low fps (15-20)
+                # 5 buffers => mid latency (40-55 ms), high fps (22-28)
+                # 3 buffers => high latency (50-70 ms), mid fps (20-23)
+                # robot goes at 50 fps, so roughly a frame every other loop
+                # fps doesn't matter much, so minimize latency
+                buffer_count=5,
+                main={
+                    "format": "YUV420",
+                    "size": (fullwidth, fullheight),
+                },
+                lores={"format": "YUV420", "size": (self.width, self.height)},
+                controls={
+                    # these manual controls are useful sometimes but turn them off for now
+                    # because auto mode seems fine
+                    # fast shutter means more gain
+                    # "AnalogueGain": 8.0,
+                    # try faster shutter to reduce blur.  with 3ms, 3 rad/s seems ok.
+                    # 3/23/24, reduced to 2ms, even less blur.
+                    "ExposureTime": 300,
+                    "AnalogueGain": 8,
+                    # "AeEnable": True,
+                    # limit auto: go as fast as possible but no slower than 30fps
+                    # without a duration limit, we slow down in the dark, which is fine
+                    # "FrameDurationLimits": (5000, 33333),  # 41 fps
+                    # noise reduction takes time, don't need it.
+                    "NoiseReductionMode": 0,  # libcamera.controls.draft.NoiseReductionModeEnum.Off,
+                    # "ScalerCrop":(0,0,width/2,height/2),
+                },
+            )
         )
         print("SENSOR MODES AVAILABLE")
-        pprint.pprint(self.camera.sensor_modes)
+        pprint.pprint(self.camera.sensor_modes)  # type:ignore
         # if identity == Camera.FRONT:
-        #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
+        # see libcamera/src/libcamera/transform.cpp
+        #     camera_config["transform"] = 3
 
         print("\nREQUESTED CONFIG")
         print(camera_config)
-        self.camera.align_configuration(camera_config)
+        self.camera.align_configuration(camera_config)  # type:ignore
         print("\nALIGNED CONFIG")
         print(camera_config)
-        self.camera.configure(camera_config)
+        self.camera.configure(camera_config)  # type:ignore
         print("\nCONTROLS")
-        print(self.camera.camera_controls)
+        print(self.camera.camera_controls)  # type:ignore
+        fx: int
+        fy: int
+        cx: int
+        cy: int
+        k1: float
+        k2: float
         if model == "imx708_wide":
             print("V3 WIDE CAMERA")
             fx = 498
@@ -158,7 +171,9 @@ class CameraData:
         p2 = 0
         self.mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
         self.dist = np.array([[k1, k2, p1, p2]])
-        self.output_stream = CameraServer.putVideo(str(id), self.width, self.height)
+        self.output_stream = CameraServer.putVideo(
+            str(camera_num), self.width, self.height
+        )
         self.estimator = robotpy_apriltag.AprilTagPoseEstimator(
             robotpy_apriltag.AprilTagPoseEstimator.Config(
                 tag_size,
@@ -168,7 +183,7 @@ class CameraData:
                 cy,
             )
         )
-        self.camera.start()
+        self.camera.start()  # type: ignore
         self.frame_time = time.time()
 
     def setFPSPublisher(self, FPSPublisher: ntcore.DoublePublisher) -> None:
@@ -183,7 +198,7 @@ class TagFinder:
         # the cpu serial number
         self.serial = serial
         self.initialize_nt(camList)
-        self.blips = []
+        self.blips: list[Blip24] = []
         self.at_detector = robotpy_apriltag.AprilTagDetector()
 
         config = self.at_detector.Config()
@@ -191,7 +206,7 @@ class TagFinder:
         self.at_detector.setConfig(config)
         self.at_detector.addFamily("tag36h11")
 
-    def analyze(self, request, camera): list[CameraData] -> None:
+    def analyze(self, request: CompletedRequest, camera: CameraData) -> None:
         # potentialTags = self.estimatedTagPose.get()
         # potentialArray = []
         # z = []
@@ -218,8 +233,8 @@ class TagFinder:
         # print(point2D[0][0])
         # z.append(translation.Z())
         # potentialArray.append(point2D[0][0])
-        buffer = request.make_buffer("lores")
-        metadata = request.get_metadata()
+        buffer: NDArray[np.uint8] = request.make_buffer("lores")  # type: ignore
+        metadata: dict[str, Any] = request.get_metadata()
 
         y_len = camera.width * camera.height
 
@@ -251,7 +266,7 @@ class TagFinder:
 
         img = cv2.undistort(img, camera.mtx, camera.dist)
 
-        result = self.at_detector.detect(img)
+        result = self.at_detector.detect(img) # type:ignore
 
         for result_item in result:
             if result_item.getHamming() > 0:
@@ -295,9 +310,11 @@ class TagFinder:
         # for now put big images
         # TODO: turn this off for prod!!
         img_output = cv2.resize(img, (416, 308))
-        camera.output_stream.putFrame(img_output)
+        camera.output_stream.putFrame(img_output)  # type:ignore
 
-    def draw_result(self, image, result_item, pose: Transform3d) -> None:
+    def draw_result(
+        self, image: MatLike, result_item: AprilTagDetection, pose: Transform3d
+    ) -> None:
         color = (255, 255, 255)
 
         # Draw lines around the tag
@@ -314,21 +331,20 @@ class TagFinder:
         self.draw_text(image, f"id {tag_id}", (c_x, c_y))
 
         # type the translation into the image, in WPI coords (x-forward)
-        if pose is not None:
-            t = pose.translation()
-            self.draw_text(
-                image,
-                f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
-                (c_x - 50, c_y + 40),
-            )
+        t = pose.translation()
+        self.draw_text(
+            image,
+            f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
+            (c_x - 50, c_y + 40),
+        )
 
     # these are white with black outline
-    def draw_text(self, image, msg: str, loc) -> None:
+    def draw_text(self, image: MatLike, msg: str, loc: tuple[int, int]) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-    def accept(self, estimatedTagPose):
-        print("ay" + str(estimatedTagPose.readQueue()))
+    # def accept(self, estimatedTagPose) -> None:
+    #     print("ay" + str(estimatedTagPose.readQueue()))
 
     def initialize_nt(self, camList: list[CameraData]) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
@@ -364,7 +380,7 @@ class TagFinder:
         ).subscribe([], ntcore.PubSubOptions())
 
 
-def getserial():
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
@@ -374,12 +390,12 @@ def getserial():
 
 def main() -> None:
     print("main")
-    print(Picamera2.global_camera_info())
+    print(str(Picamera2.global_camera_info()))  # type: ignore
     camList: list[CameraData] = []
-    if len(Picamera2.global_camera_info()) == 0:
+    if len(Picamera2.global_camera_info()) == 0:  # type: ignore
         print("NO CAMERAS DETECTED, PLEASE TURN OFF PI AND CHECK CAMERA PORT(S)")
-    for cameraData in Picamera2.global_camera_info():
-        camera = CameraData(cameraData["Num"])
+    for cameraData in Picamera2.global_camera_info():  # type:ignore
+        camera = CameraData(cast(int, cameraData["Num"]))
         camList.append(camera)
     serial: str = getserial()
     print(serial)
@@ -388,7 +404,7 @@ def main() -> None:
     try:
         while True:
             for camera in camList:
-                request = camera.camera.capture_request()
+                request: CompletedRequest = camera.camera.capture_request()  # type: ignore
                 try:
                     output.analyze(request, camera)
                 finally:

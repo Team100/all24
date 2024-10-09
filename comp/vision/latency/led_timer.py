@@ -1,7 +1,3 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=missing-class-docstring
-
 """
 led-timer.py
 
@@ -14,18 +10,21 @@ click "Writable" at the top, choose "Uploaded Python File," choose this
 file and click "Upload and Save."
 """
 
-import time
+# pylint: disable=C0115,C0116,E0401,E1101,R0903
+
+# import time
+from typing import Any
+
 import numpy as np
-import libcamera
-from RPi import GPIO
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
-from picamera2 import MappedArray
-from picamera2 import Picamera2
+from numpy.typing import NDArray
+from picamera2 import CompletedRequest, Picamera2  # type: ignore
+from RPi import GPIO  # type: ignore
 
 
 class LEDFinder:
-    def __init__(self, width, height) -> None:
+    def __init__(self, width: int, height: int) -> None:
         self.width = width
         self.height = height
 
@@ -49,21 +48,14 @@ class LEDFinder:
             self.height / 2,
         ]
 
-    # the callback blocks the camera thread, so don't do that.
-    #    def pre_callback(self, request):
-    #        with MappedArray(request, "lores") as mapped_array:
-    #            self.analyze(mapped_array.array)
-
-    # def analyze(self, buffer):
-    def analyze(self, request) -> None:
-        buffer = request.make_buffer("lores")
-        #        buffer = request.make_buffer("main")
-        metadata = request.get_metadata()
+    def analyze(self, request: CompletedRequest) -> None:
+        buffer: NDArray[np.uint8] = request.make_buffer("lores")  # type: ignore
+        # metadata: dict[str, Any] = request.get_metadata()
         # print(metadata)
         # sensor timestamp is the boottime when the first byte was received from the sensor
-        sensor_timestamp = metadata["SensorTimestamp"]
-        system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
-        time_delta_ns = system_time_ns - sensor_timestamp
+        # sensor_timestamp = metadata["SensorTimestamp"]
+        # system_time_ns = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+        # time_delta_ns = system_time_ns - sensor_timestamp
         # print(sensor_timestamp, system_time_ns, time_delta_ns//1000000) # ms
         y_len = self.width * self.height
         # truncate, ignore chrominance
@@ -84,10 +76,10 @@ class LEDFinder:
         # print("MIN", np.amin(img), "MAX", np.amax(img))
 
         # not instant, ~300us
-        led_on = np.amax(img) > 200
+        led_on: bool = np.amax(img) > 200  # type: ignore
         self.vision_nt_led.set(led_on)
 
-        self.output_stream.putFrame(img)
+        self.output_stream.putFrame(img)  # type: ignore
 
         # print(led_on)
         if led_on:
@@ -139,7 +131,7 @@ def main() -> None:
     #     buffer_count=4,
     #     encode="lores",
     # use single-frame
-    camera_config = camera.create_still_configuration(
+    camera_config: dict[str, Any] = camera.create_still_configuration(  # type: ignore
         # one buffer to write, one to read, one in between so we don't have to wait
         buffer_count=6,
         main={
@@ -156,16 +148,16 @@ def main() -> None:
             # "FrameDurationLimits": (100, 33333),
             "FrameDurationLimits": (24000, 33333),  # 41 fps
             # noise reduction takes time
-            "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            "NoiseReductionMode": 0,  # libcamera.controls.draft.NoiseReductionModeEnum.Off,
         },
     )
     print("REQUESTED")
-    print(camera_config)
-    camera.align_configuration(camera_config)
+    print(camera_config)  # type: ignore
+    camera.align_configuration(camera_config)  # type: ignore
     print("ALIGNED")
-    print(camera_config)
-    camera.configure(camera_config)
-    print(camera.camera_controls)
+    print(camera_config)  # type: ignore
+    camera.configure(camera_config)  # type: ignore
+    print(camera.camera_controls)  # type: ignore
 
     # Roborio IP: 10.1.0.2
     # Pi IP: 10.1.0.21
@@ -173,11 +165,11 @@ def main() -> None:
     output = LEDFinder(width, height)
     # the callback blocks the camera thread, so don't do that.
     # camera.pre_callback = output.pre_callback
-    camera.start()
+    camera.start()  # type: ignore
     try:
         while True:
             # the most recent frame, maybe from the past
-            request = camera.capture_request()
+            request: CompletedRequest = camera.capture_request()  # type: ignore
             try:
                 output.analyze(request)
             finally:

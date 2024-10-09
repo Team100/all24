@@ -1,23 +1,31 @@
-# pylint: disable=C0103,C0114,C0115,C0116,R0902,W0201
+# pylint: disable=C0103,C0114,C0115,C0116,E1101,R0902,R0914,W0201
 
 import dataclasses
 import pprint
 import sys
 import time
+from contextlib import AbstractContextManager
 from enum import Enum
+from mmap import mmap
+from typing import Any, cast
 
 import cv2
 import ntcore
 import numpy as np
 import robotpy_apriltag
 from cscore import CameraServer
-from picamera2 import Picamera2
-from picamera2.request import _MappedBuffer
+from cv2.typing import MatLike
+from numpy.typing import NDArray
+from picamera2 import CompletedRequest, Picamera2  # type: ignore
+from picamera2.request import _MappedBuffer  # type: ignore
+from robotpy_apriltag import AprilTagDetection
 from wpimath.geometry import Transform3d
 from wpiutil import wpistruct
 
+Mat = NDArray[np.uint8]
 
-@wpistruct.make_wpistruct
+
+@wpistruct.make_wpistruct  # type: ignore
 @dataclasses.dataclass
 class Blip24:
     id: int
@@ -39,7 +47,7 @@ class Camera(Enum):
     UNKNOWN = None
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: object) -> "Camera":
         return Camera.UNKNOWN
 
 
@@ -113,7 +121,7 @@ class TagFinder:
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
-    def analyze(self, metadata, buffer) -> None:
+    def analyze(self, metadata: dict[str, Any], buffer: mmap) -> None:
         # how old is the frame when we receive it?
         received_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
 
@@ -142,14 +150,14 @@ class TagFinder:
 
         detect_time = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
 
-        blips = []
+        blips: list[Blip24] = []
         for result_item in result:
             if result_item.getHamming() > 0:
                 continue
 
             # UNDISTORT EACH ITEM
             # undistortPoints is at least 10X faster than undistort on the whole image.
-            corners = result_item.getCorners(np.zeros(8))
+            corners = result_item.getCorners((0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
             # undistortPoints wants [[x0,y0],[x1,y1],...]
             pairs = np.reshape(corners, [4, 2])
             pairs = cv2.undistortImagePoints(pairs, self.mtx, self.dist)
@@ -171,7 +179,7 @@ class TagFinder:
         # total_et = current_time - self.frame_time
         self.frame_time = current_time
 
-        sensor_timestamp = metadata["SensorTimestamp"]
+        sensor_timestamp = cast(int, metadata["SensorTimestamp"])
         image_age_ms = (received_time - sensor_timestamp) // 1000000
         undistort_time_ms = (undistort_time - received_time) // 1000000
         detect_time_ms = (detect_time - undistort_time) // 1000000
@@ -205,9 +213,11 @@ class TagFinder:
         # for now put big images
         # TODO: turn this off for prod!!
         img_output = cv2.resize(img, (416, 308))
-        self.output_stream.putFrame(img_output)
+        self.output_stream.putFrame(img_output)  # type: ignore
 
-    def draw_result(self, image, result_item, pose: Transform3d) -> None:
+    def draw_result(
+        self, image: MatLike, result_item: AprilTagDetection, pose: Transform3d
+    ) -> None:
         color = (255, 255, 255)
 
         # Draw lines around the tag
@@ -224,20 +234,19 @@ class TagFinder:
         self.draw_text(image, f"id {tag_id}", (c_x, c_y))
 
         # type the translation into the image, in WPI coords (x-forward)
-        if pose is not None:
-            t = pose.translation()
-            self.draw_text(
-                image,
-                f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
-                (c_x - 50, c_y + 40),
-            )
+        t = pose.translation()
+        self.draw_text(
+            image,
+            f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
+            (c_x - 50, c_y + 40),
+        )
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc) -> None:
+    def draw_text(self, image: MatLike, msg: str, loc: tuple[int, int]) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-    def log_capture_time(self, ms) -> None:
+    def log_capture_time(self, ms: float) -> None:
         self.vision_capture_time_ms.set(ms)
 
     def initialize_nt(self) -> None:
@@ -273,7 +282,7 @@ class TagFinder:
         ).publish()
 
 
-def getserial()  -> str:
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
@@ -285,7 +294,7 @@ def main() -> None:
 
     camera = Picamera2()
 
-    model = camera.camera_properties["Model"]
+    model: str = cast(str, camera.camera_properties["Model"])  # type: ignore
     print("\nMODEL " + model)
 
     if model == "imx708_wide":
@@ -319,7 +328,7 @@ def main() -> None:
         width = 100
         height = 100
 
-    camera_config = camera.create_still_configuration(
+    camera_config: dict[str, Any] = camera.create_still_configuration(  # type: ignore
         # more buffers seem to make the pipeline a little smoother
         buffer_count=5,
         # hang on to one camera buffer (zero copy) and leave one
@@ -343,43 +352,46 @@ def main() -> None:
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
-            # "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
-            "NoiseReductionMode": 0,
+            "NoiseReductionMode": 0,  # libcamera.controls.draft.NoiseReductionModeEnum.Off,
             # "ScalerCrop":(0,0,width/2,height/2),
         },
     )
     print("SENSOR MODES AVAILABLE")
-    pprint.pprint(camera.sensor_modes)
+    pprint.pprint(camera.sensor_modes)  # type: ignore
     serial: str = getserial()
-    identity = Camera(serial)
+    # identity = Camera(serial)
     # if identity == Camera.FRONT:
-    #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
+    # see libcamera/src/libcamera/transform.cpp
+    #     camera_config["transform"] = 3
 
     print("\nREQUESTED CONFIG")
-    print(camera_config)
-    camera.align_configuration(camera_config)
+    print(str(camera_config))
+    camera.align_configuration(camera_config)  # type: ignore
     print("\nALIGNED CONFIG")
-    print(camera_config)
-    camera.configure(camera_config)
+    print(str(camera_config))
+    camera.configure(camera_config)  # type: ignore
     print("\nCONTROLS")
-    print(camera.camera_controls)
+    print(str(camera.camera_controls))  # type: ignore
     print(serial)
     output = TagFinder(serial, width, height, model)
 
-    camera.start()
+    camera.start()  # type: ignore
     try:
         while True:
             # the most recent completed frame, from the recent past
             capture_start = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
-            request = camera.capture_request()
+            request: CompletedRequest = camera.capture_request()  # type: ignore
             capture_end = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
             # capture time is how long we wait for the camera
             capture_time_ms = (capture_end - capture_start) // 1000000
             output.log_capture_time(capture_time_ms)
             try:
-                metadata = request.get_metadata()
+                metadata: dict[str, Any] = request.get_metadata()
                 # avoid copying the buffer
-                with _MappedBuffer(request, "lores") as buffer:
+                mapped_buffer: AbstractContextManager[mmap] = cast(
+                    AbstractContextManager[mmap], _MappedBuffer(request, "lores")
+                )
+                with mapped_buffer as buffer:
                     output.analyze(metadata, buffer)
             finally:
                 # the frame is owned by the camera so remember to release it

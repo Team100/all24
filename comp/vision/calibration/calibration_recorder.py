@@ -3,25 +3,24 @@
 This just takes frames in the same way as the prod detectors, and writes them to disk.
 """
 
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=import-error
+# pylint: disable=C0115,C0116,E1101,R0903
 
-import cv2
-import libcamera
-import numpy as np
-import ntcore
 import os
 import pprint
+from typing import Any, cast
 
+import cv2
+import ntcore
+import numpy as np
 from cscore import CameraServer
-from picamera2 import Picamera2
+from numpy.typing import NDArray
+from picamera2 import CompletedRequest, Picamera2  # type: ignore
+
 
 class TagFinder:
-    IMAGE_DIR = 'images'
+    IMAGE_DIR = "images"
 
-    def __init__(self, width, height) -> None:
+    def __init__(self, width: int, height: int) -> None:
         self.width = width
         self.height = height
 
@@ -36,9 +35,8 @@ class TagFinder:
         # to keep track of images to write
         self.img_ts_sec = 0
 
-    def analyze(self, request) -> None:
-        buffer = request.make_buffer("lores")
-        metadata = request.get_metadata()
+    def analyze(self, request: CompletedRequest) -> None:
+        buffer: NDArray[np.uint8] = request.make_buffer("lores")  # type: ignore
 
         y_len = self.width * self.height
 
@@ -55,10 +53,9 @@ class TagFinder:
         # TODO: probably remove this
         img = img[: self.height, : self.width]
 
-        now_us = ntcore._now() #pylint:disable=W0212
+        now_us = ntcore._now()  # pylint:disable=W0212
 
-
-        self.output_stream.putFrame(img)
+        self.output_stream.putFrame(img)  # type: ignore
 
         # Write some of the files for later analysis
         # To retrieve these files, use:
@@ -66,8 +63,8 @@ class TagFinder:
         # These will accumulate forever so remember to clean it out:
         # ssh pi@10.1.0.11 "rm images/img*"
         # return
-    
-        now_s = now_us // 1000000 # once per second
+
+        now_s = now_us // 1000000  # once per second
         if now_s > self.img_ts_sec:
             self.img_ts_sec = now_s
             filename = TagFinder.IMAGE_DIR + "/img" + str(now_s) + ".png"
@@ -79,12 +76,12 @@ def main() -> None:
     camera = Picamera2()
 
     print("SENSOR MODES AVAILABLE")
-    pprint.pprint(camera.sensor_modes)
+    pprint.pprint(camera.sensor_modes)  # type:ignore
 
-    model = camera.camera_properties['Model']
+    model: str = cast(str, camera.camera_properties["Model"])  # type: ignore
     print("MODEL: " + model)
 
-    if(model == "imx708_wide"):
+    if model == "imx708_wide":
         print("V3 Wide Camera")
         # full frame is 4608x2592; this is 2x2
         fullwidth = 2304
@@ -92,7 +89,7 @@ def main() -> None:
         # medium detection resolution, compromise speed vs range
         width = 1152
         height = 648
-    elif(model == "imx219"):
+    elif model == "imx219":
         print("V2 Camera")
         # full frame, 2x2, to set the detector mode to widest angle possible
         fullwidth = 1664  # slightly larger than the detector, to match stride
@@ -103,7 +100,7 @@ def main() -> None:
     elif model == "imx296":
         print("GS Camera")
         # full frame, 2x2, to set the detector mode to widest angle possible
-        fullwidth = 1408   # slightly larger than the detector, to match stride
+        fullwidth = 1408  # slightly larger than the detector, to match stride
         fullheight = 1088
         # medium detection resolution, compromise speed vs range
         width = 1408
@@ -115,9 +112,7 @@ def main() -> None:
         width = 100
         height = 100
 
-
-
-    camera_config = camera.create_still_configuration(
+    camera_config: dict[str, Any] = camera.create_still_configuration(  # type:ignore
         # 2 buffers => low latency (32-48 ms), low fps (15-20)
         # 5 buffers => mid latency (40-55 ms), high fps (22-28)
         # 3 buffers => high latency (50-70 ms), mid fps (20-23)
@@ -139,25 +134,25 @@ def main() -> None:
             # limit auto: go as fast as possible but no slower than 30fps
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
-            "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            "NoiseReductionMode": 0,  # libcamera.controls.draft.NoiseReductionModeEnum.Off,
         },
     )
 
     print("\nREQUESTED CONFIG")
-    print(camera_config)
-    camera.align_configuration(camera_config)
+    print(camera_config)  # type:ignore
+    camera.align_configuration(camera_config)  # type:ignore
     print("\nALIGNED CONFIG")
-    print(camera_config)
-    camera.configure(camera_config)
+    print(camera_config)  # type:ignore
+    camera.configure(camera_config)  # type:ignore
     print("\nCONTROLS")
-    print(camera.camera_controls)
+    print(camera.camera_controls)  # type:ignore
 
     output = TagFinder(width, height)
-    camera.start()
+    camera.start()  # type:ignore
     try:
         while True:
             # the most recent completed frame, from the recent past
-            request = camera.capture_request()
+            request: CompletedRequest = camera.capture_request()  # type:ignore
             try:
                 output.analyze(request)
             finally:
