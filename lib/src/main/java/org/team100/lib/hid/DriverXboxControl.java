@@ -68,6 +68,11 @@ public class DriverXboxControl implements DriverControl {
         return m_controller.getName();
     }
 
+    @Override
+    public double yAxis() {
+        return -1.0 * m_controller.getLeftY();
+    }
+
     /**
      * Applies expo to the magnitude of the cartesian input, since these are "round"
      * joysticks.

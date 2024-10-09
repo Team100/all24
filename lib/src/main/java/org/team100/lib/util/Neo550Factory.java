@@ -71,10 +71,13 @@ public class Neo550Factory {
             int currentLimit,
             int canID,
             double gearRatio,
-            MotorPhase motorPhase) {
+            MotorPhase motorPhase,
+            double p,
+            double gravityNm,
+            double offsetRad) {
         LoggerFactory moduleLogger = parent.child(name);
         Neo550CANSparkMotor driveMotor = new Neo550CANSparkMotor(moduleLogger, canID, motorPhase, currentLimit,
-                Feedforward100.makeNeo550(), new PIDConstants(0.0001));
+                Feedforward100.makeNeo550(), new PIDConstants(p));
         RotaryMechanism rotaryMechanism = new RotaryMechanism(moduleLogger, driveMotor,
                 new CANSparkEncoder(moduleLogger, driveMotor), 1);
         return new OutboardGravityServo(
@@ -85,8 +88,8 @@ public class Neo550Factory {
                                 moduleLogger,
                                 new SimulatedRotaryPositionSensor(moduleLogger, rotaryMechanism),
                                 rotaryMechanism)),
-                1,
-                1);
+                gravityNm,
+                offsetRad);
     }
 
     public static LinearVelocityServo getNEO550VelocityServo(

@@ -20,6 +20,14 @@ public interface AngularPositionServo extends Glassy {
 
     void setProfile(Profile100 profile);
 
+    /**
+     * Resets the encoder position, is very slow, so 
+     * only do this on startup
+     * 
+     * @param positionRad The position of the encoder
+     */
+    public void setEncoderPosition(double positionRad);
+
     void setTorqueLimit(double torqueNm);
 
     /**
