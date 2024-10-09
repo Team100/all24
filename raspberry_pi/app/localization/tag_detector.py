@@ -1,22 +1,21 @@
 """ This is a wrapper for the AprilTag detector. """
 
-# pylint: disable=no-name-in-module, protected-access
+# pylint: disable=E0611,R0902,R0913
 
 from mmap import mmap
 from typing import Any
 
-import numpy as np
-from numpy.typing import NDArray
-
 import ntcore
-
-from cv2 import undistortImagePoints
-from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
+import numpy as np
 from app.camera.camera_protocol import Camera, Request
-from app.dashboard.display import Display
 from app.config.identity import Identity
+from app.dashboard.display import Display
 from app.localization.network import Blip24, Network
 from app.util.timer import Timer
+from cv2 import undistortImagePoints
+from numpy.typing import NDArray
+from robotpy_apriltag import (AprilTagDetection, AprilTagDetector,
+                              AprilTagPoseEstimator)
 
 Mat = NDArray[np.uint8]
 

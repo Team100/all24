@@ -1,23 +1,26 @@
+# pylint: disable=C0103,C0114,C0115,C0116,R0902,R0915
+
+
 import dataclasses
+import math
+import sys
 import time
 from enum import Enum
 
+import cscore
 import cv2
 import libcamera
+import ntcore as nt
 import numpy as np
-import sys
-
-import cscore
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
-import ntcore as nt
-
 from picamera2 import Picamera2
 from wpimath.geometry import Rotation3d
-import math
+
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
+
     # TODO get correct serial numbers for Delta
     # A = "10000000caeaae82"  # "BETA FRONT"
     # B = "1000000013c9c96c"  # "BETA BACK"
@@ -32,6 +35,7 @@ class Camera(Enum):
     @classmethod
     def _missing_(cls, value):
         return Camera.UNKNOWN
+
 
 class CameraData:
     def __init__(self, id):
@@ -58,7 +62,7 @@ class CameraData:
         elif model == "imx296":
             print("GS Camera")
             # full frame, 2x2, to set the detector mode to widest angle possible
-            fullwidth = 1408   # slightly larger than the detector, to match stride
+            fullwidth = 1408  # slightly larger than the detector, to match stride
             fullheight = 1088
             # medium detection resolution, compromise speed vs range
             self.width = 1408
@@ -121,7 +125,7 @@ class CameraData:
             fy = 1680
             cx = 728
             cy = 544
-            k1 = 0 
+            k1 = 0
             k2 = 0
         else:
             print("UNKNOWN CAMERA MODEL")
@@ -134,20 +138,21 @@ class CameraData:
         self.fps = 0
         self.camera.start()
         self.frame_time = time.time()
-    
+
     def setFPSPublisher(self, FPSPublisher):
         self.FPSPublisher = FPSPublisher
 
     def setLatencyPublisher(self, LatencyPublisher):
         self.LatencyPublisher = LatencyPublisher
 
+
 class GamePieceFinder:
     def __init__(self, serial, camList):
         self.serial = serial
         self.objects = []
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = (0,150, 50)
-        self.object_lower2 = (178,150, 50)
+        self.object_lower = (0, 150, 50)
+        self.object_lower2 = (178, 150, 50)
         self.object_higher = (8, 255, 255)
         self.object_higher2 = (180, 255, 255)
         self.frame_time = 0
@@ -165,14 +170,18 @@ class GamePieceFinder:
         topic_name = "noteVision/" + self.serial
         for camera in camList:
             camera.setFPSPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/fps").publish()
+                self.inst.getDoubleTopic(
+                    topic_name + "/" + str(camera.id) + "/fps"
+                ).publish()
             )
             camera.setLatencyPublisher(
-                self.inst.getDoubleTopic(topic_name + "/" + str(camera.id) + "/latency").publish()
+                self.inst.getDoubleTopic(
+                    topic_name + "/" + str(camera.id) + "/latency"
+                ).publish()
             )
         # work around https://github.com/robotpy/mostrobotpy/issues/60
         self.inst.getStructTopic("bugfix", Rotation3d).publish().set(
-            Rotation3d(0,0,0)
+            Rotation3d(0, 0, 0)
         )
 
         self.vision_nt_struct = self.inst.getStructArrayTopic(
@@ -186,9 +195,9 @@ class GamePieceFinder:
         serial = getserial()
         identity = Camera(serial)
         if identity == Camera.GAME_PIECE:
-            img_bgr = img_bgr[65:583,:,:]
+            img_bgr = img_bgr[65:583, :, :]
 
-        img_bgr = cv2.undistort(img_bgr, camera.mtx,camera.dist)
+        img_bgr = cv2.undistort(img_bgr, camera.mtx, camera.dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
 
@@ -216,7 +225,7 @@ class GamePieceFinder:
             if cnt_width > width / 2 or cnt_height > height / 2:
                 continue
 
-            if (cnt_height < 20 or cnt_width < 20) and cnt_width/cnt_height < 3:
+            if (cnt_height < 20 or cnt_width < 20) and cnt_width / cnt_height < 3:
                 continue
 
             mmnts = cv2.moments(c)
@@ -228,20 +237,23 @@ class GamePieceFinder:
 
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
-            
-            yNormalized = (height/2-cY)/camera.mtx[1,1]
-            xNormalized = (width/2-cX)/camera.mtx[0,0]
-            
+
+            yNormalized = (height / 2 - cY) / camera.mtx[1, 1]
+            xNormalized = (width / 2 - cX) / camera.mtx[0, 0]
+
             # pitchRad = math.atan(yNormalized)
             # yawRad = math.atan(zNormalized)
             # Puts up angle to the target from the POV of the camera
             # these are not extrinsic euler angles; this is wrong.
             # rotation = Rotation3d(0, pitchRad, yawRad)
             # the correct rotation is one that matches the normalized (x,y) coordinates
-            rotation = Rotation3d(initial=np.array([1, 0, 0]), final=np.array([1, xNormalized, yNormalized]))
+            rotation = Rotation3d(
+                initial=np.array([1, 0, 0]),
+                final=np.array([1, xNormalized, yNormalized]),
+            )
             self.objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
-        img_output = cv2.resize(img_bgr, (269,162)) 
+        img_output = cv2.resize(img_bgr, (269, 162))
         camera.output_stream.putFrame(img_range)
 
     def draw_result(self, img, cnt, cX, cY):
@@ -281,11 +293,12 @@ def getserial():
                 return line[10:26]
     return ""
 
+
 def main():
     print("main")
     print(Picamera2.global_camera_info())
     camList = []
-    if (len(Picamera2.global_camera_info()) == 0):
+    if len(Picamera2.global_camera_info()) == 0:
         print("NO CAMERAS DETECTED, PLEASE TURN OFF PI AND CHECK CAMERA PORT(S)")
     for cameraData in Picamera2.global_camera_info():
         camera = CameraData(cameraData["Num"])
@@ -306,4 +319,6 @@ def main():
     finally:
         for camera in camList:
             camera.camera.stop()
+
+
 main()

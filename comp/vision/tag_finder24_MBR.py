@@ -6,18 +6,16 @@
 # type: ignore
 
 import dataclasses
-import time
 import pprint
 import sys
+import time
 from enum import Enum
 
 import cv2
 import libcamera
-import numpy as np
 import ntcore
-
+import numpy as np
 import robotpy_apriltag
-
 from cscore import CameraServer
 from picamera2 import Picamera2
 from picamera2.request import _MappedBuffer

@@ -1,19 +1,18 @@
 import dataclasses
+import math
+import sys
 import time
 from enum import Enum
 
 import cv2
 import libcamera
+import ntcore as nt
 import numpy as np
-import sys
-
 from cscore import CameraServer
 from ntcore import NetworkTableInstance
-import ntcore as nt
-
 from picamera2 import Picamera2
 from wpimath.geometry import Rotation3d
-import math
+
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
