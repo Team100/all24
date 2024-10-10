@@ -28,10 +28,10 @@ public class TurretCollection {
     ) {
         LoggerFactory collectionLogger = parent.child(kTurret);
         switch (Identity.instance) {
-            case FRC_100_ea4:
-            //TODO get real identity, canID, maxVel, and maxAccel, also motorPhase may be wrong
-            OutboardAngularPositionServo angularPositionServo = createAngularPositionServo(kTurret, collectionLogger,40,40, 1, 14, MotorPhase.REVERSE);
-            angularPositionServo.setProfile(new TrapezoidProfile100(1, 1, 0.01));
+            case SWERVE_TWO:
+            //TODO get maxVel, and maxAccel, also motorPhase may be wrong
+            OutboardAngularPositionServo angularPositionServo = createAngularPositionServo(kTurret, collectionLogger,40,40, 1, 14, MotorPhase.FORWARD);
+            angularPositionServo.setProfile(new TrapezoidProfile100(120, 200, 0.01));
             return new TurretCollection(angularPositionServo);
             case BLANK:
             default:
