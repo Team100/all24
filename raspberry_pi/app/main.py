@@ -11,22 +11,26 @@ use the script called "runapp.py" in the raspberry_pi directory
 # pylint: disable=R0914
 
 from app.camera.camera_factory import CameraFactory
-from app.camera.camera_protocol import Camera, Size
+from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
 from app.dashboard.display import Display
 from app.localization.network import Network
 from app.localization.tag_detector import TagDetector
-from app.sensors.gyro_protocol import Gyro
 from app.sensors.gyro_factory import GyroFactory
+from app.sensors.gyro_protocol import Gyro
 from app.util.timer import Timer
 
 
+# TODO: get rid of the parallel-lists stuff here.
 def main() -> None:
     print("main")
     identity: Identity = Identity.get()
     cameras: list[Camera] = CameraFactory.get(identity)
+    if not cameras:
+        print("No Cameras!")
+        return
     num = 0
-    tag_detectors = []
+    tag_detectors: list[TagDetector] = []
     for camera in cameras:
         size: Size = camera.get_size()
         display: Display = Display(size.width, size.height, num)
@@ -46,7 +50,7 @@ def main() -> None:
         while True:
             # the most recent completed frame, from the recent past
             capture_start: int = Timer.time_ns()
-            requests = []
+            requests: list[Request] = []
             for camera in cameras:
                 requests.append(camera.capture_request())
             capture_end: int = Timer.time_ns()

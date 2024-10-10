@@ -1,21 +1,22 @@
 """ This is a wrapper for the AprilTag detector. """
 
-# pylint: disable=E0611,R0902,R0913,R0914
+# pylint: disable=E0611,R0902,R0913,R0914,W0212
 
 from mmap import mmap
 from typing import Any
 
 import ntcore
 import numpy as np
+from cv2 import undistortImagePoints
+from numpy.typing import NDArray
+from robotpy_apriltag import (AprilTagDetection, AprilTagDetector,
+                              AprilTagPoseEstimator)
+
 from app.camera.camera_protocol import Camera, Request
 from app.config.identity import Identity
 from app.dashboard.display import Display
 from app.localization.network import Blip24, Network
 from app.util.timer import Timer
-from cv2 import undistortImagePoints
-from numpy.typing import NDArray
-from robotpy_apriltag import (AprilTagDetection, AprilTagDetector,
-                              AprilTagPoseEstimator)
 
 Mat = NDArray[np.uint8]
 
@@ -90,7 +91,7 @@ class TagDetector:
         result: list[AprilTagDetection] = self.at_detector.detect(img.data)
         detect_time: int = Timer.time_ns()
 
-        blips = []
+        blips: list[Blip24] = []
         result_item: AprilTagDetection
         for result_item in result:
             if result_item.getHamming() > 0:

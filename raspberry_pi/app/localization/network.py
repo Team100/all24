@@ -10,14 +10,14 @@ from wpiutil import wpistruct
 from app.config.identity import Identity
 
 
-@wpistruct.make_wpistruct
+@wpistruct.make_wpistruct #type:ignore
 @dataclasses.dataclass
 class Blip24:
     """AprilTag target pose used in 2024"""
     id: int
     pose: Transform3d
 
-@wpistruct.make_wpistruct
+@wpistruct.make_wpistruct #type:ignore
 @dataclasses.dataclass
 class Blip25:
     """AprilTag target for 2025, includes pixel coordinates, for GTSAM."""
