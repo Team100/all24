@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 from robotpy_apriltag import (AprilTagDetection, AprilTagDetector,
                               AprilTagPoseEstimator)
 
-from app.camera.camera_protocol import Camera, Request
+from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
 from app.dashboard.display import Display
 from app.localization.network import Blip24, Network
@@ -25,15 +25,15 @@ class TagDetector:
     def __init__(
         self,
         identity: Identity,
-        width: int,
-        height: int,
         cam: Camera,
         display: Display,
         network: Network,
     ) -> None:
         self.identity: Identity = identity
-        self.width: int = width
-        self.height: int = height
+        size: Size = cam.get_size()
+
+        self.width: int = size.width
+        self.height: int = size.height
         self.display: Display = display
         self.network: Network = network
 

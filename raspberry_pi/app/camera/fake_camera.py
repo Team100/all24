@@ -43,11 +43,12 @@ class FakeRequest(Request):
 
 
 class FakeCamera(Camera):
+    """Always returns the same image,
+    which is from https://berndpfrommer.github.io/tagslam_web/making_tags/"""
+
     def __init__(self) -> None:
-        # this image is from https://berndpfrommer.github.io/tagslam_web/making_tags/
         p = Path(__file__).with_name("tag_and_board.png")
         self.pathstr: str = str(p)
-        # print(f"Using fake camera with file {self.pathstr}")
 
     def capture_request(self) -> FakeRequest:
         return FakeRequest(self.pathstr)
@@ -60,6 +61,38 @@ class FakeCamera(Camera):
 
     def get_size(self) -> Size:
         return Size(fullwidth=1101, fullheight=619, width=1101, height=619)
+
+    def get_intrinsic(self) -> Mat:
+        return np.array(
+            [
+                [480, 0, 550],
+                [0, 480, 310],
+                [0, 0, 1],
+            ]
+        )
+
+    def get_dist(self) -> Mat:
+        return np.array([0, 0, 0, 0])
+
+
+class BlindCamera(Camera):
+    """Always returns the same image, a 100x100 white square."""
+
+    def __init__(self) -> None:
+        p = Path(__file__).with_name("white_square.png")
+        self.pathstr: str = str(p)
+
+    def capture_request(self) -> FakeRequest:
+        return FakeRequest(self.pathstr)
+
+    def start(self) -> None:
+        pass
+
+    def stop(self) -> None:
+        pass
+
+    def get_size(self) -> Size:
+        return Size(fullwidth=100, fullheight=100, width=100, height=100)
 
     def get_intrinsic(self) -> Mat:
         return np.array(

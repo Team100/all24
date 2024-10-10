@@ -55,7 +55,7 @@ class Model(Enum):
 
     @staticmethod
     def get(cam: Picamera2) -> "Model":
-        model_str: str = cam.camera_properties["Model"]
+        model_str: str = cam.camera_properties["Model"]  # type:ignore
         print(f"Camera model string: {model_str}")
         model: Model = Model(model_str)
         print(f"Camera model: {model.name}")
@@ -76,25 +76,25 @@ class RealCamera(Camera):
         self.mtx = RealCamera.__mtx_from_model(model)
         self.dist = RealCamera.__dist_from_model(model)
         print("SENSOR MODES AVAILABLE")
-        pprint(self.cam.sensor_modes)
+        pprint(self.cam.sensor_modes)  # type:ignore
         if identity == Identity.FLIPPED:
             # see libcamera/src/libcamera/transform.cpp
             self.camera_config["transform"] = 3
 
         print("\nREQUESTED CONFIG")
         print(self.camera_config)
-        self.cam.align_configuration(self.camera_config)
+        self.cam.align_configuration(self.camera_config)  # type:ignore
         print("\nALIGNED CONFIG")
         print(self.camera_config)
-        self.cam.configure(self.camera_config)
+        self.cam.configure(self.camera_config)  # type:ignore
         print("\nCONTROLS")
-        print(self.cam.camera_controls)
+        print(self.cam.camera_controls)  # type:ignore
 
     def capture_request(self) -> Request:
-        return RealRequest(self.cam.capture_request())
+        return RealRequest(self.cam.capture_request())  # type:ignore
 
     def start(self) -> None:
-        self.cam.start()
+        self.cam.start()  # type:ignore
 
     def stop(self) -> None:
         self.cam.stop()
@@ -126,7 +126,7 @@ class RealCamera(Camera):
 
     @staticmethod
     def __get_config(identity: Identity, cam: Picamera2, size: Size) -> dict[str, Any]:
-        camera_config: dict[str, Any] = cam.create_still_configuration(
+        camera_config: dict[str, Any] = cam.create_still_configuration(  # type:ignore
             # more buffers seem to make the pipeline a little smoother
             buffer_count=5,
             # hang on to one camera buffer (zero copy) and leave one

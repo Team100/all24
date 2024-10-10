@@ -13,7 +13,7 @@ use the script called "runapp.py" in the raspberry_pi directory
 from app.camera.camera_factory import CameraFactory
 from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
-from app.dashboard.display import Display
+from app.dashboard.real_display import RealDisplay
 from app.localization.network import Network
 from app.localization.tag_detector import TagDetector
 from app.sensors.gyro_factory import GyroFactory
@@ -33,11 +33,9 @@ def main() -> None:
     tag_detectors: list[TagDetector] = []
     for camera in cameras:
         size: Size = camera.get_size()
-        display: Display = Display(size.width, size.height, num)
+        display: RealDisplay = RealDisplay(size.width, size.height, num)
         network: Network = Network(identity, num)
-        tag_detectors.append(
-            TagDetector(identity, size.width, size.height, camera, display, network)
-        )
+        tag_detectors.append(TagDetector(identity, camera, display, network))
         num += 1
         # TODO: make network not just for cameras
     # gyronetwork: Network = Network(identity, "Gyro")

@@ -9,14 +9,14 @@ import numpy as np
 import cv2
 from wpimath.geometry import Rotation3d
 from app.camera.camera_protocol import Camera, Request
-from app.dashboard.display import Display
+from app.dashboard.real_display import RealDisplay
 from app.util.timer import Timer
 
 
 class NoteDetector:
-    def __init__(self, cam: Camera, display: Display) -> None:
+    def __init__(self, cam: Camera, display: RealDisplay) -> None:
         self.camera = cam
-        self.display: Display = display
+        self.display: RealDisplay = display
         self.frame_time = Timer.time_ns()
 
     def find_object(self, img_yuv: mmap) -> None:
