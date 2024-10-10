@@ -3,24 +3,24 @@
 
 # pylint: disable=C0415
 
-from app.config.identity import Identity
 from app.camera.camera_protocol import Camera
+from app.config.identity import Identity
+from app.localization.network import Network
 
 
 class CameraFactory:
     @staticmethod
-    def get(identity: Identity) -> list[Camera]:
+    def get(identity: Identity, camera_num: int, network: Network) -> Camera:
         try:
             # this will fail if we're not running on a Raspberry Pi.
             from app.camera.real_camera import RealCamera
 
-            num_cameras: int = CameraFactory.get_num_cameras(identity)
-            return [RealCamera(identity, x) for x in range(num_cameras)]
+            return RealCamera(identity, camera_num, network)
 
         except ImportError:
             from app.camera.fake_camera import FakeCamera
 
-            return [FakeCamera()]
+            return FakeCamera()
 
     @staticmethod
     def get_num_cameras(identity: Identity) -> int:
@@ -30,9 +30,10 @@ class CameraFactory:
                 | Identity.LEFTAMP
                 | Identity.SHOOTER
                 | Identity.GAME_PIECE
+                | Identity.UNKNOWN # will use FakeCamera
             ):
                 return 1
-            case Identity.DEV | Identity.FLIPPED | Identity.UNKNOWN:
+            case Identity.DEV | Identity.FLIPPED:
                 return 0
             case _:
                 raise ValueError(f"Unknown identity: {identity}")

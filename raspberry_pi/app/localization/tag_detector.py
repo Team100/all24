@@ -5,12 +5,10 @@
 from mmap import mmap
 from typing import Any
 
-import ntcore
 import numpy as np
 from cv2 import undistortImagePoints
 from numpy.typing import NDArray
-from robotpy_apriltag import (AprilTagDetection, AprilTagDetector,
-                              AprilTagPoseEstimator)
+from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
 
 from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
@@ -26,11 +24,19 @@ class TagDetector:
         self,
         identity: Identity,
         cam: Camera,
+        camera_num: int,
         display: Display,
         network: Network,
     ) -> None:
         self.identity: Identity = identity
         size: Size = cam.get_size()
+        self.camera_num = camera_num
+        path = "vision/" + identity.value + "/" + str(camera_num)
+        self._blips = network.get_blip_sender(path + "/blips")
+
+        self._total_time = network.get_double_sender(path + "/total_time_ms")
+        self._image_age = network.get_double_sender(path + "/image_age_ms")
+        self._detect_time = network.get_double_sender(path + "/detect_time_ms")
 
         self.width: int = size.width
         self.height: int = size.height
@@ -153,11 +159,10 @@ class TagDetector:
         delay_ns: int = Timer.time_ns() - sensor_midpoint_ns
         delay_us = delay_ns // 1000
 
-        self.network.vision_nt_struct.set(blips)
-        self.network.vision_capture_time_ms.set(ntcore._now() - delay_us)
-        self.network.vision_total_time_ms.set(total_time_ms)
-        self.network.vision_image_age_ms.set(image_age_ms)
-        self.network.vision_detect_time_ms.set(detect_time_ms)
+        self._blips.send(blips, delay_us)
+        self._total_time.send(total_time_ms, delay_us)
+        self._image_age.send(image_age_ms, delay_us)
+        self._detect_time.send(detect_time_ms, delay_us)
 
         # must flush!  otherwise 100ms update rate.
         self.network.flush()

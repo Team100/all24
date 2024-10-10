@@ -24,17 +24,18 @@ Mat = NDArray[np.uint8]
 
 class RealDisplay:
     def __init__(self, width: int, height: int, camera_num: int) -> None:
-        # print("width ", width)
-        # print("height ", height)
         if system() == "Windows":
-            # print("Windows")
+            print("Using MJpegServer for Windows")
             # on windows, cvsource breaks with cvnp contiguous-array error
-            self.stream = Stream("Processed", (width, height), quality=50, fps=30)
-            self.server = MjpegServer("localhost", 1181)
-            self.server.add_stream(self.stream)
-            self.server.start()
+            # i think (width,height) are optional, it will use frame shape.
+            # TODO: remove width,height
+            self._stream = Stream("Processed", (width, height), quality=50, fps=30)
+            self._server = MjpegServer("localhost", 1181)
+            self._server.add_stream(self._stream)
+            self._server.start()
         else:
-            self.cvsource = CameraServer.putVideo(str(camera_num), 416, 308)
+            print("Using CameraServer for Linux")
+            self._cvsource = CameraServer.putVideo(str(camera_num), 416, 308)
 
     def draw_result(
         self, image: Mat, result_item: AprilTagDetection, pose: Transform3d
@@ -55,13 +56,13 @@ class RealDisplay:
         self.draw_text(image, f"id {tag_id}", (c_x, c_y))
 
         # type the translation into the image, in WPI coords (x-forward)
-        if pose is not None:
-            t = pose.translation()
-            self.draw_text(
-                image,
-                f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
-                (c_x - 50, c_y + 40),
-            )
+
+        t = pose.translation()
+        self.draw_text(
+            image,
+            f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
+            (c_x - 50, c_y + 40),
+        )
 
     # these are white with black outline
     def draw_text(self, image: Mat, msg: str, loc: tuple[int, int]) -> None:
@@ -85,6 +86,6 @@ class RealDisplay:
         # TODO: turn this off for prod!!
         img_out = resize(img, (416, 308))
         if system() == "Windows":
-            self.stream.set_frame(img_out)  # type: ignore
+            self._stream.set_frame(img_out)  # type: ignore
         else:
-            self.cvsource.putFrame(img_out)  # type: ignore
+            self._cvsource.putFrame(img_out)  # type: ignore

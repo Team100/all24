@@ -3,19 +3,20 @@
 # pylint: disable=too-few-public-methods
 import math
 import time
-from app.sensors.gyro_protocol import Gyro
+
+from app.config.identity import Identity
 from app.localization.network import Network
+from app.sensors.gyro_protocol import Gyro
 
 
 class FakeGyro(Gyro):
-    def __init__(self, network: Network) -> None:
-        self.network = network
+    def __init__(self, identity: Identity, network: Network) -> None:
+        path = "gyro/" + identity.value
+        self._theta = network.get_double_sender(path + "/omega")
+        self._omega = network.get_double_sender(path + "/theta")
 
     def sample(self) -> None:
         # some fake data just to see if it moves
         t: float = time.time()
-        self.network.set_gyro_yaw(math.sin(t), 0)
-        self.network.set_gyro_rate(math.cos(t), 0)
-
-        # self.network.set_gyro_yaw(0, 0)
-        # self.network.set_gyro_rate(0, 0)
+        self._theta.send(math.sin(t), 0)
+        self._omega.send(math.cos(t), 0)

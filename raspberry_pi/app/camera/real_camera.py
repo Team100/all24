@@ -11,19 +11,21 @@ and the source:
 https://github.com/raspberrypi/picamera2/
 """
 
-from enum import unique, Enum
-from mmap import mmap
 from contextlib import AbstractContextManager
+from enum import Enum, unique
+from mmap import mmap
 from pprint import pprint
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
-
 from picamera2 import CompletedRequest, Picamera2  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
+
 from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
+from app.localization.network import Network
+from app.util.timer import Timer
 
 Mat = NDArray[np.uint8]
 
@@ -63,9 +65,16 @@ class Model(Enum):
 
 
 class RealCamera(Camera):
-    def __init__(self, identity: Identity, camera_num: int) -> None:
+    def __init__(
+        self,
+        identity: Identity,
+        camera_num: int,
+        network: Network,
+    ) -> None:
         self.cam: Picamera2 = Picamera2(camera_num)
         self.setup(identity)
+        path = "vision/" + identity.value + "/" + str(camera_num)
+        self._capture_time = network.get_double_sender(path + "/capture_time_ms")
 
     def setup(self, identity: Identity) -> None:
         model: Model = Model.get(self.cam)
@@ -91,7 +100,13 @@ class RealCamera(Camera):
         print(self.cam.camera_controls)  # type:ignore
 
     def capture_request(self) -> Request:
-        return RealRequest(self.cam.capture_request())  # type:ignore
+        capture_start: int = Timer.time_ns()
+        req: CompletedRequest = self.cam.capture_request()  # type:ignore
+        capture_end: int = Timer.time_ns()
+        # capture time is how long we wait for the camera, it should be close to zero.
+        capture_time_ms: int = (capture_end - capture_start) // 1000000
+        self._capture_time.send(capture_time_ms, 0)
+        return RealRequest(req)
 
     def start(self) -> None:
         self.cam.start()  # type:ignore

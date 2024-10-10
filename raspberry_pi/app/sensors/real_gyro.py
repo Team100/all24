@@ -25,6 +25,7 @@ python3 -m pip install adafruit-circuitpython-lsm6ds
 import board  # type:ignore
 from adafruit_lsm6ds import Rate  # type:ignore
 from adafruit_lsm6ds.lsm6dsox import LSM6DSOX  # type:ignore
+from app.config.identity import Identity
 from app.sensors.gyro_protocol import Gyro
 from app.localization.network import Network
 from app.util.timer import Timer
@@ -44,12 +45,16 @@ _DELAY_US = 5000
 
 
 class RealGyro(Gyro):
-    def __init__(self, network: Network) -> None:
-        self.network = network
+    def __init__(self, identity: Identity, network: Network) -> None:
+        path = "gyro/" + identity.value
+        self._theta = network.get_double_sender(path + "/omega")
+        self._omega = network.get_double_sender(path + "/theta")
+
+
         i2c = board.I2C()
         self.imu = LSM6DSOX(i2c)
         # see adafruit_lsm6ds/__init__.py
-        self.imu.gyro_data_rate = Rate.RATE_104_HZ
+        self.imu.gyro_data_rate = Rate.RATE_104_HZ # type: ignore
         self.yaw_rad = 0
         self.prev_time_ns = Timer.time_ns()
         self.prev_rate_rad_s = None
@@ -67,5 +72,5 @@ class RealGyro(Gyro):
         mid_rate_rad_s = 0.5 * (rate_rad_s + self.prev_rate_rad_s)
         d_yaw_rad = mid_rate_rad_s * duration_ns / 1e9
         self.yaw_rad += d_yaw_rad
-        self.network.set_gyro_yaw(self.yaw_rad, _DELAY_US)
-        self.network.set_gyro_rate(rate_rad_s, _DELAY_US)
+        self._theta.send(self.yaw_rad, _DELAY_US)
+        self._omega.send(rate_rad_s, _DELAY_US)

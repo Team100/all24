@@ -11,59 +11,91 @@ use the script called "runapp.py" in the raspberry_pi directory
 # pylint: disable=R0914
 
 from app.camera.camera_factory import CameraFactory
-from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
 from app.dashboard.real_display import RealDisplay
 from app.localization.network import Network
 from app.localization.tag_detector import TagDetector
 from app.sensors.gyro_factory import GyroFactory
-from app.sensors.gyro_protocol import Gyro
-from app.util.timer import Timer
 
 
-# TODO: get rid of the parallel-lists stuff here.
+def gyro_only(identity: Identity) -> None:
+    print("gyro only")
+
+    gyronetwork = Network(identity, 2)
+    gyro = GyroFactory.get(identity, gyronetwork)
+
+    while True:
+        gyro.sample()
+
+
+def single_camera(identity: Identity) -> None:
+    print("single camera")
+
+    gyronetwork = Network(identity, 2)
+    gyro = GyroFactory.get(identity, gyronetwork)
+
+    network0 = Network(identity, 0)
+    camera0 = CameraFactory.get(identity, 0, network0)
+    size0 = camera0.get_size()
+    display0 = RealDisplay(size0.width, size0.height, 0)
+    tag_detector0 = TagDetector(identity, camera0, 0, display0, network0)
+    camera0.start()
+
+    try:
+        while True:
+            req0 = camera0.capture_request()
+            try:
+                tag_detector0.analyze(req0)
+                gyro.sample()
+            finally:
+                req0.release()
+    finally:
+        camera0.stop()
+
+
+def dual_camera(identity: Identity) -> None:
+    print("dual cameras")
+
+    gyronetwork = Network(identity, 2)
+    gyro = GyroFactory.get(identity, gyronetwork)
+
+    network0 = Network(identity, 0)
+    camera0 = CameraFactory.get(identity, 0, network0)
+    size0 = camera0.get_size()
+    display0 = RealDisplay(size0.width, size0.height, 0)
+    tag_detector0 = TagDetector(identity, camera0, 0, display0, network0)
+    camera0.start()
+
+    network1 = Network(identity, 1)
+    camera1 = CameraFactory.get(identity, 1, network1)
+    size1 = camera1.get_size()
+    display1 = RealDisplay(size1.width, size1.height, 1)
+    tag_detector1 = TagDetector(identity, camera1, 1, display1, network1)
+    camera1.start()
+
+    try:
+        while True:
+            req0 = camera0.capture_request()
+            req1 = camera1.capture_request()
+            try:
+                tag_detector0.analyze(req0)
+                tag_detector1.analyze(req1)
+                gyro.sample()
+            finally:
+                req0.release()
+                req1.release()
+    finally:
+        camera0.stop()
+        camera1.stop()
+
+
 def main() -> None:
     print("main")
     identity: Identity = Identity.get()
-    cameras: list[Camera] = CameraFactory.get(identity)
-    if not cameras:
-        print("No Cameras!")
-        return
-    num = 0
-    tag_detectors: list[TagDetector] = []
-    for camera in cameras:
-        size: Size = camera.get_size()
-        display: RealDisplay = RealDisplay(size.width, size.height, num)
-        network: Network = Network(identity, num)
-        tag_detectors.append(TagDetector(identity, camera, display, network))
-        num += 1
-        # TODO: make network not just for cameras
-    # gyronetwork: Network = Network(identity, "Gyro")
-    gyronetwork: Network = Network(identity, 2)
-    gyro: Gyro = GyroFactory.get(gyronetwork)
-
-    for camera in cameras:
-        camera.start()
-    try:
-        while True:
-            # the most recent completed frame, from the recent past
-            capture_start: int = Timer.time_ns()
-            requests: list[Request] = []
-            for camera in cameras:
-                requests.append(camera.capture_request())
-            capture_end: int = Timer.time_ns()
-            # capture time is how long we wait for the camera, it should be close to zero.
-            capture_time_ms: int = (capture_end - capture_start) // 1000000
-            network.vision_capture_time_ms.set(capture_time_ms)
-            try:
-                num = 0
-                for tag_detector in tag_detectors:
-                    tag_detector.analyze(requests[num])
-                    num += 1
-                gyro.sample()
-            finally:
-                for request in requests:
-                    request.release()
-    finally:
-        for camera in cameras:
-            camera.stop()
+    num_cameras: int = CameraFactory.get_num_cameras(identity)
+    if num_cameras == 0:
+        gyro_only(identity)
+    if num_cameras == 1:
+        single_camera(identity)
+    if num_cameras == 2:
+        dual_camera(identity)
