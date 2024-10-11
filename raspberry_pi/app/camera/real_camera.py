@@ -21,6 +21,7 @@ import numpy as np
 from numpy.typing import NDArray
 from picamera2 import CompletedRequest, Picamera2  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
+from typing_extensions import override
 
 from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
@@ -34,12 +35,15 @@ class RealRequest(Request):
     def __init__(self, req: CompletedRequest):
         self._req = req
 
+    @override
     def release(self) -> None:
         self._req.release()
 
+    @override
     def buffer(self) -> AbstractContextManager[mmap]:
         return _MappedBuffer(self._req, "lores")  # type: ignore
 
+    @override
     def metadata(self) -> dict[str, Any]:
         return self._req.get_metadata()  # type: ignore
 
@@ -71,12 +75,9 @@ class RealCamera(Camera):
         camera_num: int,
         network: Network,
     ) -> None:
-        self.cam: Picamera2 = Picamera2(camera_num)
-        self.setup(identity)
         path = "vision/" + identity.value + "/" + str(camera_num)
         self._capture_time = network.get_double_sender(path + "/capture_time_ms")
-
-    def setup(self, identity: Identity) -> None:
+        self.cam: Picamera2 = Picamera2(camera_num)
         model: Model = Model.get(self.cam)
         self.size: Size = RealCamera.__size_from_model(model)
         self.camera_config: dict[str, Any] = RealCamera.__get_config(
@@ -98,7 +99,9 @@ class RealCamera(Camera):
         self.cam.configure(self.camera_config)  # type:ignore
         print("\nCONTROLS")
         print(self.cam.camera_controls)  # type:ignore
+        self.cam.start()  # type:ignore
 
+    @override
     def capture_request(self) -> Request:
         capture_start: int = Timer.time_ns()
         req: CompletedRequest = self.cam.capture_request()  # type:ignore
@@ -108,19 +111,20 @@ class RealCamera(Camera):
         self._capture_time.send(capture_time_ms, 0)
         return RealRequest(req)
 
-    def start(self) -> None:
-        self.cam.start()  # type:ignore
-
+    @override
     def stop(self) -> None:
         self.cam.stop()
         print("Camera stop")
 
+    @override
     def get_size(self) -> Size:
         return self.size
 
+    @override
     def get_intrinsic(self) -> Mat:
         return self.mtx
 
+    @override
     def get_dist(self) -> Mat:
         return self.dist
 

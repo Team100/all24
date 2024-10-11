@@ -45,7 +45,7 @@ class BlipSender:
 
 
 class Network:
-    def __init__(self, identity: Identity, camera_num: int) -> None:
+    def __init__(self, identity: Identity) -> None:
         # TODO: use identity.name instead
         # TODO: make Network work for gyro, not just vision
         self._serial: str = identity.value

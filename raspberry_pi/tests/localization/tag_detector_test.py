@@ -13,7 +13,7 @@ class TagDetectorTest(unittest.TestCase):
     def test_one_tag_found(self) -> None:
         """The fake camera produces one detection."""
         identity: Identity = Identity.UNKNOWN
-        network: Network = Network(identity, 0)
+        network: Network = Network(identity)
         camera: Camera = FakeCamera()
         display: FakeDisplay = FakeDisplay()
         tag_detector: TagDetector = TagDetector(identity, camera, 0, display, network)
@@ -35,7 +35,7 @@ class TagDetectorTest(unittest.TestCase):
     def test_zero_tags_found(self) -> None:
         """The blind camera produces zero detections."""
         identity: Identity = Identity.UNKNOWN
-        network: Network = Network(identity, 0)
+        network: Network = Network(identity)
         camera: Camera = BlindCamera()
         display: FakeDisplay = FakeDisplay()
         tag_detector: TagDetector = TagDetector(identity, camera, 0, display, network)

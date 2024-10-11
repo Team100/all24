@@ -20,7 +20,7 @@ python3 -m pip install adafruit-blinka
 python3 -m pip install adafruit-circuitpython-lsm6ds
  """
 
-#pylint: disable=E1101
+# pylint: disable=E1101,R0903
 
 import board  # type:ignore
 from adafruit_lsm6ds import Rate  # type:ignore
@@ -50,11 +50,10 @@ class RealGyro(Gyro):
         self._theta = network.get_double_sender(path + "/omega")
         self._omega = network.get_double_sender(path + "/theta")
 
-
         i2c = board.I2C()
         self.imu = LSM6DSOX(i2c)
         # see adafruit_lsm6ds/__init__.py
-        self.imu.gyro_data_rate = Rate.RATE_104_HZ # type: ignore
+        self.imu.gyro_data_rate = Rate.RATE_104_HZ  # type: ignore
         self.yaw_rad = 0
         self.prev_time_ns = Timer.time_ns()
         self.prev_rate_rad_s = None

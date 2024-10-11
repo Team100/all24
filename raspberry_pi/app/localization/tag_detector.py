@@ -9,8 +9,10 @@ import numpy as np
 from cv2 import undistortImagePoints
 from numpy.typing import NDArray
 from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
+from typing_extensions import override
 
 from app.camera.camera_protocol import Camera, Request, Size
+from app.camera.interpreter_protocol import Interpreter
 from app.config.identity import Identity
 from app.dashboard.display import Display
 from app.localization.network import Blip24, Network
@@ -19,7 +21,7 @@ from app.util.timer import Timer
 Mat = NDArray[np.uint8]
 
 
-class TagDetector:
+class TagDetector(Interpreter):
     def __init__(
         self,
         identity: Identity,
@@ -69,6 +71,7 @@ class TagDetector:
             )
         )
 
+    @override
     def analyze(self, req: Request) -> None:
         metadata: dict[str, Any] = req.metadata()
         with req.buffer() as buffer:
@@ -171,10 +174,10 @@ class TagDetector:
         # none of this is particularly fast or important for prod,
 
         # self.draw_text(img, f"fps {fps:.1f}", (5, 65))
-        self.display.draw_text(img, f"total (ms) {total_time_ms:.0f}", (5, 65))
-        self.display.draw_text(img, f"age (ms) {image_age_ms:.0f}", (5, 105))
-        self.display.draw_text(img, f"undistort (ms) {undistort_time_ms:.0f}", (5, 145))
-        self.display.draw_text(img, f"detect (ms) {detect_time_ms:.0f}", (5, 185))
-        self.display.draw_text(img, f"estimate (ms) {estimate_time_ms:.0f}", (5, 225))
+        self.display.draw_text(img, f"total (ms) {total_time_ms:2.0f}", (5, 65))
+        self.display.draw_text(img, f"age (ms) {image_age_ms:2.0f}", (5, 105))
+        self.display.draw_text(img, f"undistort (ms) {undistort_time_ms:2.0f}", (5, 145))
+        self.display.draw_text(img, f"detect (ms) {detect_time_ms:2.0f}", (5, 185))
+        self.display.draw_text(img, f"estimate (ms) {estimate_time_ms:2.0f}", (5, 225))
 
         self.display.put_frame(img)
