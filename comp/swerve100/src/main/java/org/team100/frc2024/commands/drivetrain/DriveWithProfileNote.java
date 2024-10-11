@@ -36,6 +36,12 @@ import edu.wpi.first.wpilibj2.command.Command;
  * TODO: force the theta axis to finish first, so that the approach is correct.
  */
 public class DriveWithProfileNote extends Command implements Glassy  {
+    
+    private static final double kRotationToleranceRad = Math.PI/32;
+    private static final double kTranslationalToleranceM = 0.01;
+    private static final double kRotationToleranceRad_S = Math.PI/64;
+    private static final double kTranslationalToleranceM_S = 0.01;
+    
     private final FieldLogger.Log m_field_log;
     private final Intake m_intake;
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
@@ -54,6 +60,10 @@ public class DriveWithProfileNote extends Command implements Glassy  {
     private State100 m_ySetpoint;
     private State100 m_thetaSetpoint;
     private int m_count;
+    
+    private State100 m_xGoalRaw;
+    private State100 m_yGoalRaw;
+    private State100 m_thetaGoalRaw;
 
     public DriveWithProfileNote(
             FieldLogger.Log fieldLogger,
@@ -137,18 +147,18 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
         Translation2d goal = optGoal.get();
 
-        State100 thetaGoal = getThetaGoalState(m_swerve.getState().pose(), goal);
-        State100 xGoal = new State100(goal.getX(), 0, 0);
-        State100 yGoal = new State100(goal.getY(), 0, 0);
+        m_thetaGoalRaw = getThetaGoalState(m_swerve.getState().pose(), goal);
+        m_xGoalRaw = new State100(goal.getX(), 0, 0);
+        m_yGoalRaw = new State100(goal.getY(), 0, 0);
 
-        m_xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_xSetpoint, xGoal);
-        m_ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_ySetpoint, yGoal);
+        m_xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_xSetpoint, m_xGoalRaw);
+        m_ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_ySetpoint, m_yGoalRaw);
         // make sure the setpoint uses the modulus close to the measurement.
         final double thetaMeasurement = m_swerve.getState().pose().getRotation().getRadians();
         m_thetaSetpoint = new State100(
                 Math100.getMinDistance(thetaMeasurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
-        m_thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, thetaGoal);
+        m_thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, m_thetaGoalRaw);
 
         SwerveState measurement = m_swerve.getState();
         SwerveState setpoint = new SwerveState(m_xSetpoint, m_ySetpoint, m_thetaSetpoint);
@@ -178,7 +188,23 @@ public class DriveWithProfileNote extends Command implements Glassy  {
     }
 
     @Override
+    public boolean isFinished() {
+        State100 x = m_swerve.getState().x();
+        double xError = m_xGoalRaw.x() - x.x();
+        State100 y = m_swerve.getState().y();
+        double yError = m_yGoalRaw.x() - y.x();
+        State100 theta = m_swerve.getState().theta();
+        double thetaError = m_thetaGoalRaw.x() - theta.x();
+        return Math.abs(xError) < kTranslationalToleranceM
+                && Math.abs(yError) < kTranslationalToleranceM
+                && Math.abs(thetaError) < kRotationToleranceRad
+                && Math.abs(x.v()) < kTranslationalToleranceM_S
+                && Math.abs(y.v()) < kTranslationalToleranceM_S
+                && Math.abs(theta.v()) < kRotationToleranceRad_S;
+    }
+
+    @Override
     public void end(boolean interrupted) {
-        //
+        m_swerve.stop();
     }
 }
