@@ -3,16 +3,17 @@
 
 # pylint: disable=E0611
 
-
 from platform import system
 
 import numpy as np
 from cscore import CameraServer
 from cv2 import FONT_HERSHEY_SIMPLEX, circle, line, putText, resize
+from cv2.typing import MatLike
 from numpy.typing import NDArray
 from robotpy_apriltag import AprilTagDetection
 from wpimath.geometry import Transform3d
 
+from app.dashboard.display import Display
 from app.dashboard.mjpeg_streamer import MjpegServer, Stream
 
 FONT = FONT_HERSHEY_SIMPLEX
@@ -22,7 +23,7 @@ WHITE = (255, 255, 255)
 Mat = NDArray[np.uint8]
 
 
-class RealDisplay:
+class RealDisplay(Display):
     def __init__(self, width: int, height: int, camera_num: int) -> None:
         if system() == "Windows":
             print("Using MJpegServer for Windows")
@@ -69,7 +70,7 @@ class RealDisplay:
         putText(image, msg, loc, FONT, 1.5, BLACK, 6)
         putText(image, msg, loc, FONT, 1.5, WHITE, 2)
 
-    def put_frame(self, img: Mat) -> None:
+    def put_frame(self, img: MatLike) -> None:
         # connect to localhost:1181 to see this
         # windows complains about noncontiguous
         # img = np.zeros((100,100), dtype=np.uint8)

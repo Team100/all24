@@ -20,7 +20,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 from picamera2 import CompletedRequest, Picamera2  # type: ignore
-from picamera2.request import _MappedBuffer  # type: ignore
+from picamera2.request import MappedArray, _MappedBuffer  # type: ignore
 from typing_extensions import override
 
 from app.camera.camera_protocol import Camera, Request, Size
@@ -41,7 +41,32 @@ class RealRequest(Request):
 
     @override
     def buffer(self) -> AbstractContextManager[mmap]:
+        # see CompletedRequest.make_buffer()
+        # which makes an np.array from the _MappedBuffer.
+        # for greyscale, you can use np.frombuffer().
+        #
+        # this is AbstractContextManager[mmap] because the flow is:
+        # during picamera2.configure(), the DmaAllocator allocates
+        # the requested (buffer_count) number of dma buffers, which
+        # are mmap.mmap objects.
+        # the camera uses DmaAllocator, whose sync property
+        # is the DmaSync constructor
+        # the _MappedBuffer constructor invokes this constructor
+        # to get a sync object, which is the delegate for the _MappedBuffer
+        # __enter__() method, which simply returns the mmap above.
+        #
+        # the reason to use a MappedBuffer is in order to release
+        # the dma buffer when we're done with it, which happens
+        # in MappedBuffer.__exit__(), which again delegates to the
+        # sync object, which uses the appropriate ioctl flags.
+        #
+        # since _MappedBuffer implements __enter__ and __exit__, we
+        # can duck-type it an AbstractContextManager.
         return _MappedBuffer(self._req, "lores")  # type: ignore
+
+    @override
+    def array(self) -> AbstractContextManager[MappedArray]:  # type:ignore
+        return MappedArray(self._req, "lores")
 
     @override
     def metadata(self) -> dict[str, Any]:

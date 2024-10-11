@@ -30,9 +30,13 @@ class TagDetector(Interpreter):
         display: Display,
         network: Network,
     ) -> None:
-        self.identity: Identity = identity
-        size: Size = cam.get_size()
+        self.identity = identity
         self.camera_num = camera_num
+        self.display = display
+        self.network = network
+
+        size: Size = cam.get_size()
+        # TODO: move the identity part of this path to the Network object
         path = "vision/" + identity.value + "/" + str(camera_num)
         self._blips = network.get_blip_sender(path + "/blips")
 
@@ -42,8 +46,6 @@ class TagDetector(Interpreter):
 
         self.width: int = size.width
         self.height: int = size.height
-        self.display: Display = display
-        self.network: Network = network
 
         self.y_len = self.width * self.height
 
@@ -143,6 +145,7 @@ class TagDetector(Interpreter):
         # total_et = current_time - self.frame_time
         self.frame_time = current_time
 
+        # TODO: move this reference to SensorTimestamp to the camera
         # first row
         sensor_timestamp_ns = metadata["SensorTimestamp"]
         # how long for all the rows

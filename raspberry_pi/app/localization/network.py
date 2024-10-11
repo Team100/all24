@@ -5,7 +5,7 @@
 
 import dataclasses
 import ntcore
-from wpimath.geometry import Transform3d
+from wpimath.geometry import Rotation3d, Transform3d
 from wpiutil import wpistruct
 from app.config.identity import Identity
 
@@ -44,6 +44,14 @@ class BlipSender:
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
+class NoteSender:
+    def __init__(self, pub: ntcore.StructArrayPublisher) -> None:
+        self.pub: ntcore.StructArrayPublisher = pub
+
+    def send(self, val: list[Rotation3d], delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
+
+
 class Network:
     def __init__(self, identity: Identity) -> None:
         # TODO: use identity.name instead
@@ -59,14 +67,15 @@ class Network:
         # roboRio address. windows machines can impersonate this for simulation.
         # also localhost for testing
         self._inst.setServer(["10.1.0.2", "127.0.0.1"])
-       
-
 
     def get_double_sender(self, name: str) -> DoubleSender:
         return DoubleSender(self._inst.getDoubleTopic(name).publish())
 
     def get_blip_sender(self, name: str) -> BlipSender:
         return BlipSender(self._inst.getStructArrayTopic(name, Blip24).publish())
+
+    def get_note_sender(self, name: str) -> NoteSender:
+        return NoteSender(self._inst.getStructArrayTopic(name, Rotation3d).publish())
 
     def flush(self) -> None:
         self._inst.flush()

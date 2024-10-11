@@ -9,5 +9,6 @@ set it when they fail, and exit when it becomes true.
 from typing import Protocol
 
 
+# TODO: make this a real base class that references the "done" event in the constructor.
 class Looper(Protocol):
     def run(self) -> None: ...

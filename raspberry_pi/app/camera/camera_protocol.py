@@ -4,6 +4,9 @@ To learn about Protocols for interface specification, see
 https://typing.readthedocs.io/en/latest/spec/protocol.html
 """
 
+# pylint: disable=R0903
+
+
 from mmap import mmap
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
@@ -16,9 +19,15 @@ from numpy.typing import NDArray
 Mat = NDArray[np.uint8]
 
 
+class HasMat(Protocol):
+    @property
+    def array(self) -> Mat: ...
+
+
 class Request(Protocol):
     def release(self) -> None: ...
     def buffer(self) -> AbstractContextManager[mmap]: ...
+    def array(self) -> AbstractContextManager[HasMat]: ...
     def metadata(self) -> dict[str, Any]: ...
 
 

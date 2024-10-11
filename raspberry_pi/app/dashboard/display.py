@@ -5,6 +5,7 @@ from typing import Protocol
 
 import numpy as np
 from numpy.typing import NDArray
+from cv2.typing import MatLike
 from robotpy_apriltag import AprilTagDetection
 from wpimath.geometry import Transform3d
 
@@ -16,4 +17,4 @@ class Display(Protocol):
         self, image: Mat, result_item: AprilTagDetection, pose: Transform3d
     ) -> None: ...
     def draw_text(self, image: Mat, msg: str, loc: tuple[int, int]) -> None: ...
-    def put_frame(self, img: Mat) -> None: ...
+    def put_frame(self, img: MatLike) -> None: ...

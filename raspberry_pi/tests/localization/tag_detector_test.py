@@ -1,6 +1,5 @@
 import unittest
 
-from app.camera.camera_protocol import Camera, Request
 from app.camera.fake_camera import BlindCamera, FakeCamera
 from app.config.identity import Identity
 from app.dashboard.fake_display import FakeDisplay
@@ -12,12 +11,12 @@ class TagDetectorTest(unittest.TestCase):
 
     def test_one_tag_found(self) -> None:
         """The fake camera produces one detection."""
-        identity: Identity = Identity.UNKNOWN
-        network: Network = Network(identity)
-        camera: Camera = FakeCamera()
-        display: FakeDisplay = FakeDisplay()
-        tag_detector: TagDetector = TagDetector(identity, camera, 0, display, network)
-        request: Request = camera.capture_request()
+        identity = Identity.UNKNOWN
+        network = Network(identity)
+        camera = FakeCamera()
+        display = FakeDisplay()
+        tag_detector = TagDetector(identity, camera, 0, display, network)
+        request = camera.capture_request()
         tag_detector.analyze(request)
 
         self.assertEqual(1, len(display.result_items))
@@ -34,12 +33,12 @@ class TagDetectorTest(unittest.TestCase):
 
     def test_zero_tags_found(self) -> None:
         """The blind camera produces zero detections."""
-        identity: Identity = Identity.UNKNOWN
-        network: Network = Network(identity)
-        camera: Camera = BlindCamera()
-        display: FakeDisplay = FakeDisplay()
-        tag_detector: TagDetector = TagDetector(identity, camera, 0, display, network)
-        request: Request = camera.capture_request()
+        identity = Identity.UNKNOWN
+        network = Network(identity)
+        camera = BlindCamera()
+        display = FakeDisplay()
+        tag_detector = TagDetector(identity, camera, 0, display, network)
+        request = camera.capture_request()
         tag_detector.analyze(request)
 
         self.assertEqual(0, len(display.result_items))

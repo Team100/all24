@@ -1,6 +1,6 @@
 """ This is a camera for desktop testing."""
 
-# pylint: disable=E1101,R1732
+# pylint: disable=E1101,R0903,R1732
 
 from contextlib import AbstractContextManager, nullcontext
 from mmap import mmap
@@ -14,10 +14,20 @@ from cv2.typing import MatLike
 from numpy.typing import NDArray
 from typing_extensions import override
 
-from app.camera.camera_protocol import Camera, Request, Size
+from app.camera.camera_protocol import Camera, HasMat, Request, Size
 from app.util.timer import Timer
 
 Mat = NDArray[np.uint8]
+
+
+class FakeArray(HasMat):
+    def __init__(self, val: Mat) -> None:
+        self.val = val
+
+    @property
+    @override
+    def array(self) -> Mat:
+        return self.val
 
 
 class FakeRequest(Request):
@@ -41,16 +51,22 @@ class FakeRequest(Request):
         return nullcontext(self.mmap)
 
     @override
+    def array(self) -> AbstractContextManager[HasMat]:
+        array = np.array(self.mmap, copy=False, dtype=np.uint8)
+        return nullcontext(FakeArray(array))
+
+    @override
     def metadata(self) -> dict[str, Any]:
         return {"SensorTimestamp": Timer.time_ns(), "FrameDuration": 300}
 
 
 class FakeCamera(Camera):
-    """Always returns the same image,
-    which is from https://berndpfrommer.github.io/tagslam_web/making_tags/"""
+    """Always returns the same image, which is from https://berndpfrommer.github.io/tagslam_web/making_tags/"""
 
     def __init__(self) -> None:
         p = Path(__file__).with_name("tag_and_board.png")
+        # ok oops, this file is an 8-bit monochrome image, so when the tag
+        # detector makes a length-limited array from it, it works.
         pathstr: str = str(p)
         self.img = cv2.imread(pathstr, 0)
 
@@ -86,8 +102,46 @@ class BlindCamera(Camera):
 
     def __init__(self) -> None:
         p = Path(__file__).with_name("white_square.png")
+        # this is also 8-bit mono, so "Y"
         pathstr: str = str(p)
         self.img = cv2.imread(pathstr, 0)
+
+    @override
+    def capture_request(self) -> FakeRequest:
+        return FakeRequest(self.img)
+
+    @override
+    def stop(self) -> None:
+        pass
+
+    @override
+    def get_size(self) -> Size:
+        return Size(fullwidth=100, fullheight=100, width=100, height=100)
+
+    @override
+    def get_intrinsic(self) -> Mat:
+        return np.array(
+            [
+                [480, 0, 550],
+                [0, 480, 310],
+                [0, 0, 1],
+            ]
+        )
+
+    @override
+    def get_dist(self) -> Mat:
+        return np.array([0, 0, 0, 0])
+
+
+class NoteCamera(Camera):
+    """Always returns the same image, an orange blob on a grey background."""
+
+    def __init__(self) -> None:
+        p = Path(__file__).with_name("blob.png")
+        # this is an 8 bit indexed RGB image, which won't work directly as YUV input.
+        pathstr: str = str(p)
+        self.img = cv2.imread(pathstr, 1)
+        self.img = cv2.cvtColor(self.img, cv2.COLOR_RGB2YUV_I420)
 
     @override
     def capture_request(self) -> FakeRequest:
