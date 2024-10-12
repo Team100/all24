@@ -18,16 +18,14 @@ COPY gradlew ./
 # Make the gradlew script executable
 RUN chmod +x ./gradlew
 
-# Download dependencies without running the full configuration
-RUN ./gradlew dependencies --dry-run
+# Download dependencies
+RUN --mount=type=cache,target=/root/.gradle ./gradlew --build-cache dependencies
 
 # Now copy the rest of your code
 COPY . .
 
 # Build the project
-# RUN ./gradlew build --offline
-RUN ./gradlew build
-
+RUN --mount=type=cache,target=/root/.gradle ./gradlew --build-cache build --offline
 
 # Expose the JMX port
 EXPOSE 1099
