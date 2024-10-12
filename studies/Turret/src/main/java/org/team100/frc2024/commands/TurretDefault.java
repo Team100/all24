@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class TurretDefault extends Command {
     private final Turret m_turret;
     private final Supplier<DriverControl.Velocity> m_supplier;
-    
+
     public TurretDefault(
             Supplier<DriverControl.Velocity> twistSupplier,
             Turret turret) {
@@ -26,7 +26,9 @@ public class TurretDefault extends Command {
     @Override
     public void execute() {
         Velocity velocity = m_supplier.get();
-        m_turret.setAngle(Math.atan2(-1.0 * velocity.y(), velocity.x()));
+        if (Math.abs(velocity.y()) > 0.25 || Math.abs(velocity.x()) > 0.25) {
+         m_turret.setAngle(Math.atan2(velocity.y(), -1.0 * velocity.x()));
+        }
     }
 
     @Override
