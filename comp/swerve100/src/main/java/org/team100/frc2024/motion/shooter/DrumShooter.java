@@ -21,6 +21,7 @@ import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.GravityServoInterface;
 import org.team100.lib.motion.servo.LinearVelocityServo;
@@ -159,7 +160,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         40,
                         pivotFF,
                         pivotPID);
-                RotaryMechanism pivotMech = new RotaryMechanism(
+                RotaryMechanism pivotMech = new SimpleRotaryMechanism(
                         pivotLogger,
                         pivotMotor,
                         new CANSparkEncoder(pivotLogger, pivotMotor),
@@ -196,7 +197,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         kMaxDecel);
                 // motor speed is rad/s
                 SimulatedBareMotor simMotor = new SimulatedBareMotor(pivotLogger, 600);
-                RotaryMechanism simMech = new RotaryMechanism(
+                RotaryMechanism simMech = new SimpleRotaryMechanism(
                         pivotLogger,
                         simMotor,
                         new SimulatedBareEncoder(pivotLogger, simMotor),
