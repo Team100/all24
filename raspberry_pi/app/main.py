@@ -9,7 +9,7 @@ from app.camera_factory import CameraFactory
 from app.display import Display
 from app.gyro import Gyro
 from app.gyro_factory import GyroFactory
-from app.identity import Identity
+from config.identity import Identity
 from app.network import Network
 from app.tag_detector import TagDetector
 from app.timer import Timer
@@ -23,13 +23,15 @@ def main() -> None:
     tag_detectors = []
     for camera in cameras:
         size: Size = camera.get_size()
-        display: Display = Display(size.width, size.height, str(num))
-        network: Network = Network(identity, str(num))
+        display: Display = Display(size.width, size.height, num)
+        network: Network = Network(identity, num)
         tag_detectors.append(
             TagDetector(identity, size.width, size.height, camera, display, network)
         )
         num += 1
-    gyronetwork: Network = Network(identity, "Gyro")
+        # TODO: make network not just for cameras
+    # gyronetwork: Network = Network(identity, "Gyro")
+    gyronetwork: Network = Network(identity, 2)
     gyro: Gyro = GyroFactory.get(gyronetwork)
 
     for camera in cameras:

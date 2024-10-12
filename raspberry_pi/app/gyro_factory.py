@@ -1,6 +1,6 @@
 """ Chose a gyro implementation depending on platform. """
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=0903
 
 from adafruit_platformdetect import Detector  # type:ignore
 from app.gyro import Gyro
