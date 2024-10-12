@@ -10,6 +10,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
 import org.team100.lib.motor.MockBareMotor;
@@ -36,7 +37,7 @@ class AngularPositionProfileTest implements Timeless {
 
     public AngularPositionProfileTest() {
         motor = new MockBareMotor();
-        mech = new RotaryMechanism(
+        mech = new SimpleRotaryMechanism(
                 logger,
                 motor,
                 new MockIncrementalBareEncoder(),
