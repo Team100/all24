@@ -33,14 +33,27 @@ Mat = NDArray[np.uint8]
 
 class RealRequest(Request):
     def __init__(self, req: CompletedRequest):
+        # before we get a CompletedRequest, its constructor has used the
+        # camera allocator sync property to instantiate a DMA allocator sync for
+        # each buffer, told the camera allocator to mark the buffers as
+        # 'in use', and __enter__()ed the DmaSync for each buffer, which
+        # marks them with ioctl DMA_BUF_SYNC_START
         self._req = req
 
     @override
     def release(self) -> None:
+        # this calls DmaSync.__exit__() which invokes ioctl DMA_BUF_SYNC_END
+        # to release the DMA buffer, and unmark the app-level 'in use' flag.
         self._req.release()
 
     @override
     def buffer(self) -> AbstractContextManager[mmap]:
+        # TODO: we don't need to do this, because the app-level and
+        # DMA-level in-use marking was done by the Completed Request constructor
+        # and the release() method.
+
+        # TODO: so get rid of this.
+        #
         # see CompletedRequest.make_buffer()
         # which makes an np.array from the _MappedBuffer.
         # for greyscale, you can use np.frombuffer().
@@ -176,11 +189,21 @@ class RealCamera(Camera):
             # hang on to one camera buffer (zero copy) and leave one
             # other for the camera to fill.
             queue=True,
+            # TODO: make this direct sensor configuration actually work
+            sensor={
+                "output_size": (size.width, size.height),
+                # TODO: is lower depth better?  v2 has 8, v3 only 10.  what about GS?
+                "bit_depth": 10,
+            },
+            # TODO: make main RGB so we can provide it to color-desiring interpreters
             main={
                 "format": "YUV420",
                 "size": (size.fullwidth, size.fullheight),
             },
-            lores={"format": "YUV420", "size": (size.width, size.height)},
+            lores={
+                "format": "YUV420",
+                "size": (size.width, size.height),
+            },
             controls={
                 "ExposureTime": RealCamera.__get_exposure_time(identity),
                 "AnalogueGain": 8,
