@@ -42,7 +42,10 @@ deploy {
             // or from command line. If not found an exception will be thrown.
             // You can use getTeamOrDefault(team) instead of getTeamNumber if you
             // want to store a team number in this file.
-            team = project.frc.getTeamNumber()
+            // team = project.frc.getTeamNumber()
+            // TODO(dmontauk): a better approach would be to have build dependencies pulled separately
+            // from the actual build.
+            team = project.frc.getTeamOrDefault(100)
             debug = project.frc.getDebugOrDefault(false)
 
             artifacts {          
