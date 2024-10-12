@@ -218,3 +218,14 @@ wpi.java.configureTestTasks(test)
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
+
+// Add this at the end of your build.gradle file
+task downloadDependencies() {
+    doLast {
+        configurations.all { c ->
+            if (c.canBeResolved) {
+                c.resolve()
+            }
+        }
+    }
+}
