@@ -176,8 +176,9 @@ class TagDetector(Interpreter):
         # now do the drawing (after the NT payload is written)
         # none of this is particularly fast or important for prod,
 
-        # self.draw_text(img, f"fps {fps:.1f}", (5, 65))
-        self.display.draw_text(img, f"total (ms) {total_time_ms:2.0f}", (5, 65))
+        fps = 1000/total_time_ms
+        self.display.draw_text(img, f"FPS {fps:2.0f}", (5, 65))
+        # self.display.draw_text(img, f"total (ms) {total_time_ms:2.0f}", (5, 65))
         self.display.draw_text(img, f"age (ms) {image_age_ms:2.0f}", (5, 105))
         self.display.draw_text(img, f"undistort (ms) {undistort_time_ms:2.0f}", (5, 145))
         self.display.draw_text(img, f"detect (ms) {detect_time_ms:2.0f}", (5, 185))

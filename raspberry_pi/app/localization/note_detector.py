@@ -44,18 +44,17 @@ class NoteDetector(Interpreter):
         self._notes = network.get_note_sender(path + "/Rotation3d")
         self._et = network.get_double_sender(path + "/et_ms")
 
-
     def analyze(self, req: Request) -> None:
         metadata: dict[str, Any] = req.metadata()
         with req.array() as mapped_array:
             self.analyze2(metadata, mapped_array.array)
 
-    def analyze2(self, metadata: dict[str, Any], img_yuv: Mat) -> None:
+    def analyze2(self, metadata: dict[str, Any], img_yuv: MatLike) -> None:
         t0 = Timer.time_ns()
 
         # this says YUV->RGB but it actually makes BGR.
         # github.com/raspberrypi/picamera2/issues/848
-        img_bgr = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
+        img_bgr: MatLike = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
 
         # TODO: figure out the crop
         # img_bgr : Mat = img_bgr[65:583, :, :]
@@ -113,15 +112,23 @@ class NoteDetector(Interpreter):
 
             objects.append(rotation)
             self.draw_result(img_bgr, c, cX, cY)
-        
+
         t1: int = Timer.time_ns()
         et_ms = (t1 - t0) // 1000000
         self._et.send(et_ms, 0)
 
+        # compute time since last frame
+        current_time = Timer.time_ns()
+        total_time_ms = (current_time - self.frame_time) // 1000000
+        # total_et = current_time - self.frame_time
+        self.frame_time = current_time
+        fps = 1000 / total_time_ms
+        self.display.draw_text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
 
         # img_output = cv2.resize(img_bgr, (269, 162))
 
-        self.display.put_frame(img_range)
+        # self.display.put_frame(img_range)
+        self.display.put_frame(img_bgr)
 
     def draw_result(self, img: MatLike, cnt: MatLike, cX: int, cY: int) -> None:
         # float_formatter: dict[str, Callable[[float], str]] = {"float_kind": lambda x: f"{x:4.1f}"}

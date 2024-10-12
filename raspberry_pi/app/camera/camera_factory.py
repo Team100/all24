@@ -36,9 +36,10 @@ class CameraFactory:
                 | Identity.SHOOTER
                 | Identity.GAME_PIECE
                 | Identity.UNKNOWN  # will use FakeCamera
+                | Identity.DEV # has one v2 camera at the moment
             ):
                 return 1
-            case Identity.DEV | Identity.FLIPPED:
+            case Identity.FLIPPED:
                 return 0
             case _:
                 raise ValueError(f"Unknown identity: {identity}")

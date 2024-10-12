@@ -35,7 +35,8 @@ def main() -> None:
         camera0 = CameraFactory.get(identity, 0, network)
         size0 = camera0.get_size()
         display0 = RealDisplay(size0.width, size0.height, 0)
-        detector0 = TagDetector(identity, camera0, 0, display0, network)
+        # detector0 = TagDetector(identity, camera0, 0, display0, network)
+        detector0 = NoteDetector(identity, camera0, 0, display0, network)
         loops.append(CameraLoop(detector0, camera0, done))
 
         # TODO: a better way to associate cameras and detectors
