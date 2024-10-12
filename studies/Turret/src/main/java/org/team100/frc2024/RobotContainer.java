@@ -1,6 +1,7 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
+import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.commands.TurretDefault;
 import org.team100.frc2024.turret.Turret;
@@ -17,6 +18,7 @@ import org.team100.lib.logging.Logging;
 import org.team100.lib.util.Util;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
     private final Turret m_turret;
@@ -37,11 +39,17 @@ public class RobotContainer {
         TurretCollection turretCollection = TurretCollection.get(sysLog);
         m_turret = new Turret(sysLog,turretCollection);
         m_turret.setDefaultCommand(new TurretDefault(driverControl::velocity, m_turret));
+        whileTrue(driverControl::ampLock, m_turret.run(() -> m_turret.setAngle(Math.PI/2)));
+        whileTrue(driverControl::driveToNote, m_turret.run(() -> m_turret.setAngle(0)));
     }
+
 
     public void onInit() {}
 
     public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
+    }
+    private void whileTrue(BooleanSupplier condition, Command command) {
+        new Trigger(condition).whileTrue(command);
     }
 }
