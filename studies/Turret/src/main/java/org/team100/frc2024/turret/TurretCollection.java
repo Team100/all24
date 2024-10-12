@@ -32,8 +32,8 @@ public class TurretCollection {
         switch (Identity.instance) {
             case SWERVE_TWO:
             //TODO get maxVel, and maxAccel
-            OutboardAngularPositionServo angularPositionServo = createAngularPositionServo(kTurret, collectionLogger,40,40, 1, 14, MotorPhase.FORWARD);
-            angularPositionServo.setProfile(new TrapezoidProfile100(120, 200, 0.01));
+            OutboardAngularPositionServo angularPositionServo = createAngularPositionServo(kTurret, collectionLogger,40,40, 1, 14, MotorPhase.REVERSE);
+            angularPositionServo.setProfile(new TrapezoidProfile100(120, 100, 0.01));
             return new TurretCollection(angularPositionServo);
             case BLANK:
             default:
