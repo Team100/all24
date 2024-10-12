@@ -23,7 +23,7 @@ from numpy.typing import NDArray
 from picamera2 import Picamera2, CompletedRequest  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
 from app.camera import Camera, Request, Size
-from app.identity import Identity
+from config.identity import Identity
 
 Mat = NDArray[np.uint8]
 

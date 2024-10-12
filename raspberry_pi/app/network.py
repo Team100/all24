@@ -1,13 +1,14 @@
-""" This is a wrapper for network tables.
+"""
+This is a wrapper for network tables.
 """
 
-# pylint: disable=protected-access
+# pylint: disable=R0902
 
 import dataclasses
 import ntcore
 from wpimath.geometry import Transform3d
 from wpiutil import wpistruct
-from app.identity import Identity
+from app.config.identity import Identity
 
 
 @wpistruct.make_wpistruct
@@ -26,8 +27,9 @@ class Blip25:
     pose: Transform3d
 
 class Network:
-    def __init__(self, identity: Identity, camera_num: str) -> None:
+    def __init__(self, identity: Identity, camera_num: int) -> None:
         # TODO: use identity.name instead
+        # TODO: make Network work for gyro, not just vision
         self.serial: str = identity.value
         self.inst: ntcore.NetworkTableInstance = (
             ntcore.NetworkTableInstance.getDefault()
@@ -39,7 +41,7 @@ class Network:
         # roboRio address. windows machines can impersonate this for simulation.
         # also localhost for testing
         self.inst.setServer(["10.1.0.2", "127.0.0.1"])
-        topic_name: str = "vision/" + self.serial + camera_num
+        topic_name: str = "vision/" + self.serial + str(camera_num)
         self.vision_capture_time_ms: ntcore.DoublePublisher = self.inst.getDoubleTopic(
             topic_name + "/capture_time_ms"
         ).publish()

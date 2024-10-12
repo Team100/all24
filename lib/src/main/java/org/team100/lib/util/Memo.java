@@ -56,10 +56,12 @@ public class Memo {
             // synchronized adds ~20ns.
             if (m_value == null)
                 m_value = m_delegate.get();
+                
             return m_value;
         }
 
         public synchronized void reset() {
+            // System.out.println("CotemporalCache.reset()");
             m_value = null;
         }
     }
