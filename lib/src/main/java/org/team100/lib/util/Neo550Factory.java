@@ -6,6 +6,7 @@ import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.motion.mechanism.LimitedRotaryMechanism;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
@@ -75,12 +76,14 @@ public class Neo550Factory {
             MotorPhase motorPhase,
             double p,
             double gravityNm,
-            double offsetRad) {
+            double offsetRad,
+            double lowerLimit,
+            double upperLimit) {
         LoggerFactory moduleLogger = parent.child(name);
         Neo550CANSparkMotor driveMotor = new Neo550CANSparkMotor(moduleLogger, canID, motorPhase, currentLimit,
                 Feedforward100.makeNeo550(), new PIDConstants(p));
-        RotaryMechanism rotaryMechanism = new SimpleRotaryMechanism(moduleLogger, driveMotor,
-                new CANSparkEncoder(moduleLogger, driveMotor), 1);
+        RotaryMechanism rotaryMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(moduleLogger, driveMotor,
+                new CANSparkEncoder(moduleLogger, driveMotor), gearRatio),lowerLimit, upperLimit);
         return new OutboardGravityServo(
                 new OutboardAngularPositionServo(
                         moduleLogger,

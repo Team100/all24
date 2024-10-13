@@ -26,7 +26,7 @@ public class ZeroPivot extends Command {
         double asDouble = m_pivot.getAngleRad().getAsDouble();
         m_pivot.setAngleRad(asDouble - 0.05);
         if (Math.abs(prevAngle - asDouble) < 0.025) {
-            m_pivot.setEncoderPosition(asDouble);
+            m_pivot.setEncoderPosition(Math.PI/2);
             ready = true;
         } 
         prevAngle = asDouble; 

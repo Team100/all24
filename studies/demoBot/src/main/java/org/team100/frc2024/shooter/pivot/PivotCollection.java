@@ -8,7 +8,6 @@ import org.team100.lib.util.Neo550Factory;
 
 public class PivotCollection {
     private static final String kPivot = "Pivot";
-    private static final double m_shooterWheelDiameter = 0.098425;
 
     private final OutboardGravityServo m_pivot;
 
@@ -23,7 +22,8 @@ public class PivotCollection {
         LoggerFactory collectionLogger = parent.child(kPivot);
         switch (Identity.instance) {
             case DEMO_BOT:
-            OutboardGravityServo pivot = Neo550Factory.getNEO550GravityServo(kPivot, collectionLogger, currentLimit, 1, m_shooterWheelDiameter, MotorPhase.FORWARD,1,1,1);
+            //TODO get canID, gearRatio, p values, and gravityNm
+            OutboardGravityServo pivot = Neo550Factory.getNEO550GravityServo(kPivot, collectionLogger, currentLimit, 1, 14, MotorPhase.FORWARD,1,0.1,0,-Math.PI/2, 0);
             return new PivotCollection(pivot);
             case BLANK:
             default:

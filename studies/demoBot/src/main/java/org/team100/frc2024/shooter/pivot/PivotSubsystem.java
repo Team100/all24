@@ -45,7 +45,6 @@ public class PivotSubsystem extends SubsystemBase implements Glassy {
 
     @Override
     public void periodic() {
-        
         m_logger.log(() -> getAngleRad());
     }
 
