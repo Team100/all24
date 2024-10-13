@@ -3,7 +3,7 @@ import unittest
 from app.camera.fake_camera import FakeCamera
 from app.config.identity import Identity
 from app.dashboard.fake_display import FakeDisplay
-from app.localization.network import Network
+from app.network.fake_network import FakeNetwork
 from app.localization.tag_detector import TagDetector
 
 
@@ -11,7 +11,7 @@ class TagDetectorTest(unittest.TestCase):
 
     def test_one_tag_found(self) -> None:
         identity = Identity.UNKNOWN
-        network = Network(identity)
+        network = FakeNetwork()
         # there are many tags in this file but only the big one
         # is seen by the detector
         # the jpg is very large, so scale it down
@@ -35,7 +35,7 @@ class TagDetectorTest(unittest.TestCase):
 
     def test_zero_tags_found(self) -> None:
         identity = Identity.UNKNOWN
-        network = Network(identity)
+        network = FakeNetwork()
         # nothing in this image
         camera = FakeCamera("white_square.jpg")
         display = FakeDisplay()

@@ -20,12 +20,12 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 from picamera2 import CompletedRequest, Picamera2  # type: ignore
-from picamera2.request import MappedArray, _MappedBuffer  # type: ignore
+from picamera2.request import _MappedBuffer  # type: ignore
 from typing_extensions import override
 
 from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
-from app.localization.network import Network
+from app.network.real_network import Network
 from app.util.timer import Timer
 
 Mat = NDArray[np.uint8]

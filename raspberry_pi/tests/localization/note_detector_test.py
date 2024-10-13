@@ -3,15 +3,15 @@ import unittest
 from app.camera.fake_camera import FakeCamera
 from app.config.identity import Identity
 from app.dashboard.fake_display import FakeDisplay
-from app.localization.network import Network
 from app.localization.note_detector import NoteDetector
+from app.network.fake_network import FakeNetwork
 
 
 class NoteDetectorTest(unittest.TestCase):
 
     def test_one_note_found(self) -> None:
         identity = Identity.UNKNOWN
-        network = Network(identity)
+        network = FakeNetwork()
         # this has an orange blob that matches the
         # HSV range in the note detector
         camera = FakeCamera("blob.jpg")
@@ -29,10 +29,9 @@ class NoteDetectorTest(unittest.TestCase):
         self.assertEqual(482, display.circles[0][0])
         self.assertEqual(468, display.circles[0][1])
 
-
     def test_zero_notes_found(self) -> None:
         identity = Identity.UNKNOWN
-        network = Network(identity)
+        network = FakeNetwork()
         # nothing in this image
         camera = FakeCamera("white_square.jpg")
         display = FakeDisplay()

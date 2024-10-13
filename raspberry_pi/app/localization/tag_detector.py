@@ -16,7 +16,7 @@ from app.camera.camera_protocol import Camera, Request, Size
 from app.camera.interpreter_protocol import Interpreter
 from app.config.identity import Identity
 from app.dashboard.display import Display
-from app.localization.network import Blip24, Network
+from app.network.real_network import Blip24, Network
 from app.util.timer import Timer
 
 Mat = NDArray[np.uint8]
