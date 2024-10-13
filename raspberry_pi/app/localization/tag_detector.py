@@ -135,13 +135,13 @@ class TagDetector(Interpreter):
 
             blips.append(Blip24(result_item.getId(), pose))
             # TODO: turn this off for prod
-            self.display.draw_result(img, result_item, pose)
+            self.display.tag(img, result_item, pose)
 
         estimate_time = Timer.time_ns()
 
         # compute time since last frame
         current_time = Timer.time_ns()
-        total_time_ms = (current_time - self.frame_time) // 1000000
+        total_time_ms = (current_time - self.frame_time) / 1000000
         # total_et = current_time - self.frame_time
         self.frame_time = current_time
 
@@ -176,12 +176,12 @@ class TagDetector(Interpreter):
         # now do the drawing (after the NT payload is written)
         # none of this is particularly fast or important for prod,
 
-        fps = 1000/total_time_ms
-        self.display.draw_text(img, f"FPS {fps:2.0f}", (5, 65))
+        fps = 1000 / total_time_ms
+        self.display.text(img, f"FPS {fps:2.0f}", (5, 65))
         # self.display.draw_text(img, f"total (ms) {total_time_ms:2.0f}", (5, 65))
-        self.display.draw_text(img, f"age (ms) {image_age_ms:2.0f}", (5, 105))
-        self.display.draw_text(img, f"undistort (ms) {undistort_time_ms:2.0f}", (5, 145))
-        self.display.draw_text(img, f"detect (ms) {detect_time_ms:2.0f}", (5, 185))
-        self.display.draw_text(img, f"estimate (ms) {estimate_time_ms:2.0f}", (5, 225))
+        self.display.text(img, f"age (ms) {image_age_ms:2.0f}", (5, 105))
+        self.display.text(img, f"undistort (ms) {undistort_time_ms:2.0f}", (5, 145))
+        self.display.text(img, f"detect (ms) {detect_time_ms:2.0f}", (5, 185))
+        self.display.text(img, f"estimate (ms) {estimate_time_ms:2.0f}", (5, 225))
 
-        self.display.put_frame(img)
+        self.display.put(img)

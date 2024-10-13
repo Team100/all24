@@ -9,18 +9,39 @@ from app.localization.note_detector import NoteDetector
 
 class NoteDetectorTest(unittest.TestCase):
 
-    def test_note_detector(self) -> None:
-
+    def test_one_note_found(self) -> None:
         identity = Identity.UNKNOWN
         network = Network(identity)
+        # this has an orange blob that matches the
+        # HSV range in the note detector
         camera = FakeCamera("blob.jpg")
         display = FakeDisplay()
         note_detector = NoteDetector(identity, camera, 0, display, network)
         request = camera.capture_request()
         note_detector.analyze(request)
 
-        self.assertEqual(1, len(display.result_items))
-        self.assertEqual(1, len(display.poses))
-        self.assertEqual(5, len(display.msgs))
-        self.assertEqual(5, len(display.locs))
+        self.assertEqual(1, len(display.notes))
+        self.assertEqual(1, len(display.circles))
+        self.assertEqual(1, len(display.msgs))
+        self.assertEqual(1, len(display.locs))
+        self.assertEqual(1, display.frame_count)
+
+        self.assertEqual(482, display.circles[0][0])
+        self.assertEqual(468, display.circles[0][1])
+
+
+    def test_zero_notes_found(self) -> None:
+        identity = Identity.UNKNOWN
+        network = Network(identity)
+        # nothing in this image
+        camera = FakeCamera("white_square.jpg")
+        display = FakeDisplay()
+        note_detector = NoteDetector(identity, camera, 0, display, network)
+        request = camera.capture_request()
+        note_detector.analyze(request)
+
+        self.assertEqual(0, len(display.notes))
+        self.assertEqual(0, len(display.circles))
+        self.assertEqual(1, len(display.msgs))
+        self.assertEqual(1, len(display.locs))
         self.assertEqual(1, display.frame_count)

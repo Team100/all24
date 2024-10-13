@@ -7,7 +7,6 @@ from typing import Any
 
 import cv2
 import numpy as np
-from cv2.typing import MatLike
 from numpy.typing import NDArray
 from wpimath.geometry import Rotation3d
 
@@ -116,10 +115,10 @@ class NoteDetector(Interpreter):
             )
 
             objects.append(rotation)
-            self.draw_result(img_bgr, c, cX, cY)
+            self.display.note(img_bgr, c, cX, cY)
 
         t1: int = Timer.time_ns()
-        et_ms = (t1 - t0) // 1000000
+        et_ms = (t1 - t0) / 1000000
         self._et.send(et_ms, 0)
 
         # compute time since last frame
@@ -128,16 +127,9 @@ class NoteDetector(Interpreter):
         # total_et = current_time - self.frame_time
         self.frame_time = current_time
         fps = 1000 / total_time_ms
-        self.display.draw_text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
+        self.display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
 
         # img_output = cv2.resize(img_bgr, (269, 162))
 
         # self.display.put_frame(img_range)
-        self.display.put_frame(img_bgr)
-
-    def draw_result(self, img: MatLike, cnt: MatLike, cX: int, cY: int) -> None:
-        # float_formatter: dict[str, Callable[[float], str]] = {"float_kind": lambda x: f"{x:4.1f}"}
-        cv2.drawContours(img, [cnt], -1, (0, 255, 0), 2)
-        cv2.circle(img, (cX, cY), 7, (0, 0, 0), -1)
-        # cv2.putText(img, f"t: {np.array2string(wpi_t.flatten(), formatter=float_formatter)}", (cX - 20, cY - 20),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+        self.display.put(img_bgr)

@@ -7,10 +7,12 @@ from platform import system
 
 import numpy as np
 from cscore import CameraServer
-from cv2 import FONT_HERSHEY_SIMPLEX, circle, line, putText, resize
+from cv2 import (FONT_HERSHEY_SIMPLEX, circle, drawContours, line, putText,
+                 resize)
 from cv2.typing import MatLike
 from numpy.typing import NDArray
 from robotpy_apriltag import AprilTagDetection
+from typing_extensions import override
 from wpimath.geometry import Transform3d
 
 from app.dashboard.display import Display
@@ -38,39 +40,47 @@ class RealDisplay(Display):
             print("Using CameraServer for Linux")
             self._cvsource = CameraServer.putVideo(str(camera_num), 416, 308)
 
-    def draw_result(
-        self, image: Mat, result_item: AprilTagDetection, pose: Transform3d
+    @override
+    def tag(
+        self, image: MatLike, tag: AprilTagDetection, pose: Transform3d
     ) -> None:
         # TODO use corners instead of detection
 
         # Draw lines around the tag
         for i in range(4):
             j = (i + 1) % 4
-            point1 = (int(result_item.getCorner(i).x), int(result_item.getCorner(i).y))
-            point2 = (int(result_item.getCorner(j).x), int(result_item.getCorner(j).y))
+            point1 = (int(tag.getCorner(i).x), int(tag.getCorner(i).y))
+            point2 = (int(tag.getCorner(j).x), int(tag.getCorner(j).y))
             line(image, point1, point2, WHITE, 2)
 
-        (c_x, c_y) = (int(result_item.getCenter().x), int(result_item.getCenter().y))
+        (c_x, c_y) = (int(tag.getCenter().x), int(tag.getCenter().y))
         circle(image, (c_x, c_y), 10, WHITE, -1)
 
-        tag_id = result_item.getId()
-        self.draw_text(image, f"id {tag_id}", (c_x, c_y))
+        tag_id = tag.getId()
+        self.text(image, f"id {tag_id}", (c_x, c_y))
 
         # type the translation into the image, in WPI coords (x-forward)
 
         t = pose.translation()
-        self.draw_text(
+        self.text(
             image,
             f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
             (c_x - 50, c_y + 40),
         )
+    
+    @override
+    def note(self, image: MatLike, contour: MatLike, c_x: int, c_y: int) -> None:
+        drawContours(image, [contour], -1, (0, 255, 0), 2)
+        circle(image, (c_x, c_y), 7, (0, 0, 0), -1)
 
     # these are white with black outline
-    def draw_text(self, image: MatLike, msg: str, loc: tuple[int, int]) -> None:
+    @override
+    def text(self, image: MatLike, msg: str, loc: tuple[int, int]) -> None:
         putText(image, msg, loc, FONT, 1.5, BLACK, 6)
         putText(image, msg, loc, FONT, 1.5, WHITE, 2)
 
-    def put_frame(self, img: MatLike) -> None:
+    @override
+    def put(self, img: MatLike) -> None:
         # connect to localhost:1181 to see this
         # windows complains about noncontiguous
         # img = np.zeros((100,100), dtype=np.uint8)
