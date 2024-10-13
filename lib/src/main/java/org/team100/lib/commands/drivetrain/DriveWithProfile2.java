@@ -34,8 +34,8 @@ public class DriveWithProfile2 extends Command implements Glassy {
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final SwerveKinodynamics m_limits;
-    private final TrapezoidProfile100 xProfile;
-    private final TrapezoidProfile100 yProfile;
+    private TrapezoidProfile100 xProfile;
+    private TrapezoidProfile100 yProfile;
     private final TrapezoidProfile100 thetaProfile;
     private final double dt = 0.02;
     private double sx = 1;
@@ -99,8 +99,8 @@ public class DriveWithProfile2 extends Command implements Glassy {
                 m_limits.getMaxDriveVelocityM_S(), m_limits.getMaxDriveAccelerationM_S2(), kTranslationalToleranceM, dt,
                 ySetpoint, m_yGoalRaw, slowETA, kTranslationalToleranceM_S);
 
-        xProfile.scale(sx);
-        yProfile.scale(sy);
+        xProfile = xProfile.scale(sx);
+        yProfile = yProfile.scale(sy);
     }
 
     @Override
@@ -155,8 +155,8 @@ public class DriveWithProfile2 extends Command implements Glassy {
     @Override
     public void end(boolean interrupted) {
         m_swerve.stop();
-        xProfile.scale(1/sx);
-        yProfile.scale(1/sy);
+        xProfile = xProfile.scale(1/sx);
+        yProfile = yProfile.scale(1/sy);
     }
 
 }

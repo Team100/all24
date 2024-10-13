@@ -57,7 +57,7 @@ import edu.wpi.first.math.MathUtil;
  */
 public class TrapezoidProfile100 implements Profile100 {
     private final double m_maxVelocity;
-    private double m_maxAcceleration;
+    private final double m_maxAcceleration;
     private final double m_tolerance;
 
     public TrapezoidProfile100(double maxVel, double maxAccel, double tolerance) {
@@ -67,8 +67,7 @@ public class TrapezoidProfile100 implements Profile100 {
     }
 
     public TrapezoidProfile100 scale(double s) {
-        m_maxAcceleration *= s;
-        return new TrapezoidProfile100(m_maxVelocity, m_maxAcceleration, m_tolerance);
+        return new TrapezoidProfile100(m_maxVelocity, s * m_maxAcceleration, m_tolerance);
     }
 
     public double solve(double dt, State100 i, State100 g, double eta, double etaTolerance) {
