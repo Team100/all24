@@ -14,6 +14,7 @@ import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.GravityServoInterface;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
@@ -73,7 +74,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                         kCurrentLimit,
                         ff,
                         pid);
-                RotaryMechanism mech = new RotaryMechanism(
+                RotaryMechanism mech = new SimpleRotaryMechanism(
                         child,
                         motor,
                         new CANSparkEncoder(child, motor),
@@ -97,7 +98,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                 double freeSpeedRad_S = 600;
                 SimulatedBareMotor simMotor = new SimulatedBareMotor(
                         child, freeSpeedRad_S);
-                RotaryMechanism simMech = new RotaryMechanism(
+                RotaryMechanism simMech = new SimpleRotaryMechanism(
                         child,
                         simMotor,
                         new SimulatedBareEncoder(child, simMotor),

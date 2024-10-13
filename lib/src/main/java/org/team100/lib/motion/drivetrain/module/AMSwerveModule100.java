@@ -12,6 +12,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.LinearVelocityServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
@@ -105,7 +106,7 @@ public class AMSwerveModule100 extends SwerveModule100 {
         BareMotorController100 turningMotor = new BareMotorController100(
                 parent,
                 new VictorSP(turningMotorChannel));
-        RotaryMechanism steeringGears = new RotaryMechanism(
+        RotaryMechanism steeringGears = new SimpleRotaryMechanism(
                 parent,
                 turningMotor,
                 new VelocityBareEncoder(parent, turningMotor),
