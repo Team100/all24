@@ -61,7 +61,7 @@ public class RobotContainer {
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
 
         m_pivot = new PivotSubsystem(sysLog, PivotCollection.get(sysLog, 20));
-        m_pivot.setDefaultCommand(new PivotDefault(driverControl::yAxis, m_pivot));
+        m_pivot.setDefaultCommand(new PivotDefault(driverControl::shooterPivot, m_pivot));
 
         m_indexer = IndexerCollection.get(sysLog);
 

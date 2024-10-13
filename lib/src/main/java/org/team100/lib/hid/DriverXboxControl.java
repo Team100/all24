@@ -69,7 +69,7 @@ public class DriverXboxControl implements DriverControl {
     }
 
     @Override
-    public double yAxis() {
+    public double shooterPivot() {
         return -1.0 * m_controller.getLeftY();
     }
 

@@ -79,8 +79,8 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
-    public double yAxis() {
-        return m_driverControl.yAxis();
+    public double shooterPivot() {
+        return m_driverControl.shooterPivot();
     }
 
     @Override
