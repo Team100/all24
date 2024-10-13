@@ -7,6 +7,7 @@ import org.team100.frc2024.Timeless2024;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
 import org.team100.lib.motion.servo.OutboardGravityServo;
@@ -31,7 +32,7 @@ class GravityServoTest implements Timeless2024 {
         TrapezoidProfile100 profile = new TrapezoidProfile100(8, 8, 0.001);
         // motor speed is rad/s
         SimulatedBareMotor simMotor = new SimulatedBareMotor(logger, 600);
-        RotaryMechanism simMech = new RotaryMechanism(
+        RotaryMechanism simMech = new SimpleRotaryMechanism(
                 logger,
                 simMotor,
                 new SimulatedBareEncoder(logger, simMotor),

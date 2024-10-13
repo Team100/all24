@@ -1,61 +1,66 @@
 """ This is the coprocessor main loop.
 
-It takes data from the camera and the gyro, and publishes it
-on network tables.
+Each task is run by its own Looper, in its own thread.
+
+You can't run this from the command line.  To run the app,
+use the script called "runapp.py" in the raspberry_pi directory
+(one level above this one).
 """
 
-from app.camera import Camera, Size
-from app.camera_factory import CameraFactory
-from app.display import Display
-from app.gyro import Gyro
-from app.gyro_factory import GyroFactory
-from config.identity import Identity
-from app.network import Network
-from app.tag_detector import TagDetector
-from app.timer import Timer
+# pylint: disable=R0914
+
+from threading import Event, Thread
+
+from app.camera.camera_factory import CameraFactory
+from app.camera.camera_loop import CameraLoop
+from app.config.identity import Identity
+from app.dashboard.real_display import RealDisplay
+from app.framework.looper import Looper
+from app.localization.network import Network
+from app.localization.note_detector import NoteDetector
+from app.localization.tag_detector import TagDetector
+from app.sensors.gyro_factory import GyroFactory
+from app.sensors.gyro_loop import GyroLoop
 
 
 def main() -> None:
     print("main")
     identity: Identity = Identity.get()
-    cameras: list[Camera] = CameraFactory.get(identity)
-    num = 0
-    tag_detectors = []
-    for camera in cameras:
-        size: Size = camera.get_size()
-        display: Display = Display(size.width, size.height, num)
-        network: Network = Network(identity, num)
-        tag_detectors.append(
-            TagDetector(identity, size.width, size.height, camera, display, network)
-        )
-        num += 1
-        # TODO: make network not just for cameras
-    # gyronetwork: Network = Network(identity, "Gyro")
-    gyronetwork: Network = Network(identity, 2)
-    gyro: Gyro = GyroFactory.get(gyronetwork)
+    network = Network(identity)
 
-    for camera in cameras:
-        camera.start()
+    done = Event()
     try:
-        while True:
-            # the most recent completed frame, from the recent past
-            capture_start: int = Timer.time_ns()
-            requests = []
-            for camera in cameras:
-                requests.append(camera.capture_request())
-            capture_end: int = Timer.time_ns()
-            # capture time is how long we wait for the camera, it should be close to zero.
-            capture_time_ms: int = (capture_end - capture_start) // 1000000
-            network.vision_capture_time_ms.set(capture_time_ms)
-            try:
-                num = 0
-                for tag_detector in tag_detectors:
-                    tag_detector.analyze(requests[num])
-                    num += 1
-                gyro.sample()
-            finally:
-                for request in requests:
-                    request.release()
+        loops: list[Looper] = []
+
+        camera0 = CameraFactory.get(identity, 0, network)
+        size0 = camera0.get_size()
+        display0 = RealDisplay(size0.width, size0.height, "tag0")
+        # display01 = RealDisplay(size0.width, size0.height, "note0")
+        detector0 = TagDetector(identity, camera0, 0, display0, network)
+        # detector01 = NoteDetector(identity, camera0, 1, display01, network)
+        # loops.append(CameraLoop(camera0, [detector0, detector01], done))
+        loops.append(CameraLoop(camera0, [detector0], done))
+
+        # TODO: a better way to associate cameras and detectors
+        #
+        if CameraFactory.get_num_cameras(identity) > 1:
+            camera1 = CameraFactory.get(identity, 1, network)
+            size1 = camera1.get_size()
+            display1 = RealDisplay(size1.width, size1.height, "note1")
+            # display11 = RealDisplay(size1.width, size1.height, "tag1")
+            detector1 = NoteDetector(identity, camera1, 2, display1, network)
+            # detector11 = TagDetector(identity, camera1, 3, display11, network)
+            # loops.append(CameraLoop(camera1, [detector1, detector11], done))
+            loops.append(CameraLoop(camera1, [detector1], done))
+
+        gyro = GyroFactory.get(identity, network)
+        loops.append(GyroLoop(gyro, done))
+
+        for loop in loops:
+            Thread(target=loop.run).start()
+
+        # Waits forever.  If any thread sets the event, exit.
+        done.wait()
+
     finally:
-        for camera in cameras:
-            camera.stop()
+        done.set()  # exit threads cleanly
