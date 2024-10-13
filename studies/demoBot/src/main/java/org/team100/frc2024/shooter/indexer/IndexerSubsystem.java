@@ -2,13 +2,14 @@ package org.team100.frc2024.shooter.indexer;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.servo.OutboardLinearPositionServo;
 import org.team100.lib.profile.TrapezoidProfile100;
 
-public class IndexerSubsystem implements Glassy {
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class IndexerSubsystem extends SubsystemBase implements Indexer {
 
     private final double kIndexerVelocityM_S;
     private final double m_objectLength;
@@ -27,19 +28,19 @@ public class IndexerSubsystem implements Glassy {
     }
 
     public void index() {
-        m_linearMechanism.setVelocity(kIndexerVelocityM_S, 0, 0);
+        set(kIndexerVelocityM_S);
     }
 
     public void unindex() {
-        m_linearMechanism.setVelocity(-1.0 * kIndexerVelocityM_S,0, 0);
+        set(-1.0 * kIndexerVelocityM_S);
     }
     
     public void indexOne() {
-        m_indexer.setPosition(m_indexer.getPosition().getAsDouble() + m_objectLength,0);
+        setAngle(m_indexer.getPosition().getAsDouble() + m_objectLength);
     }
 
     public void unindexOne() {
-        m_indexer.setPosition(m_indexer.getPosition().getAsDouble() - m_objectLength,0);
+        setAngle(m_indexer.getPosition().getAsDouble() - m_objectLength);
     }
 
     public void stop() {
@@ -53,5 +54,20 @@ public class IndexerSubsystem implements Glassy {
     @Override
     public String getGlassName() {
         return "Indexer";
+    }
+
+    @Override
+    public void set(double value) {
+        m_linearMechanism.setVelocity(value,0, 0);
+    }
+
+    @Override
+    public void setAngle(double value) {
+        m_indexer.setPosition(value,0);
+    }
+
+    @Override
+    public double getAngle() {
+        return m_indexer.getPosition().getAsDouble();
     }
 }

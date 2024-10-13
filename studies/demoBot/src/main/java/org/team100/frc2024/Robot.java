@@ -131,6 +131,7 @@ public class Robot extends TimedRobot100 {
 
     @Override
     public void teleopInit() {
+        m_robotContainer.onTeleopInit();
         // this cancels all the default commands, resulting in them being rescheduled
         // immediately, which seems like maybe not great?
         CommandScheduler.getInstance().cancelAll();

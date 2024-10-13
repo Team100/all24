@@ -155,6 +155,11 @@ public class OnboardGravityServo implements GravityServoInterface {
     }
 
     @Override
+    public void setEncoderPosition(double positionRad) {
+        m_mech.setEncoderPosition(positionRad);
+    }
+
+    @Override
     public void setTorqueLimit(double torqueNm) {
         m_mech.setTorqueLimit(torqueNm);
     }
