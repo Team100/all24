@@ -4,7 +4,6 @@
 # pylint: disable=C0415
 
 from app.camera.camera_protocol import Camera
-from app.camera.fake_camera import NoteCamera
 from app.config.identity import Identity
 from app.localization.network import Network
 
@@ -22,8 +21,8 @@ class CameraFactory:
             from app.camera.fake_camera import FakeCamera
 
             if camera_num == 0:
-                return FakeCamera()
-            return NoteCamera()
+                return FakeCamera("tag_and_board.jpg", (1100, 620))
+            return FakeCamera("blob.jpg")
 
     @staticmethod
     def get_num_cameras(identity: Identity) -> int:

@@ -1,10 +1,10 @@
 import unittest
 
-from app.localization.note_detector import NoteDetector
-from app.camera.fake_camera import NoteCamera
+from app.camera.fake_camera import FakeCamera
 from app.config.identity import Identity
 from app.dashboard.fake_display import FakeDisplay
 from app.localization.network import Network
+from app.localization.note_detector import NoteDetector
 
 
 class NoteDetectorTest(unittest.TestCase):
@@ -13,7 +13,7 @@ class NoteDetectorTest(unittest.TestCase):
 
         identity = Identity.UNKNOWN
         network = Network(identity)
-        camera = NoteCamera()
+        camera = FakeCamera("blob.jpg")
         display = FakeDisplay()
         note_detector = NoteDetector(identity, camera, 0, display, network)
         request = camera.capture_request()

@@ -124,7 +124,7 @@ class NoteDetector(Interpreter):
 
         # compute time since last frame
         current_time = Timer.time_ns()
-        total_time_ms = (current_time - self.frame_time) // 1000000
+        total_time_ms = (current_time - self.frame_time) / 1000000
         # total_et = current_time - self.frame_time
         self.frame_time = current_time
         fps = 1000 / total_time_ms
