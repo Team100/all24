@@ -1,6 +1,5 @@
 import unittest
 
-from app.config.identity import Identity
 from app.network.fake_network import FakeNetwork, doubles
 
 

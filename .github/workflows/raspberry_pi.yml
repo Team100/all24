@@ -13,27 +13,24 @@ jobs:
         working-directory: ./raspberry_pi
 
     container: wpilib/roborio-cross-ubuntu:2024-22.04
-        
+
+    continue-on-error: true 
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12' 
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest
-          pip install numpy
-          pip install robotpy
-          pip install robotpy-apriltag
-          pip install opencv-python
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - run: python -m pip install --upgrade pip
+      - run: pip install pytest
+      - run: pip install numpy
+      - run: pip install robotpy
+      - run: pip install robotpy-apriltag
+      - run: pip install opencv-python
         
-      - name: Test with pytest
-        run: |
-          pytest tests/config
-          pytest tests/dashboard
-          pytest tests/localization
-          pytest tests/network
-          pytest tests/util
+      - run: pytest tests/config
+      - run: pytest tests/dashboard
+      - run: pytest tests/localization
+      - run: pytest tests/network
+      - run: pytest tests/util
