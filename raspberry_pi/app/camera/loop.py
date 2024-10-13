@@ -14,27 +14,23 @@ from app.framework.looper import Looper
 class CameraLoop(Looper):
     def __init__(
         self,
-        interpreter: Interpreter,
+        interpreters: list[Interpreter],
         camera: Camera,
         done: Event,
     ) -> None:
-        self.interpreter = interpreter
+        super().__init__(done)
+        self.interpreters = interpreters
         self.camera = camera
-        self.done = done
 
     @override
-    def run(self) -> None:
-        # the camera loop runs as fast as possible,
-        # because the interpreter is slower than the camera.
+    def execute(self) -> None:
+        req = self.camera.capture_request()
         try:
-            while True:
-                if self.done.is_set():  # exit cleanly
-                    return
-                req = self.camera.capture_request()
-                try:
-                    self.interpreter.analyze(req)
-                finally:
-                    req.release()
+            for i in self.interpreters:
+                i.analyze(req)
         finally:
-            self.camera.stop()
-            self.done.set()
+            req.release()
+
+    @override
+    def end(self) -> None:
+        self.camera.stop()

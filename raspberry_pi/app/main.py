@@ -36,7 +36,7 @@ def main() -> None:
         size0 = camera0.get_size()
         display0 = RealDisplay(size0.width, size0.height, 0)
         detector0 = TagDetector(identity, camera0, 0, display0, network)
-        loops.append(CameraLoop(detector0, camera0, done))
+        loops.append(CameraLoop([detector0], camera0, done))
 
         # TODO: a better way to associate cameras and detectors
         #
@@ -45,7 +45,7 @@ def main() -> None:
             size1 = camera1.get_size()
             display1 = RealDisplay(size1.width, size1.height, 1)
             detector1 = NoteDetector(identity, camera1, 1, display1, network)
-            loops.append(CameraLoop(detector1, camera1, done))
+            loops.append(CameraLoop([detector1], camera1, done))
 
         gyro = GyroFactory.get(identity, network)
         loops.append(GyroLoop(gyro, done))

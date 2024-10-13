@@ -13,18 +13,16 @@ from app.sensors.gyro_protocol import Gyro
 
 class GyroLoop(Looper):
     def __init__(self, gyro: Gyro, done: Event) -> None:
+        super().__init__(done)
         self.gyro = gyro
-        self.done = done
 
     @override
-    def run(self) -> None:
-        try:
-            while True:
-                # the gyro only has new data every 10 ms,
-                # so don't bother sampling more often than that.
-                time.sleep(0.01)
-                if self.done.is_set():  # exit cleanly
-                    return
-                self.gyro.sample()
-        finally:
-            self.done.set()
+    def execute(self) -> None:
+        self.gyro.sample()
+        # the gyro only has new data every 10 ms,
+        # so don't bother sampling more often than that.
+        time.sleep(0.01)
+
+    @override
+    def end(self) -> None:
+        pass
