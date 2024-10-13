@@ -23,4 +23,5 @@ except ImportError:
 class Timer:
     @staticmethod
     def time_ns() -> int:
+        """Nanoseconds since boot, aligns with SensorTimestamp."""
         return _time()

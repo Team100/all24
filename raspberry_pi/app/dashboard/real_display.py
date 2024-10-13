@@ -26,19 +26,19 @@ Mat = NDArray[np.uint8]
 
 
 class RealDisplay(Display):
-    def __init__(self, width: int, height: int, camera_num: int) -> None:
+    def __init__(self, width: int, height: int, name: str) -> None:
         if system() == "Windows":
             print("Using MJpegServer for Windows")
             # on windows, cvsource breaks with cvnp contiguous-array error
             # i think (width,height) are optional, it will use frame shape.
             # TODO: remove width,height
-            self._stream = Stream("Processed", (width, height), quality=50, fps=30)
+            self._stream = Stream(name, (width, height), quality=50, fps=30)
             self._server = MjpegServer("localhost", 1181)
             self._server.add_stream(self._stream)
             self._server.start()
         else:
             print("Using CameraServer for Linux")
-            self._cvsource = CameraServer.putVideo(str(camera_num), 416, 308)
+            self._cvsource = CameraServer.putVideo(name, 416, 308)
 
     @override
     def tag(

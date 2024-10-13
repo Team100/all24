@@ -27,8 +27,10 @@ class Request(Protocol):
 
 @dataclass(frozen=True, kw_only=True)
 class Size:
-    fullwidth: int
-    fullheight: int
+    """Sensor width and height must be equal to one of the 'size' options
+    in the list of sensor formats."""
+    sensor_width: int
+    sensor_height: int
     width: int
     height: int
 
@@ -39,3 +41,4 @@ class Camera(Protocol):
     def get_size(self) -> Size: ...
     def get_intrinsic(self) -> Mat: ...
     def get_dist(self) -> Mat: ...
+    def is_rolling_shutter(self) -> bool: ...

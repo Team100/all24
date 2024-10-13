@@ -8,7 +8,8 @@ from typing import Any
 import numpy as np
 from cv2 import undistortImagePoints
 from numpy.typing import NDArray
-from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
+from robotpy_apriltag import (AprilTagDetection, AprilTagDetector,
+                              AprilTagPoseEstimator)
 from typing_extensions import override
 
 from app.camera.camera_protocol import Camera, Request, Size
@@ -31,6 +32,7 @@ class TagDetector(Interpreter):
         network: Network,
     ) -> None:
         self.identity = identity
+        self.cam = cam
         self.camera_num = camera_num
         self.display = display
         self.network = network
@@ -40,16 +42,12 @@ class TagDetector(Interpreter):
         path = "vision/" + identity.value + "/" + str(camera_num)
         self._blips = network.get_blip_sender(path + "/blips")
 
-        self._total_time = network.get_double_sender(path + "/total_time_ms")
-        self._image_age = network.get_double_sender(path + "/image_age_ms")
-        self._detect_time = network.get_double_sender(path + "/detect_time_ms")
-
         self.width: int = size.width
         self.height: int = size.height
 
         self.y_len = self.width * self.height
 
-        self.frame_time = Timer.time_ns()
+        self.frame_time_ns = Timer.time_ns()
 
         self.at_detector: AprilTagDetector = AprilTagDetector()
 
@@ -80,8 +78,6 @@ class TagDetector(Interpreter):
             self.analyze2(metadata, buffer)
 
     def analyze2(self, metadata: dict[str, Any], buffer: mmap) -> None:
-        # how old is the frame when we receive it?
-        received_time: int = Timer.time_ns()
         # truncate, ignore chrominance. this makes a view, very fast (300 ns)
         img: Mat = np.frombuffer(buffer, dtype=np.uint8, count=self.y_len)
 
@@ -98,9 +94,7 @@ class TagDetector(Interpreter):
         else:
             img = img[: self.height, : self.width]
 
-        undistort_time: int = Timer.time_ns()
         result: list[AprilTagDetection] = self.at_detector.detect(img.data)
-        detect_time: int = Timer.time_ns()
 
         blips: list[Blip24] = []
         result_item: AprilTagDetection
@@ -137,51 +131,40 @@ class TagDetector(Interpreter):
             # TODO: turn this off for prod
             self.display.tag(img, result_item, pose)
 
-        estimate_time = Timer.time_ns()
+        # time since last frame
+        current_time_ns = Timer.time_ns()
+        total_time_ms = (current_time_ns - self.frame_time_ns) / 1000000
+        self.frame_time_ns = current_time_ns
 
-        # compute time since last frame
-        current_time = Timer.time_ns()
-        total_time_ms = (current_time - self.frame_time) / 1000000
-        # total_et = current_time - self.frame_time
-        self.frame_time = current_time
-
-        # TODO: move this reference to SensorTimestamp to the camera
-        # first row
+        # TODO: move this timing logic to the camera
+        # time of first row received
         sensor_timestamp_ns = metadata["SensorTimestamp"]
-        # how long for all the rows
-        frame_duration_ns = metadata["FrameDuration"] * 1000
-        # time of the middle row in the sensor
-        # note this assumes a continuously rolling shutter
-        # and will be completely wrong for a global shutter
-        # TODO: global shutter case
-        sensor_midpoint_ns = sensor_timestamp_ns + frame_duration_ns / 2
-        image_age_ms = (received_time - sensor_timestamp_ns) // 1000000
-        undistort_time_ms = (undistort_time - received_time) // 1000000
-        detect_time_ms = (detect_time - undistort_time) // 1000000
-        estimate_time_ms = (estimate_time - detect_time) // 1000000
+
+        # For a global shutter, the whole frame is exposed a little before
+        # the SensorTimestamp.
+        sensor_midpoint_ns = sensor_timestamp_ns
+
+        if self.cam.is_rolling_shutter():
+            # For a rolling shutter, rows are exposed over the entire
+            # frame duration (1/fps).
+            # TODO: assign a different timestamp to each tag, depending on
+            # where it is in the frame.
+            frame_duration_ns = metadata["FrameDuration"] * 1000
+            sensor_midpoint_ns = sensor_timestamp_ns + frame_duration_ns / 2
+
         # oldest_pixel_ms = (system_time_ns - (sensor_timestamp - 1000 * metadata["ExposureTime"])) // 1000000
         # sensor timestamp is the boottime when the first byte was received from the sensor
 
+        # send all the data over the network
         delay_ns: int = Timer.time_ns() - sensor_midpoint_ns
         delay_us = delay_ns // 1000
-
         self._blips.send(blips, delay_us)
-        self._total_time.send(total_time_ms, delay_us)
-        self._image_age.send(image_age_ms, delay_us)
-        self._detect_time.send(detect_time_ms, delay_us)
-
         # must flush!  otherwise 100ms update rate.
         self.network.flush()
 
-        # now do the drawing (after the NT payload is written)
-        # none of this is particularly fast or important for prod,
-
+        # do the drawing (after the NT payload is written)
+        # none of this is particularly fast or important for prod.
         fps = 1000 / total_time_ms
         self.display.text(img, f"FPS {fps:2.0f}", (5, 65))
-        # self.display.draw_text(img, f"total (ms) {total_time_ms:2.0f}", (5, 65))
-        self.display.text(img, f"age (ms) {image_age_ms:2.0f}", (5, 105))
-        self.display.text(img, f"undistort (ms) {undistort_time_ms:2.0f}", (5, 145))
-        self.display.text(img, f"detect (ms) {detect_time_ms:2.0f}", (5, 185))
-        self.display.text(img, f"estimate (ms) {estimate_time_ms:2.0f}", (5, 225))
-
+        self.display.text(img, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
         self.display.put(img)

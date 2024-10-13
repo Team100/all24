@@ -12,7 +12,7 @@ use the script called "runapp.py" in the raspberry_pi directory
 from threading import Event, Thread
 
 from app.camera.camera_factory import CameraFactory
-from app.camera.loop import CameraLoop
+from app.camera.camera_loop import CameraLoop
 from app.config.identity import Identity
 from app.dashboard.real_display import RealDisplay
 from app.framework.looper import Looper
@@ -20,7 +20,7 @@ from app.localization.network import Network
 from app.localization.note_detector import NoteDetector
 from app.localization.tag_detector import TagDetector
 from app.sensors.gyro_factory import GyroFactory
-from app.sensors.loop import GyroLoop
+from app.sensors.gyro_loop import GyroLoop
 
 
 def main() -> None:
@@ -34,18 +34,24 @@ def main() -> None:
 
         camera0 = CameraFactory.get(identity, 0, network)
         size0 = camera0.get_size()
-        display0 = RealDisplay(size0.width, size0.height, 0)
+        display0 = RealDisplay(size0.width, size0.height, "tag0")
+        # display01 = RealDisplay(size0.width, size0.height, "note0")
         detector0 = TagDetector(identity, camera0, 0, display0, network)
-        loops.append(CameraLoop([detector0], camera0, done))
+        # detector01 = NoteDetector(identity, camera0, 1, display01, network)
+        # loops.append(CameraLoop(camera0, [detector0, detector01], done))
+        loops.append(CameraLoop(camera0, [detector0], done))
 
         # TODO: a better way to associate cameras and detectors
         #
         if CameraFactory.get_num_cameras(identity) > 1:
             camera1 = CameraFactory.get(identity, 1, network)
             size1 = camera1.get_size()
-            display1 = RealDisplay(size1.width, size1.height, 1)
-            detector1 = NoteDetector(identity, camera1, 1, display1, network)
-            loops.append(CameraLoop([detector1], camera1, done))
+            display1 = RealDisplay(size1.width, size1.height, "note1")
+            # display11 = RealDisplay(size1.width, size1.height, "tag1")
+            detector1 = NoteDetector(identity, camera1, 2, display1, network)
+            # detector11 = TagDetector(identity, camera1, 3, display11, network)
+            # loops.append(CameraLoop(camera1, [detector1, detector11], done))
+            loops.append(CameraLoop(camera1, [detector1], done))
 
         gyro = GyroFactory.get(identity, network)
         loops.append(GyroLoop(gyro, done))

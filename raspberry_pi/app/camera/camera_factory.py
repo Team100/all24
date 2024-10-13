@@ -27,14 +27,13 @@ class CameraFactory:
     @staticmethod
     def get_num_cameras(identity: Identity) -> int:
         match identity:
-            case Identity.UNKNOWN:  # will use FakeCamera and NoteCamera
+            case Identity.UNKNOWN:
                 return 2
             case (
                 Identity.RIGHTAMP
                 | Identity.LEFTAMP
                 | Identity.SHOOTER
                 | Identity.GAME_PIECE
-                | Identity.UNKNOWN  # will use FakeCamera
                 | Identity.DEV # has one v2 camera at the moment
             ):
                 return 1

@@ -77,8 +77,8 @@ class FakeCamera(Camera):
     @override
     def get_size(self) -> Size:
         return Size(
-            fullwidth=self.w,
-            fullheight=self.h,
+            sensor_width=self.w,
+            sensor_height=self.h,
             width=self.w,
             height=self.h,
         )
@@ -96,3 +96,7 @@ class FakeCamera(Camera):
     @override
     def get_dist(self) -> Mat:
         return np.array([0, 0, 0, 0])
+    
+    @override
+    def is_rolling_shutter(self) -> bool:
+        return True

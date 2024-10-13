@@ -47,11 +47,11 @@ class RealRequest(Request):
     @override
     def rgb(self) -> AbstractContextManager[mmap]:
         return self._buffer("main")
-    
+
     @override
     def yuv(self) -> AbstractContextManager[mmap]:
         return self._buffer("lores")
-    
+
     def _buffer(self, stream: str) -> AbstractContextManager[mmap]:
         # Returns AbstractContextManager[mmap] because the flow is:
         #
@@ -125,6 +125,7 @@ class RealCamera(Camera):
         self._capture_time = network.get_double_sender(path + "/capture_time_ms")
         self.cam: Picamera2 = Picamera2(camera_num)
         model: Model = Model.get(self.cam)
+        self.rolling = RealCamera.__rolling_from_model(model)
         self.size: Size = RealCamera.__size_from_model(model)
         self.camera_config: dict[str, Any] = RealCamera.__get_config(
             identity, self.cam, self.size
@@ -139,10 +140,20 @@ class RealCamera(Camera):
 
         print("\nREQUESTED CONFIG")
         print(self.camera_config)
-        self.cam.align_configuration(self.camera_config)  # type:ignore
+        # optimal alignment makes the ISP a little faster
+        self.cam.align_configuration(self.camera_config, optimal=True)  # type:ignore
         print("\nALIGNED CONFIG")
         print(self.camera_config)
         self.cam.configure(self.camera_config)  # type:ignore
+        if (
+            self.camera_config["sensor"]["output_size"]
+            != self.cam.camera_config["sensor"]["output_size"]  # type:ignore
+        ):
+            raise ValueError(
+                "desired sensor size must match selected sensor size",
+                self.camera_config["sensor"]["output_size"],
+                self.cam.camera_config["sensor"]["output_size"],  # type:ignore
+            )
         print("\nCONTROLS")
         print(self.cam.camera_controls)  # type:ignore
         self.cam.start()  # type:ignore
@@ -153,7 +164,7 @@ class RealCamera(Camera):
         req: CompletedRequest = self.cam.capture_request()  # type:ignore
         capture_end: int = Timer.time_ns()
         # capture time is how long we wait for the camera, it should be close to zero.
-        capture_time_ms: int = (capture_end - capture_start) // 1000000
+        capture_time_ms = (capture_end - capture_start) / 1000000
         self._capture_time.send(capture_time_ms, 0)
         return RealRequest(req)
 
@@ -174,20 +185,30 @@ class RealCamera(Camera):
     def get_dist(self) -> Mat:
         return self.dist
 
+    @override
+    def is_rolling_shutter(self) -> bool:
+        return self.rolling
+
     @staticmethod
     def __size_from_model(model: Model) -> Size:
         match model:
             case Model.V3_WIDE:
-                return Size(fullwidth=2304, fullheight=1296, width=1152, height=648)
+                return Size(
+                    sensor_width=2304, sensor_height=1296, width=1152, height=648
+                )
 
             case Model.V2:
-                return Size(fullwidth=1664, fullheight=1232, width=832, height=616)
+                return Size(
+                    sensor_width=1640, sensor_height=1232, width=832, height=616
+                )
 
             case Model.GS:
-                return Size(fullwidth=1408, fullheight=1088, width=1408, height=1088)
+                return Size(
+                    sensor_width=1408, sensor_height=1088, width=1408, height=1088
+                )
 
             case _:
-                return Size(fullwidth=100, fullheight=100, width=100, height=100)
+                return Size(sensor_width=100, sensor_height=100, width=100, height=100)
 
     @staticmethod
     def __get_config(identity: Identity, cam: Picamera2, size: Size) -> dict[str, Any]:
@@ -199,21 +220,22 @@ class RealCamera(Camera):
             # other for the camera to fill.
             queue=True,
             # TODO: make this direct sensor configuration actually work
+            #
             sensor={
-                "output_size": (size.fullwidth, size.fullheight),
-                # TODO: is lower depth better?  v2 has 8, v3 only 10.  what about GS?
+                "output_size": (size.sensor_width, size.sensor_height),
                 "bit_depth": 10,
             },
             # TODO: make main RGB so we can provide it to color-desiring interpreters
             main={
                 # see Appendix A for format strings.  Note "BGR" really means "RGB" (!)
-                "format": "BGR888",
+                "format": "RGB888",
                 "size": (size.width, size.height),
             },
             lores={
                 "format": "YUV420",
                 "size": (size.width, size.height),
             },
+            raw=None,
             controls={
                 "ExposureTime": RealCamera.__get_exposure_time(identity),
                 "AnalogueGain": 8,
@@ -286,3 +308,7 @@ class RealCamera(Camera):
                 return np.array([[0, 0, 0, 0]])
             case _:
                 return np.array([[0, 0, 0, 0]])
+
+    @staticmethod
+    def __rolling_from_model(model: Model) -> bool:
+        return model != Model.GS

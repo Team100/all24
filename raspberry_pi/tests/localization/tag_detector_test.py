@@ -23,8 +23,8 @@ class TagDetectorTest(unittest.TestCase):
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
-        self.assertEqual(5, len(display.msgs))
-        self.assertEqual(5, len(display.locs))
+        self.assertEqual(2, len(display.msgs))
+        self.assertEqual(2, len(display.locs))
         self.assertEqual(1, display.frame_count)
 
         self.assertAlmostEqual(282, display.tags[0].getCenter().x, 0)
@@ -45,6 +45,6 @@ class TagDetectorTest(unittest.TestCase):
 
         self.assertEqual(0, len(display.tags))
         self.assertEqual(0, len(display.poses))
-        self.assertEqual(5, len(display.msgs))
-        self.assertEqual(5, len(display.locs))
+        self.assertEqual(2, len(display.msgs))
+        self.assertEqual(2, len(display.locs))
         self.assertEqual(1, display.frame_count)
