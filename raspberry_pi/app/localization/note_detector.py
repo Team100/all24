@@ -2,6 +2,7 @@
 
 # pylint: disable=C0103,E1101,R0902,R0913,R0914,W0612
 
+from mmap import mmap
 from typing import Any
 
 import cv2
@@ -46,15 +47,22 @@ class NoteDetector(Interpreter):
 
     def analyze(self, req: Request) -> None:
         metadata: dict[str, Any] = req.metadata()
-        with req.array() as mapped_array:
-            self.analyze2(metadata, mapped_array.array)
+        with req.rgb() as buffer:
+            self.analyze2(metadata, buffer)
 
-    def analyze2(self, metadata: dict[str, Any], img_yuv: MatLike) -> None:
+    def analyze2(self, metadata: dict[str, Any], buffer: mmap) -> None:
+        # Wants a buffer in BGR format.  Remember that when OpenCV says
+        # "RGB" it really means "BGR"
+        # github.com/raspberrypi/picamera2/issues/848
+
         t0 = Timer.time_ns()
 
-        # this says YUV->RGB but it actually makes BGR.
-        # github.com/raspberrypi/picamera2/issues/848
-        img_bgr: MatLike = cv2.cvtColor(img_yuv, cv2.COLOR_YUV420p2RGB)
+        size = self.camera.get_size()
+        width = size.width
+        height = size.height
+
+        img: Mat = np.frombuffer(buffer, dtype=np.uint8)
+        img_bgr = img.reshape((height, width, 3))
 
         # TODO: figure out the crop
         # img_bgr : Mat = img_bgr[65:583, :, :]
@@ -75,9 +83,6 @@ class NoteDetector(Interpreter):
         img_floodfill = cv2.bitwise_or(img_range, floodfill_inv)
         median = cv2.medianBlur(img_floodfill, 5)
         contours, _ = cv2.findContours(median, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        size = self.camera.get_size()
-        width = size.width
-        height = size.height
 
         objects: list[Rotation3d] = []
         for c in contours:

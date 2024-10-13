@@ -14,20 +14,10 @@ from cv2.typing import MatLike
 from numpy.typing import NDArray
 from typing_extensions import override
 
-from app.camera.camera_protocol import Camera, HasMat, Request, Size
+from app.camera.camera_protocol import Camera, Request, Size
 from app.util.timer import Timer
 
 Mat = NDArray[np.uint8]
-
-
-class FakeArray(HasMat):
-    def __init__(self, val: Mat) -> None:
-        self.val = val
-
-    @property
-    @override
-    def array(self) -> Mat:
-        return self.val
 
 
 class FakeRequest(Request):
@@ -47,13 +37,12 @@ class FakeRequest(Request):
         self.tempfile.close()
 
     @override
-    def buffer(self) -> AbstractContextManager[mmap]:
+    def rgb(self) -> AbstractContextManager[mmap]:
         return nullcontext(self.mmap)
 
     @override
-    def array(self) -> AbstractContextManager[HasMat]:
-        array = np.array(self.mmap, copy=False, dtype=np.uint8)
-        return nullcontext(FakeArray(array))
+    def yuv(self) -> AbstractContextManager[mmap]:
+        return nullcontext(self.mmap)
 
     @override
     def metadata(self) -> dict[str, Any]:

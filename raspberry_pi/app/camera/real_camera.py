@@ -33,57 +33,65 @@ Mat = NDArray[np.uint8]
 
 class RealRequest(Request):
     def __init__(self, req: CompletedRequest):
-        # before we get a CompletedRequest, its constructor has used the
-        # camera allocator sync property to instantiate a DMA allocator sync for
-        # each buffer, told the camera allocator to mark the buffers as
-        # 'in use', and __enter__()ed the DmaSync for each buffer, which
-        # marks them with ioctl DMA_BUF_SYNC_START
+        # Before we get a CompletedRequest, its constructor has used the
+        # camera allocator sync property to:
+        # * instantiate a DMA allocator sync for each buffer
+        # * tell the camera allocator to mark the buffers as 'in use'
+        # * __enter__() each buffer's DmaSync, which calls ioctl DMA_BUF_SYNC_START
         self._req = req
-
-    @override
-    def release(self) -> None:
-        # this calls DmaSync.__exit__() which invokes ioctl DMA_BUF_SYNC_END
-        # to release the DMA buffer, and unmark the app-level 'in use' flag.
-        self._req.release()
-
-    @override
-    def buffer(self) -> AbstractContextManager[mmap]:
-        # TODO: we don't need to do this, because the app-level and
-        # DMA-level in-use marking was done by the Completed Request constructor
-        # and the release() method.
-
-        # TODO: so get rid of this.
-        #
-        # see CompletedRequest.make_buffer()
-        # which makes an np.array from the _MappedBuffer.
-        # for greyscale, you can use np.frombuffer().
-        #
-        # this is AbstractContextManager[mmap] because the flow is:
-        # during picamera2.configure(), the DmaAllocator allocates
-        # the requested (buffer_count) number of dma buffers, which
-        # are mmap.mmap objects.
-        # the camera uses DmaAllocator, whose sync property
-        # is the DmaSync constructor
-        # the _MappedBuffer constructor invokes this constructor
-        # to get a sync object, which is the delegate for the _MappedBuffer
-        # __enter__() method, which simply returns the mmap above.
-        #
-        # the reason to use a MappedBuffer is in order to release
-        # the dma buffer when we're done with it, which happens
-        # in MappedBuffer.__exit__(), which again delegates to the
-        # sync object, which uses the appropriate ioctl flags.
-        #
-        # since _MappedBuffer implements __enter__ and __exit__, we
-        # can duck-type it an AbstractContextManager.
-        return _MappedBuffer(self._req, "lores")  # type: ignore
-
-    @override
-    def array(self) -> AbstractContextManager[MappedArray]:  # type:ignore
-        return MappedArray(self._req, "lores")
 
     @override
     def metadata(self) -> dict[str, Any]:
         return self._req.get_metadata()  # type: ignore
+
+    @override
+    def rgb(self) -> AbstractContextManager[mmap]:
+        return self._buffer("main")
+    
+    @override
+    def yuv(self) -> AbstractContextManager[mmap]:
+        return self._buffer("lores")
+    
+    def _buffer(self, stream: str) -> AbstractContextManager[mmap]:
+        # Returns AbstractContextManager[mmap] because the flow is:
+        #
+        # During picamera2.configure(), the DmaAllocator allocates
+        # the requested (buffer_count) number of dma buffers, which
+        # are mmap.mmap objects.
+        #
+        # The camera uses DmaAllocator, whose sync property
+        # is the DmaSync constructor.
+        #
+        # The _MappedBuffer constructor invokes the DmaSync constructor
+        # to get a DmaSync.  _MappedBuffer.__enter__() delegates to DmaSync to
+        # do the ioctl DMA_BUF_SYNC_START (again), and return the mmap.
+        #
+        # _MappedBuffer.__exit__() also delegates to DmaSync, which implements
+        # DMA_BUF_SYNC_END.
+        #
+        # since _MappedBuffer implements __enter__ and __exit__, we
+        # can duck-type it an AbstractContextManager.
+        #
+        # Note that when the _MappedBuffer is __exit__'ed, the DMA buffer should
+        # not be touched anymore, which means not using numpy views on it.
+        # The Picamera code addresses this in CompletedRequest.make_buffer by
+        # *copying* the buffer, but we definitely don't want to do that.  Just
+        # do all your work on the buffer within the scope of the context manager.
+        #
+        # This use of _MappedBuffer is not necessary for the buffer-reservation
+        # (it's done by the CompletedRequest), but using _MappedBuffer is, by far,
+        # the easiest way to get at the mmap buffer.
+        #
+        # To use the mmap, you can pass it to np.frombuffer().
+        return _MappedBuffer(self._req, stream)  # type: ignore
+
+    @override
+    def release(self) -> None:
+        # Calls DmaSync.__exit__() which invokes ioctl DMA_BUF_SYNC_END
+        # to release the DMA buffer, and unmark the app-level 'in use' flag.
+        # Note that the _MappedBuffer has already done the ioctl work, so this
+        # is redundant.
+        self._req.release()
 
 
 @unique
@@ -183,6 +191,7 @@ class RealCamera(Camera):
 
     @staticmethod
     def __get_config(identity: Identity, cam: Picamera2, size: Size) -> dict[str, Any]:
+        """Consult https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf"""
         camera_config: dict[str, Any] = cam.create_still_configuration(  # type:ignore
             # more buffers seem to make the pipeline a little smoother
             buffer_count=5,
@@ -191,14 +200,15 @@ class RealCamera(Camera):
             queue=True,
             # TODO: make this direct sensor configuration actually work
             sensor={
-                "output_size": (size.width, size.height),
+                "output_size": (size.fullwidth, size.fullheight),
                 # TODO: is lower depth better?  v2 has 8, v3 only 10.  what about GS?
                 "bit_depth": 10,
             },
             # TODO: make main RGB so we can provide it to color-desiring interpreters
             main={
-                "format": "YUV420",
-                "size": (size.fullwidth, size.fullheight),
+                # see Appendix A for format strings.  Note "BGR" really means "RGB" (!)
+                "format": "BGR888",
+                "size": (size.width, size.height),
             },
             lores={
                 "format": "YUV420",

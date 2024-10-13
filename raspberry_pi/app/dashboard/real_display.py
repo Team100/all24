@@ -66,7 +66,7 @@ class RealDisplay(Display):
         )
 
     # these are white with black outline
-    def draw_text(self, image: Mat, msg: str, loc: tuple[int, int]) -> None:
+    def draw_text(self, image: MatLike, msg: str, loc: tuple[int, int]) -> None:
         putText(image, msg, loc, FONT, 1.5, BLACK, 6)
         putText(image, msg, loc, FONT, 1.5, WHITE, 2)
 

@@ -76,7 +76,7 @@ class TagDetector(Interpreter):
     @override
     def analyze(self, req: Request) -> None:
         metadata: dict[str, Any] = req.metadata()
-        with req.buffer() as buffer:
+        with req.yuv() as buffer:
             self.analyze2(metadata, buffer)
 
     def analyze2(self, metadata: dict[str, Any], buffer: mmap) -> None:
