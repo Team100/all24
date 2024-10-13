@@ -79,6 +79,11 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
+    public double shooterPivot() {
+        return m_driverControl.shooterPivot();
+    }
+
+    @Override
     public Velocity velocity() {
         return m_driverControl.velocity();
     }

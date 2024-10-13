@@ -80,6 +80,11 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         m_mechanism.setTorqueLimit(torqueNm);
     }
 
+    @Override
+    public void setEncoderPosition(double value) {
+        m_mechanism.setEncoderPosition(value);
+    }
+
     /** The outboard measurement does not wrap, but the goal does */
     @Override
     public void setPositionWithVelocity(double wrappedGoalRad, double goalVelocity, double feedForwardTorqueNm) {
