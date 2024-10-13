@@ -11,6 +11,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -104,7 +105,7 @@ public class ServoFactory {
                 currentLimit,
                 ff,
                 lowLevelVelocityConstants);
-        RotaryMechanism mech = new RotaryMechanism(
+        RotaryMechanism mech = new SimpleRotaryMechanism(
                 parent,
                 motor,
                 new CANSparkEncoder(parent, motor),
@@ -127,7 +128,7 @@ public class ServoFactory {
             PIDController controller) {
         // motor speed is rad/s
         SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
-        RotaryMechanism mech = new RotaryMechanism(
+        RotaryMechanism mech = new SimpleRotaryMechanism(
                 parent,
                 motor,
                 new SimulatedBareEncoder(parent, motor),
