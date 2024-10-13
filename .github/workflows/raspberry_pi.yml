@@ -14,7 +14,6 @@ jobs:
 
     container: wpilib/roborio-cross-ubuntu:2024-22.04
 
-    continue-on-error: true 
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +29,12 @@ jobs:
       - run: pip install opencv-python
         
       - run: pytest tests/config
+        if: always()
       - run: pytest tests/dashboard
+        if: always()
       - run: pytest tests/localization
+        if: always()
       - run: pytest tests/network
+        if: always()
       - run: pytest tests/util
+        if: always()
