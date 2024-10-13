@@ -12,6 +12,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.LinearVelocityServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
@@ -120,7 +121,7 @@ public class AMCANSwerveModule100 extends SwerveModule100 {
         turningPositionController.enableContinuousInput(-Math.PI, Math.PI);
         turningPositionController.setTolerance(0.1, 0.1);
         Profile100 profile = kinodynamics.getSteeringProfile();
-        RotaryMechanism mech = new RotaryMechanism(
+        RotaryMechanism mech = new SimpleRotaryMechanism(
                 parent,
                 turningMotor,
                 new VelocityBareEncoder(parent, turningMotor),
