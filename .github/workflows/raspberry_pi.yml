@@ -34,16 +34,17 @@ jobs:
       - run: pip install robotpy-wpimath
       - run: pip install robotpy-wpiutil
       - run: pip install robotpy-apriltag
-
       - run: pip install opencv-python
+
+      - run: python3 runtests.py
         
-      - run: pytest --forked -vv -rA --full-trace tests/config
-        if: always()
-      - run: pytest --forked -vv -rA --full-trace tests/dashboard
-        if: always()
-      - run: pytest --forked -vv -rA --full-trace tests/localization
-        if: always()
-      - run: pytest --forked -vv -rA --full-trace tests/network
-        if: always()
-      - run: pytest --forked -vv -rA --full-trace tests/util
-        if: always()
+#      - run: pytest --forked -vv -rA --full-trace tests/config
+#        if: always()
+#      - run: pytest --forked -vv -rA --full-trace tests/dashboard
+#        if: always()
+#      - run: pytest --forked -vv -rA --full-trace tests/localization
+#        if: always()
+#      - run: pytest --forked -vv -rA --full-trace tests/network
+#        if: always()
+#      - run: pytest --forked -vv -rA --full-trace tests/util
+#        if: always()
