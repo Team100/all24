@@ -26,6 +26,9 @@ jobs:
       - run: pip install pytest-forked
       - run: pip install numpy
       - run: pip install robotpy
+      - run: pip install robotpy-cscore
+      - run: pip install robotpy-wpimath
+      - run: pip install robotpy-wpiutil
       - run: pip install robotpy-apriltag
       - run: pip install opencv-python
         
