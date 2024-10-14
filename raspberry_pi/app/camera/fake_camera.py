@@ -42,6 +42,8 @@ class FakeRequest(Request):
         return self.make_context(yuv)
 
     def make_context(self, mat: MatLike) -> AbstractContextManager[mmap]:
+        if self.tempfile.closed:
+            raise ValueError("trying to use file after closing")
         self.tempfile.truncate(0)
         self.tempfile.write(mat.data)
         self.tempfile.seek(0)

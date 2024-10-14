@@ -42,7 +42,6 @@ class NoteDetector(Interpreter):
         # TODO: move the identity part of this path to the Network object
         path = "noteVision/" + identity.value + "/" + str(camera_num)
         self._notes = network.get_note_sender(path + "/Rotation3d")
-        self._et = network.get_double_sender(path + "/et_ms")
 
     def analyze(self, req: Request) -> None:
         metadata: dict[str, Any] = req.metadata()
@@ -54,7 +53,6 @@ class NoteDetector(Interpreter):
         # "RGB" it really means "BGR"
         # github.com/raspberrypi/picamera2/issues/848
 
-        t0 = Timer.time_ns()
 
         size = self.camera.get_size()
         width = size.width
@@ -117,9 +115,6 @@ class NoteDetector(Interpreter):
             objects.append(rotation)
             self.display.note(img_bgr, c, cX, cY)
 
-        t1: int = Timer.time_ns()
-        et_ms = (t1 - t0) / 1000000
-        self._et.send(et_ms, 0)
 
         # compute time since last frame
         current_time = Timer.time_ns()

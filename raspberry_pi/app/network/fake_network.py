@@ -19,6 +19,7 @@ class FakeDoubleSender(DoubleSender):
 
     @override
     def send(self, val: float, delay_us: int) -> None:
+        print(self.name, ": ", val)
         doubles[self.name].append(val)
 
 

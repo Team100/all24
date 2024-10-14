@@ -28,13 +28,13 @@ jobs:
       - run: pip install robotpy-apriltag
       - run: pip install opencv-python
         
-      - run: pytest tests/config
+      - run: pytest -vv -rA --full-trace tests/config
         if: always()
-      - run: pytest tests/dashboard
+      - run: pytest -vv -rA --full-trace tests/dashboard
         if: always()
-      - run: pytest tests/localization
+      - run: pytest -vv -rA --full-trace tests/localization
         if: always()
-      - run: pytest tests/network
+      - run: pytest -vv -rA --full-trace tests/network
         if: always()
-      - run: pytest tests/util
+      - run: pytest -vv -rA --full-trace tests/util
         if: always()
