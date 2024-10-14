@@ -47,3 +47,7 @@ You can also run all the tests from the command line from the raspberry_pi direc
 ```
 python3 runtests.py
 ```
+
+# Credits
+
+The test image tag_and_board.jpg is from https://berndpfrommer.github.io/tagslam_web/making_tags/

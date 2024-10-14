@@ -215,18 +215,12 @@ class RealCamera(Camera):
         camera_config: dict[str, Any] = cam.create_still_configuration(  # type:ignore
             # more buffers seem to make the pipeline a little smoother
             buffer_count=5,
-            # hang on to one camera buffer (zero copy) and leave one
-            # other for the camera to fill.
             queue=True,
-            # TODO: make this direct sensor configuration actually work
-            #
             sensor={
                 "output_size": (size.sensor_width, size.sensor_height),
                 "bit_depth": 10,
             },
-            # TODO: make main RGB so we can provide it to color-desiring interpreters
             main={
-                # see Appendix A for format strings.  Note "BGR" really means "RGB" (!)
                 "format": "RGB888",
                 "size": (size.width, size.height),
             },

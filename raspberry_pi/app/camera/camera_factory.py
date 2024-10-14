@@ -1,5 +1,4 @@
-""" Choose a camera implementation based on identity.
-"""
+""" Choose a camera implementation based on identity."""
 
 # pylint: disable=C0415
 
