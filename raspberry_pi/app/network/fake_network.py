@@ -6,58 +6,57 @@ from wpimath.geometry import Rotation3d
 from app.network.network_protocol import (Blip24, BlipSender, DoubleSender,
                                           Network, NoteSender)
 
-doubles: dict[str, list[float]] = {}
-blips: dict[str, list[Blip24]] = {}
-notes: dict[str, list[Rotation3d]] = {}
-
 
 class FakeDoubleSender(DoubleSender):
-    def __init__(self, name: str) -> None:
-        self.name = name
-        if name not in doubles:
-            doubles[name] = []
+    def __init__(self, doubles: list[float]) -> None:
+        self.doubles = doubles
 
     @override
     def send(self, val: float, delay_us: int) -> None:
-        print(self.name, ": ", val)
-        doubles[self.name].append(val)
+        self.doubles.append(val)
 
 
 class FakeBlipSender(BlipSender):
-    def __init__(self, name: str) -> None:
-        self.name = name
-        if name not in blips:
-            blips[name] = []
+    def __init__(self, blips: list[Blip24]) -> None:
+        self.blips = blips
 
     @override
     def send(self, val: list[Blip24], delay_us: int) -> None:
-        blips[self.name].extend(val)
+        self.blips.extend(val)
 
 
 class FakeNoteSender(NoteSender):
-    def __init__(self, name: str) -> None:
-        self.name = name
-        if name not in notes:
-            notes[name] = []
+    def __init__(self, notes: list[Rotation3d]) -> None:
+        self.notes = notes
 
     @override
     def send(self, val: list[Rotation3d], delay_us: int) -> None:
-        notes[self.name].extend(val)
+        self.notes.extend(val)
 
 
 class FakeNetwork(Network):
+    def __init__(self) -> None:
+        self.doubles: dict[str, list[float]] = {}
+        self.blips: dict[str, list[Blip24]] = {}
+        self.notes: dict[str, list[Rotation3d]] = {}
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:
-        return FakeDoubleSender(name)
+        if name not in self.doubles:
+            self.doubles[name] = []
+        return FakeDoubleSender(self.doubles[name])
 
     @override
     def get_blip_sender(self, name: str) -> BlipSender:
-        return FakeBlipSender(name)
+        if name not in self.blips:
+            self.blips[name] = []
+        return FakeBlipSender(self.blips[name])
 
     @override
     def get_note_sender(self, name: str) -> NoteSender:
-        return FakeNoteSender(name)
+        if name not in self.notes:
+            self.notes[name] = []
+        return FakeNoteSender(self.notes[name])
 
     @override
     def flush(self) -> None:

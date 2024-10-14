@@ -1,6 +1,6 @@
 import unittest
 
-from app.network.fake_network import FakeNetwork, doubles
+from app.network.fake_network import FakeNetwork
 
 
 class NetworkTest(unittest.TestCase):
@@ -8,4 +8,4 @@ class NetworkTest(unittest.TestCase):
         network = FakeNetwork()
         sender = network.get_double_sender("foo")
         sender.send(1.0, 0)
-        self.assertEqual(1.0, doubles["foo"][0])
+        self.assertEqual(1.0, network.doubles["foo"][0])

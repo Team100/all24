@@ -58,7 +58,6 @@ class NoteDetector(Interpreter):
         # "RGB" it really means "BGR"
         # github.com/raspberrypi/picamera2/issues/848
 
-
         size = self.cam.get_size()
         width = size.width
         height = size.height
@@ -68,7 +67,6 @@ class NoteDetector(Interpreter):
 
         # TODO: figure out the crop
         # img_bgr : Mat = img_bgr[65:583, :, :]
-
 
         img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
@@ -111,14 +109,12 @@ class NoteDetector(Interpreter):
             yNormalized = (height / 2 - cY) / self.mtx[1, 1]
             xNormalized = (width / 2 - cX) / self.mtx[0, 0]
 
-            rotation = Rotation3d(
-                initial=np.array([1, 0, 0], dtype=np.float64),
-                final=np.array([1, xNormalized, yNormalized], dtype=np.float64),
-            )
+            initial = np.array([1, 0, 0], dtype=np.float64)
+            final = np.array([1, xNormalized, yNormalized], dtype=np.float64)
+            rotation = Rotation3d(initial=initial, final=final)
 
             objects.append(rotation)
             self.display.note(img_bgr, c, cX, cY)
-
 
         # compute time since last frame
         current_time = Timer.time_ns()
