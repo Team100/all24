@@ -11,6 +11,7 @@ import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
@@ -47,7 +48,7 @@ public class ArmFactory {
                 8,
                 Feedforward100.makeNeo(),
                 new PIDConstants(0, 0, 0));
-        RotaryMechanism lowerMech = new RotaryMechanism(
+        RotaryMechanism lowerMech = new SimpleRotaryMechanism(
                 lowerLogger,
                 lowerMotor,
                 new CANSparkEncoder(lowerLogger, lowerMotor),
@@ -69,7 +70,7 @@ public class ArmFactory {
                 1,
                 Feedforward100.makeNeo(),
                 new PIDConstants(0, 0, 0));
-        RotaryMechanism upperMech = new RotaryMechanism(
+        RotaryMechanism upperMech = new SimpleRotaryMechanism(
                 upperLogger,
                 upperMotor,
                 new CANSparkEncoder(upperLogger, upperMotor),
@@ -97,7 +98,7 @@ public class ArmFactory {
 
         LoggerFactory lowerLogger = parent.child(kLower);
         SimulatedBareMotor lowerMotor = new SimulatedBareMotor(lowerLogger, kFreeSpeedRad_S);
-        RotaryMechanism lowerMech = new RotaryMechanism(
+        RotaryMechanism lowerMech = new SimpleRotaryMechanism(
                 lowerLogger,
                 lowerMotor,
                 new SimulatedBareEncoder(lowerLogger, lowerMotor),
@@ -109,7 +110,7 @@ public class ArmFactory {
 
         LoggerFactory upperLogger = parent.child(kUpper);
         SimulatedBareMotor upperMotor = new SimulatedBareMotor(upperLogger, kFreeSpeedRad_S);
-        RotaryMechanism upperMech = new RotaryMechanism(
+        RotaryMechanism upperMech = new SimpleRotaryMechanism(
                 upperLogger,
                 upperMotor,
                 new SimulatedBareEncoder(upperLogger, upperMotor),

@@ -3,13 +3,13 @@ package org.team100.frc2024;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.commands.AutonCommand;
 import org.team100.frc2024.commands.Feed;
 import org.team100.frc2024.commands.Lob;
 import org.team100.frc2024.commands.climber.HomeClimber;
-import org.team100.frc2024.commands.drivetrain.DriveWithProfileNote;
 import org.team100.frc2024.commands.drivetrain.manual.ManualWithAmpLock;
 import org.team100.frc2024.commands.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.config.AutonChooser;
@@ -33,6 +33,7 @@ import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
+import org.team100.lib.commands.drivetrain.DriveWithProfileRotation;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.SetRotation;
@@ -90,9 +91,11 @@ import org.team100.lib.visualization.TrajectoryVisualization;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -255,14 +258,11 @@ public class RobotContainer implements Glassy {
         final DriveTrajectoryFollower drivePID = driveControllerFactory.goodPIDF(PIDFlog);
 
         whileTrue(driverControl::driveToNote,
-                new DriveWithProfileNote(
-                        fieldLog,
-                        comLog,
-                        intake,
-                        noteListener::getClosestTranslation2d,
-                        m_drive,
-                        halfFullStateController,
-                        swerveKinodynamics));
+        new ParallelDeadlineGroup(new DriveWithProfileRotation(
+                () -> Optional.of(new Translation2d()),
+                m_drive,
+                halfFullStateController,
+                swerveKinodynamics), intake.run(intake::intakeSmart)));
         whileTrue(driverControl::actualCircle,
                 new DriveInACircle(comLog, m_drive, controller, -1, viz));
 

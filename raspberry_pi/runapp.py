@@ -1,4 +1,5 @@
-""" Runs the code in the zip file.
+"""
+Runs the code in the zip file (or the filesystem).
 
 This should be uploaded to WPILibPi once, in the "Application
 Configuration" tab, using the "Application" upload as an
@@ -10,6 +11,9 @@ the zip file on the fly, treating it just like a file system.
 If it can't find the zip file, it looks in the local filesystem
 (i.e. maybe you're running it from vscode), and if that doesn't work,
 it exits with an error.
+
+This file can also be run from the command line, or in vscode by clicking
+the little triangle on the upper right (up there ^^^).
 """
 
 import os
@@ -25,7 +29,7 @@ else:
 try:
     from app import main
 except ImportError as e:
-    print(''.join(traceback.format_exception(e)))
+    print("".join(traceback.format_exception(e)))
     sys.exit("app import failed!")
 
 main.main()

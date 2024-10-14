@@ -1,40 +1,39 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=import-error
+# pylint: disable=C0114,C0115,C0116,C0116,E1101,R0902
+
+import os
 import time
 from enum import Enum
+from typing import Any, Callable, Union
 
 import cv2
-import libcamera
-import msgpack
-import numpy as np
+import msgpack  # type: ignore
 import ntcore
-import os
-
+import numpy as np
 from cscore import CameraServer
-# from ntcore import NetworkTableInstance
-from picamera2 import Picamera2
-from pupil_apriltags import Detector
+from cv2.typing import MatLike
+from numpy.typing import NDArray
+from picamera2 import CompletedRequest, Picamera2  # type: ignore
+from pupil_apriltags import Detection, Detector  # type: ignore
 
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
 
-    FRONT = "1000000013c9c96c" # "2"
-    REAR = "100000004e0a1fb9" # "1"
-    LEFT = "10000000a7c673d9" # "4"
-    RIGHT = "10000000a7a892c0" # "3"
+    FRONT = "1000000013c9c96c"  # "2"
+    REAR = "100000004e0a1fb9"  # "1"
+    LEFT = "10000000a7c673d9"  # "4"
+    RIGHT = "10000000a7a892c0"  # "3"
     UNKNOWN = None
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: object) -> "Camera":
         return Camera.UNKNOWN
 
 
 class TagFinder:
-    IMAGE_DIR = 'images'
-    def __init__(self, topic_name, width, height):
+    IMAGE_DIR = "images"
+
+    def __init__(self, topic_name: str, width: int, height: int) -> None:
         self.frame_time = time.time()
         # each camera has its own topic
         self.topic_name = topic_name
@@ -76,8 +75,8 @@ class TagFinder:
         # to keep track of images to write
         self.img_ts_sec = 0
 
-    def analyze(self, request):
-        buffer = request.make_buffer("lores")
+    def analyze(self, request: CompletedRequest) -> None:
+        buffer: NDArray[np.uint8] = request.make_buffer("lores")  # type: ignore
         # buffer = request.make_buffer("main")
         # metadata = request.get_metadata()
         # print(metadata)
@@ -91,7 +90,7 @@ class TagFinder:
         # time_delta_ns = system_time_ns - sensor_timestamp
         # print(sensor_timestamp, system_time_ns, time_delta_ns//1000000) # ms
 
-        start_time = time.time()
+        # start_time = time.time()
         y_len = self.width * self.height
         # truncate, ignore chrominance
         # this makes a view, takes 300ns
@@ -116,15 +115,15 @@ class TagFinder:
         # self.vision_nt_led.set(led_on)
 
         # TODO: add big  tag detection?
-        result = self.at_detector.detect(
+        result: list[Detection] = self.at_detector.detect(
             img,
             estimate_tag_pose=True,
-            camera_params=self.camera_params,
+            camera_params=self.camera_params,  # type: ignore
             tag_size=self.tag_size,
         )
         self.draw_result(img, result)
 
-        tags = {}
+        tags: dict[str, Union[float, list[dict[str, Any]]]] = {}
         tags["tags"] = []
 
         for result_item in result:
@@ -134,8 +133,8 @@ class TagFinder:
             tags["tags"].append(
                 {
                     "id": result_item.tag_id,
-                    "pose_t": result_item.pose_t.tolist(),
-                    "pose_R": result_item.pose_R.tolist(),
+                    "pose_t": result_item.pose_t.tolist(), # type: ignore
+                    "pose_R": result_item.pose_R.tolist(), # type: ignore
                 }
             )
 
@@ -146,26 +145,26 @@ class TagFinder:
         tags["et"] = total_et
         # print(tags)
 
-        posebytes = msgpack.packb(tags)
+        posebytes: bytes = msgpack.packb(tags) # type: ignore
 
         self.vision_nt_msgpack.set(posebytes)
 
         fps = 1 / total_et
         self.frame_time = current_time
-        #self.draw_text(img, f"analysis ET(ms) {1000*analysis_et:.0f}", (5, 25))
-        #self.draw_text(img, f"total ET(ms) {1000*total_et:.0f}", (5, 65))
-        #self.draw_text(img, f"fps {fps:.1f}", (5, 105))
+        # self.draw_text(img, f"analysis ET(ms) {1000*analysis_et:.0f}", (5, 25))
+        # self.draw_text(img, f"total ET(ms) {1000*total_et:.0f}", (5, 65))
+        # self.draw_text(img, f"fps {fps:.1f}", (5, 105))
         self.draw_text(img, f"fps {fps:.1f}", (5, 65))
 
         # write the current timestamp on the image
         # this timestamp is attached to the NT payloads, see getAtomic()
-        now_us = ntcore._now() #pylint:disable=W0212
+        now_us = ntcore._now()  # pylint:disable=W0212
         self.draw_text(img, f"time(us) {now_us}", (5, 105))
 
         # shrink the driver view to avoid overloading the radio
         # driver_img = cv2.resize(img, (self.view_width, self.view_height))
         # self.output_stream.putFrame(driver_img)
-        self.output_stream.putFrame(img)
+        self.output_stream.putFrame(img) # type: ignore
 
         # Write some of the files for later analysis
         # To retrieve these files, use:
@@ -178,8 +177,7 @@ class TagFinder:
         #     filename = TagFinder.IMAGE_DIR + "/img" + str(now_s) + ".png"
         #     cv2.imwrite(filename, img)
 
-
-    def draw_result(self, image, result):
+    def draw_result(self, image: MatLike, result: list[Detection]) -> None:
         for result_item in result:
             if result_item.hamming > 0:
                 continue
@@ -205,7 +203,7 @@ class TagFinder:
 
             # put the pose translation in the image
             # the use of 'item' here is to force a scalar to format
-            float_formatter = {"float_kind": lambda x: f"{x:4.1f}"}
+            float_formatter: dict[str, Callable[[float], str]] = {"float_kind": lambda x: f"{x:4.1f}"}
             if result_item.pose_t is not None:
                 # wpi_axes = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
                 # wpi_t = np.matmul(wpi_axes, result_item.pose_t)
@@ -265,11 +263,11 @@ class TagFinder:
                 # )
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc):
+    def draw_text(self, image: MatLike, msg: str, loc: tuple[int, int]) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-    def initialize_nt(self):
+    def initialize_nt(self) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startClient4("tag-finder")
@@ -286,7 +284,7 @@ class TagFinder:
             "msgpack"
         )
 
-    # def reconnect_nt(self):
+    # def reconnect_nt(self) -> None:
     #     """NT doesn't recover from network disruptions by itself, nor does it
     #     recognize them, so this blindly stops and starts the client.  This is
     #     disruptive, causing flashing in Glass for example ... but better than
@@ -296,7 +294,7 @@ class TagFinder:
     #     inst.startClient4("tag-finder")
 
 
-def getserial():
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
@@ -304,7 +302,7 @@ def getserial():
     return ""
 
 
-def main():
+def main() -> None:
     print("main")
 
     # full frame, 2x2, to set the detector mode
@@ -344,7 +342,7 @@ def main():
     #     buffer_count=4,
     #     encode="lores",
     # use single-frame
-    camera_config = camera.create_still_configuration(
+    camera_config: dict[str, Any] = camera.create_still_configuration( # type: ignore
         # one buffer to write, one to read, one in between so we don't have to wait
         buffer_count=6,
         main={
@@ -361,22 +359,23 @@ def main():
             # go as fast as possible but no slower than 30fps
             "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time
-            "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            "NoiseReductionMode": 0,  # libcamera.controls.draft.NoiseReductionModeEnum.Off,
         },
     )
 
-    topic_name = getserial()  # was: topic_name = "tags"
+    topic_name: str = getserial()  # was: topic_name = "tags"
     identity = Camera(topic_name)
     if identity == Camera.REAR or identity == Camera.FRONT:
-        camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
+        # see libcamera/src/libcamera/transform.cpp
+        camera_config["transform"] = 3
 
     print("REQUESTED")
     print(camera_config)
-    camera.align_configuration(camera_config)
+    camera.align_configuration(camera_config) # type: ignore
     print("ALIGNED")
     print(camera_config)
-    camera.configure(camera_config)
-    print(camera.camera_controls)
+    camera.configure(camera_config)  # type: ignore
+    print(camera.camera_controls) # type: ignore
 
     # Roborio IP: 10.1.0.2
     # Pi IP: 10.1.0.21
@@ -384,7 +383,7 @@ def main():
     output = TagFinder(topic_name, width, height)
     # the callback blocks the camera thread, so don't do that.
     # camera.pre_callback = output.pre_callback
-    camera.start()
+    camera.start() # type: ignore
     # frame_counter = 0
     try:
         while True:
@@ -398,7 +397,7 @@ def main():
             #     frame_counter = 0
             #     output.reconnect_nt()
             # the most recent frame, maybe from the past
-            request = camera.capture_request()
+            request: CompletedRequest = camera.capture_request() # type: ignore
             try:
                 output.analyze(request)
             finally:

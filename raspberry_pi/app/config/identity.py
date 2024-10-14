@@ -1,12 +1,13 @@
-"""
-Represents the Raspberry Pi identity, used to select configuration.
+""" Represents the Raspberry Pi identity, used to select configuration.
 
 Don't put anything in this class about the actual configuration, use a different class for that.
 
 Keep this synchronized with java team100.config.Camera.
 """
 
-from enum import unique, Enum
+# pylint: disable=C0103,
+
+from enum import Enum, unique
 from typing import Any
 
 
@@ -21,10 +22,10 @@ def _read_cpu_info() -> str:
 try:
     # the raspberry pi 4 puts a sort-of-unique number here
     # TODO: does the rpi 5 do the same thing?
-    _SERIAL = _read_cpu_info()
+    _serial = _read_cpu_info()
 except FileNotFoundError:
     # windows doesn't have this file
-    _SERIAL = ""
+    _serial = ""
 
 
 @unique
@@ -51,8 +52,8 @@ class Identity(Enum):
 
     @staticmethod
     def get() -> "Identity":
-        serial = _SERIAL
-        print(f"Coprocessor serial: {serial}")
+        serial = _serial
+        # print(f"Coprocessor serial: {serial}")
         identity: Identity = Identity(serial)
-        print(f"Coprocessor identity: {identity.name}")
+        # print(f"Coprocessor identity: {identity.name}")
         return identity

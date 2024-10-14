@@ -1,10 +1,21 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
+import java.util.function.BooleanSupplier;
 
-import org.team100.frc2024.drivetrain.DriveManually;
 import org.team100.frc2024.drivetrain.TankDriveSubsystem;
 import org.team100.frc2024.drivetrain.TankModuleCollection;
+import org.team100.frc2024.drivetrain.commands.DriveManually;
+import org.team100.frc2024.shooter.commands.Shoot;
+import org.team100.frc2024.shooter.commands.ShootOne;
+import org.team100.frc2024.shooter.drumShooter.DrumShooter;
+import org.team100.frc2024.shooter.drumShooter.ShooterCollection;
+import org.team100.frc2024.shooter.indexer.Indexer;
+import org.team100.frc2024.shooter.indexer.IndexerCollection;
+import org.team100.frc2024.shooter.pivot.PivotCollection;
+import org.team100.frc2024.shooter.pivot.PivotSubsystem;
+import org.team100.frc2024.shooter.pivot.commands.PivotDefault;
+import org.team100.frc2024.shooter.pivot.commands.ZeroPivot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.framework.TimedRobot100;
@@ -15,15 +26,17 @@ import org.team100.lib.logging.LevelPoller;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
 import org.team100.lib.util.Util;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class RobotContainer {
-    private final TankModuleCollection m_modules;
     private final TankDriveSubsystem m_drive;
-    // private final PivotShooter m_shooter;
-    // private final ShooterCollection m_drums;
     private final Command m_auton;
+    private final DrumShooter m_shooter;
+    private final Indexer m_indexer;
+    private final PivotSubsystem m_pivot;
 
     public RobotContainer(TimedRobot100 robot) throws IOException {
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
@@ -39,18 +52,31 @@ public class RobotContainer {
 
         final DriverControl driverControl = new DriverControlProxy(logger, async);
 
-        m_modules = TankModuleCollection.get(fieldLogger, 40);
-        m_drive = new TankDriveSubsystem(fieldLogger, m_modules);
+        final LoggerFactory sysLog = logger.child("Subsystems");
+
+        m_drive = new TankDriveSubsystem(fieldLogger, TankModuleCollection.get(fieldLogger, 40));
         m_drive.setDefaultCommand(new DriveManually(driverControl::velocity, m_drive));
 
-        // m_drums = ShooterCollection.get(shooterLogger, 20);
-        // m_shooter = new PivotShooter(shooterLogger, m_drums);
-        // m_shooter.setDefaultCommand(m_shooter.run(m_shooter::idle));
+        m_shooter = new DrumShooter(sysLog, ShooterCollection.get(sysLog, 20));
+        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+
+        m_pivot = new PivotSubsystem(sysLog, PivotCollection.get(sysLog, 20));
+        m_pivot.setDefaultCommand(new PivotDefault(driverControl::shooterPivot, m_pivot));
+
+        m_indexer = IndexerCollection.get(sysLog);
+
+        whileTrue(driverControl::ampLock, new Shoot(m_shooter, m_indexer));
+        whileTrue(driverControl::fullCycle, new ShootOne(m_shooter, m_indexer));
+        whileTrue(driverControl::driveToNote, m_shooter.run(m_shooter::spinUp));
 
         m_auton = null;
     }
 
     public void onInit() {
+    }
+
+    public void onTeleopInit() {
+        new ZeroPivot(m_pivot).schedule();
     }
 
     public void periodic() {
@@ -60,6 +86,10 @@ public class RobotContainer {
     }
 
     public void close() {
+    }
+
+    private void whileTrue(BooleanSupplier condition, Command command) {
+        new Trigger(condition).whileTrue(command);
     }
 
     public void scheduleAuton() {

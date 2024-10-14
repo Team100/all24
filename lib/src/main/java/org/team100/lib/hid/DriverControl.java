@@ -56,6 +56,10 @@ public interface DriverControl extends Glassy {
         return new Velocity(0, 0, 0);
     }
 
+    default double shooterPivot() {
+        return 0;
+    }
+
     /**
      * Absolute rotational input. This could be mapped to a turntable or a POV hat
      * or similar. Return null if the control should be ignored.

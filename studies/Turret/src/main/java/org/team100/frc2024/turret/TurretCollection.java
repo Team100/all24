@@ -8,6 +8,8 @@ import org.team100.lib.encoder.ProxyRotaryPositionSensor;
 import org.team100.lib.encoder.Talon6Encoder;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
+import org.team100.lib.motion.mechanism.TurretMechanism;
 import org.team100.lib.motion.servo.OutboardAngularPositionServo;
 import org.team100.lib.motor.Kraken6Motor;
 import org.team100.lib.motor.MotorPhase;
@@ -28,10 +30,10 @@ public class TurretCollection {
     ) {
         LoggerFactory collectionLogger = parent.child(kTurret);
         switch (Identity.instance) {
-            case FRC_100_ea4:
-            //TODO get real identity, canID, maxVel, and maxAccel, also motorPhase may be wrong
+            case SWERVE_TWO:
+            //TODO get maxVel, and maxAccel
             OutboardAngularPositionServo angularPositionServo = createAngularPositionServo(kTurret, collectionLogger,40,40, 1, 14, MotorPhase.REVERSE);
-            angularPositionServo.setProfile(new TrapezoidProfile100(1, 1, 0.01));
+            angularPositionServo.setProfile(new TrapezoidProfile100(120, 100, 0.01));
             return new TurretCollection(angularPositionServo);
             case BLANK:
             default:
@@ -56,7 +58,7 @@ public class TurretCollection {
         LoggerFactory moduleLogger = parent.child(name);
         //TODO tune PID and feedforward
         Kraken6Motor kraken6Motor = new Kraken6Motor(moduleLogger, canID, motorPhase, supplyLimit, statorLimit, new PIDConstants(1), Feedforward100.makeKrakenTurret());
-        RotaryMechanism rotaryMechanism = new RotaryMechanism(moduleLogger, kraken6Motor, new Talon6Encoder(moduleLogger, kraken6Motor), gearRatio);
+        RotaryMechanism rotaryMechanism = new TurretMechanism(new SimpleRotaryMechanism(moduleLogger, kraken6Motor, new Talon6Encoder(moduleLogger, kraken6Motor), gearRatio), -1.0 * Math.PI, Math.PI);
         OutboardAngularPositionServo outboardAngularPositionServo = new OutboardAngularPositionServo(moduleLogger, rotaryMechanism, new CombinedEncoder(moduleLogger, new ProxyRotaryPositionSensor(rotaryMechanism), rotaryMechanism));
         return outboardAngularPositionServo;
     }
