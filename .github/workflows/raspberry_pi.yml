@@ -23,18 +23,19 @@ jobs:
 
       - run: python -m pip install --upgrade pip
       - run: pip install pytest
+      - run: pip install pytest-forked
       - run: pip install numpy
       - run: pip install robotpy
       - run: pip install robotpy-apriltag
       - run: pip install opencv-python
         
-      - run: pytest -vv -rA --full-trace tests/config
+      - run: pytest --forked -vv -rA --full-trace tests/config
         if: always()
-      - run: pytest -vv -rA --full-trace tests/dashboard
+      - run: pytest --forked -vv -rA --full-trace tests/dashboard
         if: always()
-      - run: pytest -vv -rA --full-trace tests/localization
+      - run: pytest --forked -vv -rA --full-trace tests/localization
         if: always()
-      - run: pytest -vv -rA --full-trace tests/network
+      - run: pytest --forked -vv -rA --full-trace tests/network
         if: always()
-      - run: pytest -vv -rA --full-trace tests/util
+      - run: pytest --forked -vv -rA --full-trace tests/util
         if: always()

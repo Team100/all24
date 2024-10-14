@@ -22,8 +22,8 @@ class NoteDetectorTest(unittest.TestCase):
 
         self.assertEqual(1, len(display.notes))
         self.assertEqual(1, len(display.circles))
-        self.assertEqual(1, len(display.msgs))
-        self.assertEqual(1, len(display.locs))
+        self.assertEqual(2, len(display.msgs))
+        self.assertEqual(2, len(display.locs))
         self.assertEqual(1, display.frame_count)
 
         self.assertEqual(482, display.circles[0][0])
@@ -41,6 +41,6 @@ class NoteDetectorTest(unittest.TestCase):
 
         self.assertEqual(0, len(display.notes))
         self.assertEqual(0, len(display.circles))
-        self.assertEqual(1, len(display.msgs))
-        self.assertEqual(1, len(display.locs))
+        self.assertEqual(2, len(display.msgs))
+        self.assertEqual(2, len(display.locs))
         self.assertEqual(1, display.frame_count)

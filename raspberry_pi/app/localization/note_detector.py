@@ -29,8 +29,10 @@ class NoteDetector(Interpreter):
         display: Display,
         network: Network,
     ) -> None:
-        self.camera = cam
+        self.cam = cam
         self.display = display
+        self.network = network
+
         self.frame_time = Timer.time_ns()
 
         # opencv hue values are 0-180, half the usual number
@@ -54,7 +56,7 @@ class NoteDetector(Interpreter):
         # github.com/raspberrypi/picamera2/issues/848
 
 
-        size = self.camera.get_size()
+        size = self.cam.get_size()
         width = size.width
         height = size.height
 
@@ -64,8 +66,8 @@ class NoteDetector(Interpreter):
         # TODO: figure out the crop
         # img_bgr : Mat = img_bgr[65:583, :, :]
 
-        mtx = self.camera.get_intrinsic()
-        dist = self.camera.get_dist()
+        mtx = self.cam.get_intrinsic()
+        dist = self.cam.get_dist()
         img_bgr = cv2.undistort(img_bgr, mtx, dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
@@ -121,8 +123,32 @@ class NoteDetector(Interpreter):
         total_time_ms = (current_time - self.frame_time) / 1000000
         # total_et = current_time - self.frame_time
         self.frame_time = current_time
+
+        # TODO: move this timing logic to the camera
+        # time of first row received
+        sensor_timestamp_ns = metadata["SensorTimestamp"]
+
+        # For a global shutter, the whole frame is exposed a little before
+        # the SensorTimestamp.
+        sensor_midpoint_ns = sensor_timestamp_ns
+
+        if self.cam.is_rolling_shutter():
+            # For a rolling shutter, rows are exposed over the entire
+            # frame duration (1/fps).
+            # TODO: assign a different timestamp to each tag, depending on
+            # where it is in the frame.
+            frame_duration_ns = metadata["FrameDuration"] * 1000
+            sensor_midpoint_ns = sensor_timestamp_ns + frame_duration_ns / 2
+
+        delay_ns: int = Timer.time_ns() - sensor_midpoint_ns
+        delay_us = delay_ns // 1000
+        self._notes.send(objects, delay_us)
+        # must flush!  otherwise 100ms update rate.
+        self.network.flush()
+
         fps = 1000 / total_time_ms
         self.display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
+        self.display.text(img, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
 
         # img_output = cv2.resize(img_bgr, (269, 162))
 
