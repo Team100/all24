@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Team100/all24/actions/workflows/main.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/main.yml)
 [![CI](https://github.com/Team100/all24/actions/workflows/lib.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/lib.yml)
-[![CI](https://github.com/Team100/all24/actions/workflows/vision.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/vision.yml)
+[![CI](https://github.com/Team100/all24/actions/workflows/raspberry_pi.yml/badge.svg)](https://github.com/Team100/all24/actions/workflows/raspberry_pi.yml)
 
 
 all24 contains *all* the Team 100 code for *2024.*  There's just one repository,

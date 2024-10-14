@@ -1,27 +1,28 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=import-error
+# pylint: disable=C0103,C0114,C0115,C0116,E1101,R0902,R0914
+
 import dataclasses
-import time
 import pprint
-
-from enum import Enum
-
 import sys
-import cv2
-import libcamera
-import numpy as np
-import ntcore
-import robotpy_apriltag
+import time
+from enum import Enum
+from typing import Any, cast
 
+import cv2
+import ntcore
+import numpy as np
+import robotpy_apriltag
 from cscore import CameraServer
-from picamera2 import Picamera2
+from cv2.typing import MatLike
+from numpy.typing import NDArray
+from picamera2 import CompletedRequest, Picamera2  # type: ignore
+from robotpy_apriltag import AprilTagDetection
 from wpimath.geometry import Transform3d
 from wpiutil import wpistruct
 
+Mat = NDArray[np.uint8]
 
-@wpistruct.make_wpistruct
+
+@wpistruct.make_wpistruct # type: ignore
 @dataclasses.dataclass
 class Blip24:
     id: int
@@ -30,9 +31,8 @@ class Blip24:
 
 class Camera(Enum):
     """Keep this synchronized with java team100.config.Camera."""
-    # TODO get correct serial numbers for Delta
+
     A = "10000000caeaae82"  # "BETA FRONT"
-    # B = "1000000013c9c96c"  # "BETA BACK"
     C = "10000000a7c673d9"  # "GAMMA INTAKE"
 
     SHOOTER = "10000000a7a892c0"  # "DELTA SHOOTER"
@@ -44,11 +44,12 @@ class Camera(Enum):
     UNKNOWN = None
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: object) -> "Camera":
         return Camera.UNKNOWN
 
+
 class TagFinder:
-    def __init__(self, serial, width, height, model):
+    def __init__(self, serial: str, width: int, height: int, model: str) -> None:
         self.frame_time = time.time()
         # the cpu serial number
         self.serial = serial
@@ -65,9 +66,9 @@ class TagFinder:
 
         self.at_detector = robotpy_apriltag.AprilTagDetector()
         self.at_detector.addFamily("tag36h11")
-        
+
         # from testing on 3/22/24, k1 and k2 only
-        
+
         if self.model == "imx708_wide":
             print("V3 WIDE CAMERA")
             fx = 498
@@ -88,8 +89,8 @@ class TagFinder:
         elif self.model == "imx296":
             fx = 1680
             fy = 1680
-            cx = int(1408/2)
-            cy = int(1088/2)
+            cx = int(1408 / 2)
+            cy = int(1088 / 2)
             k1 = 0
             k2 = 0
         else:
@@ -114,7 +115,7 @@ class TagFinder:
 
         self.output_stream = CameraServer.putVideo("Processed", width, height)
 
-    def analyze(self, request):
+    def analyze(self, request: CompletedRequest) -> None:
         # potentialTags = self.estimatedTagPose.get()
         # potentialArray = []
         # z = []
@@ -122,18 +123,18 @@ class TagFinder:
         #     translation = Blip24s.pose.translation()
         #     if (translation.Z() < 0):
         #         continue
-        #     rvec = np.zeros((3, 1), np.float32) 
-        #     tvec = np.zeros((3, 1), np.float32) 
+        #     rvec = np.zeros((3, 1), np.float32)
+        #     tvec = np.zeros((3, 1), np.float32)
         #     object_points = np.array([translation.X(), translation.Y(),translation.Z()],np.float32)
         #     (point2D, _) = cv2.projectPoints(object_points,rvec,tvec,self.mtx,self.dist)
         #     if (point2D[0][0][0] > 0 and point2D[0][0][0] < 1456 and point2D[0][0][1] > 0 and point2D[0][0][1] < 1088):
-                # print(Blip24s.id)
-                # print(object_points)
-                # print(point2D[0][0])
-                # z.append(translation.Z())
-                # potentialArray.append(point2D[0][0])
-        buffer = request.make_buffer("lores")
-        metadata = request.get_metadata()
+        # print(Blip24s.id)
+        # print(object_points)
+        # print(point2D[0][0])
+        # z.append(translation.Z())
+        # potentialArray.append(point2D[0][0])
+        buffer: NDArray[np.uint8] = request.make_buffer("lores")  # type: ignore
+        metadata: dict[str, Any] = request.get_metadata()
 
         y_len = self.width * self.height
 
@@ -154,9 +155,9 @@ class TagFinder:
 
         img = cv2.undistort(img, self.mtx, self.dist)
 
-        result = self.at_detector.detect(img)
-        
-        blips = []
+        result: list[AprilTagDetection] = self.at_detector.detect(img) # type: ignore
+
+        blips: list[Blip24] = []
         for result_item in result:
             if result_item.getHamming() > 0:
                 continue
@@ -198,10 +199,15 @@ class TagFinder:
 
         # for now put big images
         # TODO: turn this off for prod!!
-        img_output = cv2.resize(img, (416,308)) 
-        self.output_stream.putFrame(img_output)
+        img_output = cv2.resize(img, (416, 308))
+        self.output_stream.putFrame(img_output) # type: ignore
 
-    def draw_result(self, image, result_item, pose: Transform3d):
+    def draw_result(
+        self,
+        image: MatLike,
+        result_item: AprilTagDetection,
+        pose: Transform3d,
+    ) -> None:
         color = (255, 255, 255)
 
         # Draw lines around the tag
@@ -218,23 +224,24 @@ class TagFinder:
         self.draw_text(image, f"id {tag_id}", (c_x, c_y))
 
         # type the translation into the image, in WPI coords (x-forward)
-        if pose is not None:
-            t = pose.translation()
-            self.draw_text(
-                image,
-                f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
-                (c_x - 50, c_y + 40),
-            )
+        t = pose.translation()
+        self.draw_text(
+            image,
+            f"t: {t.z:4.1f},{-t.x:4.1f},{-t.y:4.1f}",
+            (c_x - 50, c_y + 40),
+        )
 
     # these are white with black outline
-    def draw_text(self, image, msg, loc):
+    def draw_text(
+        self, image: MatLike, msg: str, loc: tuple[int, int]
+    ) -> None:
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0), 6)
         cv2.putText(image, msg, loc, cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-    def accept(self, estimatedTagPose):
-        print("ay" + str(estimatedTagPose.readQueue()))
+    # def accept(self, estimatedTagPose) -> None:
+    #     print("ay" + str(estimatedTagPose.readQueue()))
 
-    def initialize_nt(self):
+    def initialize_nt(self) -> None:
         """Start NetworkTables with Rio as server, set up publisher."""
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.inst.startClient4("tag_finder24")
@@ -258,12 +265,10 @@ class TagFinder:
 
         self.estimatedTagPose = self.inst.getStructArrayTopic(
             topic_name + "/estimatedTagPose", Blip24
-        ).subscribe([],ntcore.PubSubOptions())
-        
+        ).subscribe([], ntcore.PubSubOptions())
 
 
-
-def getserial():
+def getserial() -> str:
     with open("/proc/cpuinfo", "r", encoding="ascii") as cpuinfo:
         for line in cpuinfo:
             if line[0:6] == "Serial":
@@ -271,11 +276,11 @@ def getserial():
     return ""
 
 
-def main():
+def main() -> None:
 
     camera = Picamera2()
 
-    model = camera.camera_properties["Model"]
+    model: str = cast(str, camera.camera_properties["Model"])  # type:ignore
     print("\nMODEL " + model)
 
     if model == "imx708_wide":
@@ -297,7 +302,7 @@ def main():
     elif model == "imx296":
         print("GS Camera")
         # full frame, 2x2, to set the detector mode to widest angle possible
-        fullwidth = 1408   # slightly larger than the detector, to match stride
+        fullwidth = 1408  # slightly larger than the detector, to match stride
         fullheight = 1088
         # medium detection resolution, compromise speed vs range
         width = 1408
@@ -309,7 +314,7 @@ def main():
         width = 100
         height = 100
 
-    camera_config = camera.create_still_configuration(
+    camera_config: dict[str, Any] = camera.create_still_configuration( # type: ignore
         # 2 buffers => low latency (32-48 ms), low fps (15-20)
         # 5 buffers => mid latency (40-55 ms), high fps (22-28)
         # 3 buffers => high latency (50-70 ms), mid fps (20-23)
@@ -334,34 +339,35 @@ def main():
             # without a duration limit, we slow down in the dark, which is fine
             # "FrameDurationLimits": (5000, 33333),  # 41 fps
             # noise reduction takes time, don't need it.
-            "NoiseReductionMode": libcamera.controls.draft.NoiseReductionModeEnum.Off,
+            "NoiseReductionMode": 0,  # libcamera.controls.draft.NoiseReductionModeEnum.Off,
             # "ScalerCrop":(0,0,width/2,height/2),
         },
     )
     print("SENSOR MODES AVAILABLE")
-    pprint.pprint(camera.sensor_modes)
-    serial = getserial()
-    identity = Camera(serial)
+    pprint.pprint(camera.sensor_modes) # type: ignore
+    serial: str = getserial()
+    # identity = Camera(serial)
     # if identity == Camera.FRONT:
-    #     camera_config["transform"] = libcamera.Transform(hflip=1, vflip=1)
+    # see libcamera/src/libcamera/transform.cpp
+    #     camera_config["transform"] = 3
 
     print("\nREQUESTED CONFIG")
-    print(camera_config)
-    camera.align_configuration(camera_config)
+    print(str(camera_config))
+    camera.align_configuration(camera_config) # type: ignore
     print("\nALIGNED CONFIG")
-    print(camera_config)
-    camera.configure(camera_config)
+    print(str(camera_config))
+    camera.configure(camera_config) # type: ignore
     print("\nCONTROLS")
-    print(camera.camera_controls)
+    print(str(camera.camera_controls))  # type: ignore
     print(serial)
     output = TagFinder(serial, width, height, model)
 
-    camera.start()
+    camera.start() # type: ignore
     # output.startListening()
     try:
         while True:
             # the most recent completed frame, from the recent past
-            request = camera.capture_request()
+            request: CompletedRequest = camera.capture_request()  # type: ignore
             try:
                 output.analyze(request)
             finally:

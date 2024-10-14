@@ -8,6 +8,7 @@ import org.team100.lib.encoder.MockIncrementalBareEncoder;
 import org.team100.lib.encoder.MockRotaryPositionSensor;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.OnboardAngularPositionServo;
 import org.team100.lib.motion.servo.OutboardAngularPositionServo;
@@ -30,7 +31,7 @@ class AnglePositionServoTest {
     @Test
     void testOnboard() {
         MockBareMotor turningMotor = new MockBareMotor();
-        RotaryMechanism mech = new RotaryMechanism(
+        RotaryMechanism mech = new SimpleRotaryMechanism(
                 logger,
                 turningMotor,
                 new MockIncrementalBareEncoder(),
@@ -62,7 +63,7 @@ class AnglePositionServoTest {
     @Test
     void testOutboard() {
         MockBareMotor motor = new MockBareMotor();
-        RotaryMechanism mech = new RotaryMechanism(
+        RotaryMechanism mech = new SimpleRotaryMechanism(
                 logger,
                 motor,
                 new MockIncrementalBareEncoder(),

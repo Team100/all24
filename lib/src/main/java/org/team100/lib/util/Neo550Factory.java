@@ -6,9 +6,11 @@ import org.team100.lib.encoder.CANSparkEncoder;
 import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
+import org.team100.lib.motion.mechanism.LimitedRotaryMechanism;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleLinearMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.LinearVelocityServo;
 import org.team100.lib.motion.servo.OutboardAngularPositionServo;
 import org.team100.lib.motion.servo.OutboardGravityServo;
@@ -58,7 +60,7 @@ public class Neo550Factory {
                 currentLimit,
                 Feedforward100.makeNeo550(),
                 new PIDConstants(1));
-        return new RotaryMechanism(
+        return new SimpleRotaryMechanism(
                 moduleLogger,
                 motor,
                 new CANSparkEncoder(moduleLogger, motor),
@@ -71,12 +73,17 @@ public class Neo550Factory {
             int currentLimit,
             int canID,
             double gearRatio,
-            MotorPhase motorPhase) {
+            MotorPhase motorPhase,
+            double p,
+            double gravityNm,
+            double offsetRad,
+            double lowerLimit,
+            double upperLimit) {
         LoggerFactory moduleLogger = parent.child(name);
         Neo550CANSparkMotor driveMotor = new Neo550CANSparkMotor(moduleLogger, canID, motorPhase, currentLimit,
-                Feedforward100.makeNeo550(), new PIDConstants(0.0001));
-        RotaryMechanism rotaryMechanism = new RotaryMechanism(moduleLogger, driveMotor,
-                new CANSparkEncoder(moduleLogger, driveMotor), 1);
+                Feedforward100.makeNeo550(), new PIDConstants(p));
+        RotaryMechanism rotaryMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(moduleLogger, driveMotor,
+                new CANSparkEncoder(moduleLogger, driveMotor), gearRatio),lowerLimit, upperLimit);
         return new OutboardGravityServo(
                 new OutboardAngularPositionServo(
                         moduleLogger,
@@ -85,8 +92,8 @@ public class Neo550Factory {
                                 moduleLogger,
                                 new SimulatedRotaryPositionSensor(moduleLogger, rotaryMechanism),
                                 rotaryMechanism)),
-                1,
-                1);
+                gravityNm,
+                offsetRad);
     }
 
     public static LinearVelocityServo getNEO550VelocityServo(
@@ -115,7 +122,7 @@ public class Neo550Factory {
 
     public static OutboardGravityServo simulatedGravityServo(LoggerFactory parent) {
         SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
-        RotaryMechanism rotaryMechanism = new RotaryMechanism(parent, driveMotor,
+        RotaryMechanism rotaryMechanism = new SimpleRotaryMechanism(parent, driveMotor,
                 new SimulatedBareEncoder(parent, driveMotor), 1);
         return new OutboardGravityServo(
                 new OutboardAngularPositionServo(
@@ -131,7 +138,7 @@ public class Neo550Factory {
 
     public static RotaryMechanism simulatedRotaryMechanism(LoggerFactory parent) {
         SimulatedBareMotor driveMotor = new SimulatedBareMotor(parent, 5);
-        return new RotaryMechanism(parent, driveMotor, new SimulatedBareEncoder(parent, driveMotor), 1);
+        return new SimpleRotaryMechanism(parent, driveMotor, new SimulatedBareEncoder(parent, driveMotor), 1);
     }
 
     public static LinearMechanism simulatedLinearMechanism(LoggerFactory parent) {
