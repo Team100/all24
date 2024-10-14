@@ -33,6 +33,9 @@ class NoteDetector(Interpreter):
         self.display = display
         self.network = network
 
+        self.mtx = self.cam.get_intrinsic()
+        self.dist = self.cam.get_dist()
+
         self.frame_time = Timer.time_ns()
 
         # opencv hue values are 0-180, half the usual number
@@ -66,9 +69,8 @@ class NoteDetector(Interpreter):
         # TODO: figure out the crop
         # img_bgr : Mat = img_bgr[65:583, :, :]
 
-        mtx = self.cam.get_intrinsic()
-        dist = self.cam.get_dist()
-        img_bgr = cv2.undistort(img_bgr, mtx, dist)
+
+        img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
 
@@ -106,12 +108,12 @@ class NoteDetector(Interpreter):
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
 
-            yNormalized = (height / 2 - cY) / mtx[1, 1]
-            xNormalized = (width / 2 - cX) / mtx[0, 0]
+            yNormalized = (height / 2 - cY) / self.mtx[1, 1]
+            xNormalized = (width / 2 - cX) / self.mtx[0, 0]
 
             rotation = Rotation3d(
-                initial=np.array([1, 0, 0]),
-                final=np.array([1, xNormalized, yNormalized]),
+                initial=np.array([1, 0, 0], dtype=np.float64),
+                final=np.array([1, xNormalized, yNormalized], dtype=np.float64),
             )
 
             objects.append(rotation)
@@ -148,7 +150,7 @@ class NoteDetector(Interpreter):
 
         fps = 1000 / total_time_ms
         self.display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
-        self.display.text(img, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
+        self.display.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
 
         # img_output = cv2.resize(img_bgr, (269, 162))
 

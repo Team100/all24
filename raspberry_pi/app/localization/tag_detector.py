@@ -89,10 +89,10 @@ class TagDetector(Interpreter):
         # img = img[int(self.height / 4) : int(3 * self.height / 4), : self.width]
         # for now use the full frame
         # TODO: probably remove this
-        if self.identity == Identity.SHOOTER:
-            img = img[62:554, : self.width]
-        else:
-            img = img[: self.height, : self.width]
+        # if self.identity == Identity.SHOOTER:
+        #     img = img[62:554, : self.width]
+        # else:
+        #     img = img[: self.height, : self.width]
 
         result: list[AprilTagDetection] = self.at_detector.detect(img.data)
 
