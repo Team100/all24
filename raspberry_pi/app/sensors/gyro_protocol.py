@@ -1,5 +1,4 @@
-""" This is a wrapper for the gyro.
-"""
+""" This is a wrapper for the gyro. """
 
 # pylint: disable=R0903
 

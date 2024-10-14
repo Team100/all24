@@ -5,7 +5,7 @@
 
 from app.camera.camera_protocol import Camera
 from app.config.identity import Identity
-from app.localization.network import Network
+from app.network.real_network import Network
 
 
 class CameraFactory:

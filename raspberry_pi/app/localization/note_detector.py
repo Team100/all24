@@ -2,19 +2,19 @@
 
 # pylint: disable=C0103,E1101,R0902,R0913,R0914,W0612
 
-from mmap import mmap
-from typing import Any
+from typing import Any, cast
 
 import cv2
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import Buffer
 from wpimath.geometry import Rotation3d
 
 from app.camera.camera_protocol import Camera, Request
 from app.camera.interpreter_protocol import Interpreter
 from app.config.identity import Identity
 from app.dashboard.display import Display
-from app.localization.network import Network
+from app.network.real_network import Network
 from app.util.timer import Timer
 
 Mat = NDArray[np.uint8]
@@ -29,8 +29,13 @@ class NoteDetector(Interpreter):
         display: Display,
         network: Network,
     ) -> None:
-        self.camera = cam
+        self.cam = cam
         self.display = display
+        self.network = network
+
+        self.mtx = self.cam.get_intrinsic()
+        self.dist = self.cam.get_dist()
+
         self.frame_time = Timer.time_ns()
 
         # opencv hue values are 0-180, half the usual number
@@ -42,33 +47,28 @@ class NoteDetector(Interpreter):
         # TODO: move the identity part of this path to the Network object
         path = "noteVision/" + identity.value + "/" + str(camera_num)
         self._notes = network.get_note_sender(path + "/Rotation3d")
-        self._et = network.get_double_sender(path + "/et_ms")
 
     def analyze(self, req: Request) -> None:
         metadata: dict[str, Any] = req.metadata()
         with req.rgb() as buffer:
             self.analyze2(metadata, buffer)
 
-    def analyze2(self, metadata: dict[str, Any], buffer: mmap) -> None:
+    def analyze2(self, metadata: dict[str, Any], buffer: Buffer) -> None:
         # Wants a buffer in BGR format.  Remember that when OpenCV says
         # "RGB" it really means "BGR"
         # github.com/raspberrypi/picamera2/issues/848
 
-        t0 = Timer.time_ns()
-
-        size = self.camera.get_size()
+        size = self.cam.get_size()
         width = size.width
         height = size.height
 
-        img: Mat = np.frombuffer(buffer, dtype=np.uint8)
+        img: Mat = cast(Mat, np.frombuffer(buffer, dtype=np.uint8))  # type:ignore
         img_bgr = img.reshape((height, width, 3))
 
         # TODO: figure out the crop
         # img_bgr : Mat = img_bgr[65:583, :, :]
 
-        mtx = self.camera.get_intrinsic()
-        dist = self.camera.get_dist()
-        img_bgr = cv2.undistort(img_bgr, mtx, dist)
+        img_bgr = cv2.undistort(img_bgr, self.mtx, self.dist)
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
 
@@ -106,28 +106,47 @@ class NoteDetector(Interpreter):
             cX = int(mmnts["m10"] / mmnts["m00"])
             cY = int(mmnts["m01"] / mmnts["m00"])
 
-            yNormalized = (height / 2 - cY) / mtx[1, 1]
-            xNormalized = (width / 2 - cX) / mtx[0, 0]
+            yNormalized = (height / 2 - cY) / self.mtx[1, 1]
+            xNormalized = (width / 2 - cX) / self.mtx[0, 0]
 
-            rotation = Rotation3d(
-                initial=np.array([1, 0, 0]),
-                final=np.array([1, xNormalized, yNormalized]),
-            )
+            initial = np.array([1, 0, 0], dtype=np.float64)
+            final = np.array([1, xNormalized, yNormalized], dtype=np.float64)
+            rotation = Rotation3d(initial=initial, final=final)
 
             objects.append(rotation)
             self.display.note(img_bgr, c, cX, cY)
-
-        t1: int = Timer.time_ns()
-        et_ms = (t1 - t0) / 1000000
-        self._et.send(et_ms, 0)
 
         # compute time since last frame
         current_time = Timer.time_ns()
         total_time_ms = (current_time - self.frame_time) / 1000000
         # total_et = current_time - self.frame_time
         self.frame_time = current_time
+
+        # TODO: move this timing logic to the camera
+        # time of first row received
+        sensor_timestamp_ns = metadata["SensorTimestamp"]
+
+        # For a global shutter, the whole frame is exposed a little before
+        # the SensorTimestamp.
+        sensor_midpoint_ns = sensor_timestamp_ns
+
+        if self.cam.is_rolling_shutter():
+            # For a rolling shutter, rows are exposed over the entire
+            # frame duration (1/fps).
+            # TODO: assign a different timestamp to each tag, depending on
+            # where it is in the frame.
+            frame_duration_ns = metadata["FrameDuration"] * 1000
+            sensor_midpoint_ns = sensor_timestamp_ns + frame_duration_ns / 2
+
+        delay_ns: int = Timer.time_ns() - sensor_midpoint_ns
+        delay_us = delay_ns // 1000
+        self._notes.send(objects, delay_us)
+        # must flush!  otherwise 100ms update rate.
+        self.network.flush()
+
         fps = 1000 / total_time_ms
         self.display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
+        self.display.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
 
         # img_output = cv2.resize(img_bgr, (269, 162))
 

@@ -5,7 +5,7 @@ import math
 import time
 
 from app.config.identity import Identity
-from app.localization.network import Network
+from app.network.real_network import Network
 from app.sensors.gyro_protocol import Gyro
 
 

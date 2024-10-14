@@ -6,7 +6,6 @@
 from platform import system
 
 import numpy as np
-from cscore import CameraServer
 from cv2 import (FONT_HERSHEY_SIMPLEX, circle, drawContours, line, putText,
                  resize)
 from cv2.typing import MatLike
@@ -16,7 +15,6 @@ from typing_extensions import override
 from wpimath.geometry import Transform3d
 
 from app.dashboard.display import Display
-from app.dashboard.mjpeg_streamer import MjpegServer, Stream
 
 FONT = FONT_HERSHEY_SIMPLEX
 BLACK = (0, 0, 0)
@@ -28,6 +26,7 @@ Mat = NDArray[np.uint8]
 class RealDisplay(Display):
     def __init__(self, width: int, height: int, name: str) -> None:
         if system() == "Windows":
+            from app.dashboard.mjpeg_streamer import MjpegServer, Stream
             print("Using MJpegServer for Windows")
             # on windows, cvsource breaks with cvnp contiguous-array error
             # i think (width,height) are optional, it will use frame shape.
@@ -37,6 +36,7 @@ class RealDisplay(Display):
             self._server.add_stream(self._stream)
             self._server.start()
         else:
+            from cscore import CameraServer
             print("Using CameraServer for Linux")
             self._cvsource = CameraServer.putVideo(name, 416, 308)
 

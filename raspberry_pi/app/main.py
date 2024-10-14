@@ -16,7 +16,7 @@ from app.camera.camera_loop import CameraLoop
 from app.config.identity import Identity
 from app.dashboard.real_display import RealDisplay
 from app.framework.looper import Looper
-from app.localization.network import Network
+from app.network.real_network import RealNetwork
 from app.localization.note_detector import NoteDetector
 from app.localization.tag_detector import TagDetector
 from app.sensors.gyro_factory import GyroFactory
@@ -26,7 +26,7 @@ from app.sensors.gyro_loop import GyroLoop
 def main() -> None:
     print("main")
     identity: Identity = Identity.get()
-    network = Network(identity)
+    network = RealNetwork(identity)
 
     done = Event()
     try:
