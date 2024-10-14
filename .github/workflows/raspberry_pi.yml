@@ -30,7 +30,8 @@ jobs:
       - run: pip install typeguard
       - run: pip install anyio
       - run: pip install pytest-forked
-      - run: pip install numpy
+      # i think the default numpy version is 2.1.2, which is really new
+      - run: pip install numpy==1.26.2
       - run: pip install robotpy==2024.3.2.1
       - run: pip install robotpy-cscore
       - run: pip install robotpy-wpimath
