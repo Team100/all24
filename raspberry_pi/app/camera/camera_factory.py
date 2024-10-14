@@ -32,6 +32,9 @@ class CameraFactory:
                 | Identity.LEFTAMP
                 | Identity.SHOOTER
                 | Identity.GAME_PIECE
+                | Identity.GLOBAL_GAME_PIECE
+                | Identity.GLOBAL_LEFT
+                | Identity.GLOBAL_RIGHT
                 | Identity.DEV # has one v2 camera at the moment
             ):
                 return 1

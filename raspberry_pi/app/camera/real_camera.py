@@ -230,7 +230,7 @@ class RealCamera(Camera):
 
             case Model.GS:
                 return Size(
-                    sensor_width=1408, sensor_height=1088, width=1408, height=1088
+                    sensor_width=1456, sensor_height=1088, width=1408, height=1088
                 )
 
             case _:
