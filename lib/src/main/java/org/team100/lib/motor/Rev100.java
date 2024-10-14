@@ -33,7 +33,7 @@ public class Rev100 {
 
     public static void motorConfig(CANSparkBase motor, IdleMode idleMode, MotorPhase phase,
             int velocityMeasurementPeriod) {
-        crash(() -> motor.setIdleMode(idleMode));
+        setIdleMode(motor, idleMode);
         motor.setInverted(phase == MotorPhase.REVERSE);
         // velocity is in the Status1 frame
         // position is in the Status2 frame.
@@ -44,6 +44,10 @@ public class Rev100 {
 
     public static void currentConfig(CANSparkBase motor, int currentLimit) {
         crash(() -> motor.setSmartCurrentLimit(currentLimit));
+    }
+
+    public static void setIdleMode(CANSparkBase motor, IdleMode idleMode) {
+        crash(() -> motor.setIdleMode(idleMode));
     }
 
     /**
