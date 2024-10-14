@@ -2,14 +2,13 @@
 
 # pylint: disable=E0611,R0902,R0913,R0914,W0212
 
-from mmap import mmap
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
+from typing_extensions import Buffer
 from cv2 import undistortImagePoints
 from numpy.typing import NDArray
-from robotpy_apriltag import (AprilTagDetection, AprilTagDetector,
-                              AprilTagPoseEstimator)
+from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
 from typing_extensions import override
 
 from app.camera.camera_protocol import Camera, Request, Size
@@ -77,12 +76,15 @@ class TagDetector(Interpreter):
         with req.yuv() as buffer:
             self.analyze2(metadata, buffer)
 
-    def analyze2(self, metadata: dict[str, Any], buffer: mmap) -> None:
+    def analyze2(self, metadata: dict[str, Any], buffer: Buffer) -> None:
         # truncate, ignore chrominance. this makes a view, very fast (300 ns)
-        img: Mat = np.frombuffer(buffer, dtype=np.uint8, count=self.y_len)
+        img: Mat = cast(
+            Mat,
+            np.frombuffer(buffer, dtype=np.uint8, count=self.y_len),  # type:ignore
+        )
 
         # this  makes a view, very fast (150 ns)
-        img = img.reshape((self.height, self.width))
+        img: Mat = img.reshape((self.height, self.width))  # type:ignore
 
         # TODO: crop regions that never have targets
         # this also makes a view, very fast (150 ns)

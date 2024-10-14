@@ -13,7 +13,6 @@ https://github.com/raspberrypi/picamera2/
 
 from contextlib import AbstractContextManager
 from enum import Enum, unique
-from mmap import mmap
 from pprint import pprint
 from typing import Any
 
@@ -21,7 +20,7 @@ import numpy as np
 from numpy.typing import NDArray
 from picamera2 import CompletedRequest, Picamera2  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
-from typing_extensions import override
+from typing_extensions import Buffer, override
 
 from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
@@ -45,19 +44,19 @@ class RealRequest(Request):
         return self._req.get_metadata()  # type: ignore
 
     @override
-    def rgb(self) -> AbstractContextManager[mmap]:
+    def rgb(self) -> AbstractContextManager[Buffer]:
         return self._buffer("main")
 
     @override
-    def yuv(self) -> AbstractContextManager[mmap]:
+    def yuv(self) -> AbstractContextManager[Buffer]:
         return self._buffer("lores")
 
-    def _buffer(self, stream: str) -> AbstractContextManager[mmap]:
-        # Returns AbstractContextManager[mmap] because the flow is:
+    def _buffer(self, stream: str) -> AbstractContextManager[Buffer]:
+        # Returns AbstractContextManager[Buffer] because the flow is:
         #
         # During picamera2.configure(), the DmaAllocator allocates
         # the requested (buffer_count) number of dma buffers, which
-        # are mmap.mmap objects.
+        # are mmap.mmap objects, which are Buffers.
         #
         # The camera uses DmaAllocator, whose sync property
         # is the DmaSync constructor.
@@ -82,7 +81,7 @@ class RealRequest(Request):
         # (it's done by the CompletedRequest), but using _MappedBuffer is, by far,
         # the easiest way to get at the mmap buffer.
         #
-        # To use the mmap, you can pass it to np.frombuffer().
+        # To use the buffer, you can pass it to np.frombuffer().
         return _MappedBuffer(self._req, stream)  # type: ignore
 
     @override

@@ -2,12 +2,12 @@
 
 # pylint: disable=C0103,E1101,R0902,R0913,R0914,W0612
 
-from mmap import mmap
-from typing import Any
+from typing import Any, cast
 
 import cv2
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import Buffer
 from wpimath.geometry import Rotation3d
 
 from app.camera.camera_protocol import Camera, Request
@@ -53,7 +53,7 @@ class NoteDetector(Interpreter):
         with req.rgb() as buffer:
             self.analyze2(metadata, buffer)
 
-    def analyze2(self, metadata: dict[str, Any], buffer: mmap) -> None:
+    def analyze2(self, metadata: dict[str, Any], buffer: Buffer) -> None:
         # Wants a buffer in BGR format.  Remember that when OpenCV says
         # "RGB" it really means "BGR"
         # github.com/raspberrypi/picamera2/issues/848
@@ -62,7 +62,7 @@ class NoteDetector(Interpreter):
         width = size.width
         height = size.height
 
-        img: Mat = np.frombuffer(buffer, dtype=np.uint8)
+        img: Mat = cast(Mat, np.frombuffer(buffer, dtype=np.uint8))  # type:ignore
         img_bgr = img.reshape((height, width, 3))
 
         # TODO: figure out the crop

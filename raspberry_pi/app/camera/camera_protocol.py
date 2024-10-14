@@ -6,22 +6,21 @@ https://typing.readthedocs.io/en/latest/spec/protocol.html
 
 # pylint: disable=R0903
 
-
-from mmap import mmap
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import Buffer
 
 Mat = NDArray[np.uint8]
 
 
 class Request(Protocol):
     def metadata(self) -> dict[str, Any]: ...
-    def rgb(self) -> AbstractContextManager[mmap]: ...
-    def yuv(self) -> AbstractContextManager[mmap]: ...
+    def rgb(self) -> AbstractContextManager[Buffer]: ...
+    def yuv(self) -> AbstractContextManager[Buffer]: ...
     def release(self) -> None: ...
 
 
@@ -29,6 +28,7 @@ class Request(Protocol):
 class Size:
     """Sensor width and height must be equal to one of the 'size' options
     in the list of sensor formats."""
+
     sensor_width: int
     sensor_height: int
     width: int
