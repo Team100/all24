@@ -5,11 +5,10 @@
 from typing import Any, cast
 
 import numpy as np
-from typing_extensions import Buffer
 from cv2 import undistortImagePoints
 from numpy.typing import NDArray
 from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
-from typing_extensions import override
+from typing_extensions import Buffer, override
 
 from app.camera.camera_protocol import Camera, Request, Size
 from app.camera.interpreter_protocol import Interpreter
@@ -130,7 +129,6 @@ class TagDetector(Interpreter):
             pose = self.estimator.estimate(homography, corners)
 
             blips.append(Blip24(result_item.getId(), pose))
-            # TODO: turn this off for prod
             self.display.tag(img, result_item, pose)
 
         # time since last frame
@@ -154,7 +152,8 @@ class TagDetector(Interpreter):
             frame_duration_ns = metadata["FrameDuration"] * 1000
             sensor_midpoint_ns = sensor_timestamp_ns + frame_duration_ns / 2
 
-        # oldest_pixel_ms = (system_time_ns - (sensor_timestamp - 1000 * metadata["ExposureTime"])) // 1000000
+        # oldest_pixel_ms = (system_time_ns - (
+        # sensor_timestamp - 1000 * metadata["ExposureTime"])) // 1000000
         # sensor timestamp is the boottime when the first byte was received from the sensor
 
         # send all the data over the network
