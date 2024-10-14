@@ -16,7 +16,7 @@ from app.camera.camera_loop import CameraLoop
 from app.config.identity import Identity
 from app.dashboard.real_display import RealDisplay
 from app.framework.looper import Looper
-from app.localization.network import Network
+from app.network.real_network import RealNetwork
 from app.localization.note_detector import NoteDetector
 from app.localization.tag_detector import TagDetector
 from app.sensors.gyro_factory import GyroFactory
@@ -26,15 +26,15 @@ from app.sensors.gyro_loop import GyroLoop
 def main() -> None:
     print("main")
     identity: Identity = Identity.get()
-    network = Network(identity)
+    network = RealNetwork(identity)
 
     done = Event()
     try:
         loops: list[Looper] = []
 
-        camera0 = CameraFactory.get(identity, 0, network)
+        camera0 = CameraFactory.get(identity, 0)
         size0 = camera0.get_size()
-        display0 = RealDisplay(size0.width, size0.height, "tag0")
+        display0 = RealDisplay(size0.width // 2, size0.height // 2, "tag0")
         # display01 = RealDisplay(size0.width, size0.height, "note0")
         detector0 = TagDetector(identity, camera0, 0, display0, network)
         # detector01 = NoteDetector(identity, camera0, 1, display01, network)
@@ -44,9 +44,9 @@ def main() -> None:
         # TODO: a better way to associate cameras and detectors
         #
         if CameraFactory.get_num_cameras(identity) > 1:
-            camera1 = CameraFactory.get(identity, 1, network)
+            camera1 = CameraFactory.get(identity, 1)
             size1 = camera1.get_size()
-            display1 = RealDisplay(size1.width, size1.height, "note1")
+            display1 = RealDisplay(size1.width // 2, size1.height // 2, "note1")
             # display11 = RealDisplay(size1.width, size1.height, "tag1")
             detector1 = NoteDetector(identity, camera1, 2, display1, network)
             # detector11 = TagDetector(identity, camera1, 3, display11, network)

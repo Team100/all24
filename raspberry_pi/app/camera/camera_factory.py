@@ -1,21 +1,19 @@
-""" Choose a camera implementation based on identity.
-"""
+""" Choose a camera implementation based on identity."""
 
 # pylint: disable=C0415
 
 from app.camera.camera_protocol import Camera
 from app.config.identity import Identity
-from app.localization.network import Network
 
 
 class CameraFactory:
     @staticmethod
-    def get(identity: Identity, camera_num: int, network: Network) -> Camera:
+    def get(identity: Identity, camera_num: int) -> Camera:
         try:
             # this will fail if we're not running on a Raspberry Pi.
             from app.camera.real_camera import RealCamera
 
-            return RealCamera(identity, camera_num, network)
+            return RealCamera(identity, camera_num)
 
         except ImportError:
             from app.camera.fake_camera import FakeCamera

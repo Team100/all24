@@ -24,3 +24,10 @@ It seems not necessary to sprinkle \_\_init\_\_.py files in the app code, but it
 # Packages
 
 As much as possible, the sub-packages within the "app" top-level package should mirror the packages used in the RoboRIO Java code.  So, for example, the RoboRIO "Identity" concept lives in the "config" package, so it does here too.
+
+# Protocols
+
+This project makes extensive use of python Protocols, which are like Java interfaces.
+
+To learn about Protocols for interface specification, see
+https://typing.readthedocs.io/en/latest/spec/protocol.html

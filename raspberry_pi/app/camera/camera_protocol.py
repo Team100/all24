@@ -1,27 +1,38 @@
-""" Interface spec for camera types.
+""" Interface spec for camera types. """
 
-To learn about Protocols for interface specification, see
-https://typing.readthedocs.io/en/latest/spec/protocol.html
-"""
+# pylint: disable=R0903,W2301
 
-# pylint: disable=R0903
-
-
-from mmap import mmap
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Protocol
 
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import Buffer
 
 Mat = NDArray[np.uint8]
 
 
 class Request(Protocol):
-    def metadata(self) -> dict[str, Any]: ...
-    def rgb(self) -> AbstractContextManager[mmap]: ...
-    def yuv(self) -> AbstractContextManager[mmap]: ...
+    def fps(self) -> float:
+        """FPS calculated from the previous capture."""
+        ...
+
+    def delay_us(self) -> int:
+        """Duration between the capture instant of the center of the frame
+        and the current instant, microseconds"""
+        ...
+
+    def rgb(self) -> AbstractContextManager[Buffer]:
+        """Context-managed Buffer containing RGB888.
+        Remember that when OpenCV says "RGB" it really means "BGR"
+        github.com/raspberrypi/picamera2/issues/848"""
+        ...
+
+    def yuv(self) -> AbstractContextManager[Buffer]:
+        """Context-managed Buffer containing YUV420."""
+        ...
+
     def release(self) -> None: ...
 
 
@@ -29,6 +40,7 @@ class Request(Protocol):
 class Size:
     """Sensor width and height must be equal to one of the 'size' options
     in the list of sensor formats."""
+
     sensor_width: int
     sensor_height: int
     width: int

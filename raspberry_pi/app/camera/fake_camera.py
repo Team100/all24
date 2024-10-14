@@ -1,18 +1,16 @@
-""" This is a camera for desktop testing."""
+""" A camera for desktop testing."""
 
 # pylint: disable=E1101,R0903,R1732
 
 from contextlib import AbstractContextManager, nullcontext
-from mmap import mmap
 from pathlib import Path
-from tempfile import TemporaryFile
-from typing import Any, Optional
+from typing import Optional
 
 import cv2
 import numpy as np
 from cv2.typing import MatLike
 from numpy.typing import NDArray
-from typing_extensions import override
+from typing_extensions import Buffer, override
 
 from app.camera.camera_protocol import Camera, Request, Size
 from app.util.timer import Timer
@@ -21,37 +19,30 @@ Mat = NDArray[np.uint8]
 
 
 class FakeRequest(Request):
-    def __init__(self, img: MatLike) -> None:
+    def __init__(self, img: MatLike, fps:float) -> None:
         """img should be cv2 RGB (really BGR)"""
-        # Makes a copy so we can write into the image.
-        # Uses a temp file so we can return mmap.
         self.img = img
-        self.tempfile = TemporaryFile()
+        self._fps = fps
+
+    @override
+    def fps(self) -> float:
+        return self._fps
+
+    @override
+    def delay_us(self) -> int:
+        return 500
+
+    @override
+    def rgb(self) -> AbstractContextManager[Buffer]:
+        return nullcontext(self.img.copy().data)
+
+    @override
+    def yuv(self) -> AbstractContextManager[Buffer]:
+        return nullcontext(cv2.cvtColor(self.img, cv2.COLOR_RGB2YUV_I420).data)
 
     @override
     def release(self) -> None:
-        self.tempfile.close()
-
-    @override
-    def rgb(self) -> AbstractContextManager[mmap]:
-        return self.make_context(self.img)
-
-    @override
-    def yuv(self) -> AbstractContextManager[mmap]:
-        yuv = cv2.cvtColor(self.img, cv2.COLOR_RGB2YUV_I420)
-        return self.make_context(yuv)
-
-    def make_context(self, mat: MatLike) -> AbstractContextManager[mmap]:
-        self.tempfile.truncate(0)
-        self.tempfile.write(mat.data)
-        self.tempfile.seek(0)
-        val = mmap(self.tempfile.fileno(), 0)
-        val.seek(0)
-        return nullcontext(val)
-
-    @override
-    def metadata(self) -> dict[str, Any]:
-        return {"SensorTimestamp": Timer.time_ns(), "FrameDuration": 300}
+        pass
 
 
 class FakeCamera(Camera):
@@ -65,10 +56,15 @@ class FakeCamera(Camera):
         self.h = self.img.shape[0]
         self.w = self.img.shape[1]
         self.c = self.img.shape[2]
+        self.frame_time = Timer.time_ns()
 
     @override
     def capture_request(self) -> FakeRequest:
-        return FakeRequest(self.img)
+        capture_start: int = Timer.time_ns()
+        total_time_ms = (capture_start - self.frame_time) / 1000000
+        self.frame_time = capture_start
+        fps = 1000 / total_time_ms
+        return FakeRequest(self.img, fps)
 
     @override
     def stop(self) -> None:
@@ -96,7 +92,7 @@ class FakeCamera(Camera):
     @override
     def get_dist(self) -> Mat:
         return np.array([0, 0, 0, 0])
-    
+
     @override
     def is_rolling_shutter(self) -> bool:
         return True
