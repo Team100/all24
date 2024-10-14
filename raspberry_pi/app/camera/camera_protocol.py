@@ -1,10 +1,10 @@
 """ Interface spec for camera types. """
 
-# pylint: disable=R0903
+# pylint: disable=R0903,W2301
 
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -14,9 +14,25 @@ Mat = NDArray[np.uint8]
 
 
 class Request(Protocol):
-    def metadata(self) -> dict[str, Any]: ...
-    def rgb(self) -> AbstractContextManager[Buffer]: ...
-    def yuv(self) -> AbstractContextManager[Buffer]: ...
+    def fps(self) -> float:
+        """FPS calculated from the previous capture."""
+        ...
+
+    def delay_us(self) -> int:
+        """Duration between the capture instant of the center of the frame
+        and the current instant, microseconds"""
+        ...
+
+    def rgb(self) -> AbstractContextManager[Buffer]:
+        """Context-managed Buffer containing RGB888.
+        Remember that when OpenCV says "RGB" it really means "BGR"
+        github.com/raspberrypi/picamera2/issues/848"""
+        ...
+
+    def yuv(self) -> AbstractContextManager[Buffer]:
+        """Context-managed Buffer containing YUV420."""
+        ...
+
     def release(self) -> None: ...
 
 

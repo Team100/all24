@@ -1,10 +1,10 @@
-""" This is a camera for desktop testing."""
+""" A camera for desktop testing."""
 
 # pylint: disable=E1101,R0903,R1732
 
 from contextlib import AbstractContextManager, nullcontext
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -19,13 +19,18 @@ Mat = NDArray[np.uint8]
 
 
 class FakeRequest(Request):
-    def __init__(self, img: MatLike) -> None:
+    def __init__(self, img: MatLike, fps:float) -> None:
         """img should be cv2 RGB (really BGR)"""
         self.img = img
+        self._fps = fps
 
     @override
-    def release(self) -> None:
-        pass
+    def fps(self) -> float:
+        return self._fps
+
+    @override
+    def delay_us(self) -> int:
+        return 500
 
     @override
     def rgb(self) -> AbstractContextManager[Buffer]:
@@ -36,8 +41,8 @@ class FakeRequest(Request):
         return nullcontext(cv2.cvtColor(self.img, cv2.COLOR_RGB2YUV_I420).data)
 
     @override
-    def metadata(self) -> dict[str, Any]:
-        return {"SensorTimestamp": Timer.time_ns(), "FrameDuration": 300}
+    def release(self) -> None:
+        pass
 
 
 class FakeCamera(Camera):
@@ -51,10 +56,15 @@ class FakeCamera(Camera):
         self.h = self.img.shape[0]
         self.w = self.img.shape[1]
         self.c = self.img.shape[2]
+        self.frame_time = Timer.time_ns()
 
     @override
     def capture_request(self) -> FakeRequest:
-        return FakeRequest(self.img)
+        capture_start: int = Timer.time_ns()
+        total_time_ms = (capture_start - self.frame_time) / 1000000
+        self.frame_time = capture_start
+        fps = 1000 / total_time_ms
+        return FakeRequest(self.img, fps)
 
     @override
     def stop(self) -> None:

@@ -70,7 +70,7 @@ class RealDisplay(Display):
 
     @override
     def note(self, image: MatLike, contour: MatLike, c_x: int, c_y: int) -> None:
-        drawContours(image, [contour], -1, (0, 255, 0), 2)
+        drawContours(image, [contour], -1, (0, 255, 0), 3)
         circle(image, (c_x, c_y), 7, (0, 0, 0), -1)
 
     # these are white with black outline
