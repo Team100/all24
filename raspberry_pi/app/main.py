@@ -34,7 +34,7 @@ def main() -> None:
 
         camera0 = CameraFactory.get(identity, 0)
         size0 = camera0.get_size()
-        display0 = RealDisplay(size0.width // 2, size0.height // 2, "tag0")
+        display0 = RealDisplay(size0.width // 4, size0.height // 4, "tag0")
         # display01 = RealDisplay(size0.width, size0.height, "note0")
         detector0 = TagDetector(identity, camera0, 0, display0, network)
         # detector01 = NoteDetector(identity, camera0, 1, display01, network)
