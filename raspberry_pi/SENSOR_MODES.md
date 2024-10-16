@@ -109,15 +109,15 @@ The third one is *all* the pixels, which is a lot.
 The middle one is a 2x2 bin of the full sensor, which is what we want.
 
 ## Global Shutter Camera
+
+The GS camera has only one mode:
+
 ```
   [{'bit_depth': 10,
-
   'crop_limits': (0, 0, 1456, 1088),
   'exposure_limits': (29, 15534385, None),
   'format': SRGGB10_CSI2P,
   'fps': 60.38,
-
   'size': (1456, 1088),
-
   'unpacked': 'SRGGB10'}]
 ```
