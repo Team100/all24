@@ -88,7 +88,7 @@ public class LimitedRotaryMechanism implements RotaryMechanism {
             double outputPositionRad,
             double outputVelocityRad_S,
             double outputTorqueNm) {
-        if (outputPositionRad < m_maxPositionRad) {
+        if (outputPositionRad < m_minPositionRad) {
             m_delegate.stop();
             return;
         }
