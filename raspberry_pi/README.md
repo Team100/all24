@@ -2,6 +2,8 @@
 
 This is for the 2025 season, not ready yet.
 
+See the __doc__ directory for more documentation.
+
 Team 100 uses Raspberry Pis for coprocessing, with several different workloads:
 
 * AprilTag vision

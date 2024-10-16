@@ -2,7 +2,6 @@ package org.team100.lib.logging.primitive;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanTopic;
