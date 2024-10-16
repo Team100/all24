@@ -3,8 +3,8 @@ import unittest
 from app.camera.fake_camera import FakeCamera
 from app.config.identity import Identity
 from app.dashboard.fake_display import FakeDisplay
-from app.network.fake_network import FakeNetwork
 from app.localization.tag_detector import TagDetector
+from app.network.fake_network import FakeNetwork
 
 
 class TagDetectorTest(unittest.TestCase):
@@ -48,3 +48,34 @@ class TagDetectorTest(unittest.TestCase):
         self.assertEqual(2, len(display.msgs))
         self.assertEqual(2, len(display.locs))
         self.assertEqual(1, display.frame_count)
+
+    def test_distortion(self) -> None:
+        """How much distortion can there be in the image?"""
+        identity = Identity.UNKNOWN
+        network = FakeNetwork()
+
+        # no distortion, like above
+        camera = FakeCamera("tag_and_board.jpg", (1100, 620), 0)
+        display = FakeDisplay()
+        TagDetector(identity, camera, 0, display, network).analyze(
+            camera.capture_request()
+        )
+        self.assertEqual(1, len(display.tags))
+
+        # this is about the most possible
+        camera = FakeCamera("tag_and_board.jpg", (1100, 620), -5)
+        display = FakeDisplay()
+        TagDetector(identity, camera, 0, display, network).analyze(
+            camera.capture_request()
+        )
+        self.assertEqual(1, len(display.tags))
+
+        # this is too much distortion
+        # I tried increasing QuadThresholdParameters.maxLineFitMSE to 100
+        # to try to relax the straight line fit to the curved lines, but that didn't work.
+        camera = FakeCamera("tag_and_board.jpg", (1100, 620), -6)
+        display = FakeDisplay()
+        TagDetector(identity, camera, 0, display, network).analyze(
+            camera.capture_request()
+        )
+        self.assertEqual(0, len(display.tags))
