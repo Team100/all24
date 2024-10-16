@@ -19,7 +19,7 @@ Mat = NDArray[np.uint8]
 
 
 class FakeRequest(Request):
-    def __init__(self, img: MatLike, fps:float) -> None:
+    def __init__(self, img: MatLike, fps: float) -> None:
         """img should be cv2 RGB (really BGR)"""
         self.img = img
         self._fps = fps
@@ -46,8 +46,13 @@ class FakeRequest(Request):
 
 
 class FakeCamera(Camera):
-    def __init__(self, filename: str, size: Optional[tuple[int, int]] = None) -> None:
-        """If no size is supplied, the native size is used."""
+    def __init__(
+        self, filename: str, size: Optional[tuple[int, int]] = None, k1: float = 0.0
+    ) -> None:
+        """
+        size: if no size is supplied, the native size is used.
+        k1: quadratic distortion term, used to distort the image and returned in get_dist()
+        """
         p = Path(__file__).with_name(filename)
         pathstr: str = str(p)
         self.img = cv2.imread(pathstr)
@@ -57,6 +62,13 @@ class FakeCamera(Camera):
         self.w = self.img.shape[1]
         self.c = self.img.shape[2]
         self.frame_time = Timer.time_ns()
+        self.k1 = k1
+        # use undistort to distort the image, using the inverse
+        mtx = self.get_intrinsic()
+        dist = self.get_dist()
+        dist[0] *= -1 # invert!
+        self.img = cv2.undistort(self.img, mtx, dist)
+
 
     @override
     def capture_request(self) -> FakeRequest:
@@ -91,7 +103,11 @@ class FakeCamera(Camera):
 
     @override
     def get_dist(self) -> Mat:
-        return np.array([0, 0, 0, 0])
+        k1 = self.k1  # radial quadratic term
+        k2 = 0  # radial quartic term
+        p1 = 0  # tangential
+        p2 = 0  # tangential
+        return np.array([k1, k2, p1, p2])
 
     @override
     def is_rolling_shutter(self) -> bool:

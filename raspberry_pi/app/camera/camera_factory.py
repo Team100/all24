@@ -19,7 +19,7 @@ class CameraFactory:
             from app.camera.fake_camera import FakeCamera
 
             if camera_num == 0:
-                return FakeCamera("tag_and_board.jpg", (1100, 620))
+                return FakeCamera("tag_and_board.jpg", (1100, 620), -5)
             return FakeCamera("blob.jpg")
 
     @staticmethod
