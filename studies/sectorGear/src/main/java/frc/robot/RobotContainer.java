@@ -55,15 +55,16 @@ public class RobotContainer {
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         m_driverControl = new DriverControlProxy(logger, async);
+        int angdeg = 114;
         NeoCANSparkMotor leftMotor = new NeoCANSparkMotor(fieldLogger, 4, MotorPhase.FORWARD, 40,Feedforward100.makeNeoArm(), new PIDConstants(.5));
-        NeoCANSparkMotor rightMotor = new NeoCANSparkMotor(sysLog, 7, MotorPhase.REVERSE, 40,Feedforward100.makeNeoArm(), new PIDConstants(.5));
-        RotaryMechanism leftMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(fieldLogger, leftMotor, new CANSparkEncoder(fieldLogger, leftMotor), 105),Math.toRadians(25),Math.toRadians(115));
-        RotaryMechanism rightMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(sysLog, rightMotor, new CANSparkEncoder(sysLog, rightMotor), 105),Math.toRadians(25),Math.toRadians(115));
+        NeoCANSparkMotor rightMotor = new NeoCANSparkMotor(sysLog, 7, MotorPhase.REVERSE, 40,Feedforward100.makeNeoArm(), new PIDConstants(0.5));
+        RotaryMechanism leftMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(fieldLogger, leftMotor, new CANSparkEncoder(fieldLogger, leftMotor), 105),Math.toRadians(25),Math.toRadians(angdeg));
+        RotaryMechanism rightMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(sysLog, rightMotor, new CANSparkEncoder(sysLog, rightMotor), 105),Math.toRadians(25),Math.toRadians(angdeg));
         m_leftMotor = new OutboardGravityServo(new OutboardAngularPositionServo(fieldLogger, leftMechanism, new CombinedEncoder(fieldLogger, new ProxyRotaryPositionSensor(leftMechanism), leftMechanism)), 8.5, Math.PI/2);
         m_rightMotor = new OutboardGravityServo(new OutboardAngularPositionServo(sysLog, rightMechanism, new CombinedEncoder(sysLog, new ProxyRotaryPositionSensor(rightMechanism), rightMechanism)), 8.5, Math.PI/2);
         TrapezoidProfile100 profile = new TrapezoidProfile100(Math.PI, Math.PI, 0.01);
-        m_leftMotor.setEncoderPosition(Math.toRadians(114.9));
-        m_rightMotor.setEncoderPosition(Math.toRadians(114.9));
+        m_leftMotor.setEncoderPosition(Math.toRadians(angdeg));
+        m_rightMotor.setEncoderPosition(Math.toRadians(angdeg));
         m_leftMotor.reset(); 
         m_rightMotor.reset(); 
         m_leftMotor.setProfile(profile);
@@ -73,9 +74,7 @@ public class RobotContainer {
 
   public void teleopPeriodic() {
     m_leftMotor.setPosition(Math.PI/2);
-    m_rightMotor.setPosition(Math.PI/2);
-    m_leftMotor.periodic();
-    m_rightMotor.periodic();
+    m_rightMotor.setPosition(Math.PI/2)
   }
 
   public void robotPeriodic() {

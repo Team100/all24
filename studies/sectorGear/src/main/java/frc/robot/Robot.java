@@ -100,7 +100,7 @@ public class Robot extends TimedRobot100 {
         Memo.resetAll();
         CommandScheduler.getInstance().run();
        
-
+        m_robotContainer.robotPeriodic();
         m_log_ds_MatchTime.log(DriverStation::getMatchTime);
         m_log_ds_AutonomousEnabled.log(DriverStation::isAutonomousEnabled);
         m_log_ds_TeleopEnabled.log(DriverStation::isTeleopEnabled);
