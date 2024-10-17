@@ -42,11 +42,12 @@ public class ReduxGyro implements Gyro {
 
     @Override
     public double getYawRateNWU() {
-        double m_yawRateRad_S = 360 * m_gyro.getAngularVelocityYaw();
+        double m_yawRateRad_S = -360 * m_gyro.getAngularVelocityYaw();
         m_log_heading_rate.log(() -> m_yawRateRad_S);
         return m_yawRateRad_S;
     }
 
+    
     @Override
     public Rotation2d getPitchNWU() {
         Rotation2d pitchNWU = Rotation2d.fromDegrees(-1.0 * getPitchDeg());
