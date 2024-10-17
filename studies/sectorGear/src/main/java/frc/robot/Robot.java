@@ -93,6 +93,7 @@ public class Robot extends TimedRobot100 {
      */
     @Override
     public void robotPeriodic() {
+        m_robotContainer.robotPeriodic();
         // Cache instances hold measurements that we want to keep consistent
         // for an entire cycle, but that we want to forget between cycles, so we
         // reset them all here.

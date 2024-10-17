@@ -55,8 +55,8 @@ public class RobotContainer {
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         m_driverControl = new DriverControlProxy(logger, async);
-        NeoCANSparkMotor leftMotor = new NeoCANSparkMotor(fieldLogger, 4, MotorPhase.FORWARD, 40,Feedforward100.makeNeoArm(), new PIDConstants(0));
-        NeoCANSparkMotor rightMotor = new NeoCANSparkMotor(sysLog, 7, MotorPhase.REVERSE, 40,Feedforward100.makeNeoArm(), new PIDConstants(0));
+        NeoCANSparkMotor leftMotor = new NeoCANSparkMotor(fieldLogger, 4, MotorPhase.FORWARD, 40,Feedforward100.makeNeoArm(), new PIDConstants(.5));
+        NeoCANSparkMotor rightMotor = new NeoCANSparkMotor(sysLog, 7, MotorPhase.REVERSE, 40,Feedforward100.makeNeoArm(), new PIDConstants(.5));
         RotaryMechanism leftMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(fieldLogger, leftMotor, new CANSparkEncoder(fieldLogger, leftMotor), 105),Math.toRadians(25),Math.toRadians(115));
         RotaryMechanism rightMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(sysLog, rightMotor, new CANSparkEncoder(sysLog, rightMotor), 105),Math.toRadians(25),Math.toRadians(115));
         m_leftMotor = new OutboardGravityServo(new OutboardAngularPositionServo(fieldLogger, leftMechanism, new CombinedEncoder(fieldLogger, new ProxyRotaryPositionSensor(leftMechanism), leftMechanism)), 8.5, Math.PI/2);
@@ -72,11 +72,15 @@ public class RobotContainer {
   }
 
   public void teleopPeriodic() {
-    m_leftMotor.periodic();
-    m_rightMotor.periodic();
     m_leftMotor.setPosition(Math.PI/2);
     m_rightMotor.setPosition(Math.PI/2);
-    
+    m_leftMotor.periodic();
+    m_rightMotor.periodic();
+  }
+
+  public void robotPeriodic() {
+    m_leftMotor.periodic();
+    m_rightMotor.periodic();
   }
 
   public Command getAutonomousCommand() {
