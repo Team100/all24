@@ -22,7 +22,7 @@ public class ReduxGyro implements Gyro {
     public ReduxGyro(LoggerFactory parent) {
         LoggerFactory child = parent.child(this);
         m_gyro = new Canandgyro(60);
-        // m_gyro.setYaw(0);
+        m_gyro.setYaw(0);
         m_log_heading = child.doubleLogger(Level.TRACE, "Heading NWU (rad)");
         m_log_heading_rate = child.doubleLogger(Level.TRACE, "Heading Rate NWU (rad_s)");
         m_log_pitch = child.doubleLogger(Level.TRACE, "Pitch NWU (rad)");
@@ -42,7 +42,7 @@ public class ReduxGyro implements Gyro {
 
     @Override
     public double getYawRateNWU() {
-        double m_yawRateRad_S = -360 * m_gyro.getAngularVelocityYaw();
+        double m_yawRateRad_S = Math.toRadians(-1.0 * getYawVelocityNEDDeg());
         m_log_heading_rate.log(() -> m_yawRateRad_S);
         return m_yawRateRad_S;
     }
@@ -64,6 +64,12 @@ public class ReduxGyro implements Gyro {
 
     private double getYawNEDDeg() {
         double yawDeg = 360 * m_gyro.getYaw();
+        m_log_yaw_deg.log(() -> yawDeg);
+        return yawDeg;
+    }
+
+    private double getYawVelocityNEDDeg() {
+        double yawDeg = 360 * m_gyro.getAngularVelocityYaw();
         m_log_yaw_deg.log(() -> yawDeg);
         return yawDeg;
     }
