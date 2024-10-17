@@ -74,7 +74,7 @@ public class RobotContainer {
 
   public void teleopPeriodic() {
     m_leftMotor.setPosition(Math.PI/2);
-    m_rightMotor.setPosition(Math.PI/2)
+    m_rightMotor.setPosition(Math.PI/2);
   }
 
   public void robotPeriodic() {
