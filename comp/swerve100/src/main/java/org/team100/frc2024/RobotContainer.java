@@ -37,6 +37,8 @@ import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
+import org.team100.lib.commands.drivetrain.for_testing.OscillateDirect;
+import org.team100.lib.commands.drivetrain.for_testing.OscillateForceField;
 import org.team100.lib.commands.drivetrain.for_testing.OscillateProfile;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
@@ -287,14 +289,14 @@ public class RobotContainer implements Glassy {
         // HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1,
         // 0.01, 1, 1, 0.01);
         // high cruise but also moderate accel
-        HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 4, 4, 0.01, 3, 3, 0.01);
+        HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1, 0.01, 3, 3, 0.01);
         FullStateDriveController hcontroller = new FullStateDriveController(hlog);
 
         whileTrue(driverControl::fullCycle,
                 // new RepeatCommand(
                 // new SequentialCommandGroup(
-                // new OscillateForceField(m_drive, hcontroller, 1),
-                // new OscillateForceField(m_drive, hcontroller, -1))));
+                // new OscillateForceField(m_drive, halfFullStateController, 1),
+                // new OscillateForceField(m_drive, halfFullStateController, -1))));
 
                 new RepeatCommand(
                         new SequentialCommandGroup(
@@ -306,7 +308,7 @@ public class RobotContainer implements Glassy {
         // new OscillatePosition(driveLog, m_drive, maker, controller, 1, viz),
         // new OscillatePosition(driveLog, m_drive, maker, controller, -1, viz))));
 
-        // new OscillateDirect(comLog, m_drive));
+        // whileTrue(driverControl::fullCycle, new OscillateDirect(comLog, m_drive));
         // new Oscillate(comLog, m_drive));
         // new RepeatCommand(
         // new FullCycle(comLog, m_drive, controller, viz)));

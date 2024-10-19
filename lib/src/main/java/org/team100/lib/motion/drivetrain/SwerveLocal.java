@@ -55,6 +55,8 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
     private final ChassisSpeedsLogger m_log_setpoint_delta;
     private final ChassisSpeedsLogger m_log_prev_setpoint;
     private final ChassisSpeedsLogger m_log_setpoint;
+    private final ChassisSpeedsLogger m_log_chassis_speed;
+
 
     private SwerveSetpoint prevSetpoint;
 
@@ -67,6 +69,7 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
         m_log_setpoint_delta = child.chassisSpeedsLogger(Level.TRACE, "setpoint delta");
         m_log_prev_setpoint = child.chassisSpeedsLogger(Level.TRACE, "prevSetpoint chassis speed");
         m_log_setpoint = child.chassisSpeedsLogger(Level.DEBUG, "setpoint chassis speed");
+        m_log_chassis_speed = child.chassisSpeedsLogger(Level.TRACE, "chassis speed LOG");
         m_swerveKinodynamics = swerveKinodynamics;
         m_modules = modules;
         m_SwerveSetpointGenerator = new AsymSwerveSetpointGenerator(child, m_swerveKinodynamics);
@@ -234,6 +237,8 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
                     prevSetpoint.getModuleStates(), gyroRateRad_S);
         } else {
             states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S);
+            // System.out.println(speeds);
+            m_log_chassis_speed.log(() -> speeds);
         }
         setModuleStates(states);
         prevSetpoint = new SwerveSetpoint(speeds, states);
