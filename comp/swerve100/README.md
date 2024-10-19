@@ -28,12 +28,24 @@ Use the WPI extensions to run the `gradlew` build:
 TODO: what if the build is not successful?
 
 ## Simulating the RoboRIO
-Use the WPI extensions to kick off the Simulator.
+Use the WPI extensions to kick off the Simulator. Good overall instructions are available [here](https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/simulation-gui.html). 
 1. Press `CTRL + SHIFT + P` to get the VSCode Command Mode.
 1. Search for `Simulate Robot Code`
 1. Select `swerve100` when it asks.
 1. It will ask you what simulations to run. Make sure `Sim GUI` is selected, and nothing else.
 1. You should get the robot simulation GUI, which looks like this:
 ![Simulation GUI](readme_img/sim_gui.png)
+1. Make sure you can debug your code in simulation.
+    1. If you aren't familiar with debugging in VSCode, read this: TODO.
+    1. Set a debug breakpoint on:
+        ```java
+        public void robotPeriodic() 
+        ```
+    1. The simulation should trip your debugger since it calls this function every few ms. Then you are ready to go!
+1. Make sure you have the Field view available. This will allow you to "drive" the robot virtually. If you don't, go to `Network Tables > Field` ![Field View](readme_img/field_view.png).
+    1. Learn more about using the Field widget [here](https://docs.wpilib.org/en/stable/docs/software/dashboards/glass/field2d-widget.html).
+1. Try to drive the Robot. You will need to setup your Keyboard as a Joystick if you haven't yet. 
+    1. Click and drag Keyboard 0 to Joystick[0] like this: ![Drag Keyboard](readme_img/drag_keyboard.png).
+    1. 
 
 ## Deploying the RoboRIO
