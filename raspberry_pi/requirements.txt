@@ -1,0 +1,6 @@
+hidapi
+adafruit-blinka
+adafruit-circuitpython-lsm6ds
+robotpy
+robotpy-cscore
+robotpy-apriltag
