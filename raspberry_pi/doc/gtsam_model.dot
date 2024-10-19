@@ -1,0 +1,38 @@
+/**
+ * To render this file, install the tintinweb Graphviz preview extension and click
+ * the little "DOT" that appears in the upper right.  Choose the "FDP" engine,
+ * which notices the "pos" parameter.
+ */
+graph {
+    Xp [color = "blue";shape = "point";width = "0.2";xlabel = "prior";];
+    X0 [label = "X0";shape = "circle";pos = "10,12!";margin = -0.1;];
+    O0 [color = "green";shape = "point";width = "0.2";xlabel = "odometry";];
+    X1 [label = "X1";shape = "circle";pos = "12,12!";margin = -0.1;];
+    Xe [label = "";shape = "none";pos = "13,12!";];
+    t0 [label = "Tag1";shape = "box";pos = "11,15!";];
+    c0 [label = "Off";shape = "circle";margin = -0.1;pos = "11,14!";];
+    cp [color = "blue";shape = "point";width = "0.2";xlabel = "prior";];
+    k0 [label = "Cal";shape = "circle";margin = -0.1;pos = "11,13!";];
+    kp [color = "blue";shape = "point";width = "0.2";xlabel = "prior";];
+    v0 [color = "green";shape = "point";width = "0.2";xlabel = "vision";];
+    v1 [color = "green";shape = "point";width = "0.2";xlabel = "vision ";];
+    g0 [color = "green";shape = "point";width = "0.2";xlabel = "gyro";];
+    g1 [color = "green";shape = "point";width = "0.2";xlabel = "gyro ";];
+    
+    Xp -- X0;
+    X0 -- O0;
+    O0 -- X1;
+    X1 -- Xe [style = "dotted";];
+    X0 -- v0;
+    X1 -- v1;
+    v0 -- t0;
+    v1 -- t0;
+    cp -- c0;
+    v0 -- c0;
+    v1 -- c0;
+    kp -- k0;
+    v0 -- k0;
+    v1 -- k0;
+    g0 -- X0;
+    g1 -- X1;
+}
