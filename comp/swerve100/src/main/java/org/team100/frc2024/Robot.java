@@ -99,6 +99,7 @@ public class Robot extends TimedRobot100 {
         // reset them all here.
         Memo.resetAll();
         CommandScheduler.getInstance().run();
+        // TODO(dmontauk): why do we separate things between Robot and RobotContainer? What is the logical separation?
         m_robotContainer.periodic();
 
         m_log_ds_MatchTime.log(DriverStation::getMatchTime);
