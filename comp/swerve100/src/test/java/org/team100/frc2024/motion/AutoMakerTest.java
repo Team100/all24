@@ -23,6 +23,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.SimulatedGyro;
+import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -47,7 +48,11 @@ class AutoMakerTest {
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
         gyro = new SimulatedGyro(swerveKinodynamics, collection);
-        swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
+        final AsymSwerveSetpointGenerator setpointGenerator = new AsymSwerveSetpointGenerator(
+                logger,
+                swerveKinodynamics,
+                () -> 12);
+        swerveLocal = new SwerveLocal(logger, swerveKinodynamics, setpointGenerator, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
                 logger,
                 gyro.getYawNWU(),

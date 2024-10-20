@@ -2,17 +2,17 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import org.team100.lib.motion.drivetrain.kinodynamics.struct.SwerveModulePosition100Struct;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
-import edu.wpi.first.math.kinematics.proto.SwerveModulePositionProto;
-import edu.wpi.first.math.kinematics.struct.SwerveModulePositionStruct;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.util.protobuf.ProtobufSerializable;
 import edu.wpi.first.util.struct.StructSerializable;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is a copy of {@link edu.wpi.first.math.kinematics.SwerveModulePosition}
@@ -24,7 +24,6 @@ import java.util.Optional;
 public class SwerveModulePosition100
         implements Comparable<SwerveModulePosition100>,
         Interpolatable<SwerveModulePosition100>,
-        ProtobufSerializable,
         StructSerializable {
     /** Distance measured by the wheel of the module. */
     public double distanceMeters;
@@ -36,11 +35,8 @@ public class SwerveModulePosition100
      */
     public Optional<Rotation2d> angle = Optional.empty();
 
-    /** SwerveModulePosition protobuf for serialization. */
-    public static final SwerveModulePositionProto proto = new SwerveModulePositionProto();
-
     /** SwerveModulePosition struct for serialization. */
-    public static final SwerveModulePositionStruct struct = new SwerveModulePositionStruct();
+    public static final SwerveModulePosition100Struct struct = new SwerveModulePosition100Struct();
 
     /** Constructs a SwerveModulePosition with zeros for distance and angle. */
     public SwerveModulePosition100() {

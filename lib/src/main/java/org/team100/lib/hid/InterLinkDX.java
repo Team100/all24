@@ -4,8 +4,6 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import org.team100.lib.logging.LoggerFactory;
-
 import edu.wpi.first.wpilibj.GenericHID;
 
 /**

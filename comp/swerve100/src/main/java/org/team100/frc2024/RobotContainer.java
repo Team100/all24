@@ -82,6 +82,7 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.profile.HolonomicProfile;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
+import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.timing.ConstantConstraint;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
@@ -93,6 +94,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -174,7 +176,11 @@ public class RobotContainer implements Glassy {
                 m_layout,
                 poseEstimator);
 
-        final SwerveLocal swerveLocal = new SwerveLocal(driveLog, swerveKinodynamics, m_modules);
+        final AsymSwerveSetpointGenerator setpointGenerator = new AsymSwerveSetpointGenerator(
+                driveLog,
+                swerveKinodynamics,
+                RobotController::getBatteryVoltage);
+        final SwerveLocal swerveLocal = new SwerveLocal(driveLog, swerveKinodynamics, setpointGenerator, m_modules);
 
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
@@ -258,11 +264,11 @@ public class RobotContainer implements Glassy {
         final DriveTrajectoryFollower drivePID = driveControllerFactory.goodPIDF(PIDFlog);
 
         whileTrue(driverControl::driveToNote,
-        new ParallelDeadlineGroup(new DriveWithProfileRotation(
-                () -> Optional.of(new Translation2d()),
-                m_drive,
-                halfFullStateController,
-                swerveKinodynamics), intake.run(intake::intakeSmart)));
+                new ParallelDeadlineGroup(new DriveWithProfileRotation(
+                        () -> Optional.of(new Translation2d()),
+                        m_drive,
+                        halfFullStateController,
+                        swerveKinodynamics), intake.run(intake::intakeSmart)));
         whileTrue(driverControl::actualCircle,
                 new DriveInACircle(comLog, m_drive, controller, -1, viz));
 

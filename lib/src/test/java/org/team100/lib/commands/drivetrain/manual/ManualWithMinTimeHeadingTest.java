@@ -279,12 +279,12 @@ class ManualWithMinTimeHeadingTest {
         gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // goal is the current state but at rest
-        assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        assertEquals(0.471, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // ?
         assertEquals(0.058, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(2.796, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(3.228, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // ?
-        verify(0, 0, 2.796, v);
+        verify(0, 0, 2.828, v);
     }
 
     @Test
@@ -335,12 +335,12 @@ class ManualWithMinTimeHeadingTest {
         gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // velocity carries forward
-        assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        assertEquals(0.471, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // ?
         assertEquals(0.058, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(2.796, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(3.228, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // ?
-        verify(0, 0, 2.796, v);
+        verify(0, 0, 2.828, v);
     }
 
     /**
