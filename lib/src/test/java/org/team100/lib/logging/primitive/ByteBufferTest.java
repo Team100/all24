@@ -36,7 +36,8 @@ class ByteBufferTest {
 
     @Test
     void testBufferPerformance() {
-        final int N = 10000000;
+        // final int N = 10000000;
+        final int N = 1000000;
         final int S = 500;
         {
             // 130 ms (!)
@@ -110,7 +111,8 @@ class ByteBufferTest {
     @Test
     void testDoubleEncodingPerformance() {
         // this goes at 1.3 ns/row, with or without offset
-        final int ITERATIONS = 10000000;
+        // final int ITERATIONS = 10000000;
+        final int ITERATIONS = 1000000;
         final int N = 180;
         ByteBuffer bb = ByteBuffer.allocateDirect(N * 8);
         double t1 = Timer.getFPGATimestamp();
@@ -128,7 +130,8 @@ class ByteBufferTest {
     @Test
     void testDoubleDecodingPerformance() {
         // 1 ns/row, including the addition
-        final int ITERATIONS = 10000000;
+        // final int ITERATIONS = 10000000;
+        final int ITERATIONS = 1000000;
         final int N = 180;
         ByteBuffer bb = ByteBuffer.allocateDirect(N * 8);
         for (int i = 0; i < N; ++i) {
@@ -153,7 +156,8 @@ class ByteBufferTest {
     void testDoubleBulkDecodingPerformance() {
         // 1 ns/row, including the addition
         // bulk copying to a new double[] is >3ns, bad.
-        final int ITERATIONS = 10000000;
+        // final int ITERATIONS = 10000000;
+        final int ITERATIONS = 1000000;
         final int N = 180;
         ByteBuffer bb = ByteBuffer.allocateDirect(N * 8);
         for (int i = 0; i < N; ++i) {

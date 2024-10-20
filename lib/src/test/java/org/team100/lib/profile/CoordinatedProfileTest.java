@@ -21,6 +21,8 @@ import org.team100.lib.state.State100;
  * we can look there; our own profile does not, so we need to modify it.
  */
 class CoordinatedProfileTest {
+    private static final boolean PRINT = false;
+
     private static final double PROFILE_TOLERANCE = 0.01;
     private static final double kDelta = 0.001;
     private static final double DT = 0.02;
@@ -56,12 +58,15 @@ class CoordinatedProfileTest {
             total_time += DT;
             max_v = Math.max(max_v, s1.v());
             if (s1.near(g1, 0.01)) {
-                System.out.println("at goal at t " + total_time);
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s\n", total_time, s1);
+            if (PRINT)
+                System.out.printf("%f %s\n", total_time, s1);
         }
-        System.out.println("max v " + max_v);
+        if (PRINT)
+            System.out.println("max v " + max_v);
         // this is a triangle profile
         assertEquals(2.0, total_time, kDelta);
 
@@ -75,12 +80,15 @@ class CoordinatedProfileTest {
             total_time += DT;
             max_v = Math.max(max_v, s2.v());
             if (s2.near(g2, 0.01)) {
-                System.out.println("at goal at t " + total_time);
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s\n", total_time, s2);
+            if (PRINT)
+                System.out.printf("%f %s\n", total_time, s2);
         }
-        System.out.println("max v " + max_v);
+        if (PRINT)
+            System.out.println("max v " + max_v);
         // this is a trapezoid profile
         assertEquals(3.0, total_time, kDelta);
     }
@@ -113,12 +121,15 @@ class CoordinatedProfileTest {
             total_time += DT;
             max_v = Math.max(max_v, s1.v());
             if (s1.near(g1, 0.01)) {
-                System.out.println("at goal at t " + total_time);
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s\n", total_time, s1);
+            if (PRINT)
+                System.out.printf("%f %s\n", total_time, s1);
         }
-        System.out.println("max v " + max_v);
+        if (PRINT)
+            System.out.println("max v " + max_v);
         // this is a triangle profile
         assertEquals(2.0, total_time, kDelta);
 
@@ -132,12 +143,15 @@ class CoordinatedProfileTest {
             total_time += DT;
             max_v = Math.max(max_v, s2.v());
             if (s2.near(g2, 0.01)) {
-                System.out.println("at goal at t " + total_time);
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s\n", total_time, s2);
+            if (PRINT)
+                System.out.printf("%f %s\n", total_time, s2);
         }
-        System.out.println("max v " + max_v);
+        if (PRINT)
+            System.out.println("max v " + max_v);
         // this is a trapezoid profile
         assertEquals(3.0, total_time, kDelta);
     }
@@ -194,7 +208,6 @@ class CoordinatedProfileTest {
         total_time = r.etaS();
         assertEquals(3.0, total_time, kDelta);
     }
-
 
     @Test
     void testCoordinatedProfiles() {
@@ -254,10 +267,12 @@ class CoordinatedProfileTest {
             stateX = px.calculate(DT, stateX, gx);
             stateY = py.calculate(DT, stateY, gy);
             if (stateX.near(gx, PROFILE_TOLERANCE) && stateY.near(gy, PROFILE_TOLERANCE)) {
-                System.out.println("at goal at t " + total_time);
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s %s\n", total_time, stateX, stateY);
+            if (PRINT)
+                System.out.printf("%f %s %s\n", total_time, stateX, stateY);
         }
     }
 

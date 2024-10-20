@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Timer;
 
 class HolonomicProfileTest {
+    private static final boolean PRINT = false;
+
     @Test
     void test2d() {
         HolonomicProfile hp = new HolonomicProfile(0.02, 1, 1, 0.01, 1, 1, 0.01);
@@ -18,7 +20,8 @@ class HolonomicProfileTest {
         SwerveState s = i;
         for (double t = 0; t < 10; t += 0.02) {
             s = hp.calculate(s, g);
-            System.out.printf("%.2f %.3f %.3f\n", t, s.x().x(), s.y().x());
+            if (PRINT)
+                System.out.printf("%.2f %.3f %.3f\n", t, s.x().x(), s.y().x());
         }
     }
 
@@ -31,7 +34,8 @@ class HolonomicProfileTest {
         SwerveState s = i;
         for (double t = 0; t < 10; t += 0.02) {
             s = hp.calculate(s, g);
-            System.out.printf("%.2f %.3f %.3f\n", t, s.x().x(), s.y().x());
+            if (PRINT)
+                System.out.printf("%.2f %.3f %.3f\n", t, s.x().x(), s.y().x());
         }
     }
 
@@ -50,7 +54,9 @@ class HolonomicProfileTest {
             hp.solve(i, g);
         }
         double t1 = Timer.getFPGATimestamp();
-        System.out.printf("duration (ms)  %5.1f\n", 1e3 * (t1 - t0));
-        System.out.printf("per op (ns)    %5.1f\n", 1e9 * (t1 - t0) / N);
+        if (PRINT)
+            System.out.printf("duration (ms)  %5.1f\n", 1e3 * (t1 - t0));
+        if (PRINT)
+            System.out.printf("per op (ns)    %5.1f\n", 1e9 * (t1 - t0) / N);
     }
 }

@@ -12,10 +12,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class HeadingLatch {
     private static final double unlatch = 0.01;
-    private static final double maxARad_S2 = 10;
+
     private Rotation2d m_desiredRotation = null;
 
+    /**
+     * @param maxARad_S2 supply an acceleration that matches whatever profile or
+     *                   expectations you have for angular acceleration.
+     */
     public Rotation2d latchedRotation(
+            double maxARad_S2,
             State100 state,
             Rotation2d pov,
             double inputOmega) {

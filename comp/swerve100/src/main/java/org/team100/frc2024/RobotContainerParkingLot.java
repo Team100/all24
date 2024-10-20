@@ -33,8 +33,8 @@ import org.team100.lib.hid.OperatorControlProxy;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.SwerveDrivePoseEstimator100;
 import org.team100.lib.localization.VisionDataProvider24;
-import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.Logging;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveLocal;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -43,6 +43,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
+import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
 import org.team100.lib.trajectory.TrajectoryMaker;
@@ -52,6 +53,7 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -114,7 +116,11 @@ public class RobotContainerParkingLot implements Glassy {
                 driveLogger,
                 m_layout,
                 poseEstimator);
-        SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, m_modules);
+        final AsymSwerveSetpointGenerator setpointGenerator = new AsymSwerveSetpointGenerator(
+                driveLogger,
+                swerveKinodynamics,
+                RobotController::getBatteryVoltage);
+        SwerveLocal swerveLocal = new SwerveLocal(driveLogger, swerveKinodynamics, setpointGenerator, m_modules);
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
                 driveLogger,
