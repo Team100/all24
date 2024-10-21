@@ -11,13 +11,17 @@ graph {
     Xe [label = "";shape = "none";pos = "13,12!";];
     t0 [label = "Tag1";shape = "box";pos = "11,15!";];
     c0 [label = "Off";shape = "circle";margin = -0.1;pos = "11,14!";];
-    cp [color = "blue";shape = "point";width = "0.2";xlabel = "prior";];
+    cp [color = "blue";shape = "point";width = "0.2";pos = "12,14!";xlabel = "prior";];
     k0 [label = "Cal";shape = "circle";margin = -0.1;pos = "11,13!";];
-    kp [color = "blue";shape = "point";width = "0.2";xlabel = "prior";];
+    kp [color = "blue";shape = "point";width = "0.2";pos = "10,13!";xlabel = "prior";];
     v0 [color = "green";shape = "point";width = "0.2";xlabel = "vision";];
     v1 [color = "green";shape = "point";width = "0.2";xlabel = "vision ";];
     g0 [color = "green";shape = "point";width = "0.2";xlabel = "gyro";];
     g1 [color = "green";shape = "point";width = "0.2";xlabel = "gyro ";];
+    b0 [label = "b0";shape = "circle";pos = "10,10!";margin = -0.1;];
+    b1 [label = "b1";shape = "circle";pos = "12,10!";margin = -0.1;];
+    bb [color = "green";shape = "point";width = "0.2";xlabel = "bias";];
+    br [color = "blue";shape = "point";width = "0.2";xlabel = "reset";];
     
     Xp -- X0;
     X0 -- O0;
@@ -35,4 +39,9 @@ graph {
     v1 -- k0;
     g0 -- X0;
     g1 -- X1;
+    b0 -- g0;
+    b1 -- g1;
+    b0 -- bb;
+    bb -- b1;
+    b1 -- br;
 }
