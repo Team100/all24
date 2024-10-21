@@ -55,8 +55,7 @@ public class RobotContainer {
 
         final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
         m_driverControl = new DriverControlProxy(logger, async);
-                int angdeg = 114;
-
+        int angdeg = 114;
         NeoCANSparkMotor leftMotor = new NeoCANSparkMotor(fieldLogger, 4, MotorPhase.FORWARD, 40,Feedforward100.makeNeoArm(), new PIDConstants(.5));
         NeoCANSparkMotor rightMotor = new NeoCANSparkMotor(sysLog, 7, MotorPhase.REVERSE, 40,Feedforward100.makeNeoArm(), new PIDConstants(0.5));
         RotaryMechanism leftMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(fieldLogger, leftMotor, new CANSparkEncoder(fieldLogger, leftMotor), 105),Math.toRadians(25),Math.toRadians(angdeg));
@@ -73,15 +72,14 @@ public class RobotContainer {
 
   }
 
-  public void robotPeriodic(){
-    m_rightMotor.periodic();
-    m_leftMotor.periodic();
-  }
-
   public void teleopPeriodic() {
     m_leftMotor.setPosition(Math.PI/2);
     m_rightMotor.setPosition(Math.PI/2);
-    
+  }
+
+  public void robotPeriodic() {
+    m_leftMotor.periodic();
+    m_rightMotor.periodic();
   }
 
   public Command getAutonomousCommand() {
