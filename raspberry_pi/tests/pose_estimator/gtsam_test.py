@@ -3,5 +3,5 @@ import unittest
 
 class GtsamTest(unittest.TestCase):
 
-    def testSimple(self) -> None:
+    def test_simple(self) -> None:
         self.assertTrue(True)
