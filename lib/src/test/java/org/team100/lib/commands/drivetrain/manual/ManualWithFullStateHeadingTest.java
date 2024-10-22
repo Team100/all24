@@ -290,12 +290,12 @@ class ManualWithFullStateHeadingTest {
         gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // goal is the current state but at rest
-        assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        assertEquals(0.471, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // setpoint is the goal
-        assertEquals(0.399, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0.471, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // trying to stop
-        verify(0, 0, -2.428, v);
+        verify(0, 0, -2.357, v);
     }
 
     @Test
@@ -347,12 +347,12 @@ class ManualWithFullStateHeadingTest {
         gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
         // goal is the current state but at rest
-        assertEquals(0.399, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        assertEquals(0.471, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // in this version the setpoint is the goal
-        assertEquals(0.399, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
+        assertEquals(0.471, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // try very hard to stop
-        verify(0, 0, -2.428, v);
+        verify(0, 0, -2.356, v);
     }
 
     /**

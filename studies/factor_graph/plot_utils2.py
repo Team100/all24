@@ -128,7 +128,7 @@ class Plot:
     def plot_some_points(
             self, points: list[Point2]
     ) -> None:
-        print(points)
+        # print(points)
         self.ax.scatter([p[0] for p in points], [p[1] for p in points])
         self.fig.canvas.draw()
         self.fig.canvas.update()

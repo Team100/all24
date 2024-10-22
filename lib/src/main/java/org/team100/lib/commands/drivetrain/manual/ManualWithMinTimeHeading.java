@@ -147,7 +147,11 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // double yawRate = getYawRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(state.theta(), pov, twistM_S.theta());
+        m_goal = m_latch.latchedRotation(
+                m_swerveKinodynamics.getMaxAngleAccelRad_S2(),
+                state.theta(),
+                pov,
+                twistM_S.theta());
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
@@ -185,7 +189,6 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         // the snap overrides the user input for omega.
         final double thetaFF = getThetaFF();
 
-        
         final double omega = MathUtil.clamp(
                 thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),

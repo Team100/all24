@@ -149,7 +149,6 @@ ROBOT_GROUND_TRUTH = [
     # Pose2(Rot2.fromDegrees(0), Point2(-5, 4)),
     # Pose2(Rot2.fromDegrees(10), Point2(-5, 4)),
     # Pose2(Rot2.fromDegrees(30), Point2(-5, 4)),
-    
 ]
 # these offsets are x-forward z-up
 # note: if offsets are parallel to the robot path then
@@ -286,9 +285,9 @@ def main() -> None:
                 camera_measurement = vision_measurements(
                     gt_robot_pose, gt_offset, gt_landmark
                 )
-                if (np.any(camera_measurement < 0)):
-                    continue;
-                if (np.any(camera_measurement > 400)):
+                if np.any(camera_measurement < 0):
+                    continue
+                if np.any(camera_measurement > 400):
                     continue
                 print("pixels ", camera_measurement)
                 graph.add(
@@ -332,17 +331,25 @@ def main() -> None:
     np.set_printoptions(precision=2, linewidth=150)
     marginals = Marginals(graph, result)
     print(
-        "K0 mean: ",
+        "\nK0 K: ",
+        result.atCal3DS2(K(0)).K(), # ndarray
+        "\nK0 k: ",
+        result.atCal3DS2(K(0)).k(), # ndarray
+        "\nK0 mean: ",
         result.atCal3DS2(K(0)),
-        "sigma: ",
+        "\nsigma: ",
         np.sqrt(np.diagonal(marginals.marginalCovariance(K(0)))),
+        "\ncovariance: ",
+        marginals.marginalCovariance(K(0)),
     )
     for i in range(len(ROBOT_GROUND_TRUTH)):
         print(f"X{i} mean: ", result.atPose2(X(i)))
         print(f"X{i} sigma: ", np.sqrt(np.diagonal(marginals.marginalCovariance(X(i)))))
     for i in range(len(OFFSET_GROUND_TRUTH)):
+        print(f"C{i} matrix: ", result.atPose3(C(i)).matrix()) # ndarray
         print(f"C{i} mean: ", result.atPose3(C(i)))
         print(f"C{i} sigma: ", np.sqrt(np.diagonal(marginals.marginalCovariance(C(i)))))
+        print(f"C{i} covariance: ", marginals.marginalCovariance(C(i)))
 
     # print("DOT\n", graph.dot(result))
 

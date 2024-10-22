@@ -70,7 +70,6 @@ class TrajectoryPlannerTest {
                 headings, constraints, start_vel, end_vel);
         // u-turn trajectories are not allowed.
         assertTrue(t.isEmpty());
-
     }
 
     /**

@@ -1,6 +1,7 @@
 package org.team100.lib.swerve;
 
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.experiments.Experiment;
@@ -14,7 +15,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.RobotController;
 
 /**
  * Just-in-time kinodynamic limits.
@@ -43,13 +43,16 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     private final DriveAccelerationLimiter m_DriveAccelerationLimiter;
     private final BatterySagLimiter m_BatterySagLimiter;
 
-    public AsymSwerveSetpointGenerator(LoggerFactory parent, SwerveKinodynamics limits) {
+    public AsymSwerveSetpointGenerator(
+            LoggerFactory parent,
+            SwerveKinodynamics limits,
+            DoubleSupplier batteryVoltage) {
         m_limits = limits;
         m_centripetalLimiter = new CapsizeAccelerationLimiter(parent, limits);
         m_SteeringOverride = new SteeringOverride(parent, limits);
         m_steeringRateLimiter = new SteeringRateLimiter(parent, limits);
         m_DriveAccelerationLimiter = new DriveAccelerationLimiter(parent, limits);
-        m_BatterySagLimiter = new BatterySagLimiter();
+        m_BatterySagLimiter = new BatterySagLimiter(batteryVoltage);
     }
 
     /**
@@ -158,7 +161,7 @@ public class AsymSwerveSetpointGenerator implements Glassy {
 
         min_s = Math.min(min_s, accel_min_s);
 
-        double battery_min_s = m_BatterySagLimiter.get(RobotController.getBatteryVoltage());
+        double battery_min_s = m_BatterySagLimiter.get();
         min_s = Math.min(min_s, battery_min_s);
 
         return makeSetpoint(

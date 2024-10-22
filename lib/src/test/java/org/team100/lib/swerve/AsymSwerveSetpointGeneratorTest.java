@@ -82,7 +82,10 @@ class AsymSwerveSetpointGeneratorTest {
                 new SwerveModuleState100(0, Optional.of(new Rotation2d()))
         };
         SwerveSetpoint setpoint = new SwerveSetpoint(new ChassisSpeeds(), initialStates);
-        AsymSwerveSetpointGenerator generator = new AsymSwerveSetpointGenerator(logger, kKinematicLimits);
+        AsymSwerveSetpointGenerator generator = new AsymSwerveSetpointGenerator(
+                logger,
+                kKinematicLimits,
+                () -> 12);
 
         ChassisSpeeds goalSpeeds = new ChassisSpeeds(0.0, 0.0, 1.0);
         setpoint = driveToGoal(setpoint, goalSpeeds, generator);
@@ -112,7 +115,10 @@ class AsymSwerveSetpointGeneratorTest {
     @Test
     void testLimiting() {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.limiting();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(
+                logger,
+                limits,
+                () -> 12);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -146,7 +152,10 @@ class AsymSwerveSetpointGeneratorTest {
     void testNotLimiting() {
         // high centripetal limit to stay out of the way
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(
+                logger,
+                limits,
+                () -> 12);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -171,7 +180,8 @@ class AsymSwerveSetpointGeneratorTest {
     void testLimitingALittle() {
         // high centripetal limit to stay out of the way
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits,
+                () -> 12);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -202,7 +212,8 @@ class AsymSwerveSetpointGeneratorTest {
     void testLowCentripetal() {
         // very low centripetal limit so we can see it
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.lowCapsize();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(
+                logger, limits, () -> 12);
 
         // initially at rest.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
@@ -238,7 +249,8 @@ class AsymSwerveSetpointGeneratorTest {
     void testCentripetal() {
         boolean dump = false;
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.limiting();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits,
+                () -> 12);
 
         // initially moving full speed +x
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(4, 0, 0);
@@ -295,7 +307,8 @@ class AsymSwerveSetpointGeneratorTest {
     void testCase4() {
         // this corresponds to the "4" cases in SwerveUtilTest.
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.decelCase();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits,
+                () -> 12);
 
         // initially moving 0.5 +y
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0.5, 0);
@@ -328,7 +341,8 @@ class AsymSwerveSetpointGeneratorTest {
         // very high decel and centripetal limit allows immediate reduction to max
         // allowed speed.
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.highDecelAndCapsize();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(
+                logger, limits, () -> 12);
 
         // initial speed is faster than possible.
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(10, 0, 0);
@@ -354,7 +368,8 @@ class AsymSwerveSetpointGeneratorTest {
         // very high decel and centripetal limit allows immediate reduction to max
         // allowed speed.
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
-        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(logger, limits);
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(
+                logger, limits, () -> 12);
 
         // initial speed is at the limit +x
         ChassisSpeeds initialSpeeds = new ChassisSpeeds(5, 0, 0);
@@ -373,6 +388,31 @@ class AsymSwerveSetpointGeneratorTest {
         setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
         assertEquals(4.919, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
         assertEquals(0.064, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
+    }
+
+    @Test
+    void testBrownout() {
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.get();
+        // shouldn't allow any movement at 6v.
+        AsymSwerveSetpointGenerator swerveSetpointGenerator = new AsymSwerveSetpointGenerator(
+                logger, limits, () -> 6);
+
+        ChassisSpeeds initialSpeeds = new ChassisSpeeds(0, 0, 0);
+        SwerveModuleState100[] initialStates = new SwerveModuleState100[] {
+                new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero)),
+                new SwerveModuleState100(0, Optional.of(GeometryUtil.kRotationZero))
+        };
+        SwerveSetpoint setpoint = new SwerveSetpoint(initialSpeeds, initialStates);
+
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(1, 0, 0);
+
+        // no output allowed
+        setpoint = swerveSetpointGenerator.generateSetpoint(setpoint, desiredSpeeds);
+        assertEquals(0, setpoint.getChassisSpeeds().vxMetersPerSecond, kDelta);
+        assertEquals(0, setpoint.getChassisSpeeds().vyMetersPerSecond, kDelta);
         assertEquals(0, setpoint.getChassisSpeeds().omegaRadiansPerSecond, kDelta);
     }
 }
