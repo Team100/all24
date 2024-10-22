@@ -20,8 +20,9 @@ public class GyroFactory {
             SwerveModuleCollection collection,
             AsyncFactory asyncFactory) {
         switch (Identity.instance) {
-            case COMP_BOT:
             case SWERVE_ONE:
+                return new ReduxGyro(parent);
+            case COMP_BOT:
                 try {
                     // the kauailabs library calls System.exit() in case
                     // it can't find this library, so check here first.
