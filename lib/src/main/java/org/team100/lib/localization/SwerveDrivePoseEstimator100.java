@@ -14,6 +14,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Util;
@@ -202,13 +203,14 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         // the entry right before this one, the basis for integration.
         Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
-        // System.out.println("SwerveDrivePoseEstiamtor.put() lowerEntry " + lowerEntry);
+        // System.out.println("SwerveDrivePoseEstiamtor.put() lowerEntry " +
+        // lowerEntry);
 
         double t1 = currentTimeS - lowerEntry.getKey();
         InterpolationRecord value = lowerEntry.getValue();
         SwerveState previousState = value.m_state;
 
-        SwerveModulePosition100[] modulePositionDelta = DriveUtil.modulePositionDelta(
+        SwerveModuleDelta[] modulePositionDelta = DriveUtil.modulePositionDelta(
                 value.m_wheelPositions,
                 wheelPositions);
 
@@ -231,7 +233,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 deltaTransform.getX(),
                 deltaTransform.getY(),
                 deltaTransform.getRotation().getRadians());
-        // System.out.println("SwerveDrivePoseEstimator.put() current velocity " + velocity);
+        // System.out.println("SwerveDrivePoseEstimator.put() current velocity " +
+        // velocity);
 
         // calculate acceleration if possible
         FieldRelativeAcceleration accel = new FieldRelativeAcceleration(0, 0, 0);
@@ -246,7 +249,8 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             // for acceleration we recalculate from position, since position might have been
             // updated by the cameras.
             Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
-            // System.out.println("SwerveDrivePoseEstiamtor.put() earlierEntry " + earlierEntry);
+            // System.out.println("SwerveDrivePoseEstiamtor.put() earlierEntry " +
+            // earlierEntry);
 
             double t0 = lowerEntry.getKey() - earlierEntry.getKey();
             // System.out.println("SwerveDrivePoseEstimator.put() accel " + accel);

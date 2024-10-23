@@ -1,7 +1,5 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import java.util.Objects;
 import java.util.Optional;
 
@@ -10,8 +8,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.struct.SwerveModulePositio
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.util.struct.StructSerializable;
 
 /**
@@ -38,7 +34,7 @@ public class SwerveModulePosition100
     /** SwerveModulePosition struct for serialization. */
     public static final SwerveModulePosition100Struct struct = new SwerveModulePosition100Struct();
 
-    /** Constructs a SwerveModulePosition with zeros for distance and angle. */
+    /** Zero distance and empty angle. */
     public SwerveModulePosition100() {
     }
 
@@ -51,28 +47,6 @@ public class SwerveModulePosition100
     public SwerveModulePosition100(double distanceMeters, Optional<Rotation2d> angle) {
         this.distanceMeters = distanceMeters;
         this.angle = angle;
-    }
-
-    /**
-     * Constructs a SwerveModulePosition.
-     *
-     * @param distance The distance measured by the wheel of the module.
-     * @param angle    The angle of the module.
-     */
-    public SwerveModulePosition100(Measure<Distance> distance, Optional<Rotation2d> angle) {
-        this(distance.in(Meters), angle);
-    }
-
-    /** */
-    public SwerveModulePosition100(double x, double y) {
-        if (Math.abs(x) < 1e-6 && Math.abs(y) < 1e-6) {
-            // avoid the garbage rotation.
-            this.distanceMeters = 0.0;
-            this.angle = Optional.empty();
-        } else {
-            this.distanceMeters = Math.hypot(x, y);
-            this.angle = Optional.of(new Rotation2d(x, y));
-        }
     }
 
     @Override

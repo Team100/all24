@@ -1,20 +1,15 @@
 package org.team100.lib.motion.drivetrain.kinodynamics;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.proto.SwerveModuleStateProto;
-import edu.wpi.first.math.kinematics.struct.SwerveModuleStateStruct;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.util.protobuf.ProtobufSerializable;
-import edu.wpi.first.util.struct.StructSerializable;
-
 import java.util.Objects;
 import java.util.Optional;
 
 import org.team100.lib.util.Util;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.proto.SwerveModuleStateProto;
+import edu.wpi.first.math.kinematics.struct.SwerveModuleStateStruct;
+import edu.wpi.first.util.protobuf.ProtobufSerializable;
+import edu.wpi.first.util.struct.StructSerializable;
 
 /**
  * This is a copy of {@link edu.wpi.first.math.kinematics.SwerveModuleState} but
@@ -70,27 +65,20 @@ public class SwerveModuleState100
     /**
      * Constructs a SwerveModuleState.
      *
-     * @param accelMetersPerSecond   The speed of the wheel of the module.
+     * @param speedMetersPerSecond   The speed of the wheel of the module.
      * @param angle                  The angle of the module.
      * @param accelMetersPerSecond_2 The acceleration of the wheel of the module.
-     * @param angle_2                The angular velocity of the module.
+     * @param omega                  The angular velocity of the module.
      */
-    public SwerveModuleState100(double accelMetersPerSecond, Optional<Rotation2d> angle, double accelMetersPerSecond_2,
-            double angle_2) {
-        this.speedMetersPerSecond = accelMetersPerSecond;
+    public SwerveModuleState100(
+            double speedMetersPerSecond,
+            Optional<Rotation2d> angle,
+            double accelMetersPerSecond_2,
+            double omega) {
+        this.speedMetersPerSecond = speedMetersPerSecond;
         this.angle = angle;
         this.accelMetersPerSecond_2 = accelMetersPerSecond_2;
-        this.omega = angle_2;
-    }
-
-    /**
-     * Constructs a SwerveModuleState.
-     *
-     * @param speed The speed of the wheel of the module.
-     * @param angle The angle of the module.
-     */
-    public SwerveModuleState100(Measure<Velocity<Distance>> speed, Optional<Rotation2d> angle) {
-        this(speed.in(MetersPerSecond), angle);
+        this.omega = omega;
     }
 
     @Override

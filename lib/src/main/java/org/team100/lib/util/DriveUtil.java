@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 
 import edu.wpi.first.math.MathUtil;
@@ -108,39 +109,36 @@ public class DriveUtil {
     }
 
     /**
-     * Path between start and end is assumed to be a circular arc so the
-     * angle of the delta is the angle of the chord between the endpoints,
-     * i.e. the average angle. This might not be a good assumption if the positional
-     * control is at a lower level, so that the motion is not uniform during the
-     * control period.
-     * 
-     * Note the arc is assumed to be the same length as the chord, though, i.e. the
-     * angles are assumed to be close to each other.
+     * The inverse kinematics wants this to represent a geodesic, which
+     * means that the steering doesn't change between start and end.
      */
-    public static SwerveModulePosition100[] modulePositionDelta(
+    public static SwerveModuleDelta[] modulePositionDelta(
             SwerveModulePosition100[] start,
             SwerveModulePosition100[] end) {
         if (start.length != end.length) {
             throw new IllegalArgumentException("Inconsistent number of modules!");
         }
-        SwerveModulePosition100[] newPositions = new SwerveModulePosition100[start.length];
+        SwerveModuleDelta[] newPositions = new SwerveModuleDelta[start.length];
         for (int i = 0; i < start.length; i++) {
-            SwerveModulePosition100 startModule = start[i];
-            SwerveModulePosition100 endModule = end[i];
-            // these positions might be null, if the encoder has failed (which can seem to
-            // happen if the robot is *severely* overrunning).
-            double deltaM = endModule.distanceMeters - startModule.distanceMeters;
-            if (startModule.angle.isPresent() && endModule.angle.isPresent()) {
-                newPositions[i] = new SwerveModulePosition100(
-                        deltaM,
-                        // this change breaks the odometry test on line 66, the 90 degree turn case.
-                        // endModule.angle);
-                        Optional.of(endModule.angle.get().interpolate(startModule.angle.get(), 0.5)));
-            } else {
-                newPositions[i] = new SwerveModulePosition100(deltaM, Optional.empty());
-            }
+            newPositions[i] = delta(start[i], end[i]);
         }
         return newPositions;
+    }
+
+    /**
+     * Delta for one module, straight line path using the end angle.
+     */
+    public static SwerveModuleDelta delta(
+            SwerveModulePosition100 start,
+            SwerveModulePosition100 end) {
+        double deltaM = end.distanceMeters - start.distanceMeters;
+        if (end.angle.isPresent()) {
+            return new SwerveModuleDelta(deltaM, end.angle);
+        } else {
+            // the angle might be empty, if the encoder has failed
+            // (which can seem to happen if the robot is *severely* overrunning).
+            return new SwerveModuleDelta(0, Optional.empty());
+        }
     }
 
     private DriveUtil() {

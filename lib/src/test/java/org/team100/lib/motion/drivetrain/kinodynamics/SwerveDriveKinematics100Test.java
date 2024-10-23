@@ -8,8 +8,11 @@ import java.util.Optional;
 
 import org.ejml.simple.SimpleMatrix;
 import org.junit.jupiter.api.Test;
+import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Util;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -18,7 +21,223 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 class SwerveDriveKinematics100Test {
     private static final double kDelta = 0.001;
 
-        /**
+    @Test
+    void testCrab() {
+        // in this case the wheels are assumed to turn immediately to the new
+        // angle, so this is straight back.
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5), // 1,1
+                new Translation2d(0.5, -0.5), // 1,0
+                new Translation2d(-0.5, 0.5), // 0,1
+                new Translation2d(-0.5, -0.5) // origin
+        );
+        SwerveModulePosition100[] start = {
+                new SwerveModulePosition100(
+                        0,
+                        Optional.of(Rotation2d.fromRadians(Math.PI / 2))),
+                new SwerveModulePosition100(
+                        0,
+                        Optional.of(Rotation2d.fromRadians(Math.PI / 2))),
+                new SwerveModulePosition100(
+                        0,
+                        Optional.of(Rotation2d.fromRadians(Math.PI / 2))),
+                new SwerveModulePosition100(
+                        0.0,
+                        Optional.of(Rotation2d.fromRadians(Math.PI / 2)))
+        };
+        SwerveModulePosition100[] end = {
+                new SwerveModulePosition100(
+                        1,
+                        Optional.of(Rotation2d.fromRadians(Math.PI))),
+                new SwerveModulePosition100(
+                        1,
+                        Optional.of(Rotation2d.fromRadians(Math.PI))),
+                new SwerveModulePosition100(
+                        1,
+                        Optional.of(Rotation2d.fromRadians(Math.PI))),
+                new SwerveModulePosition100(
+                        1,
+                        Optional.of(Rotation2d.fromRadians(Math.PI)))
+        };
+
+        SwerveModuleDelta[] delta = DriveUtil.modulePositionDelta(start, end);
+
+        assertEquals(1, delta[0].distanceMeters, kDelta);
+        assertEquals(Math.PI, delta[0].angle.get().getRadians(), kDelta);
+
+        Twist2d twist = kinematics.toTwist2d(delta);
+        assertEquals(-1, twist.dx, kDelta);
+        assertEquals(0, twist.dy, kDelta);
+        assertEquals(0, twist.dtheta, kDelta);
+
+        // it transforms the starting pose correctly
+        Pose2d pStart = new Pose2d(0.5, 0.5, GeometryUtil.kRotationZero);
+        Pose2d pEnd = pStart.exp(twist);
+        assertEquals(-0.5, pEnd.getX(), kDelta);
+        assertEquals(0.5, pEnd.getY(), kDelta);
+        assertEquals(0, pEnd.getRotation().getRadians(), kDelta);
+    }
+
+    @Test
+    void testCrabInverse() {
+        // inverse kinematics for the above case
+        SwerveDriveKinematics100 m_kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
+
+        Pose2d pStart = new Pose2d(0.5, 0.5, GeometryUtil.kRotationZero);
+        Pose2d pEnd = new Pose2d(-0.5, 1.5, GeometryUtil.kRotationZero);
+        Twist2d t = pStart.log(pEnd);
+        assertEquals(-1, t.dx, kDelta);
+        assertEquals(1, t.dy, kDelta);
+        assertEquals(0, t.dtheta, kDelta);
+
+        // the inverse kinematics really just finds the dx and dy for each
+        // corner; it doesn't know the path the corners take to get there
+        // so it assumes the corner paths are straight lines.
+        SwerveModuleDelta[] p = m_kinematics.toSwerveModuleDelta(t);
+        assertEquals(Math.sqrt(2), p[0].distanceMeters, kDelta);
+        assertEquals(3 * Math.PI / 4, p[0].angle.get().getRadians(), kDelta);
+        assertEquals(Math.sqrt(2), p[1].distanceMeters, kDelta);
+        assertEquals(3 * Math.PI / 4, p[1].angle.get().getRadians(), kDelta);
+        assertEquals(Math.sqrt(2), p[2].distanceMeters, kDelta);
+        assertEquals(3 * Math.PI / 4, p[2].angle.get().getRadians(), kDelta);
+        assertEquals(Math.sqrt(2), p[3].distanceMeters, kDelta);
+        assertEquals(3 * Math.PI / 4, p[3].angle.get().getRadians(), kDelta);
+    }
+
+    @Test
+    void testRollDelta() {
+        // a rotate-and-move case you can do in your head
+        // face +x with right rear at origin
+        // keep origin corner still, rotate around it
+        // in this maneuver the steering doesn't change
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5), // 1,1
+                new Translation2d(0.5, -0.5), // 1,0
+                new Translation2d(-0.5, 0.5), // 0,1
+                new Translation2d(-0.5, -0.5) // origin
+        );
+        SwerveModulePosition100[] start = {
+                new SwerveModulePosition100(
+                        0,
+                        Optional.of(Rotation2d.fromRadians(3 * Math.PI / 4))),
+                new SwerveModulePosition100(
+                        0,
+                        Optional.of(Rotation2d.fromRadians(Math.PI / 2))),
+                new SwerveModulePosition100(
+                        0,
+                        Optional.of(Rotation2d.fromRadians(Math.PI))),
+                new SwerveModulePosition100(
+                        0.0,
+                        Optional.empty())
+        };
+        SwerveModulePosition100[] end = {
+                new SwerveModulePosition100(
+                        Math.sqrt(2) * Math.PI / 2,
+                        Optional.of(Rotation2d.fromRadians(3 * Math.PI / 4))),
+                new SwerveModulePosition100(
+                        Math.PI / 2,
+                        Optional.of(Rotation2d.fromRadians(Math.PI / 2))),
+                new SwerveModulePosition100(
+                        Math.PI / 2,
+                        Optional.of(Rotation2d.fromRadians(Math.PI))),
+                new SwerveModulePosition100(
+                        0,
+                        Optional.empty())
+        };
+
+        SwerveModuleDelta[] delta = DriveUtil.modulePositionDelta(start, end);
+        assertEquals(Math.sqrt(2) * Math.PI / 2, delta[0].distanceMeters, kDelta);
+        assertEquals(3 * Math.PI / 4, delta[0].angle.get().getRadians(), kDelta);
+        assertEquals(Math.PI / 2, delta[1].distanceMeters, kDelta);
+        assertEquals(Math.PI / 2, delta[1].angle.get().getRadians(), kDelta);
+        assertEquals(Math.PI / 2, delta[2].distanceMeters, kDelta);
+        assertEquals(Math.PI, delta[2].angle.get().getRadians(), kDelta);
+        assertEquals(0, delta[3].distanceMeters, kDelta);
+        assertTrue(delta[3].angle.isEmpty());
+
+        Twist2d twist = kinematics.toTwist2d(delta);
+
+        assertEquals(-0.5 * Math.PI / 2, twist.dx, kDelta);
+        assertEquals(0.5 * Math.PI / 2, twist.dy, kDelta);
+        assertEquals(Math.PI / 2, twist.dtheta, kDelta);
+    }
+
+    @Test
+    void testRoll() {
+        // a rotate-and-move case you can do in your head
+        // face +x with right rear at origin
+        // keep origin corner still, rotate around it
+        // in this maneuver the steering doesn't change
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5), // 1,1
+                new Translation2d(0.5, -0.5), // 1,0
+                new Translation2d(-0.5, 0.5), // 0,1
+                new Translation2d(-0.5, -0.5) // origin
+        );
+        Twist2d twist = kinematics.toTwist2d(
+                new SwerveModuleDelta(
+                        Math.sqrt(2) * Math.PI / 2,
+                        Optional.of(Rotation2d.fromRadians(3 * Math.PI / 4))),
+                new SwerveModuleDelta(
+                        Math.PI / 2,
+                        Optional.of(Rotation2d.fromRadians(Math.PI / 2))),
+                new SwerveModuleDelta(
+                        Math.PI / 2,
+                        Optional.of(Rotation2d.fromRadians(Math.PI))),
+                // this wheel doesn't move
+                new SwerveModuleDelta(
+                        0.0,
+                        Optional.empty()));
+
+        assertEquals(-0.5 * Math.PI / 2, twist.dx, kDelta);
+        assertEquals(0.5 * Math.PI / 2, twist.dy, kDelta);
+        assertEquals(Math.PI / 2, twist.dtheta, kDelta);
+    }
+
+    @Test
+    void testRollInverse() {
+        // inverse kinematics for the above case
+        SwerveDriveKinematics100 m_kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
+
+        // move diagonally while turning 90 degrees; this should leave
+        // one of the wheels in place.
+        Twist2d t = new Twist2d(
+                -0.5 * Math.PI / 2,
+                0.5 * Math.PI / 2,
+                Math.PI / 2);
+
+        // check that the exp is correct
+        Pose2d pStart = new Pose2d(0.5, 0.5, GeometryUtil.kRotationZero);
+        Pose2d pEnd = pStart.exp(t);
+        assertEquals(-0.5, pEnd.getX(), kDelta);
+        assertEquals(0.5, pEnd.getY(), kDelta);
+        assertEquals(Math.PI / 2, pEnd.getRotation().getRadians(), kDelta);
+
+        // check that the twist is really really correct
+        Twist2d t2 = pStart.log(pEnd);
+        assertEquals(t, t2);
+
+        SwerveModuleDelta[] p = m_kinematics.toSwerveModuleDelta(t);
+        assertEquals(Math.sqrt(2) * Math.PI / 2, p[0].distanceMeters, kDelta);
+        assertEquals(3 * Math.PI / 4, p[0].angle.get().getRadians(), kDelta);
+        assertEquals(Math.PI / 2, p[1].distanceMeters, kDelta);
+        assertEquals(Math.PI / 2, p[1].angle.get().getRadians(), kDelta);
+        assertEquals(Math.PI / 2, p[2].distanceMeters, kDelta);
+        assertEquals(Math.PI, p[2].angle.get().getRadians(), kDelta);
+        // this is the one that shouldn't move
+        assertEquals(0, p[3].distanceMeters, kDelta);
+        assertTrue(p[3].angle.isEmpty());
+    }
+
+    /**
      * array order:
      * 
      * frontLeft
@@ -46,7 +265,7 @@ class SwerveDriveKinematics100Test {
         assertEquals(1, kinematics.m_inverseKinematics.get(3, 1));
         assertEquals(0.5, kinematics.m_inverseKinematics.get(3, 2));
     }
-    
+
     /**
      * array order:
      * 
@@ -62,18 +281,18 @@ class SwerveDriveKinematics100Test {
                 new Translation2d(0.5, -0.5),
                 new Translation2d(-0.5, 0.5),
                 new Translation2d(-0.5, -0.5));
-        assertEquals(0.25, kinematics.m_forwardKinematics.get(0, 0),kDelta);
-        assertEquals(0, kinematics.m_forwardKinematics.get(1, 0),kDelta);
-        assertEquals(-0.25, kinematics.m_forwardKinematics.get(2, 0),kDelta);
-        assertEquals(0, kinematics.m_forwardKinematics.get(0, 1),kDelta);
-        assertEquals(0.25, kinematics.m_forwardKinematics.get(1, 1),kDelta);
-        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 1),kDelta);
-        assertEquals(0.25, kinematics.m_forwardKinematics.get(0, 2),kDelta);
-        assertEquals(0, kinematics.m_forwardKinematics.get(1, 2),kDelta);
-        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 2),kDelta);
-        assertEquals(0, kinematics.m_forwardKinematics.get(0, 3),kDelta);
-        assertEquals(0.25, kinematics.m_forwardKinematics.get(1, 3),kDelta);
-        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 3),kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(0, 0), kDelta);
+        assertEquals(0, kinematics.m_forwardKinematics.get(1, 0), kDelta);
+        assertEquals(-0.25, kinematics.m_forwardKinematics.get(2, 0), kDelta);
+        assertEquals(0, kinematics.m_forwardKinematics.get(0, 1), kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(1, 1), kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 1), kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(0, 2), kDelta);
+        assertEquals(0, kinematics.m_forwardKinematics.get(1, 2), kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 2), kDelta);
+        assertEquals(0, kinematics.m_forwardKinematics.get(0, 3), kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(1, 3), kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 3), kDelta);
     }
 
     @Test
@@ -85,10 +304,10 @@ class SwerveDriveKinematics100Test {
                 new Translation2d(-0.5, -0.5));
         // 0.1m straight ahead, all same.
         Twist2d twist = kinematics.toTwist2d(
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))));
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(0))));
 
         assertEquals(0.1, twist.dx, kDelta);
         assertEquals(0, twist.dy, kDelta);
@@ -104,10 +323,10 @@ class SwerveDriveKinematics100Test {
                 new Translation2d(-0.5, -0.5));
 
         Twist2d twist = kinematics.toTwist2d(
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(135))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(45))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(-135))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(-45))));
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(135))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(45))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(-135))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(-45))));
 
         assertEquals(0, twist.dx, kDelta);
         assertEquals(0, twist.dy, kDelta);
@@ -123,10 +342,10 @@ class SwerveDriveKinematics100Test {
                 new Translation2d(-0.5, -0.5));
         // 0.1m straight ahead, all same.
         Twist2d twist = kinematics.toTwist2d(
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))),
-                new SwerveModulePosition100(0.1, Optional.of(Rotation2d.fromDegrees(0))));
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(0))),
+                new SwerveModuleDelta(0.1, Optional.of(Rotation2d.fromDegrees(0))));
 
         assertEquals(0.1, twist.dx, kDelta);
         assertEquals(0, twist.dy, kDelta);
@@ -179,13 +398,12 @@ class SwerveDriveKinematics100Test {
     @Test
     void testStraightLineForwardKinematicsWithDeltas() {
         // test forward kinematics going in a straight line
-        SwerveModulePosition100 delta = new SwerveModulePosition100(5.0, Optional.of(Rotation2d.fromDegrees(0.0)));
-        var twist = m_kinematics.toTwist2d(delta, delta, delta, delta);
+        SwerveModuleDelta delta = new SwerveModuleDelta(5.0, Optional.of(Rotation2d.fromDegrees(0.0)));
+        Twist2d twist = m_kinematics.toTwist2d(delta, delta, delta, delta);
 
-        assertAll(
-                () -> assertEquals(5.0, twist.dx, kEpsilon),
-                () -> assertEquals(0.0, twist.dy, kEpsilon),
-                () -> assertEquals(0.0, twist.dtheta, kEpsilon));
+        assertEquals(5.0, twist.dx, kEpsilon);
+        assertEquals(0.0, twist.dy, kEpsilon);
+        assertEquals(0.0, twist.dtheta, kEpsilon);
     }
 
     @Test
@@ -217,13 +435,14 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testStraightStrafeForwardKinematicsWithDeltas() {
-        SwerveModulePosition100 delta = new SwerveModulePosition100(5.0, Optional.of(Rotation2d.fromDegrees(90.0)));
-        var twist = m_kinematics.toTwist2d(delta, delta, delta, delta);
+        SwerveModuleDelta delta = new SwerveModuleDelta(
+                5.0,
+                Optional.of(Rotation2d.fromDegrees(90.0)));
+        Twist2d twist = m_kinematics.toTwist2d(delta, delta, delta, delta);
 
-        assertAll(
-                () -> assertEquals(0.0, twist.dx, kEpsilon),
-                () -> assertEquals(5.0, twist.dy, kEpsilon),
-                () -> assertEquals(0.0, twist.dtheta, kEpsilon));
+        assertEquals(0.0, twist.dx, kEpsilon);
+        assertEquals(5.0, twist.dy, kEpsilon);
+        assertEquals(0.0, twist.dtheta, kEpsilon);
     }
 
     @Test
@@ -308,20 +527,20 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testTurnInPlaceForwardKinematicsWithDeltas() {
-        SwerveModulePosition100 flDelta = new SwerveModulePosition100(106.629,
+        SwerveModuleDelta flDelta = new SwerveModuleDelta(106.629,
                 Optional.of(Rotation2d.fromDegrees(135)));
-        SwerveModulePosition100 frDelta = new SwerveModulePosition100(106.629, Optional.of(Rotation2d.fromDegrees(45)));
-        SwerveModulePosition100 blDelta = new SwerveModulePosition100(106.629,
+        SwerveModuleDelta frDelta = new SwerveModuleDelta(106.629,
+                Optional.of(Rotation2d.fromDegrees(45)));
+        SwerveModuleDelta blDelta = new SwerveModuleDelta(106.629,
                 Optional.of(Rotation2d.fromDegrees(-135)));
-        SwerveModulePosition100 brDelta = new SwerveModulePosition100(106.629,
+        SwerveModuleDelta brDelta = new SwerveModuleDelta(106.629,
                 Optional.of(Rotation2d.fromDegrees(-45)));
 
-        var twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
+        Twist2d twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
 
-        assertAll(
-                () -> assertEquals(0.0, twist.dx, kEpsilon),
-                () -> assertEquals(0.0, twist.dy, kEpsilon),
-                () -> assertEquals(2 * Math.PI, twist.dtheta, 0.1));
+        assertEquals(0.0, twist.dx, kEpsilon);
+        assertEquals(0.0, twist.dy, kEpsilon);
+        assertEquals(2 * Math.PI, twist.dtheta, 0.1);
     }
 
     @Test
@@ -354,15 +573,16 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testOffCenterCORRotationForwardKinematicsWithDeltas() {
-        SwerveModulePosition100 flDelta = new SwerveModulePosition100(0.0, Optional.of(Rotation2d.fromDegrees(0.0)));
-        SwerveModulePosition100 frDelta = new SwerveModulePosition100(150.796,
+        SwerveModuleDelta flDelta = new SwerveModuleDelta(0.0,
                 Optional.of(Rotation2d.fromDegrees(0.0)));
-        SwerveModulePosition100 blDelta = new SwerveModulePosition100(150.796,
+        SwerveModuleDelta frDelta = new SwerveModuleDelta(150.796,
+                Optional.of(Rotation2d.fromDegrees(0.0)));
+        SwerveModuleDelta blDelta = new SwerveModuleDelta(150.796,
                 Optional.of(Rotation2d.fromDegrees(-90)));
-        SwerveModulePosition100 brDelta = new SwerveModulePosition100(213.258,
+        SwerveModuleDelta brDelta = new SwerveModuleDelta(213.258,
                 Optional.of(Rotation2d.fromDegrees(-45)));
 
-        var twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
+        Twist2d twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
 
         /*
          * We already know that our omega should be 2π from the previous test. Next, we
@@ -409,16 +629,16 @@ class SwerveDriveKinematics100Test {
 
     @Test
     void testOffCenterCORRotationAndTranslationForwardKinematicsWithDeltas() {
-        SwerveModulePosition100 flDelta = new SwerveModulePosition100(23.43,
+        SwerveModuleDelta flDelta = new SwerveModuleDelta(23.43,
                 Optional.of(Rotation2d.fromDegrees(-140.19)));
-        SwerveModulePosition100 frDelta = new SwerveModulePosition100(23.43,
+        SwerveModuleDelta frDelta = new SwerveModuleDelta(23.43,
                 Optional.of(Rotation2d.fromDegrees(-39.81)));
-        SwerveModulePosition100 blDelta = new SwerveModulePosition100(54.08,
+        SwerveModuleDelta blDelta = new SwerveModuleDelta(54.08,
                 Optional.of(Rotation2d.fromDegrees(-109.44)));
-        SwerveModulePosition100 brDelta = new SwerveModulePosition100(54.08,
+        SwerveModuleDelta brDelta = new SwerveModuleDelta(54.08,
                 Optional.of(Rotation2d.fromDegrees(-70.56)));
 
-        var twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
+        Twist2d twist = m_kinematics.toTwist2d(flDelta, frDelta, blDelta, brDelta);
 
         /*
          * From equation (13.17), we know that chassis motion is th dot product of the
