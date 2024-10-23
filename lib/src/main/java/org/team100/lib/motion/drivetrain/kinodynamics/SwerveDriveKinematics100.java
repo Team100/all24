@@ -55,7 +55,7 @@ public class SwerveDriveKinematics100 {
      * </pre>
      */
 
-    private final SimpleMatrix m_inverseKinematics;
+    final SimpleMatrix m_inverseKinematics;
     /**
      * like this:
      * this (3 x 2n) matrix is the pseudo-inverse of above, which ends up something
@@ -86,7 +86,7 @@ public class SwerveDriveKinematics100 {
      * some combination depending on dimensions
      * </pre>
      */
-    private final SimpleMatrix m_forwardKinematics;
+    final SimpleMatrix m_forwardKinematics;
     /**
      * Used when velocity is zero, to keep the steering the same.
      * elements are nullable.
@@ -94,6 +94,13 @@ public class SwerveDriveKinematics100 {
     private Rotation2d[] m_moduleHeadings;
 
     /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     * 
      * @param moduleTranslationsM relative to the center of rotation
      */
     public SwerveDriveKinematics100(Translation2d... moduleTranslationsM) {
@@ -114,6 +121,13 @@ public class SwerveDriveKinematics100 {
 
     /**
      * Reset the internal swerve module headings
+     *
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
      * 
      * arg elements are nullable
      */
@@ -479,7 +493,7 @@ public class SwerveDriveKinematics100 {
                 // angle = new Rotation2d(MathUtil.angleModulus(
                 // angle2.get().getRadians() + dtheta));
                 // actually we really have no idea what the current state should be
-                // TODO: confirm this is OK 
+                // TODO: confirm this is OK
                 moduleStates[i] = new SwerveModuleState100(0, Optional.empty());
                 continue;
             } else {

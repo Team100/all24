@@ -18,6 +18,64 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 class SwerveDriveKinematics100Test {
     private static final double kDelta = 0.001;
 
+        /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     */
+    @Test
+    void testInverse() {
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
+        assertEquals(1, kinematics.m_inverseKinematics.get(0, 0));
+        assertEquals(0, kinematics.m_inverseKinematics.get(0, 1));
+        assertEquals(-0.5, kinematics.m_inverseKinematics.get(0, 2));
+        assertEquals(0, kinematics.m_inverseKinematics.get(1, 0));
+        assertEquals(1, kinematics.m_inverseKinematics.get(1, 1));
+        assertEquals(0.5, kinematics.m_inverseKinematics.get(1, 2));
+        assertEquals(1, kinematics.m_inverseKinematics.get(2, 0));
+        assertEquals(0, kinematics.m_inverseKinematics.get(2, 1));
+        assertEquals(0.5, kinematics.m_inverseKinematics.get(2, 2));
+        assertEquals(0, kinematics.m_inverseKinematics.get(3, 0));
+        assertEquals(1, kinematics.m_inverseKinematics.get(3, 1));
+        assertEquals(0.5, kinematics.m_inverseKinematics.get(3, 2));
+    }
+    
+    /**
+     * array order:
+     * 
+     * frontLeft
+     * frontRight
+     * rearLeft
+     * rearRight
+     */
+    @Test
+    void testForward() {
+        SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
+                new Translation2d(0.5, 0.5),
+                new Translation2d(0.5, -0.5),
+                new Translation2d(-0.5, 0.5),
+                new Translation2d(-0.5, -0.5));
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(0, 0),kDelta);
+        assertEquals(0, kinematics.m_forwardKinematics.get(1, 0),kDelta);
+        assertEquals(-0.25, kinematics.m_forwardKinematics.get(2, 0),kDelta);
+        assertEquals(0, kinematics.m_forwardKinematics.get(0, 1),kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(1, 1),kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 1),kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(0, 2),kDelta);
+        assertEquals(0, kinematics.m_forwardKinematics.get(1, 2),kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 2),kDelta);
+        assertEquals(0, kinematics.m_forwardKinematics.get(0, 3),kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(1, 3),kDelta);
+        assertEquals(0.25, kinematics.m_forwardKinematics.get(2, 3),kDelta);
+    }
+
     @Test
     void testTwistStraight() {
         SwerveDriveKinematics100 kinematics = new SwerveDriveKinematics100(
