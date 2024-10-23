@@ -43,5 +43,5 @@ graph {
     b1 -- g1;
     b0 -- bb;
     bb -- b1;
-    b1 -- br;
+    br -- X1;
 }
