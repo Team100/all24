@@ -366,7 +366,7 @@ public class SwerveDriveKinematics100 {
     }
 
     /** Twist as a 3x1 column vector: [dx; dy; dtheta] */
-    private SimpleMatrix twist2Vector(Twist2d twist) {
+    private static SimpleMatrix twist2Vector(Twist2d twist) {
         return new SimpleMatrix(new double[] {
                 twist.dx,
                 twist.dy,

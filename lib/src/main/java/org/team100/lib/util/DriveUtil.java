@@ -134,11 +134,10 @@ public class DriveUtil {
         double deltaM = end.distanceMeters - start.distanceMeters;
         if (end.angle.isPresent()) {
             return new SwerveModuleDelta(deltaM, end.angle);
-        } else {
-            // the angle might be empty, if the encoder has failed
-            // (which can seem to happen if the robot is *severely* overrunning).
-            return new SwerveModuleDelta(0, Optional.empty());
         }
+        // the angle might be empty, if the encoder has failed
+        // (which can seem to happen if the robot is *severely* overrunning).
+        return new SwerveModuleDelta(0, Optional.empty());
     }
 
     private DriveUtil() {
