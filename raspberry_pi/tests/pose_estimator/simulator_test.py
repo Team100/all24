@@ -17,17 +17,17 @@ class SimulatorTest(unittest.TestCase):
         self.assertAlmostEqual(0, sim.gt_y)
         self.assertAlmostEqual(0, sim.gt_theta)
         # lower left
-        self.assertAlmostEqual(192, sim.pixels[0][0], 0)
-        self.assertAlmostEqual(208, sim.pixels[0][1], 0)
+        self.assertAlmostEqual(192, sim.gt_pixels[0][0], 0)
+        self.assertAlmostEqual(208, sim.gt_pixels[0][1], 0)
         # lower right
-        self.assertAlmostEqual(208, sim.pixels[1][0], 0)
-        self.assertAlmostEqual(208, sim.pixels[1][1], 0)
+        self.assertAlmostEqual(208, sim.gt_pixels[1][0], 0)
+        self.assertAlmostEqual(208, sim.gt_pixels[1][1], 0)
         # upper right
-        self.assertAlmostEqual(208, sim.pixels[2][0], 0)
-        self.assertAlmostEqual(192, sim.pixels[2][1], 0)
+        self.assertAlmostEqual(208, sim.gt_pixels[2][0], 0)
+        self.assertAlmostEqual(192, sim.gt_pixels[2][1], 0)
         # upper left
-        self.assertAlmostEqual(192, sim.pixels[3][0], 0)
-        self.assertAlmostEqual(192, sim.pixels[3][1], 0)
+        self.assertAlmostEqual(192, sim.gt_pixels[3][0], 0)
+        self.assertAlmostEqual(192, sim.gt_pixels[3][1], 0)
 
         sim.step(math.pi / 2)
         self.assertAlmostEqual(1, sim.gt_x)

@@ -5,13 +5,15 @@
 The field is 4x4 meters
 The field has one tag on the far (+x) end, 1m off the floor
 The robot has one camera with the same pose as the robot, except 1m high.
-The camera uses realistic 6mm lens and GS sensor parameters.
-The camera data is noisy at the level of a pixel or two.
-The robot has a gyro, with realistic noise and drift.
 The robot path is a circle of radius 1m, centered 3m away from the tag, followed at 1m/s.
 The robot rotates back and forth with an amplitude of 0.5 rad, at 3x the frequency of the circular path (so 4 rad/s)
 
 Because the gyro drift is a random walk, the whole thing needs to be sequential.
+
+TODO:
+use realistic 6mm lens and GS sensor parameters.
+add camera noise, white noise +/- 1 px
+add gyro noise, random walk, plus white noise +/- 0.01 rad.
 """
 
 import math
@@ -40,7 +42,6 @@ CALIB = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
 
 
 class Simulator:
-
     def __init__(self) -> None:
         self.time_s: float = 0
         self.gt_x: float
@@ -51,7 +52,7 @@ class Simulator:
         # lower right
         # upper right
         # upper left
-        self.pixels: list[np.ndarray]
+        self.gt_pixels: list[np.ndarray]
         # initialize
         self.step(0)
 
@@ -97,7 +98,7 @@ class Simulator:
             camera_offset,
             CALIB,
         )
-        self.pixels = [p0, p1, p2, p3]
+        self.gt_pixels = [p0, p1, p2, p3]
 
     def px(  # type: ignore
         self,
