@@ -17,3 +17,4 @@ class EstimateTest(unittest.TestCase):
     def test_eval(self) -> None:
         sim = Simulator()
         est = Estimate()
+        est.update()

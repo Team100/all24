@@ -6,8 +6,6 @@ Those inputs are asserted using one of the input methods here.
 
 # pylint: disable=C0301,E0611,R0903
 
-import math
-import unittest
 
 import numpy as np
 from gtsam import (
@@ -27,7 +25,8 @@ from gtsam import (
 
 from app.pose_estimator.swerve_module_position import SwerveModulePosition100
 
-KeyTimestampMap = dict[int,float]
+KeyTimestampMap = dict[int, float]
+
 
 class Estimate:
     def __init__(self) -> None:
@@ -39,17 +38,16 @@ class Estimate:
         self.new_theta = Values()
         self.timestamps = KeyTimestampMap()
 
-    def odometry(self, positions:list[SwerveModulePosition100]) -> None:
+    def odometry(self, positions: list[SwerveModulePosition100]) -> None:
         """Add an odometry measurement"""
         # odometry is not guaranteed to arrive in order, but for now, it is.
         # TODO: out-of-order odometry
         # each odometry update maps exactly to a "between" factor
-
+        # remember a "twist" is a robot-relative concept
 
     def update(self) -> None:
         """Run the solver"""
-
-        self.result = self.isam.calculateEstimate()
+        self.result: Values = self.isam.calculateEstimate()  # type: ignore
         # reset the accumulators
         self.new_factors = NonlinearFactorGraph()
         self.new_theta = Values()
@@ -57,5 +55,5 @@ class Estimate:
 
     def make_smoother(self) -> FixedLagSmoother:
         lag_s = 10
-        lm_params = LevenbergMarquardtParams.LegacyDefaults()
+        lm_params: LevenbergMarquardtParams = LevenbergMarquardtParams()
         return BatchFixedLagSmoother(lag_s, lm_params)

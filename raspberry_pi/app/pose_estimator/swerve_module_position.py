@@ -6,14 +6,14 @@ from wpimath.geometry import Rotation2d
 from wpiutil import wpistruct
 
 
-@wpistruct.make_wpistruct
+@wpistruct.make_wpistruct # type: ignore
 @dataclasses.dataclass
 class OptionalRotation2d:
     present: bool
     value: Rotation2d
 
 
-@wpistruct.make_wpistruct
+@wpistruct.make_wpistruct # type: ignore
 @dataclasses.dataclass
 class SwerveModulePosition100:
     distance_m: float

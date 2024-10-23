@@ -14,7 +14,7 @@
         "--strict",
     ],
     "editor.minimap.enabled": false,
-    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.typeCheckingMode": "strict",
     "mypy-type-checker.reportingScope": "workspace",
     "markdown.validate.enabled": true,
     "tidyMarkdown.disableFormatter": true,
