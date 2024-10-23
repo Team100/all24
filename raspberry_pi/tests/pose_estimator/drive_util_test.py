@@ -1,16 +1,57 @@
 import unittest
 
-from wpimath.geometry import Rotation2d
+import random
+
+from wpimath.geometry import Rotation2d, Translation2d, Twist2d
 
 from app.pose_estimator.drive_util import DriveUtil
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100)
+from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 
 # pylint: disable=C0200,R0903
 
 
-
 class DriveUtilTest(unittest.TestCase):
+    def test_round_trip_module_deltas(self) -> None:
+        k = SwerveDriveKinematics100(
+            [
+                Translation2d(0.5, 0.5),
+                Translation2d(0.5, -0.5),
+                Translation2d(-0.5, 0.5),
+                Translation2d(-0.5, -0.5),
+            ]
+        )
+        self.assertEqual(4, k.num_modules)
+
+        # straight diagonal path
+        t = Twist2d(1, 1, 0)
+        p = k.to_swerve_module_delta(t)
+        self.assertEqual(4, len(p))
+        t2 = k.to_twist_2d(p)
+        self.assertAlmostEqual(t.dx, t2.dx)
+        self.assertAlmostEqual(t.dy, t2.dy)
+        self.assertAlmostEqual(t.dtheta, t2.dtheta)
+
+        # turning and moving
+        t = Twist2d(1, 1, 1)
+        p = k.to_swerve_module_delta(t)
+        t2 = k.to_twist_2d(p)
+        self.assertAlmostEqual(t.dx, t2.dx)
+        self.assertAlmostEqual(t.dy, t2.dy)
+        self.assertAlmostEqual(t.dtheta, t2.dtheta)
+
+        for _ in range(500):
+            # inverse always works
+            t = Twist2d(random.random(), random.random(), random.random())
+            p = k.to_swerve_module_delta(t)
+            t2 = k.to_twist_2d(p)
+            self.assertAlmostEqual(t.dx, t2.dx)
+            self.assertAlmostEqual(t.dy, t2.dy)
+            self.assertAlmostEqual(t.dtheta, t2.dtheta)
+
     def test_delta(self) -> None:
         start = [
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
@@ -41,10 +82,10 @@ class DriveUtilTest(unittest.TestCase):
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(1))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(1))),
         ]
+        # there is no interpolation, we use the ending value.
         lerp = DriveUtil.module_position_delta(start, end)
         self.assertAlmostEqual(0, lerp[0].distance_m)
-        self.assertAlmostEqual(0.5, lerp[0].angle.value.radians())
-
+        self.assertAlmostEqual(1, lerp[0].angle.value.radians())
 
     def test_delta3(self) -> None:
         start = [
@@ -59,6 +100,7 @@ class DriveUtilTest(unittest.TestCase):
             SwerveModulePosition100(1, OptionalRotation2d(True, Rotation2d(1))),
             SwerveModulePosition100(1, OptionalRotation2d(True, Rotation2d(1))),
         ]
+        # there is no interpolation, we use the ending value.
         lerp = DriveUtil.module_position_delta(start, end)
         self.assertAlmostEqual(1, lerp[0].distance_m)
-        self.assertAlmostEqual(0.5, lerp[0].angle.value.radians())
+        self.assertAlmostEqual(1, lerp[0].angle.value.radians())
