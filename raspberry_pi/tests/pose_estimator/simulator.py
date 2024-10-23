@@ -20,8 +20,7 @@ import math
 
 import numpy as np
 from gtsam import Cal3DS2  # includes distortion
-from gtsam import PinholeCameraCal3DS2, Pose2, Pose3, Rot3
-from gtsam import Point2, Point3  # actually np.ndarray
+from gtsam import PinholeCameraCal3DS2, Point2, Point3, Pose2, Pose3, Rot3
 
 TAG_SIZE_M: float = 0.1651
 TAG_X: float = 4
@@ -52,7 +51,7 @@ class Simulator:
         # lower right
         # upper right
         # upper left
-        self.gt_pixels: list[np.ndarray]
+        self.gt_pixels: list[Point2]
         # initialize
         self.step(0)
 

@@ -3,8 +3,8 @@
 import math
 import unittest
 
-from gtsam import Cal3DS2, Pose2, Pose3, Point2, Point3, Rot3
 import numpy as np
+from gtsam import Cal3DS2, Point2, Point3, Pose2, Pose3, Rot3
 
 # this works with runtests.py but not the little triangle up there
 from tests.pose_estimator.simulator import Simulator
@@ -45,10 +45,10 @@ class SimulatorTest(unittest.TestCase):
     def test_camera(self) -> None:
         sim = Simulator()
         # this is the lower right corner
-        landmark: Point3 = Point3(4, -(0.1651 / 2), 1 - (0.1651 / 2))
-        robot_pose: Pose2 = Pose2(2, 0, 0)
-        camera_offset: Pose3 = Pose3(Rot3(), np.array([0, 0, 1]))
-        calib: Cal3DS2 = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
+        landmark = Point3(4, -(0.1651 / 2.0), 1 - (0.1651 / 2))
+        robot_pose = Pose2(2, 0, 0)
+        camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
+        calib = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
         px: Point2 = sim.px(landmark, robot_pose, camera_offset, calib)
         # pixel should be in the lower right quadrant
         # remember x+right, y+down
