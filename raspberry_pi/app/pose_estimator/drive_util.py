@@ -17,12 +17,12 @@ class DriveUtil:
         """Uses the end angle to cover the whole interval."""
         new_positions: list[SwerveModuleDelta] = []
         for i in range(len(start)):
-            new_positions.append(DriveUtil.delta(start[i], end[i]))
+            new_positions.append(DriveUtil._delta(start[i], end[i]))
 
         return new_positions
 
     @staticmethod
-    def delta(
+    def _delta(
         start: SwerveModulePosition100, end: SwerveModulePosition100
     ) -> SwerveModuleDelta:
         delta_m: float = end.distance_m - start.distance_m
