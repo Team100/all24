@@ -90,8 +90,5 @@ public class ReduxGyro implements Gyro {
     }
 
     @Override
-    public void periodic() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'periodic'");
-    }
+    public void periodic() {}
 }
