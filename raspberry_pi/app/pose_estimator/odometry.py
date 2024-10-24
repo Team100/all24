@@ -1,31 +1,20 @@
-"""Factory for odometry factors"""
+"""Factory for odometry factors.
+
+This also serves as a template for other factors.  The pattern should always be
+the same: an "h" function that performs the estimated measurement, an
+"h_H" function that wraps it with numerical derivatives (to avoid confusion
+with analytic Jacobians), and a "factor" factory that wraps that in a
+CustomFactor.
+
+There's some discussion relevant to these operations here:
+https://groups.google.com/g/gtsam-users/c/c-BhH8mfqbo/m/IMk1RQ84AwAJ
+"""
 
 # pylint: disable=C0103,E0611
 
-from typing import Callable
-
 import gtsam
 import numpy as np
-from gtsam import (
-    BetweenFactorDouble,
-    BetweenFactorPose2,
-    CustomFactor,
-    FixedLagSmoother,
-    ISAM2GaussNewtonParams,
-    KeyVector,
-    NonlinearFactor,
-    NonlinearFactorGraph,
-    Point2,
-    Point3,
-    Pose2,
-    Pose3,
-    Rot2,
-    Rot3,
-    Values,
-)
 from gtsam.noiseModel import Base as SharedNoiseModel
-from gtsam.noiseModel import Diagonal
-from gtsam.symbol_shorthand import X  # robot pose
 from wpimath.geometry import Twist2d
 
 from app.pose_estimator.numerical_derivative import (
@@ -34,15 +23,15 @@ from app.pose_estimator.numerical_derivative import (
 )
 
 
-def odometry_h_fn() -> Callable[[Pose2, Pose2], np.ndarray]:
-    def h(p0: Pose2, p1: Pose2) -> np.ndarray:
-        return p0.logmap(p1)
+def h(p0: gtsam.Pose2, p1: gtsam.Pose2) -> np.ndarray:
+    """Difference between p0 and p1 in the tangent space.
+    This is identical to the WPILib "Twist2d" idea. """
+    return p0.logmap(p1)
 
-    return h
 
-
-def odo_H(measured, p0, p1, H):
-    h = odometry_h_fn()
+def h_H(measured: np.ndarray, p0: gtsam.Pose2, p1: gtsam.Pose2, H: list[np.ndarray]):
+    """Error function including Jacobians.
+    Returns the difference between the measured and estimated tangent-space odometry."""
     result = h(p0, p1) - measured
     if H is not None:
         H[0] = numericalDerivative21(h, p0, p1)
@@ -50,19 +39,21 @@ def odo_H(measured, p0, p1, H):
     return result
 
 
-def odometry_factor(
+def factor(
     t: Twist2d,
     model: SharedNoiseModel,
-    p0_key: int,
-    p1_key: int,
-) -> NonlinearFactor:
+    p0_key: gtsam.Symbol,
+    p1_key: gtsam.Symbol,
+) -> gtsam.NonlinearFactor:
+    """Factory for Custom Factor implementing odometry using tangent-space measurements.
+    """
     measured = np.array([t.dx, t.dy, t.dtheta])
 
-    def error_func(this: CustomFactor, v: Values, H: list[np.ndarray]) -> np.ndarray:
-        p0 = v.atPose2(this.keys()[0])
-        p1 = v.atPose2(this.keys()[1])
-        result = odo_H(measured, p0, p1, H)
+    def error_func(
+        this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
+    ) -> np.ndarray:
+        p0: gtsam.Pose2 = v.atPose2(this.keys()[0])
+        p1: gtsam.Pose2 = v.atPose2(this.keys()[1])
+        return h_H(measured, p0, p1, H)
 
-        return result
-
-    return CustomFactor(model, KeyVector([p0_key, p1_key]), error_func)
+    return gtsam.CustomFactor(model, gtsam.KeyVector([p0_key, p1_key]), error_func)

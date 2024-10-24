@@ -20,6 +20,7 @@ class EstimateTest(unittest.TestCase):
         sim = Simulator()
         # initial position at origin
         est = Estimate()
+        est.init()
         # drive straight ahead
         positions = [
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
@@ -27,6 +28,6 @@ class EstimateTest(unittest.TestCase):
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
         ]
-        time_s = 0.1
-        est.odometry(time_s, positions)
+        time_us: int = 1
+        est.odometry(time_us, positions)
         est.update()
