@@ -41,6 +41,15 @@ def odometry_h_fn() -> Callable[[Pose2, Pose2], np.ndarray]:
     return h
 
 
+def odo_H(measured, p0, p1, H):
+    h = odometry_h_fn()
+    result = h(p0, p1) - measured
+    if H is not None:
+        H[0] = numericalDerivative21(h, p0, p1)
+        H[1] = numericalDerivative22(h, p0, p1)
+    return result
+
+
 def odometry_factor(
     t: Twist2d,
     model: SharedNoiseModel,
@@ -52,11 +61,7 @@ def odometry_factor(
     def error_func(this: CustomFactor, v: Values, H: list[np.ndarray]) -> np.ndarray:
         p0 = v.atPose2(this.keys()[0])
         p1 = v.atPose2(this.keys()[1])
-        h = odometry_h_fn()
-        result = h(p0, p1) - measured
-        if H is not None:
-            H[0] = numericalDerivative21(h, p0, p1)
-            H[1] = numericalDerivative22(h, p0, p1)
+        result = odo_H(measured, p0, p1, H)
 
         return result
 
