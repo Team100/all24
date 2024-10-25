@@ -4,14 +4,18 @@
 
 import math
 import unittest
-from wpimath.geometry import Rotation2d, Translation2d
 
-from gtsam import Cal3DS2, Pose2, Pose3, Point2, Point3, Rot3
+import gtsam
 import numpy as np
+from gtsam.symbol_shorthand import X
+from wpimath.geometry import Rotation2d, Translation2d
 
 # this works with runtests.py but not the little triangle up there
 from app.pose_estimator.estimate import Estimate
-from app.pose_estimator.swerve_module_position import OptionalRotation2d, SwerveModulePosition100
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 from tests.pose_estimator.simulator import Simulator
 
 
@@ -21,7 +25,7 @@ class EstimateTest(unittest.TestCase):
         # initial position at origin
         est = Estimate()
         est.init()
-        # drive straight ahead
+        # drive straight ahead 0.1
         positions = [
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
@@ -31,3 +35,56 @@ class EstimateTest(unittest.TestCase):
         time_us: int = 1
         est.odometry(time_us, positions)
         est.update()
+        print(est.result)
+        self.assertEqual(2, est.result.size())
+        p0: gtsam.Pose2 = est.result.atPose2(X(0))
+        self.assertAlmostEqual(0, p0.x())
+        self.assertAlmostEqual(0, p0.y())
+        self.assertAlmostEqual(0, p0.theta())
+        p1: gtsam.Pose2 = est.result.atPose2(X(1))
+        # this is the x value from above
+        self.assertAlmostEqual(0.1, p1.x())
+        self.assertAlmostEqual(0, p1.y())
+        self.assertAlmostEqual(0, p1.theta())
+
+    def test_eval2(self) -> None:
+        """array order:
+        *
+        * frontLeft
+        * frontRight
+        * rearLeft
+        * rearRight
+        """
+        sim = Simulator()
+        # initial position at origin, 1m wheelbase
+        est = Estimate()
+        est.init()
+        # This is a rotating translation that should end up rotated 90 to the left
+        # and 1m behind
+        positions = [
+            SwerveModulePosition100(
+                math.sqrt(2) * math.pi / 2,
+                OptionalRotation2d(True, Rotation2d.fromDegrees(135)),
+            ),
+            SwerveModulePosition100(
+                math.pi / 2, OptionalRotation2d(True, Rotation2d.fromDegrees(90))
+            ),
+            SwerveModulePosition100(
+                math.pi / 2, OptionalRotation2d(True, Rotation2d.fromDegrees(180))
+            ),
+            SwerveModulePosition100(0.0, OptionalRotation2d(False, Rotation2d(0))),
+        ]
+        time_us: int = 1
+        est.odometry(time_us, positions)
+        est.update()
+        print(est.result)
+        self.assertEqual(2, est.result.size())
+        p0: gtsam.Pose2 = est.result.atPose2(X(0))
+        self.assertAlmostEqual(0, p0.x())
+        self.assertAlmostEqual(0, p0.y())
+        self.assertAlmostEqual(0, p0.theta())
+        p1: gtsam.Pose2 = est.result.atPose2(X(1))
+        # this is the x value from above
+        self.assertAlmostEqual(-1, p1.x())
+        self.assertAlmostEqual(0, p1.y())
+        self.assertAlmostEqual(math.pi/2, p1.theta())

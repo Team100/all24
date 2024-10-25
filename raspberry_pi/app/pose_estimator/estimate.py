@@ -16,8 +16,10 @@ import app.pose_estimator.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100)
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 
 # odometry noise.  TODO: real noise estimate.
 NOISE3 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
@@ -25,7 +27,9 @@ NOISE3 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
 class Estimate:
     def __init__(self) -> None:
-        """Initialize the model"""
+        """Initialize the model
+        initial module positions are at their origins.
+        TODO: some other initial positions?"""
         self.isam: gtsam.FixedLagSmoother = self.make_smoother()
         self.result: gtsam.Values
         # between updates we accumulate inputs here
@@ -96,7 +100,7 @@ class Estimate:
     def update(self) -> None:
         """Run the solver"""
         self.isam.update(self.new_factors, self.new_values, self.new_timestamps)
-        self.result: Values = self.isam.calculateEstimate()  # type: ignore
+        self.result = self.isam.calculateEstimate()  # type: ignore
         # reset the accumulators
         self.new_factors.resize(0)
         self.new_values.clear()
