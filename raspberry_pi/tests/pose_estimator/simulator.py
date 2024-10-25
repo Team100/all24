@@ -21,6 +21,13 @@ import math
 import numpy as np
 from gtsam import Cal3DS2  # includes distortion
 from gtsam import PinholeCameraCal3DS2, Point2, Point3, Pose2, Pose3, Rot3
+from wpimath.geometry import Rotation2d, Translation2d, Twist2d, Pose2d
+
+from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 
 TAG_SIZE_M: float = 0.1651
 TAG_X: float = 4
@@ -42,6 +49,24 @@ CALIB = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
 
 class Simulator:
     def __init__(self) -> None:
+        # TODO: actual wheelbase etc
+        self.kinematics = SwerveDriveKinematics100(
+            [
+                Translation2d(0.5, 0.5),
+                Translation2d(0.5, -0.5),
+                Translation2d(-0.5, 0.5),
+                Translation2d(-0.5, -0.5),
+            ]
+        )
+        self.positions = [
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+        ]
+        # cheating the initial pose
+        # TODO: more clever init
+        self.wpi_pose = Pose2d(PATH_CENTER_X_M + PATH_RADIUS_M, 0, 0)
         self.time_s: float = 0
         self.gt_x: float
         self.gt_y: float
@@ -54,6 +79,14 @@ class Simulator:
         self.gt_pixels: list[Point2]
         # initialize
         self.step(0)
+        # set positions back to zero
+        # TODO: more clever init
+        self.positions = [
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+        ]
 
     def step(self, dt_s: float) -> None:
         """set all the state according to the supplied time"""
@@ -67,6 +100,15 @@ class Simulator:
         self.gt_theta = PAN_SCALE_RAD * math.sin(
             2 * math.pi * self.time_s / PAN_PERIOD_S
         )
+
+        # find the wheel positions
+        new_wpi_pose = Pose2d(self.gt_x, self.gt_y, self.gt_theta)
+        twist = self.wpi_pose.log(new_wpi_pose)
+        self.wpi_pose = new_wpi_pose
+        self.positions = self.kinematics.to_swerve_module_positions(
+            self.positions, twist
+        )
+
         robot_pose = Pose2(self.gt_x, self.gt_y, self.gt_theta)
         camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
         # lower left

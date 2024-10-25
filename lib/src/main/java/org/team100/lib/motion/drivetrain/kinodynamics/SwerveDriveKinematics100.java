@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.ejml.simple.SimpleMatrix;
+import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -208,6 +209,16 @@ public class SwerveDriveKinematics100 {
         SwerveModuleDelta[] deltas = deltasFromVector(deltaVector);
         updateHeadings(deltas);
         return deltas;
+    }
+
+    /**
+     * Find the module deltas and apply them to the given initial positions.
+     */
+    public SwerveModulePosition100[] toSwerveModulePositions(
+            SwerveModulePosition100[] initial,
+            Twist2d twist) {
+        SwerveModuleDelta[] deltas = toSwerveModuleDelta(twist);
+        return DriveUtil.modulePositionFromDelta(initial, deltas);
     }
 
     /**

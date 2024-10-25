@@ -65,9 +65,9 @@ class DriveUtilTest(unittest.TestCase):
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
-        lerp = DriveUtil.module_position_delta(start, end)
-        self.assertAlmostEqual(0, lerp[0].distance_m)
-        self.assertAlmostEqual(0, lerp[0].angle.value.radians())
+        delta = DriveUtil.module_position_delta(start, end)
+        self.assertAlmostEqual(0, delta[0].distance_m)
+        self.assertAlmostEqual(0, delta[0].angle.value.radians())
 
     def test_delta2(self) -> None:
         start = [
@@ -83,9 +83,9 @@ class DriveUtilTest(unittest.TestCase):
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(1))),
         ]
         # there is no interpolation, we use the ending value.
-        lerp = DriveUtil.module_position_delta(start, end)
-        self.assertAlmostEqual(0, lerp[0].distance_m)
-        self.assertAlmostEqual(1, lerp[0].angle.value.radians())
+        delta = DriveUtil.module_position_delta(start, end)
+        self.assertAlmostEqual(0, delta[0].distance_m)
+        self.assertAlmostEqual(1, delta[0].angle.value.radians())
 
     def test_delta3(self) -> None:
         start = [
@@ -101,6 +101,6 @@ class DriveUtilTest(unittest.TestCase):
             SwerveModulePosition100(1, OptionalRotation2d(True, Rotation2d(1))),
         ]
         # there is no interpolation, we use the ending value.
-        lerp = DriveUtil.module_position_delta(start, end)
-        self.assertAlmostEqual(1, lerp[0].distance_m)
-        self.assertAlmostEqual(1, lerp[0].angle.value.radians())
+        delta = DriveUtil.module_position_delta(start, end)
+        self.assertAlmostEqual(1, delta[0].distance_m)
+        self.assertAlmostEqual(1, delta[0].angle.value.radians())

@@ -6,25 +6,21 @@ import math
 import unittest
 
 import gtsam
-import numpy as np
 from gtsam.symbol_shorthand import X
-from wpimath.geometry import Rotation2d, Translation2d
+from wpimath.geometry import Rotation2d, Pose2d
 
-# this works with runtests.py but not the little triangle up there
 from app.pose_estimator.estimate import Estimate
 from app.pose_estimator.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
 )
-from tests.pose_estimator.simulator import Simulator
 
 
 class EstimateTest(unittest.TestCase):
     def test_eval(self) -> None:
-        sim = Simulator()
         # initial position at origin
         est = Estimate()
-        est.init()
+        est.init(Pose2d())
         # drive straight ahead 0.1
         positions = [
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
@@ -55,10 +51,9 @@ class EstimateTest(unittest.TestCase):
         * rearLeft
         * rearRight
         """
-        sim = Simulator()
         # initial position at origin, 1m wheelbase
         est = Estimate()
-        est.init()
+        est.init(Pose2d())
         # This is a rotating translation that should end up rotated 90 to the left
         # and 1m behind
         positions = [
@@ -87,4 +82,4 @@ class EstimateTest(unittest.TestCase):
         # this is the x value from above
         self.assertAlmostEqual(-1, p1.x())
         self.assertAlmostEqual(0, p1.y())
-        self.assertAlmostEqual(math.pi/2, p1.theta())
+        self.assertAlmostEqual(math.pi / 2, p1.theta())

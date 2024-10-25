@@ -5,7 +5,9 @@ import numpy as np
 import numpy.typing as npt
 from wpimath.geometry import Translation2d, Twist2d
 
+from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
+from app.pose_estimator.swerve_module_position import SwerveModulePosition100
 
 
 class SwerveDriveKinematics100:
@@ -48,6 +50,13 @@ class SwerveDriveKinematics100:
         # [d cos; d sin; ...] (2n x 1)
         delta_vector = np.matmul(self.inverse_kinematics, twist_vector)
         return self.deltas_from_vector(delta_vector)
+
+    def to_swerve_module_positions(
+        self, initial: list[SwerveModulePosition100], twist: Twist2d
+    ) -> list[SwerveModulePosition100]:
+        """Find the module deltas and apply them to the given initial positions."""
+        deltas: list[SwerveModuleDelta] = self.to_swerve_module_delta(twist)
+        return DriveUtil.module_position_from_delta(initial, deltas)
 
     @staticmethod
     def twist_2_vector(twist: Twist2d) -> npt.NDArray[np.float64]:

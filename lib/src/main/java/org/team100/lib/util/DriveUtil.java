@@ -118,11 +118,21 @@ public class DriveUtil {
         if (start.length != end.length) {
             throw new IllegalArgumentException("Inconsistent number of modules!");
         }
-        SwerveModuleDelta[] newPositions = new SwerveModuleDelta[start.length];
+        SwerveModuleDelta[] deltas = new SwerveModuleDelta[start.length];
         for (int i = 0; i < start.length; i++) {
-            newPositions[i] = delta(start[i], end[i]);
+            deltas[i] = delta(start[i], end[i]);
         }
-        return newPositions;
+        return deltas;
+    }
+
+    public static SwerveModulePosition100[] modulePositionFromDelta(
+            SwerveModulePosition100[] initial,
+            SwerveModuleDelta[] delta) {
+        SwerveModulePosition100[] new_positions = new SwerveModulePosition[initial.length];
+        for (int i = 0; i < initial.length; ++i) {
+            new_positions = plus(initial[i], delta[i]);
+        }
+        return new_positions;
     }
 
     /**
@@ -138,6 +148,17 @@ public class DriveUtil {
         // the angle might be empty, if the encoder has failed
         // (which can seem to happen if the robot is *severely* overrunning).
         return new SwerveModuleDelta(0, Optional.empty());
+    }
+
+    public static SwerveModulePosition100 plus(
+            SwerveModulePosition100 start,
+            SwerveModuleDelta delta) {
+        double posM = start.distanceMeters + delta.distanceMeters;
+        if (delta.angle.isPresent()) {
+            return new SwerveModulePosition100(posM, delta.angle);
+        }
+        // if there's no delta angle, we're not going anywhere.
+        return start;
     }
 
     private DriveUtil() {

@@ -10,16 +10,14 @@ import gtsam
 import numpy as np
 from gtsam import noiseModel
 from gtsam.symbol_shorthand import X
-from wpimath.geometry import Rotation2d, Translation2d, Twist2d
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
 import app.pose_estimator.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (
-    OptionalRotation2d,
-    SwerveModulePosition100,
-)
+from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
+                                                       SwerveModulePosition100)
 
 # odometry noise.  TODO: real noise estimate.
 NOISE3 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
@@ -54,9 +52,9 @@ class Estimate:
         ]
         self.timestamp: int = 0
 
-    def init(self) -> None:
+    def init(self, initial_pose: Pose2d) -> None:
         """Add a state at zero"""
-        prior_mean = gtsam.Pose2(0, 0, 0)
+        prior_mean = gtsam.Pose2(initial_pose.X(), initial_pose.Y(), initial_pose.rotation().radians())
         prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
         self.new_factors.push_back(
             gtsam.PriorFactorPose2(X(0), prior_mean, prior_noise)
@@ -107,6 +105,6 @@ class Estimate:
         self.new_timestamps.clear()
 
     def make_smoother(self) -> gtsam.FixedLagSmoother:
-        lag_s = 10
+        lag_us = 10000000
         lm_params = gtsam.LevenbergMarquardtParams()
-        return gtsam.BatchFixedLagSmoother(lag_s, lm_params)
+        return gtsam.BatchFixedLagSmoother(lag_us, lm_params)
