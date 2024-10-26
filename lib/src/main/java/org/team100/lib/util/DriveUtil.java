@@ -128,9 +128,9 @@ public class DriveUtil {
     public static SwerveModulePosition100[] modulePositionFromDelta(
             SwerveModulePosition100[] initial,
             SwerveModuleDelta[] delta) {
-        SwerveModulePosition100[] new_positions = new SwerveModulePosition[initial.length];
+        SwerveModulePosition100[] new_positions = new SwerveModulePosition100[initial.length];
         for (int i = 0; i < initial.length; ++i) {
-            new_positions = plus(initial[i], delta[i]);
+            new_positions[i] = plus(initial[i], delta[i]);
         }
         return new_positions;
     }
