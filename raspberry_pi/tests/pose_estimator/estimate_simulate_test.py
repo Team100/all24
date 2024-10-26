@@ -9,6 +9,7 @@ from wpimath.geometry import Pose2d
 
 from app.pose_estimator.estimate import Estimate
 from tests.pose_estimator.simulator import Simulator
+import time
 
 
 class EstimateSimulateTest(unittest.TestCase):
@@ -18,16 +19,19 @@ class EstimateSimulateTest(unittest.TestCase):
         est.init(sim.wpi_pose)
 
         print()
-        for i in range(1,500):
+        for i in range(1,1000):
+            t0 = time.time_ns()
             time_us = 20000 * i
             est.odometry(time_us, sim.positions)
             est.update()
-            # print(est.result)
+            t1 = time.time_ns()
+            et = t1-t0
+            print(f"{et/1e9} {est.result.size()}")
             t = i*0.02
             gt_x = sim.gt_x
             gt_y = sim.gt_y
             gt_theta = sim.gt_theta
 
-            print(f"{t:5.2f} {gt_x:5.2f} {gt_y:5.2f} {gt_theta:5.2f}")
+            #print(f"{t:5.2f} {gt_x:5.2f} {gt_y:5.2f} {gt_theta:5.2f}")
            
             sim.step(0.02)

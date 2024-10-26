@@ -105,6 +105,13 @@ class Estimate:
         self.new_timestamps.clear()
 
     def make_smoother(self) -> gtsam.FixedLagSmoother:
-        lag_us = 10000000
+        # experimenting with the size of the lag buffer.
+        # the python odometry factor is intolerably slow
+        # but the native one is quite fast.
+        # i'm not sure what sort of window we really need; maybe
+        # just long enough to span periods of blindness, so,
+        # like a second or two?
+        lag_s = 30
+        lag_us = lag_s * 1e6
         lm_params = gtsam.LevenbergMarquardtParams()
         return gtsam.BatchFixedLagSmoother(lag_us, lm_params)

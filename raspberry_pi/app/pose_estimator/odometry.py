@@ -8,6 +8,13 @@ CustomFactor.
 
 There's some discussion relevant to these operations here:
 https://groups.google.com/g/gtsam-users/c/c-BhH8mfqbo/m/IMk1RQ84AwAJ
+
+NOTE! the native GTSAM BetweenFactor is much faster than the python
+CustomFactor.  For a computation budget of 10ms, the python factor can
+only handle about 45 values (i.e. a window of about 1 sec at 50 hz)
+but the native factor can handle about 600 (i.e. a 12 sec window).
+
+For production, we should use the native factor.  :-)
 """
 
 # pylint: disable=C0103,E0611
@@ -15,7 +22,7 @@ https://groups.google.com/g/gtsam-users/c/c-BhH8mfqbo/m/IMk1RQ84AwAJ
 import gtsam
 import numpy as np
 from gtsam.noiseModel import Base as SharedNoiseModel
-from wpimath.geometry import Twist2d
+from wpimath.geometry import Twist2d, Pose2d
 
 from app.pose_estimator.numerical_derivative import (
     numericalDerivative21,
@@ -25,7 +32,7 @@ from app.pose_estimator.numerical_derivative import (
 
 def h(p0: gtsam.Pose2, p1: gtsam.Pose2) -> np.ndarray:
     """Difference between p0 and p1 in the tangent space.
-    This is identical to the WPILib "Twist2d" idea. """
+    This is identical to the WPILib "Twist2d" idea."""
     return p0.logmap(p1)
 
 
@@ -35,18 +42,18 @@ def h_H(measured: np.ndarray, p0: gtsam.Pose2, p1: gtsam.Pose2, H: list[np.ndarr
     result = h(p0, p1) - measured
     if H is not None:
         H[0] = numericalDerivative21(h, p0, p1)
+        # H[1] = np.eye(3) # even slower than the numerical derivative!
         H[1] = numericalDerivative22(h, p0, p1)
     return result
 
 
-def factor(
+def factorCustom(
     t: Twist2d,
     model: SharedNoiseModel,
     p0_key: gtsam.Symbol,
     p1_key: gtsam.Symbol,
 ) -> gtsam.NonlinearFactor:
-    """Factory for Custom Factor implementing odometry using tangent-space measurements.
-    """
+    """Uses a python CustomFactor."""
     measured = np.array([t.dx, t.dy, t.dtheta])
 
     def error_func(
@@ -57,3 +64,27 @@ def factor(
         return h_H(measured, p0, p1, H)
 
     return gtsam.CustomFactor(model, gtsam.KeyVector([p0_key, p1_key]), error_func)
+
+
+def factorNative(
+    t: Twist2d,
+    model: SharedNoiseModel,
+    p0_key: gtsam.Symbol,
+    p1_key: gtsam.Symbol,
+) -> gtsam.NonlinearFactor:
+    """Uses the GTSAM BetweenFactor."""
+    # the gtsam between factor uses a relative pose, not a twist.
+    p = Pose2d().exp(t)
+    gp = gtsam.Pose2(p.x, p.y, p.rotation().radians())
+    return gtsam.BetweenFactorPose2(p0_key, p1_key, gp, model)
+
+
+def factor(
+    t: Twist2d,
+    model: SharedNoiseModel,
+    p0_key: gtsam.Symbol,
+    p1_key: gtsam.Symbol,
+) -> gtsam.NonlinearFactor:
+    """Factory for a factor implementing odometry using tangent-space measurements."""
+    return factorNative(t, model, p0_key, p1_key)
+    # return factorCustom(t, model, p0_key, p1_key)
