@@ -28,6 +28,7 @@ graph {
     O0 -- X1;
     X1 -- Xe [style = "dotted";];
     X0 -- v0;
+    X0 -- g1;
     X1 -- v1;
     v0 -- t0;
     v1 -- t0;
