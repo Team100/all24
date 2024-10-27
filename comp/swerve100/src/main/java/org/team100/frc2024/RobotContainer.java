@@ -33,6 +33,7 @@ import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
+import org.team100.lib.commands.drivetrain.DriveWithProfile2;
 import org.team100.lib.commands.drivetrain.DriveWithProfileRotation;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
@@ -94,6 +95,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -265,7 +267,7 @@ public class RobotContainer implements Glassy {
 
         whileTrue(driverControl::driveToNote,
                 new ParallelDeadlineGroup(new DriveWithProfileRotation(
-                        () -> Optional.of(new Translation2d()),
+                        noteListener::getClosestTranslation2d,
                         m_drive,
                         halfFullStateController,
                         swerveKinodynamics), intake.run(intake::intakeSmart)));
@@ -398,7 +400,7 @@ public class RobotContainer implements Glassy {
                         swerveKinodynamics,
                         gyro,
                         driverControl::desiredRotation,
-                        new double[] { 5.0, 0.5 }));
+                        new double[] { 5.0, 1 }));
 
         driveManually.register("SNAPS_MIN_TIME", true,
                 new ManualWithMinTimeHeading(

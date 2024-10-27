@@ -15,11 +15,8 @@ from app.camera.camera_factory import CameraFactory
 from app.camera.interpreter_factory import InterpreterFactory
 from app.camera.camera_loop import CameraLoop
 from app.config.identity import Identity
-from app.dashboard.real_display import RealDisplay
 from app.framework.looper import Looper
 from app.network.real_network import RealNetwork
-from app.localization.note_detector import NoteDetector
-from app.localization.tag_detector import TagDetector
 from app.sensors.gyro_factory import GyroFactory
 from app.sensors.gyro_loop import GyroLoop
 

@@ -94,7 +94,7 @@ public class SwerveKinodynamics implements Glassy {
         m_radius = Math.hypot(track / 2, m_wheelbase / 2);
         m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, frontoffset);
         // fulcrum is the distance from the center to the nearest edge.
-        double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
+        double fulcrum = Math.min(Math.min(m_fronttrack,m_backtrack) / 2, m_wheelbase / 2);
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
 
         setMaxDriveVelocityM_S(maxDriveVelocity);
@@ -147,7 +147,7 @@ public class SwerveKinodynamics implements Glassy {
         m_radius = Math.hypot((fronttrack + backtrack) / 4, m_wheelbase / 2);
         m_kinematics = get(m_fronttrack, m_backtrack, m_wheelbase, m_frontoffset);
         // fulcrum is the distance from the center to the nearest edge.
-        double fulcrum = Math.min(m_fronttrack / 2, m_wheelbase / 2);
+        double fulcrum = Math.min(Math.min(m_fronttrack,m_backtrack) / 2, m_wheelbase / 2);
         m_MaxCapsizeAccelM_S2 = 9.8 * (fulcrum / m_vcg);
 
         setMaxDriveVelocityM_S(maxDriveVelocity);

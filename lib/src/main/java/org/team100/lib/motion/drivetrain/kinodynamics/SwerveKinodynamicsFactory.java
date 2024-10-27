@@ -61,8 +61,9 @@ public class SwerveKinodynamicsFactory {
                         20, // max decel m/s/s
                         40, // steering rate rad/s
                         40 * Math.PI, // steering accel rad/s/s
-                        0.449, // track m
-                        0.464, // wheelbase m
+                        0.49, // front track m
+                        0.44, // back track m
+                        0.462, // wheelbase m
                         .232, // front offset m
                         0.3); // vcg m
             case BLANK:

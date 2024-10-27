@@ -17,17 +17,19 @@ public class ReduxGyro implements Gyro {
     private final DoubleLogger m_log_pitch;
     private final DoubleLogger m_log_roll;
     private final DoubleLogger m_log_yaw_deg;
+    private final DoubleLogger m_log_yaw_rate_deg;
     private final DoubleLogger m_log_pitch_deg;
     private final DoubleLogger m_log_roll_deg;
     public ReduxGyro(LoggerFactory parent) {
         LoggerFactory child = parent.child(this);
         m_gyro = new Canandgyro(60);
-        m_gyro.setYaw(0);
+        m_gyro.setYaw(0);   
         m_log_heading = child.doubleLogger(Level.TRACE, "Heading NWU (rad)");
         m_log_heading_rate = child.doubleLogger(Level.TRACE, "Heading Rate NWU (rad_s)");
         m_log_pitch = child.doubleLogger(Level.TRACE, "Pitch NWU (rad)");
         m_log_roll = child.doubleLogger(Level.TRACE, "Roll NWU (rad)");
         m_log_yaw_deg = child.doubleLogger(Level.DEBUG, "Yaw NED (deg)");
+        m_log_yaw_rate_deg = child.doubleLogger(Level.DEBUG, "Yaw Rate NED (deg)");
         m_log_pitch_deg = child.doubleLogger(Level.TRACE, "Pitch (deg)");
         m_log_roll_deg = child.doubleLogger(Level.TRACE, "Roll (deg)");
 
@@ -63,14 +65,14 @@ public class ReduxGyro implements Gyro {
     }
 
     private double getYawNEDDeg() {
-        double yawDeg = 360 * m_gyro.getYaw();
+        double yawDeg = -360 * m_gyro.getYaw();
         m_log_yaw_deg.log(() -> yawDeg);
         return yawDeg;
     }
 
     private double getYawVelocityNEDDeg() {
-        double yawDeg = 360 * m_gyro.getAngularVelocityYaw();
-        m_log_yaw_deg.log(() -> yawDeg);
+        double yawDeg = -360 * m_gyro.getAngularVelocityYaw();
+        m_log_yaw_rate_deg.log(() -> yawDeg);
         return yawDeg;
     }
 
