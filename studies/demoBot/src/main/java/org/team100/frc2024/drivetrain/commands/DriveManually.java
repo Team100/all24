@@ -57,7 +57,7 @@ public class DriveManually extends Command implements Glassy {
             "Manual",
                 new TankDriver() {
                     public void apply(DriverControl.Velocity t) {
-                        m_drive.set(t.x(), t.theta());
+                        m_drive.set(t.x(), t.y());
                     }
         });
     }

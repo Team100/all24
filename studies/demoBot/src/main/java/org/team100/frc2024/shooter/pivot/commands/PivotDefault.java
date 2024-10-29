@@ -11,11 +11,12 @@ public class PivotDefault extends Command {
     private final Supplier<Double> m_twistSupplier;
     private final PivotSubsystem m_pivot;
 
-    private final double rate = 0.01;
+    private final double rate = -0.5;
 
     public PivotDefault(Supplier<Double> twistSupplier, PivotSubsystem pivot) {
         m_twistSupplier = twistSupplier;
         m_pivot = pivot;
+        addRequirements(m_pivot);
     }
 
     @Override
@@ -23,7 +24,7 @@ public class PivotDefault extends Command {
 
     @Override
     public void execute() {
-        m_pivot.setAngleRad(m_pivot.getAngleRad().getAsDouble() + m_twistSupplier.get() * rate);
+        m_pivot.dutyCycle(m_twistSupplier.get());
     }
 
     @Override

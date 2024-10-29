@@ -5,30 +5,39 @@ import java.util.OptionalDouble;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.motion.servo.OutboardGravityServo;
+import org.team100.lib.motor.Neo550CANSparkMotor;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class PivotSubsystem extends SubsystemBase implements Glassy {
     
-    private final OutboardGravityServo m_pivot;
-    private final OptionalDoubleLogger m_logger;
-
+    private final Neo550CANSparkMotor m_pivot;
+    private final DoubleLogger m_logger;
     public PivotSubsystem(
             LoggerFactory parent,
             PivotCollection pivotCollection) {
         LoggerFactory logger = parent.child(this);
-        m_logger = logger.optionalDoubleLogger(Level.TRACE, "Pivot Position (rad)");
+        m_logger = logger.doubleLogger(Level.TRACE, "Pivot Position (rad)");
         m_pivot = pivotCollection.getPivot();
     }
 
-    public void setAngleRad(double angle) {
-        m_pivot.setPosition(angle);
+    // public void setAngleRad(double angle) {
+    //     m_pivot.setD(angle);
+    // }
+
+    public void dutyCycle(double set) {
+        m_pivot.setDutyCycle(set);
     }
 
-    public OptionalDouble getAngleRad() {
-        return m_pivot.getPositionRad();
+    // public void setVelocityRad_S(double angle_S) {
+    //     m_pivot.setVelocity(angle_S);
+    // }
+
+    public double getAngleRad() {
+        return m_pivot.getPositionRot();
     }
 
     public void setEncoderPosition(double positionRad) {
