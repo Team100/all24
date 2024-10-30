@@ -53,7 +53,7 @@ class RealNetwork(Network):
 
         # roboRio address. windows machines can impersonate this for simulation.
         # also localhost for testing
-        self._inst.setServer(["10.1.0.2", "127.0.0.1"])
+        self._inst.setServer("10.1.0.2")
 
     @override
     def get_double_sender(self, name: str) -> RealDoubleSender:
