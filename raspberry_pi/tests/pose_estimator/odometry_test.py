@@ -69,7 +69,7 @@ class OdometryTest(unittest.TestCase):
         )
 
     def test_h(self) -> None:
-        """Verify h factor alone"""
+        """Verify h alone"""
         # (1,1) facing +y
         p0 = gtsam.Pose2()
         p1 = gtsam.Pose2(1, 1, math.pi / 2)

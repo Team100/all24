@@ -17,7 +17,7 @@ but the native factor can handle about 600 (i.e. a 12 sec window).
 For production, we should use the native factor.  :-)
 """
 
-# pylint: disable=C0103,E0611
+# pylint: disable=C0103,E0611,E1101
 
 import gtsam
 import numpy as np
@@ -36,7 +36,9 @@ def h(p0: gtsam.Pose2, p1: gtsam.Pose2) -> np.ndarray:
     return p0.logmap(p1)
 
 
-def h_H(measured: np.ndarray, p0: gtsam.Pose2, p1: gtsam.Pose2, H: list[np.ndarray]):
+def h_H(
+    measured: np.ndarray, p0: gtsam.Pose2, p1: gtsam.Pose2, H: list[np.ndarray]
+) -> np.ndarray:
     """Error function including Jacobians.
     Returns the difference between the measured and estimated tangent-space odometry."""
     result = h(p0, p1) - measured
