@@ -41,7 +41,8 @@ from app.pose_estimator.numerical_derivative import (
 def h(
     p0: gtsam.Pose2, p1: gtsam.Pose2, p2: gtsam.Pose2, dt1: float, dt2: float
 ) -> np.ndarray:
-    """Compute the second-order backward finite difference, in tangent space.
+    """Estimated tangential acceleration at p2.
+    Computes the second-order backward finite difference, in tangent space.
     TODO: something better than the dt's here?
     In 2d, the translation velocity and angular velocity are always perpendicular
     so the coriolis force is always -2*omega*v"""
@@ -90,6 +91,7 @@ def factor(
     p1_key: gtsam.Symbol,
     p2_key: gtsam.Symbol,
 ) -> gtsam.NonlinearFactor:
+    # TODO: something other than dt1 and dt2?
     # this is the robot-frame acceleration vector.
     measured = np.array([x, y, 0])
 

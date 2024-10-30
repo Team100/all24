@@ -31,7 +31,7 @@ from app.pose_estimator.numerical_derivative import (
 
 
 def h(p0: gtsam.Pose2, p1: gtsam.Pose2) -> np.ndarray:
-    """Difference between p0 and p1 in the tangent space.
+    """Estimated tangential difference between p0 and p1.
     This is identical to the WPILib "Twist2d" idea."""
     return p0.logmap(p1)
 
