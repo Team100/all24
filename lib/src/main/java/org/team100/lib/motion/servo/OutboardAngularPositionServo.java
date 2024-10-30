@@ -11,9 +11,12 @@ import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
 import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.profile.ProfileWPI;
 import org.team100.lib.state.State100;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 
 /**
  * Passthrough to outboard closed-loop angular control, using a profile with
@@ -46,6 +49,8 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     /** Remember that the outboard setpoint "winds up" i.e. it's not in [-pi,pi] */
     private State100 m_setpoint = new State100(0, 0);
 
+    private ProfileWPI profileTest = new ProfileWPI(40,120);
+    
     /** Don't forget to set a profile. */
     public OutboardAngularPositionServo(
             LoggerFactory parent,
@@ -107,7 +112,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
         // choose a goal which is near the measurement
         // apply error to unwrapped measurement, so goal is [-inf, inf]
-        m_goal = new State100(goalErr + unwrappedMeasurementRad, goalVelocity);
+        m_goal = new State100(0, goalVelocity);
 
         // @sanjan's version from sep 2024 used measurement as setpoint which i think is
         // an error.
@@ -121,7 +126,8 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         m_setpoint = new State100(setpointErr + unwrappedMeasurementRad, m_setpoint.v());
 
         // finally compute a new setpoint
-        m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, m_goal);
+        // m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, m_goal);
+        m_setpoint = profileTest.calculate(0.02, m_setpoint, m_goal);
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 

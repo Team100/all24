@@ -442,10 +442,11 @@ public class SwerveDriveKinematics100 {
     SwerveModuleState100[] statesFromVector(SimpleMatrix chassisSpeedsVector) {
         SimpleMatrix moduleStatesMatrix = m_inverseKinematics.mult(chassisSpeedsVector);
         SwerveModuleState100[] moduleStates = new SwerveModuleState100[m_numModules];
+
         for (int i = 0; i < m_numModules; i++) {
             double x = moduleStatesMatrix.get(i * 2, 0);
             double y = moduleStatesMatrix.get(i * 2 + 1, 0);
-            if (Math.abs(x) < 1e-6 && Math.abs(y) < 1e-6) {
+            if (Math.abs(x) < 0.004 && Math.abs(y) < 0.004) {
                 moduleStates[i] = new SwerveModuleState100(0.0, Optional.empty());
             } else {
                 moduleStates[i] = new SwerveModuleState100(Math.hypot(x, y),

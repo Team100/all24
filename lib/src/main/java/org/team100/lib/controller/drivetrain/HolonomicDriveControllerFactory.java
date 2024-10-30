@@ -24,7 +24,7 @@ public class HolonomicDriveControllerFactory {
         PIDController pid;
         switch (Identity.instance) {
             case COMP_BOT:
-                pid = new PIDController(3, 2, 0);
+                pid = new PIDController(0.5, 0, 0);
                 pid.setIntegratorRange(-0.1, 0.1);
                 pid.setTolerance(0.01); // 1 cm
                 return pid;
