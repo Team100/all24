@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 
 import edu.wpi.first.math.MathUtil;
@@ -108,39 +109,56 @@ public class DriveUtil {
     }
 
     /**
-     * Path between start and end is assumed to be a circular arc so the
-     * angle of the delta is the angle of the chord between the endpoints,
-     * i.e. the average angle. This might not be a good assumption if the positional
-     * control is at a lower level, so that the motion is not uniform during the
-     * control period.
-     * 
-     * Note the arc is assumed to be the same length as the chord, though, i.e. the
-     * angles are assumed to be close to each other.
+     * The inverse kinematics wants this to represent a geodesic, which
+     * means that the steering doesn't change between start and end.
      */
-    public static SwerveModulePosition100[] modulePositionDelta(
+    public static SwerveModuleDelta[] modulePositionDelta(
             SwerveModulePosition100[] start,
             SwerveModulePosition100[] end) {
         if (start.length != end.length) {
             throw new IllegalArgumentException("Inconsistent number of modules!");
         }
-        SwerveModulePosition100[] newPositions = new SwerveModulePosition100[start.length];
+        SwerveModuleDelta[] deltas = new SwerveModuleDelta[start.length];
         for (int i = 0; i < start.length; i++) {
-            SwerveModulePosition100 startModule = start[i];
-            SwerveModulePosition100 endModule = end[i];
-            // these positions might be null, if the encoder has failed (which can seem to
-            // happen if the robot is *severely* overrunning).
-            double deltaM = endModule.distanceMeters - startModule.distanceMeters;
-            if (startModule.angle.isPresent() && endModule.angle.isPresent()) {
-                newPositions[i] = new SwerveModulePosition100(
-                        deltaM,
-                        // this change breaks the odometry test on line 66, the 90 degree turn case.
-                        // endModule.angle);
-                        Optional.of(endModule.angle.get().interpolate(startModule.angle.get(), 0.5)));
-            } else {
-                newPositions[i] = new SwerveModulePosition100(deltaM, Optional.empty());
-            }
+            deltas[i] = delta(start[i], end[i]);
         }
-        return newPositions;
+        return deltas;
+    }
+
+    public static SwerveModulePosition100[] modulePositionFromDelta(
+            SwerveModulePosition100[] initial,
+            SwerveModuleDelta[] delta) {
+        SwerveModulePosition100[] new_positions = new SwerveModulePosition100[initial.length];
+        for (int i = 0; i < initial.length; ++i) {
+            new_positions[i] = plus(initial[i], delta[i]);
+        }
+        return new_positions;
+    }
+
+    /**
+     * Delta for one module, straight line path using the end angle.
+     */
+    public static SwerveModuleDelta delta(
+            SwerveModulePosition100 start,
+            SwerveModulePosition100 end) {
+        double deltaM = end.distanceMeters - start.distanceMeters;
+        if (end.angle.isPresent()) {
+            return new SwerveModuleDelta(deltaM, end.angle);
+        }
+        // the angle might be empty, if the encoder has failed
+        // (which can seem to happen if the robot is *severely* overrunning).
+        return new SwerveModuleDelta(0, Optional.empty());
+    }
+
+    public static SwerveModulePosition100 plus(
+            SwerveModulePosition100 start,
+            SwerveModuleDelta delta) {
+        double posM = start.distanceMeters + delta.distanceMeters;
+        if (delta.angle.isPresent()) {
+            return new SwerveModulePosition100(posM, delta.angle);
+        }
+        // if there's no delta angle, we're not going anywhere.
+        return start;
     }
 
     private DriveUtil() {

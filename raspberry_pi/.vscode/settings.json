@@ -10,11 +10,8 @@
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
     "workbench.colorTheme": "Default Light Modern",
-    "mypy-type-checker.args": [
-        "--strict",
-    ],
     "editor.minimap.enabled": false,
-    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.typeCheckingMode": "off",
     "mypy-type-checker.reportingScope": "workspace",
     "markdown.validate.enabled": true,
     "tidyMarkdown.disableFormatter": true,
@@ -23,5 +20,6 @@
         "**/.gradle": true,
         "**/.mypy_cache": true,
         "**/*.pyc": true
-    }
+    },
+    "python.analysis.autoImportCompletions": true
 }
