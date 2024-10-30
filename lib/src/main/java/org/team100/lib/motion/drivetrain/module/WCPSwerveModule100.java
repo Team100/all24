@@ -121,7 +121,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         //
         // note the outboard steering setting!
         //
-        final boolean useOutboardSteering = false;
+        final boolean useOutboardSteering = true;
         LinearVelocityServo driveServo = driveFalconServo(
                 parent.child("Drive"),
                 supplyLimitAmps,

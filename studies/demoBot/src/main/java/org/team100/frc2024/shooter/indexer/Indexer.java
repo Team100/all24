@@ -7,10 +7,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 public interface Indexer extends Glassy, Subsystem {
 
     public void set(double value);
-    
-    public void setAngle(double value);
-    
-    public double getAngle();
 
     public void stop();
 } 

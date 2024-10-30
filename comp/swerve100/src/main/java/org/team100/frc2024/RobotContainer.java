@@ -33,11 +33,14 @@ import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
+import org.team100.lib.commands.drivetrain.DriveWithProfile2;
 import org.team100.lib.commands.drivetrain.DriveWithProfileRotation;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.SetRotation;
 import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
+import org.team100.lib.commands.drivetrain.for_testing.OscillateDirect;
+import org.team100.lib.commands.drivetrain.for_testing.OscillateForceField;
 import org.team100.lib.commands.drivetrain.for_testing.OscillateProfile;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
@@ -94,6 +97,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -265,7 +269,7 @@ public class RobotContainer implements Glassy {
 
         whileTrue(driverControl::driveToNote,
                 new ParallelDeadlineGroup(new DriveWithProfileRotation(
-                        () -> Optional.of(new Translation2d()),
+                        noteListener::getClosestTranslation2d,
                         m_drive,
                         halfFullStateController,
                         swerveKinodynamics), intake.run(intake::intakeSmart)));
@@ -293,14 +297,14 @@ public class RobotContainer implements Glassy {
         // HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1,
         // 0.01, 1, 1, 0.01);
         // high cruise but also moderate accel
-        HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 4, 4, 0.01, 3, 3, 0.01);
+        HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1, 0.01, 3, 3, 0.01);
         FullStateDriveController hcontroller = new FullStateDriveController(hlog);
 
         whileTrue(driverControl::fullCycle,
                 // new RepeatCommand(
                 // new SequentialCommandGroup(
-                // new OscillateForceField(m_drive, hcontroller, 1),
-                // new OscillateForceField(m_drive, hcontroller, -1))));
+                // new OscillateForceField(m_drive, halfFullStateController, 1),
+                // new OscillateForceField(m_drive, halfFullStateController, -1))));
 
                 new RepeatCommand(
                         new SequentialCommandGroup(
@@ -312,7 +316,7 @@ public class RobotContainer implements Glassy {
         // new OscillatePosition(driveLog, m_drive, maker, controller, 1, viz),
         // new OscillatePosition(driveLog, m_drive, maker, controller, -1, viz))));
 
-        // new OscillateDirect(comLog, m_drive));
+        // whileTrue(driverControl::fullCycle, new OscillateDirect(comLog, m_drive));
         // new Oscillate(comLog, m_drive));
         // new RepeatCommand(
         // new FullCycle(comLog, m_drive, controller, viz)));
@@ -398,7 +402,7 @@ public class RobotContainer implements Glassy {
                         swerveKinodynamics,
                         gyro,
                         driverControl::desiredRotation,
-                        new double[] { 5.0, 0.5 }));
+                        new double[] { 5.0, 1 }));
 
         driveManually.register("SNAPS_MIN_TIME", true,
                 new ManualWithMinTimeHeading(

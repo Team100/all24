@@ -3,46 +3,39 @@ package org.team100.frc2024.shooter.indexer;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.motor.MotorPhase;
 
-import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IndexerServo extends SubsystemBase implements Indexer {
     
-    private final Servo m_servo;
+    private final PWM m_servo;
     private final DoubleLogger m_doubleLogger;
+    private final int m_motorPhase;
 
-    private double speed;
-
-    public IndexerServo(LoggerFactory parent, int channel) {
+    public IndexerServo(LoggerFactory parent, MotorPhase motorPhase,int channel) {
         LoggerFactory logger = parent.child(this);
+        if (MotorPhase.FORWARD.equals(motorPhase)) {
+            m_motorPhase = 1;
+        } else {
+            m_motorPhase = -1;
+        }
         m_doubleLogger = logger.doubleLogger(Level.TRACE, "Angle (deg)");
-        m_servo = new Servo(channel);
+        m_servo = new PWM(channel);
         stop();
-    }
-
-    public void set(double value) {
-        speed = value;
-    } 
-
-    public void stop() {
-        speed = 0;
-    } 
-
-    public void setAngle(double value) {
-        stop();
-        m_servo.setAngle(value);
-    } 
-
-    public double getAngle() {
-        return m_servo.getAngle();
     }
 
     @Override
-    public void periodic() {
-        m_doubleLogger.log(() -> getAngle());
-        m_servo.setAngle(getAngle() + speed);
-    }
+    public void set(double value) {
+        m_servo.setSpeed(value * m_motorPhase);
+        m_doubleLogger.log(() -> value);
+    } 
+
+    @Override
+    public void stop() {
+        m_servo.setSpeed(0);
+    } 
 
     @Override
     public String getGlassName() {

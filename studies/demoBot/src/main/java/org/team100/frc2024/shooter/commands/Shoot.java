@@ -24,7 +24,9 @@ public class Shoot extends Command {
 
     @Override
     public void execute() {
-        m_indexer.set(1);
+        if (m_shooter.atVeloctity()) {
+            m_indexer.set(1);
+        }
     }
 
     @Override

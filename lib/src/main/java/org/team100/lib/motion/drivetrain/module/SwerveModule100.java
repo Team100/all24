@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public abstract class SwerveModule100 implements Glassy {
     private final LinearVelocityServo m_driveServo;
     private final AngularPositionServo m_turningServo;
+    private Rotation2d previousPosition = new Rotation2d();
 
     protected SwerveModule100(
             LinearVelocityServo driveServo,
@@ -34,8 +35,14 @@ public abstract class SwerveModule100 implements Glassy {
      */
     void setDesiredState(SwerveModuleState100 desiredState) {
         OptionalDouble position = m_turningServo.getPosition();
+
+        if(position.isPresent()){
+            previousPosition = new Rotation2d(position.getAsDouble());
+        }
+
         if (position.isEmpty())
-            return;
+            desiredState = new SwerveModuleState100(desiredState.speedMetersPerSecond, Optional.of(previousPosition));
+
         setRawDesiredState(
                 SwerveModuleState100.optimize(
                         desiredState,
