@@ -4,23 +4,29 @@ The general idea is to run a free-running loop, polling for inputs.
 Those inputs are asserted using one of the input methods here.
 """
 
-# pylint: disable=C0301,E0611,E1101,R0903
+# pylint: disable=C0301,E0611,E1101,R0402,R0902,R0903,R0913
 
 import gtsam
 import numpy as np
 from gtsam import noiseModel
+from gtsam.noiseModel import Base as SharedNoiseModel
 from gtsam.symbol_shorthand import X
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
 import app.pose_estimator.odometry as odometry
+import app.pose_estimator.accelerometer as accelerometer
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100)
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 
-# odometry noise.  TODO: real noise estimate.
-NOISE3 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
+# TODO: real noise estimates.
+ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
+PRIOR_NOISE = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
+ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 
 
 class Estimate:
@@ -50,22 +56,37 @@ class Estimate:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
+        # keep two trailing timestamps
+        # TODO: not this
         self.timestamp: int = 0
+        self.older_timestamp: int = 0
 
     def init(self, initial_pose: Pose2d) -> None:
         """Add a state at zero"""
-        prior_mean = gtsam.Pose2(initial_pose.X(), initial_pose.Y(), initial_pose.rotation().radians())
-        prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
-        self.new_factors.push_back(
-            gtsam.PriorFactorPose2(X(0), prior_mean, prior_noise)
+        prior_mean = gtsam.Pose2(
+            initial_pose.X(), initial_pose.Y(), initial_pose.rotation().radians()
         )
-        self.new_values.insert(X(0), prior_mean)
-        self.new_timestamps[X(0)] = 0.0
+        self.add_state(0, prior_mean)
+        self.prior(0, prior_mean, PRIOR_NOISE)
+
+    def add_state(self, time_us: int, initial_value: gtsam.Pose2) -> None:
+        """Add a new robot state (pose) to the estimator."""
+        # if you're using the batch smoother, the initial value almost doesn't matter:
+        # TODO: use the previous pose as the initial value
+        self.new_values.insert(X(time_us), initial_value)
+        self.new_timestamps[X(time_us)] = time_us
+
+    def prior(self, time_us: int, value: gtsam.Pose2, noise: SharedNoiseModel) -> None:
+        """Prior can have wide noise model (when we really don't know)
+        or narrow (for resetting) or mixed (to reset rotation alone)"""
+        self.new_factors.push_back(gtsam.PriorFactorPose2(X(time_us), value, noise))
 
     def odometry(self, time_us: int, positions: list[SwerveModulePosition100]) -> None:
-        """Add an odometry measurement
+        """Add an odometry measurement.  Remember to call add_state so that
+        the odometry factor has something to refer to.
 
         time_us: network tables timestamp in integer microseconds.
+
         """
         # odometry is not guaranteed to arrive in order, but for now, it is.
         # TODO: out-of-order odometry
@@ -76,24 +97,42 @@ class Estimate:
         )
         # this is the tangent-space (twist) measurement
         measurement: Twist2d = self.kinematics.to_twist_2d(deltas)
-        # each odometry update makes a new state
-        # if you're using the batch smoother, the initial value almost doesn't matter:
-        # TODO: use the previous pose as the initial value
-        initial_value = gtsam.Pose2()
-        self.new_values.insert(X(time_us), initial_value)
-        self.new_timestamps[X(time_us)] = time_us
 
-        self.new_factors.add(
+        self.new_factors.push_back(
             odometry.factor(
                 measurement,
-                NOISE3,
+                ODOMETRY_NOISE,
                 X(self.timestamp),
                 X(time_us),
             )
         )
 
         self.positions = positions
+        self.older_timestamp = self.timestamp
         self.timestamp = time_us
+
+    def accelerometer(
+        self, t0_us: int, t1_us: int, t2_us: int, x: float, y: float
+    ) -> None:
+        """Add an accelerometer measurement.
+        t0_us, t1_us, t2_us: timestamps of the referenced states
+        TODO: handle time differently
+        """
+        print(self.timestamp)
+        dt1: float = (t1_us - t0_us) / 1000000
+        dt2: float = (t2_us - t1_us) / 1000000
+        self.new_factors.push_back(
+            accelerometer.factor(
+                x,
+                y,
+                dt1,
+                dt2,
+                ACCELEROMETER_NOISE,
+                X(t0_us),
+                X(t1_us),
+                X(t2_us),
+            )
+        )
 
     def update(self) -> None:
         """Run the solver"""

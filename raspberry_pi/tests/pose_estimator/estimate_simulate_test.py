@@ -1,9 +1,10 @@
-# pylint: disable=C0301,E0611,R0903
+# pylint: disable=C0301,E0611,E1101,R0903,R0914
 
 import math
 import time
 import unittest
 
+import gtsam
 import numpy as np
 from gtsam import Cal3DS2, Point2, Point3, Pose2, Pose3, Rot3
 from gtsam.symbol_shorthand import X
@@ -23,6 +24,7 @@ class EstimateSimulateTest(unittest.TestCase):
         for i in range(1, 100):
             t0 = time.time_ns()
             time_us = 20000 * i
+            est.add_state(time_us, gtsam.Pose2())
             est.odometry(time_us, sim.positions)
             est.update()
             t1 = time.time_ns()
@@ -40,6 +42,8 @@ class EstimateSimulateTest(unittest.TestCase):
             est_y = p.y()
             est_theta = p.theta()
 
-            print(f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}")
+            print(
+                f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}"
+            )
 
             sim.step(0.02)

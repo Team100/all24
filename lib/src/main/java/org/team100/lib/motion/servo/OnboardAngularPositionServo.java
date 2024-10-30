@@ -14,7 +14,6 @@ import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.profile.ProfileWPI;
 import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
@@ -47,7 +46,8 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     /** Profile may be updated at runtime. */
     private Profile100 m_profile = new NullProfile();
-    private ProfileWPI profileTest = new ProfileWPI(40,120);
+    // this was Sanjan experimenting in October 2024
+    // private ProfileWPI profileTest = new ProfileWPI(40,120);
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpointRad = new State100(0, 0);
@@ -153,8 +153,9 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
                 MathUtil.angleModulus(m_setpointRad.x() - measurementPositionRad) + measurementPositionRad,
                 m_setpointRad.v());
 
-        // m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad, m_goal);
-        m_setpointRad = profileTest.calculate(0.02, m_setpointRad, m_goal);
+        m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad, m_goal);
+        // this was Sanjan experimenting in October 2024
+        // m_setpointRad = profileTest.calculate(0.02, m_setpointRad, m_goal);
 
         final double u_FB;
         if (Experiments.instance.enabled(Experiment.FilterFeedback)) {
