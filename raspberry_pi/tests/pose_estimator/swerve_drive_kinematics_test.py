@@ -1,13 +1,12 @@
 import math
 import unittest
 
-from wpimath.geometry import Translation2d, Rotation2d
+from wpimath.geometry import Rotation2d, Translation2d
 
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
-from app.pose_estimator.swerve_module_position import (
-    OptionalRotation2d,
-    SwerveModulePosition100,
-)
+from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
+from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
+                                                       SwerveModulePosition100)
 
 
 class SwerveDriveKinematics100Test(unittest.TestCase):
@@ -74,16 +73,16 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
         # 0.1m straight ahead, all same.
         twist = kinematics.to_twist_2d(
             [
-                SwerveModulePosition100(
+                SwerveModuleDelta(
                     0.1, OptionalRotation2d(True, Rotation2d.fromDegrees(0))
                 ),
-                SwerveModulePosition100(
+                SwerveModuleDelta(
                     0.1, OptionalRotation2d(True, Rotation2d.fromDegrees(0))
                 ),
-                SwerveModulePosition100(
+                SwerveModuleDelta(
                     0.1, OptionalRotation2d(True, Rotation2d.fromDegrees(0))
                 ),
-                SwerveModulePosition100(
+                SwerveModuleDelta(
                     0.1, OptionalRotation2d(True, Rotation2d.fromDegrees(0))
                 ),
             ]
@@ -105,16 +104,16 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
 
         twist = kinematics.to_twist_2d(
             [
-                SwerveModulePosition100(
+                SwerveModuleDelta(
                     0.1, OptionalRotation2d(True, Rotation2d.fromDegrees(135))
                 ),
-                SwerveModulePosition100(
+                SwerveModuleDelta(
                     0.1, OptionalRotation2d(True, Rotation2d.fromDegrees(45))
                 ),
-                SwerveModulePosition100(
+                SwerveModuleDelta(
                     0.1, OptionalRotation2d(True, Rotation2d.fromDegrees(-135))
                 ),
-                SwerveModulePosition100(
+                SwerveModuleDelta(
                     0.1, OptionalRotation2d(True, Rotation2d.fromDegrees(-45))
                 ),
             ]
@@ -133,7 +132,7 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
         m_kinematics = SwerveDriveKinematics100([m_fl, m_fr, m_bl, m_br])
 
         # test forward kinematics going in a straight line
-        delta = SwerveModulePosition100(
+        delta = SwerveModuleDelta(
             5.0, OptionalRotation2d(True, Rotation2d.fromDegrees(0.0))
         )
         twist = m_kinematics.to_twist_2d([delta, delta, delta, delta])
@@ -150,7 +149,7 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
 
         m_kinematics = SwerveDriveKinematics100([m_fl, m_fr, m_bl, m_br])
 
-        delta = SwerveModulePosition100(
+        delta = SwerveModuleDelta(
             5.0, OptionalRotation2d(True, Rotation2d.fromDegrees(90.0))
         )
         twist = m_kinematics.to_twist_2d([delta, delta, delta, delta])
@@ -167,16 +166,16 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
 
         m_kinematics = SwerveDriveKinematics100([m_fl, m_fr, m_bl, m_br])
 
-        fl_delta = SwerveModulePosition100(
+        fl_delta = SwerveModuleDelta(
             106.629, OptionalRotation2d(True, Rotation2d.fromDegrees(135))
         )
-        fr_delta = SwerveModulePosition100(
+        fr_delta = SwerveModuleDelta(
             106.629, OptionalRotation2d(True, Rotation2d.fromDegrees(45))
         )
-        bl_delta = SwerveModulePosition100(
+        bl_delta = SwerveModuleDelta(
             106.629, OptionalRotation2d(True, Rotation2d.fromDegrees(-135))
         )
-        br_delta = SwerveModulePosition100(
+        br_delta = SwerveModuleDelta(
             106.629, OptionalRotation2d(True, Rotation2d.fromDegrees(-45))
         )
 

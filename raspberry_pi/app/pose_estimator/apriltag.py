@@ -12,7 +12,7 @@ from typing import Callable
 
 import gtsam
 import numpy as np
-from gtsam.noiseModel import Base as SharedNoiseModel
+from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 
 from app.pose_estimator.numerical_derivative import (
     numericalDerivative31,
@@ -22,7 +22,8 @@ from app.pose_estimator.numerical_derivative import (
 
 # camera "zero" is facing +z; this turns it to face +x
 CAM_COORD = gtsam.Pose3(
-    gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])), gtsam.Point3(0, 0, 0)
+    gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+    gtsam.Point3(0, 0, 0),  # type:ignore
 )
 
 
@@ -45,7 +46,7 @@ def h_fn(
 
 def h_H(
     landmark: np.ndarray,
-    measured: np.array,
+    measured: np.ndarray,
     p0: gtsam.Pose2,
     offset: gtsam.Pose3,
     calib: gtsam.Cal3DS2,
@@ -67,7 +68,7 @@ def factor(
     p0_key: gtsam.Symbol,
     offset_key: gtsam.Symbol,
     calib_key: gtsam.Symbol,
-) -> gtsam.NonlinearFactor:
+) -> gtsam.NoiseModelFactor:
     """landmark: field coordinates
     measured: pixel coordinate"""
 
@@ -82,6 +83,6 @@ def factor(
 
     return gtsam.CustomFactor(
         model,
-        gtsam.KeyVector([p0_key, offset_key, calib_key]),
+        gtsam.KeyVector([p0_key, offset_key, calib_key]), # type:ignore
         error_func,
     )

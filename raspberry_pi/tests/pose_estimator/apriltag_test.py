@@ -5,11 +5,13 @@ import unittest
 
 import gtsam
 import numpy as np
+from gtsam import noiseModel  # type:ignore
+from gtsam.symbol_shorthand import X  # type:ignore
 
 import app.pose_estimator.apriltag as apriltag
 
 KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
-NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
+NOISE2 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 
 
 class AprilTagTest(unittest.TestCase):
@@ -109,11 +111,12 @@ class AprilTagTest(unittest.TestCase):
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
-        f: gtsam.NonlinearFactor = apriltag.factor(landmark, measured, NOISE2, 0, 1, 2)
+        f: gtsam.NoiseModelFactor = apriltag.factor(landmark, measured, NOISE2,
+                                                     X(0), X(1), X(2))
         v = gtsam.Values()
-        v.insert(0, p0)
-        v.insert(1, offset)
-        v.insert(2, KCAL)
+        v.insert(X(0), p0)
+        v.insert(X(1), offset)
+        v.insert(X(2), KCAL)
         result = f.unwhitenedError(v)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(0, result[0], 2)

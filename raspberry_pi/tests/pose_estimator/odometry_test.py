@@ -1,15 +1,17 @@
-# pylint: disable=C0103,E0611,E1101
+# pylint: disable=C0103,E0611,E1101,R0402
 
 import math
 import unittest
 
 import gtsam
 import numpy as np
+from gtsam import noiseModel  # type:ignore
+from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d, Twist2d
 
 import app.pose_estimator.odometry as odometry
 
-NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
+NOISE3 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
 
 class OdometryTest(unittest.TestCase):
@@ -17,7 +19,7 @@ class OdometryTest(unittest.TestCase):
         """No movement in either estimate or measurement, so no error."""
         # The CustomFactor wrapper makes this hard to test more thoroughly.
         t = Twist2d(0, 0, 0)
-        f: gtsam.NonlinearFactor = odometry.factor(t, NOISE3, 0, 1)
+        f: gtsam.NoiseModelFactor = odometry.factor(t, NOISE3, X(0), X(1))
         print("keys", f.keys())
         v = gtsam.Values()
         p0 = gtsam.Pose2()
@@ -34,7 +36,7 @@ class OdometryTest(unittest.TestCase):
         """No movement, also include Jacobians."""
         # use the inner odo_H factor without the CustomFactor wrapper.
         t = Twist2d(0, 0, 0)
-        measured = [t.dx, t.dy, t.dtheta]
+        measured = np.array([t.dx, t.dy, t.dtheta])
         p0 = gtsam.Pose2()
         p1 = gtsam.Pose2()
         H = [np.zeros((3, 3)), np.zeros((3, 3))]
@@ -88,7 +90,7 @@ class OdometryTest(unittest.TestCase):
         self.assertAlmostEqual(1, testP1.X())
         self.assertAlmostEqual(1, testP1.Y())
         self.assertAlmostEqual(math.pi / 2, testP1.rotation().radians())
-        measured = [t.dx, t.dy, t.dtheta]
+        measured = np.array([t.dx, t.dy, t.dtheta])
         p0 = gtsam.Pose2()
         # here's (1,1) facing +y again
         p1 = gtsam.Pose2(1, 1, math.pi / 2)
@@ -138,7 +140,7 @@ class OdometryTest(unittest.TestCase):
         self.assertAlmostEqual(1, testP1.X())
         self.assertAlmostEqual(1, testP1.Y())
         self.assertAlmostEqual(math.pi / 2, testP1.rotation().radians())
-        measured = [t.dx, t.dy, t.dtheta]
+        measured = np.array([t.dx, t.dy, t.dtheta])
         p0 = gtsam.Pose2()
         # now there's an error which should map to a pure x error in the twist
         # this position is due to just not driving far enough
@@ -188,7 +190,7 @@ class OdometryTest(unittest.TestCase):
         self.assertAlmostEqual(1, testP1.X())
         self.assertAlmostEqual(1, testP1.Y())
         self.assertAlmostEqual(0, testP1.rotation().radians())
-        measured = [t.dx, t.dy, t.dtheta]
+        measured = np.array([t.dx, t.dy, t.dtheta])
         p0 = gtsam.Pose2()
         # now there's an error which should be symmetrical
         p1 = gtsam.Pose2(0.9, 0.9, 0)

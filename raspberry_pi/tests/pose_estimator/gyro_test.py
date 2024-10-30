@@ -4,10 +4,12 @@ import unittest
 
 import gtsam
 import numpy as np
+from gtsam import noiseModel  # type:ignore
+from gtsam.symbol_shorthand import X  # type:ignore
 
 import app.pose_estimator.gyro as gyro
 
-NOISE1 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1]))
+NOISE1 = noiseModel.Diagonal.Sigmas(np.array([0.1]))
 
 
 class GyroTest(unittest.TestCase):
@@ -80,7 +82,7 @@ class GyroTest(unittest.TestCase):
 
     def test_factor_0(self) -> None:
         measured = np.array([0])
-        f: gtsam.NonlinearFactor = gyro.factor(measured, NOISE1, 0, 1)
+        f: gtsam.NoiseModelFactor = gyro.factor(measured, NOISE1, X(0), X(1))
         v = gtsam.Values()
         p0 = gtsam.Pose2(0, 0, 0)
         p1 = gtsam.Pose2(0, 0, 0)
@@ -93,7 +95,7 @@ class GyroTest(unittest.TestCase):
     def test_factor_1(self) -> None:
         """both estimate and measurement are 1"""
         measured = np.array([1])
-        f: gtsam.NonlinearFactor = gyro.factor(measured, NOISE1, 0, 1)
+        f: gtsam.NonlinearFactor = gyro.factor(measured, NOISE1, X(0), X(1))
         v = gtsam.Values()
         p0 = gtsam.Pose2(0, 0, 0)
         p1 = gtsam.Pose2(0, 0, 1)

@@ -11,10 +11,12 @@ rotation-only odometry factor.
 
 import gtsam
 import numpy as np
-from gtsam.noiseModel import Base as SharedNoiseModel
+from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 
-from app.pose_estimator.numerical_derivative import (numericalDerivative21,
-                                                     numericalDerivative22)
+from app.pose_estimator.numerical_derivative import (
+    numericalDerivative21,
+    numericalDerivative22,
+)
 
 
 def h(p0: gtsam.Pose2, p1: gtsam.Pose2) -> np.ndarray:
@@ -40,7 +42,7 @@ def factor(
     model: SharedNoiseModel,
     p0_key: gtsam.Symbol,
     p1_key: gtsam.Symbol,
-) -> gtsam.NonlinearFactor:
+) -> gtsam.NoiseModelFactor:
     def error_func(
         this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
     ) -> np.ndarray:
@@ -48,4 +50,8 @@ def factor(
         p1: gtsam.Pose2 = v.atPose2(this.keys()[1])
         return h_H(measured, p0, p1, H)
 
-    return gtsam.CustomFactor(model, gtsam.KeyVector([p0_key, p1_key]), error_func)
+    return gtsam.CustomFactor(
+        model,
+        gtsam.KeyVector([p0_key, p1_key]),  # type:ignore
+        error_func,
+    )

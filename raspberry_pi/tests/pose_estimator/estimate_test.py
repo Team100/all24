@@ -5,7 +5,7 @@
 import unittest
 
 import gtsam
-from gtsam.symbol_shorthand import X
+from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d
 
 from app.pose_estimator.estimate import Estimate

@@ -40,6 +40,7 @@ class DriveUtil:
         # happen if the robot is *severely* overrunning).
         return SwerveModuleDelta(0, OptionalRotation2d(False, Rotation2d(0)))
 
+    @staticmethod
     def _plus(
             start:SwerveModulePosition100, delta:SwerveModuleDelta) -> SwerveModulePosition100:
         new_distance_m = start.distance_m + delta.distance_m

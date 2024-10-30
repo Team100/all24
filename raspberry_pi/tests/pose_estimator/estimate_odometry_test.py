@@ -6,7 +6,7 @@ import math
 import unittest
 
 import gtsam
-from gtsam.symbol_shorthand import X
+from gtsam.symbol_shorthand import X # type:ignore
 from wpimath.geometry import Rotation2d, Pose2d
 
 from app.pose_estimator.estimate import Estimate
@@ -22,8 +22,7 @@ class EstimateOdometryTest(unittest.TestCase):
         est = Estimate()
         est.init(Pose2d())
 
-        time_us: int = 1
-        est.add_state(time_us, gtsam.Pose2())
+        est.add_state(1, gtsam.Pose2())
 
         # drive straight ahead 0.1
         positions = [
@@ -33,7 +32,7 @@ class EstimateOdometryTest(unittest.TestCase):
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
         ]
 
-        est.odometry(time_us, positions)
+        est.odometry(0, 1, positions)
         est.update()
         print(est.result)
         self.assertEqual(2, est.result.size())
@@ -53,8 +52,7 @@ class EstimateOdometryTest(unittest.TestCase):
         est = Estimate()
         est.init(Pose2d())
 
-        time_us: int = 1
-        est.add_state(time_us, gtsam.Pose2())
+        est.add_state(1, gtsam.Pose2())
 
         # This is a rotating translation that should end up rotated 90 to the left
         # and 1m behind
@@ -79,7 +77,7 @@ class EstimateOdometryTest(unittest.TestCase):
             SwerveModulePosition100(0.0, OptionalRotation2d(False, Rotation2d(0))),
         ]
 
-        est.odometry(time_us, positions)
+        est.odometry(0, 1, positions)
         est.update()
         print(est.result)
         self.assertEqual(2, est.result.size())
@@ -120,8 +118,7 @@ class EstimateOdometryTest(unittest.TestCase):
             ),
             SwerveModulePosition100(0.0, OptionalRotation2d(False, Rotation2d(0))),
         ]
-        time_us: int = 1
-        est.odometry(time_us, positions)
+        est.odometry(0, 1, positions)
         est.update()
         print(est.result)
         self.assertEqual(2, est.result.size())
