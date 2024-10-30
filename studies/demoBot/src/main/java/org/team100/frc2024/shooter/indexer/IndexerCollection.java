@@ -2,6 +2,7 @@ package org.team100.frc2024.shooter.indexer;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.motor.MotorPhase;
 
 public class IndexerCollection {
 
@@ -9,8 +10,8 @@ public class IndexerCollection {
             LoggerFactory parent
             ) {
         switch (Identity.instance) {
-            case BETA_BOT:
-                return new IndexerServo(parent, 0);
+            case DEMO_BOT:
+                return new IndexerServo(parent, MotorPhase.REVERSE, 0);
             case BLANK:
             default:
                 return new Indexer() {
@@ -19,18 +20,6 @@ public class IndexerCollection {
                     public void set(double value) {
                         // TODO Auto-generated method stub
                         throw new UnsupportedOperationException("Unimplemented method 'set'");
-                    }
-
-                    @Override
-                    public void setAngle(double value) {
-                        // TODO Auto-generated method stub
-                        throw new UnsupportedOperationException("Unimplemented method 'setAngle'");
-                    }
-
-                    @Override
-                    public double getAngle() {
-                        // TODO Auto-generated method stub
-                        throw new UnsupportedOperationException("Unimplemented method 'getAngle'");
                     }
 
                     @Override

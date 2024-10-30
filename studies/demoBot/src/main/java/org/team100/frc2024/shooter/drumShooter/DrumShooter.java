@@ -30,7 +30,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
 
     private final LinearVelocityServo m_leftRoller;
     private final LinearVelocityServo m_rightRoller;
-    private final double shooterVelocityM_S = 30;
+    private final double shooterVelocityM_S = 10;
 
     private double currentDesiredLeftVelocity = 0;
     private double currentDesiredRightVelocity = 0;
@@ -80,7 +80,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
     }
 
     public boolean atVeloctity() {
-        return atVeloctity(0.5);
+        return atVeloctity(10);
     }
 
     /**
