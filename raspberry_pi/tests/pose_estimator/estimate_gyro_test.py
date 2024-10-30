@@ -12,7 +12,7 @@ from app.pose_estimator.estimate import Estimate
 
 
 class EstimateGyroTest(unittest.TestCase):
-    def test_gyro_0(self)-> None:
+    def test_gyro_0(self) -> None:
         """motionless"""
         est = Estimate()
         est.init(Pose2d(0, 0, 0))
@@ -30,7 +30,7 @@ class EstimateGyroTest(unittest.TestCase):
         self.assertAlmostEqual(0, p1.y())
         self.assertAlmostEqual(0, p1.theta())
 
-    def test_gyro_1(self)-> None:
+    def test_gyro_1(self) -> None:
         """rotating"""
         est = Estimate()
         est.init(Pose2d(0, 0, 0))

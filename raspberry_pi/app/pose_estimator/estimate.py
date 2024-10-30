@@ -8,9 +8,9 @@ Those inputs are asserted using one of the input methods here.
 
 import gtsam
 import numpy as np
-from gtsam import noiseModel # type:ignore
-from gtsam.noiseModel import Base as SharedNoiseModel # type:ignore
-from gtsam.symbol_shorthand import X # type:ignore
+from gtsam import noiseModel  # type:ignore
+from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
+from gtsam.symbol_shorthand import K, X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
 import app.pose_estimator.accelerometer as accelerometer
@@ -29,6 +29,8 @@ ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1]))
+
+CAL = gtsam.Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0)
 
 
 class Estimate:
@@ -70,6 +72,11 @@ class Estimate:
         )
         self.add_state(0, prior_mean)
         self.prior(0, prior_mean, PRIOR_NOISE)
+        # there is just one camera factor
+        self.new_values.insert(
+            K(0), CAL
+        )
+        self.new_timestamps[K(0)] = CAL
 
     def add_state(self, time_us: int, initial_value: gtsam.Pose2) -> None:
         """Add a new robot state (pose) to the estimator."""
@@ -153,6 +160,9 @@ class Estimate:
             )
         )
         self.theta = theta
+
+    def apriltag(self, landmark: np.ndarray, measured: np.ndarray, t0_us: int) -> None:
+        pass
 
     def update(self) -> None:
         """Run the solver"""
