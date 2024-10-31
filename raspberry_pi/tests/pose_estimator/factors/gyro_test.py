@@ -7,7 +7,7 @@ import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
-import app.pose_estimator.gyro as gyro
+import app.pose_estimator.factors.gyro as gyro
 
 NOISE1 = noiseModel.Diagonal.Sigmas(np.array([0.1]))
 

@@ -8,7 +8,7 @@ import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
-import app.pose_estimator.apriltag_calibrate as apriltag_calibrate
+import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
 
 KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
 NOISE2 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))

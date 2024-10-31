@@ -37,6 +37,7 @@ class EstimateAprilTagTest(unittest.TestCase):
         self.assertAlmostEqual(60, k0.fx(), 3)
 
     def test_apriltag_1(self) -> None:
+        """Test the smoothing factor."""
         est = Estimate()
         est.init(Pose2d(0, 0, 0))
         # upper left

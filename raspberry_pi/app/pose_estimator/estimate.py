@@ -13,11 +13,11 @@ from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 from gtsam.symbol_shorthand import C, K, X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
-import app.pose_estimator.accelerometer as accelerometer
-import app.pose_estimator.gyro as gyro
-import app.pose_estimator.apriltag_smooth as apriltag_smooth
-import app.pose_estimator.apriltag_calibrate as apriltag_calibrate
-import app.pose_estimator.odometry as odometry
+import app.pose_estimator.factors.accelerometer as accelerometer
+import app.pose_estimator.factors.gyro as gyro
+import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
+import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
+import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta

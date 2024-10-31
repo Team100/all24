@@ -9,7 +9,7 @@ from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d, Twist2d
 
-import app.pose_estimator.odometry as odometry
+import app.pose_estimator.factors.odometry as odometry
 
 NOISE3 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 

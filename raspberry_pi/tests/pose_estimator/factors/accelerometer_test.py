@@ -7,7 +7,7 @@ import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
-import app.pose_estimator.accelerometer as accelerometer
+import app.pose_estimator.factors.accelerometer as accelerometer
 
 NOISE3 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
