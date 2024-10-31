@@ -301,8 +301,8 @@ class RealCamera(Camera):
             case Model.GS:
                 return np.array(
                     [
-                        [1680, 0, 728],
-                        [0, 1680, 544],
+                        [1780, 0, 728],
+                        [0, 1780, 544],
                         [0, 0, 1],
                     ]
                 )

@@ -29,7 +29,7 @@ public class HolonomicDriveControllerFactory {
                 pid.setTolerance(0.01); // 1 cm
                 return pid;
             case SWERVE_ONE:
-                pid = new PIDController(0.15, 0, 0);
+                pid = new PIDController(0.3, 0, 0);
                 pid.setIntegratorRange(-0.1, 0.1);
                 pid.setTolerance(0.01); // 1 cm
                 return pid;
