@@ -99,6 +99,16 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
+    /** Skip all scaling, setpoint generator, etc. */
+    public void driveInFieldCoordsVerbatim(FieldRelativeVelocity vIn) {
+        ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                vIn.x(),
+                vIn.y(),
+                vIn.theta(),
+                getState().pose().getRotation());
+        m_swerveLocal.setChassisSpeedsNormally(targetChassisSpeeds, m_gyro.getYawRateNWU());
+    }
+
     /**
      * steer the wheels to match the target but don't drive them. This is for the
      * beginning of trajectories, like the "square" project or any other case where
