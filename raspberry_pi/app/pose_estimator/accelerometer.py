@@ -99,9 +99,9 @@ def factor(
     dt1: float,
     dt2: float,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
-    p2_key: gtsam.Symbol,
+    p0_key: int,
+    p1_key: int,
+    p2_key: int,
 ) -> gtsam.NoiseModelFactor:
     # TODO: something other than dt1 and dt2?
     # this is the robot-frame acceleration vector.

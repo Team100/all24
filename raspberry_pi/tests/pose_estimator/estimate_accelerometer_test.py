@@ -20,7 +20,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         est.accelerometer(0, 20000, 40000, 0, 0)
         est.update()
         print(est.result)
-        self.assertEqual(3, est.result.size())
+        self.assertEqual(5, est.result.size())
         p0: gtsam.Pose2 = est.result.atPose2(X(0))
         self.assertAlmostEqual(0, p0.x())
         self.assertAlmostEqual(0, p0.y())
@@ -43,7 +43,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         est.accelerometer(0, 20000, 40000, 1, 0)
         est.update()
         print(est.result)
-        self.assertEqual(3, est.result.size())
+        self.assertEqual(5, est.result.size())
         p0: gtsam.Pose2 = est.result.atPose2(X(0))
         # this state has a prior so it is relatively immobile
         self.assertAlmostEqual(0, p0.x())

@@ -4,7 +4,8 @@ One type of factor uses constant camera parameters, the other treats
 camera parameters as a model variable, for calibration.
 
 This also serves as a template for parameterized estimators -- in this
-case, the parameter is the landmark location.
+case, the parameters are the landmark location, camera calibration,
+and camera offset.
 """
 
 # pylint: disable=C0103,E0611,E1101,R0913
@@ -14,11 +15,7 @@ import gtsam
 import numpy as np
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 
-from app.pose_estimator.numerical_derivative import (
-    numericalDerivative31,
-    numericalDerivative32,
-    numericalDerivative33,
-)
+from app.pose_estimator.numerical_derivative import numericalDerivative11
 
 # camera "zero" is facing +z; this turns it to face +x
 CAM_COORD = gtsam.Pose3(
@@ -29,10 +26,12 @@ CAM_COORD = gtsam.Pose3(
 
 def h_fn(
     landmark: np.ndarray,
-) -> Callable[[gtsam.Pose2, gtsam.Pose3, gtsam.Cal3DS2], np.ndarray]:
+    offset: gtsam.Pose3,
+    calib: gtsam.Cal3DS2,
+) -> Callable[[gtsam.Pose2], np.ndarray]:
     """landmark is field position of a tag corner."""
 
-    def h(p0: gtsam.Pose2, offset: gtsam.Pose3, calib: gtsam.Cal3DS2) -> np.ndarray:
+    def h(p0: gtsam.Pose2) -> np.ndarray:
         """estimated pixel location of the target"""
         # this is x-forward z-up
         offset_pose = gtsam.Pose3(p0).compose(offset)
@@ -52,37 +51,35 @@ def h_H(
     calib: gtsam.Cal3DS2,
     H: list[np.ndarray],
 ) -> np.ndarray:
-    h = h_fn(landmark)
-    result = h(p0, offset, calib) - measured
+    h = h_fn(landmark, offset, calib)
+    result = h(p0) - measured
     if H is not None:
-        H[0] = numericalDerivative31(h, p0, offset, calib)
-        H[1] = numericalDerivative32(h, p0, offset, calib)
-        H[2] = numericalDerivative33(h, p0, offset, calib)
+        H[0] = numericalDerivative11(h, p0)
+
     return result
 
 
 def factor(
     landmark: np.ndarray,
     measured: np.ndarray,
+    offset: gtsam.Pose3,
+    calib: gtsam.Cal3DS2,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    offset_key: gtsam.Symbol,
-    calib_key: gtsam.Symbol,
+    p0_key: int,
 ) -> gtsam.NoiseModelFactor:
-    """landmark: field coordinates
+    """using constant offset and calibration, use this for smoothing.
+
+    landmark: field coordinates
     measured: pixel coordinate"""
 
     def error_func(
         this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
     ) -> np.ndarray:
         p0: gtsam.Pose2 = v.atPose2(this.keys()[0])
-        offset: gtsam.Pose3 = v.atPose3(this.keys()[1])
-        calib: gtsam.Cal3DS2 = v.atCal3DS2(this.keys()[2])
-
         return h_H(landmark, measured, p0, offset, calib, H)
 
     return gtsam.CustomFactor(
         model,
-        gtsam.KeyVector([p0_key, offset_key, calib_key]), # type:ignore
+        gtsam.KeyVector([p0_key]),  # type:ignore
         error_func,
     )

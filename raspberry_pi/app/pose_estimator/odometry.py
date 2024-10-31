@@ -52,8 +52,8 @@ def h_H(
 def factorCustom(
     t: Twist2d,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
+    p0_key: int,
+    p1_key: int,
 ) -> gtsam.NoiseModelFactor:
     """Uses a python CustomFactor."""
     measured = np.array([t.dx, t.dy, t.dtheta])
@@ -75,21 +75,21 @@ def factorCustom(
 def factorNative(
     t: Twist2d,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
+    p0_key: int,
+    p1_key: int,
 ) -> gtsam.NoiseModelFactor:
     """Uses the GTSAM BetweenFactor."""
     # the gtsam between factor uses a relative pose, not a twist.
     p = Pose2d().exp(t)
     gp = gtsam.Pose2(p.x, p.y, p.rotation().radians())
-    return gtsam.BetweenFactorPose2(p0_key.key(), p1_key.key(), gp, model)
+    return gtsam.BetweenFactorPose2(p0_key, p1_key, gp, model)
 
 
 def factor(
     t: Twist2d,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
+    p0_key: int,
+    p1_key: int,
 ) -> gtsam.NoiseModelFactor:
     """Factory for a factor implementing odometry using tangent-space measurements."""
     return factorNative(t, model, p0_key, p1_key)

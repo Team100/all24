@@ -40,8 +40,8 @@ def h_H(
 def factor(
     measured: np.ndarray,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
+    p0_key: int,
+    p1_key: int,
 ) -> gtsam.NoiseModelFactor:
     def error_func(
         this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]

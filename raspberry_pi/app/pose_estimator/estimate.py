@@ -10,11 +10,13 @@ import gtsam
 import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
-from gtsam.symbol_shorthand import K, X  # type:ignore
+from gtsam.symbol_shorthand import C, K, X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
 import app.pose_estimator.accelerometer as accelerometer
 import app.pose_estimator.gyro as gyro
+import app.pose_estimator.apriltag_smooth as apriltag_smooth
+import app.pose_estimator.apriltag_calibrate as apriltag_calibrate
 import app.pose_estimator.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
@@ -31,6 +33,24 @@ ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1]))
 
 CAL = gtsam.Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0)
+PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
+CAL_NOISE = noiseModel.Diagonal.Sigmas(
+    np.array(
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ]
+    )
+)
+OFFSET0 = gtsam.Pose3()
+OFFSET_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1]))
 
 
 class Estimate:
@@ -73,10 +93,13 @@ class Estimate:
         self.add_state(0, prior_mean)
         self.prior(0, prior_mean, PRIOR_NOISE)
         # there is just one camera factor
-        self.new_values.insert(
-            K(0), CAL
-        )
-        self.new_timestamps[K(0)] = CAL
+        self.new_values.insert(K(0), CAL)
+        self.new_timestamps[K(0)] = 0
+        self.new_factors.push_back(gtsam.PriorFactorCal3DS2(K(0), CAL, CAL_NOISE))
+        # and one camera offset for now
+        self.new_values.insert(C(0), OFFSET0)
+        self.new_timestamps[C(0)] = 0
+        self.new_factors.push_back(gtsam.PriorFactorPose3(C(0), OFFSET0, OFFSET_NOISE))
 
     def add_state(self, time_us: int, initial_value: gtsam.Pose2) -> None:
         """Add a new robot state (pose) to the estimator."""
@@ -161,8 +184,21 @@ class Estimate:
         )
         self.theta = theta
 
-    def apriltag(self, landmark: np.ndarray, measured: np.ndarray, t0_us: int) -> None:
-        pass
+    def apriltag_for_calibration(
+        self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
+    ) -> None:
+        self.new_factors.push_back(
+            apriltag_calibrate.factor(
+                landmark, measured, PX_NOISE, X(t0_us), C(0), K(0)
+            )
+        )
+
+    def apriltag_for_smoothing(
+        self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
+    ) -> None:
+        self.new_factors.push_back(
+            apriltag_smooth.factor(landmark, measured, OFFSET0, CAL, PX_NOISE, X(t0_us))
+        )
 
     def update(self) -> None:
         """Run the solver"""
