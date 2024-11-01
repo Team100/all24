@@ -16,6 +16,7 @@ from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 import app.pose_estimator.factors.accelerometer as accelerometer
 import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
 import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
+import app.pose_estimator.factors.apriltag_smooth_batch as apriltag_smooth_batch
 import app.pose_estimator.factors.gyro as gyro
 import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
@@ -230,6 +231,27 @@ class Estimate:
                 landmark, measured, camera_offset, calib, PX_NOISE, X(t0_us)
             )
         )
+
+    def apriltag_for_smoothing_batch(
+        self,
+        landmarks: list[np.ndarray],
+        measured: np.ndarray,
+        t0_us: int,
+        camera_offset: gtsam.Pose3,
+        calib: gtsam.Cal3DS2,
+    ) -> None:
+        """landmarks: list of 3d points
+        measured: concatenated px measurements"""
+        noise = noiseModel.Diagonal.Sigmas(
+            np.concatenate(
+                [[1, 1] for _ in landmarks])
+            )
+        self.new_factors.push_back(
+            apriltag_smooth_batch.factor(
+                landmarks, measured, camera_offset, calib, noise, X(t0_us)
+            )
+        )
+
 
     def update(self) -> None:
         """Run the solver"""
