@@ -329,7 +329,8 @@ class EstimateSimulateTest(unittest.TestCase):
             sim.step(0.02)
             est.add_state(t1_us, state)
             est.odometry(t0_us, t1_us, sim.positions)
-            est.gyro(t0_us, t1_us, sim.gt_theta - gt_theta_0)
+            dtheta = sim.gt_theta - gt_theta_0
+            est.gyro(t0_us, t1_us, dtheta)
             gt_theta_0 = sim.gt_theta
 
             est.apriltag_for_smoothing(

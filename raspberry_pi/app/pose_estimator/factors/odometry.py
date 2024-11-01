@@ -92,5 +92,5 @@ def factor(
     p1_key: int,
 ) -> gtsam.NoiseModelFactor:
     """Factory for a factor implementing odometry using tangent-space measurements."""
-    return factorNative(t, model, p0_key, p1_key)
-    # return factorCustom(t, model, p0_key, p1_key)
+    # return factorNative(t, model, p0_key, p1_key)
+    return factorCustom(t, model, p0_key, p1_key)

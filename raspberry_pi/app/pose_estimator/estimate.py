@@ -21,8 +21,10 @@ import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100)
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -79,10 +81,6 @@ class Estimate:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
-
-        # to keep track of theta increments
-        self.theta: float = 0
-        # TODO: maybe keeping these states here is a bad idea
 
     def init(self, initial_pose: Pose2d) -> None:
         """Add a state at zero"""
@@ -200,9 +198,7 @@ class Estimate:
             )
         )
 
-    def gyro(self, t0_us: int, t1_us: int, theta: float) -> None:
-        dtheta = theta - self.theta
-
+    def gyro(self, t0_us: int, t1_us: int, dtheta: float) -> None:
         self.new_factors.push_back(
             gyro.factor(
                 np.array([dtheta]),
@@ -211,7 +207,6 @@ class Estimate:
                 X(t1_us),
             )
         )
-        self.theta = theta
 
     def apriltag_for_calibration(
         self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
