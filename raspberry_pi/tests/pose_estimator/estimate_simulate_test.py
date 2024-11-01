@@ -20,8 +20,8 @@ PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
 class EstimateSimulateTest(unittest.TestCase):
     def test_odo_only(self) -> None:
-        """Odometry only.
-        This is very fast."""
+        """Odometry only, using the native factor.
+        This is very fast, 0.1s on my machine"""
         sim = CircleSimulator()
         est = Estimate()
         est.init(sim.wpi_pose)
@@ -38,6 +38,50 @@ class EstimateSimulateTest(unittest.TestCase):
             sim.step(0.02)
             est.add_state(t1_us, gtsam.Pose2())
             est.odometry(t0_us, t1_us, sim.positions)
+            est.update()
+            t1 = time.time_ns()
+            et = t1 - t0
+            if actually_print:
+                print(f"{et/1e9} {est.result.size()}")
+            t = i * 0.02
+            gt_x = sim.gt_x
+            gt_y = sim.gt_y
+            gt_theta = sim.gt_theta
+
+            # using just odometry without noise, the error
+            # is exactly zero, all the time. :-)
+            p: Pose2 = est.result.atPose2(X(t1_us))
+            est_x = p.x()
+            est_y = p.y()
+            est_theta = p.theta()
+
+            err_x = est_x - gt_x
+            err_y = est_y - gt_y
+            err_theta = est_theta - gt_theta
+
+            print(
+                f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}, {err_x:7.4f}, {err_y:7.4f}, {err_theta:7.4f}"
+            )
+
+    def test_odo_only_custom(self) -> None:
+        """Odometry only, using the python custom factor.
+        This is very slow, 1.4s on my machine."""
+        sim = CircleSimulator()
+        est = Estimate()
+        est.init(sim.wpi_pose)
+
+        print()
+        print(
+            "      t,    GT X,    GT Y,  GT ROT,   EST X,   EST Y, EST ROT,   ERR X,   ERR Y, ERR ROT"
+        )
+        for i in range(1, 100):
+            t0 = time.time_ns()
+            t0_us = 20000 * (i - 1)
+            t1_us = 20000 * i
+            # updates gt to t1
+            sim.step(0.02)
+            est.add_state(t1_us, gtsam.Pose2())
+            est.odometry_custom(t0_us, t1_us, sim.positions)
             est.update()
             t1 = time.time_ns()
             et = t1 - t0

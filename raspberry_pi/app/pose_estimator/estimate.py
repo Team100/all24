@@ -148,6 +148,36 @@ class Estimate:
 
         self.positions = positions
 
+    def odometry_custom(
+        self, t0_us: int, t1_us: int, positions: list[SwerveModulePosition100]
+    ) -> None:
+        """Add an odometry measurement.  Remember to call add_state so that
+        the odometry factor has something to refer to.
+
+        t0_us, t1_us: network tables timestamp in integer microseconds.
+        TODO: something more clever with timestamps
+        """
+        # odometry is not guaranteed to arrive in order, but for now, it is.
+        # TODO: out-of-order odometry
+        # each odometry update maps exactly to a "between" factor
+        # remember a "twist" is a robot-relative concept
+        deltas: list[SwerveModuleDelta] = DriveUtil.module_position_delta(
+            self.positions, positions
+        )
+        # this is the tangent-space (twist) measurement
+        measurement: Twist2d = self.kinematics.to_twist_2d(deltas)
+
+        self.new_factors.push_back(
+            odometry.factorCustom(
+                measurement,
+                ODOMETRY_NOISE,
+                X(t0_us),
+                X(t1_us),
+            )
+        )
+
+        self.positions = positions
+
     def accelerometer(
         self, t0_us: int, t1_us: int, t2_us: int, x: float, y: float
     ) -> None:
