@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,R0903
+# pylint: disable=C0301,E0611,R0902,R0903
 # mypy: disable-error-code="import-untyped"
 """Minimal simulated telemetry generator for both smoothing and calibration.
 
@@ -9,6 +9,8 @@ The robot path is a circle of radius 1m, centered 3m away from the tag, followed
 The robot rotates back and forth with an amplitude of 0.5 rad, at 3x the frequency of the circular path (so 4 rad/s)
 
 Because the gyro drift is a random walk, the whole thing needs to be sequential.
+
+Woah i have no idea how to compute the acceleration for this path, so it's not there.
 
 TODO:
 use realistic 6mm lens and GS sensor parameters.
@@ -22,7 +24,7 @@ import numpy as np
 from gtsam import Cal3DS2  # includes distortion
 from gtsam import (PinholeCameraCal3DS2, Point2, Point3, Pose2,  # type:ignore
                    Pose3, Rot3)
-from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
@@ -43,10 +45,9 @@ CAM_COORD = Pose3(
     Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
     Point3(0, 0, 0),  # type: ignore
 )
-CALIB = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
 
 
-class Simulator:
+class CircleSimulator:
     def __init__(self) -> None:
         # TODO: actual wheelbase etc
         self.kinematics = SwerveDriveKinematics100(
@@ -76,8 +77,7 @@ class Simulator:
         # upper right
         # upper left
         self.gt_pixels: list[Point2]
-        # initialize
-        self.step(0)
+
         # set positions back to zero
         # TODO: more clever init
         self.positions = [
@@ -86,6 +86,16 @@ class Simulator:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
+        # constant landmark points
+        self.l0 = np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
+        self.l1 = np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
+        self.l2 = np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
+        self.l3 = np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
+        self.camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
+        self.CALIB = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
+
+        # initialize
+        self.step(0)
 
     def step(self, dt_s: float) -> None:
         """set all the state according to the supplied time"""
@@ -109,40 +119,40 @@ class Simulator:
         )
 
         robot_pose = Pose2(self.gt_x, self.gt_y, self.gt_theta)
-        camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
+
         # lower left
         p0 = self.px(
-            Point3(TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)),
+            self.l0,
             robot_pose,
-            camera_offset,
-            CALIB,
+            self.camera_offset,
+            self.CALIB,
         )
         # lower right
         p1 = self.px(
-            Point3(TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)),
+            self.l1,
             robot_pose,
-            camera_offset,
-            CALIB,
+            self.camera_offset,
+            self.CALIB,
         )
         # upper right
         p2 = self.px(
-            Point3(TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)),
+            self.l2,
             robot_pose,
-            camera_offset,
-            CALIB,
+            self.camera_offset,
+            self.CALIB,
         )
         # upper left
         p3 = self.px(
-            Point3(TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)),
+            self.l3,
             robot_pose,
-            camera_offset,
-            CALIB,
+            self.camera_offset,
+            self.CALIB,
         )
         self.gt_pixels = [p0, p1, p2, p3]
 
     def px(  # type: ignore
         self,
-        landmark: Point3,  # type: ignore
+        landmark: np.ndarray,
         robot_pose: Pose2,
         camera_offset: Pose3,
         calib: Cal3DS2,

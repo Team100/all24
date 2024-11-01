@@ -14,38 +14,37 @@ from gtsam.symbol_shorthand import C, K, X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
 import app.pose_estimator.factors.accelerometer as accelerometer
-import app.pose_estimator.factors.gyro as gyro
-import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
 import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
+import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
+import app.pose_estimator.factors.gyro as gyro
 import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (
-    OptionalRotation2d,
-    SwerveModulePosition100,
-)
+from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
+                                                       SwerveModulePosition100)
 
 # TODO: real noise estimates.
-ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
+ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
-GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1]))
+GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.05]))
 
+PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
+# used for calibration only
 CAL = gtsam.Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0)
-PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 CAL_NOISE = noiseModel.Diagonal.Sigmas(
     np.array(
         [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.01,
+            0.01,
+            0.001,
+            0.001,
         ]
     )
 )
@@ -194,10 +193,17 @@ class Estimate:
         )
 
     def apriltag_for_smoothing(
-        self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
+        self,
+        landmark: np.ndarray,
+        measured: np.ndarray,
+        t0_us: int,
+        camera_offset: gtsam.Pose3,
+        calib: gtsam.Cal3DS2,
     ) -> None:
         self.new_factors.push_back(
-            apriltag_smooth.factor(landmark, measured, OFFSET0, CAL, PX_NOISE, X(t0_us))
+            apriltag_smooth.factor(
+                landmark, measured, camera_offset, calib, PX_NOISE, X(t0_us)
+            )
         )
 
     def update(self) -> None:
@@ -216,7 +222,9 @@ class Estimate:
         # i'm not sure what sort of window we really need; maybe
         # just long enough to span periods of blindness, so,
         # like a second or two?
-        lag_s = 30
+        # a long window is VERY SLOW, so try very short windows
+        # just long enough to catch a single vision update.
+        lag_s = 1
         lag_us = lag_s * 1e6
         lm_params = gtsam.LevenbergMarquardtParams()
         return gtsam.BatchFixedLagSmoother(lag_us, lm_params)
