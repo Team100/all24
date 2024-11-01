@@ -254,7 +254,7 @@ class Estimate:
         # like a second or two?
         # a long window is VERY SLOW, so try very short windows
         # just long enough to catch a single vision update.
-        lag_s = 1
+        lag_s = 0.1
         lag_us = lag_s * 1e6
         lm_params = gtsam.LevenbergMarquardtParams()
         return gtsam.BatchFixedLagSmoother(lag_us, lm_params)
