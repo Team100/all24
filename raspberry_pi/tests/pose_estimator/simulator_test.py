@@ -13,12 +13,12 @@ from app.pose_estimator.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
 )
-from tests.pose_estimator.simulator import Simulator
+from tests.pose_estimator.circle_simulator import CircleSimulator
 
 
 class SimulatorTest(unittest.TestCase):
     def test_simple(self) -> None:
-        sim = Simulator()
+        sim = CircleSimulator()
         self.assertAlmostEqual(2, sim.gt_x)
         self.assertAlmostEqual(0, sim.gt_y)
         self.assertAlmostEqual(0, sim.gt_theta)
@@ -52,7 +52,7 @@ class SimulatorTest(unittest.TestCase):
         self.assertAlmostEqual(0.5, sim.gt_theta)
 
     def test_camera(self) -> None:
-        sim = Simulator()
+        sim = CircleSimulator()
         # this is the lower right corner
         landmark = Point3(4, -(0.1651 / 2.0), 1 - (0.1651 / 2))
         robot_pose = Pose2(2, 0, 0)
@@ -65,7 +65,7 @@ class SimulatorTest(unittest.TestCase):
         self.assertAlmostEqual(208, px[1], 0)
 
     def test_full(self) -> None:
-        sim = Simulator()
+        sim = CircleSimulator()
         k = SwerveDriveKinematics100(
             [
                 Translation2d(0.5, 0.5),

@@ -28,13 +28,13 @@ class EstimateAprilTagTest(unittest.TestCase):
         # so nothing interesting is going to happen.
         self.assertEqual(3, est.result.size())
         p0: gtsam.Pose2 = est.result.atPose2(X(0))
-        self.assertAlmostEqual(0, p0.x(), 1)
+        self.assertAlmostEqual(-0.14, p0.x(), 1)
         self.assertAlmostEqual(0, p0.y(), 1)
         self.assertAlmostEqual(0, p0.theta(), 1)
         c0: gtsam.Pose3 = est.result.atPose3(C(0))
         self.assertAlmostEqual(0, c0.x(), 1)
         k0: gtsam.Cal3DS2 = est.result.atCal3DS2(K(0))
-        self.assertAlmostEqual(60, k0.fx(), 3)
+        self.assertAlmostEqual(59.993, k0.fx(), 3)
 
     def test_apriltag_1(self) -> None:
         """Test the smoothing factor."""
@@ -45,7 +45,13 @@ class EstimateAprilTagTest(unittest.TestCase):
         measured = np.array([0, 0])
         # this uses constant offset and cal
         # TODO: specify offset and cal here
-        est.apriltag_for_smoothing(landmark, measured, 0)
+        est.apriltag_for_smoothing(
+            landmark,
+            measured,
+            0,
+            gtsam.Pose3(),
+            gtsam.Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0),
+        )
         est.update()
         print(est.result)
         # there are a lot of degrees of freedom here

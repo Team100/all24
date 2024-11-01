@@ -34,9 +34,11 @@ import gtsam
 import numpy as np
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 
-from app.pose_estimator.numerical_derivative import (numericalDerivative31,
-                                                     numericalDerivative32,
-                                                     numericalDerivative33)
+from app.pose_estimator.numerical_derivative import (
+    numericalDerivative31,
+    numericalDerivative32,
+    numericalDerivative33,
+)
 
 
 def coriolis(v2: np.ndarray) -> np.ndarray:
@@ -85,7 +87,8 @@ def h_H(
 ):
     """Error function including Jacobians.
     measured: [x,y] accelerations"""
-    result = h(p0, p1, p2, dt1, dt2) - measured
+    estimated = h(p0, p1, p2, dt1, dt2)
+    result = estimated - measured
     if H is not None:
         H[0] = numericalDerivative31(lambda x, y, z: h(x, y, z, dt1, dt2), p0, p1, p2)
         H[1] = numericalDerivative32(lambda x, y, z: h(x, y, z, dt1, dt2), p0, p1, p2)
