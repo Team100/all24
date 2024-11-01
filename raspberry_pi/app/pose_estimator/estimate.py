@@ -8,13 +8,16 @@ Those inputs are asserted using one of the input methods here.
 
 import gtsam
 import numpy as np
-from gtsam import noiseModel
-from gtsam.noiseModel import Base as SharedNoiseModel
-from gtsam.symbol_shorthand import X
+from gtsam import noiseModel  # type:ignore
+from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
+from gtsam.symbol_shorthand import C, K, X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
-import app.pose_estimator.odometry as odometry
-import app.pose_estimator.accelerometer as accelerometer
+import app.pose_estimator.factors.accelerometer as accelerometer
+import app.pose_estimator.factors.gyro as gyro
+import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
+import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
+import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
@@ -25,8 +28,29 @@ from app.pose_estimator.swerve_module_position import (
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
-PRIOR_NOISE = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
+GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1]))
+
+CAL = gtsam.Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0)
+PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
+CAL_NOISE = noiseModel.Diagonal.Sigmas(
+    np.array(
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ]
+    )
+)
+OFFSET0 = gtsam.Pose3()
+OFFSET_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1]))
 
 
 class Estimate:
@@ -56,10 +80,10 @@ class Estimate:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
-        # keep two trailing timestamps
-        # TODO: not this
-        self.timestamp: int = 0
-        self.older_timestamp: int = 0
+
+        # to keep track of theta increments
+        self.theta: float = 0
+        # TODO: maybe keeping these states here is a bad idea
 
     def init(self, initial_pose: Pose2d) -> None:
         """Add a state at zero"""
@@ -68,6 +92,14 @@ class Estimate:
         )
         self.add_state(0, prior_mean)
         self.prior(0, prior_mean, PRIOR_NOISE)
+        # there is just one camera factor
+        self.new_values.insert(K(0), CAL)
+        self.new_timestamps[K(0)] = 0
+        self.new_factors.push_back(gtsam.PriorFactorCal3DS2(K(0), CAL, CAL_NOISE))
+        # and one camera offset for now
+        self.new_values.insert(C(0), OFFSET0)
+        self.new_timestamps[C(0)] = 0
+        self.new_factors.push_back(gtsam.PriorFactorPose3(C(0), OFFSET0, OFFSET_NOISE))
 
     def add_state(self, time_us: int, initial_value: gtsam.Pose2) -> None:
         """Add a new robot state (pose) to the estimator."""
@@ -79,14 +111,22 @@ class Estimate:
     def prior(self, time_us: int, value: gtsam.Pose2, noise: SharedNoiseModel) -> None:
         """Prior can have wide noise model (when we really don't know)
         or narrow (for resetting) or mixed (to reset rotation alone)"""
-        self.new_factors.push_back(gtsam.PriorFactorPose2(X(time_us), value, noise))
+        self.new_factors.push_back(
+            gtsam.PriorFactorPose2(
+                X(time_us),
+                value,
+                noise,
+            )
+        )
 
-    def odometry(self, time_us: int, positions: list[SwerveModulePosition100]) -> None:
+    def odometry(
+        self, t0_us: int, t1_us: int, positions: list[SwerveModulePosition100]
+    ) -> None:
         """Add an odometry measurement.  Remember to call add_state so that
         the odometry factor has something to refer to.
 
-        time_us: network tables timestamp in integer microseconds.
-
+        t0_us, t1_us: network tables timestamp in integer microseconds.
+        TODO: something more clever with timestamps
         """
         # odometry is not guaranteed to arrive in order, but for now, it is.
         # TODO: out-of-order odometry
@@ -102,14 +142,12 @@ class Estimate:
             odometry.factor(
                 measurement,
                 ODOMETRY_NOISE,
-                X(self.timestamp),
-                X(time_us),
+                X(t0_us),
+                X(t1_us),
             )
         )
 
         self.positions = positions
-        self.older_timestamp = self.timestamp
-        self.timestamp = time_us
 
     def accelerometer(
         self, t0_us: int, t1_us: int, t2_us: int, x: float, y: float
@@ -118,7 +156,6 @@ class Estimate:
         t0_us, t1_us, t2_us: timestamps of the referenced states
         TODO: handle time differently
         """
-        print(self.timestamp)
         dt1: float = (t1_us - t0_us) / 1000000
         dt2: float = (t2_us - t1_us) / 1000000
         self.new_factors.push_back(
@@ -132,6 +169,35 @@ class Estimate:
                 X(t1_us),
                 X(t2_us),
             )
+        )
+
+    def gyro(self, t0_us: int, t1_us: int, theta: float) -> None:
+        dtheta = theta - self.theta
+
+        self.new_factors.push_back(
+            gyro.factor(
+                np.array([dtheta]),
+                GYRO_NOISE,
+                X(t0_us),
+                X(t1_us),
+            )
+        )
+        self.theta = theta
+
+    def apriltag_for_calibration(
+        self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
+    ) -> None:
+        self.new_factors.push_back(
+            apriltag_calibrate.factor(
+                landmark, measured, PX_NOISE, X(t0_us), C(0), K(0)
+            )
+        )
+
+    def apriltag_for_smoothing(
+        self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
+    ) -> None:
+        self.new_factors.push_back(
+            apriltag_smooth.factor(landmark, measured, OFFSET0, CAL, PX_NOISE, X(t0_us))
         )
 
     def update(self) -> None:

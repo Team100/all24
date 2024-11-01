@@ -32,7 +32,7 @@ rotational acceleration term in the measurement.
 
 import gtsam
 import numpy as np
-from gtsam.noiseModel import Base as SharedNoiseModel
+from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 
 from app.pose_estimator.numerical_derivative import (numericalDerivative31,
                                                      numericalDerivative32,
@@ -99,10 +99,10 @@ def factor(
     dt1: float,
     dt2: float,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
-    p2_key: gtsam.Symbol,
-) -> gtsam.NonlinearFactor:
+    p0_key: int,
+    p1_key: int,
+    p2_key: int,
+) -> gtsam.NoiseModelFactor:
     # TODO: something other than dt1 and dt2?
     # this is the robot-frame acceleration vector.
     measured = np.array([x, y])
@@ -116,5 +116,7 @@ def factor(
         return h_H(measured, p0, p1, p2, dt1, dt2, H)
 
     return gtsam.CustomFactor(
-        model, gtsam.KeyVector([p0_key, p1_key, p2_key]), error_func
+        model,
+        gtsam.KeyVector([p0_key, p1_key, p2_key]),  # type:ignore
+        error_func,
     )

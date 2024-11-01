@@ -5,11 +5,13 @@ import unittest
 
 import gtsam
 import numpy as np
+from gtsam import noiseModel  # type:ignore
+from gtsam.symbol_shorthand import X  # type:ignore
 
-import app.pose_estimator.apriltag as apriltag
+import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
 
 KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
-NOISE2 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
+NOISE2 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 
 
 class AprilTagTest(unittest.TestCase):
@@ -18,7 +20,7 @@ class AprilTagTest(unittest.TestCase):
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
         calib = gtsam.Cal3DS2()
-        result: np.ndarray = apriltag.h_fn(landmark)(p0, offset, calib)
+        result: np.ndarray = apriltag_calibrate.h_fn(landmark)(p0, offset, calib)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(0, result[0])
         self.assertAlmostEqual(0, result[1])
@@ -27,7 +29,7 @@ class AprilTagTest(unittest.TestCase):
         landmark = np.array([1, 0, 0])
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
-        result: np.ndarray = apriltag.h_fn(landmark)(p0, offset, KCAL)
+        result: np.ndarray = apriltag_calibrate.h_fn(landmark)(p0, offset, KCAL)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(200, result[0])
         self.assertAlmostEqual(200, result[1])
@@ -37,7 +39,7 @@ class AprilTagTest(unittest.TestCase):
         landmark = np.array([1, 0, 1])
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
-        result: np.ndarray = apriltag.h_fn(landmark)(p0, offset, KCAL)
+        result: np.ndarray = apriltag_calibrate.h_fn(landmark)(p0, offset, KCAL)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(200, result[0])
         self.assertAlmostEqual(20, result[1])
@@ -47,7 +49,7 @@ class AprilTagTest(unittest.TestCase):
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
-        result: np.ndarray = apriltag.h_fn(landmark)(p0, offset, KCAL)
+        result: np.ndarray = apriltag_calibrate.h_fn(landmark)(p0, offset, KCAL)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(0, result[0])
         self.assertAlmostEqual(0, result[1])
@@ -59,7 +61,9 @@ class AprilTagTest(unittest.TestCase):
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
         H = [np.zeros((3, 2)), np.zeros((6, 2)), np.zeros((9, 2))]
-        result: np.ndarray = apriltag.h_H(landmark, measured, p0, offset, KCAL, H)
+        result: np.ndarray = apriltag_calibrate.h_H(
+            landmark, measured, p0, offset, KCAL, H
+        )
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(0, result[0])
         self.assertAlmostEqual(0, result[1])
@@ -109,11 +113,18 @@ class AprilTagTest(unittest.TestCase):
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
-        f: gtsam.NonlinearFactor = apriltag.factor(landmark, measured, NOISE2, 0, 1, 2)
+        f: gtsam.NoiseModelFactor = apriltag_calibrate.factor(
+            landmark,
+            measured,
+            NOISE2,
+            X(0),
+            X(1),
+            X(2),
+        )
         v = gtsam.Values()
-        v.insert(0, p0)
-        v.insert(1, offset)
-        v.insert(2, KCAL)
+        v.insert(X(0), p0)
+        v.insert(X(1), offset)
+        v.insert(X(2), KCAL)
         result = f.unwhitenedError(v)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(0, result[0], 2)

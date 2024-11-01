@@ -68,7 +68,8 @@ class SwerveDriveKinematics100:
         """
         The resulting distance is always positive.
 
-        @param moduleDeltaVector [d cos; d sin; ...] (2n x 1),                        equivalently [dx0; dy0; dx1; ...]
+        @param moduleDeltaVector [d cos; d sin; ...] (2n x 1),
+        equivalently [dx0; dy0; dx1; ...]
         """
         module_deltas: list[SwerveModuleDelta] = []
         for i in range(self.num_modules):

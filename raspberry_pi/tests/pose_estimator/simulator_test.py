@@ -4,7 +4,7 @@ import math
 import unittest
 
 import numpy as np
-from gtsam import Cal3DS2, Point2, Point3, Pose2, Pose3, Rot3
+from gtsam import Cal3DS2, Point2, Point3, Pose2, Pose3, Rot3  # type:ignore
 from wpimath.geometry import Rotation2d, Translation2d
 
 from app.pose_estimator.drive_util import DriveUtil
@@ -92,7 +92,9 @@ class SimulatorTest(unittest.TestCase):
             positions = sim.positions
             self.assertAlmostEqual(new_pose.x, sim.wpi_pose.x)
             self.assertAlmostEqual(new_pose.y, sim.wpi_pose.y)
-            self.assertAlmostEqual(new_pose.rotation().radians(), sim.wpi_pose.rotation().radians())
+            self.assertAlmostEqual(
+                new_pose.rotation().radians(), sim.wpi_pose.rotation().radians()
+            )
 
             t = i * 0.02
             x = sim.gt_x

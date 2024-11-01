@@ -4,10 +4,12 @@ import unittest
 
 import gtsam
 import numpy as np
+from gtsam import noiseModel  # type:ignore
+from gtsam.symbol_shorthand import X  # type:ignore
 
-import app.pose_estimator.accelerometer as accelerometer
+import app.pose_estimator.factors.accelerometer as accelerometer
 
-NOISE3 = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
+NOISE3 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
 
 class AccelerometerTest(unittest.TestCase):
@@ -328,16 +330,16 @@ class AccelerometerTest(unittest.TestCase):
         y_accel = 0
         dt = 0.02
 
-        f: gtsam.NonlinearFactor = accelerometer.factor(
-            x_accel, y_accel, dt, dt, NOISE3, 0, 1, 2
+        f: gtsam.NoiseModelFactor = accelerometer.factor(
+            x_accel, y_accel, dt, dt, NOISE3, X(0), X(1), X(2)
         )
         v = gtsam.Values()
         p0 = gtsam.Pose2()
         p1 = gtsam.Pose2()
         p2 = gtsam.Pose2()
-        v.insert(0, p0)
-        v.insert(1, p1)
-        v.insert(2, p2)
+        v.insert(X(0), p0)
+        v.insert(X(1), p1)
+        v.insert(X(2), p2)
         result = f.unwhitenedError(v)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(0, result[0])
@@ -349,15 +351,15 @@ class AccelerometerTest(unittest.TestCase):
         dt = 0.02
 
         f: gtsam.NonlinearFactor = accelerometer.factor(
-            x_accel, y_accel, dt, dt, NOISE3, 0, 1, 2
+            x_accel, y_accel, dt, dt, NOISE3, X(0), X(1), X(2)
         )
         v = gtsam.Values()
         p0 = gtsam.Pose2(0, 0, 0)
         p1 = gtsam.Pose2(0.01, 0, 0)
         p2 = gtsam.Pose2(0.04, 0, 0)
-        v.insert(0, p0)
-        v.insert(1, p1)
-        v.insert(2, p2)
+        v.insert(X(0), p0)
+        v.insert(X(1), p1)
+        v.insert(X(2), p2)
         result = f.unwhitenedError(v)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(50, result[0])
@@ -369,15 +371,15 @@ class AccelerometerTest(unittest.TestCase):
         dt = 0.02
 
         f: gtsam.NonlinearFactor = accelerometer.factor(
-            x_accel, y_accel, dt, dt, NOISE3, 0, 1, 2
+            x_accel, y_accel, dt, dt, NOISE3, X(0), X(1), X(2)
         )
         v = gtsam.Values()
         p0 = gtsam.Pose2(0, 0, 0)
         p1 = gtsam.Pose2(0.02, 0, 0.02)
         p2 = gtsam.Pose2(0.04, 0, 0.04)
-        v.insert(0, p0)
-        v.insert(1, p1)
-        v.insert(2, p2)
+        v.insert(X(0), p0)
+        v.insert(X(1), p1)
+        v.insert(X(2), p2)
         result = f.unwhitenedError(v)
         self.assertEqual(2, len(result))
         self.assertAlmostEqual(-0.08, result[0], 2)

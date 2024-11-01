@@ -5,7 +5,7 @@
 import unittest
 
 import gtsam
-from gtsam.symbol_shorthand import X
+from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d
 
 from app.pose_estimator.estimate import Estimate
@@ -19,7 +19,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         time_us: int = 1
         est.add_state(time_us, gtsam.Pose2())
         est.update()
-        self.assertEqual(2, est.result.size())
+        self.assertEqual(4, est.result.size())
         p0: gtsam.Pose2 = est.result.atPose2(X(0))
         self.assertAlmostEqual(0, p0.x())
         self.assertAlmostEqual(0, p0.y())

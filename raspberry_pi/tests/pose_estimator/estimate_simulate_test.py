@@ -6,13 +6,14 @@ import unittest
 
 import gtsam
 import numpy as np
-from gtsam import Cal3DS2, Point2, Point3, Pose2, Pose3, Rot3
-from gtsam.symbol_shorthand import X
+from gtsam import Cal3DS2, Point2, Point3, Pose2, Pose3, Rot3 # type:ignore
+from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d
 
 from app.pose_estimator.estimate import Estimate
 from tests.pose_estimator.simulator import Simulator
 
+actually_print = False
 
 class EstimateSimulateTest(unittest.TestCase):
     def test_simple(self) -> None:
@@ -23,13 +24,15 @@ class EstimateSimulateTest(unittest.TestCase):
         print()
         for i in range(1, 100):
             t0 = time.time_ns()
-            time_us = 20000 * i
-            est.add_state(time_us, gtsam.Pose2())
-            est.odometry(time_us, sim.positions)
+            t0_us = 20000 * (i-1)
+            t1_us = 20000 * i
+            est.add_state(t1_us, gtsam.Pose2())
+            est.odometry(t0_us, t1_us, sim.positions)
             est.update()
             t1 = time.time_ns()
             et = t1 - t0
-            # print(f"{et/1e9} {est.result.size()}")
+            if actually_print:
+                print(f"{et/1e9} {est.result.size()}")
             t = i * 0.02
             gt_x = sim.gt_x
             gt_y = sim.gt_y
@@ -37,7 +40,7 @@ class EstimateSimulateTest(unittest.TestCase):
 
             # using just odometry without noise, the error
             # is exactly zero, all the time. :-)
-            p: Pose2 = est.result.atPose2(X(time_us))
+            p: Pose2 = est.result.atPose2(X(t1_us))
             est_x = p.x()
             est_y = p.y()
             est_theta = p.theta()
