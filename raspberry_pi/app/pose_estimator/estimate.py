@@ -29,7 +29,8 @@ from app.pose_estimator.swerve_module_position import (
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
-PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
+# prior uncertainty is larger than field, i.e. "no idea"
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([16, 8, 6]))
 ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.05]))
 

@@ -28,3 +28,4 @@ class NTSimTest(unittest.TestCase):
         for _ in range(50):
             sim.step(0.02)
             print(net.blip25s)
+

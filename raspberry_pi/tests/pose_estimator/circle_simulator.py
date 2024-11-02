@@ -22,13 +22,17 @@ import math
 
 import numpy as np
 from gtsam import Cal3DS2  # includes distortion
-from gtsam import (PinholeCameraCal3DS2, Point2, Point3, Pose2,  # type:ignore
-                   Pose3, Rot3)
+from gtsam import Point2  # type:ignore
+from gtsam import Point3  # type:ignore
+from gtsam import Pose2  # type:ignore
+from gtsam import PinholeCameraCal3DS2, Pose3, Rot3
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100)
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 
 TAG_SIZE_M: float = 0.1651
 TAG_X: float = 4
@@ -91,7 +95,7 @@ class CircleSimulator:
         self.l1 = np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
         self.l2 = np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
         self.l3 = np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
-        self.landmarks = [self.l0,self.l1,self.l2,self.l3]
+        self.landmarks = [self.l0, self.l1, self.l2, self.l3]
         self.camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
         self.calib = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
 

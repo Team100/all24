@@ -2,10 +2,10 @@
 
 # pylint: disable=R0902,R0903,W0212,W2301
 
-
 import dataclasses
 from typing import Protocol
 
+import numpy as np
 from wpimath.geometry import Rotation3d, Transform3d
 from wpiutil import wpistruct
 
@@ -38,6 +38,21 @@ class Blip25:
     ury: float
     ulx: float  # upper left
     uly: float
+
+    def measurement(self) -> np.ndarray:
+        """Concatenated corners, for GTSAM."""
+        return np.array(
+            [
+                self.llx,
+                self.lly,
+                self.lrx,
+                self.lry,
+                self.urx,
+                self.ury,
+                self.ulx,
+                self.uly,
+            ]
+        )
 
 
 class DoubleSender(Protocol):

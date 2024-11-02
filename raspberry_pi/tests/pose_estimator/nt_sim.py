@@ -14,6 +14,8 @@ class NTSim:
         self.sim = CircleSimulator()
 
     def step(self, dt_s: float) -> None:
+        """Step the simulation dt_s and publish the
+        measurements to the network."""
         self.sim.step(dt_s)
         p = self.sim.gt_pixels
         b = Blip25(
