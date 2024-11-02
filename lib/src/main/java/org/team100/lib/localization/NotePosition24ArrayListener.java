@@ -64,14 +64,14 @@ public class NotePosition24ArrayListener {
             NetworkTableValue v = ve.value;
             String name = ve.getTopic().getName();
             String[] fields = name.split("/");
-            if (fields.length != 3) {
+            if (fields.length != 4) {
                 return;
             }
             if (fields[2].equals("fps")) {
                 // FPS is not used by the robot
             } else if (fields[2].equals("latency")) {
                 // latency is not used by the robot
-            } else if (fields[2].equals("Rotation3d")) {
+            } else if (fields[3].equals("Rotation3d")) {
                 // decode the way StructArrayEntryImpl does
                 byte[] b = v.getRaw();
                 if (b.length == 0) {

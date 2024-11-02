@@ -259,6 +259,8 @@ class RealCamera(Camera):
             controls={
                 "ExposureTime": RealCamera.__get_exposure_time(identity),
                 "AnalogueGain": 8,
+                "AeEnable": True,
+                "AwbEnable": False,
                 # limit auto: go as fast as possible but no slower than 30fps
                 # without a duration limit, we slow down in the dark, which is fine
                 # "FrameDurationLimits": (5000, 33333),  # 41 fps
@@ -276,7 +278,7 @@ class RealCamera(Camera):
             case Identity.GLOBAL_RIGHT | Identity.GLOBAL_LEFT:
                 return 300  # from b5879a6, works with GS cameras
             case _:
-                return 3000  # the old value, works with v2 cameras
+                return 1000  # the old value, works with v2 cameras
 
     @staticmethod
     def __mtx_from_model(model: Model) -> Mat:
