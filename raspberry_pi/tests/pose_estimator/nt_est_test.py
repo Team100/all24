@@ -15,7 +15,6 @@ class NTEstTest(unittest.TestCase):
     def test_real_nt_est(self) -> None:
         net = RealNetwork(Identity.UNKNOWN)
         est = NTEstimate(net)
-        
 
     def test_fake_nt_est(self) -> None:
         net = FakeNetwork()

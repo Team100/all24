@@ -5,10 +5,14 @@ smoother, and publish the results on Network Tables."""
 
 # TODO: remove gtsam
 import gtsam
+import numpy as np
+from gtsam import noiseModel  # type:ignore
 from wpimath.geometry import Pose2d
 
 from app.network.network_protocol import Network
 from app.pose_estimator.estimate import Estimate
+
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
 
 class NTEstimate:
@@ -19,7 +23,10 @@ class NTEstimate:
         # current estimate, used for initial value for next time
         # TODO: remove gtsam types
         self.state = gtsam.Pose2()
-        self.est.init(Pose2d())
+        self.est.init()
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        self.est.add_state(0, prior_mean)
+        self.est.prior(0, prior_mean, PRIOR_NOISE)
 
     def step(self) -> None:
         """Collect any pending measurements from
@@ -30,7 +37,3 @@ class NTEstimate:
             blips = frame[1]
             for blip in blips:
                 id = blip.id
-                
-
-
-

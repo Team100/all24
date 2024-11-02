@@ -28,16 +28,17 @@ from gtsam import Pose2  # type:ignore
 from gtsam import PinholeCameraCal3DS2, Pose3, Rot3
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
+from app.pose_estimator.field_map import FieldMap
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
 )
 
-TAG_SIZE_M: float = 0.1651
-TAG_X: float = 4
-TAG_Y: float = 0
-TAG_Z: float = 1
+# TAG_SIZE_M: float = 0.1651
+# TAG_X: float = 4
+# TAG_Y: float = 0
+# TAG_Z: float = 1
 PATH_CENTER_X_M = 1
 PATH_CENTER_Y_M = 0
 PATH_RADIUS_M = 1
@@ -52,7 +53,8 @@ CAM_COORD = Pose3(
 
 
 class CircleSimulator:
-    def __init__(self) -> None:
+    def __init__(self, field_map: FieldMap) -> None:
+        self.field_map = field_map
         # TODO: actual wheelbase etc
         self.kinematics = SwerveDriveKinematics100(
             [
@@ -91,10 +93,11 @@ class CircleSimulator:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
         # constant landmark points
-        self.l0 = np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
-        self.l1 = np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
-        self.l2 = np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
-        self.l3 = np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
+        tag = self.field_map.get(0)
+        self.l0 = tag[0] # np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
+        self.l1 = tag[1] #np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
+        self.l2 = tag[2] #np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
+        self.l3 = tag[3] #np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
         self.landmarks = [self.l0, self.l1, self.l2, self.l3]
         self.camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
         self.calib = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
