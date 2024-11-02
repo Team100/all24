@@ -84,6 +84,11 @@ public class DriverControlProxy implements DriverControl {
     }
 
     @Override
+    public boolean shoot() {
+        return m_driverControl.shoot();
+    }
+
+    @Override
     public Velocity velocity() {
         return m_driverControl.velocity();
     }

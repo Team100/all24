@@ -116,6 +116,10 @@ public class DriverXboxControl implements DriverControl {
         }
     }
 
+    public boolean shoot() {
+        return m_controller.getRightBumper();
+    }
+
     /**
      * This used to be public and affect everything; now it just affects the
      * velocity() output above.
