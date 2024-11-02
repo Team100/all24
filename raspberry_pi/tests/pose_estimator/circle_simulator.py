@@ -91,8 +91,9 @@ class CircleSimulator:
         self.l1 = np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
         self.l2 = np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
         self.l3 = np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
+        self.landmarks = [self.l0,self.l1,self.l2,self.l3]
         self.camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
-        self.CALIB = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
+        self.calib = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
 
         # initialize
         self.step(0)
@@ -125,28 +126,28 @@ class CircleSimulator:
             self.l0,
             robot_pose,
             self.camera_offset,
-            self.CALIB,
+            self.calib,
         )
         # lower right
         p1 = self.px(
             self.l1,
             robot_pose,
             self.camera_offset,
-            self.CALIB,
+            self.calib,
         )
         # upper right
         p2 = self.px(
             self.l2,
             robot_pose,
             self.camera_offset,
-            self.CALIB,
+            self.calib,
         )
         # upper left
         p3 = self.px(
             self.l3,
             robot_pose,
             self.camera_offset,
-            self.CALIB,
+            self.calib,
         )
         self.gt_pixels = [p0, p1, p2, p3]
 

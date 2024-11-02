@@ -16,13 +16,16 @@ from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 import app.pose_estimator.factors.accelerometer as accelerometer
 import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
 import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
+import app.pose_estimator.factors.apriltag_smooth_batch as apriltag_smooth_batch
 import app.pose_estimator.factors.gyro as gyro
 import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100)
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -79,10 +82,6 @@ class Estimate:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
-
-        # to keep track of theta increments
-        self.theta: float = 0
-        # TODO: maybe keeping these states here is a bad idea
 
     def init(self, initial_pose: Pose2d) -> None:
         """Add a state at zero"""
@@ -148,6 +147,36 @@ class Estimate:
 
         self.positions = positions
 
+    def odometry_custom(
+        self, t0_us: int, t1_us: int, positions: list[SwerveModulePosition100]
+    ) -> None:
+        """Add an odometry measurement.  Remember to call add_state so that
+        the odometry factor has something to refer to.
+
+        t0_us, t1_us: network tables timestamp in integer microseconds.
+        TODO: something more clever with timestamps
+        """
+        # odometry is not guaranteed to arrive in order, but for now, it is.
+        # TODO: out-of-order odometry
+        # each odometry update maps exactly to a "between" factor
+        # remember a "twist" is a robot-relative concept
+        deltas: list[SwerveModuleDelta] = DriveUtil.module_position_delta(
+            self.positions, positions
+        )
+        # this is the tangent-space (twist) measurement
+        measurement: Twist2d = self.kinematics.to_twist_2d(deltas)
+
+        self.new_factors.push_back(
+            odometry.factorCustom(
+                measurement,
+                ODOMETRY_NOISE,
+                X(t0_us),
+                X(t1_us),
+            )
+        )
+
+        self.positions = positions
+
     def accelerometer(
         self, t0_us: int, t1_us: int, t2_us: int, x: float, y: float
     ) -> None:
@@ -170,9 +199,7 @@ class Estimate:
             )
         )
 
-    def gyro(self, t0_us: int, t1_us: int, theta: float) -> None:
-        dtheta = theta - self.theta
-
+    def gyro(self, t0_us: int, t1_us: int, dtheta: float) -> None:
         self.new_factors.push_back(
             gyro.factor(
                 np.array([dtheta]),
@@ -181,7 +208,6 @@ class Estimate:
                 X(t1_us),
             )
         )
-        self.theta = theta
 
     def apriltag_for_calibration(
         self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
@@ -206,6 +232,27 @@ class Estimate:
             )
         )
 
+    def apriltag_for_smoothing_batch(
+        self,
+        landmarks: list[np.ndarray],
+        measured: np.ndarray,
+        t0_us: int,
+        camera_offset: gtsam.Pose3,
+        calib: gtsam.Cal3DS2,
+    ) -> None:
+        """landmarks: list of 3d points
+        measured: concatenated px measurements"""
+        noise = noiseModel.Diagonal.Sigmas(
+            np.concatenate(
+                [[1, 1] for _ in landmarks])
+            )
+        self.new_factors.push_back(
+            apriltag_smooth_batch.factor(
+                landmarks, measured, camera_offset, calib, noise, X(t0_us)
+            )
+        )
+
+
     def update(self) -> None:
         """Run the solver"""
         self.isam.update(self.new_factors, self.new_values, self.new_timestamps)
@@ -224,7 +271,7 @@ class Estimate:
         # like a second or two?
         # a long window is VERY SLOW, so try very short windows
         # just long enough to catch a single vision update.
-        lag_s = 1
+        lag_s = 0.1
         lag_us = lag_s * 1e6
         lm_params = gtsam.LevenbergMarquardtParams()
         return gtsam.BatchFixedLagSmoother(lag_us, lm_params)

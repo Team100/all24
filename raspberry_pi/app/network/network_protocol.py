@@ -1,6 +1,6 @@
 """ Interface for Network Tables-like things. """
 
-# pylint: disable=R0902,R0903,W0212
+# pylint: disable=R0902,R0903,W0212,W2301
 
 
 import dataclasses
@@ -22,10 +22,22 @@ class Blip24:
 @wpistruct.make_wpistruct  # type:ignore
 @dataclasses.dataclass
 class Blip25:
-    """AprilTag target for 2025, includes pixel coordinates, for GTSAM."""
+    """AprilTag target for 2025, includes pixel coordinates.
+    the struct concept only supports fixed-length records
+    so i can't use an array here. it's ok because a tag only
+    ever has exactly 4 corners; if one is occluded then the
+    entire tag is unseen.
+    """
 
     id: int
-    pose: Transform3d
+    llx: float  # lower left
+    lly: float
+    lrx: float  # lower right
+    lry: float
+    urx: float  # upper right
+    ury: float
+    ulx: float  # upper left
+    uly: float
 
 
 class DoubleSender(Protocol):
@@ -40,8 +52,20 @@ class NoteSender(Protocol):
     def send(self, val: list[Rotation3d], delay_us: int) -> None: ...
 
 
+class Blip25Sender(Protocol):
+    def send(self, val: list[Blip25], delay_us: int) -> None: ...
+
+
+class Blip25Receiver(Protocol):
+    def get(self) -> list[tuple[int, list[Blip25]]]:
+        """Returns the list of tuples (timetamp, list[blip]) seen in a single frame"""
+        ...
+
+
 class Network(Protocol):
     def get_double_sender(self, name: str) -> DoubleSender: ...
     def get_blip_sender(self, name: str) -> BlipSender: ...
     def get_note_sender(self, name: str) -> NoteSender: ...
+    def get_blip25_sender(self, name: str) -> Blip25Sender: ...
+    def get_blip25_receiver(self, name: str) -> Blip25Receiver: ...
     def flush(self) -> None: ...
