@@ -68,4 +68,7 @@ Once you have your code compiling locally there is one more step before you star
     1. ![](readme_img/usb_2.jpg)
 1. Click the "W" button (or go to the search) in VSCode and find `WPILIB: Deploy Robot Code`
     1. ![deploy](readme_img/wpilib_deploy.png)
-1. Select `swerve100` and then watch the build happen in the terminal.
+1. Select `swerve100` and then watch the build happen in the terminal. You should get `BUILD SUCCESSFUL` and the RioLog should pop up on the right after the build. 
+    1. ![rio_log](readme_img/rio_log.png)
+
+You are (hopefully!) getting a bunch of errors because we just deployed "production" code to a test RoboRIO, so it can't find motors, devices, etc. That's good! Move forward to the next step, [controlling your first motor](README_2_MOTOR.md)
