@@ -3,21 +3,17 @@
 # pylint: disable=R0902,R0903,W0212
 
 # github workflow crashes in ntcore, bleah
+from typing import cast
+
 import ntcore
 from typing_extensions import override
 from wpimath.geometry import Rotation3d
+from wpiutil import wpistruct
 
 from app.config.identity import Identity
-from app.network.network_protocol import (
-    Blip24,
-    Blip25,
-    Blip25Receiver,
-    Blip25Sender,
-    BlipSender,
-    DoubleSender,
-    Network,
-    NoteSender,
-)
+from app.network.network_protocol import (Blip24, Blip25, Blip25Receiver,
+                                          Blip25Sender, BlipSender,
+                                          DoubleSender, Network, NoteSender)
 
 
 class RealDoubleSender(DoubleSender):
@@ -58,17 +54,39 @@ class RealBlip25Sender(Blip25Sender):
 
 
 class RealBlip25Receiver(Blip25Receiver):
-    def __init__(self, sub: ntcore.StructArraySubscriber) -> None:
-        self.sub = sub
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        print(name)
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(inst, [name])
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([""], ntcore.EventFlags.kValueAll)
 
     @override
-    def get(self) -> list[tuple[int, list[Blip25]]]:
-        recv = self.sub.readQueue()
-        result: list[tuple[int, list[Blip25]]] = []
-        for item in recv:
-            server_time_us = item.serverTime
-            value_list = item.value
-            result.append((server_time_us, value_list))
+    def get(self) -> list[tuple[int, int, Blip25]]:
+        """(timestamp, tag id, blip)"""
+        result: list[tuple[int, int, Blip25]] = []
+        print("get")
+        # see NotePosition24ArrayListener for example
+        for e in self.poller.readQueue():
+            print("in queue")
+            ve = cast(ntcore.ValueEventData, e.data)
+            v = ve.value
+            name = ve.topic.getName()
+            # TODO: redo the key scheme
+            tag_id = int(name.split("/")[1])
+            print(name)
+            server_time_us = v.server_time()
+            b = v.getRaw()
+            # value = cast(Blip25, v.value)
+            value = wpistruct.unpack(Blip25, b)
+            print(value)
+            result.append((server_time_us, tag_id, value))
         return result
 
 
@@ -113,9 +131,7 @@ class RealNetwork(Network):
 
     @override
     def get_blip25_receiver(self, name: str) -> Blip25Receiver:
-        return RealBlip25Receiver(
-            self._inst.getStructArrayTopic(name, Blip25).subscribe([])
-        )
+        return RealBlip25Receiver(name, self._inst)
 
     @override
     def flush(self) -> None:

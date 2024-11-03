@@ -11,7 +11,7 @@ import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 from gtsam.symbol_shorthand import C, K, X  # type:ignore
-from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
+from wpimath.geometry import Rotation2d, Translation2d, Twist2d
 
 import app.pose_estimator.factors.accelerometer as accelerometer
 import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
@@ -22,14 +22,13 @@ import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (
-    OptionalRotation2d,
-    SwerveModulePosition100,
-)
+from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
+                                                       SwerveModulePosition100)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
-PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
+# prior uncertainty is larger than field, i.e. "no idea"
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([16, 8, 6]))
 ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.05]))
 
@@ -83,13 +82,8 @@ class Estimate:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
 
-    def init(self, initial_pose: Pose2d) -> None:
-        """Add a state at zero"""
-        prior_mean = gtsam.Pose2(
-            initial_pose.X(), initial_pose.Y(), initial_pose.rotation().radians()
-        )
-        self.add_state(0, prior_mean)
-        self.prior(0, prior_mean, PRIOR_NOISE)
+    def init(self) -> None:
+        """No longer adds a state at zero, if you want that, do it."""
         # there is just one camera factor
         self.new_values.insert(K(0), CAL)
         self.new_timestamps[K(0)] = 0
@@ -241,7 +235,8 @@ class Estimate:
         calib: gtsam.Cal3DS2,
     ) -> None:
         """landmarks: list of 3d points
-        measured: concatenated px measurements"""
+        measured: concatenated px measurements
+        TODO: flatten landmarks"""
         noise = noiseModel.Diagonal.Sigmas(
             np.concatenate(
                 [[1, 1] for _ in landmarks])

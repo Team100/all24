@@ -5,16 +5,26 @@
 import unittest
 
 import gtsam
+import numpy as np
+
+from gtsam import noiseModel  # type:ignore
+
 from gtsam.symbol_shorthand import X  # type:ignore
-from wpimath.geometry import Pose2d
 
 from app.pose_estimator.estimate import Estimate
+
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
 
 class EstimateAccelerometerTest(unittest.TestCase):
     def test_accelerometer_0(self) -> None:
         est = Estimate()
-        est.init(Pose2d(0, 0, 0))
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         est.add_state(20000, gtsam.Pose2(0.02, 0, 0))
         est.add_state(40000, gtsam.Pose2(0.04, 0, 0))
         est.accelerometer(0, 20000, 40000, 0, 0)
@@ -36,7 +46,12 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
     def test_accelerometer_1(self) -> None:
         est = Estimate()
-        est.init(Pose2d(0, 0, 0))
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         est.add_state(20000, gtsam.Pose2(0.02, 0, 0))
         est.add_state(40000, gtsam.Pose2(0.04, 0, 0))
         # non-zero accel

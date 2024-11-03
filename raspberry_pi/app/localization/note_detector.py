@@ -66,7 +66,6 @@ class NoteDetector(Interpreter):
             floodfill = img_range.copy()
             mask = np.zeros((self.height + 2, self.width + 2), np.uint8)
             cv2.floodFill(floodfill, mask, [0, 0], [255])
-            
 
             floodfill_inv = cv2.bitwise_not(floodfill)
             img_floodfill = cv2.bitwise_or(img_range, floodfill_inv)
@@ -117,5 +116,5 @@ class NoteDetector(Interpreter):
             fps = req.fps()
             self.display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
             self.display.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
-            #self.display.put(img_range)
+            # self.display.put(img_range)
             self.display.put(img_bgr)

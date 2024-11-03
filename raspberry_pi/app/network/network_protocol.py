@@ -2,10 +2,10 @@
 
 # pylint: disable=R0902,R0903,W0212,W2301
 
-
 import dataclasses
 from typing import Protocol
 
+import numpy as np
 from wpimath.geometry import Rotation3d, Transform3d
 from wpiutil import wpistruct
 
@@ -27,9 +27,9 @@ class Blip25:
     so i can't use an array here. it's ok because a tag only
     ever has exactly 4 corners; if one is occluded then the
     entire tag is unseen.
+    There's no tag id here because tag id is in the NT key.
     """
 
-    id: int
     llx: float  # lower left
     lly: float
     lrx: float  # lower right
@@ -38,6 +38,21 @@ class Blip25:
     ury: float
     ulx: float  # upper left
     uly: float
+
+    def measurement(self) -> np.ndarray:
+        """Concatenated corners, for GTSAM."""
+        return np.array(
+            [
+                self.llx,
+                self.lly,
+                self.lrx,
+                self.lry,
+                self.urx,
+                self.ury,
+                self.ulx,
+                self.uly,
+            ]
+        )
 
 
 class DoubleSender(Protocol):
@@ -57,7 +72,7 @@ class Blip25Sender(Protocol):
 
 
 class Blip25Receiver(Protocol):
-    def get(self) -> list[tuple[int, list[Blip25]]]:
+    def get(self) -> list[tuple[int, int, Blip25]]:
         """Returns the list of tuples (timetamp, list[blip]) seen in a single frame"""
         ...
 
