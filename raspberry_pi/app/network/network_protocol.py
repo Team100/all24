@@ -30,6 +30,7 @@ class Blip25:
     There's no tag id here because tag id is in the NT key.
     """
 
+    tag_id: int
     llx: float  # lower left
     lly: float
     lrx: float  # lower right
@@ -72,7 +73,7 @@ class Blip25Sender(Protocol):
 
 
 class Blip25Receiver(Protocol):
-    def get(self) -> list[tuple[int, int, Blip25]]:
+    def get(self) -> list[tuple[int, list[Blip25]]]:
         """Returns the list of tuples (timetamp, list[blip]) seen in a single frame"""
         ...
 

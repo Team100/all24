@@ -3,6 +3,8 @@ smoother, and publish the results on Network Tables."""
 
 # pylint: disable=C0301,E0611,E1101,R0903,R0914
 
+import math
+
 # TODO: remove gtsam
 import gtsam
 import numpy as np
@@ -39,14 +41,22 @@ class NTEstimate:
         # TODO: read the camera identity from the blip
         cam = CameraConfig(Identity.UNKNOWN)
         sights = self.blip_receiver.get()
-        print("sights ", sights)
+        # print("NTEstimate.step() sights ", sights)
         for sight in sights:
+            # timestamp in us from the epoch (i.e. a big number)
             timestamp_us = sight[0]
-            tag_id = sight[1]
-            blip = sight[2]
-            pixels = blip.measurement()
-            corners = self.field_map.get(tag_id)
-            self.est.apriltag_for_smoothing_batch(
-                corners, pixels, timestamp_us, cam.camera_offset, cam.calib
-            )
+            # print("NTEstimate.step() timestamp ", timestamp_us)
+            # discretize at 50 Hz
+            time_slice = math.ceil(timestamp_us/20000) * 20000
+            # print("NTEstimate.step() time slice ", time_slice)
+            blip_list = sight[1]
+            for blip in blip_list:
+                pixels = blip.measurement()
+                corners = self.field_map.get(blip.tag_id)
+                self.est.add_state(time_slice, self.state)
+                self.est.apriltag_for_smoothing_batch(
+                    corners, pixels, time_slice, cam.camera_offset, cam.calib
+                )
+        self.est.update()
+        print("NTEstimate.step() result ", self.est.result)
 

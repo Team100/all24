@@ -20,21 +20,24 @@ class NTEstTest(unittest.TestCase):
         print()
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
-        pub = inst.getStructTopic("foo/1", Blip25).publish()
+        pub = inst.getStructArrayTopic("foo/1", Blip25).publish(
+            ntcore.PubSubOptions(keepDuplicates=True)
+        )
         field_map = FieldMap()
         net = RealNetwork(Identity.UNKNOWN)
         est = NTEstimate(field_map, net)
         for i in range(10):
-            time.sleep(1)
-            print("set ", i)
+            time.sleep(0.02)
+            # print("NTEstTest.test_real_nt_est() i ", i)
+            time_us = ntcore._now()
+            # print("NTEstTest.test_real_nt_est() time_us ", time_us)
             pub.set(
-                Blip25(190, 210, 210, 210, 210, 190, 190, 190),
-                ntcore._now(),
+                [
+                    Blip25(0, 190, 210, 210, 210, 210, 190, 190, 190),
+                    Blip25(0, 190, 210, 210, 210, 210, 190, 190, 190),
+                ],
+                time_us,
             )
-            # t = inst.getTopics()
-            # print("0 ", t[0].getName())
-            # print("1 ", t[1].getName())
-            # print(inst.getStructArrayTopic("foo", Blip25).subscribe([]).get())
             est.step()
 
     def test_fake_nt_est(self) -> None:

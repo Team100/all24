@@ -56,10 +56,12 @@ class StructArrayTest(unittest.TestCase):
         self.assertEqual(list, type(item.value))
         self.assertEqual(Datum, type(item.value[0]))
         self.assertEqual(2, len(item.value))
-        self.assertEqual(1, item.value[0].field0)
-        self.assertEqual(2, item.value[0].field1)
-        self.assertEqual(3, item.value[1].field0)
-        self.assertEqual(4, item.value[1].field1)
+        value: Datum = item.value[0]
+        self.assertEqual(1, value.field0)
+        self.assertEqual(2, value.field1)
+        value: Datum = item.value[1]
+        self.assertEqual(3, value.field0)
+        self.assertEqual(4, value.field1)
 
     def test_struct_listener(self) -> None:
         """A simple struct pub/listener case."""
@@ -90,10 +92,12 @@ class StructArrayTest(unittest.TestCase):
         queue = poller.readQueue()
         self.assertEqual(1, len(queue))
         event = queue.pop()
+        # item =  event.data
         item = cast(ntcore.ValueEventData, event.data)
         self.assertEqual(ntcore.Value, type(item.value))
         item_size = wpistruct.getSize(Datum)
         self.assertEqual(8, item_size)
+        # raw_array: bytes =  item.value.getRaw()
         raw_array: bytes = cast(bytes, item.value.getRaw())
         self.assertEqual(16, len(raw_array))
         # step through the byte array one Datum at a time.
@@ -101,9 +105,9 @@ class StructArrayTest(unittest.TestCase):
             raw_array[i : i + item_size] for i in range(0, len(raw_array), item_size)
         ]
         self.assertEqual(2, len(raw_item_array))
-        value = wpistruct.unpack(Datum, raw_item_array[0])
+        value: Datum = wpistruct.unpack(Datum, raw_item_array[0])
         self.assertEqual(1, value.field0)
         self.assertEqual(2, value.field1)
-        value = wpistruct.unpack(Datum, raw_item_array[1])
+        value: Datum = wpistruct.unpack(Datum, raw_item_array[1])
         self.assertEqual(3, value.field0)
         self.assertEqual(4, value.field1)

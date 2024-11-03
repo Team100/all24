@@ -60,7 +60,7 @@ class Estimate:
         initial module positions are at their origins.
         TODO: some other initial positions?"""
         self.isam: gtsam.FixedLagSmoother = self.make_smoother()
-        self.result: gtsam.Values
+        self.result = gtsam.Values()
         # between updates we accumulate inputs here
         self.new_factors = gtsam.NonlinearFactorGraph()
         self.new_values = gtsam.Values()
@@ -95,6 +95,12 @@ class Estimate:
 
     def add_state(self, time_us: int, initial_value: gtsam.Pose2) -> None:
         """Add a new robot state (pose) to the estimator."""
+        if self.result.exists(X(time_us)):
+            # it's already in the model
+            return
+        if self.new_values.exists(X(time_us)):
+            # don't need to add it to the new values
+            return
         # if you're using the batch smoother, the initial value almost doesn't matter:
         # TODO: use the previous pose as the initial value
         self.new_values.insert(X(time_us), initial_value)
