@@ -44,5 +44,17 @@ class NTEstTest(unittest.TestCase):
         field_map = FieldMap()
         net = FakeNetwork()
         est = NTEstimate(field_map, net)
-        for _ in range(50):
+        start_time_us = ntcore._now()
+        for _ in range(10):
+            time.sleep(0.02)
+            time_us = ntcore._now() - start_time_us
+            net.received_blip25s["foo"] = [
+                (
+                    time_us,
+                    [
+                        Blip25(0, 190, 210, 210, 210, 210, 190, 190, 190),
+                        Blip25(0, 190, 210, 210, 210, 210, 190, 190, 190),
+                    ],
+                )
+            ]
             est.step()

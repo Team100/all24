@@ -51,12 +51,13 @@ class FakeBlip25Sender(BlipSender):
 
 
 class FakeBlip25Receiver(Blip25Receiver):
-    def __init__(self) -> None:
-        self.blips: list[tuple[int, list[Blip25]]] = []
+    def __init__(self, name: str, net: 'FakeNetwork') -> None:
+        self.name = name
+        self.net = net
 
     @override
     def get(self) -> list[tuple[int, list[Blip25]]]:
-        return self.blips
+        return self.net.received_blip25s[self.name]
 
 
 class FakeNetwork(Network):
@@ -64,6 +65,8 @@ class FakeNetwork(Network):
         self.doubles: dict[str, list[float]] = {}
         self.blips: dict[str, list[Blip24]] = {}
         self.blip25s: dict[str, list[Blip25]] = {}
+        # key: camera, list of updates, each update is tuple (timestamp, list of blips)
+        self.received_blip25s: dict[str, list[tuple[int, list[Blip25]]]] = {}
         self.notes: dict[str, list[Rotation3d]] = {}
 
     @override
@@ -92,7 +95,9 @@ class FakeNetwork(Network):
 
     @override
     def get_blip25_receiver(self, name: str) -> Blip25Receiver:
-        return FakeBlip25Receiver()
+        if name not in self.received_blip25s:
+            self.received_blip25s[name] = []
+        return FakeBlip25Receiver(name, self)
 
     @override
     def flush(self) -> None:
