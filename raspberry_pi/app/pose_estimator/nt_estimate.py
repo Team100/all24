@@ -26,6 +26,7 @@ class NTEstimate:
         self.field_map = field_map
         self.net = net
         self.blip_receiver = net.get_blip25_receiver("foo")
+        self.pose_sender = net.get_pose_sender("pose")
         self.est = Estimate()
         # current estimate, used for initial value for next time
         # TODO: remove gtsam types
@@ -59,4 +60,6 @@ class NTEstimate:
                 )
         self.est.update()
         print("NTEstimate.step() result ", self.est.result)
+        # pose = self.est.result.atPose2()
+        # self.pose_sender.send()
 

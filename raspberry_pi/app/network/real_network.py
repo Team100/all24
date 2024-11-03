@@ -7,7 +7,7 @@ from typing import cast
 
 import ntcore
 from typing_extensions import override
-from wpimath.geometry import Rotation3d
+from wpimath.geometry import Rotation3d, Pose2d
 from wpiutil import wpistruct
 
 from app.config.identity import Identity
@@ -20,6 +20,7 @@ from app.network.network_protocol import (
     DoubleSender,
     Network,
     NoteSender,
+    PoseSender,
 )
 
 
@@ -77,13 +78,12 @@ class RealBlip25Receiver(Blip25Receiver):
         # self.poller.addListener([""], ntcore.EventFlags.kValueAll)
         self.start_time_us = ntcore._now()
         # print("RealBlip25Receiver.__init__() start_time_us ", self.start_time_us)
-        
 
     @override
     def get(self) -> list[tuple[int, list[Blip25]]]:
         """(timestamp_us, tag id, blip)
         The timestamp is referenced to the "now" value at
-        construction, so that the number isn't too large. 
+        construction, so that the number isn't too large.
         """
         result: list[tuple[int, list[Blip25]]] = []
         # print("RealBlip25Receiver.get()")
@@ -118,6 +118,15 @@ class RealBlip25Receiver(Blip25Receiver):
                 frame.append(blip)
             result.append((time_us, frame))
         return result
+
+
+class RealPoseSender(PoseSender):
+    def __init__(self, pub: ntcore.StructArrayPublisher) -> None:
+        self.pub = pub
+
+    @override
+    def send(self, val: list[Pose2d], delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
 
 
 class RealNetwork(Network):
@@ -162,6 +171,10 @@ class RealNetwork(Network):
     @override
     def get_blip25_receiver(self, name: str) -> Blip25Receiver:
         return RealBlip25Receiver(name, self._inst)
+
+    @override
+    def get_pose_sender(self, name: str) -> PoseSender:
+        return RealPoseSender(self._inst.getStructArrayTopic(name, Pose2d).publish())
 
     @override
     def flush(self) -> None:

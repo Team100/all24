@@ -60,7 +60,7 @@ class Estimate:
         initial module positions are at their origins.
         TODO: some other initial positions?"""
         self.isam: gtsam.FixedLagSmoother = self.make_smoother()
-        self.result = gtsam.Values()
+        self.result: gtsam.Values = gtsam.Values()
         # between updates we accumulate inputs here
         self.new_factors = gtsam.NonlinearFactorGraph()
         self.new_values = gtsam.Values()
@@ -257,7 +257,15 @@ class Estimate:
     def update(self) -> None:
         """Run the solver"""
         self.isam.update(self.new_factors, self.new_values, self.new_timestamps)
-        self.result = self.isam.calculateEstimate()  # type: ignore
+        self.result: gtsam.Values = self.isam.calculateEstimate()  # type: ignore
+
+        print("TIMESTAMPS")
+        print(self.isam.timestamps())
+        k = max(self.isam.timestamps().keys())
+        ts = max(self.isam.timestamps().values())
+        print(self.result.atPose2(k))
+        # print(ts)
+
         # reset the accumulators
         self.new_factors.resize(0)
         self.new_values.clear()
