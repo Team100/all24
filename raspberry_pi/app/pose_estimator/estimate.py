@@ -235,7 +235,8 @@ class Estimate:
         calib: gtsam.Cal3DS2,
     ) -> None:
         """landmarks: list of 3d points
-        measured: concatenated px measurements"""
+        measured: concatenated px measurements
+        TODO: flatten landmarks"""
         noise = noiseModel.Diagonal.Sigmas(
             np.concatenate(
                 [[1, 1] for _ in landmarks])

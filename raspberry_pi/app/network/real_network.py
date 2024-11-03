@@ -3,6 +3,7 @@
 # pylint: disable=R0902,R0903,W0212
 
 # github workflow crashes in ntcore, bleah
+from typing import cast
 import ntcore
 from typing_extensions import override
 from wpimath.geometry import Rotation3d
@@ -19,6 +20,7 @@ from app.network.network_protocol import (
     NoteSender,
 )
 
+from wpiutil import wpistruct
 
 class RealDoubleSender(DoubleSender):
     def __init__(self, pub: ntcore.DoublePublisher) -> None:
@@ -58,17 +60,36 @@ class RealBlip25Sender(Blip25Sender):
 
 
 class RealBlip25Receiver(Blip25Receiver):
-    def __init__(self, sub: ntcore.StructArraySubscriber) -> None:
-        self.sub = sub
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        print(name)
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(inst, [name])
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([""], ntcore.EventFlags.kValueAll)
 
     @override
     def get(self) -> list[tuple[int, list[Blip25]]]:
-        recv = self.sub.readQueue()
         result: list[tuple[int, list[Blip25]]] = []
-        for item in recv:
-            server_time_us = item.serverTime
-            value_list = item.value
-            result.append((server_time_us, value_list))
+        print("get")
+        # see NotePosition24ArrayListener for example
+        for e in self.poller.readQueue():
+            print("in queue")
+            ve = cast(ntcore.ValueEventData, e.data)
+            v = ve.value
+            name = ve.topic.getName()
+            print(name)
+            server_time_us = v.server_time()
+            value_list = v.getRaw()
+            print("value_list ", value_list)
+            obj = wpistruct.unpack(Blip25, value_list)
+            print(obj)
+            result.append((server_time_us, obj))
         return result
 
 
@@ -113,9 +134,7 @@ class RealNetwork(Network):
 
     @override
     def get_blip25_receiver(self, name: str) -> Blip25Receiver:
-        return RealBlip25Receiver(
-            self._inst.getStructArrayTopic(name, Blip25).subscribe([])
-        )
+        return RealBlip25Receiver(name, self._inst)
 
     @override
     def flush(self) -> None:

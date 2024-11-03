@@ -18,6 +18,7 @@ class FieldMap:
         self.tags[1] = FieldMap.make_tag(2, 2, 1, math.pi / 2)
 
     def get(self, tag_id: int) -> list[np.ndarray]:
+        """list of corners"""
         return self.tags[tag_id]
 
     @staticmethod

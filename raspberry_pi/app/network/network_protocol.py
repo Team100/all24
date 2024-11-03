@@ -29,7 +29,7 @@ class Blip25:
     entire tag is unseen.
     """
 
-    id: int
+    tag_id: int
     llx: float  # lower left
     lly: float
     lrx: float  # lower right

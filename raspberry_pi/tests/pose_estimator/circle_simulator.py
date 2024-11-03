@@ -94,10 +94,10 @@ class CircleSimulator:
         ]
         # constant landmark points
         tag = self.field_map.get(0)
-        self.l0 = tag[0] # np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
-        self.l1 = tag[1] #np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z - (TAG_SIZE_M / 2)])
-        self.l2 = tag[2] #np.array([TAG_X, TAG_Y - (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
-        self.l3 = tag[3] #np.array([TAG_X, TAG_Y + (TAG_SIZE_M / 2), TAG_Z + (TAG_SIZE_M / 2)])
+        self.l0 = tag[0]
+        self.l1 = tag[1]
+        self.l2 = tag[2]
+        self.l3 = tag[3]
         self.landmarks = [self.l0, self.l1, self.l2, self.l3]
         self.camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
         self.calib = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)

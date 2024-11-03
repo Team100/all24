@@ -9,14 +9,19 @@ import numpy as np
 from gtsam import noiseModel  # type:ignore
 from wpimath.geometry import Pose2d
 
+from app.camera.camera_protocol import Camera
+from app.config.camera_config import CameraConfig
+from app.config.identity import Identity
 from app.network.network_protocol import Network
 from app.pose_estimator.estimate import Estimate
+from app.pose_estimator.field_map import FieldMap
 
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
 
 class NTEstimate:
-    def __init__(self, net: Network) -> None:
+    def __init__(self, field_map: FieldMap, net: Network) -> None:
+        self.field_map = field_map
         self.net = net
         self.blip_receiver = net.get_blip25_receiver("foo")
         self.est = Estimate()
@@ -31,9 +36,18 @@ class NTEstimate:
     def step(self) -> None:
         """Collect any pending measurements from
         the network and add them to the sim."""
+        # TODO: read the camera identity from the blip
+        cam = CameraConfig(Identity.UNKNOWN)
         frames = self.blip_receiver.get()
+        print("frames ", frames)
         for frame in frames:
             timestamp_us = frame[0]
             blips = frame[1]
             for blip in blips:
-                id = blip.id
+                tag_id = blip.tag_id
+                pixels = blip.measurement()
+                corners = self.field_map.get(tag_id)
+                self.est.apriltag_for_smoothing_batch(
+                    corners, pixels, timestamp_us, cam.camera_offset, cam.calib
+                )
+
