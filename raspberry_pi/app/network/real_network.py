@@ -4,23 +4,17 @@
 
 # github workflow crashes in ntcore, bleah
 from typing import cast
+
 import ntcore
 from typing_extensions import override
 from wpimath.geometry import Rotation3d
+from wpiutil import wpistruct
 
 from app.config.identity import Identity
-from app.network.network_protocol import (
-    Blip24,
-    Blip25,
-    Blip25Receiver,
-    Blip25Sender,
-    BlipSender,
-    DoubleSender,
-    Network,
-    NoteSender,
-)
+from app.network.network_protocol import (Blip24, Blip25, Blip25Receiver,
+                                          Blip25Sender, BlipSender,
+                                          DoubleSender, Network, NoteSender)
 
-from wpiutil import wpistruct
 
 class RealDoubleSender(DoubleSender):
     def __init__(self, pub: ntcore.DoublePublisher) -> None:
