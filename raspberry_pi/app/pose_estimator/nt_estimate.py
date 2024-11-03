@@ -38,16 +38,15 @@ class NTEstimate:
         the network and add them to the sim."""
         # TODO: read the camera identity from the blip
         cam = CameraConfig(Identity.UNKNOWN)
-        frames = self.blip_receiver.get()
-        print("frames ", frames)
-        for frame in frames:
-            timestamp_us = frame[0]
-            blips = frame[1]
-            for blip in blips:
-                tag_id = blip.tag_id
-                pixels = blip.measurement()
-                corners = self.field_map.get(tag_id)
-                self.est.apriltag_for_smoothing_batch(
-                    corners, pixels, timestamp_us, cam.camera_offset, cam.calib
-                )
+        sights = self.blip_receiver.get()
+        print("sights ", sights)
+        for sight in sights:
+            timestamp_us = sight[0]
+            tag_id = sight[1]
+            blip = sight[2]
+            pixels = blip.measurement()
+            corners = self.field_map.get(tag_id)
+            self.est.apriltag_for_smoothing_batch(
+                corners, pixels, timestamp_us, cam.camera_offset, cam.calib
+            )
 

@@ -20,7 +20,6 @@ class NTSim:
         self.sim.step(dt_s)
         p = self.sim.gt_pixels
         b = Blip25(
-            1,
             p[0][0],
             p[0][1],
             p[1][0],

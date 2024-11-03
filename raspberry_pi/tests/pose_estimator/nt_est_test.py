@@ -20,7 +20,7 @@ class NTEstTest(unittest.TestCase):
         print()
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
-        pub = inst.getStructArrayTopic("foo", Blip25).publish()
+        pub = inst.getStructTopic("foo/1", Blip25).publish()
         field_map = FieldMap()
         net = RealNetwork(Identity.UNKNOWN)
         est = NTEstimate(field_map, net)
@@ -28,10 +28,7 @@ class NTEstTest(unittest.TestCase):
             time.sleep(1)
             print("set ", i)
             pub.set(
-                [
-                    Blip25(1, 190, 210, 210, 210, 210, 190, 190, 190),
-                    Blip25(2, 190, 210, 210, 210, 210, 190, 190, 190),
-                ],
+                Blip25(190, 210, 210, 210, 210, 190, 190, 190),
                 ntcore._now(),
             )
             # t = inst.getTopics()

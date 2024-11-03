@@ -74,8 +74,9 @@ class RealBlip25Receiver(Blip25Receiver):
         # self.poller.addListener([""], ntcore.EventFlags.kValueAll)
 
     @override
-    def get(self) -> list[tuple[int, list[Blip25]]]:
-        result: list[tuple[int, list[Blip25]]] = []
+    def get(self) -> list[tuple[int, int, Blip25]]:
+        """(timestamp, tag id, blip)"""
+        result: list[tuple[int, int, Blip25]] = []
         print("get")
         # see NotePosition24ArrayListener for example
         for e in self.poller.readQueue():
@@ -83,13 +84,15 @@ class RealBlip25Receiver(Blip25Receiver):
             ve = cast(ntcore.ValueEventData, e.data)
             v = ve.value
             name = ve.topic.getName()
+            # TODO: redo the key scheme
+            tag_id = int(name.split("/")[1])
             print(name)
             server_time_us = v.server_time()
-            value_list = v.getRaw()
-            print("value_list ", value_list)
-            obj = wpistruct.unpack(Blip25, value_list)
-            print(obj)
-            result.append((server_time_us, obj))
+            b = v.getRaw()
+            # value = cast(Blip25, v.value)
+            value = wpistruct.unpack(Blip25, b)
+            print(value)
+            result.append((server_time_us, tag_id, value))
         return result
 
 
