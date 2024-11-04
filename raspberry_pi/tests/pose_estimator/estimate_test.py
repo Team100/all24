@@ -117,7 +117,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         est = Estimate()
         est.init()
 
-        prior_noise = noiseModel.Diagonal.Sigmas(np.array([1, 2, 3]))
+        prior_noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
         prior_mean = gtsam.Pose2(0, 0, 0)
         est.add_state(0, prior_mean)
@@ -126,7 +126,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
         est.add_state(1, gtsam.Pose2())
         # try no prior, odometry will do
-        # est.prior(1, prior_mean, noise)
+        # est.prior(1, prior_mean, prior_noise)
 
         # use a colossal amount of noise
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
@@ -143,12 +143,12 @@ class EstimateAccelerometerTest(unittest.TestCase):
         est.update()
 
         cov = est.joint_marginals()
-        np.set_printoptions(suppress=True)
+        np.set_printoptions(suppress=True, precision=4)
         print(cov.fullMatrix())
-        print(cov.at(X(0),X(0)))
-        print(cov.at(X(0),X(1)))
-        print(cov.at(X(1),X(0)))
-        print(cov.at(X(1),X(1)))
+        # print(cov.at(X(0),X(0)))
+        # print(cov.at(X(0),X(1)))
+        # print(cov.at(X(1),X(0)))
+        # print(cov.at(X(1),X(1)))
         # self.assertTrue(
         #     np.allclose(
         #         cov,
