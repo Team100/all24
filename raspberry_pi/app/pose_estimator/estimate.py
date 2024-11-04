@@ -22,8 +22,10 @@ import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100)
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -59,7 +61,7 @@ class Estimate:
         """Initialize the model
         initial module positions are at their origins.
         TODO: some other initial positions?"""
-        self.isam: gtsam.FixedLagSmoother = self.make_smoother()
+        self.isam: gtsam.BatchFixedLagSmoother = self.make_smoother()
         self.result: gtsam.Values = gtsam.Values()
         # between updates we accumulate inputs here
         self.new_factors = gtsam.NonlinearFactorGraph()
@@ -83,7 +85,8 @@ class Estimate:
         ]
 
     def init(self) -> None:
-        """No longer adds a state at zero, if you want that, do it."""
+        """Adds camera cal (K) and offset (C) at t0.
+        No longer adds a pose at t0, if you want that, do it."""
         # there is just one camera factor
         self.new_values.insert(K(0), CAL)
         self.new_timestamps[K(0)] = 0
@@ -243,16 +246,12 @@ class Estimate:
         """landmarks: list of 3d points
         measured: concatenated px measurements
         TODO: flatten landmarks"""
-        noise = noiseModel.Diagonal.Sigmas(
-            np.concatenate(
-                [[1, 1] for _ in landmarks])
-            )
+        noise = noiseModel.Diagonal.Sigmas(np.concatenate([[1, 1] for _ in landmarks]))
         self.new_factors.push_back(
             apriltag_smooth_batch.factor(
                 landmarks, measured, camera_offset, calib, noise, X(t0_us)
             )
         )
-
 
     def update(self) -> None:
         """Run the solver"""
@@ -271,7 +270,46 @@ class Estimate:
         self.new_values.clear()
         self.new_timestamps.clear()
 
-    def make_smoother(self) -> gtsam.FixedLagSmoother:
+    def get_result(self) -> tuple[int, gtsam.Pose2, np.ndarray] | None:
+        """the most recent timestamped pose and covariance
+        tuple(time_us, pose2, cov)
+        TODO: maybe make update() do this"""
+        timestamp_map = self.isam.timestamps()
+        factors = self.isam.getFactors()
+        m = gtsam.Marginals(factors, self.result)
+        # timestamp map is std::map inside, which is ordered by key
+        for key, value in reversed(list(timestamp_map.items())):
+            # run through the list from newest to oldest, looking for X
+            # idx = gtsam.symbolIndex(key)
+            char = chr(gtsam.symbolChr(key))
+            # print("KEY", key, "IDX", idx, "CHR", char, "VALUE", value)
+            if char == "x":
+                # the most-recent pose
+                x: gtsam.Pose2 = self.result.atPose2(key)
+                cov: np.ndarray = m.marginalCovariance(key)
+                return (int(value), x, cov)
+
+        return None
+
+    def marginals(self) -> np.ndarray:
+        """marginal covariance of most-recent pose
+        this is just for testing"""
+        timestamp_map = self.isam.timestamps()
+        for key, _ in reversed(list(timestamp_map.items())):
+            # run through the list from newest to oldest, looking for X
+            char = chr(gtsam.symbolChr(key))
+            if char == "x":
+                factors = self.isam.getFactors()
+                m = gtsam.Marginals(factors, self.result)
+                return m.marginalCovariance(key)
+        return np.array([])
+
+    def twist(self) -> None:
+        """twist between most-recent and next-most-recent estimates."""
+        pass
+
+
+    def make_smoother(self) -> gtsam.BatchFixedLagSmoother:
         # experimenting with the size of the lag buffer.
         # the python odometry factor is intolerably slow
         # but the native one is quite fast.

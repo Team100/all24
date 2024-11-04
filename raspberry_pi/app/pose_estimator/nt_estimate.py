@@ -60,6 +60,8 @@ class NTEstimate:
                 )
         self.est.update()
         print("NTEstimate.step() result ", self.est.result)
+        results: list[tuple[int, gtsam.Pose2]] = self.est.get_result()
+        poses: list[Pose2d] = []
         # pose = self.est.result.atPose2()
         # self.pose_sender.send()
 
