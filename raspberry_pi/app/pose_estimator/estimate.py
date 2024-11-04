@@ -109,7 +109,12 @@ class Estimate:
         self.new_values.insert(X(time_us), initial_value)
         self.new_timestamps[X(time_us)] = time_us
 
-    def prior(self, time_us: int, value: gtsam.Pose2, noise: SharedNoiseModel) -> None:
+    def prior(
+        self,
+        time_us: int,
+        value: gtsam.Pose2,
+        noise: SharedNoiseModel,
+    ) -> None:
         """Prior can have wide noise model (when we really don't know)
         or narrow (for resetting) or mixed (to reset rotation alone)"""
         self.new_factors.push_back(
@@ -121,7 +126,11 @@ class Estimate:
         )
 
     def odometry(
-        self, t0_us: int, t1_us: int, positions: list[SwerveModulePosition100]
+        self,
+        t0_us: int,
+        t1_us: int,
+        positions: list[SwerveModulePosition100],
+        noise: SharedNoiseModel,
     ) -> None:
         """Add an odometry measurement.  Remember to call add_state so that
         the odometry factor has something to refer to.
@@ -304,10 +313,24 @@ class Estimate:
                 return m.marginalCovariance(key)
         return np.array([])
 
+    def joint_marginals(self) -> gtsam.JointMarginal:
+        """joint marginals of the two most recent pose estimates"""
+        timestamp_map = self.isam.timestamps()
+        keys = []
+        for key, _ in reversed(list(timestamp_map.items())):
+            # run through the list from newest to oldest, looking for X
+            char = chr(gtsam.symbolChr(key))
+            if char == "x":
+                keys.append(key)
+            if len(keys) > 1:
+                break
+        factors = self.isam.getFactors()
+        m = gtsam.Marginals(factors, self.result)
+        return m.jointMarginalCovariance(keys)
+
     def twist(self) -> None:
         """twist between most-recent and next-most-recent estimates."""
         pass
-
 
     def make_smoother(self) -> gtsam.BatchFixedLagSmoother:
         # experimenting with the size of the lag buffer.

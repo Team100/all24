@@ -4,6 +4,7 @@ smoother, and publish the results on Network Tables."""
 # pylint: disable=C0301,E0611,E1101,R0903,R0914
 
 import math
+from typing import cast
 
 # TODO: remove gtsam
 import gtsam
@@ -60,7 +61,7 @@ class NTEstimate:
                 )
         self.est.update()
         print("NTEstimate.step() result ", self.est.result)
-        results: list[tuple[int, gtsam.Pose2]] = self.est.get_result()
+        results: tuple[int, gtsam.Pose2, np.ndarray] = cast(tuple[int, gtsam.Pose2, np.ndarray], self.est.get_result())
         poses: list[Pose2d] = []
         # pose = self.est.result.atPose2()
         # self.pose_sender.send()
