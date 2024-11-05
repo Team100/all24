@@ -39,8 +39,8 @@ class NoteDetector(Interpreter):
         self.height: int = size.height
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = np.array((0, 200, 150))
-        self.object_lower2 = np.array((178, 150, 50))
+        self.object_lower = np.array((0, 200, 190))
+        self.object_lower2 = np.array(6, 0, 0)
         self.object_higher = np.array((8, 255, 255))
         self.object_higher2 = np.array((180, 255, 255))
 
