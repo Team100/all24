@@ -11,7 +11,7 @@ import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 from gtsam.symbol_shorthand import C, K, X  # type:ignore
-from wpimath.geometry import Rotation2d, Translation2d, Twist2d
+from wpimath.geometry import Rotation2d, Translation2d, Twist2d, Pose2d
 
 import app.pose_estimator.factors.accelerometer as accelerometer
 import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
@@ -83,6 +83,9 @@ class Estimate:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
+        # remember this so we can use it for extrapolation.
+        # TODO: keep track of how old it is?
+        self.measurement = Twist2d()
 
     def init(self) -> None:
         """Adds camera cal (K) and offset (C) at t0.
@@ -146,12 +149,12 @@ class Estimate:
             self.positions, positions
         )
         # this is the tangent-space (twist) measurement
-        measurement: Twist2d = self.kinematics.to_twist_2d(deltas)
+        self.measurement: Twist2d = self.kinematics.to_twist_2d(deltas)
 
         self.new_factors.push_back(
             odometry.factor(
-                measurement,
-                ODOMETRY_NOISE,
+                self.measurement,
+                noise,
                 X(t0_us),
                 X(t1_us),
             )
@@ -314,7 +317,11 @@ class Estimate:
         return np.array([])
 
     def joint_marginals(self) -> gtsam.JointMarginal:
-        """joint marginals of the two most recent pose estimates"""
+        """Joint marginals of the two most recent pose estimates,
+        which results in a 6x6 matrix.
+
+        I thought this would be useful for extrapolation, but
+        it's not.  Maybe delete it?"""
         timestamp_map = self.isam.timestamps()
         keys = []
         for key, _ in reversed(list(timestamp_map.items())):
@@ -328,9 +335,13 @@ class Estimate:
         m = gtsam.Marginals(factors, self.result)
         return m.jointMarginalCovariance(keys)
 
-    def twist(self) -> None:
-        """twist between most-recent and next-most-recent estimates."""
-        pass
+    def extrapolate(self, pose: gtsam.Pose2) -> gtsam.Pose2:
+        # we should be using Pose2.expmap but it's not wrapped
+        # TODO: add it
+        p: Pose2d = Pose2d(pose.x(), pose.y(), Rotation2d(pose.theta()))
+        p1 = p.exp(self.measurement)
+        return gtsam.Pose2(p1.X(), p1.Y(), p1.rotation().radians())
+        
 
     def make_smoother(self) -> gtsam.BatchFixedLagSmoother:
         # experimenting with the size of the lag buffer.
