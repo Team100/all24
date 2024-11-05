@@ -6,8 +6,8 @@ import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.state.State100;
@@ -115,7 +115,7 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 11,
                                 1,
-                                0.619,  
+                                0.619,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(rearLeftLogger,
@@ -224,34 +224,19 @@ public class SwerveModuleCollection {
     // Actuators
     //
 
-    /**
-     * array order:
-     * 
-     * frontLeft
-     * frontRight
-     * rearLeft
-     * rearRight
-     */
-    public void setDesiredStates(SwerveModuleState100[] swerveModuleStates) {
-        m_frontLeft.setDesiredState(swerveModuleStates[0]);
-        m_frontRight.setDesiredState(swerveModuleStates[1]);
-        m_rearLeft.setDesiredState(swerveModuleStates[2]);
-        m_rearRight.setDesiredState(swerveModuleStates[3]);
+
+    public void setDesiredStates(SwerveModuleStates swerveModuleStates) {
+        m_frontLeft.setDesiredState(swerveModuleStates.frontLeft());
+        m_frontRight.setDesiredState(swerveModuleStates.frontRight());
+        m_rearLeft.setDesiredState(swerveModuleStates.rearLeft());
+        m_rearRight.setDesiredState(swerveModuleStates.rearRight());
     }
 
-    /**
-     * array order:
-     * 
-     * frontLeft
-     * frontRight
-     * rearLeft
-     * rearRight
-     */
-    public void setRawDesiredStates(SwerveModuleState100[] swerveModuleStates) {
-        m_frontLeft.setRawDesiredState(swerveModuleStates[0]);
-        m_frontRight.setRawDesiredState(swerveModuleStates[1]);
-        m_rearLeft.setRawDesiredState(swerveModuleStates[2]);
-        m_rearRight.setRawDesiredState(swerveModuleStates[3]);
+    public void setRawDesiredStates(SwerveModuleStates swerveModuleStates) {
+        m_frontLeft.setRawDesiredState(swerveModuleStates.frontLeft());
+        m_frontRight.setRawDesiredState(swerveModuleStates.frontRight());
+        m_rearLeft.setRawDesiredState(swerveModuleStates.rearLeft());
+        m_rearRight.setRawDesiredState(swerveModuleStates.rearRight());
     }
 
     public void stop() {
@@ -273,13 +258,12 @@ public class SwerveModuleCollection {
     // Observers
     //
 
-    public SwerveModuleState100[] getDesiredStates() {
-        return new SwerveModuleState100[] {
+    public SwerveModuleStates getDesiredStates() {
+        return new SwerveModuleStates(
                 m_frontLeft.getDesiredState(),
                 m_frontRight.getDesiredState(),
                 m_rearLeft.getDesiredState(),
-                m_rearRight.getDesiredState()
-        };
+                m_rearRight.getDesiredState());
     }
 
     public State100[] getSetpoint() {
@@ -291,22 +275,20 @@ public class SwerveModuleCollection {
         };
     }
 
-    public SwerveModulePosition100[] positions() {
-        return new SwerveModulePosition100[] {
+    public SwerveModulePositions positions() {
+        return new SwerveModulePositions(
                 m_frontLeft.getPosition(),
                 m_frontRight.getPosition(),
                 m_rearLeft.getPosition(),
-                m_rearRight.getPosition()
-        };
+                m_rearRight.getPosition());
     }
 
-    public SwerveModuleState100[] states() {
-        return new SwerveModuleState100[] {
+    public SwerveModuleStates states() {
+        return new SwerveModuleStates(
                 m_frontLeft.getState(),
                 m_frontRight.getState(),
                 m_rearLeft.getState(),
-                m_rearRight.getState()
-        };
+                m_rearRight.getState());
     }
 
     public boolean[] atSetpoint() {

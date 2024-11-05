@@ -7,13 +7,22 @@ from typing import cast
 
 import ntcore
 from typing_extensions import override
-from wpimath.geometry import Rotation3d
+from wpimath.geometry import Rotation3d, Pose2d
 from wpiutil import wpistruct
 
 from app.config.identity import Identity
-from app.network.network_protocol import (Blip24, Blip25, Blip25Receiver,
-                                          Blip25Sender, BlipSender,
-                                          DoubleSender, Network, NoteSender)
+from app.network.network_protocol import (
+    Blip24,
+    Blip25,
+    Blip25Receiver,
+    Blip25Sender,
+    BlipSender,
+    DoubleSender,
+    Network,
+    NoteSender,
+    PoseEstimate25,
+    PoseSender,
+)
 
 
 class RealDoubleSender(DoubleSender):
@@ -59,35 +68,66 @@ class RealBlip25Receiver(Blip25Receiver):
         name: str,
         inst: ntcore.NetworkTableInstance,
     ) -> None:
-        print(name)
+        # print("RealBlip25Receiver.__init__() name ", name)
         self.name = name
         self.poller = ntcore.NetworkTableListenerPoller(inst)
         # need to hang on to this reference :-(
-        self.msub = ntcore.MultiSubscriber(inst, [name])
+        self.msub = ntcore.MultiSubscriber(
+            inst, [name], ntcore.PubSubOptions(keepDuplicates=True)
+        )
         self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
         # self.poller.addListener([""], ntcore.EventFlags.kValueAll)
+        self.start_time_us = ntcore._now()
+        # print("RealBlip25Receiver.__init__() start_time_us ", self.start_time_us)
 
     @override
-    def get(self) -> list[tuple[int, int, Blip25]]:
-        """(timestamp, tag id, blip)"""
-        result: list[tuple[int, int, Blip25]] = []
-        print("get")
+    def get(self) -> list[tuple[int, list[Blip25]]]:
+        """(timestamp_us, tag id, blip)
+        The timestamp is referenced to the "now" value at
+        construction, so that the number isn't too large.
+        """
+        result: list[tuple[int, list[Blip25]]] = []
+        # print("RealBlip25Receiver.get()")
         # see NotePosition24ArrayListener for example
-        for e in self.poller.readQueue():
-            print("in queue")
-            ve = cast(ntcore.ValueEventData, e.data)
-            v = ve.value
-            name = ve.topic.getName()
+        queue: list = self.poller.readQueue()
+        # print("RealBlip25Receiver.get() queue length ", len(queue))
+        for event in queue:
+            value_event_data = cast(ntcore.ValueEventData, event.data)
+
+            # name = value_event_data.topic.getName()
             # TODO: redo the key scheme
-            tag_id = int(name.split("/")[1])
-            print(name)
-            server_time_us = v.server_time()
-            b = v.getRaw()
-            # value = cast(Blip25, v.value)
-            value = wpistruct.unpack(Blip25, b)
-            print(value)
-            result.append((server_time_us, tag_id, value))
+            # camera_id = int(name.split("/")[0])
+
+            nt_value: ntcore.Value = value_event_data.value
+
+            # server time is always 1.  ???
+            server_time_us = nt_value.server_time()
+            # print("RealBlip25Receiver.get() server time ", server_time_us)
+            time_us = nt_value.time() - self.start_time_us
+            # print("RealBlip25Receiver.get() time ", time_us)
+
+            frame: list[Blip25] = []
+            raw_array: bytes = cast(bytes, nt_value.getRaw())
+            item_size = wpistruct.getSize(Blip25)
+            raw_item_array = [
+                raw_array[i : i + item_size]
+                for i in range(0, len(raw_array), item_size)
+            ]
+            for raw_item in raw_item_array:
+                blip: Blip25 = wpistruct.unpack(Blip25, raw_item)
+                # print(blip)
+                frame.append(blip)
+            result.append((time_us, frame))
         return result
+
+
+class RealPoseSender(PoseSender):
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
+        self.pub = pub
+
+    @override
+    def send(self, val: PoseEstimate25, delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
 
 
 class RealNetwork(Network):
@@ -132,6 +172,10 @@ class RealNetwork(Network):
     @override
     def get_blip25_receiver(self, name: str) -> Blip25Receiver:
         return RealBlip25Receiver(name, self._inst)
+
+    @override
+    def get_pose_sender(self, name: str) -> PoseSender:
+        return RealPoseSender(self._inst.getStructTopic(name, PoseEstimate25).publish())
 
     @override
     def flush(self) -> None:

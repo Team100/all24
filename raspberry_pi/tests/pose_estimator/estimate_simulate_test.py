@@ -33,6 +33,7 @@ class EstimateSimulateTest(unittest.TestCase):
         est.prior(0, prior_mean, PRIOR_NOISE)
 
         state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
         print()
         print(
@@ -45,7 +46,7 @@ class EstimateSimulateTest(unittest.TestCase):
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
-            est.odometry(t0_us, t1_us, sim.positions)
+            est.odometry(t0_us, t1_us, sim.positions, odometry_noise)
             est.update()
             t1 = time.time_ns()
             et = t1 - t0
@@ -330,6 +331,7 @@ class EstimateSimulateTest(unittest.TestCase):
         est.prior(0, prior_mean, PRIOR_NOISE)
 
         state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
         print()
         print(
@@ -343,7 +345,7 @@ class EstimateSimulateTest(unittest.TestCase):
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
-            est.odometry(t0_us, t1_us, sim.positions)
+            est.odometry(t0_us, t1_us, sim.positions, odometry_noise)
 
             est.apriltag_for_smoothing(
                 sim.l0, sim.gt_pixels[0], t1_us, sim.camera_offset, sim.calib
@@ -401,6 +403,8 @@ class EstimateSimulateTest(unittest.TestCase):
         est.prior(0, prior_mean, PRIOR_NOISE)
 
         state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
+
 
         print()
         print(
@@ -415,7 +419,7 @@ class EstimateSimulateTest(unittest.TestCase):
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
-            est.odometry(t0_us, t1_us, sim.positions)
+            est.odometry(t0_us, t1_us, sim.positions, odometry_noise)
             dtheta = sim.gt_theta - gt_theta_0
             est.gyro(t0_us, t1_us, dtheta)
             gt_theta_0 = sim.gt_theta
@@ -473,6 +477,7 @@ class EstimateSimulateTest(unittest.TestCase):
         est.prior(0, prior_mean, PRIOR_NOISE)
 
         state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
         print()
         print(
@@ -487,7 +492,7 @@ class EstimateSimulateTest(unittest.TestCase):
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
-            est.odometry(t0_us, t1_us, sim.positions)
+            est.odometry(t0_us, t1_us, sim.positions, odometry_noise)
             dtheta = sim.gt_theta - gt_theta_0
             est.gyro(t0_us, t1_us, dtheta)
             gt_theta_0 = sim.gt_theta

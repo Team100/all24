@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDelta;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDeltas;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -112,27 +114,24 @@ public class DriveUtil {
      * The inverse kinematics wants this to represent a geodesic, which
      * means that the steering doesn't change between start and end.
      */
-    public static SwerveModuleDelta[] modulePositionDelta(
-            SwerveModulePosition100[] start,
-            SwerveModulePosition100[] end) {
-        if (start.length != end.length) {
-            throw new IllegalArgumentException("Inconsistent number of modules!");
-        }
-        SwerveModuleDelta[] deltas = new SwerveModuleDelta[start.length];
-        for (int i = 0; i < start.length; i++) {
-            deltas[i] = delta(start[i], end[i]);
-        }
-        return deltas;
+    public static SwerveModuleDeltas modulePositionDelta(
+            SwerveModulePositions start,
+            SwerveModulePositions end) {
+        return new SwerveModuleDeltas(
+                delta(start.frontLeft(), end.frontLeft()),
+                delta(start.frontRight(), end.frontRight()),
+                delta(start.rearLeft(), end.rearLeft()),
+                delta(start.rearRight(), end.rearRight()));
     }
 
-    public static SwerveModulePosition100[] modulePositionFromDelta(
-            SwerveModulePosition100[] initial,
-            SwerveModuleDelta[] delta) {
-        SwerveModulePosition100[] new_positions = new SwerveModulePosition100[initial.length];
-        for (int i = 0; i < initial.length; ++i) {
-            new_positions[i] = plus(initial[i], delta[i]);
-        }
-        return new_positions;
+    public static SwerveModulePositions modulePositionFromDelta(
+            SwerveModulePositions initial,
+            SwerveModuleDeltas delta) {
+        return new SwerveModulePositions(
+                plus(initial.frontLeft(), delta.frontLeft()),
+                plus(initial.frontRight(), delta.frontRight()),
+                plus(initial.rearLeft(), delta.rearLeft()),
+                plus(initial.rearRight(), delta.rearRight()));
     }
 
     /**

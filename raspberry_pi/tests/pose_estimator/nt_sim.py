@@ -3,6 +3,8 @@ and compare to the estimations from Network Tables.
 
 For now this uses the CircleSimulator only."""
 
+# pylint: disable=R0903
+
 from app.network.network_protocol import Blip25, Network
 from app.pose_estimator.field_map import FieldMap
 from tests.pose_estimator.circle_simulator import CircleSimulator
@@ -20,6 +22,7 @@ class NTSim:
         self.sim.step(dt_s)
         p = self.sim.gt_pixels
         b = Blip25(
+            1,
             p[0][0],
             p[0][1],
             p[1][0],

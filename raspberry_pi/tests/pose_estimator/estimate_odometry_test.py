@@ -42,8 +42,9 @@ class EstimateOdometryTest(unittest.TestCase):
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
         ]
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
-        est.odometry(0, 1, positions)
+        est.odometry(0, 1, positions, odometry_noise)
         est.update()
         print(est.result)
         self.assertEqual(4, est.result.size())
@@ -91,8 +92,8 @@ class EstimateOdometryTest(unittest.TestCase):
             ),
             SwerveModulePosition100(0.0, OptionalRotation2d(False, Rotation2d(0))),
         ]
-
-        est.odometry(0, 1, positions)
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
+        est.odometry(0, 1, positions, odometry_noise)
         est.update()
         print(est.result)
         self.assertEqual(4, est.result.size())
@@ -138,7 +139,8 @@ class EstimateOdometryTest(unittest.TestCase):
             ),
             SwerveModulePosition100(0.0, OptionalRotation2d(False, Rotation2d(0))),
         ]
-        est.odometry(0, 1, positions)
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
+        est.odometry(0, 1, positions, odometry_noise)
         est.update()
         print(est.result)
         self.assertEqual(4, est.result.size())

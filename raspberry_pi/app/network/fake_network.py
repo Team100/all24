@@ -2,15 +2,17 @@
 
 from typing_extensions import override
 from wpimath.geometry import Rotation3d
-
 from app.network.network_protocol import (
     Blip24,
     Blip25,
     Blip25Receiver,
+    Blip25Sender,
     BlipSender,
     DoubleSender,
     Network,
     NoteSender,
+    PoseEstimate25,
+    PoseSender,
 )
 
 
@@ -41,7 +43,7 @@ class FakeNoteSender(NoteSender):
         self.notes.extend(val)
 
 
-class FakeBlip25Sender(BlipSender):
+class FakeBlip25Sender(Blip25Sender):
     def __init__(self, blips: list[Blip25]) -> None:
         self.blips = blips
 
@@ -51,12 +53,23 @@ class FakeBlip25Sender(BlipSender):
 
 
 class FakeBlip25Receiver(Blip25Receiver):
-    def __init__(self) -> None:
-        self.blips: list[tuple[int, list[Blip25]]] = []
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
 
     @override
     def get(self) -> list[tuple[int, list[Blip25]]]:
-        return self.blips
+        return self.net.received_blip25s[self.name]
+
+
+class FakePoseSender(PoseSender):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    @override
+    def send(self, val: PoseEstimate25, delay_us: int) -> None:
+        self.net.estimate = val
 
 
 class FakeNetwork(Network):
@@ -64,7 +77,10 @@ class FakeNetwork(Network):
         self.doubles: dict[str, list[float]] = {}
         self.blips: dict[str, list[Blip24]] = {}
         self.blip25s: dict[str, list[Blip25]] = {}
+        # key: camera, list of updates, each update is tuple (timestamp, list of blips)
+        self.received_blip25s: dict[str, list[tuple[int, list[Blip25]]]] = {}
         self.notes: dict[str, list[Rotation3d]] = {}
+        self.estimate: PoseEstimate25
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:
@@ -85,14 +101,19 @@ class FakeNetwork(Network):
         return FakeNoteSender(self.notes[name])
 
     @override
-    def get_blip25_sender(self, name: str) -> BlipSender:
+    def get_blip25_sender(self, name: str) -> Blip25Sender:
         if name not in self.blip25s:
             self.blip25s[name] = []
         return FakeBlip25Sender(self.blip25s[name])
 
     @override
     def get_blip25_receiver(self, name: str) -> Blip25Receiver:
-        return FakeBlip25Receiver()
+        if name not in self.received_blip25s:
+            self.received_blip25s[name] = []
+        return FakeBlip25Receiver(name, self)
+
+    def get_pose_sender(self, name: str) -> PoseSender:
+        return FakePoseSender(name, self)
 
     @override
     def flush(self) -> None:

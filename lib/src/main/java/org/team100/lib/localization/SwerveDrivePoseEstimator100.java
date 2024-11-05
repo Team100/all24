@@ -14,8 +14,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDelta;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDeltas;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Util;
 
@@ -28,7 +28,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     // look back a little to get a pose for velocity estimation
     private static final double velocityDtS = 0.02;
 
-    private final int m_numModules;
     private final SwerveKinodynamics m_kinodynamics;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
     // LOGGERS
@@ -52,11 +51,10 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             LoggerFactory parent,
             SwerveKinodynamics kinodynamics,
             Rotation2d gyroAngle,
-            SwerveModulePosition100[] modulePositions,
+            SwerveModulePositions modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
         LoggerFactory child = parent.child(this);
-        m_numModules = modulePositions.length;
         m_kinodynamics = kinodynamics;
         m_poseBuffer = new TimeInterpolatableBuffer100<>(
                 child,
@@ -84,11 +82,9 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     /** Empty the buffer and add the given measurements. */
     public void reset(
             Rotation2d gyroAngle,
-            SwerveModulePosition100[] modulePositions,
+            SwerveModulePositions modulePositions,
             Pose2d pose,
             double timestampSeconds) {
-
-        checkLength(modulePositions);
 
         m_gyroOffset = pose.getRotation().minus(gyroAngle);
 
@@ -173,7 +169,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         for (Map.Entry<Double, InterpolationRecord> entry : m_poseBuffer.tailMap(timestampS, false).entrySet()) {
             double entryTimestampS = entry.getKey();
             Rotation2d entryGyroAngle = entry.getValue().m_gyroAngle;
-            SwerveModulePosition100[] wheelPositions = entry.getValue().m_wheelPositions;
+            SwerveModulePositions wheelPositions = entry.getValue().m_wheelPositions;
             put(entryTimestampS, entryGyroAngle, wheelPositions);
         }
 
@@ -186,8 +182,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     public void put(
             double currentTimeS,
             Rotation2d gyroAngle,
-            SwerveModulePosition100[] wheelPositions) {
-        checkLength(wheelPositions);
+            SwerveModulePositions wheelPositions) {
 
         // the extra little bit here is to make sure we catch the most recent entry even
         // though the clock jitters a little.
@@ -210,7 +205,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         InterpolationRecord value = lowerEntry.getValue();
         SwerveState previousState = value.m_state;
 
-        SwerveModuleDelta[] modulePositionDelta = DriveUtil.modulePositionDelta(
+        SwerveModuleDeltas modulePositionDelta = DriveUtil.modulePositionDelta(
                 value.m_wheelPositions,
                 wheelPositions);
 
@@ -269,13 +264,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     }
 
     ///////////////////////////////////////
-
-    private void checkLength(SwerveModulePosition100[] modulePositions) {
-        int ct = modulePositions.length;
-        if (ct != m_numModules) {
-            throw new IllegalArgumentException("Wrong module count: " + ct);
-        }
-    }
 
     /**
      * Given q and r stddev's, what mixture should that yield?
