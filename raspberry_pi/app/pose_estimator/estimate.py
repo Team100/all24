@@ -11,7 +11,7 @@ import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 from gtsam.symbol_shorthand import C, K, X  # type:ignore
-from wpimath.geometry import Rotation2d, Translation2d, Twist2d, Pose2d
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
 import app.pose_estimator.factors.accelerometer as accelerometer
 import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
@@ -22,10 +22,8 @@ import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (
-    OptionalRotation2d,
-    SwerveModulePosition100,
-)
+from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
+                                                       SwerveModulePosition100)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -83,9 +81,12 @@ class Estimate:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
+        # most-recent odometry
         # remember this so we can use it for extrapolation.
         # TODO: keep track of how old it is?
         self.measurement = Twist2d()
+        # duration of most-recent odometry
+        self.odo_dt = 0
 
     def init(self) -> None:
         """Adds camera cal (K) and offset (C) at t0.
@@ -150,7 +151,7 @@ class Estimate:
         )
         # this is the tangent-space (twist) measurement
         self.measurement: Twist2d = self.kinematics.to_twist_2d(deltas)
-
+        self.odo_dt = t1_us - t0_us
         self.new_factors.push_back(
             odometry.factor(
                 self.measurement,
@@ -290,7 +291,7 @@ class Estimate:
         factors = self.isam.getFactors()
         m = gtsam.Marginals(factors, self.result)
         # timestamp map is std::map inside, which is ordered by key
-        for key, value in reversed(list(timestamp_map.items())):
+        for key, time_us in reversed(list(timestamp_map.items())):
             # run through the list from newest to oldest, looking for X
             # idx = gtsam.symbolIndex(key)
             char = chr(gtsam.symbolChr(key))
@@ -299,7 +300,7 @@ class Estimate:
                 # the most-recent pose
                 x: gtsam.Pose2 = self.result.atPose2(key)
                 cov: np.ndarray = m.marginalCovariance(key)
-                return (int(value), x, cov)
+                return (int(time_us), x, cov)
 
         return None
 
@@ -336,12 +337,12 @@ class Estimate:
         return m.jointMarginalCovariance(keys)
 
     def extrapolate(self, pose: gtsam.Pose2) -> gtsam.Pose2:
+        """We're not going to actually use this, we'll let the roboRIO do it."""
         # we should be using Pose2.expmap but it's not wrapped
         # TODO: add it
         p: Pose2d = Pose2d(pose.x(), pose.y(), Rotation2d(pose.theta()))
         p1 = p.exp(self.measurement)
         return gtsam.Pose2(p1.X(), p1.Y(), p1.rotation().radians())
-        
 
     def make_smoother(self) -> gtsam.BatchFixedLagSmoother:
         # experimenting with the size of the lag buffer.

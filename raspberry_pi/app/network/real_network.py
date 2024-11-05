@@ -20,6 +20,7 @@ from app.network.network_protocol import (
     DoubleSender,
     Network,
     NoteSender,
+    PoseEstimate25,
     PoseSender,
 )
 
@@ -121,11 +122,11 @@ class RealBlip25Receiver(Blip25Receiver):
 
 
 class RealPoseSender(PoseSender):
-    def __init__(self, pub: ntcore.StructArrayPublisher) -> None:
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
         self.pub = pub
 
     @override
-    def send(self, val: list[Pose2d], delay_us: int) -> None:
+    def send(self, val: PoseEstimate25, delay_us: int) -> None:
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
@@ -174,7 +175,7 @@ class RealNetwork(Network):
 
     @override
     def get_pose_sender(self, name: str) -> PoseSender:
-        return RealPoseSender(self._inst.getStructArrayTopic(name, Pose2d).publish())
+        return RealPoseSender(self._inst.getStructTopic(name, PoseEstimate25).publish())
 
     @override
     def flush(self) -> None:

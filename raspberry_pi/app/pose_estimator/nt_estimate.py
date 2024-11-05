@@ -1,21 +1,21 @@
 """Read measurements from Network Tables, run the
 smoother, and publish the results on Network Tables."""
 
-# pylint: disable=C0301,E0611,E1101,R0903,R0914
+# pylint: disable=C0301,E0611,E1101,R0903,R0914,W0212
 
 import math
 from typing import cast
 
 # TODO: remove gtsam
 import gtsam
+import ntcore
 import numpy as np
 from gtsam import noiseModel  # type:ignore
 from wpimath.geometry import Pose2d
 
-from app.camera.camera_protocol import Camera
 from app.config.camera_config import CameraConfig
 from app.config.identity import Identity
-from app.network.network_protocol import Network
+from app.network.network_protocol import Network, PoseEstimate25
 from app.pose_estimator.estimate import Estimate
 from app.pose_estimator.field_map import FieldMap
 
@@ -61,8 +61,27 @@ class NTEstimate:
                 )
         self.est.update()
         print("NTEstimate.step() result ", self.est.result)
-        results: tuple[int, gtsam.Pose2, np.ndarray] = cast(tuple[int, gtsam.Pose2, np.ndarray], self.est.get_result())
-        poses: list[Pose2d] = []
-        # pose = self.est.result.atPose2()
-        # self.pose_sender.send()
+        results: tuple[int, gtsam.Pose2, np.ndarray] = cast(
+            tuple[int, gtsam.Pose2, np.ndarray], self.est.get_result())
+        timestamp = results[0]
+        most_recent_estimate = results[1]
+        covariance = results[2]
+        # TODO: move this somehow
+        twist = self.est.measurement
+        odo_dt_us = self.est.odo_dt
+        # future_estimate = self.est.extrapolate(most_recent_estimate)
+        pose_estimate = PoseEstimate25(most_recent_estimate.x(),
+                                      most_recent_estimate.y(),
+                                      most_recent_estimate.theta(),
+                                      math.sqrt(covariance[0,0]),
+                                      math.sqrt(covariance[1,1]),
+                                      math.sqrt(covariance[2,2]),
+                                      twist.dx,
+                                      twist.dy,
+                                      twist.dtheta,
+                                      odo_dt_us
+                                      )
+        self.pose_sender.send(pose_estimate, ntcore._now() - timestamp)
+
+
 

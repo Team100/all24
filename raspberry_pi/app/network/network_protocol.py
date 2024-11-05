@@ -6,7 +6,7 @@ import dataclasses
 from typing import Protocol
 
 import numpy as np
-from wpimath.geometry import Pose2d, Rotation3d, Transform3d
+from wpimath.geometry import Rotation3d, Transform3d
 from wpiutil import wpistruct
 
 
@@ -27,7 +27,6 @@ class Blip25:
     so i can't use an array here. it's ok because a tag only
     ever has exactly 4 corners; if one is occluded then the
     entire tag is unseen.
-    There's no tag id here because tag id is in the NT key.
     """
 
     tag_id: int
@@ -56,6 +55,27 @@ class Blip25:
         )
 
 
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
+class PoseEstimate25:
+    """Result of the pose estimator."""
+
+    # most-recent state (corresponding to the NT timestamp)
+    x: float
+    y: float
+    theta: float
+    # std dev of most-recent state (sqrt of diagonal of marginal covariance)
+    x_sigma: float
+    y_sigma: float
+    theta_sigma: float
+    # twist of most-recent odometry
+    dx: float
+    dy: float
+    dtheta: float
+    # time between next-most-recent and most-recent
+    dt: float
+
+
 class DoubleSender(Protocol):
     def send(self, val: float, delay_us: int) -> None: ...
 
@@ -74,13 +94,15 @@ class Blip25Sender(Protocol):
 
 class Blip25Receiver(Protocol):
     def get(self) -> list[tuple[int, list[Blip25]]]:
-        """Returns the list of tuples (timetamp, list[blip]) seen in a single frame"""
+        """Receive the list of tuples (timetamp, list[blip]) seen in a single frame"""
         ...
 
+
 class PoseSender(Protocol):
-    def send(self, val: list[Pose2d], delay_us: int) -> None:
-        """A list of future pose estimates."""
+    def send(self, val: PoseEstimate25, delay_us: int) -> None:
+        """Send the pose estimate."""
         ...
+
 
 class Network(Protocol):
     def get_double_sender(self, name: str) -> DoubleSender: ...

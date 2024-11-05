@@ -1,15 +1,17 @@
 # pylint: disable=R0902,R0903,W0212
 
 from typing_extensions import override
-from wpimath.geometry import Rotation3d, Pose2d
+from wpimath.geometry import Rotation3d
 from app.network.network_protocol import (
     Blip24,
     Blip25,
     Blip25Receiver,
+    Blip25Sender,
     BlipSender,
     DoubleSender,
     Network,
     NoteSender,
+    PoseEstimate25,
     PoseSender,
 )
 
@@ -41,7 +43,7 @@ class FakeNoteSender(NoteSender):
         self.notes.extend(val)
 
 
-class FakeBlip25Sender(BlipSender):
+class FakeBlip25Sender(Blip25Sender):
     def __init__(self, blips: list[Blip25]) -> None:
         self.blips = blips
 
@@ -66,8 +68,8 @@ class FakePoseSender(PoseSender):
         self.net = net
 
     @override
-    def send(self, val: list[Pose2d], delay_us: int) -> None:
-        self.net.poses = val
+    def send(self, val: PoseEstimate25, delay_us: int) -> None:
+        self.net.estimate = val
 
 
 class FakeNetwork(Network):
@@ -78,7 +80,7 @@ class FakeNetwork(Network):
         # key: camera, list of updates, each update is tuple (timestamp, list of blips)
         self.received_blip25s: dict[str, list[tuple[int, list[Blip25]]]] = {}
         self.notes: dict[str, list[Rotation3d]] = {}
-        self.poses: list[Pose2d] = []
+        self.estimate: PoseEstimate25
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:
@@ -99,7 +101,7 @@ class FakeNetwork(Network):
         return FakeNoteSender(self.notes[name])
 
     @override
-    def get_blip25_sender(self, name: str) -> BlipSender:
+    def get_blip25_sender(self, name: str) -> Blip25Sender:
         if name not in self.blip25s:
             self.blip25s[name] = []
         return FakeBlip25Sender(self.blip25s[name])
