@@ -89,7 +89,9 @@ class NoteSender(Protocol):
 
 
 class Blip25Sender(Protocol):
-    def send(self, val: list[Blip25], delay_us: int) -> None: ...
+    def send(self, val: list[Blip25], delay_us: int) -> None:
+        """This is used by the simulator, and by the cameras."""
+        ...
 
 
 class Blip25Receiver(Protocol):

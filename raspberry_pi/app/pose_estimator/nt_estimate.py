@@ -52,6 +52,9 @@ class NTEstimate:
             time_slice = math.ceil(timestamp_us/20000) * 20000
             # print("NTEstimate.step() time slice ", time_slice)
             blip_list = sight[1]
+            # TODO: push this list-unpacking into the estimate module
+            # so that the network schema and the estimate schema are more
+            # similar
             for blip in blip_list:
                 pixels = blip.measurement()
                 corners = self.field_map.get(blip.tag_id)
