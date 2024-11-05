@@ -13,7 +13,7 @@ import org.team100.lib.logging.LoggerFactory.EnumLogger;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.util.Memo;
@@ -147,16 +147,9 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
     }
 
     /**
-     * array order:
-     * 
-     * frontLeft
-     * frontRight
-     * rearLeft
-     * rearRight
-     * 
      * Does not desaturate.
      */
-    public void setRawModuleStates(SwerveModuleState100[] states) {
+    public void setRawModuleStates(SwerveModuleStates states) {
         m_swerveLocal.setRawModuleStates(states);
     }
 

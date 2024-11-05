@@ -2,7 +2,7 @@ package org.team100.lib.commands.drivetrain.manual;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 
 
 public interface ModuleStateDriver extends Glassy {
@@ -10,5 +10,5 @@ public interface ModuleStateDriver extends Glassy {
      * @param input control units [-1,1]
      * @return module states
      */
-    SwerveModuleState100[] apply(DriverControl.Velocity input);
+    SwerveModuleStates apply(DriverControl.Velocity input);
 }

@@ -6,6 +6,7 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
@@ -143,12 +144,14 @@ public class SwerveUtil {
      */
     public static boolean desiredIsStopped(
             ChassisSpeeds desiredState,
-            SwerveModuleState100[] desiredModuleStates,
-            SwerveModuleState100[] prevModuleStates) {
+            SwerveModuleStates desiredModuleStates,
+            SwerveModuleStates prevModuleStates) {
+        SwerveModuleState100[] desiredModuleStatesAll = desiredModuleStates.all();
+        SwerveModuleState100[] prevModuleStatesAll = prevModuleStates.all();
         if (GeometryUtil.isZero(desiredState)) {
-            for (int i = 0; i < prevModuleStates.length; ++i) {
-                desiredModuleStates[i].angle = prevModuleStates[i].angle;
-                desiredModuleStates[i].speedMetersPerSecond = 0.0;
+            for (int i = 0; i < prevModuleStatesAll.length; ++i) {
+                desiredModuleStatesAll[i].angle = prevModuleStatesAll[i].angle;
+                desiredModuleStatesAll[i].speedMetersPerSecond = 0.0;
             }
             return true;
         }
