@@ -5,6 +5,7 @@ import time
 import unittest
 
 import ntcore
+from wpimath.geometry import Rotation2d
 
 from app.config.identity import Identity
 from app.network.fake_network import FakeNetwork
@@ -12,10 +13,13 @@ from app.network.network_protocol import Blip25, PoseEstimate25
 from app.network.real_network import RealNetwork
 from app.pose_estimator.field_map import FieldMap
 from app.pose_estimator.nt_estimate import NTEstimate
+from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
+                                                       SwerveModulePosition100,
+                                                       SwerveModulePositions)
 
 
 class NTEstTest(unittest.TestCase):
-    def test_real_nt_est(self) -> None:
+    def test_real_nt_est_blips(self) -> None:
         print()
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
@@ -60,7 +64,7 @@ class NTEstTest(unittest.TestCase):
             self.assertAlmostEqual(0, estimate.dtheta, 3)
             self.assertAlmostEqual(0, estimate.dt, 3)
 
-    def test_fake_nt_est(self) -> None:
+    def test_fake_nt_est_blips(self) -> None:
         field_map = FieldMap()
         net = FakeNetwork()
         est = NTEstimate(field_map, net)
@@ -97,6 +101,49 @@ class NTEstTest(unittest.TestCase):
         self.assertAlmostEqual(0, net.estimate.dtheta, 3)
         self.assertAlmostEqual(0, net.estimate.dt, 3)
 
-
-
-
+    def test_real_nt_est_odo(self) -> None:
+        print()
+        inst = ntcore.NetworkTableInstance.getDefault()
+        inst.startServer()
+        pub = inst.getStructTopic("bar", SwerveModulePositions).publish(
+            ntcore.PubSubOptions(keepDuplicates=True)
+        )
+        sub = inst.getStructTopic("pose", PoseEstimate25).subscribe(None)
+        field_map = FieldMap()
+        net = RealNetwork(Identity.UNKNOWN)
+        est = NTEstimate(field_map, net)
+        estimate = None
+        for i in range(10):
+            time.sleep(0.02)
+            # print("NTEstTest.test_real_nt_est() i ", i)
+            time_us = ntcore._now()
+            # print("NTEstTest.test_real_nt_est() time_us ", time_us)
+            
+            pub.set(
+                SwerveModulePositions(
+                    SwerveModulePosition100(0.1*i, OptionalRotation2d(True, Rotation2d(0))),
+                    SwerveModulePosition100(0.1*i, OptionalRotation2d(True, Rotation2d(0))),
+                    SwerveModulePosition100(0.1*i, OptionalRotation2d(True, Rotation2d(0))),
+                    SwerveModulePosition100(0.1*i, OptionalRotation2d(True, Rotation2d(0))),
+                ),
+                time_us,
+            )
+            est.step()
+            estimate = sub.get()
+            print(estimate)
+        if estimate is not None:
+            # so what are we left with?
+            # ten steps of 0.1 each
+            self.assertAlmostEqual(0.9, estimate.x, 3)
+            self.assertAlmostEqual(0, estimate.y, 3)
+            self.assertAlmostEqual(0, estimate.theta, 3)
+            # prior was 0.3, each odo is 0.01
+            self.assertAlmostEqual(0.301, estimate.x_sigma, 3)
+            self.assertAlmostEqual(0.315, estimate.y_sigma, 3)
+            # prior was 0.1
+            self.assertAlmostEqual(0.104, estimate.theta_sigma, 3)
+            # we should get back the odometry we sent
+            self.assertAlmostEqual(0.1, estimate.dx, 3)
+            self.assertAlmostEqual(0, estimate.dy, 3)
+            self.assertAlmostEqual(0, estimate.dtheta, 3)
+            self.assertAlmostEqual(20000, estimate.dt, 3)

@@ -96,7 +96,7 @@ class FakeNetwork(Network):
         self.received_blip25s: dict[str, list[tuple[int, list[Blip25]]]] = {}
         self.notes: dict[str, list[Rotation3d]] = {}
         self.estimate: PoseEstimate25
-        self.received_positions: list[tuple[int, SwerveModulePositions]]
+        self.received_positions: list[tuple[int, SwerveModulePositions]] = []
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:

@@ -143,6 +143,12 @@ class RealOdometryReceiver(OdometryReceiver):
     ) -> None:
         self.name = name
         self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(
+            inst, [name], ntcore.PubSubOptions(keepDuplicates=True)
+        )
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
 
     def get(self) -> list[tuple[int, SwerveModulePositions]]:
         result: list[tuple[int, SwerveModulePositions]] = []
@@ -153,7 +159,7 @@ class RealOdometryReceiver(OdometryReceiver):
             nt_value: ntcore.Value = value_event_data.value
             time_us = nt_value.time() - start_time_us
             raw: bytes = cast(bytes, nt_value.getRaw())
-            pos: SwerveModulePositions = wpistruct.unpack(Blip25, raw)
+            pos: SwerveModulePositions = wpistruct.unpack(SwerveModulePositions, raw)
             result.append((time_us, pos))
         return result
 

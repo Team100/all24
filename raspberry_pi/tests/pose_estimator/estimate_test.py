@@ -130,13 +130,24 @@ class EstimateAccelerometerTest(unittest.TestCase):
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
         positions = SwerveModulePositions(
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+        )
+
+        # this will just record the positions and timestamp
+        est.odometry(0, positions, odometry_noise)
+
+        positions = SwerveModulePositions(
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
         )
 
-        est.odometry(0, 1, positions, odometry_noise)
+        # this should actually apply the between factor
+        est.odometry(1, positions, odometry_noise)
 
         est.update()
 
@@ -157,6 +168,17 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
         est.add_state(1, gtsam.Pose2())
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
+
+        positions = SwerveModulePositions(
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+            SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
+        )
+
+        # this will just record the positions and timestamp
+        est.odometry(0, positions, odometry_noise)
+
         positions = SwerveModulePositions(
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
@@ -164,7 +186,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
         )
 
-        est.odometry(0, 1, positions, odometry_noise)
+        est.odometry(1, positions, odometry_noise)
 
         est.update()
 
