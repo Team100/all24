@@ -12,7 +12,7 @@ from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d
 
 from app.pose_estimator.estimate import Estimate
-from app.pose_estimator.swerve_module_position import OptionalRotation2d, SwerveModulePosition100
+from app.pose_estimator.swerve_module_position import OptionalRotation2d, SwerveModulePosition100, SwerveModulePositions
 
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
@@ -129,12 +129,12 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
 
-        positions = [
+        positions = SwerveModulePositions(
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
-        ]
+        )
 
         est.odometry(0, 1, positions, odometry_noise)
 
@@ -157,12 +157,12 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
         est.add_state(1, gtsam.Pose2())
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
-        positions = [
+        positions = SwerveModulePositions(
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0.1, OptionalRotation2d(True, Rotation2d(0))),
-        ]
+        )
 
         est.odometry(0, 1, positions, odometry_noise)
 

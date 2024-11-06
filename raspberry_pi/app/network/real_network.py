@@ -20,9 +20,14 @@ from app.network.network_protocol import (
     DoubleSender,
     Network,
     NoteSender,
+    OdometryReceiver,
     PoseEstimate25,
     PoseSender,
 )
+from app.pose_estimator.swerve_module_position import SwerveModulePositions
+
+# global singleton
+start_time_us = ntcore._now()
 
 
 class RealDoubleSender(DoubleSender):
@@ -77,7 +82,7 @@ class RealBlip25Receiver(Blip25Receiver):
         )
         self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
         # self.poller.addListener([""], ntcore.EventFlags.kValueAll)
-        self.start_time_us = ntcore._now()
+
         # print("RealBlip25Receiver.__init__() start_time_us ", self.start_time_us)
 
     @override
@@ -103,7 +108,7 @@ class RealBlip25Receiver(Blip25Receiver):
             # server time is always 1.  ???
             server_time_us = nt_value.server_time()
             # print("RealBlip25Receiver.get() server time ", server_time_us)
-            time_us = nt_value.time() - self.start_time_us
+            time_us = nt_value.time() - start_time_us
             # print("RealBlip25Receiver.get() time ", time_us)
 
             frame: list[Blip25] = []
@@ -128,6 +133,29 @@ class RealPoseSender(PoseSender):
     @override
     def send(self, val: PoseEstimate25, delay_us: int) -> None:
         self.pub.set(val, int(ntcore._now() - delay_us))
+
+
+class RealOdometryReceiver(OdometryReceiver):
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+
+    def get(self) -> list[tuple[int, SwerveModulePositions]]:
+        result: list[tuple[int, SwerveModulePositions]] = []
+        # see NotePosition24ArrayListener for example
+        queue: list = self.poller.readQueue()
+        for event in queue:
+            value_event_data = cast(ntcore.ValueEventData, event.data)
+            nt_value: ntcore.Value = value_event_data.value
+            time_us = nt_value.time() - start_time_us
+            raw: bytes = cast(bytes, nt_value.getRaw())
+            pos: SwerveModulePositions = wpistruct.unpack(Blip25, raw)
+            result.append((time_us, pos))
+        return result
 
 
 class RealNetwork(Network):
@@ -176,6 +204,10 @@ class RealNetwork(Network):
     @override
     def get_pose_sender(self, name: str) -> PoseSender:
         return RealPoseSender(self._inst.getStructTopic(name, PoseEstimate25).publish())
+
+    @override
+    def get_odometry_receiver(self, name: str) -> OdometryReceiver:
+        return RealOdometryReceiver(name, self._inst)
 
     @override
     def flush(self) -> None:

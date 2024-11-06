@@ -21,9 +21,10 @@ import app.pose_estimator.factors.gyro as gyro
 import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
-from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
+from app.pose_estimator.swerve_module_delta import SwerveModuleDeltas
 from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100)
+                                                       SwerveModulePosition100,
+                                                       SwerveModulePositions)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -75,12 +76,12 @@ class Estimate:
             ]
         )
         # TODO: reset position
-        self.positions = [
+        self.positions = SwerveModulePositions(
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
-        ]
+        )
         # most-recent odometry
         # remember this so we can use it for extrapolation.
         # TODO: keep track of how old it is?
@@ -101,7 +102,7 @@ class Estimate:
         self.new_factors.push_back(gtsam.PriorFactorPose3(C(0), OFFSET0, OFFSET_NOISE))
 
     def add_state(self, time_us: int, initial_value: gtsam.Pose2) -> None:
-        """Add a new robot state (pose) to the estimator."""
+        """Add a new robot state (pose) to the estimator, if it doesn't already exist."""
         if self.result.exists(X(time_us)):
             # it's already in the model
             return
@@ -133,7 +134,7 @@ class Estimate:
         self,
         t0_us: int,
         t1_us: int,
-        positions: list[SwerveModulePosition100],
+        positions: SwerveModulePositions,
         noise: SharedNoiseModel,
     ) -> None:
         """Add an odometry measurement.  Remember to call add_state so that
@@ -146,7 +147,7 @@ class Estimate:
         # TODO: out-of-order odometry
         # each odometry update maps exactly to a "between" factor
         # remember a "twist" is a robot-relative concept
-        deltas: list[SwerveModuleDelta] = DriveUtil.module_position_delta(
+        deltas: SwerveModuleDeltas = DriveUtil.module_position_delta(
             self.positions, positions
         )
         # this is the tangent-space (twist) measurement
@@ -164,7 +165,7 @@ class Estimate:
         self.positions = positions
 
     def odometry_custom(
-        self, t0_us: int, t1_us: int, positions: list[SwerveModulePosition100]
+        self, t0_us: int, t1_us: int, positions: SwerveModulePositions
     ) -> None:
         """Add an odometry measurement.  Remember to call add_state so that
         the odometry factor has something to refer to.
@@ -176,7 +177,7 @@ class Estimate:
         # TODO: out-of-order odometry
         # each odometry update maps exactly to a "between" factor
         # remember a "twist" is a robot-relative concept
-        deltas: list[SwerveModuleDelta] = DriveUtil.module_position_delta(
+        deltas: SwerveModuleDeltas = DriveUtil.module_position_delta(
             self.positions, positions
         )
         # this is the tangent-space (twist) measurement

@@ -9,6 +9,8 @@ import numpy as np
 from wpimath.geometry import Rotation3d, Transform3d
 from wpiutil import wpistruct
 
+from app.pose_estimator.swerve_module_position import SwerveModulePositions
+
 
 @wpistruct.make_wpistruct  # type:ignore
 @dataclasses.dataclass
@@ -101,8 +103,12 @@ class Blip25Receiver(Protocol):
 
 
 class PoseSender(Protocol):
-    def send(self, val: PoseEstimate25, delay_us: int) -> None:
-        """Send the pose estimate."""
+    def send(self, val: PoseEstimate25, delay_us: int) -> None: ...
+
+
+class OdometryReceiver(Protocol):
+    def get(self) -> list[tuple[int, SwerveModulePositions]]: 
+        """Receive a list of tuples (timestamp, positions)"""
         ...
 
 
@@ -113,4 +119,5 @@ class Network(Protocol):
     def get_blip25_sender(self, name: str) -> Blip25Sender: ...
     def get_blip25_receiver(self, name: str) -> Blip25Receiver: ...
     def get_pose_sender(self, name: str) -> PoseSender: ...
+    def get_odometry_receiver(self, name: str) -> OdometryReceiver: ...
     def flush(self) -> None: ...

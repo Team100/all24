@@ -11,9 +11,11 @@ from app.network.network_protocol import (
     DoubleSender,
     Network,
     NoteSender,
+    OdometryReceiver,
     PoseEstimate25,
     PoseSender,
 )
+from app.pose_estimator.swerve_module_position import SwerveModulePositions
 
 
 class FakeDoubleSender(DoubleSender):
@@ -72,6 +74,19 @@ class FakePoseSender(PoseSender):
         self.net.estimate = val
 
 
+class FakeOdometryReceiver(OdometryReceiver):
+    def __init__(
+        self,
+        name: str,
+        net: "FakeNetwork"
+    ) -> None:
+        self.name = name
+        self.net = net
+
+    def get(self) -> list[tuple[int, SwerveModulePositions]]:
+        return self.net.received_positions
+
+
 class FakeNetwork(Network):
     def __init__(self) -> None:
         self.doubles: dict[str, list[float]] = {}
@@ -81,6 +96,7 @@ class FakeNetwork(Network):
         self.received_blip25s: dict[str, list[tuple[int, list[Blip25]]]] = {}
         self.notes: dict[str, list[Rotation3d]] = {}
         self.estimate: PoseEstimate25
+        self.received_positions: list[tuple[int, SwerveModulePositions]]
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:
@@ -112,8 +128,13 @@ class FakeNetwork(Network):
             self.received_blip25s[name] = []
         return FakeBlip25Receiver(name, self)
 
+    @override
     def get_pose_sender(self, name: str) -> PoseSender:
         return FakePoseSender(name, self)
+
+    @override
+    def get_odometry_receiver(self, name:str) -> OdometryReceiver:
+        return FakeOdometryReceiver(name, self)
 
     @override
     def flush(self) -> None:
