@@ -226,17 +226,10 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
 
     public void setChassisSpeedsNormally(ChassisSpeeds speeds, double gyroRateRad_S) {
         // Informs SwerveDriveKinematics of the module states.
-        SwerveModuleStates states;
-        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
-            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, m_prevSetpoint.getChassisSpeeds(),
-                    m_prevSetpoint.getModuleStates(), gyroRateRad_S);
-        } else {
-            states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S);
-            // System.out.println(speeds);
-            m_log_chassis_speed.log(() -> speeds);
-        }
+        SwerveModuleStates states = m_swerveKinodynamics.toSwerveModuleStates(speeds, gyroRateRad_S);
         setModuleStates(states);
         m_prevSetpoint = new SwerveSetpoint(speeds, states);
+        m_log_chassis_speed.log(() -> speeds);
     }
 
     /** Updates visualization. */
