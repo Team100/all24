@@ -94,8 +94,8 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
             stepTime(kDtS);
             fixture.drive.periodic();
             command.execute();
-            double measurement = fixture.drive.getSwerveLocal().states()[0].angle.get().getRadians();
-            SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates()[0];
+            double measurement = fixture.drive.getSwerveLocal().states().frontLeft().angle.get().getRadians();
+            SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates().frontLeft();
             State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)

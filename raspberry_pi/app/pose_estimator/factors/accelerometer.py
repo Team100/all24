@@ -32,11 +32,13 @@ rotational acceleration term in the measurement.
 
 import gtsam
 import numpy as np
-from gtsam.noiseModel import Base as SharedNoiseModel
+from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 
-from app.pose_estimator.numerical_derivative import (numericalDerivative31,
-                                                     numericalDerivative32,
-                                                     numericalDerivative33)
+from app.pose_estimator.numerical_derivative import (
+    numericalDerivative31,
+    numericalDerivative32,
+    numericalDerivative33,
+)
 
 
 def coriolis(v2: np.ndarray) -> np.ndarray:
@@ -85,7 +87,8 @@ def h_H(
 ):
     """Error function including Jacobians.
     measured: [x,y] accelerations"""
-    result = h(p0, p1, p2, dt1, dt2) - measured
+    estimated = h(p0, p1, p2, dt1, dt2)
+    result = estimated - measured
     if H is not None:
         H[0] = numericalDerivative31(lambda x, y, z: h(x, y, z, dt1, dt2), p0, p1, p2)
         H[1] = numericalDerivative32(lambda x, y, z: h(x, y, z, dt1, dt2), p0, p1, p2)
@@ -99,10 +102,10 @@ def factor(
     dt1: float,
     dt2: float,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
-    p2_key: gtsam.Symbol,
-) -> gtsam.NonlinearFactor:
+    p0_key: int,
+    p1_key: int,
+    p2_key: int,
+) -> gtsam.NoiseModelFactor:
     # TODO: something other than dt1 and dt2?
     # this is the robot-frame acceleration vector.
     measured = np.array([x, y])
@@ -116,5 +119,7 @@ def factor(
         return h_H(measured, p0, p1, p2, dt1, dt2, H)
 
     return gtsam.CustomFactor(
-        model, gtsam.KeyVector([p0_key, p1_key, p2_key]), error_func
+        model,
+        gtsam.KeyVector([p0_key, p1_key, p2_key]),  # type:ignore
+        error_func,
     )

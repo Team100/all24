@@ -47,9 +47,9 @@ def numericalDerivative11(h: Callable[[X], Y], x: X, delta=1e-5) -> np.ndarray:
     factor: float = 1.0 / (2.0 * delta)
     for j in range(N):
         dx[j] = delta
-        dy1 = local(hx, h(retract(x, dx)))
+        dy1 = local(hx, h(retract(x, dx)))  # type:ignore
         dx[j] = -delta
-        dy2 = local(hx, h(retract(x, dx)))
+        dy2 = local(hx, h(retract(x, dx)))  # type:ignore
         dx[j] = 0
         H[:, j] = (dy1 - dy2) * factor
     return H
@@ -57,31 +57,31 @@ def numericalDerivative11(h: Callable[[X], Y], x: X, delta=1e-5) -> np.ndarray:
 
 def numericalDerivative21(
     h: Callable[[X1, X2], Y], x1: X1, x2: X2, delta=1e-5
-) -> np.array:
+) -> np.ndarray:
     return numericalDerivative11(lambda x: h(x, x2), x1, delta)
 
 
 def numericalDerivative22(
     h: Callable[[X1, X2], Y], x1: X1, x2: X2, delta=1e-5
-) -> np.array:
+) -> np.ndarray:
     return numericalDerivative11(lambda x: h(x1, x), x2, delta)
 
 
 def numericalDerivative31(
     h: Callable[[X1, X2, X3], Y], x1: X1, x2: X2, x3: X3, delta=1e-5
-) -> np.array:
+) -> np.ndarray:
     return numericalDerivative11(lambda x: h(x, x2, x3), x1, delta)
 
 
 def numericalDerivative32(
     h: Callable[[X1, X2, X3], Y], x1: X1, x2: X2, x3: X3, delta=1e-5
-) -> np.array:
+) -> np.ndarray:
     return numericalDerivative11(lambda x: h(x1, x, x3), x2, delta)
 
 
 def numericalDerivative33(
     h: Callable[[X1, X2, X3], Y], x1: X1, x2: X2, x3: X3, delta=1e-5
-) -> np.array:
+) -> np.ndarray:
     return numericalDerivative11(lambda x: h(x1, x2, x), x3, delta)
 
 
@@ -94,5 +94,5 @@ def numericalDerivative61(
     x5: X5,
     x6: X6,
     delta=1e-5,
-) -> np.array:
+) -> np.ndarray:
     return numericalDerivative11(lambda x: h(x, x2, x3, x4, x5, x6), x1, delta)

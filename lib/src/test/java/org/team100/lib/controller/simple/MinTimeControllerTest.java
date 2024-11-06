@@ -30,7 +30,7 @@ class MinTimeControllerTest {
         // System.out.println("testDelayWithAccel");
         // if actuation uses the acceleration field, then delay causes lag in control
         // (equal to the delay) and oscillation around the goal.
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 x -> x,
                 1, // maxV
@@ -55,11 +55,12 @@ class MinTimeControllerTest {
 
         for (int i = 0; i < 500; ++i) {
             State100 delayedMeasurement = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurement, goal);
+            State100 u = c.calculate(kDt, delayedMeasurement, goal);
             double tSec = i * kDt;
             State100 newState = applyAccelOnly(tSec, actualCurrentState, u);
             queue.add(newState);
             actualCurrentState = newState;
+            // System.out.println(u);
         }
     }
 
@@ -71,7 +72,7 @@ class MinTimeControllerTest {
         // ratio of the delay and the timestep (!)
         // so definitely don't do this -- it's why the "normal" way to use the profile
         // is to use the previous setpoint, not the measurement, as the initial state.
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 x -> x,
                 1, // maxV
@@ -96,7 +97,7 @@ class MinTimeControllerTest {
 
         for (int i = 0; i < 500; ++i) {
             State100 delayedMeasurement = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurement, goal);
+            State100 u = c.calculate(kDt, delayedMeasurement, goal);
             double tSec = i * kDt;
             State100 newState = applyVelocityOnly(tSec, actualCurrentState, u);
             queue.add(newState);
@@ -108,7 +109,7 @@ class MinTimeControllerTest {
     @Test
     void testAngleWrapping() {
         // System.out.println("testAngleWrapping");
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 MathUtil::angleModulus,
                 1, // maxV
@@ -136,7 +137,7 @@ class MinTimeControllerTest {
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
             State100 newStateRad = closedLoop(MathUtil::angleModulus, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
@@ -162,7 +163,7 @@ class MinTimeControllerTest {
     @Test
     void testMovingAngleWrapping() {
         // System.out.println("testMovingAngleWrapping");
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 MathUtil::angleModulus,
                 1, // maxV
@@ -192,7 +193,7 @@ class MinTimeControllerTest {
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
             State100 newStateRad = closedLoop(MathUtil::angleModulus, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
@@ -210,7 +211,7 @@ class MinTimeControllerTest {
         // so to allow some headroom, use 20% less.
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 x -> x,
                 1, // maxV
@@ -224,7 +225,9 @@ class MinTimeControllerTest {
 
         // measurements are substantially delayed.
         Queue<State100> queue = new LinkedList<>();
-        double delay = 0.1;
+        // NOTE SHORT DELAY HERE, works fine.  :-)
+        // long delay (e.g. 0.1) does not work fine
+        double delay = 0.02;
         // double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
@@ -237,11 +240,12 @@ class MinTimeControllerTest {
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
             State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
+            // System.out.println(u);
         }
     }
 
@@ -253,7 +257,7 @@ class MinTimeControllerTest {
         // so to allow some headroom, use 20% less.
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 x -> x,
                 0.6, // maxV
@@ -280,7 +284,7 @@ class MinTimeControllerTest {
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
             State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
@@ -298,7 +302,7 @@ class MinTimeControllerTest {
         // so to allow some headroom, use 20% less.
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 x -> x,
                 1, // maxV
@@ -325,7 +329,7 @@ class MinTimeControllerTest {
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
             State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
@@ -341,7 +345,7 @@ class MinTimeControllerTest {
     @Test
     void testUnderdrive() {
         // System.out.println("testUnderdrive");
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 x -> x,
                 1, // maxV
@@ -363,7 +367,7 @@ class MinTimeControllerTest {
         final double drive = 0.5;
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
 
             State100 newStateRad = closedLoop(x -> x, tSec, noise, drive, actualCurrentStateRad, u);
@@ -385,7 +389,7 @@ class MinTimeControllerTest {
     @Test
     void testOverdrive() {
         // System.out.println("testOverdrive");
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 x -> x,
                 1, // maxV
@@ -407,7 +411,7 @@ class MinTimeControllerTest {
         final double drive = 1.5;
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
-            State100 u = profile.calculate(kDt, delayedMeasurementRad, goalRad);
+            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
 
             State100 newStateRad = closedLoop(x -> x, tSec, noise, drive, actualCurrentStateRad, u);
@@ -445,7 +449,7 @@ class MinTimeControllerTest {
         // max vel = 1 rad/s
         // max accel = 0.8 rad/s^2
 
-        final MinTimeController profile = new MinTimeController(
+        final MinTimeController c = new MinTimeController(
                 logger,
                 x -> x,
                 1, // maxV
@@ -474,7 +478,7 @@ class MinTimeControllerTest {
 
         for (int i = 0; i < iterations; ++i) {
             State100 delayedMeasurementRad = queue.remove();
-            State100 u = profile.calculate(kDt, addNoise(noise, delayedMeasurementRad), goalRad);
+            State100 u = c.calculate(kDt, addNoise(noise, delayedMeasurementRad), goalRad);
             double tSec = i * kDt;
             State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);

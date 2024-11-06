@@ -21,7 +21,7 @@ For production, we should use the native factor.  :-)
 
 import gtsam
 import numpy as np
-from gtsam.noiseModel import Base as SharedNoiseModel
+from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 from wpimath.geometry import Twist2d, Pose2d
 
 from app.pose_estimator.numerical_derivative import (
@@ -52,9 +52,9 @@ def h_H(
 def factorCustom(
     t: Twist2d,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
-) -> gtsam.NonlinearFactor:
+    p0_key: int,
+    p1_key: int,
+) -> gtsam.NoiseModelFactor:
     """Uses a python CustomFactor."""
     measured = np.array([t.dx, t.dy, t.dtheta])
 
@@ -65,15 +65,19 @@ def factorCustom(
         p1: gtsam.Pose2 = v.atPose2(this.keys()[1])
         return h_H(measured, p0, p1, H)
 
-    return gtsam.CustomFactor(model, gtsam.KeyVector([p0_key, p1_key]), error_func)
+    return gtsam.CustomFactor(
+        model,
+        gtsam.KeyVector([p0_key, p1_key]),  # type:ignore
+        error_func,
+    )
 
 
 def factorNative(
     t: Twist2d,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
-) -> gtsam.NonlinearFactor:
+    p0_key: int,
+    p1_key: int,
+) -> gtsam.NoiseModelFactor:
     """Uses the GTSAM BetweenFactor."""
     # the gtsam between factor uses a relative pose, not a twist.
     p = Pose2d().exp(t)
@@ -84,9 +88,9 @@ def factorNative(
 def factor(
     t: Twist2d,
     model: SharedNoiseModel,
-    p0_key: gtsam.Symbol,
-    p1_key: gtsam.Symbol,
-) -> gtsam.NonlinearFactor:
+    p0_key: int,
+    p1_key: int,
+) -> gtsam.NoiseModelFactor:
     """Factory for a factor implementing odometry using tangent-space measurements."""
     return factorNative(t, model, p0_key, p1_key)
     # return factorCustom(t, model, p0_key, p1_key)

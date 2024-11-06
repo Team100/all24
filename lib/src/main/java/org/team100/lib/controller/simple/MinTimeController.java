@@ -122,6 +122,8 @@ public class MinTimeController implements Glassy {
 
     private final StringLogger m_log_mode;
 
+    private boolean m_atSetpoint;
+
     /**
      * @param modulus        for angle wrapping
      * @param maxVel
@@ -185,6 +187,8 @@ public class MinTimeController implements Glassy {
      * period.
      */
     public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
+        m_log_mode.log(() -> "calculating");
+
         State100 initial = new State100(initialRaw.x(),
                 MathUtil.clamp(initialRaw.v(), -m_maxVelocity, m_maxVelocity));
 
@@ -194,8 +198,10 @@ public class MinTimeController implements Glassy {
                 m_modulus.applyAsDouble(goalRaw.x() - initialRaw.x()) + initialRaw.x(),
                 MathUtil.clamp(goalRaw.v(), -m_maxVelocity, m_maxVelocity));
 
+        m_atSetpoint = false;
         // AT THE GOAL: DO NOTHING
         if (goal.near(initial, m_tolerance)) {
+            m_atSetpoint = true;
             m_log_mode.log(() -> "within tolerance");
             return modulus(goal);
         }
@@ -272,6 +278,11 @@ public class MinTimeController implements Glassy {
             return fullG(dt, initial, 1);
         }
         return fullG(dt, initial, -1);
+    }
+
+    /** True if the most-recent call to calculate is within tolerance. */
+    public boolean atSetpoint() {
+        return m_atSetpoint;
     }
 
     /**
@@ -393,6 +404,7 @@ public class MinTimeController implements Glassy {
      * For I paths, use slightly-stronger effort.
      */
     private State100 fullI(double dt, State100 in_initial, double direction) {
+        m_log_mode.log(() -> "full I");
         // final double scale = 0.1;
         direction = MathUtil.clamp(direction, -1, 1);
         double x_i = in_initial.x();
@@ -407,6 +419,7 @@ public class MinTimeController implements Glassy {
      * For G paths, use slightly-weaker effort.
      */
     private State100 fullG(double dt, State100 in_initial, double direction) {
+        m_log_mode.log(() -> "full I");
         // final double scale = 0.1;
         direction = MathUtil.clamp(direction, -1, 1);
         double x_i = in_initial.x();

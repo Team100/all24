@@ -40,7 +40,7 @@ class NoteDetector(Interpreter):
 
         # opencv hue values are 0-180, half the usual number
         self.object_lower = np.array((0, 200, 190))
-        self.object_lower2 = np.array(6, 0, 0)
+        self.object_lower2 = np.array((6, 0, 0))
         self.object_higher = np.array((8, 255, 255))
         self.object_higher2 = np.array((180, 255, 255))
 
@@ -66,7 +66,6 @@ class NoteDetector(Interpreter):
             floodfill = img_range.copy()
             mask = np.zeros((self.height + 2, self.width + 2), np.uint8)
             cv2.floodFill(floodfill, mask, [0, 0], [255])
-            
 
             floodfill_inv = cv2.bitwise_not(floodfill)
             img_floodfill = cv2.bitwise_or(img_range, floodfill_inv)
