@@ -36,10 +36,6 @@ public enum Experiment {
      */
     AvoidVisionJitter,
     /**
-     * 
-     */
-    UseSecondDerivativeSwerve,
-    /**
      * Filter rotational output to remove oscillation
      */
     UseThetaFilter,

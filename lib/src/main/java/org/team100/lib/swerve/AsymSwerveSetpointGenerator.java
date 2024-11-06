@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.LoggerFactory;
@@ -72,14 +70,8 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             ChassisSpeeds desiredState) {
         SwerveModuleStates prevModuleStates = prevSetpoint.getModuleStates();
         // the desired module state speeds are always positive.
-        SwerveModuleStates desiredModuleStates;
-        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
-            desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
-                    desiredState, prevSetpoint.getChassisSpeeds(), prevModuleStates);
-        } else {
-            desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
-                    desiredState);
-        }
+        SwerveModuleStates desiredModuleStates = m_limits.toSwerveModuleStatesWithoutDiscretization(
+                desiredState);
         desiredState = desaturate(desiredState, desiredModuleStates);
         boolean desiredIsStopped = SwerveUtil.desiredIsStopped(desiredState, desiredModuleStates, prevModuleStates);
 
@@ -93,7 +85,6 @@ public class AsymSwerveSetpointGenerator implements Glassy {
         double[] desired_vy = computeVy(desiredModuleStates);
         // elements may be null.
         Rotation2d[] desired_heading = computeHeading(desiredModuleStates);
-        double[] desired_heading_velocity = computeHeadingVelocity(desiredModuleStates);
 
         boolean shouldStopAndReverse = shouldStopAndReverse(prev_heading, desired_heading);
         if (shouldStopAndReverse
@@ -150,7 +141,6 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                     desired_vx,
                     desired_vy,
                     desired_heading,
-                    desired_heading_velocity,
                     overrideSteering);
             min_s = Math.min(min_s, steering_min_s);
         }
@@ -228,18 +218,6 @@ public class AsymSwerveSetpointGenerator implements Glassy {
     }
 
     /**
-     * Which way each module is actually going, taking speed polarity into account.
-     */
-    private double[] computeHeadingVelocity(SwerveModuleStates states) {
-        return new double[] {
-                states.frontLeft().omega,
-                states.frontRight().omega,
-                states.rearLeft().omega,
-                states.rearRight().omega,
-        };
-    }
-
-    /**
      * If we want to go back the way we came, it might be faster to stop
      * and then reverse. This is certainly true for near-180 degree turns, but
      * it's definitely not true for near-90 degree turns.
@@ -284,20 +262,10 @@ public class AsymSwerveSetpointGenerator implements Glassy {
                 dy,
                 dtheta,
                 min_s);
-        SwerveModuleStates setpointStates;
         // the speeds in these states are always positive.
-        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
-            setpointStates = m_limits.toSwerveModuleStates(
-                    setpointSpeeds,
-                    prevSetpoint.getChassisSpeeds(),
-                    prevModuleStates,
-                    setpointSpeeds.omegaRadiansPerSecond);
-        } else {
-            setpointStates = m_limits.toSwerveModuleStates(
-                    setpointSpeeds,
-                    setpointSpeeds.omegaRadiansPerSecond);
-        }
-
+        SwerveModuleStates setpointStates = m_limits.toSwerveModuleStates(
+                setpointSpeeds,
+                setpointSpeeds.omegaRadiansPerSecond);
         applyOverrides(overrideSteering, setpointStates);
         flipIfRequired(prevModuleStates, setpointStates);
 
@@ -321,7 +289,6 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             }
         }
     }
-
 
     private void flipIfRequired(SwerveModuleStates prevStates, SwerveModuleStates setpointStates) {
         SwerveModuleState100[] prevStatesAll = prevStates.all();

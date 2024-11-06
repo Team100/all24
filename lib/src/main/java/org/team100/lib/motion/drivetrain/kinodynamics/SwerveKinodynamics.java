@@ -319,56 +319,6 @@ public class SwerveKinodynamics implements Glassy {
     }
 
     /**
-     * Inverse kinematics, chassis speeds => module states.
-     * 
-     * The resulting state speeds are always positive.
-     * 
-     * This version does **DISCRETIZATION** to correct for swerve veering.
-     * 
-     * It also does extra veering correction proportional to rotation rate and
-     * translational acceleration.
-     * 
-     * @param in            chassis speeds to transform
-     * @param gyroRateRad_S current gyro rate, or the trajectory gyro rate
-     * @param accelM_S      magnitude of acceleration
-     */
-    public SwerveModuleStates toSwerveModuleStates(
-            ChassisSpeeds in,
-            ChassisSpeeds prevIn,
-            SwerveModuleStates prevSwerveModuleState,
-            double gyroRateRad_S) {
-        // This is the extra correction angle ...
-        Rotation2d angle = new Rotation2d(VeeringCorrection.correctionRad(gyroRateRad_S));
-        // ... which is subtracted here; this isn't really a field-relative
-        // transformation it's just a rotation.
-        ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                in.vxMetersPerSecond,
-                in.vyMetersPerSecond,
-                in.omegaRadiansPerSecond,
-                angle);
-        ChassisSpeeds descretized = ChassisSpeeds.discretize(chassisSpeeds, TimedRobot100.LOOP_PERIOD_S);
-
-        ChassisSpeeds prevChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                prevIn.vxMetersPerSecond,
-                prevIn.vyMetersPerSecond,
-                prevIn.omegaRadiansPerSecond,
-                angle);
-        ChassisSpeeds prevDescretized = ChassisSpeeds.discretize(prevChassisSpeeds, TimedRobot100.LOOP_PERIOD_S);
-
-        ChassisSpeeds acceleration = (chassisSpeeds.minus(prevDescretized)).div(TimedRobot100.LOOP_PERIOD_S);
-
-        return m_kinematics.toSwerveModuleStates(descretized, acceleration, prevSwerveModuleState);
-    }
-
-    /**
-     * The resulting state speeds are always positive.
-     */
-    public SwerveModuleStates toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds,
-            ChassisSpeeds prevChassisSpeeds, SwerveModuleStates prevModuleStates) {
-        return m_kinematics.toSwerveModuleStates(speeds, prevChassisSpeeds, prevModuleStates);
-    }
-
-    /**
      * The resulting state speeds are always positive.
      */
     public SwerveModuleStates toSwerveModuleStatesWithoutDiscretization(ChassisSpeeds speeds) {
