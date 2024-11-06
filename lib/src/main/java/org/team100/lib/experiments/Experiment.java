@@ -40,10 +40,6 @@ public enum Experiment {
      */
     UseThetaFilter,
     /**
-     * Use outboard closed-loop position control for steering instead of onboard PID
-     */
-    OutboardSteering,
-    /**
      * Use low-pass filter and deadbanding on controller feedback, to prevent
      * overresponse to noise and jitter around zero.
      */
