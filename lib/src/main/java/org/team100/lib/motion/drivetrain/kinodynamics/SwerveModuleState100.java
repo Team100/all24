@@ -132,7 +132,7 @@ public class SwerveModuleState100
             SwerveModuleState100 desiredState, Rotation2d currentAngle) {
         // this does happen
         if (desiredState.angle.isEmpty()) {
-            Util.warn("SwerveModuleState100.optimize: empty angle!");
+            // Util.warn("SwerveModuleState100.optimize: empty angle!");
             return desiredState;
         }
         var delta = desiredState.angle.get().minus(currentAngle);

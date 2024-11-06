@@ -56,7 +56,7 @@ public abstract class SwerveModule100 implements Glassy {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
         if (state.angle.isEmpty()) {
-            Util.warn("SwerveModule100.setRawDesiredState: empty angle!");
+            // Util.warn("SwerveModule100.setRawDesiredState: empty angle!");
             m_driveServo.setVelocityM_S(0);
             return;
             // throw new IllegalArgumentException();
