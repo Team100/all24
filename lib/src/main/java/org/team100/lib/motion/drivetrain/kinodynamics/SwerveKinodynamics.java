@@ -368,6 +368,7 @@ public class SwerveKinodynamics implements Glassy {
     public SwerveDrivePoseEstimator100 newPoseEstimator(
             LoggerFactory parent,
             Rotation2d gyroAngle,
+            double gyroRate,
             SwerveModulePositions modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
@@ -375,6 +376,7 @@ public class SwerveKinodynamics implements Glassy {
                 parent,
                 this,
                 gyroAngle,
+                gyroRate,
                 modulePositions,
                 initialPoseMeters,
                 timestampSeconds);

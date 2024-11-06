@@ -178,6 +178,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.reset();
         m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
+                m_gyro.getYawRateNWU(),
                 m_swerveLocal.positions(),
                 new Pose2d(translation, m_gyro.getYawNWU()),
                 Timer.getFPGATimestamp());
@@ -189,6 +190,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.reset();
         m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
+                m_gyro.getYawRateNWU(),
                 m_swerveLocal.positions(),
                 robotPose,
                 Timer.getFPGATimestamp());
@@ -261,6 +263,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_poseEstimator.put(
                 now,
                 m_gyro.getYawNWU(),
+                m_gyro.getYawRateNWU(),
                 m_swerveLocal.positions());
         m_cameras.update();
         return m_poseEstimator.get(now);

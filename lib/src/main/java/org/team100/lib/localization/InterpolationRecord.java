@@ -7,6 +7,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 import org.team100.lib.util.DriveUtil;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
@@ -27,6 +28,8 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     // The current gyro angle.
     final Rotation2d m_gyroAngle;
 
+    final double m_gyroRateRad_S;
+
     // The current encoder readings.
     final SwerveModulePositions m_wheelPositions;
 
@@ -42,10 +45,12 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
             SwerveDriveKinematics100 kinematics,
             SwerveState state,
             Rotation2d gyro,
+            double gyroRateRad_S,
             SwerveModulePositions wheelPositions) {
         m_kinematics = kinematics;
         m_state = state;
         m_gyroAngle = gyro;
+        m_gyroRateRad_S = gyroRateRad_S;
         m_wheelPositions = new SwerveModulePositions(wheelPositions);
     }
 
@@ -73,14 +78,14 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
         }
         // Find the new wheel distances.
         SwerveModulePositions wheelLerp = new SwerveModulePositions(
-            m_wheelPositions.frontLeft().interpolate(endValue.m_wheelPositions.frontLeft(), t),
-            m_wheelPositions.frontRight().interpolate(endValue.m_wheelPositions.frontRight(), t),
-            m_wheelPositions.rearLeft().interpolate(endValue.m_wheelPositions.rearLeft(), t),
-            m_wheelPositions.rearRight().interpolate(endValue.m_wheelPositions.rearRight(), t)        
-        );
+                m_wheelPositions.frontLeft().interpolate(endValue.m_wheelPositions.frontLeft(), t),
+                m_wheelPositions.frontRight().interpolate(endValue.m_wheelPositions.frontRight(), t),
+                m_wheelPositions.rearLeft().interpolate(endValue.m_wheelPositions.rearLeft(), t),
+                m_wheelPositions.rearRight().interpolate(endValue.m_wheelPositions.rearRight(), t));
 
         // Find the new gyro angle.
         Rotation2d gyroLerp = m_gyroAngle.interpolate(endValue.m_gyroAngle, t);
+        double gyroRateLerp = MathUtil.interpolate(m_gyroRateRad_S, endValue.m_gyroRateRad_S, t);
 
         // Create a twist to represent the change based on the interpolated sensor
         // inputs.
@@ -92,7 +97,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
                 m_state.pose().exp(twist),
                 m_state.velocity(),
                 m_state.acceleration());
-        return new InterpolationRecord(m_kinematics, newState, gyroLerp, wheelLerp);
+        return new InterpolationRecord(m_kinematics, newState, gyroLerp, gyroRateLerp, wheelLerp);
     }
 
     @Override
