@@ -9,6 +9,7 @@ from app.network.network_protocol import (
     Blip25Sender,
     BlipSender,
     DoubleSender,
+    GyroReceiver,
     Network,
     NoteSender,
     OdometryReceiver,
@@ -75,16 +76,21 @@ class FakePoseSender(PoseSender):
 
 
 class FakeOdometryReceiver(OdometryReceiver):
-    def __init__(
-        self,
-        name: str,
-        net: "FakeNetwork"
-    ) -> None:
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
         self.name = name
         self.net = net
 
     def get(self) -> list[tuple[int, SwerveModulePositions]]:
         return self.net.received_positions
+
+
+class FakeGyroReceiver(GyroReceiver):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    def get(self) -> list[tuple[int, float]]:
+        return self.net.received_yaw
 
 
 class FakeNetwork(Network):
@@ -97,6 +103,7 @@ class FakeNetwork(Network):
         self.notes: dict[str, list[Rotation3d]] = {}
         self.estimate: PoseEstimate25
         self.received_positions: list[tuple[int, SwerveModulePositions]] = []
+        self.received_yaw: list[tuple[int, float]] = []
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:
@@ -133,8 +140,12 @@ class FakeNetwork(Network):
         return FakePoseSender(name, self)
 
     @override
-    def get_odometry_receiver(self, name:str) -> OdometryReceiver:
+    def get_odometry_receiver(self, name: str) -> OdometryReceiver:
         return FakeOdometryReceiver(name, self)
+
+    @override
+    def get_gyro_receiver(self, name: str) -> GyroReceiver:
+        return FakeGyroReceiver(name, self)
 
     @override
     def flush(self) -> None:

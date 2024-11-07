@@ -93,6 +93,9 @@ class Estimate:
         self.measurement = Twist2d()
         # duration of most-recent odometry
         self.odo_dt = 0
+        # gyro memory
+        self.yaw = None
+        self.gyro_t = None
 
     def init(self) -> None:
         """Adds camera cal (K) and offset (C) at t0.

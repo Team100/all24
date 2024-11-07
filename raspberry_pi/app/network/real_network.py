@@ -18,6 +18,7 @@ from app.network.network_protocol import (
     Blip25Sender,
     BlipSender,
     DoubleSender,
+    GyroReceiver,
     Network,
     NoteSender,
     OdometryReceiver,
@@ -164,6 +165,14 @@ class RealOdometryReceiver(OdometryReceiver):
         return result
 
 
+class RealGyroReceiver(GyroReceiver):
+    def __init__(self) -> None:
+        pass
+
+    def get(self) -> list[tuple[int, float]]:
+        pass
+
+
 class RealNetwork(Network):
     def __init__(self, identity: Identity) -> None:
         # TODO: use identity.name instead
@@ -214,6 +223,10 @@ class RealNetwork(Network):
     @override
     def get_odometry_receiver(self, name: str) -> OdometryReceiver:
         return RealOdometryReceiver(name, self._inst)
+
+    @override
+    def get_gyro_receiver(self, name: str) -> GyroReceiver:
+        return RealGyroReceiver()
 
     @override
     def flush(self) -> None:
