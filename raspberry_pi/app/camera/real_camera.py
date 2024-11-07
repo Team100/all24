@@ -278,7 +278,7 @@ class RealCamera(Camera):
             case Identity.GLOBAL_RIGHT | Identity.GLOBAL_LEFT:
                 return 300  # from b5879a6, works with GS cameras
             case _:
-                return 5000  # the old value, works with v2 cameras
+                return 1500  # the old value, works with v2 cameras
 
     @staticmethod
     def __mtx_from_model(model: Model) -> Mat:

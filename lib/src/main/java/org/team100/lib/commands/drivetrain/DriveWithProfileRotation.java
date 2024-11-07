@@ -47,23 +47,24 @@ public class DriveWithProfileRotation extends DriveWithProfile2 {
      * empty.
      */
     private Optional<Translation2d> getGoal() {
-        Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
-        if (optGoal.isPresent()) {
-            // Supplier is ok, use this goal and reset the history mechanism.
-            m_previousGoal = optGoal.get();
-            m_count = 0;
-            return optGoal;
-        }
-        if (m_count > 50) {
-            // Supplier is empty and timer has expired.
-            return Optional.empty();
-        }
-        if (m_previousGoal == null) {
-            // Nothing to fall back to.
-            return Optional.empty();
-        }
-        m_count++;
-        return Optional.of(m_previousGoal);
+        return m_fieldRelativeGoal.get();
+        // Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
+        // if (optGoal.isPresent()) {
+        //     // Supplier is ok, use this goal and reset the history mechanism.
+        //     m_previousGoal = optGoal.get();
+        //     m_count = 0;
+        //     return optGoal;
+        // }
+        // if (m_count > 50) {
+        //     // Supplier is empty and timer has expired.
+        //     return Optional.empty();
+        // }
+        // if (m_previousGoal == null) {
+        //     // Nothing to fall back to.
+        //     return Optional.empty();
+        // }
+        // m_count++;
+        // return Optional.of(m_previousGoal);
     }
 
 /**

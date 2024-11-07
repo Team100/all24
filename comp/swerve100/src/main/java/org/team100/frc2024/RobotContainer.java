@@ -3,6 +3,7 @@ package org.team100.frc2024;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.commands.AutonCommand;
@@ -33,6 +34,7 @@ import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
 import org.team100.lib.commands.drivetrain.DriveToPoseSimple;
+import org.team100.lib.commands.drivetrain.DriveWithProfile2;
 import org.team100.lib.commands.drivetrain.DriveWithProfileRotation;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
@@ -92,7 +94,9 @@ import org.team100.lib.visualization.TrajectoryVisualization;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -279,17 +283,12 @@ public class RobotContainer implements Glassy {
                         m_drive));
         // whileTrue(driverControl::actualCircle,
         // new DriveInACircle(comLog, m_drive, controller, -1, viz));
-
         whileTrue(driverControl::driveToAmp,
-                new DriveToAmp(
-                        m_drive,
-                        halfFullStateController,
-                        swerveKinodynamics,
-                        m_ampPivot,
-                        m_ampFeeder,
-                        intake,
-                        m_shooter,
-                        feeder));
+        new DriveWithProfileRotation(
+            () -> Optional.of(m_layout.getTagPose(DriverStation.getAlliance().get(), 4).get().getTranslation().toTranslation2d()),
+            m_drive,
+            halfFullStateController,
+            swerveKinodynamics));
 
         ///////////////////////
         //

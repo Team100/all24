@@ -39,9 +39,11 @@ class NoteDetector(Interpreter):
         self.height: int = size.height
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = np.array((0, 200, 190))
-        self.object_lower2 = np.array((6, 0, 0))
-        self.object_higher = np.array((8, 255, 255))
+        lowerSat = 210
+        lowerValue = 100
+        self.object_lower = np.array((0, lowerSat, lowerValue))
+        self.object_lower2 = np.array((170, lowerSat, lowerValue))
+        self.object_higher = np.array((40, 255, 255))
         self.object_higher2 = np.array((180, 255, 255))
 
         # TODO: move the identity part of this path to the Network object
@@ -61,7 +63,9 @@ class NoteDetector(Interpreter):
             img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
             img_hsv = np.ascontiguousarray(img_hsv)
 
-            img_range = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
+            img_range1 = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
+            img_range2 = cv2.inRange(img_hsv, self.object_lower2, self.object_higher2)
+            img_range = cv2.bitwise_or(img_range1, img_range2)
 
             floodfill = img_range.copy()
             mask = np.zeros((self.height + 2, self.width + 2), np.uint8)
@@ -69,7 +73,7 @@ class NoteDetector(Interpreter):
 
             floodfill_inv = cv2.bitwise_not(floodfill)
             img_floodfill = cv2.bitwise_or(img_range, floodfill_inv)
-            median = cv2.medianBlur(img_floodfill, 5)
+            median = cv2.medianBlur(img_range, 5)
             contours, _ = cv2.findContours(
                 median, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
             )
@@ -91,7 +95,7 @@ class NoteDetector(Interpreter):
                 # reject too small (m00 is in pixels)
                 # TODO: make this adjustable at runtime
                 # to pick out distant targets
-                if mmnts["m00"] < 100:
+                if mmnts["m00"] < 500:
                     continue
 
                 cX = int(mmnts["m10"] / mmnts["m00"])
