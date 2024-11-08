@@ -21,7 +21,7 @@ public class GyroFactory {
             AsyncFactory asyncFactory) {
         switch (Identity.instance) {
             case SWERVE_ONE:
-                return new ReduxGyro(parent);
+                return new ReduxGyro(parent, 60);
             case COMP_BOT:
                 try {
                     // the kauailabs library calls System.exit() in case

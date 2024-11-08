@@ -2,10 +2,10 @@
 
 # pylint: disable=R0902,R0903,W0212,W2301
 
-
 import dataclasses
 from typing import Protocol
 
+import numpy as np
 from wpimath.geometry import Rotation3d, Transform3d
 from wpiutil import wpistruct
 
@@ -29,7 +29,7 @@ class Blip25:
     entire tag is unseen.
     """
 
-    id: int
+    tag_id: int
     llx: float  # lower left
     lly: float
     lrx: float  # lower right
@@ -38,6 +38,42 @@ class Blip25:
     ury: float
     ulx: float  # upper left
     uly: float
+
+    def measurement(self) -> np.ndarray:
+        """Concatenated corners, for GTSAM."""
+        return np.array(
+            [
+                self.llx,
+                self.lly,
+                self.lrx,
+                self.lry,
+                self.urx,
+                self.ury,
+                self.ulx,
+                self.uly,
+            ]
+        )
+
+
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
+class PoseEstimate25:
+    """Result of the pose estimator."""
+
+    # most-recent state (corresponding to the NT timestamp)
+    x: float
+    y: float
+    theta: float
+    # std dev of most-recent state (sqrt of diagonal of marginal covariance)
+    x_sigma: float
+    y_sigma: float
+    theta_sigma: float
+    # twist of most-recent odometry
+    dx: float
+    dy: float
+    dtheta: float
+    # time between next-most-recent and most-recent
+    dt: float
 
 
 class DoubleSender(Protocol):
@@ -53,12 +89,20 @@ class NoteSender(Protocol):
 
 
 class Blip25Sender(Protocol):
-    def send(self, val: list[Blip25], delay_us: int) -> None: ...
+    def send(self, val: list[Blip25], delay_us: int) -> None:
+        """This is used by the simulator, and by the cameras."""
+        ...
 
 
 class Blip25Receiver(Protocol):
     def get(self) -> list[tuple[int, list[Blip25]]]:
-        """Returns the list of tuples (timetamp, list[blip]) seen in a single frame"""
+        """Receive the list of tuples (timetamp, list[blip]) seen in a single frame"""
+        ...
+
+
+class PoseSender(Protocol):
+    def send(self, val: PoseEstimate25, delay_us: int) -> None:
+        """Send the pose estimate."""
         ...
 
 
@@ -68,4 +112,5 @@ class Network(Protocol):
     def get_note_sender(self, name: str) -> NoteSender: ...
     def get_blip25_sender(self, name: str) -> Blip25Sender: ...
     def get_blip25_receiver(self, name: str) -> Blip25Receiver: ...
+    def get_pose_sender(self, name: str) -> PoseSender: ...
     def flush(self) -> None: ...

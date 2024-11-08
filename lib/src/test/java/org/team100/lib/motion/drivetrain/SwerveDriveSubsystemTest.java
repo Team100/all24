@@ -26,13 +26,13 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
         verify(drive, 0, 0, 0);
 
         drive.setChassisSpeeds(new ChassisSpeeds(1, 0, 0));
-        assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
+        assertEquals(0.02, fixture.collection.states().frontLeft().speedMetersPerSecond);
 
         stepTime(0.02);
         drive.periodic();
-        assertEquals(0.0004, fixture.collection.positions()[0].distanceMeters, 1e-6);
+        assertEquals(0.0004, fixture.collection.positions().frontLeft().distanceMeters, 1e-6);
 
-        assertEquals(0.02, fixture.collection.states()[0].speedMetersPerSecond);
+        assertEquals(0.02, fixture.collection.states().frontLeft().speedMetersPerSecond);
 
         // the acceleration limit is applied here
         verify(drive, 0.0003, 0.019, 1.0);
@@ -79,7 +79,7 @@ class SwerveDriveSubsystemTest extends Fixtured implements Timeless {
 
         // System.out.println("read distance");
         // at 1 m/s for 0.02 s, so we go 0.02 m
-        assertEquals(0.02, fixture.collection.positions()[0].distanceMeters, 1e-6);
+        assertEquals(0.02, fixture.collection.positions().frontLeft().distanceMeters, 1e-6);
 
         // it took 0.02 s to go from 0 m/s to 1 m/s, so we accelerated 50 m/s/s.
         // System.out.println("verify 2");

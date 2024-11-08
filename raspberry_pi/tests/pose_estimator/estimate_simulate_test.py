@@ -10,6 +10,7 @@ from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
 from app.pose_estimator.estimate import Estimate
+from app.pose_estimator.field_map import FieldMap
 from tests.pose_estimator.circle_simulator import CircleSimulator
 from tests.pose_estimator.line_simulator import LineSimulator
 
@@ -23,10 +24,16 @@ class EstimateSimulateTest(unittest.TestCase):
         """Odometry only, using the native factor.
         This is very fast, 0.1s on my machine for a 1s window,
         0.03s for a 0.1s window"""
-        sim = CircleSimulator()
+        sim = CircleSimulator(FieldMap())
         est = Estimate()
-        est.init(sim.wpi_pose)
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
         print()
         print(
@@ -39,7 +46,7 @@ class EstimateSimulateTest(unittest.TestCase):
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
-            est.odometry(t0_us, t1_us, sim.positions)
+            est.odometry(t0_us, t1_us, sim.positions, odometry_noise)
             est.update()
             t1 = time.time_ns()
             et = t1 - t0
@@ -72,9 +79,14 @@ class EstimateSimulateTest(unittest.TestCase):
         This is very slow, 1.4s on my machine for a 1s window,
         0.2s for a 0.1s window
         """
-        sim = CircleSimulator()
+        sim = CircleSimulator(FieldMap())
         est = Estimate()
-        est.init(sim.wpi_pose)
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         state = gtsam.Pose2()
 
         print()
@@ -123,7 +135,12 @@ class EstimateSimulateTest(unittest.TestCase):
         sim = LineSimulator()
         est = Estimate()
         # adds a state at zero
-        est.init(sim.wpi_pose)
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         state = gtsam.Pose2()
 
         # for accel we need another state
@@ -182,9 +199,14 @@ class EstimateSimulateTest(unittest.TestCase):
         next state.  if you don't do that (e.g. initial always at origin) then
         it gets really confused, producing big errors and taking a long time.
         this is not fast: 0.9s for a 0.1s window."""
-        sim = CircleSimulator()
+        sim = CircleSimulator(FieldMap())
         est = Estimate()
-        est.init(sim.wpi_pose)
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         state = gtsam.Pose2()
 
         print()
@@ -239,9 +261,14 @@ class EstimateSimulateTest(unittest.TestCase):
     def test_camera_batched(self) -> None:
         """Camera with batch factors.
         this is much faster than multiple factors, 0.4s for a 0.1s window"""
-        sim = CircleSimulator()
+        sim = CircleSimulator(FieldMap())
         est = Estimate()
-        est.init(sim.wpi_pose)
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         state = gtsam.Pose2()
 
         print()
@@ -295,10 +322,16 @@ class EstimateSimulateTest(unittest.TestCase):
         tightening up the noise model fixes it.
         also using the previous state as the estimate for the next state
         fixes it."""
-        sim = CircleSimulator()
+        sim = CircleSimulator(FieldMap())
         est = Estimate()
-        est.init(sim.wpi_pose)
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
         print()
         print(
@@ -312,7 +345,7 @@ class EstimateSimulateTest(unittest.TestCase):
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
-            est.odometry(t0_us, t1_us, sim.positions)
+            est.odometry(t0_us, t1_us, sim.positions, odometry_noise)
 
             est.apriltag_for_smoothing(
                 sim.l0, sim.gt_pixels[0], t1_us, sim.camera_offset, sim.calib
@@ -361,10 +394,17 @@ class EstimateSimulateTest(unittest.TestCase):
         a lag window at all, i.e. lag of 0.001 s, so just one state, and
         it runs in about 4x real time (0.5s for 2s of samples).
         """
-        sim = CircleSimulator()
+        sim = CircleSimulator(FieldMap())
         est = Estimate()
-        est.init(sim.wpi_pose)
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
+
 
         print()
         print(
@@ -379,7 +419,7 @@ class EstimateSimulateTest(unittest.TestCase):
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
-            est.odometry(t0_us, t1_us, sim.positions)
+            est.odometry(t0_us, t1_us, sim.positions, odometry_noise)
             dtheta = sim.gt_theta - gt_theta_0
             est.gyro(t0_us, t1_us, dtheta)
             gt_theta_0 = sim.gt_theta
@@ -428,10 +468,16 @@ class EstimateSimulateTest(unittest.TestCase):
         Batching vision speeds things up significantly,
         0.6s for 2s of data in a 0.1s window
         """
-        sim = CircleSimulator()
+        sim = CircleSimulator(FieldMap())
         est = Estimate()
-        est.init(sim.wpi_pose)
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
         print()
         print(
@@ -446,7 +492,7 @@ class EstimateSimulateTest(unittest.TestCase):
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
-            est.odometry(t0_us, t1_us, sim.positions)
+            est.odometry(t0_us, t1_us, sim.positions, odometry_noise)
             dtheta = sim.gt_theta - gt_theta_0
             est.gyro(t0_us, t1_us, dtheta)
             gt_theta_0 = sim.gt_theta

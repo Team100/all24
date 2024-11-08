@@ -7,17 +7,24 @@ import unittest
 
 import gtsam
 import numpy as np
-from wpimath.geometry import Pose2d
+from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import C, K, X  # type:ignore
 
 from app.pose_estimator.estimate import Estimate
+
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
 
 class EstimateAprilTagTest(unittest.TestCase):
     def test_apriltag_0(self) -> None:
         """test the calibration factor"""
         est = Estimate()
-        est.init(Pose2d(0, 0, 0))
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         # upper left
         landmark = np.array([1, 1, 1])
         measured = np.array([0, 0])
@@ -39,7 +46,12 @@ class EstimateAprilTagTest(unittest.TestCase):
     def test_apriltag_1(self) -> None:
         """Test the smoothing factor."""
         est = Estimate()
-        est.init(Pose2d(0, 0, 0))
+        est.init()
+
+        prior_mean = gtsam.Pose2(0, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
         # upper left
         landmark = np.array([1, 1, 1])
         measured = np.array([0, 0])

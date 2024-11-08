@@ -22,14 +22,13 @@ import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import (
-    OptionalRotation2d,
-    SwerveModulePosition100,
-)
+from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
+                                                       SwerveModulePosition100)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
-PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
+# prior uncertainty is larger than field, i.e. "no idea"
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([16, 8, 6]))
 ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.05]))
 
@@ -60,8 +59,8 @@ class Estimate:
         """Initialize the model
         initial module positions are at their origins.
         TODO: some other initial positions?"""
-        self.isam: gtsam.FixedLagSmoother = self.make_smoother()
-        self.result: gtsam.Values
+        self.isam: gtsam.BatchFixedLagSmoother = self.make_smoother()
+        self.result: gtsam.Values = gtsam.Values()
         # between updates we accumulate inputs here
         self.new_factors = gtsam.NonlinearFactorGraph()
         self.new_values = gtsam.Values()
@@ -82,14 +81,16 @@ class Estimate:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         ]
+        # most-recent odometry
+        # remember this so we can use it for extrapolation.
+        # TODO: keep track of how old it is?
+        self.measurement = Twist2d()
+        # duration of most-recent odometry
+        self.odo_dt = 0
 
-    def init(self, initial_pose: Pose2d) -> None:
-        """Add a state at zero"""
-        prior_mean = gtsam.Pose2(
-            initial_pose.X(), initial_pose.Y(), initial_pose.rotation().radians()
-        )
-        self.add_state(0, prior_mean)
-        self.prior(0, prior_mean, PRIOR_NOISE)
+    def init(self) -> None:
+        """Adds camera cal (K) and offset (C) at t0.
+        No longer adds a pose at t0, if you want that, do it."""
         # there is just one camera factor
         self.new_values.insert(K(0), CAL)
         self.new_timestamps[K(0)] = 0
@@ -101,12 +102,23 @@ class Estimate:
 
     def add_state(self, time_us: int, initial_value: gtsam.Pose2) -> None:
         """Add a new robot state (pose) to the estimator."""
+        if self.result.exists(X(time_us)):
+            # it's already in the model
+            return
+        if self.new_values.exists(X(time_us)):
+            # don't need to add it to the new values
+            return
         # if you're using the batch smoother, the initial value almost doesn't matter:
         # TODO: use the previous pose as the initial value
         self.new_values.insert(X(time_us), initial_value)
         self.new_timestamps[X(time_us)] = time_us
 
-    def prior(self, time_us: int, value: gtsam.Pose2, noise: SharedNoiseModel) -> None:
+    def prior(
+        self,
+        time_us: int,
+        value: gtsam.Pose2,
+        noise: SharedNoiseModel,
+    ) -> None:
         """Prior can have wide noise model (when we really don't know)
         or narrow (for resetting) or mixed (to reset rotation alone)"""
         self.new_factors.push_back(
@@ -118,7 +130,11 @@ class Estimate:
         )
 
     def odometry(
-        self, t0_us: int, t1_us: int, positions: list[SwerveModulePosition100]
+        self,
+        t0_us: int,
+        t1_us: int,
+        positions: list[SwerveModulePosition100],
+        noise: SharedNoiseModel,
     ) -> None:
         """Add an odometry measurement.  Remember to call add_state so that
         the odometry factor has something to refer to.
@@ -134,12 +150,12 @@ class Estimate:
             self.positions, positions
         )
         # this is the tangent-space (twist) measurement
-        measurement: Twist2d = self.kinematics.to_twist_2d(deltas)
-
+        self.measurement: Twist2d = self.kinematics.to_twist_2d(deltas)
+        self.odo_dt = t1_us - t0_us
         self.new_factors.push_back(
             odometry.factor(
-                measurement,
-                ODOMETRY_NOISE,
+                self.measurement,
+                noise,
                 X(t0_us),
                 X(t1_us),
             )
@@ -241,28 +257,94 @@ class Estimate:
         calib: gtsam.Cal3DS2,
     ) -> None:
         """landmarks: list of 3d points
-        measured: concatenated px measurements"""
-        noise = noiseModel.Diagonal.Sigmas(
-            np.concatenate(
-                [[1, 1] for _ in landmarks])
-            )
+        measured: concatenated px measurements
+        TODO: flatten landmarks"""
+        noise = noiseModel.Diagonal.Sigmas(np.concatenate([[1, 1] for _ in landmarks]))
         self.new_factors.push_back(
             apriltag_smooth_batch.factor(
                 landmarks, measured, camera_offset, calib, noise, X(t0_us)
             )
         )
 
-
     def update(self) -> None:
         """Run the solver"""
         self.isam.update(self.new_factors, self.new_values, self.new_timestamps)
-        self.result = self.isam.calculateEstimate()  # type: ignore
+        self.result: gtsam.Values = self.isam.calculateEstimate()  # type: ignore
+
+        print("TIMESTAMPS")
+        print(self.isam.timestamps())
+        k = max(self.isam.timestamps().keys())
+        ts = max(self.isam.timestamps().values())
+        print(self.result.atPose2(k))
+        # print(ts)
+
         # reset the accumulators
         self.new_factors.resize(0)
         self.new_values.clear()
         self.new_timestamps.clear()
 
-    def make_smoother(self) -> gtsam.FixedLagSmoother:
+    def get_result(self) -> tuple[int, gtsam.Pose2, np.ndarray] | None:
+        """the most recent timestamped pose and covariance
+        tuple(time_us, pose2, cov)
+        TODO: maybe make update() do this"""
+        timestamp_map = self.isam.timestamps()
+        factors = self.isam.getFactors()
+        m = gtsam.Marginals(factors, self.result)
+        # timestamp map is std::map inside, which is ordered by key
+        for key, time_us in reversed(list(timestamp_map.items())):
+            # run through the list from newest to oldest, looking for X
+            # idx = gtsam.symbolIndex(key)
+            char = chr(gtsam.symbolChr(key))
+            # print("KEY", key, "IDX", idx, "CHR", char, "VALUE", value)
+            if char == "x":
+                # the most-recent pose
+                x: gtsam.Pose2 = self.result.atPose2(key)
+                cov: np.ndarray = m.marginalCovariance(key)
+                return (int(time_us), x, cov)
+
+        return None
+
+    def marginals(self) -> np.ndarray:
+        """marginal covariance of most-recent pose
+        this is just for testing"""
+        timestamp_map = self.isam.timestamps()
+        for key, _ in reversed(list(timestamp_map.items())):
+            # run through the list from newest to oldest, looking for X
+            char = chr(gtsam.symbolChr(key))
+            if char == "x":
+                factors = self.isam.getFactors()
+                m = gtsam.Marginals(factors, self.result)
+                return m.marginalCovariance(key)
+        return np.array([])
+
+    def joint_marginals(self) -> gtsam.JointMarginal:
+        """Joint marginals of the two most recent pose estimates,
+        which results in a 6x6 matrix.
+
+        I thought this would be useful for extrapolation, but
+        it's not.  Maybe delete it?"""
+        timestamp_map = self.isam.timestamps()
+        keys = []
+        for key, _ in reversed(list(timestamp_map.items())):
+            # run through the list from newest to oldest, looking for X
+            char = chr(gtsam.symbolChr(key))
+            if char == "x":
+                keys.append(key)
+            if len(keys) > 1:
+                break
+        factors = self.isam.getFactors()
+        m = gtsam.Marginals(factors, self.result)
+        return m.jointMarginalCovariance(keys)
+
+    def extrapolate(self, pose: gtsam.Pose2) -> gtsam.Pose2:
+        """We're not going to actually use this, we'll let the roboRIO do it."""
+        # we should be using Pose2.expmap but it's not wrapped
+        # TODO: add it
+        p: Pose2d = Pose2d(pose.x(), pose.y(), Rotation2d(pose.theta()))
+        p1 = p.exp(self.measurement)
+        return gtsam.Pose2(p1.X(), p1.Y(), p1.rotation().radians())
+
+    def make_smoother(self) -> gtsam.BatchFixedLagSmoother:
         # experimenting with the size of the lag buffer.
         # the python odometry factor is intolerably slow
         # but the native one is quite fast.

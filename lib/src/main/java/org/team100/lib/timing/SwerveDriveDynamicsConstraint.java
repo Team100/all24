@@ -2,7 +2,7 @@ package org.team100.lib.timing;
 
 import java.util.Optional;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -49,10 +49,9 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
         // which is like moving 1 m/s.
         ChassisSpeeds chassis_speeds = new ChassisSpeeds(vx, vy, vtheta);
 
-        SwerveModuleState100[] module_states = m_limits.toSwerveModuleStates(chassis_speeds, vtheta);
+        SwerveModuleStates module_states = m_limits.toSwerveModuleStates(chassis_speeds, vtheta);
         double max_vel = Double.POSITIVE_INFINITY;
-        for (var module : module_states) {
-
+        for (SwerveModuleState100 module : module_states.all()) {
             max_vel = Math.min(max_vel, m_limits.getMaxDriveVelocityM_S() / Math.abs(module.speedMetersPerSecond));
         }
         return new NonNegativeDouble(max_vel);

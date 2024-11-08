@@ -3,9 +3,12 @@
 # pylint: disable=R0902,R0903,W0212
 
 # github workflow crashes in ntcore, bleah
+from typing import cast
+
 import ntcore
 from typing_extensions import override
-from wpimath.geometry import Rotation3d
+from wpimath.geometry import Rotation3d, Pose2d
+from wpiutil import wpistruct
 
 from app.config.identity import Identity
 from app.network.network_protocol import (
@@ -17,6 +20,8 @@ from app.network.network_protocol import (
     DoubleSender,
     Network,
     NoteSender,
+    PoseEstimate25,
+    PoseSender,
 )
 
 
@@ -58,18 +63,71 @@ class RealBlip25Sender(Blip25Sender):
 
 
 class RealBlip25Receiver(Blip25Receiver):
-    def __init__(self, sub: ntcore.StructArraySubscriber) -> None:
-        self.sub = sub
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        # print("RealBlip25Receiver.__init__() name ", name)
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(
+            inst, [name], ntcore.PubSubOptions(keepDuplicates=True)
+        )
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([""], ntcore.EventFlags.kValueAll)
+        self.start_time_us = ntcore._now()
+        # print("RealBlip25Receiver.__init__() start_time_us ", self.start_time_us)
 
     @override
     def get(self) -> list[tuple[int, list[Blip25]]]:
-        recv = self.sub.readQueue()
+        """(timestamp_us, tag id, blip)
+        The timestamp is referenced to the "now" value at
+        construction, so that the number isn't too large.
+        """
         result: list[tuple[int, list[Blip25]]] = []
-        for item in recv:
-            server_time_us = item.serverTime
-            value_list = item.value
-            result.append((server_time_us, value_list))
+        # print("RealBlip25Receiver.get()")
+        # see NotePosition24ArrayListener for example
+        queue: list = self.poller.readQueue()
+        # print("RealBlip25Receiver.get() queue length ", len(queue))
+        for event in queue:
+            value_event_data = cast(ntcore.ValueEventData, event.data)
+
+            # name = value_event_data.topic.getName()
+            # TODO: redo the key scheme
+            # camera_id = int(name.split("/")[0])
+
+            nt_value: ntcore.Value = value_event_data.value
+
+            # server time is always 1.  ???
+            server_time_us = nt_value.server_time()
+            # print("RealBlip25Receiver.get() server time ", server_time_us)
+            time_us = nt_value.time() - self.start_time_us
+            # print("RealBlip25Receiver.get() time ", time_us)
+
+            frame: list[Blip25] = []
+            raw_array: bytes = cast(bytes, nt_value.getRaw())
+            item_size = wpistruct.getSize(Blip25)
+            raw_item_array = [
+                raw_array[i : i + item_size]
+                for i in range(0, len(raw_array), item_size)
+            ]
+            for raw_item in raw_item_array:
+                blip: Blip25 = wpistruct.unpack(Blip25, raw_item)
+                # print(blip)
+                frame.append(blip)
+            result.append((time_us, frame))
         return result
+
+
+class RealPoseSender(PoseSender):
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
+        self.pub = pub
+
+    @override
+    def send(self, val: PoseEstimate25, delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
 
 
 class RealNetwork(Network):
@@ -113,9 +171,11 @@ class RealNetwork(Network):
 
     @override
     def get_blip25_receiver(self, name: str) -> Blip25Receiver:
-        return RealBlip25Receiver(
-            self._inst.getStructArrayTopic(name, Blip25).subscribe([])
-        )
+        return RealBlip25Receiver(name, self._inst)
+
+    @override
+    def get_pose_sender(self, name: str) -> PoseSender:
+        return RealPoseSender(self._inst.getStructTopic(name, PoseEstimate25).publish())
 
     @override
     def flush(self) -> None:

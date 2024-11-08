@@ -11,7 +11,7 @@
     "python.testing.unittestEnabled": true,
     "workbench.colorTheme": "Default Light Modern",
     "editor.minimap.enabled": false,
-    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.typeCheckingMode": "standard",
     "mypy-type-checker.reportingScope": "workspace",
     "markdown.validate.enabled": true,
     "tidyMarkdown.disableFormatter": true,
