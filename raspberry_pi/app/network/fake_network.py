@@ -1,13 +1,16 @@
 # pylint: disable=R0902,R0903,W0212
 
 from typing_extensions import override
-from wpimath.geometry import Rotation3d, Rotation2d
+from wpimath.geometry import Rotation2d, Rotation3d
+
 from app.network.network_protocol import (
     Blip24,
     Blip25,
     Blip25Receiver,
     Blip25Sender,
     BlipSender,
+    CalibSender,
+    CameraCalibration,
     DoubleSender,
     GyroReceiver,
     Network,
@@ -75,6 +78,16 @@ class FakePoseSender(PoseSender):
         self.net.estimate = val
 
 
+class FakeCalibSender(CalibSender):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    @override
+    def send(self, val: CameraCalibration, delay_us: int) -> None:
+        self.net.calib = val
+
+
 class FakeOdometryReceiver(OdometryReceiver):
     def __init__(self, name: str, net: "FakeNetwork") -> None:
         self.name = name
@@ -104,6 +117,7 @@ class FakeNetwork(Network):
         self.estimate: PoseEstimate25
         self.received_positions: list[tuple[int, SwerveModulePositions]] = []
         self.received_yaw: list[tuple[int, Rotation2d]] = []
+        self.calib: CameraCalibration
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:
@@ -146,6 +160,10 @@ class FakeNetwork(Network):
     @override
     def get_gyro_receiver(self, name: str) -> GyroReceiver:
         return FakeGyroReceiver(name, self)
+
+    @override
+    def get_calib_sender(self, name: str) -> CalibSender:
+        return FakeCalibSender(name, self)
 
     @override
     def flush(self) -> None:

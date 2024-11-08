@@ -7,7 +7,7 @@ from typing import cast
 
 import ntcore
 from typing_extensions import override
-from wpimath.geometry import Rotation3d, Pose2d, Rotation2d
+from wpimath.geometry import Rotation2d, Rotation3d
 from wpiutil import wpistruct
 
 from app.config.identity import Identity
@@ -17,6 +17,8 @@ from app.network.network_protocol import (
     Blip25Receiver,
     Blip25Sender,
     BlipSender,
+    CalibSender,
+    CameraCalibration,
     DoubleSender,
     GyroReceiver,
     Network,
@@ -180,7 +182,6 @@ class RealGyroReceiver(GyroReceiver):
         self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
         # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
 
-
     def get(self) -> list[tuple[int, Rotation2d]]:
         result: list[tuple[int, Rotation2d]] = []
         queue: list = self.poller.readQueue()
@@ -192,6 +193,15 @@ class RealGyroReceiver(GyroReceiver):
             pos: Rotation2d = wpistruct.unpack(Rotation2d, raw)
             result.append((time_us, pos))
         return result
+
+
+class RealCalibSender(CalibSender):
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
+        self.pub = pub
+
+    @override
+    def send(self, val: CameraCalibration, delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
 
 
 class RealNetwork(Network):
@@ -248,6 +258,12 @@ class RealNetwork(Network):
     @override
     def get_gyro_receiver(self, name: str) -> GyroReceiver:
         return RealGyroReceiver(name, self._inst)
+
+    @override
+    def get_calib_sender(self, name: str) -> CalibSender:
+        return RealCalibSender(
+            self._inst.getStructTopic(name, CameraCalibration).publish()
+        )
 
     @override
     def flush(self) -> None:
