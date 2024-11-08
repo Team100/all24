@@ -1,7 +1,7 @@
 """Read measurements from Network Tables, run the
 smoother, and publish the results on Network Tables."""
 
-# pylint: disable=C0301,E0611,E1101,R0903,R0914,W0212
+# pylint: disable=C0301,E0611,E1101,R0902,R0903,R0914,W0212
 
 import math
 from typing import cast
@@ -31,6 +31,7 @@ class NTEstimate:
         self.net = net
         self.blip_receiver = net.get_blip25_receiver("foo")
         self.odo_receiver = net.get_odometry_receiver("bar")
+        self.gyro_receiver=  net.get_gyro_receiver("baz")
         self.pose_sender = net.get_pose_sender("pose")
         self.est = Estimate()
         # current estimate, used for initial value for next time
@@ -50,6 +51,7 @@ class NTEstimate:
 
         self._receive_blips()
         self._receive_odometry()
+        self._receive_gyro()
 
         self.est.update()
 
@@ -112,6 +114,18 @@ class NTEstimate:
             positions = pos[1]
             self.est.add_state(time_slice, self.state)
             self.est.odometry(time_slice, positions, ODO_NOISE)
+
+    def _receive_gyro(self) -> None:
+        gyro = self.gyro_receiver.get()
+        for g in gyro:
+            time_slice = NTEstimate.discrete(g[0])
+            yaw = g[1]
+            print("TIME", time_slice, "YAW", yaw)
+            # if this is the only factor attached to this variable
+            # then it will be underconstrained (i.e. no constraint on x or y)
+            self.est.add_state(time_slice, self.state)
+            self.est.gyro(time_slice, yaw.radians())
+
 
     @staticmethod
     def discrete(timestamp_us: int) -> int:

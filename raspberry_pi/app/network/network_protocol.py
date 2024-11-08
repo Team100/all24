@@ -6,7 +6,7 @@ import dataclasses
 from typing import Protocol
 
 import numpy as np
-from wpimath.geometry import Rotation3d, Transform3d
+from wpimath.geometry import Rotation3d, Transform3d, Rotation2d
 from wpiutil import wpistruct
 
 from app.pose_estimator.swerve_module_position import SwerveModulePositions
@@ -113,7 +113,7 @@ class OdometryReceiver(Protocol):
 
 
 class GyroReceiver(Protocol):
-    def get(self) -> list[tuple[int, float]]:
+    def get(self) -> list[tuple[int, Rotation2d]]:
         """Receive a list of tuples (timestamp, yaw)"""
         ...
 

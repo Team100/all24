@@ -34,7 +34,7 @@ class EstimateSimulateTest(unittest.TestCase):
 
         state = gtsam.Pose2()
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
-        
+
         # this should just record the positions and timestamp
         est.odometry(0, sim.positions, odometry_noise)
 
@@ -407,9 +407,15 @@ class EstimateSimulateTest(unittest.TestCase):
         est = Estimate()
         est.init()
 
+        # use a good guess for initial state, to eliminate the transient error.
+        # prior_mean = gtsam.Pose2(sim.gt_x, sim.gt_y, sim.gt_theta)
+        # est.prior(0, prior_mean, PRIOR_NOISE)
+
+        # or use a very high noise level to say "ignore this prior"
         prior_mean = gtsam.Pose2(0, 0, 0)
+        est.prior(0, prior_mean, noiseModel.Diagonal.Sigmas(np.array([100, 100, 100])))
         est.add_state(0, prior_mean)
-        est.prior(0, prior_mean, PRIOR_NOISE)
+
 
         state = gtsam.Pose2()
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -421,19 +427,19 @@ class EstimateSimulateTest(unittest.TestCase):
         print(
             "      t,    GT X,    GT Y,  GT ROT,   EST X,   EST Y, EST ROT,   ERR X,   ERR Y, ERR ROT"
         )
-        gt_theta_0 = sim.gt_theta
+        # gt_theta_0 = sim.gt_theta
         for i in range(1, 100):
             t0 = time.time_ns()
 
-            t0_us = 20000 * (i - 1)
+            # t0_us = 20000 * (i - 1)
             t1_us = 20000 * i
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
             est.odometry(t1_us, sim.positions, odometry_noise)
-            dtheta = sim.gt_theta - gt_theta_0
-            est.gyro(t0_us, t1_us, dtheta)
-            gt_theta_0 = sim.gt_theta
+            # dtheta = sim.gt_theta - gt_theta_0
+            est.gyro(t1_us, sim.gt_theta)
+            # gt_theta_0 = sim.gt_theta
 
             est.apriltag_for_smoothing(
                 sim.l0, sim.gt_pixels[0], t1_us, sim.camera_offset, sim.calib
@@ -485,12 +491,11 @@ class EstimateSimulateTest(unittest.TestCase):
 
         prior_mean = gtsam.Pose2(0, 0, 0)
         est.add_state(0, prior_mean)
-        est.prior(0, prior_mean, PRIOR_NOISE)
-
+        est.prior(0, prior_mean, noiseModel.Diagonal.Sigmas(np.array([100, 100, 100])))
+        
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
         # this should just record the positions and timestamp
         est.odometry(0, sim.positions, odometry_noise)
-
 
         state = gtsam.Pose2()
 
@@ -498,19 +503,19 @@ class EstimateSimulateTest(unittest.TestCase):
         print(
             "      t,    GT X,    GT Y,  GT ROT,   EST X,   EST Y, EST ROT,   ERR X,   ERR Y, ERR ROT"
         )
-        gt_theta_0 = sim.gt_theta
+        # gt_theta_0 = sim.gt_theta
         for i in range(1, 100):
             t0 = time.time_ns()
 
-            t0_us = 20000 * (i - 1)
+            # t0_us = 20000 * (i - 1)
             t1_us = 20000 * i
             # updates gt to t1
             sim.step(0.02)
             est.add_state(t1_us, state)
             est.odometry(t1_us, sim.positions, odometry_noise)
-            dtheta = sim.gt_theta - gt_theta_0
-            est.gyro(t0_us, t1_us, dtheta)
-            gt_theta_0 = sim.gt_theta
+            # dtheta = sim.gt_theta - gt_theta_0
+            est.gyro(t1_us, sim.gt_theta)
+            # gt_theta_0 = sim.gt_theta
 
             all_pixels = np.concatenate(sim.gt_pixels)
 

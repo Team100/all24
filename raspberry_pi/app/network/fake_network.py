@@ -1,7 +1,7 @@
 # pylint: disable=R0902,R0903,W0212
 
 from typing_extensions import override
-from wpimath.geometry import Rotation3d
+from wpimath.geometry import Rotation3d, Rotation2d
 from app.network.network_protocol import (
     Blip24,
     Blip25,
@@ -89,7 +89,7 @@ class FakeGyroReceiver(GyroReceiver):
         self.name = name
         self.net = net
 
-    def get(self) -> list[tuple[int, float]]:
+    def get(self) -> list[tuple[int, Rotation2d]]:
         return self.net.received_yaw
 
 
@@ -103,7 +103,7 @@ class FakeNetwork(Network):
         self.notes: dict[str, list[Rotation3d]] = {}
         self.estimate: PoseEstimate25
         self.received_positions: list[tuple[int, SwerveModulePositions]] = []
-        self.received_yaw: list[tuple[int, float]] = []
+        self.received_yaw: list[tuple[int, Rotation2d]] = []
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:

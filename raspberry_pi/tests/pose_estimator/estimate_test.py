@@ -12,7 +12,11 @@ from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d
 
 from app.pose_estimator.estimate import Estimate
-from app.pose_estimator.swerve_module_position import OptionalRotation2d, SwerveModulePosition100, SwerveModulePositions
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+    SwerveModulePositions,
+)
 
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
@@ -43,17 +47,17 @@ class EstimateAccelerometerTest(unittest.TestCase):
         self.assertAlmostEqual(0, p1.theta())
 
     def test_result(self) -> None:
+        """Just one state and one prior factor."""
         est = Estimate()
         est.init()
 
-        prior_mean = gtsam.Pose2(0, 0, 0)
-        est.add_state(0, prior_mean)
+        est.add_state(0, gtsam.Pose2(0, 0, 0))
         # noise model is expressed as sigma
-        noise = noiseModel.Diagonal.Sigmas(np.array([1, 2, 3]))
-        est.prior(0, prior_mean, noise)
-
-        est.add_state(1, gtsam.Pose2())
-        est.prior(1, prior_mean, noise)
+        est.prior(
+            0,
+            gtsam.Pose2(0, 0, 0),
+            noiseModel.Diagonal.Sigmas(np.array([1, 2, 3])),
+        )
         est.update()
 
         results = est.get_result()
@@ -61,9 +65,9 @@ class EstimateAccelerometerTest(unittest.TestCase):
         results = cast(tuple[int, gtsam.Pose2, np.ndarray], results)
         t: int = results[0]
         p: gtsam.Pose2 = results[1]
-        cov:np.ndarray = results[2]
+        cov: np.ndarray = results[2]
 
-        self.assertAlmostEqual(1, t)
+        self.assertAlmostEqual(0, t)
 
         self.assertAlmostEqual(0, p.x())
         self.assertAlmostEqual(0, p.y())
@@ -84,6 +88,57 @@ class EstimateAccelerometerTest(unittest.TestCase):
             )
         )
 
+    def test_multiple_priors(self) -> None:
+        """One state but two different priors: the tighter prior "wins"."""
+        est = Estimate()
+        est.init()
+
+        est.add_state(0, gtsam.Pose2(0, 0, 0))
+        # a very loose prior
+        est.prior(
+            0,
+            gtsam.Pose2(0, 0, 0),
+            noiseModel.Diagonal.Sigmas(np.array([10, 10, 10])),
+        )
+
+        # a much tighter prior
+        est.prior(
+            0,
+            gtsam.Pose2(0, 0, 0),
+            noiseModel.Diagonal.Sigmas(np.array([1, 1, 1])),
+        )
+
+        est.update()
+
+        results = est.get_result()
+        self.assertIsNotNone(results)
+        results = cast(tuple[int, gtsam.Pose2, np.ndarray], results)
+        t: int = results[0]
+        p: gtsam.Pose2 = results[1]
+        cov: np.ndarray = results[2]
+
+        self.assertAlmostEqual(0, t)
+
+        self.assertAlmostEqual(0, p.x())
+        self.assertAlmostEqual(0, p.y())
+        self.assertAlmostEqual(0, p.theta())
+
+        print(cov)
+        # note the resulting variance is *better* than either
+        # prior alone, because they're assumed to be independent.
+        self.assertTrue(
+            np.allclose(
+                cov,
+                np.array(
+                    [
+                        [0.99, 0, 0],
+                        [0, 0.99, 0],
+                        [0, 0, 0.99],
+                    ],
+                ),
+                atol=0.01,
+            )
+        )
 
     def test_marginals(self) -> None:
         est = Estimate()
@@ -195,7 +250,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         results = cast(tuple[int, gtsam.Pose2, np.ndarray], results)
         t: int = results[0]
         p1: gtsam.Pose2 = results[1]
-        cov:np.ndarray = results[2]
+        cov: np.ndarray = results[2]
 
         p2 = est.extrapolate(p1)
 

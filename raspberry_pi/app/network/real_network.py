@@ -7,7 +7,7 @@ from typing import cast
 
 import ntcore
 from typing_extensions import override
-from wpimath.geometry import Rotation3d, Pose2d
+from wpimath.geometry import Rotation3d, Pose2d, Rotation2d
 from wpiutil import wpistruct
 
 from app.config.identity import Identity
@@ -166,11 +166,32 @@ class RealOdometryReceiver(OdometryReceiver):
 
 
 class RealGyroReceiver(GyroReceiver):
-    def __init__(self) -> None:
-        pass
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(
+            inst, [name], ntcore.PubSubOptions(keepDuplicates=True)
+        )
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
 
-    def get(self) -> list[tuple[int, float]]:
-        pass
+
+    def get(self) -> list[tuple[int, Rotation2d]]:
+        result: list[tuple[int, Rotation2d]] = []
+        queue: list = self.poller.readQueue()
+        for event in queue:
+            value_event_data = cast(ntcore.ValueEventData, event.data)
+            nt_value: ntcore.Value = value_event_data.value
+            time_us = nt_value.time() - start_time_us
+            raw: bytes = cast(bytes, nt_value.getRaw())
+            pos: Rotation2d = wpistruct.unpack(Rotation2d, raw)
+            result.append((time_us, pos))
+        return result
 
 
 class RealNetwork(Network):
@@ -226,7 +247,7 @@ class RealNetwork(Network):
 
     @override
     def get_gyro_receiver(self, name: str) -> GyroReceiver:
-        return RealGyroReceiver()
+        return RealGyroReceiver(name, self._inst)
 
     @override
     def flush(self) -> None:

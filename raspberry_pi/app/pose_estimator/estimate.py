@@ -17,21 +17,26 @@ import app.pose_estimator.factors.accelerometer as accelerometer
 import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
 import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
 import app.pose_estimator.factors.apriltag_smooth_batch as apriltag_smooth_batch
+import app.pose_estimator.factors.binary_gyro as binary_gyro
 import app.pose_estimator.factors.gyro as gyro
 import app.pose_estimator.factors.odometry as odometry
 from app.pose_estimator.drive_util import DriveUtil
 from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_delta import SwerveModuleDeltas
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
-                                                       SwerveModulePosition100,
-                                                       SwerveModulePositions)
+from app.pose_estimator.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+    SwerveModulePositions,
+)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
-# prior uncertainty is larger than field, i.e. "no idea"
-PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([16, 8, 6]))
+# prior uncertainty is *much* larger than field, i.e. "no idea"
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([160, 80, 60]))
+PRIOR_MEAN = gtsam.Pose2(8, 4, 0)
 ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
-GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.05]))
+# the gyro has really low noise.
+GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.0001]))
 
 PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
 # used for calibration only
@@ -118,10 +123,12 @@ class Estimate:
         if self.new_values.exists(X(time_us)):
             # print("it's already in the values")
             return
-        # if you're using the batch smoother, the initial value almost doesn't matter:
+        # if you're using the batch smoother, the initial value
+        # almost doesn't matter:
         # TODO: use the previous pose as the initial value
         self.new_values.insert(X(time_us), initial_value)
         self.new_timestamps[X(time_us)] = time_us
+
 
     def prior(
         self,
@@ -169,7 +176,7 @@ class Estimate:
             self.positions = positions
             self.odo_t = t1_us
             return
-        
+
         t0_us = self.odo_t
 
         deltas: SwerveModuleDeltas = DriveUtil.module_position_delta(
@@ -191,9 +198,7 @@ class Estimate:
         self.positions = positions
         self.odo_t = t1_us
 
-    def odometry_custom(
-        self, t1_us: int, positions: SwerveModulePositions
-    ) -> None:
+    def odometry_custom(self, t1_us: int, positions: SwerveModulePositions) -> None:
         """Add an odometry measurement.  Remember to call add_state so that
         the odometry factor has something to refer to.
 
@@ -210,7 +215,7 @@ class Estimate:
             self.positions = positions
             self.odo_t = t1_us
             return
-        
+
         t0_us = self.odo_t
 
         deltas: SwerveModuleDeltas = DriveUtil.module_position_delta(
@@ -252,9 +257,17 @@ class Estimate:
             )
         )
 
-    def gyro(self, t0_us: int, t1_us: int, dtheta: float) -> None:
+    def gyro(self, t0_us: int, yaw: float) -> None:
+        # if this is the only factor attached to this variable
+        # then it will be underconstrained (i.e. no constraint on x or y), which could happen.
+        self.new_factors.push_back(gyro.factor(np.array([yaw]), GYRO_NOISE, X(t0_us)))
+        # if you have only the gyro (which only constrains yaw)
+        # you will fail, so add an extremely loose prior.
+        self.prior(t0_us, PRIOR_MEAN, PRIOR_NOISE)
+
+    def binary_gyro(self, t0_us: int, t1_us: int, dtheta: float) -> None:
         self.new_factors.push_back(
-            gyro.factor(
+            binary_gyro.factor(
                 np.array([dtheta]),
                 GYRO_NOISE,
                 X(t0_us),
