@@ -12,18 +12,18 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class NeoTest extends SubsystemBase {
 
-  private final LinearPositionServo servo;
+  private final LinearPositionServo servo = null;
   /** Creates a new NeoTest. */
   public NeoTest(LoggerFactory parent) {
-    LoggerFactory child = parent.child(this);
-    LoggerFactory rightLogger = child.child("right");
-    m_right = comp(rightLogger, rightClimberID,MotorPhase.FORWARD);
+    // LoggerFactory child = parent.child(this);
+    // LoggerFactory rightLogger = child.child("right");
+    // m_right = comp(rightLogger, rightClimberID,MotorPhase.FORWARD);
 
-    servo = new OnboardLinearDutyCyclePositionServo(
-                child.child("left"),
-                m_right,
-                new PIDControlleservor(0.1, 0, 0),
-                new TrapezoidProfile100(0.02, 0.1, 0.01));
+    // servo = new OnboardLinearDutyCyclePositionServo(
+    //             child.child("left"),
+    //             m_right,
+    //             new PIDControlleservor(0.1, 0, 0),
+    //             new TrapezoidProfile100(0.02, 0.1, 0.01));
   }
 
   @Override
