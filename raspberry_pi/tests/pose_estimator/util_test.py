@@ -7,7 +7,7 @@ import unittest
 import gtsam
 import numpy as np
 
-from app.pose_estimator.util import pose3_to_pose3d, to_cal
+from app.pose_estimator.util import pose2_to_pose2d, pose3_to_pose3d, to_cal
 
 
 class UtilTest(unittest.TestCase):
@@ -70,6 +70,18 @@ class UtilTest(unittest.TestCase):
         self.assertAlmostEqual(0, wp.translation().X())
         self.assertAlmostEqual(0, wp.translation().Y())
         self.assertAlmostEqual(1, wp.translation().Z())
+
+    def test_pose2_to_pose2d(self) -> None:
+        gp = gtsam.Pose2(0, 0, 0)
+        wp = pose2_to_pose2d(gp)
+        self.assertAlmostEqual(0, wp.X())
+        self.assertAlmostEqual(0, wp.Y())
+        self.assertAlmostEqual(0, wp.rotation().radians())
+        gp = gtsam.Pose2(1, 2, 3)
+        wp = pose2_to_pose2d(gp)
+        self.assertAlmostEqual(1, wp.X())
+        self.assertAlmostEqual(2, wp.Y())
+        self.assertAlmostEqual(3, wp.rotation().radians())
 
     def test_cal(self) -> None:
         gc = gtsam.Cal3DS2(100, 150, 0, 50, 75, 1, 2, 3, 4)
