@@ -20,14 +20,6 @@ Let's make sure the WPILib plugin can build your Study and deploy it to the Robo
 If your deploy is successful, you should see in the Driver Station that Communications is GREEN, Robot Code is GREEN, and there are no errors scrolling in the log:
 ![](readme_img/test_project_success.png)
 
-## Send a Pull Request With Your Study
-Time to send your code in for review. If you are not familiar with Git, go read our [Git beginner guide](TODO!!).
-
-1. In a Terminal, go to your Study directory.
-1. Create a new branch.
-1. `git add` all your code.
-1. `git push` your branch to Github.
-1. Click on the link to create a new PR. 
 
 ## Get the 'lib' Directory Included
 Starting from scratch is daunting! Fortunately, you can reuse most of the Team100 code because the common functionality for motor control, etc etc, is all in the `lib` directory. We need to instruct Gradle how to include this code in the build. 
@@ -89,3 +81,16 @@ Repeat this process for each of the other two vendordeps files.
 
 ## Try to Build Again
 Always good to make sure everything works :) Run another Build + Deploy and make sure there aren't any errors.
+
+## Send a Pull Request With Your Study
+Time to send your code in for review. If you are not familiar with Git, go read our [Git beginner guide](TODO!!).
+
+1. In a Terminal, go to your Study directory.
+1. Create a new branch.
+1. `git add` all your code.
+1. `git push` your branch to Github.
+1. Click on the link to create a new PR. 
+
+You should end up with a big PR that looks like [this one](https://github.com/Team100/all24/pull/548). Don't worry about it too much; we want to get this committed without any of YOUR changes because there is no reason for anyone to review this boilplate code.
+
+# Move On to the Next Chapter!
