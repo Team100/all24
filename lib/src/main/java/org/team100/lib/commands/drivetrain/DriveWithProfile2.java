@@ -40,7 +40,6 @@ public class DriveWithProfile2 extends Command implements Glassy {
     private final double dt = 0.02;
     private double sx = 1;
     private double sy = 1;
-    private boolean wheelsAtCorrectPos;
 
     private Pose2d m_fieldRelativeGoal = null;
     private State100 xSetpoint;
@@ -62,7 +61,7 @@ public class DriveWithProfile2 extends Command implements Glassy {
         m_limits = limits;
         xProfile = new TrapezoidProfile100(
                 m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2() /2,
+                m_limits.getMaxDriveAccelerationM_S2()/2,
                 kTranslationalToleranceM);
         yProfile = new TrapezoidProfile100(
                 m_limits.getMaxDriveVelocityM_S(),
@@ -77,8 +76,6 @@ public class DriveWithProfile2 extends Command implements Glassy {
 
     @Override
     public void initialize() {
-        wheelsAtCorrectPos = false;
-
         xSetpoint = m_swerve.getState().x();
         ySetpoint = m_swerve.getState().y();
         thetaSetpoint = m_swerve.getState().theta();
@@ -122,25 +119,6 @@ public class DriveWithProfile2 extends Command implements Glassy {
         }
         Rotation2d bearing = new Rotation2d(
                 Math100.getMinDistance(measurement, m_fieldRelativeGoal.getRotation().getRadians()));
-
-        if (!wheelsAtCorrectPos) {
-            if (atRest()) {
-                m_thetaGoalRaw = new State100(bearing.getRadians(), 0);
-                m_xGoalRaw = new State100(m_fieldRelativeGoal.getX(), 0, 0);
-                State100 xs = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, xSetpoint, m_xGoalRaw);
-
-                m_yGoalRaw = new State100(m_fieldRelativeGoal.getY(), 0, 0);
-                State100 ys = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, ySetpoint, m_yGoalRaw);
-
-                State100 thetas = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, thetaSetpoint, m_thetaGoalRaw);
-                SwerveState goalState = new SwerveState(xs, ys, thetas);
-                FieldRelativeVelocity goal = m_controller.calculate(m_swerve.getState(), goalState);
-                wheelsAtCorrectPos = m_swerve.steerAtRest(goal);
-                return;
-            } else {
-                wheelsAtCorrectPos = true;
-            }
-        }
         // make sure the setpoint uses the modulus close to the measurement.
         thetaSetpoint = new State100(
                 Math100.getMinDistance(measurement, thetaSetpoint.x()),
