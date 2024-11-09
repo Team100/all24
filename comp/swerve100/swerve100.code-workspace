@@ -6,12 +6,6 @@
         {
             "path": "../../lib"
         },
-        {
-            "path": "../../studies"
-        },
-        {
-            "path": "../.."
-        }
     ],
     "settings": {
         "java.configuration.updateBuildConfiguration": "automatic",

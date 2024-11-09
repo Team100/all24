@@ -25,8 +25,7 @@ public enum Identity {
     TEAM100_2018("0313baf3"),
     BETA_BOT("0315db43"),
     SQUAREBOT("031e31e3"),
-    SWERVE_TWO(""),
-    FIRST_MOTOR_CONTROL("0317f285"),
+    SWERVE_TWO("0317f285"),
     COMP_BOT("03238232"), 
     SWERVE_ONE("032363AC"), 
     BLANK(""), // e.g. test default or simulation
