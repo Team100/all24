@@ -8,7 +8,7 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.util.NamedChooser;
 
@@ -67,7 +67,7 @@ public class DriveManually extends Command implements Glassy  {
         // Note this is not necessarily "at rest," because we might start driving
         // manually while the robot is moving.
         ChassisSpeeds currentSpeeds = m_drive.getState().chassisSpeeds();
-        SwerveModuleState100[] currentStates = m_drive.getSwerveLocal().states();
+        SwerveModuleStates currentStates = m_drive.getSwerveLocal().states();
         SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
         m_drive.resetSetpoint(setpoint);
         Pose2d p = m_drive.getState().pose();

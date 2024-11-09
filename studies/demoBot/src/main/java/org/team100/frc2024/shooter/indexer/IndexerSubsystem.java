@@ -61,12 +61,10 @@ public class IndexerSubsystem extends SubsystemBase implements Indexer {
         m_linearMechanism.setVelocity(value,0, 0);
     }
 
-    @Override
     public void setAngle(double value) {
         m_indexer.setPosition(value,0);
     }
 
-    @Override
     public double getAngle() {
         return m_indexer.getPosition().getAsDouble();
     }

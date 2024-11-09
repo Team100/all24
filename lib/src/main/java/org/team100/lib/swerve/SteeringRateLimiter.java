@@ -1,8 +1,6 @@
 package org.team100.lib.swerve;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -38,7 +36,6 @@ public class SteeringRateLimiter implements Glassy {
             double[] desired_vx,
             double[] desired_vy,
             Rotation2d[] desired_heading, // nullable entries
-            double[] desired_heading_velocity,
             Rotation2d[] overrideSteering) {
 
         double min_s = 1.0;
@@ -52,33 +49,20 @@ public class SteeringRateLimiter implements Glassy {
                 // ignore overridden wheels
                 continue;
             }
-            double s;
-            if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
-                s = SwerveUtil.findSteeringMaxS(
+            double s = SwerveUtil.findSteeringMaxS(
                     prev_vx[i],
                     prev_vy[i],
                     prev_heading[i].getRadians(),
                     desired_vx[i],
                     desired_vy[i],
                     desired_heading[i].getRadians(),
-                    desired_heading_velocity[i] * TimedRobot100.LOOP_PERIOD_S,
                     TimedRobot100.LOOP_PERIOD_S * m_limits.getMaxSteeringVelocityRad_S(),
                     kMaxIterations);
-            } else {
-                s = SwerveUtil.findSteeringMaxS(
-                        prev_vx[i],
-                        prev_vy[i],
-                        prev_heading[i].getRadians(),
-                        desired_vx[i],
-                        desired_vy[i],
-                        desired_heading[i].getRadians(),
-                        TimedRobot100.LOOP_PERIOD_S * m_limits.getMaxSteeringVelocityRad_S(),
-                        kMaxIterations);
-            }
+
             min_s = Math.min(min_s, s);
         }
         double s = min_s;
-        m_log_s.log( () -> s);
+        m_log_s.log(() -> s);
         return min_s;
     }
 

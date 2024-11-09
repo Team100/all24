@@ -3,7 +3,6 @@ package org.team100.frc2024;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2024.commands.AutonCommand;
@@ -33,11 +32,11 @@ import org.team100.frc2024.motion.shooter.TestShoot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.commands.AllianceCommand;
+import org.team100.lib.commands.drivetrain.DriveToPoseSimple;
 import org.team100.lib.commands.drivetrain.DriveWithProfileRotation;
 import org.team100.lib.commands.drivetrain.FancyTrajectory;
 import org.team100.lib.commands.drivetrain.ResetPose;
 import org.team100.lib.commands.drivetrain.SetRotation;
-import org.team100.lib.commands.drivetrain.for_testing.DriveInACircle;
 import org.team100.lib.commands.drivetrain.for_testing.OscillateProfile;
 import org.team100.lib.commands.drivetrain.manual.DriveManually;
 import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
@@ -53,6 +52,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.controller.drivetrain.FullStateDriveController;
 import org.team100.lib.controller.drivetrain.HolonomicDriveControllerFactory;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
+import org.team100.lib.controller.drivetrain.MinTimeDriveController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.follower.DrivePIDFFollower;
 import org.team100.lib.follower.DriveTrajectoryFollower;
@@ -82,6 +82,7 @@ import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
 import org.team100.lib.profile.HolonomicProfile;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
+import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
 import org.team100.lib.timing.ConstantConstraint;
 import org.team100.lib.trajectory.StraightLineTrajectory;
 import org.team100.lib.trajectory.TrajectoryMaker;
@@ -91,8 +92,8 @@ import org.team100.lib.visualization.TrajectoryVisualization;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -164,6 +165,7 @@ public class RobotContainer implements Glassy {
         final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 driveLog,
                 gyro.getYawNWU(),
+                gyro.getYawRateNWU(),
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
@@ -174,7 +176,11 @@ public class RobotContainer implements Glassy {
                 m_layout,
                 poseEstimator);
 
-        final SwerveLocal swerveLocal = new SwerveLocal(driveLog, swerveKinodynamics, m_modules);
+        final AsymSwerveSetpointGenerator setpointGenerator = new AsymSwerveSetpointGenerator(
+                driveLog,
+                swerveKinodynamics,
+                RobotController::getBatteryVoltage);
+        final SwerveLocal swerveLocal = new SwerveLocal(driveLog, swerveKinodynamics, setpointGenerator, m_modules);
 
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
@@ -258,13 +264,21 @@ public class RobotContainer implements Glassy {
         final DriveTrajectoryFollower drivePID = driveControllerFactory.goodPIDF(PIDFlog);
 
         whileTrue(driverControl::driveToNote,
-        new ParallelDeadlineGroup(new DriveWithProfileRotation(
-                () -> Optional.of(new Translation2d()),
-                m_drive,
-                halfFullStateController,
-                swerveKinodynamics), intake.run(intake::intakeSmart)));
+                new ParallelDeadlineGroup(new DriveWithProfileRotation(
+                        noteListener::getClosestTranslation2d,
+                        m_drive,
+                        halfFullStateController,
+                        swerveKinodynamics), intake.run(intake::intakeSmart)));
+        // try the new mintime controller
+        final HolonomicFieldRelativeController minTimeController = new MinTimeDriveController(comLog, hlog);
         whileTrue(driverControl::actualCircle,
-                new DriveInACircle(comLog, m_drive, controller, -1, viz));
+                new DriveToPoseSimple(
+                        comLog,
+                        new Pose2d(8, 4, GeometryUtil.kRotationZero),
+                        minTimeController,
+                        m_drive));
+        // whileTrue(driverControl::actualCircle,
+        // new DriveInACircle(comLog, m_drive, controller, -1, viz));
 
         whileTrue(driverControl::driveToAmp,
                 new DriveToAmp(
@@ -287,14 +301,14 @@ public class RobotContainer implements Glassy {
         // HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1,
         // 0.01, 1, 1, 0.01);
         // high cruise but also moderate accel
-        HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 4, 4, 0.01, 3, 3, 0.01);
+        HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1, 0.01, 3, 3, 0.01);
         FullStateDriveController hcontroller = new FullStateDriveController(hlog);
 
         whileTrue(driverControl::fullCycle,
                 // new RepeatCommand(
                 // new SequentialCommandGroup(
-                // new OscillateForceField(m_drive, hcontroller, 1),
-                // new OscillateForceField(m_drive, hcontroller, -1))));
+                // new OscillateForceField(m_drive, halfFullStateController, 1),
+                // new OscillateForceField(m_drive, halfFullStateController, -1))));
 
                 new RepeatCommand(
                         new SequentialCommandGroup(
@@ -306,7 +320,7 @@ public class RobotContainer implements Glassy {
         // new OscillatePosition(driveLog, m_drive, maker, controller, 1, viz),
         // new OscillatePosition(driveLog, m_drive, maker, controller, -1, viz))));
 
-        // new OscillateDirect(comLog, m_drive));
+        // whileTrue(driverControl::fullCycle, new OscillateDirect(comLog, m_drive));
         // new Oscillate(comLog, m_drive));
         // new RepeatCommand(
         // new FullCycle(comLog, m_drive, controller, viz)));
@@ -392,7 +406,7 @@ public class RobotContainer implements Glassy {
                         swerveKinodynamics,
                         gyro,
                         driverControl::desiredRotation,
-                        new double[] { 5.0, 0.5 }));
+                        new double[] { 5.0, 1 }));
 
         driveManually.register("SNAPS_MIN_TIME", true,
                 new ManualWithMinTimeHeading(

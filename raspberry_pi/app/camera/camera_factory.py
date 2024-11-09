@@ -19,7 +19,10 @@ class CameraFactory:
             from app.camera.fake_camera import FakeCamera
 
             if camera_num == 0:
-                return FakeCamera("tag_and_board.jpg", (1100, 620))
+                # 1/4 scale
+                # return FakeCamera("tag_and_board.jpg", (1100, 620), -5)
+                # full-size (huge)
+                return FakeCamera("tag_and_board.jpg", (5504, 3096), -0.1)
             return FakeCamera("blob.jpg")
 
     @staticmethod
@@ -32,6 +35,9 @@ class CameraFactory:
                 | Identity.LEFTAMP
                 | Identity.SHOOTER
                 | Identity.GAME_PIECE
+                | Identity.GLOBAL_GAME_PIECE
+                | Identity.GLOBAL_LEFT
+                | Identity.GLOBAL_RIGHT
                 | Identity.DEV # has one v2 camera at the moment
             ):
                 return 1

@@ -47,9 +47,13 @@ public class Feedforward100 {
         return new Feedforward100(0.122, 0.000, 0.100, 0.065, 0.5);
     }
 
+    public static Feedforward100 makeNeoArm() {
+        return new Feedforward100(0.22, 1, 0, 0, 0);
+    }
+
     // TODO get the acurate numbers here
     public static Feedforward100 makeNeo550() {
-        return new Feedforward100(0.32, 0, 0, .07, 0);
+        return new Feedforward100(0.12, 0, 0, .07, 0);
     }
 
     public static Feedforward100 makeArmPivot() {

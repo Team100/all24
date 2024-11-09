@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /** Uses a holonomic profile. */
 public class OscillateProfile extends Command implements Glassy {
-    private static final double TOLERANCE = 0.01;
+    private static final double TOLERANCE = 0.05;
 
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicProfile m_profile;
@@ -38,6 +38,7 @@ public class OscillateProfile extends Command implements Glassy {
 
     @Override
     public void initialize() {
+        m_swerve.stop();
         m_controller.reset();
         // choose a goal 1m away
         SwerveState start = m_swerve.getState();

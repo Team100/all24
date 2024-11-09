@@ -23,13 +23,12 @@ public class ShootOne extends Command {
     @Override
     public void initialize() {
         m_shooter.spinUp();
-        angle = m_indexer.getAngle();
     }
 
     @Override
     public void execute() {
         if (m_shooter.atVeloctity()) {
-            m_indexer.setAngle(angle + distanceDeg);
+            m_indexer.set(angle + distanceDeg);
         }
     }
 
@@ -38,8 +37,8 @@ public class ShootOne extends Command {
         m_shooter.stop();
     }
 
-    @Override
-    public boolean isFinished() {
-        return Math.abs(m_indexer.getAngle() - (angle + distanceDeg)) < 0.05;
-    }
+    // @Override
+    // public boolean isFinished() {
+        // return Math.abs(m_indexer.getAngle() - (angle + distanceDeg)) < 0.05;
+    // }
 }

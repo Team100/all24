@@ -13,7 +13,7 @@ import org.team100.lib.logging.LoggerFactory.EnumLogger;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.util.Memo;
@@ -99,6 +99,16 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
+    /** Skip all scaling, setpoint generator, etc. */
+    public void driveInFieldCoordsVerbatim(FieldRelativeVelocity vIn) {
+        ChassisSpeeds targetChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                vIn.x(),
+                vIn.y(),
+                vIn.theta(),
+                getState().pose().getRotation());
+        m_swerveLocal.setChassisSpeedsNormally(targetChassisSpeeds, m_gyro.getYawRateNWU());
+    }
+
     /**
      * steer the wheels to match the target but don't drive them. This is for the
      * beginning of trajectories, like the "square" project or any other case where
@@ -137,16 +147,9 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
     }
 
     /**
-     * array order:
-     * 
-     * frontLeft
-     * frontRight
-     * rearLeft
-     * rearRight
-     * 
      * Does not desaturate.
      */
-    public void setRawModuleStates(SwerveModuleState100[] states) {
+    public void setRawModuleStates(SwerveModuleStates states) {
         m_swerveLocal.setRawModuleStates(states);
     }
 
@@ -175,6 +178,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.reset();
         m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
+                m_gyro.getYawRateNWU(),
                 m_swerveLocal.positions(),
                 new Pose2d(translation, m_gyro.getYawNWU()),
                 Timer.getFPGATimestamp());
@@ -186,6 +190,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.reset();
         m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
+                m_gyro.getYawRateNWU(),
                 m_swerveLocal.positions(),
                 robotPose,
                 Timer.getFPGATimestamp());
@@ -258,6 +263,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_poseEstimator.put(
                 now,
                 m_gyro.getYawNWU(),
+                m_gyro.getYawRateNWU(),
                 m_swerveLocal.positions());
         m_cameras.update();
         return m_poseEstimator.get(now);

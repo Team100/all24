@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.motion.servo.AngularPositionServo;
@@ -21,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public abstract class SwerveModule100 implements Glassy {
     private final LinearVelocityServo m_driveServo;
     private final AngularPositionServo m_turningServo;
+    private Rotation2d previousPosition = new Rotation2d();
 
     protected SwerveModule100(
             LinearVelocityServo driveServo,
@@ -34,8 +33,14 @@ public abstract class SwerveModule100 implements Glassy {
      */
     void setDesiredState(SwerveModuleState100 desiredState) {
         OptionalDouble position = m_turningServo.getPosition();
+
+        if (position.isPresent()) {
+            previousPosition = new Rotation2d(position.getAsDouble());
+        }
+
         if (position.isEmpty())
-            return;
+            desiredState = new SwerveModuleState100(desiredState.speedMetersPerSecond, Optional.of(previousPosition));
+
         setRawDesiredState(
                 SwerveModuleState100.optimize(
                         desiredState,
@@ -51,18 +56,13 @@ public abstract class SwerveModule100 implements Glassy {
         if (Double.isNaN(state.speedMetersPerSecond))
             throw new IllegalArgumentException("speed is NaN");
         if (state.angle.isEmpty()) {
-            Util.warn("SwerveModule100.setRawDesiredState: empty angle!");
+            // Util.warn("SwerveModule100.setRawDesiredState: empty angle!");
             m_driveServo.setVelocityM_S(0);
             return;
             // throw new IllegalArgumentException();
         }
-        if (Experiments.instance.enabled(Experiment.UseSecondDerivativeSwerve)) {
-            m_driveServo.setVelocity(state.speedMetersPerSecond, state.accelMetersPerSecond_2);
-            m_turningServo.setPositionWithVelocity(state.angle.get().getRadians(), state.omega, 0);
-        } else {
-            m_driveServo.setVelocityM_S(state.speedMetersPerSecond);
-            m_turningServo.setPosition(state.angle.get().getRadians(), 0);
-        }
+        m_driveServo.setVelocityM_S(state.speedMetersPerSecond);
+        m_turningServo.setPosition(state.angle.get().getRadians(), 0);
     }
 
     /** For testing */

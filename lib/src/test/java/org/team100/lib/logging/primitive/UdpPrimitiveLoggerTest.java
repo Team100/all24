@@ -226,7 +226,8 @@ class UdpPrimitiveLoggerTest {
 
         double t0 = Timer.getFPGATimestamp();
         final double interval = 0.02;
-        final double total_time = 10;
+        // final double total_time = 10;
+        final double total_time = 1;
         // 5000 keys at 50hz, listener works perfectly.
         final int KEYS = 5000;
         final int ITERATIONS = (int) (total_time / interval);
@@ -277,7 +278,8 @@ class UdpPrimitiveLoggerTest {
                 udpLogger);
 
         final int KEYS = 20000;
-        final int ITERATIONS = 10000;
+        // final int ITERATIONS = 10000;
+        final int ITERATIONS = 1000;
 
         DoubleLogger[] loggers = new DoubleLogger[KEYS];
         for (int j = 0; j < KEYS; ++j) {

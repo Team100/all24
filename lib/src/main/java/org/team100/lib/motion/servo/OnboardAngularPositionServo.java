@@ -46,6 +46,8 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     /** Profile may be updated at runtime. */
     private Profile100 m_profile = new NullProfile();
+    // this was Sanjan experimenting in October 2024
+    // private ProfileWPI profileTest = new ProfileWPI(40,120);
 
     private State100 m_goal = new State100(0, 0);
     private State100 m_setpointRad = new State100(0, 0);
@@ -152,6 +154,8 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
                 m_setpointRad.v());
 
         m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad, m_goal);
+        // this was Sanjan experimenting in October 2024
+        // m_setpointRad = profileTest.calculate(0.02, m_setpointRad, m_goal);
 
         final double u_FB;
         if (Experiments.instance.enabled(Experiment.FilterFeedback)) {
@@ -164,6 +168,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
             u_FB = m_controller.calculate(measurementPositionRad,
                     m_setpointRad.x());
         }
+
 
         final double u_FF = m_setpointRad.v();
         // note u_FF is rad/s, so a big number, u_FB should also be a big number.
