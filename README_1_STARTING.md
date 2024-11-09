@@ -1,13 +1,25 @@
 # Setting up a VSCode Development Environment
 This guide will walk you through how to set up your computer to make code changes and push them to the RoboRio. You should make sure all of these instructions work before you spend a lot of time changing any code to know that your end-to-end testing loop with a robot will work.
 
-## Preparing Your Dev Env
-TODO.
+## Get Set Up With Git
+TODO
 
-The rest of the instructions assume that you have the following setup:
 1. Git `Team100/all24` repo checked out.
-1. Custom WPI VSCode with extensions installed.
-1. `swerve100` workspace opened.
+
+## Get VSCode + WPILib Set Up
+TODO
+
+## Getting VSCode Workspace Working
+In VSCode, go to `File > Open Folder` and select the `swerve100` folder. 
+
+When you open the swerve100 project, VS Code should show a message in the bottom-right corner suggesting that you open the "workspace" instead, which includes lib:
+
+<img src="readme_img/openworkspace.png" width=350/>
+
+When you have VS Code correctly set up, the Explorer view should contain two top-level folders: "swerve100" and "lib":
+
+<img src="readme_img/workspace.png" width=350/>
+TODO.
 
 ## Building the RoboRIO Code
 Use the WPI extensions to run the `gradlew` build:

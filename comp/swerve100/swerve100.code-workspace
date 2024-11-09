@@ -1,12 +1,18 @@
 {
 	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../../lib"
-		}
-	],
+        {
+            "path": "."
+        },
+        {
+            "path": "../../lib"
+        },
+        {
+            "path": "../../studies"
+        },
+        {
+            "path": "../.."
+        }
+    ],
     "settings": {
         "java.configuration.updateBuildConfiguration": "automatic",
         "java.server.launchMode": "Standard",

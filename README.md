@@ -21,15 +21,15 @@ Here is the directory layout:
   * another project
   * etc ...
 
-# VS Code
+# Getting Started
 
-When you open the swerve100 project, VS Code should show a message in the bottom-right corner suggesting that you open the "workspace" instead, which includes lib:
+First time working on Control? Fret not! This guide will walk you through everything from setting up your development environment, to deploying code to the RoboRIO, to controlling your first motor, and then to building a complex robot. It's an in-progress guide so please add to it anytime you see gaps.
 
-<img src="openworkspace.png" width=350/>
+Chapters:
+1. [Setting up your development environment](README_1_STARTING.md)
+2. [Getting your first motor running](README_2_MOTOR.md)
+3. [Creating a new 'study'](README_3_STUDY.md)
 
-When you have VS Code correctly set up, the Explorer view should contain two top-level folders: "swerve100" and "lib":
-
-<img src="workspace.png" width=350/>
 
 # Setup
 
