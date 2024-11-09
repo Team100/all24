@@ -6,7 +6,8 @@ import dataclasses
 from typing import Protocol
 
 import numpy as np
-from wpimath.geometry import Pose3d, Rotation2d, Rotation3d, Transform3d
+from wpimath.geometry import (Pose3d, Rotation2d, Rotation3d, Transform3d,
+                              Twist3d)
 from wpiutil import wpistruct
 
 from app.pose_estimator.swerve_module_position import SwerveModulePositions
@@ -63,14 +64,17 @@ class PoseEstimate25:
     """Result of the pose estimator."""
 
     # most-recent state (corresponding to the NT timestamp)
+    # TODO: make this a pose2d
     x: float
     y: float
     theta: float
     # std dev of most-recent state (sqrt of diagonal of marginal covariance)
+    # TODO: make this a twist2d
     x_sigma: float
     y_sigma: float
     theta_sigma: float
     # twist of most-recent odometry
+    # TODO: make this a twist2d
     dx: float
     dy: float
     dtheta: float
@@ -104,7 +108,9 @@ class Cal3DS2:
 @dataclasses.dataclass
 class CameraCalibration:
     camera_offset: Pose3d
+    offset_sigma: Twist3d
     calib: Cal3DS2
+    calib_sigma: Cal3DS2
 
 
 class DoubleSender(Protocol):
