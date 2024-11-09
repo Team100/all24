@@ -4,6 +4,13 @@
 
 package frc.robot;
 
+import org.team100.lib.config.Feedforward100;
+import org.team100.lib.config.PIDConstants;
+import org.team100.lib.logging.Logging;
+import org.team100.lib.motor.BareMotor;
+import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeoCANSparkMotor;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,6 +27,8 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  private BareMotor m_single_motor;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -29,6 +38,14 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    m_single_motor = new NeoCANSparkMotor(
+      Logging.instance().rootLogger.child("test logger"),
+      7, 
+      MotorPhase.FORWARD, 
+      1, 
+      Feedforward100.makeNeo(), 
+      new PIDConstants(0, 0, 0));
+    m_single_motor.setVelocity(0.1, 0.1, 0.1);
   }
 
   /**
