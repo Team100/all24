@@ -35,11 +35,14 @@ In this step we are going to create a new robot Identity so that we can map cust
     SWERVE_TWO(""),
     FIRST_MOTOR_CONTROL("0317f285"),
 ```
-1. 
 
 ## Get the CAN ID of your Motor
 
 ## Map Controls to the Motor
+
+# Scratch
+What are submodules? 
+TODO: what is NeoTest.java for??
 
 
 
