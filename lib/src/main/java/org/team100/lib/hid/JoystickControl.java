@@ -8,7 +8,7 @@ import org.team100.lib.geometry.GeometryUtil;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.GenericHID;
 
 /**
  * Experiment for driving swerve with the big joystick.
@@ -22,11 +22,11 @@ public abstract class JoystickControl implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
 
-    private final Joystick m_controller;
+    private final GenericHID m_controller;
     private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     protected JoystickControl() {
-        m_controller = new Joystick(0);
+        m_controller = new GenericHID(0);
     }
 
     @Override
@@ -73,9 +73,9 @@ public abstract class JoystickControl implements DriverControl {
      */
     @Override
     public DriverControl.Velocity velocity() {
-        double dx = expo(deadband(-1.0 * clamp(m_controller.getY(), 1), kDeadband, 1), kExpo);
-        double dy = expo(deadband(-1.0 * clamp(m_controller.getX(), 1), kDeadband, 1), kExpo);
-        double dtheta = expo(deadband(-1.0 * clamp(m_controller.getTwist(), 1), kDeadband, 1), kExpo);
+        double dx = expo(deadband(-1.0 * clamp(m_controller.getRawAxis(1), 1), kDeadband, 1), kExpo);
+        double dy = expo(deadband(-1.0 * clamp(m_controller.getRawAxis(0), 1), kDeadband, 1), kExpo);
+        double dtheta = expo(deadband(-1.0 * clamp(m_controller.getRawAxis(2), 1), kDeadband, 1), kExpo);
         return new DriverControl.Velocity(dx, dy, dtheta);
     }
 

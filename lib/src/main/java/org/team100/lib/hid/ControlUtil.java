@@ -26,6 +26,13 @@ public class ControlUtil {
         return MathUtil.clamp(input, low, high);
     }
 
+    public static double scale(double raw, double negScale, double center, double posScale) {
+        double zeroed = raw - center;
+        if (zeroed < 0)
+            return zeroed / negScale;
+        return zeroed / posScale;
+    }
+
     private ControlUtil() {
     }
 }

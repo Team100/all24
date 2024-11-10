@@ -3,6 +3,7 @@ package org.team100.lib.hid;
 import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
+import static org.team100.lib.hid.ControlUtil.scale;
 
 import edu.wpi.first.wpilibj.GenericHID;
 
@@ -60,69 +61,41 @@ public class InterLinkDX implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
 
-    private final GenericHID hid;
+    private final GenericHID m_hid;
 
     public InterLinkDX() {
-        hid = new GenericHID(0);
+        m_hid = new GenericHID(0);
     }
 
     @Override
     public String getHIDName() {
-        return hid.getName();
+        return m_hid.getName();
     }
 
     @Override
     public Velocity velocity() {
-        double dx = expo(deadband(-1.0 * clamp(scaled(4), 1), kDeadband, 1), kExpo);
-        double dy = expo(deadband(-1.0 * clamp(scaled(3), 1), kDeadband, 1), kExpo);
-        double dtheta = expo(deadband(-1.0 * clamp(scaled(0), 1), kDeadband, 1), kExpo);
+        double dx = expo(deadband(
+                -1.0 * clamp(scale(m_hid.getRawAxis(4), 0.836, 0.031, 0.900), 1),
+                kDeadband, 1),
+                kExpo);
+        double dy = expo(deadband(
+                -1.0 * clamp(scale(m_hid.getRawAxis(3), 0.859, -0.008, 0.827), 1),
+                kDeadband, 1),
+                kExpo);
+        double dtheta = expo(deadband(
+                -1.0 * clamp(scale(m_hid.getRawAxis(0), 0.812, 0.0, 0.850), 1),
+                kDeadband, 1),
+                kExpo);
         return new Velocity(dx, dy, dtheta);
     }
 
     @Override
     public boolean fullCycle() {
-        return hid.getRawButton(13);
+        return m_hid.getRawButton(13);
     }
 
     @Override
     public boolean resetRotation0() {
-        return hid.getRawButton(14);
+        return m_hid.getRawButton(14);
     }
-
-    private double scaled(int axis) {
-        double raw = hid.getRawAxis(axis);
-        double zeroed = 0;
-        switch (axis) {
-            case 0:
-                zeroed = -1 * raw - 0.000;
-                System.out.println(zeroed);
-                if (zeroed < 0)
-                    return zeroed / 0.812;
-                return zeroed / 0.850;
-            case 1:
-                zeroed = raw - 0.169;
-                if (zeroed < 0)
-                    return zeroed / 0.628;
-                return zeroed / 0.619;
-            case 2:
-                zeroed = raw - 0.137;
-                if (zeroed < 0)
-                    return zeroed / 0.604;
-                return zeroed / 0.643;
-
-            case 3:
-                zeroed =  raw + 0.008;
-                if (zeroed < 0)
-                    return zeroed / 0.859;
-                return zeroed / 0.827;
-            case 4:
-                zeroed = -1 * raw - 0.031;
-                if (zeroed < 0)
-                    return zeroed / 0.836;
-                return zeroed / 0.900;
-            default:
-                return 0;
-        }
-    }
-
 }
