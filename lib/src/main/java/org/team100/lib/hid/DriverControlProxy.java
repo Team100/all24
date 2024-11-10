@@ -70,6 +70,9 @@ public class DriverControlProxy implements DriverControl {
         if (name.contains("Keyboard")) {
             return new SimulatedJoystick();
         }
+        if (name.contains("InterLinkDX")) {
+            return new InterLinkDX();
+        }
         return new NoDriverControl();
     }
 

@@ -89,17 +89,16 @@ public class InterLinkDX implements DriverControl {
         return hid.getRawButton(14);
     }
 
-
-    // TODO: find the zeros
     private double scaled(int axis) {
         double raw = hid.getRawAxis(axis);
         double zeroed = 0;
         switch (axis) {
             case 0:
-                zeroed = raw - 0.043;
+                zeroed = -1 * raw - 0.000;
+                System.out.println(zeroed);
                 if (zeroed < 0)
-                    return zeroed / 0.729;
-                return zeroed / 0.784;
+                    return zeroed / 0.812;
+                return zeroed / 0.850;
             case 1:
                 zeroed = raw - 0.169;
                 if (zeroed < 0)
@@ -112,12 +111,15 @@ public class InterLinkDX implements DriverControl {
                 return zeroed / 0.643;
 
             case 3:
-                return 0;
-            case 4:
-                zeroed = raw - 0.075;
+                zeroed =  raw + 0.008;
                 if (zeroed < 0)
-                    return zeroed / 0.738;
-                return zeroed / 0.776;
+                    return zeroed / 0.859;
+                return zeroed / 0.827;
+            case 4:
+                zeroed = -1 * raw - 0.031;
+                if (zeroed < 0)
+                    return zeroed / 0.836;
+                return zeroed / 0.900;
             default:
                 return 0;
         }
