@@ -1,18 +1,18 @@
 package org.team100.lib.motion.drivetrain;
 
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 
 
 /** Read-only view of SwerveLocal. */
 public interface SwerveLocalObserver {
 
-    SwerveModuleState100[] getDesiredStates();
+    SwerveModuleStates getDesiredStates();
 
     /** @return current measurements */
-    SwerveModuleState100[] states();
+    SwerveModuleStates states();
 
-    SwerveModulePosition100[] positions();
+    SwerveModulePositions positions();
 
     boolean[] atSetpoint();
 

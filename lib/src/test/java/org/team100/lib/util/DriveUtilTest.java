@@ -10,6 +10,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDelta;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDeltas;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -55,14 +56,14 @@ class DriveUtilTest {
         {
             // straight diagonal path
             Twist2d t = new Twist2d(1, 1, 0);
-            SwerveModuleDelta[] p = m_kinematics.toSwerveModuleDelta(t);
+            SwerveModuleDeltas p = m_kinematics.toSwerveModuleDelta(t);
             Twist2d t2 = m_kinematics.toTwist2d(p);
             assertEquals(t, t2);
         }
         {
             // turning and moving
             Twist2d t = new Twist2d(1, 1, 1);
-            SwerveModuleDelta[] p = m_kinematics.toSwerveModuleDelta(t);
+            SwerveModuleDeltas p = m_kinematics.toSwerveModuleDelta(t);
             Twist2d t2 = m_kinematics.toTwist2d(p);
             assertEquals(t, t2);
         }
@@ -73,7 +74,7 @@ class DriveUtilTest {
                     random.nextDouble(),
                     random.nextDouble(),
                     random.nextDouble());
-            SwerveModuleDelta[] p = m_kinematics.toSwerveModuleDelta(t);
+            SwerveModuleDeltas p = m_kinematics.toSwerveModuleDelta(t);
             Twist2d t2 = m_kinematics.toTwist2d(p);
             assertEquals(t, t2);
         }

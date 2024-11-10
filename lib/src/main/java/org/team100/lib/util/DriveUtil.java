@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDelta;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDeltas;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -112,17 +114,24 @@ public class DriveUtil {
      * The inverse kinematics wants this to represent a geodesic, which
      * means that the steering doesn't change between start and end.
      */
-    public static SwerveModuleDelta[] modulePositionDelta(
-            SwerveModulePosition100[] start,
-            SwerveModulePosition100[] end) {
-        if (start.length != end.length) {
-            throw new IllegalArgumentException("Inconsistent number of modules!");
-        }
-        SwerveModuleDelta[] newPositions = new SwerveModuleDelta[start.length];
-        for (int i = 0; i < start.length; i++) {
-            newPositions[i] = delta(start[i], end[i]);
-        }
-        return newPositions;
+    public static SwerveModuleDeltas modulePositionDelta(
+            SwerveModulePositions start,
+            SwerveModulePositions end) {
+        return new SwerveModuleDeltas(
+                delta(start.frontLeft(), end.frontLeft()),
+                delta(start.frontRight(), end.frontRight()),
+                delta(start.rearLeft(), end.rearLeft()),
+                delta(start.rearRight(), end.rearRight()));
+    }
+
+    public static SwerveModulePositions modulePositionFromDelta(
+            SwerveModulePositions initial,
+            SwerveModuleDeltas delta) {
+        return new SwerveModulePositions(
+                plus(initial.frontLeft(), delta.frontLeft()),
+                plus(initial.frontRight(), delta.frontRight()),
+                plus(initial.rearLeft(), delta.rearLeft()),
+                plus(initial.rearRight(), delta.rearRight()));
     }
 
     /**
@@ -138,6 +147,17 @@ public class DriveUtil {
         // the angle might be empty, if the encoder has failed
         // (which can seem to happen if the robot is *severely* overrunning).
         return new SwerveModuleDelta(0, Optional.empty());
+    }
+
+    public static SwerveModulePosition100 plus(
+            SwerveModulePosition100 start,
+            SwerveModuleDelta delta) {
+        double posM = start.distanceMeters + delta.distanceMeters;
+        if (delta.angle.isPresent()) {
+            return new SwerveModulePosition100(posM, delta.angle);
+        }
+        // if there's no delta angle, we're not going anywhere.
+        return start;
     }
 
     private DriveUtil() {

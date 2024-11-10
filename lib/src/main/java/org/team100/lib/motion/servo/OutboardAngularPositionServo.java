@@ -45,7 +45,9 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private State100 m_goal = new State100(0, 0);
     /** Remember that the outboard setpoint "winds up" i.e. it's not in [-pi,pi] */
     private State100 m_setpoint = new State100(0, 0);
-
+    // this was Sanjan experimenting in October 2024
+    // private ProfileWPI profileTest = new ProfileWPI(40,120);
+    
     /** Don't forget to set a profile. */
     public OutboardAngularPositionServo(
             LoggerFactory parent,
@@ -122,6 +124,8 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
         // finally compute a new setpoint
         m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, m_goal);
+        // this was Sanjan experimenting in October 2024
+        // m_setpoint = profileTest.calculate(0.02, m_setpoint, m_goal);
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 

@@ -89,7 +89,9 @@ class _StreamHandler:
             await asyncio.sleep(1 / self._stream.fps)
             frame = await self._stream.get_frame_processed()
             with MultipartWriter("image/jpeg", boundary="image-boundary") as mpwriter:
-                mpwriter.append(frame.tobytes(), {"Content-Type": "image/jpeg"})
+                mpwriter.append(
+                    frame.tobytes(), {"Content-Type": "image/jpeg"}  # type:ignore
+                )
                 try:
                     await mpwriter.write(response, close_boundary=False)
                 except (ConnectionResetError, ConnectionAbortedError):
@@ -124,13 +126,13 @@ class MjpegServer:
         self._cap_routes: List[str,] = []
 
     def is_running(self) -> bool:
-        return self._app.is_running
+        return self._app.is_running  # type:ignore
 
     async def __root_handler(self, _) -> web.Response:
         text = "<h2>Available streams:</h2>"
         for route in self._cap_routes:
             text += f"<a href='http://{self._host[0]}:{self._port}{route}'>{route}</a>\n<br>\n"
-        return aiohttp.web.Response(text=text, content_type="text/html")
+        return aiohttp.web.Response(text=text, content_type="text/html")  # type:ignore
 
     def add_stream(self, stream: Stream) -> None:
         if self.is_running():
@@ -147,7 +149,7 @@ class MjpegServer:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         loop.run_until_complete(runner.setup())
-        site = web.TCPSite(runner, self._host, self._port)
+        site = web.TCPSite(runner, self._host, self._port)  # type:ignore
         loop.run_until_complete(site.start())
         loop.run_forever()
 

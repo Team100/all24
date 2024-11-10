@@ -13,7 +13,7 @@ public class TankModuleCollection {
     private static final String kSwerveModules = "Tank Modules";
     private static final String kLeft = "Left";
     private static final String kRight = "Right";
-    private static final double m_gearRatio = 5.2307692308;
+    private static final double m_5to1 = 5.2307692308;
     private static final double m_wheelDiameter = 0.098425;
 
     private final OutboardLinearVelocityServo m_rightDrive;
@@ -35,9 +35,9 @@ public class TankModuleCollection {
             case DEMO_BOT:
                 Util.println("************** Custom Tank Module Modules, using in built encoders? **************");
                 OutboardLinearVelocityServo rightMotor = new OutboardLinearVelocityServo(collectionLogger, Neo550Factory.getNEO550LinearMechanism(
-                        kRight, collectionLogger, currentLimit, 3, Math.pow(m_gearRatio, 2), MotorPhase.REVERSE, m_wheelDiameter));
+                        kRight, collectionLogger, currentLimit, 2, Math.pow(m_5to1, 2), MotorPhase.REVERSE, m_wheelDiameter));
                 OutboardLinearVelocityServo leftMotor = new OutboardLinearVelocityServo(collectionLogger, Neo550Factory.getNEO550LinearMechanism(
-                        kLeft, collectionLogger, currentLimit, 2, Math.pow(m_gearRatio, 2), MotorPhase.FORWARD, m_wheelDiameter));
+                        kLeft, collectionLogger, currentLimit, 3, Math.pow(m_5to1, 2), MotorPhase.FORWARD, m_wheelDiameter));
                 return new TankModuleCollection(leftMotor, rightMotor);
             case BLANK:
             Util.println("************** SIMULATED MODULES **************");

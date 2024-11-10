@@ -230,7 +230,7 @@ class RealCamera(Camera):
 
             case Model.GS:
                 return Size(
-                    sensor_width=1456, sensor_height=1088, width=1456, height=1088
+                    sensor_width=1456, sensor_height=1088, width=1408, height=1088
                 )
 
             case _:
@@ -301,8 +301,8 @@ class RealCamera(Camera):
             case Model.GS:
                 return np.array(
                     [
-                        [1680, 0, 728],
-                        [0, 1680, 544],
+                        [1780, 0, 728],
+                        [0, 1780, 544],
                         [0, 0, 1],
                     ]
                 )
@@ -325,7 +325,7 @@ class RealCamera(Camera):
             case Model.V2:
                 return np.array([[-0.003, 0.04, 0, 0]])
             case Model.GS:
-                return np.array([[0, 0, 0, 0]])
+                return np.array([[-0.2, -0.4, 0, 0]])
             case _:
                 return np.array([[0, 0, 0, 0]])
 

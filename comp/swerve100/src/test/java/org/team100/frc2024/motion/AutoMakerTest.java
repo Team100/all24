@@ -56,6 +56,7 @@ class AutoMakerTest {
         poseEstimator = swerveKinodynamics.newPoseEstimator(
                 logger,
                 gyro.getYawNWU(),
+                gyro.getYawRateNWU(),
                 collection.positions(),
                 GeometryUtil.kPoseZero,
                 0); // initial time is zero here for testing

@@ -7,6 +7,7 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
@@ -95,12 +96,12 @@ public class DriveInALittleSquare extends Command implements Glassy  {
         }
 
         // there are four states here because state is mutable :-(
-        SwerveModuleState100[] states = new SwerveModuleState100[] {
+        SwerveModuleStates states = new SwerveModuleStates(
                 new SwerveModuleState100(m_setpoint.v(), Optional.of(m_goal)),
                 new SwerveModuleState100(m_setpoint.v(), Optional.of(m_goal)),
                 new SwerveModuleState100(m_setpoint.v(), Optional.of(m_goal)),
                 new SwerveModuleState100(m_setpoint.v(), Optional.of(m_goal))
-        };
+        );
         m_swerve.setRawModuleStates(states);
     }
 

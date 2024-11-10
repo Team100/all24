@@ -1,15 +1,14 @@
 package org.team100.lib.commands.drivetrain.manual;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 
 
 class SimpleManualModuleStatesTest {
@@ -21,16 +20,16 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0);
-        SwerveModuleState100[] ms = s.apply(input);
-        assertEquals(0, ms[0].angle.get().getRadians(), kDelta);
-        assertEquals(0, ms[1].angle.get().getRadians(), kDelta);
-        assertEquals(0, ms[2].angle.get().getRadians(), kDelta);
-        assertEquals(0, ms[3].angle.get().getRadians(), kDelta);
+        SwerveModuleStates ms = s.apply(input);
+        assertEquals(0, ms.frontLeft().angle.get().getRadians(), kDelta);
+        assertEquals(0, ms.frontRight().angle.get().getRadians(), kDelta);
+        assertEquals(0, ms.rearLeft().angle.get().getRadians(), kDelta);
+        assertEquals(0, ms.rearRight().angle.get().getRadians(), kDelta);
 
-        assertEquals(0, ms[0].speedMetersPerSecond, kDelta);
-        assertEquals(0, ms[1].speedMetersPerSecond, kDelta);
-        assertEquals(0, ms[2].speedMetersPerSecond, kDelta);
-        assertEquals(0, ms[3].speedMetersPerSecond, kDelta);
+        assertEquals(0, ms.frontLeft().speedMetersPerSecond, kDelta);
+        assertEquals(0, ms.frontRight().speedMetersPerSecond, kDelta);
+        assertEquals(0, ms.rearLeft().speedMetersPerSecond, kDelta);
+        assertEquals(0, ms.rearRight().speedMetersPerSecond, kDelta);
     }
 
     @Test
@@ -38,16 +37,16 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0, 0, 0.5);
-        SwerveModuleState100[] ms = s.apply(input);
-        assertEquals(Math.PI / 2, ms[0].angle.get().getRadians(), kDelta);
-        assertEquals(Math.PI / 2, ms[1].angle.get().getRadians(), kDelta);
-        assertEquals(Math.PI / 2, ms[2].angle.get().getRadians(), kDelta);
-        assertEquals(Math.PI / 2, ms[3].angle.get().getRadians(), kDelta);
+        SwerveModuleStates ms = s.apply(input);
+        assertEquals(Math.PI / 2, ms.frontLeft().angle.get().getRadians(), kDelta);
+        assertEquals(Math.PI / 2, ms.frontRight().angle.get().getRadians(), kDelta);
+        assertEquals(Math.PI / 2, ms.rearLeft().angle.get().getRadians(), kDelta);
+        assertEquals(Math.PI / 2, ms.rearRight().angle.get().getRadians(), kDelta);
 
-        assertEquals(0, ms[0].speedMetersPerSecond, kDelta);
-        assertEquals(0, ms[1].speedMetersPerSecond, kDelta);
-        assertEquals(0, ms[2].speedMetersPerSecond, kDelta);
-        assertEquals(0, ms[3].speedMetersPerSecond, kDelta);
+        assertEquals(0, ms.frontLeft().speedMetersPerSecond, kDelta);
+        assertEquals(0, ms.frontRight().speedMetersPerSecond, kDelta);
+        assertEquals(0, ms.rearLeft().speedMetersPerSecond, kDelta);
+        assertEquals(0, ms.rearRight().speedMetersPerSecond, kDelta);
     }
 
     @Test
@@ -55,16 +54,16 @@ class SimpleManualModuleStatesTest {
         SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         SimpleManualModuleStates s = new SimpleManualModuleStates(logger, limits);
         DriverControl.Velocity input = new DriverControl.Velocity(0.5, 0, 0);
-        SwerveModuleState100[] ms = s.apply(input);
-        assertEquals(0, ms[0].angle.get().getRadians(), kDelta);
-        assertEquals(0, ms[1].angle.get().getRadians(), kDelta);
-        assertEquals(0, ms[2].angle.get().getRadians(), kDelta);
-        assertEquals(0, ms[3].angle.get().getRadians(), kDelta);
+        SwerveModuleStates ms = s.apply(input);
+        assertEquals(0, ms.frontLeft().angle.get().getRadians(), kDelta);
+        assertEquals(0, ms.frontRight().angle.get().getRadians(), kDelta);
+        assertEquals(0, ms.rearLeft().angle.get().getRadians(), kDelta);
+        assertEquals(0, ms.rearRight().angle.get().getRadians(), kDelta);
 
-        assertEquals(0.5, ms[0].speedMetersPerSecond, kDelta);
-        assertEquals(0.5, ms[1].speedMetersPerSecond, kDelta);
-        assertEquals(0.5, ms[2].speedMetersPerSecond, kDelta);
-        assertEquals(0.5, ms[3].speedMetersPerSecond, kDelta);
+        assertEquals(0.5, ms.frontLeft().speedMetersPerSecond, kDelta);
+        assertEquals(0.5, ms.frontRight().speedMetersPerSecond, kDelta);
+        assertEquals(0.5, ms.rearLeft().speedMetersPerSecond, kDelta);
+        assertEquals(0.5, ms.rearRight().speedMetersPerSecond, kDelta);
     }
 
 }
