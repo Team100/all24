@@ -235,11 +235,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     }
 
     /**
-     * the profile has no state and is ~free to instantiate so make a new one every
-     * time. the max speed adapts to the observed speed (plus a little).
-     * the max speed should be half of the absolute max, to compromise
-     * translation and rotation, unless the actual translation speed is less, in
-     * which case we can rotate faster.
+     * Note that the max speed and accel are inversely proportional to the current velocity.
      */
     public TrapezoidProfile100 makeProfile(double currentVelocity) {
         // fraction of the maximum speed
