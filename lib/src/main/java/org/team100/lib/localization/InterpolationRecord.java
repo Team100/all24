@@ -3,11 +3,14 @@ package org.team100.lib.localization;
 import java.util.Objects;
 
 import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 import org.team100.lib.util.DriveUtil;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
@@ -36,9 +39,11 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     /**
      * Constructs an Interpolation Record with the specified parameters.
      *
+     * @param kinematics
      * @param state          The pose observed given the current sensor inputs and
      *                       the previous pose.
      * @param gyro           The current gyro angle.
+     * @param gyroRateRad_S  current omega
      * @param wheelPositions The current encoder readings. Makes a copy.
      */
     InterpolationRecord(
@@ -93,10 +98,20 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
                 DriveUtil.modulePositionDelta(m_wheelPositions, wheelLerp));
         twist.dtheta = gyroLerp.minus(m_gyroAngle).getRadians();
 
+        Pose2d pose = m_state.pose().exp(twist);
+
+        // these lerps are wrong but maybe close enough
+        FieldRelativeVelocity startVelocity = m_state.velocity();
+        FieldRelativeVelocity endVelocity = endValue.m_state.velocity();
+        FieldRelativeVelocity velocity = startVelocity.plus(endVelocity.minus(startVelocity).times(t));
+
+        FieldRelativeAcceleration startAccel = m_state.acceleration();
+        FieldRelativeAcceleration endAccel = endValue.m_state.acceleration();
+        FieldRelativeAcceleration acceleration = startAccel.plus(endAccel.minus(startAccel).times(t));
         SwerveState newState = new SwerveState(
-                m_state.pose().exp(twist),
-                m_state.velocity(),
-                m_state.acceleration());
+                pose,
+                velocity,
+                acceleration);
         return new InterpolationRecord(m_kinematics, newState, gyroLerp, gyroRateLerp, wheelLerp);
     }
 

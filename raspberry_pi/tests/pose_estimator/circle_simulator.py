@@ -33,6 +33,7 @@ from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
+    SwerveModulePositions,
 )
 
 # TAG_SIZE_M: float = 0.1651
@@ -64,12 +65,12 @@ class CircleSimulator:
                 Translation2d(-0.5, -0.5),
             ]
         )
-        self.positions = [
+        self.positions = SwerveModulePositions(
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
-        ]
+        )
         # cheating the initial pose
         # TODO: more clever init
         self.wpi_pose = Pose2d(PATH_CENTER_X_M + PATH_RADIUS_M, 0, 0)
@@ -86,12 +87,12 @@ class CircleSimulator:
 
         # set positions back to zero
         # TODO: more clever init
-        self.positions = [
+        self.positions = SwerveModulePositions(
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
-        ]
+        )
         # constant landmark points
         tag = self.field_map.get(0)
         self.l0 = tag[0]

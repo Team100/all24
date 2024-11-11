@@ -20,11 +20,17 @@ public class CapsizeAccelerationLimiter implements Glassy {
         m_log_s = child.doubleLogger(Level.TRACE, "s");
     }
 
+    /**
+     * 
+     * @param dx difference between desired and actual speed, m/s
+     * @param dy
+     * @return
+     */
     public double enforceCentripetalLimit(double dx, double dy) {
         double min_s = 1.0;
         double dv = Math.hypot(dx, dy);
         if (Math.abs(dv) > 1e-6) {
-            min_s = TimedRobot100.LOOP_PERIOD_S * m_limits.getMaxCapsizeAccelM_S2() / dv;
+            min_s = Math.min(1, TimedRobot100.LOOP_PERIOD_S * m_limits.getMaxCapsizeAccelM_S2() / dv);
         }
         double s = min_s;
         m_log_s.log( () -> s);

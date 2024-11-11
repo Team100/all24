@@ -1,19 +1,25 @@
 # pylint: disable=R0902,R0903,W0212
 
 from typing_extensions import override
-from wpimath.geometry import Rotation3d
+from wpimath.geometry import Rotation2d, Rotation3d
+
 from app.network.network_protocol import (
     Blip24,
     Blip25,
     Blip25Receiver,
     Blip25Sender,
     BlipSender,
+    CalibSender,
+    CameraCalibration,
     DoubleSender,
+    GyroReceiver,
     Network,
     NoteSender,
+    OdometryReceiver,
     PoseEstimate25,
     PoseSender,
 )
+from app.pose_estimator.swerve_module_position import SwerveModulePositions
 
 
 class FakeDoubleSender(DoubleSender):
@@ -72,6 +78,34 @@ class FakePoseSender(PoseSender):
         self.net.estimate = val
 
 
+class FakeCalibSender(CalibSender):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    @override
+    def send(self, val: CameraCalibration, delay_us: int) -> None:
+        self.net.calib = val
+
+
+class FakeOdometryReceiver(OdometryReceiver):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    def get(self) -> list[tuple[int, SwerveModulePositions]]:
+        return self.net.received_positions
+
+
+class FakeGyroReceiver(GyroReceiver):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    def get(self) -> list[tuple[int, Rotation2d]]:
+        return self.net.received_yaw
+
+
 class FakeNetwork(Network):
     def __init__(self) -> None:
         self.doubles: dict[str, list[float]] = {}
@@ -81,6 +115,9 @@ class FakeNetwork(Network):
         self.received_blip25s: dict[str, list[tuple[int, list[Blip25]]]] = {}
         self.notes: dict[str, list[Rotation3d]] = {}
         self.estimate: PoseEstimate25
+        self.received_positions: list[tuple[int, SwerveModulePositions]] = []
+        self.received_yaw: list[tuple[int, Rotation2d]] = []
+        self.calib: CameraCalibration
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:
@@ -112,8 +149,21 @@ class FakeNetwork(Network):
             self.received_blip25s[name] = []
         return FakeBlip25Receiver(name, self)
 
+    @override
     def get_pose_sender(self, name: str) -> PoseSender:
         return FakePoseSender(name, self)
+
+    @override
+    def get_odometry_receiver(self, name: str) -> OdometryReceiver:
+        return FakeOdometryReceiver(name, self)
+
+    @override
+    def get_gyro_receiver(self, name: str) -> GyroReceiver:
+        return FakeGyroReceiver(name, self)
+
+    @override
+    def get_calib_sender(self, name: str) -> CalibSender:
+        return FakeCalibSender(name, self)
 
     @override
     def flush(self) -> None:

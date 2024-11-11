@@ -11,6 +11,10 @@ public record FieldRelativeAcceleration(double x, double y, double theta) {
         return new FieldRelativeAcceleration(x + other.x, y + other.y, theta + other.theta);
     }
 
+    public FieldRelativeAcceleration minus(FieldRelativeAcceleration other) {
+        return new FieldRelativeAcceleration(x - other.x, y - other.y, theta - other.theta);
+    }
+
     public FieldRelativeAcceleration times(double scalar) {
         return new FieldRelativeAcceleration(x * scalar, y * scalar, theta * scalar);
     }
