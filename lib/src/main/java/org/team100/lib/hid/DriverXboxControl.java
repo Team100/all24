@@ -52,8 +52,6 @@ public class DriverXboxControl implements DriverControl {
     private final DoubleLogger m_log_left_x;
     private final EnumLogger m_log_speed;
 
-    Rotation2d previousRotation = GeometryUtil.kRotationZero;
-
     public DriverXboxControl(LoggerFactory parent) {
         m_controller = new XboxController(0);
         LoggerFactory child = parent.child(this);

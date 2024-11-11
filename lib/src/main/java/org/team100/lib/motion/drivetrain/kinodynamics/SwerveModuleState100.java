@@ -32,12 +32,6 @@ public class SwerveModuleState100
      */
     public Optional<Rotation2d> angle = Optional.empty();
 
-    /** Acceleration of the wheel of the module. */
-    public double accelMetersPerSecond_2 = 0;
-
-    /** Anglular velocity of the module, radians per second */
-    public double omega = 0;
-
     /** SwerveModuleState protobuf for serialization. */
     public static final SwerveModuleStateProto proto = new SwerveModuleStateProto();
 
@@ -62,25 +56,6 @@ public class SwerveModuleState100
         this.angle = angle;
     }
 
-    /**
-     * Constructs a SwerveModuleState.
-     *
-     * @param speedMetersPerSecond   The speed of the wheel of the module.
-     * @param angle                  The angle of the module.
-     * @param accelMetersPerSecond_2 The acceleration of the wheel of the module.
-     * @param omega                  The angular velocity of the module.
-     */
-    public SwerveModuleState100(
-            double speedMetersPerSecond,
-            Optional<Rotation2d> angle,
-            double accelMetersPerSecond_2,
-            double omega) {
-        this.speedMetersPerSecond = speedMetersPerSecond;
-        this.angle = angle;
-        this.accelMetersPerSecond_2 = accelMetersPerSecond_2;
-        this.omega = omega;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SwerveModuleState100) {
@@ -93,7 +68,7 @@ public class SwerveModuleState100
 
     @Override
     public int hashCode() {
-        return Objects.hash(speedMetersPerSecond, angle, accelMetersPerSecond_2, omega);
+        return Objects.hash(speedMetersPerSecond, angle);
     }
 
     /**
@@ -112,8 +87,8 @@ public class SwerveModuleState100
     @Override
     public String toString() {
         return String.format(
-                "SwerveModuleState(Speed: %.2f m/s, Angle: %s, Acceleration: %.2f m/s, Anglular Velocity: %s)",
-                speedMetersPerSecond, angle, accelMetersPerSecond_2, omega);
+                "SwerveModuleState(Speed: %.2f m/s, Angle: %s)",
+                speedMetersPerSecond, angle);
     }
 
     /**
@@ -139,12 +114,11 @@ public class SwerveModuleState100
         if (Math.abs(delta.getDegrees()) > 90.0) {
             return new SwerveModuleState100(
                     -desiredState.speedMetersPerSecond,
-                    Optional.of(desiredState.angle.get().rotateBy(Rotation2d.fromDegrees(180.0))),
-                    desiredState.accelMetersPerSecond_2,
-                    desiredState.omega * -1);
+                    Optional.of(desiredState.angle.get().rotateBy(Rotation2d.fromDegrees(180.0))));
         } else {
-            return new SwerveModuleState100(desiredState.speedMetersPerSecond, desiredState.angle,
-                    desiredState.accelMetersPerSecond_2, desiredState.omega);
+            return new SwerveModuleState100(
+                    desiredState.speedMetersPerSecond,
+                    desiredState.angle);
         }
     }
 }

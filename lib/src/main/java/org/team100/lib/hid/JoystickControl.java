@@ -23,7 +23,6 @@ public abstract class JoystickControl implements DriverControl {
     private static final double kExpo = 0.5;
 
     private final GenericHID m_controller;
-    private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     protected JoystickControl() {
         m_controller = new GenericHID(0);
@@ -85,8 +84,7 @@ public abstract class JoystickControl implements DriverControl {
         if (desiredAngleDegrees < 0) {
             return null;
         }
-        previousRotation = Rotation2d.fromDegrees(-1.0 * desiredAngleDegrees);
-        return previousRotation;
+        return Rotation2d.fromDegrees(-1.0 * desiredAngleDegrees);
     }
 
     /**

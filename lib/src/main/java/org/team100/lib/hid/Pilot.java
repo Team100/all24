@@ -4,8 +4,6 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import org.team100.lib.geometry.GeometryUtil;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 
@@ -22,7 +20,6 @@ public class Pilot implements DriverControl {
     private static final double kExpo = 0.5;
 
     private final GenericHID m_controller;
-    private Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public Pilot() {
         m_controller = new GenericHID(0);
@@ -59,8 +56,7 @@ public class Pilot implements DriverControl {
     public Rotation2d desiredRotation() {
         // the control goes from -1 to 1 in one turn
         double rotControl = m_controller.getRawAxis(5);
-        previousRotation = Rotation2d.fromRotations(rotControl / 2);
-        return previousRotation;
+        return Rotation2d.fromRotations(rotControl / 2);
     }
 
     private double axis(int axis) {

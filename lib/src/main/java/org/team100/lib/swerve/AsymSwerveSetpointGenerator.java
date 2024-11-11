@@ -302,7 +302,6 @@ public class AsymSwerveSetpointGenerator implements Glassy {
             if (SwerveUtil.shouldFlip(deltaRotation)) {
                 setpointStatesAll[i].angle = Optional.of(GeometryUtil.flip(setpointStatesAll[i].angle.get()));
                 setpointStatesAll[i].speedMetersPerSecond *= -1.0;
-                setpointStatesAll[i].accelMetersPerSecond_2 *= -1.0;
             }
         }
     }

@@ -32,6 +32,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * Rotation uses simple full-state feedback and that's all..
  */
 public class ManualWithFullStateHeading implements FieldRelativeDriver {
+    /**
+     * in "gentle snaps" mode this is the max omega allowed. The
+     * idea is to get to the setpoint over a few seconds, so plan ahead!
+     */
+    private static final double GENTLE_OMEGA = Math.PI / 2;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
@@ -48,7 +53,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
     private final DoubleLogger m_log_measurement_omega;
     private final DoubleLogger m_log_error_theta;
     private final DoubleLogger m_log_error_omega;
-    private final DoubleLogger m_log_theta_FF;
     private final DoubleLogger m_log_theta_FB;
     private final DoubleLogger m_log_omega_FB;
     private final DoubleLogger m_log_output_omega;
@@ -86,7 +90,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         m_log_measurement_omega = child.doubleLogger(Level.DEBUG, "measurement/omega");
         m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
         m_log_error_omega = child.doubleLogger(Level.TRACE, "error/omega");
-        m_log_theta_FF = child.doubleLogger(Level.TRACE, "thetaFF");
         m_log_theta_FB = child.doubleLogger(Level.TRACE, "thetaFB");
         m_log_omega_FB = child.doubleLogger(Level.TRACE, "omegaFB");
         m_log_output_omega = child.doubleLogger(Level.TRACE, "output/omega");
@@ -167,17 +170,17 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         // the omega goal in snap mode is always zero.
         m_thetaSetpoint = new State100(m_goal.getRadians(), 0);
 
-        // the snap overrides the user input for omega.
-        double thetaFF = m_thetaSetpoint.v();
-
         double thetaError = MathUtil.angleModulus(m_thetaSetpoint.x() - yawMeasurement);
-        double omegaError = m_thetaSetpoint.v() - yawRate;
+        double omegaError = -1.0 * yawRate;
 
         final double omegaFB = getOmegaFB(omegaError);
         final double thetaFB = getThetaFB(thetaError);
+        double totalFB = thetaFB + omegaFB;
+        if (Experiments.instance.enabled(Experiment.SnapGentle))
+            totalFB = MathUtil.clamp(totalFB, -1.0 * GENTLE_OMEGA, GENTLE_OMEGA);
 
         final double omega = MathUtil.clamp(
-                thetaFF + thetaFB + omegaFB,
+                totalFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
@@ -190,21 +193,23 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         m_log_measurement_omega.log(() -> yawRate);
         m_log_error_theta.log(() -> thetaError);
         m_log_error_omega.log(() -> omegaError);
-        m_log_theta_FF.log(() -> thetaFF);
         m_log_theta_FB.log(() -> thetaFB);
         m_log_omega_FB.log(() -> omegaFB);
         m_log_output_omega.log(() -> omega);
 
-        // desaturate the end result to feasibility by preferring the rotation over
-        // translation
-        twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
+        // desaturate the end result to feasibility, optionally preferring the rotation
+        // over translation
+        if (Experiments.instance.enabled(Experiment.SnapPreferRotation))
+            twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
+        else
+            twistWithSnapM_S = m_swerveKinodynamics.analyticDesaturation(twistWithSnapM_S);
         return twistWithSnapM_S;
     }
 
     private double getOmegaFB(double omegaError) {
         double omegaFB = m_K[1] * omegaError;
 
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+        if (Experiments.instance.enabled(Experiment.SnapThetaFilter)) {
             // output filtering to prevent oscillation due to delay
             omegaFB = m_outputFilter.calculate(omegaFB);
         }

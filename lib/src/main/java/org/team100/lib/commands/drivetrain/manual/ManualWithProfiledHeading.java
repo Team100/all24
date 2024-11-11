@@ -259,7 +259,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private double getOmegaFB(double headingRate) {
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
 
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+        if (Experiments.instance.enabled(Experiment.SnapThetaFilter)) {
             // output filtering to prevent oscillation due to delay
             omegaFB = m_outputFilter.calculate(omegaFB);
         }

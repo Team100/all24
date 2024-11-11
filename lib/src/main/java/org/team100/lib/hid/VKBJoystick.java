@@ -4,8 +4,6 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import org.team100.lib.geometry.GeometryUtil;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -25,8 +23,6 @@ public class VKBJoystick implements DriverControl {
 
     private final GenericHID m_hid;
 
-    private Rotation2d previousRotation = GeometryUtil.kRotationZero;
-
     protected VKBJoystick() {
         m_hid = new GenericHID(0);
     }
@@ -38,12 +34,12 @@ public class VKBJoystick implements DriverControl {
 
     @Override
     public boolean fullCycle() {
-        return button(1);
+        return button(1); // trigger halfway down
     }
 
     @Override
     public boolean test() {
-        return button(3);
+        return button(3); // red thumb
     }
 
     @Override
@@ -53,20 +49,18 @@ public class VKBJoystick implements DriverControl {
 
     @Override
     public boolean resetRotation0() {
-        // return button(2);
-        return false;
+        return button(7); // "F1"
     }
 
     @Override
     public boolean resetRotation180() {
-        return false;
-        // return button(3);
+        return button(8); // "F2"
     }
 
     @Override
     public boolean outtakeFromAmp() {
-        // return false;
-        return button(5);
+        // return button(5);
+        return false;
     }
 
     /**
@@ -75,20 +69,20 @@ public class VKBJoystick implements DriverControl {
      */
     @Override
     public DriverControl.Velocity velocity() {
-        double dx = expo(deadband(-1.0 * clamp(m_hid.getRawAxis(1), 1), kDeadband, 1), kExpo);
-        double dy = expo(deadband(-1.0 * clamp(m_hid.getRawAxis(0), 1), kDeadband, 1), kExpo);
-        double dtheta = expo(deadband(-1.0 * clamp(m_hid.getRawAxis(2), 1), kDeadband, 1), kExpo);
+        double dx = expo(deadband(-1.0 * clamp(axis(1), 1), kDeadband, 1), kExpo);
+        double dy = expo(deadband(-1.0 * clamp(axis(0), 1), kDeadband, 1), kExpo);
+        double dtheta = expo(deadband(clamp(axis(5), 1), kDeadband, 1), kExpo);
         return new DriverControl.Velocity(dx, dy, dtheta);
     }
 
     @Override
     public Rotation2d desiredRotation() {
-        double desiredAngleDegrees = m_hid.getPOV();
+        // POV 2 is the center one
+        double desiredAngleDegrees = m_hid.getPOV(2);
         if (desiredAngleDegrees < 0) {
             return null;
         }
-        previousRotation = Rotation2d.fromDegrees(-1.0 * desiredAngleDegrees);
-        return previousRotation;
+        return Rotation2d.fromDegrees(-1.0 * desiredAngleDegrees);
     }
 
     /**
@@ -109,22 +103,30 @@ public class VKBJoystick implements DriverControl {
 
     @Override
     public boolean trigger() {
-        return m_hid.getRawButton(4);
+        // return button(1);
+        return false;
     }
 
     @Override
     public boolean driveToNote() {
-        return m_hid.getRawButton(7);
+        // return button(7);
+        return false;
     }
 
     @Override
     public boolean shooterLock() {
-        return m_hid.getRawButton(6);
+        // return button(3);
+        return false;
     }
 
     @Override
     public boolean driveToAmp() {
-        return m_hid.getRawButton(8);
+        // return button(8);
+        return false;
+    }
+
+    private double axis(int axis) {
+        return m_hid.getRawAxis(axis);
     }
 
     private boolean button(int button) {

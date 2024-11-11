@@ -36,9 +36,9 @@ public enum Experiment {
      */
     AvoidVisionJitter,
     /**
-     * Filter rotational output to remove oscillation
+     * Filter snap rotational output to remove oscillation
      */
-    UseThetaFilter,
+    SnapThetaFilter,
     /**
      * Use low-pass filter and deadbanding on controller feedback, to prevent
      * overresponse to noise and jitter around zero.
@@ -47,5 +47,13 @@ public enum Experiment {
     /**
      * Use the network-tables gyro. 
      */
-    NetworkGyro
+    NetworkGyro,
+    /**
+     * Snaps can prefer rotation or translation
+     */
+    SnapPreferRotation,
+    /**
+     * Clip the snap omega
+     */
+    SnapGentle
 }

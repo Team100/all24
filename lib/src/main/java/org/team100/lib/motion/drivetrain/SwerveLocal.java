@@ -257,9 +257,9 @@ public class SwerveLocal implements Glassy, SwerveLocalObserver {
      * Desaturation mutates states.
      */
     private void setModuleStates(SwerveModuleStates states) {
-        SwerveDriveKinematics100.desaturateWheelSpeeds(states, m_swerveKinodynamics.getMaxDriveVelocityM_S(),
-                m_swerveKinodynamics.getMaxDriveAccelerationM_S2(), m_swerveKinodynamics.getMaxDriveDecelerationM_S2(),
-                m_swerveKinodynamics.getMaxSteeringVelocityRad_S());
+        SwerveDriveKinematics100.desaturateWheelSpeeds(
+                states,
+                m_swerveKinodynamics.getMaxDriveVelocityM_S());
         // all the callers of setModuleStates inform kinematics.
         m_modules.setDesiredStates(states);
     }

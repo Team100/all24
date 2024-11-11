@@ -60,6 +60,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 public class InterLinkDX implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
+    private static final double kSlow = 0.25;
 
     private final GenericHID m_hid;
 
@@ -75,27 +76,37 @@ public class InterLinkDX implements DriverControl {
     @Override
     public Velocity velocity() {
         double dx = expo(deadband(
-                -1.0 * clamp(scale(m_hid.getRawAxis(4), 0.836, 0.031, 0.900), 1),
+                clamp(scale(axis(4), 0.836, 0.031, 0.900), 1),
                 kDeadband, 1),
                 kExpo);
         double dy = expo(deadband(
-                -1.0 * clamp(scale(m_hid.getRawAxis(3), 0.859, -0.008, 0.827), 1),
+                -1.0 * clamp(scale(axis(3), 0.859, -0.008, 0.827), 1),
                 kDeadband, 1),
                 kExpo);
         double dtheta = expo(deadband(
-                -1.0 * clamp(scale(m_hid.getRawAxis(0), 0.812, 0.0, 0.850), 1),
+                -1.0 * clamp(scale(axis(0), 0.812, 0.0, 0.850), 1),
                 kDeadband, 1),
                 kExpo);
+        if (button(1))
+            return new Velocity(kSlow * dx, kSlow * dy, kSlow * dtheta);
         return new Velocity(dx, dy, dtheta);
     }
 
     @Override
     public boolean fullCycle() {
-        return m_hid.getRawButton(13);
+        return button(13);
     }
 
     @Override
     public boolean resetRotation0() {
-        return m_hid.getRawButton(14);
+        return button(14);
+    }
+
+    private double axis(int axis) {
+        return m_hid.getRawAxis(axis);
+    }
+
+    private boolean button(int button) {
+        return m_hid.getRawButton(button);
     }
 }
