@@ -221,7 +221,7 @@ public class RobotContainer implements Glassy {
         m_ampFeeder = new AmpFeeder(sysLog);
         m_ampPivot = new AmpPivot(sysLog);
 
-        final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
+        //final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
 
         ////////////////////////////
         //
@@ -352,10 +352,10 @@ public class RobotContainer implements Glassy {
 
         whileTrue(operatorControl::never, new Lob(m_shooter, intake));
 
-        whileTrue(operatorControl::homeClimber, new HomeClimber(comLog, climber));
+        //whileTrue(operatorControl::homeClimber, new HomeClimber(comLog, climber));
 
-        whileTrue(operatorControl::climbUpPosition, climber.upPosition());
-        whileTrue(operatorControl::climbDownPosition, climber.downPosition());
+        //whileTrue(operatorControl::climbUpPosition, climber.upPosition());
+        //whileTrue(operatorControl::climbDownPosition, climber.downPosition());
 
         ///////////////////////////
         //
@@ -500,11 +500,11 @@ public class RobotContainer implements Glassy {
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
         feeder.setDefaultCommand(feeder.run(feeder::stop));
         intake.setDefaultCommand(intake.run(intake::stop));
-        climber.setDefaultCommand(new ClimberDefault(
-                comLog,
-                climber,
-                operatorControl::leftClimb,
-                operatorControl::rightClimb));
+        //climber.setDefaultCommand(new ClimberDefault(
+                // // comLog,
+                // climber,
+                // operatorControl::leftClimb,
+                // operatorControl::rightClimb));
         m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
         // m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
         // if far from the goal, go fast. if near, go slow.

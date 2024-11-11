@@ -21,24 +21,8 @@ public class GyroFactory {
             AsyncFactory asyncFactory) {
         switch (Identity.instance) {
             case SWERVE_ONE:
-                return new ReduxGyro(parent, 60);
             case COMP_BOT:
-                try {
-                    // the kauailabs library calls System.exit() in case
-                    // it can't find this library, so check here first.
-                    // this seems only to be a problem in some test or
-                    // simulation scenarios.
-                    // System.loadLibrary("vmxHaljni");
-                    return new SelectGyro(
-                            new NTGyro(),
-                            new SingleNavXGyro(parent, asyncFactory.get()),
-                            () -> Experiments.instance.enabled(Experiment.NetworkGyro));
-                } catch (UnsatisfiedLinkError e) {
-                    // fall back to simulated heading for testing.
-                    Util.warn("No NavX Library!");
-                    throw e;
-                    // return new SimulatedHeading(kinodynamics, collection);
-                }
+                return new ReduxGyro(parent, 60);
             default:
                 // for simulation
                 return new SelectGyro(
