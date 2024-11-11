@@ -419,13 +419,6 @@ public class RobotContainer implements Glassy {
                                 0.35
                         }));
 
-        driveManually.register("SNAPS_MIN_TIME", false,
-                new ManualWithMinTimeHeading(
-                        manLog,
-                        swerveKinodynamics,
-                        gyro,
-                        driverControl::desiredRotation));
-
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(
                         fieldLog,
