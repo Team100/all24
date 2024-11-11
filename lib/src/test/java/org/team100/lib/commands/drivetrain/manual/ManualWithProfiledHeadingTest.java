@@ -155,9 +155,9 @@ class ManualWithProfiledHeadingTest {
         // we did one calculation so setpoint is not zero
         assertEquals(0.0002, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         // max accel is half actual max, 4.24, 0.02 => 0.0848
-        assertEquals(0.0848, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(0.017, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // since initial state is motionless the feedback controllers apply extra
-        verify(0, 0, 0.382, twistM_S);
+        verify(0, 0, 0.017, twistM_S);
 
         // let go of the pov to let the profile run.
         desiredRotation = null;
@@ -169,7 +169,7 @@ class ManualWithProfiledHeadingTest {
                         new Pose2d(0, 0, new Rotation2d(0.5)),
                         new FieldRelativeVelocity(0, 0, 0.1)),
                 twist1_1);
-        assertEquals(1.0848, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(1.017, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
         verify(0, 0, 2.828, twistM_S);
 
@@ -180,10 +180,10 @@ class ManualWithProfiledHeadingTest {
                         new Pose2d(0, 0, new Rotation2d(1.55)),
                         new FieldRelativeVelocity(0, 0, 0.2)),
                 twist1_1);
-        assertEquals(0.285, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(0.183, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
         // initial is setpoint, so new setpoint is a bit further, thus some feedback.
-        verify(0, 0, 0.581, twistM_S);
+        verify(0, 0, 0.183, twistM_S);
 
         // done
         m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
@@ -237,7 +237,7 @@ class ManualWithProfiledHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // at t0 there's not much position in the profile but there is velocity
-        verify(0, 0, 0.381, v);
+        verify(0, 0, 0.017, v);
 
         // say we've rotated a little.
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
@@ -246,9 +246,9 @@ class ManualWithProfiledHeadingTest {
                         new Pose2d(0, 0, new Rotation2d(0.5)),
                         new FieldRelativeVelocity(0, 0, 1)),
                 twist1_1);
-        assertEquals(1.084, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(1.017, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 1.382, v);
+        verify(0, 0, 1.017, v);
 
         // mostly rotated, so the FB controller is calm
         m_manualWithHeading.m_thetaSetpoint = new State100(1.555, 0.2);
@@ -257,11 +257,11 @@ class ManualWithProfiledHeadingTest {
                         new Pose2d(0, 0, new Rotation2d(1.555)),
                         new FieldRelativeVelocity(0, 0, 0.2)),
                 twist1_1);
-        assertEquals(0.284, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(0.183, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // still want to go really fast?
-        verify(0, 0, 0.581, v);
+        verify(0, 0, 0.183, v);
 
         // at the setpoint
         m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
@@ -333,24 +333,24 @@ class ManualWithProfiledHeadingTest {
 
         FieldRelativeVelocity clipped = m_manualWithHeading.clipAndScale(control);
 
-        TrapezoidProfile100 profile = m_manualWithHeading.makeProfile(clipped, 2.828);
+        TrapezoidProfile100 profile = m_manualWithHeading.makeProfile(0);
         // profile speed is half max.
         assertEquals(1.414, profile.getMaxVelocity(), kDelta);
         // profile accel is half max
-        assertEquals(4.243, profile.getMaxAcceleration(), kDelta);
+        assertEquals(0.848, profile.getMaxAcceleration(), kDelta);
 
         v = m_manualWithHeading.apply(currentState, control);
 
         // goal is the current state but at rest; the latch calculates a goal that is
         // uses the profile max braking.
-        assertEquals(0.942, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        assertEquals(-1.570, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // setpoint respects velocity (though it's trying to slow down)
         // v(2.828) * dt(0.02) = 0.0566, but slowing a little
         assertEquals(0.056, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         // braking
-        assertEquals(2.743, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(2.811, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // just feedforward, which is just the setpoint velocity
-        verify(0, 0, 2.743, v);
+        verify(0, 0, 2.811, v);
     }
 
     @Test
@@ -411,13 +411,13 @@ class ManualWithProfiledHeadingTest {
         gyro.rate = 2.828;
         v = m_manualWithHeading.apply(currentState, twist1_1);
 
-        assertEquals(0.942, m_manualWithHeading.m_goal.getRadians(), kDelta);
+        assertEquals(-1.571, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // velocity carries forward
         assertEquals(0.056, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         // not sure how it can slow down so fast
-        assertEquals(2.743, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(2.811, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // includes some feedback
-        verify(0, 0, 2.641, v);
+        verify(0, 0, 2.828, v);
     }
 
     /**

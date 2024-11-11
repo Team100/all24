@@ -1,7 +1,9 @@
 package org.team100.lib.hid;
 
 import org.team100.lib.async.Async;
+import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.StringLogger;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,6 +25,7 @@ public class DriverControlProxy implements DriverControl {
     private DriverControl m_driverControl;
     /** Used by the private factory method below. */
     private final LoggerFactory m_logger;
+    private final StringLogger m_hidLogger;
 
     /**
      * The async is just to scan for control updates, maybe don't use a whole thread
@@ -30,6 +33,7 @@ public class DriverControlProxy implements DriverControl {
      */
     public DriverControlProxy(LoggerFactory parent, Async async) {
         m_logger = parent.child(this);
+        m_hidLogger = m_logger.stringLogger(Level.COMP, "HID");
         refresh();
         async.addPeriodic(this::refresh, kFreq, "DriverControlProxy");
     }
@@ -37,8 +41,10 @@ public class DriverControlProxy implements DriverControl {
     public void refresh() {
         // name is blank if not connected
         String name = DriverStation.getJoystickName(kPort);
-        if (name.equals(m_name))
+        name = name.trim();
+        if (name.equals(m_name)) {
             return;
+        }
         m_name = name;
         m_driverControl = getDriverControl(m_logger, name);
 
@@ -46,16 +52,18 @@ public class DriverControlProxy implements DriverControl {
         Util.printf("*** Driver HID: %s Control: %s\n",
                 m_driverControl.getHIDName(),
                 m_driverControl.getClass().getSimpleName());
+        m_hidLogger.log(() -> m_driverControl.getClass().getSimpleName());
     }
 
     private static DriverControl getDriverControl(LoggerFactory parent, String name) {
+        System.out.printf("Trying to match HID name '%s'\n", name);
         if (name.contains("F310")) {
             return new DriverXboxControl(parent);
         }
         if (name.contains("Xbox")) {
             return new DriverXboxControl(parent);
         }
-        if (name.startsWith("VKBsim")) {
+        if (name.contains("VKBsim")) {
             return new VKBJoystick();
         }
         if (name.startsWith("Logitech Extreme")) {
@@ -70,6 +78,10 @@ public class DriverControlProxy implements DriverControl {
         if (name.contains("Keyboard")) {
             return new SimulatedJoystick();
         }
+        if (name.contains("InterLinkDX")) {
+            return new InterLinkDX();
+        }
+        System.out.println("No HID Match!");
         return new NoDriverControl();
     }
 

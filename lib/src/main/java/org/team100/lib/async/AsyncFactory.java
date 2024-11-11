@@ -4,25 +4,29 @@ import org.team100.lib.framework.TimedRobot100;
 
 public class AsyncFactory {
     // runner is made at startup so it's not possible to control with an
-    // experiment. instead, these booleans will have to do.
-    private static final boolean USE_TIMED_ROBOT_ASYNC = true;
-    private static final boolean USE_EXECUTOR_ASYNC = false;
+    // experiment. instead, this enum will have to do.
+    private static final AsyncType TYPE = AsyncType.TIMED;
+
+    private enum AsyncType {
+        TIMED,
+        EXECUTOR,
+        NOTIFIER
+    }
 
     private final Async runner;
 
     public AsyncFactory(TimedRobot100 robot) {
-        if (USE_TIMED_ROBOT_ASYNC) {
+        runner = switch (TYPE) {
             // Adds asyncs to the main loop callbacks.
             // This will slow down the main loop but avoid context-switching.
-            runner = new TimedRobotAsync(robot);
-        } else if (USE_EXECUTOR_ASYNC) {
+            case TIMED -> new TimedRobotAsync(robot);
             // Adds asyncs to a single-threaded java executor.
             // This avoids loading the main loop with the minimum number of threads.
-            runner = new ExecutorAsync();
-        } else {
+            case EXECUTOR -> new ExecutorAsync();
             // Each async gets its own notifier thread.
-            runner = new NotifierAsync();
-        }
+            case NOTIFIER -> new NotifierAsync();
+        };
+
     }
 
     public Async get() {

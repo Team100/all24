@@ -363,10 +363,9 @@ public class RobotContainer implements Glassy {
         //
 
         // TODO (jun 24) tune theta and omega control
-        // TODO replace with min-time or full-state
-        final PIDController thetaController = new PIDController(2.0, 0, 0); // 1.7
+        final PIDController thetaController = new PIDController(3.0, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        final PIDController omegaController = new PIDController(0.1, 0, 0); // .5
+        final PIDController omegaController = new PIDController(0.2, 0, 0);
 
         final DriveManually driveManually = new DriveManually(driverControl::velocity, m_drive);
         final LoggerFactory manLog = comLog.child(driveManually);
@@ -400,20 +399,25 @@ public class RobotContainer implements Glassy {
                         omegaController));
 
         // these gains are not terrible; trying to go faster seems to induce oscillation
+        // theta feedback is rad/s, per rad of error.
+        // so if you want to go 1.5rad at a time in a lot less than
+        // a second, you kinda want 3 or 5 or something.  if you make
+        // it too big, it will overshoot.
+        // omega feedback is rad/s per rad/s of error.
+        // this generally opposes the theta feedback, so you don't
+        // want it to be too large, or it will slow the motion too much
+        // but you don't want it to be too small either, it helps
+        // prevent overshoot.
         driveManually.register("SNAPS_FULL_STATE", true,
                 new ManualWithFullStateHeading(
                         manLog,
                         swerveKinodynamics,
                         gyro,
                         driverControl::desiredRotation,
-                        new double[] { 5.0, 1 }));
-
-        driveManually.register("SNAPS_MIN_TIME", true,
-                new ManualWithMinTimeHeading(
-                        manLog,
-                        swerveKinodynamics,
-                        gyro,
-                        driverControl::desiredRotation));
+                        new double[] {
+                                5,
+                                0.35
+                        }));
 
         driveManually.register("FIELD_RELATIVE_FACING_NOTE", false,
                 new FieldManualWithNoteRotation(

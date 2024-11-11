@@ -51,9 +51,9 @@ class TrajectoryTimeIteratorTest {
         assertEquals(0, sample.state().state().getPose().getX(), kDelta);
 
         sample = iter.preview(1).get();
-        assertEquals(0.999, sample.state().state().getPose().getX(), kDelta);
+        assertEquals(1, sample.state().state().getPose().getX(), kDelta);
         sample = iter.advance(1).get();
-        assertEquals(0.999, sample.state().state().getPose().getX(), kDelta);
+        assertEquals(1, sample.state().state().getPose().getX(), kDelta);
 
         sample = iter.preview(1).get();
         assertEquals(1, sample.state().state().getPose().getX(), kDelta);

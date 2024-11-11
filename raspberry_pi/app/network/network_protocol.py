@@ -6,8 +6,11 @@ import dataclasses
 from typing import Protocol
 
 import numpy as np
-from wpimath.geometry import Rotation3d, Transform3d
+from wpimath.geometry import (Pose3d, Rotation2d, Rotation3d, Transform3d,
+                              Twist3d)
 from wpiutil import wpistruct
+
+from app.pose_estimator.swerve_module_position import SwerveModulePositions
 
 
 @wpistruct.make_wpistruct  # type:ignore
@@ -61,19 +64,53 @@ class PoseEstimate25:
     """Result of the pose estimator."""
 
     # most-recent state (corresponding to the NT timestamp)
+    # TODO: make this a pose2d
     x: float
     y: float
     theta: float
     # std dev of most-recent state (sqrt of diagonal of marginal covariance)
+    # TODO: make this a twist2d
     x_sigma: float
     y_sigma: float
     theta_sigma: float
     # twist of most-recent odometry
+    # TODO: make this a twist2d
     dx: float
     dy: float
     dtheta: float
     # time between next-most-recent and most-recent
     dt: float
+
+
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
+class Cal3DS2:
+    """Camera parameters mirroring gtsam.Cal3DS2.
+    see Cal3DS2_Base.h and Cal3.h"""
+
+    # focal length
+    fx: float
+    fy: float
+    # skew
+    s: float
+    #  principal (i.e. center) point
+    u0: float
+    v0: float
+    # radial 2nd-order and 4th-order
+    k1: float
+    k2: float
+    #  tangential distortion
+    p1: float
+    p2: float
+
+
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
+class CameraCalibration:
+    camera_offset: Pose3d
+    offset_sigma: Twist3d
+    calib: Cal3DS2
+    calib_sigma: Cal3DS2
 
 
 class DoubleSender(Protocol):
@@ -101,9 +138,23 @@ class Blip25Receiver(Protocol):
 
 
 class PoseSender(Protocol):
-    def send(self, val: PoseEstimate25, delay_us: int) -> None:
-        """Send the pose estimate."""
+    def send(self, val: PoseEstimate25, delay_us: int) -> None: ...
+
+
+class OdometryReceiver(Protocol):
+    def get(self) -> list[tuple[int, SwerveModulePositions]]:
+        """Receive a list of tuples (timestamp, positions)"""
         ...
+
+
+class GyroReceiver(Protocol):
+    def get(self) -> list[tuple[int, Rotation2d]]:
+        """Receive a list of tuples (timestamp, yaw)"""
+        ...
+
+
+class CalibSender(Protocol):
+    def send(self, val: CameraCalibration, delay_us: int) -> None: ...
 
 
 class Network(Protocol):
@@ -113,4 +164,7 @@ class Network(Protocol):
     def get_blip25_sender(self, name: str) -> Blip25Sender: ...
     def get_blip25_receiver(self, name: str) -> Blip25Receiver: ...
     def get_pose_sender(self, name: str) -> PoseSender: ...
+    def get_odometry_receiver(self, name: str) -> OdometryReceiver: ...
+    def get_gyro_receiver(self, name: str) -> GyroReceiver: ...
+    def get_calib_sender(self, name: str) -> CalibSender: ...
     def flush(self) -> None: ...

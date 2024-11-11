@@ -13,6 +13,7 @@ from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.pose_estimator.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
+    SwerveModulePositions,
 )
 from tests.pose_estimator.circle_simulator import CircleSimulator
 
@@ -23,8 +24,8 @@ class SimulatorTest(unittest.TestCase):
         self.assertAlmostEqual(2, sim.gt_x)
         self.assertAlmostEqual(0, sim.gt_y)
         self.assertAlmostEqual(0, sim.gt_theta)
-        self.assertAlmostEqual(0, sim.positions[0].distance_m)
-        self.assertAlmostEqual(0, sim.positions[0].angle.value.radians())
+        self.assertAlmostEqual(0, sim.positions.front_left.distance_m)
+        self.assertAlmostEqual(0, sim.positions.front_left.angle.value.radians())
 
         # lower left
         self.assertAlmostEqual(192, sim.gt_pixels[0][0], 0)
@@ -75,12 +76,12 @@ class SimulatorTest(unittest.TestCase):
                 Translation2d(-0.5, -0.5),
             ]
         )
-        positions = [
+        positions = SwerveModulePositions(
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
-        ]
+        )
         pose = sim.wpi_pose
         print()
         for i in range(500):
@@ -101,7 +102,7 @@ class SimulatorTest(unittest.TestCase):
             x = sim.gt_x
             y = sim.gt_y
             theta = sim.gt_theta
-            d0 = sim.positions[0].distance_m
-            a0 = sim.positions[0].angle.value.radians()
+            d0 = sim.positions.front_left.distance_m
+            a0 = sim.positions.front_left.angle.value.radians()
             print(f"{t:5.2f} {x:5.2f} {y:5.2f} {theta:5.2f} {d0:5.2f} {a0:5.2f}")
             sim.step(0.02)

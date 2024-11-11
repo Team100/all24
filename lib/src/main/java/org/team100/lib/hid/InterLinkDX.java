@@ -3,6 +3,7 @@ package org.team100.lib.hid;
 import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
+import static org.team100.lib.hid.ControlUtil.scale;
 
 import edu.wpi.first.wpilibj.GenericHID;
 
@@ -59,68 +60,53 @@ import edu.wpi.first.wpilibj.GenericHID;
 public class InterLinkDX implements DriverControl {
     private static final double kDeadband = 0.02;
     private static final double kExpo = 0.5;
+    private static final double kSlow = 0.25;
 
-    private final GenericHID hid;
+    private final GenericHID m_hid;
 
     public InterLinkDX() {
-        hid = new GenericHID(0);
+        m_hid = new GenericHID(0);
     }
 
     @Override
     public String getHIDName() {
-        return hid.getName();
+        return m_hid.getName();
     }
 
     @Override
     public Velocity velocity() {
-        double dx = expo(deadband(-1.0 * clamp(scaled(4), 1), kDeadband, 1), kExpo);
-        double dy = expo(deadband(-1.0 * clamp(scaled(3), 1), kDeadband, 1), kExpo);
-        double dtheta = expo(deadband(-1.0 * clamp(scaled(0), 1), kDeadband, 1), kExpo);
+        double dx = expo(deadband(
+                clamp(scale(axis(4), 0.836, 0.031, 0.900), 1),
+                kDeadband, 1),
+                kExpo);
+        double dy = expo(deadband(
+                -1.0 * clamp(scale(axis(3), 0.859, -0.008, 0.827), 1),
+                kDeadband, 1),
+                kExpo);
+        double dtheta = expo(deadband(
+                -1.0 * clamp(scale(axis(0), 0.812, 0.0, 0.850), 1),
+                kDeadband, 1),
+                kExpo);
+        if (button(1))
+            return new Velocity(kSlow * dx, kSlow * dy, kSlow * dtheta);
         return new Velocity(dx, dy, dtheta);
     }
 
     @Override
     public boolean fullCycle() {
-        return hid.getRawButton(13);
+        return button(13);
     }
 
     @Override
     public boolean resetRotation0() {
-        return hid.getRawButton(14);
+        return button(14);
     }
 
-
-    // TODO: find the zeros
-    private double scaled(int axis) {
-        double raw = hid.getRawAxis(axis);
-        double zeroed = 0;
-        switch (axis) {
-            case 0:
-                zeroed = raw - 0.043;
-                if (zeroed < 0)
-                    return zeroed / 0.729;
-                return zeroed / 0.784;
-            case 1:
-                zeroed = raw - 0.169;
-                if (zeroed < 0)
-                    return zeroed / 0.628;
-                return zeroed / 0.619;
-            case 2:
-                zeroed = raw - 0.137;
-                if (zeroed < 0)
-                    return zeroed / 0.604;
-                return zeroed / 0.643;
-
-            case 3:
-                return 0;
-            case 4:
-                zeroed = raw - 0.075;
-                if (zeroed < 0)
-                    return zeroed / 0.738;
-                return zeroed / 0.776;
-            default:
-                return 0;
-        }
+    private double axis(int axis) {
+        return m_hid.getRawAxis(axis);
     }
 
+    private boolean button(int button) {
+        return m_hid.getRawButton(button);
+    }
 }
