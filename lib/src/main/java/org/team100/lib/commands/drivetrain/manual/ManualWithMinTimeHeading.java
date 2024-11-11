@@ -36,8 +36,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * limiter makes it fall behind, which means it oscillates with high
  * amplitude and low frequency.
  * 
- * It could be that the setpoint generator acceleration limit is too
- * conservative in tests.
+ * The issue is that the setpoint generator accurately models the low torque
+ * available at high speed, whereas the available torque is modeled here as a
+ * constant.
  */
 public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     /**
@@ -157,7 +158,6 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         double yawMeasurement = state.theta().x();
-        // TODO: i think the state omega isn't right. find out.
         double yawRate = state.theta().v();
         // double yawRate = getYawRateNWURad_S();
 
