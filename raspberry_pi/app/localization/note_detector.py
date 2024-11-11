@@ -39,12 +39,10 @@ class NoteDetector(Interpreter):
         self.height: int = size.height
 
         # opencv hue values are 0-180, half the usual number
-        lowerSat = 210
+        lowerSat = 50
         lowerValue = 100
-        self.object_lower = np.array((0, lowerSat, lowerValue))
-        self.object_lower2 = np.array((170, lowerSat, lowerValue))
-        self.object_higher = np.array((40, 255, 255))
-        self.object_higher2 = np.array((180, 255, 255))
+        self.object_lower = np.array((45, lowerSat, lowerValue))
+        self.object_higher = np.array((90, 255, 255))
 
         # TODO: move the identity part of this path to the Network object
         path = "noteVision/" + identity.value + "/" + str(camera_num)
@@ -63,9 +61,9 @@ class NoteDetector(Interpreter):
             img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
             img_hsv = np.ascontiguousarray(img_hsv)
 
-            img_range1 = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
-            img_range2 = cv2.inRange(img_hsv, self.object_lower2, self.object_higher2)
-            img_range = cv2.bitwise_or(img_range1, img_range2)
+            img_range = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
+            # img_range2 = cv2.inRange(img_hsv, self.object_lower2, self.object_higher2)
+            # img_range = cv2.bitwise_or(img_range1, img_range2)
 
             floodfill = img_range.copy()
             mask = np.zeros((self.height + 2, self.width + 2), np.uint8)
@@ -121,4 +119,4 @@ class NoteDetector(Interpreter):
             self.display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
             self.display.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
             #self.display.put(img_range)
-            self.display.put(img_bgr)
+            self.display.put(img_range)

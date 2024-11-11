@@ -104,11 +104,11 @@ class Cal3DS2:
     p2: float
 
 
-@wpistruct.make_wpistruct
+@wpistruct.make_wpistruct 
 @dataclasses.dataclass
 class CameraCalibration:
     camera_offset: Pose3d
-    offset_sigma: Twist3d
+    # offset_sigma: Twist3d
     calib: Cal3DS2
     calib_sigma: Cal3DS2
 

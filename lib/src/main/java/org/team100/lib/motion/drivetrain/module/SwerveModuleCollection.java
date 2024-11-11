@@ -105,7 +105,7 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 12,
                                 2,
-                                0.336,
+                                0.342,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(frontRightLogger,
@@ -115,7 +115,7 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 11,
                                 1,
-                                0.619,
+                                0.623,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(rearLeftLogger,
@@ -135,7 +135,7 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, AnalogTurningEncoder.class,
                                 33,
                                 0,
-                                0.512,
+                                0.618,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE));
             case BETA_BOT:
