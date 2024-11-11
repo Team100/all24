@@ -133,8 +133,8 @@ class ManualWithMinTimeHeadingTest {
         assertEquals(Math.PI / 2, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // we did one calculation so setpoint is not zero
         assertEquals(0.0002, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(0.4, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
-        verify(0, 0, 0.4, twistM_S);
+        assertEquals(0.2, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        verify(0, 0, 0.2, twistM_S);
 
         // let go of the pov to let the profile run.
         desiredRotation = null;
@@ -144,9 +144,9 @@ class ManualWithMinTimeHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
-        assertEquals(0.8, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(0.4, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 0.8, twistM_S);
+        verify(0, 0, 0.4, twistM_S);
 
         // mostly rotated
         currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
@@ -164,7 +164,7 @@ class ManualWithMinTimeHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // there should be no more profile to follow
-        verify(0, 0, 0, twistM_S);
+        verify(0, 0, 0.207, twistM_S);
 
     }
 
@@ -199,7 +199,7 @@ class ManualWithMinTimeHeadingTest {
         assertNotNull(m_manualWithHeading.m_goal);
 
         // ?
-        verify(0, 0, 0.4, v);
+        verify(0, 0, 0.2, v);
 
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
@@ -207,20 +207,20 @@ class ManualWithMinTimeHeadingTest {
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
         v = m_manualWithHeading.apply(new SwerveState(currentPose, v), twist1_1);
-        assertEquals(0.8, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(0.4, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
-        verify(0, 0, 0.8, v);
+        verify(0, 0, 0.4, v);
 
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new State100(1.555, 0.2);
         v = m_manualWithHeading.apply(new SwerveState(currentPose, v), twist1_1);
-        assertEquals(0.4, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(0.350, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         assertNotNull(m_manualWithHeading.m_goal);
 
         // ?
-        verify(0, 0, 0.4, v);
+        verify(0, 0, 0.350, v);
 
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
@@ -228,7 +228,7 @@ class ManualWithMinTimeHeadingTest {
         v = m_manualWithHeading.apply(new SwerveState(currentPose, v), twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
         // there should be no more profile to follow
-        verify(0, 0, 0, v);
+        verify(0, 0, 0.150, v);
     }
 
     @Test
@@ -282,9 +282,9 @@ class ManualWithMinTimeHeadingTest {
         assertEquals(0.471, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // ?
         assertEquals(0.058, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(3.228, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(2.628, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // ?
-        verify(0, 0, 2.828, v);
+        verify(0, 0, 2.628, v);
     }
 
     @Test
@@ -338,9 +338,9 @@ class ManualWithMinTimeHeadingTest {
         assertEquals(0.471, m_manualWithHeading.m_goal.getRadians(), kDelta);
         // ?
         assertEquals(0.058, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
-        assertEquals(3.228, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
+        assertEquals(2.628, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
         // ?
-        verify(0, 0, 2.828, v);
+        verify(0, 0, 2.628, v);
     }
 
     /**

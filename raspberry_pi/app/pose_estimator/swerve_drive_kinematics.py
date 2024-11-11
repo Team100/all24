@@ -6,8 +6,11 @@ import numpy.typing as npt
 from wpimath.geometry import Translation2d, Twist2d
 
 from app.pose_estimator.drive_util import DriveUtil
-from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
-from app.pose_estimator.swerve_module_position import SwerveModulePosition100
+from app.pose_estimator.swerve_module_delta import SwerveModuleDelta, SwerveModuleDeltas
+from app.pose_estimator.swerve_module_position import (
+    SwerveModulePosition100,
+    SwerveModulePositions,
+)
 
 
 class SwerveDriveKinematics100:
@@ -28,7 +31,7 @@ class SwerveDriveKinematics100:
         )
         self.forward_kinematics = np.linalg.pinv(self.inverse_kinematics)
 
-    def to_twist_2d(self, deltas: list[SwerveModuleDelta]) -> Twist2d:
+    def to_twist_2d(self, deltas: SwerveModuleDeltas) -> Twist2d:
         """FORWARD: module deltas -> twist."""
         # [d cos; d sin; ...] (2n x 1)
         delta_vector: npt.NDArray[np.float64] = self._deltas_2_vector(deltas)
@@ -38,7 +41,7 @@ class SwerveDriveKinematics100:
         )
         return self._vector_2_twist(twist_vector)
 
-    def to_swerve_module_delta(self, twist: Twist2d) -> list[SwerveModuleDelta]:
+    def to_swerve_module_delta(self, twist: Twist2d) -> SwerveModuleDeltas:
         """
         INVERSE: twist -> module position deltas
 
@@ -52,10 +55,11 @@ class SwerveDriveKinematics100:
         return self.deltas_from_vector(delta_vector)
 
     def to_swerve_module_positions(
-        self, initial: list[SwerveModulePosition100], twist: Twist2d
-    ) -> list[SwerveModulePosition100]:
-        """Find the module deltas and apply them to the given initial positions."""
-        deltas: list[SwerveModuleDelta] = self.to_swerve_module_delta(twist)
+        self, initial: SwerveModulePositions, twist: Twist2d
+    ) -> SwerveModulePositions:
+        """Find the module deltas and apply them to the given initial positions.
+        See SwerveDriveKinematics100.java:159"""
+        deltas: SwerveModuleDeltas = self.to_swerve_module_delta(twist)
         return DriveUtil.module_position_from_delta(initial, deltas)
 
     @staticmethod
@@ -64,28 +68,31 @@ class SwerveDriveKinematics100:
 
     def deltas_from_vector(
         self, module_delta_vector: npt.NDArray[np.float64]
-    ) -> list[SwerveModuleDelta]:
+    ) -> SwerveModuleDeltas:
         """
         The resulting distance is always positive.
 
         @param moduleDeltaVector [d cos; d sin; ...] (2n x 1),
         equivalently [dx0; dy0; dx1; ...]
+        See SwerveDriveKinematics100.java:402
         """
-        module_deltas: list[SwerveModuleDelta] = []
-        for i in range(self.num_modules):
-            x: float = module_delta_vector[i * 2, 0]
-            y: float = module_delta_vector[i * 2 + 1, 0]
-            module_deltas.append(SwerveModuleDelta.of(x, y))
-
-        return module_deltas
+        return SwerveModuleDeltas(
+            SwerveModuleDelta.of(module_delta_vector[0, 0], module_delta_vector[1, 0]),
+            SwerveModuleDelta.of(module_delta_vector[2, 0], module_delta_vector[3, 0]),
+            SwerveModuleDelta.of(module_delta_vector[4, 0], module_delta_vector[5, 0]),
+            SwerveModuleDelta.of(module_delta_vector[6, 0], module_delta_vector[7, 0]),
+        )
 
     def _deltas_2_vector(
-        self, module_deltas: list[SwerveModuleDelta]
+        self, module_deltas: SwerveModuleDeltas
     ) -> npt.NDArray[np.float64]:
-        """deltas -> [d cos; d sin; ... ] (2n x 1) */"""
+        """deltas -> [d cos; d sin; ... ] (2n x 1)
+        See SwerveDriveKinematics100.java:292
+        """
         module_delta_matrix = np.zeros((self.num_modules * 2, 1))
+        module_deltas_all = module_deltas.all()
         for i in range(self.num_modules):
-            module: SwerveModuleDelta = module_deltas[i]
+            module: SwerveModuleDelta = module_deltas_all[i]
             if abs(module.distance_m) < 1e-6 or not module.angle.present:
                 module_delta_matrix[i * 2, 0] = 0
                 module_delta_matrix[i * 2 + 1, 0] = 0

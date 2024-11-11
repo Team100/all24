@@ -196,60 +196,12 @@ public class SwerveDriveKinematics100 {
     /**
      * Scale wheel speeds to limit maximum.
      *
-     * @param states        WILL BE MUTATED!
-     * @param maxSpeedM_s   Max module speed
-     * @param maxAccelM_s2  Max module acceleration
-     * @param maxDeccelM_s2 Max module deceleration
-     */
-    public static void desaturateWheelSpeeds(
-            SwerveModuleStates states,
-            double maxSpeedM_s,
-            double maxAccelM_s2,
-            double maxDeccelM_s2,
-            double maxTurnVelocityM_s) {
-        double realMaxSpeed = 0;
-        double realMaxAccel = 0;
-        double realMaxDeccel = 0;
-        double realTurnVelocity = 0;
-        for (SwerveModuleState100 moduleState : states.all()) {
-            realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
-            realMaxAccel = Math.max(realMaxAccel, moduleState.accelMetersPerSecond_2);
-            realMaxDeccel = Math.min(realMaxDeccel, moduleState.accelMetersPerSecond_2);
-            realTurnVelocity = Math.max(maxTurnVelocityM_s, Math.abs(moduleState.omega));
-        }
-        if (realMaxSpeed > maxSpeedM_s) {
-            for (SwerveModuleState100 moduleState : states.all()) {
-                moduleState.speedMetersPerSecond = moduleState.speedMetersPerSecond / realMaxSpeed
-                        * maxSpeedM_s;
-            }
-        }
-        if (realMaxAccel > maxAccelM_s2) {
-            for (SwerveModuleState100 moduleState : states.all()) {
-                moduleState.accelMetersPerSecond_2 = moduleState.accelMetersPerSecond_2 / realMaxAccel
-                        * maxAccelM_s2;
-            }
-        }
-        if (realMaxDeccel < -1.0 * maxDeccelM_s2) {
-            for (SwerveModuleState100 moduleState : states.all()) {
-                moduleState.accelMetersPerSecond_2 = moduleState.accelMetersPerSecond_2 / (-1.0 * realMaxDeccel)
-                        * maxDeccelM_s2;
-            }
-        }
-        if (realTurnVelocity > maxTurnVelocityM_s) {
-            for (SwerveModuleState100 moduleState : states.all()) {
-                moduleState.omega = moduleState.omega / realTurnVelocity
-                        * maxTurnVelocityM_s;
-            }
-        }
-    }
-
-    /**
-     * Scale wheel speeds to limit maximum.
-     *
      * @param states      WILL BE MUTATED!
      * @param maxSpeedM_s Max module speed
      */
-    public static void desaturateWheelSpeeds(SwerveModuleStates states, double maxSpeedM_s) {
+    public static void desaturateWheelSpeeds(
+            SwerveModuleStates states,
+            double maxSpeedM_s) {
         double realMaxSpeed = 0;
         for (SwerveModuleState100 moduleState : states.all()) {
             realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));

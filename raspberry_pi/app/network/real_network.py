@@ -7,7 +7,7 @@ from typing import cast
 
 import ntcore
 from typing_extensions import override
-from wpimath.geometry import Rotation3d, Pose2d
+from wpimath.geometry import Rotation2d, Rotation3d
 from wpiutil import wpistruct
 
 from app.config.identity import Identity
@@ -17,12 +17,20 @@ from app.network.network_protocol import (
     Blip25Receiver,
     Blip25Sender,
     BlipSender,
+    CalibSender,
+    CameraCalibration,
     DoubleSender,
+    GyroReceiver,
     Network,
     NoteSender,
+    OdometryReceiver,
     PoseEstimate25,
     PoseSender,
 )
+from app.pose_estimator.swerve_module_position import SwerveModulePositions
+
+# global singleton
+start_time_us = ntcore._now()
 
 
 class RealDoubleSender(DoubleSender):
@@ -77,7 +85,7 @@ class RealBlip25Receiver(Blip25Receiver):
         )
         self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
         # self.poller.addListener([""], ntcore.EventFlags.kValueAll)
-        self.start_time_us = ntcore._now()
+
         # print("RealBlip25Receiver.__init__() start_time_us ", self.start_time_us)
 
     @override
@@ -103,7 +111,7 @@ class RealBlip25Receiver(Blip25Receiver):
             # server time is always 1.  ???
             server_time_us = nt_value.server_time()
             # print("RealBlip25Receiver.get() server time ", server_time_us)
-            time_us = nt_value.time() - self.start_time_us
+            time_us = nt_value.time() - start_time_us
             # print("RealBlip25Receiver.get() time ", time_us)
 
             frame: list[Blip25] = []
@@ -127,6 +135,72 @@ class RealPoseSender(PoseSender):
 
     @override
     def send(self, val: PoseEstimate25, delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
+
+
+class RealOdometryReceiver(OdometryReceiver):
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(
+            inst, [name], ntcore.PubSubOptions(keepDuplicates=True)
+        )
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
+
+    def get(self) -> list[tuple[int, SwerveModulePositions]]:
+        result: list[tuple[int, SwerveModulePositions]] = []
+        # see NotePosition24ArrayListener for example
+        queue: list = self.poller.readQueue()
+        for event in queue:
+            value_event_data = cast(ntcore.ValueEventData, event.data)
+            nt_value: ntcore.Value = value_event_data.value
+            time_us = nt_value.time() - start_time_us
+            raw: bytes = cast(bytes, nt_value.getRaw())
+            pos: SwerveModulePositions = wpistruct.unpack(SwerveModulePositions, raw)
+            result.append((time_us, pos))
+        return result
+
+
+class RealGyroReceiver(GyroReceiver):
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(
+            inst, [name], ntcore.PubSubOptions(keepDuplicates=True)
+        )
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
+
+    def get(self) -> list[tuple[int, Rotation2d]]:
+        result: list[tuple[int, Rotation2d]] = []
+        queue: list = self.poller.readQueue()
+        for event in queue:
+            value_event_data = cast(ntcore.ValueEventData, event.data)
+            nt_value: ntcore.Value = value_event_data.value
+            time_us = nt_value.time() - start_time_us
+            raw: bytes = cast(bytes, nt_value.getRaw())
+            pos: Rotation2d = wpistruct.unpack(Rotation2d, raw)
+            result.append((time_us, pos))
+        return result
+
+
+class RealCalibSender(CalibSender):
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
+        self.pub = pub
+
+    @override
+    def send(self, val: CameraCalibration, delay_us: int) -> None:
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
@@ -176,6 +250,20 @@ class RealNetwork(Network):
     @override
     def get_pose_sender(self, name: str) -> PoseSender:
         return RealPoseSender(self._inst.getStructTopic(name, PoseEstimate25).publish())
+
+    @override
+    def get_odometry_receiver(self, name: str) -> OdometryReceiver:
+        return RealOdometryReceiver(name, self._inst)
+
+    @override
+    def get_gyro_receiver(self, name: str) -> GyroReceiver:
+        return RealGyroReceiver(name, self._inst)
+
+    @override
+    def get_calib_sender(self, name: str) -> CalibSender:
+        return RealCalibSender(
+            self._inst.getStructTopic(name, CameraCalibration).publish()
+        )
 
     @override
     def flush(self) -> None:

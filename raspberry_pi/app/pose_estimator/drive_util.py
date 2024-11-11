@@ -2,32 +2,39 @@
 
 from wpimath.geometry import Rotation2d
 
-from app.pose_estimator.swerve_module_delta import SwerveModuleDelta
+from app.pose_estimator.swerve_module_delta import SwerveModuleDelta, SwerveModuleDeltas
 from app.pose_estimator.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
+    SwerveModulePositions,
 )
 
 
 class DriveUtil:
     @staticmethod
     def module_position_delta(
-        start: list[SwerveModulePosition100], end: list[SwerveModulePosition100]
-    ) -> list[SwerveModuleDelta]:
-        """Uses the end angle to cover the whole interval."""
-        deltas: list[SwerveModuleDelta] = []
-        for i in range(len(start)):
-            deltas.append(DriveUtil._delta(start[i], end[i]))
-        return deltas
-    
+        start: SwerveModulePositions, end: SwerveModulePositions
+    ) -> SwerveModuleDeltas:
+        """Uses the end angle to cover the whole interval.
+        See DriveUtil.java:117"""
+        return SwerveModuleDeltas(
+            DriveUtil._delta(start.front_left, end.front_left),
+            DriveUtil._delta(start.front_right, end.front_right),
+            DriveUtil._delta(start.rear_left, end.rear_left),
+            DriveUtil._delta(start.rear_right, end.rear_right),
+        )
+
     @staticmethod
     def module_position_from_delta(
-        start: list[SwerveModulePosition100], delta: list[SwerveModuleDelta]
-    ) -> list [SwerveModulePosition100]:
-        new_positions: list[SwerveModulePosition100] = []
-        for i in range(len(start)):
-            new_positions.append(DriveUtil._plus(start[i], delta[i]))
-        return new_positions
+        start: SwerveModulePositions, delta: SwerveModuleDeltas
+    ) -> SwerveModulePositions:
+        """See DriveUtil.java:127"""
+        return SwerveModulePositions(
+            DriveUtil._plus(start.front_left, delta.front_left),
+            DriveUtil._plus(start.front_right, delta.front_right),
+            DriveUtil._plus(start.rear_left, delta.rear_left),
+            DriveUtil._plus(start.rear_right, delta.rear_right),
+        )
 
     @staticmethod
     def _delta(
@@ -42,10 +49,10 @@ class DriveUtil:
 
     @staticmethod
     def _plus(
-            start:SwerveModulePosition100, delta:SwerveModuleDelta) -> SwerveModulePosition100:
+        start: SwerveModulePosition100, delta: SwerveModuleDelta
+    ) -> SwerveModulePosition100:
         new_distance_m = start.distance_m + delta.distance_m
         if delta.angle.present:
-            return  SwerveModulePosition100(new_distance_m, delta.angle)
+            return SwerveModulePosition100(new_distance_m, delta.angle)
         # if there's no angle, we're not going anywhere.
         return start
-    

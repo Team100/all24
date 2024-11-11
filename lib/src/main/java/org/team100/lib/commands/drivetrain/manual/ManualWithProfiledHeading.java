@@ -32,12 +32,19 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * rotational control.
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
+ * 
+ * The profile here is constant with robot speed, which is wrong: the available
+ * rotational velocity and acceleration decline with speed.  As a result, the 
+ * robot can't keep up with the profile, the controller errors grow, and the
+ * robot overshoots at speed.
+ * 
+ * TODO: make the profile speed-dependent.
  */
 public class ManualWithProfiledHeading implements FieldRelativeDriver {
     // don't try to go full speed
     private static final double PROFILE_SPEED = 0.5;
     // accelerate gently to avoid upset
-    private static final double PROFILE_ACCEL = 0.5;
+    private static final double PROFILE_ACCEL = 0.1;
     private static final double OMEGA_FB_DEADBAND = 0.1;
     private static final double THETA_FB_DEADBAND = 0.1;
     private final SwerveKinodynamics m_swerveKinodynamics;
@@ -146,7 +153,9 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         final double yawMeasurement = state.theta().x();
         final double yawRateMeasurement = state.theta().v();
 
-        final TrapezoidProfile100 m_profile = makeProfile(control, yawRateMeasurement);
+        final double currentVelocity = state.velocity().norm();
+
+        final TrapezoidProfile100 m_profile = makeProfile(currentVelocity);
 
         Rotation2d pov = m_desiredRotation.get();
         m_goal = m_latch.latchedRotation(
@@ -226,24 +235,17 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     }
 
     /**
-     * the profile has no state and is ~free to instantiate so make a new one every
-     * time. the max speed adapts to the observed speed (plus a little).
-     * the max speed should be half of the absolute max, to compromise
-     * translation and rotation, unless the actual translation speed is less, in
-     * which case we can rotate faster.
+     * Note that the max speed and accel are inversely proportional to the current velocity.
      */
-    public TrapezoidProfile100 makeProfile(FieldRelativeVelocity twistM_S, double yawRate) {
-        // how fast do we want to go?
-        double xySpeed = twistM_S.norm();
+    public TrapezoidProfile100 makeProfile(double currentVelocity) {
         // fraction of the maximum speed
-        double xyRatio = Math.min(1, xySpeed / m_swerveKinodynamics.getMaxDriveVelocityM_S());
+        double xyRatio = Math.min(1, currentVelocity / m_swerveKinodynamics.getMaxDriveVelocityM_S());
         // fraction left for rotation
         double oRatio = 1 - xyRatio;
-        // actual speed is at least half
-        double kRotationSpeed = Math.max(0.5, oRatio);
+        // add a little bit of default speed
+        double kRotationSpeed = Math.max(0.1, oRatio);
 
-        double maxSpeedRad_S = Math.max(Math.abs(yawRate) + 0.001,
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed) * PROFILE_SPEED;
+        double maxSpeedRad_S = m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed * PROFILE_SPEED;
 
         double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * PROFILE_ACCEL;
 
@@ -259,7 +261,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private double getOmegaFB(double headingRate) {
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
 
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+        if (Experiments.instance.enabled(Experiment.SnapThetaFilter)) {
             // output filtering to prevent oscillation due to delay
             omegaFB = m_outputFilter.calculate(omegaFB);
         }
