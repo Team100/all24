@@ -3,8 +3,6 @@ package org.team100.lib.localization;
 import java.util.Objects;
 
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
@@ -106,10 +104,6 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
         FieldRelativeVelocity endVelocity = endValue.m_state.velocity();
         FieldRelativeVelocity velocity = startVelocity.plus(endVelocity.minus(startVelocity).times(t));
 
-        // FieldRelativeAcceleration startAccel = m_state.acceleration();
-        // FieldRelativeAcceleration endAccel = endValue.m_state.acceleration();
-        // FieldRelativeAcceleration acceleration = startAccel.plus(endAccel.minus(startAccel).times(t));
-        // 11/11/24, no more accel here.
         SwerveModel newState = new SwerveModel(pose, velocity);
         return new InterpolationRecord(m_kinematics, newState, gyroLerp, gyroRateLerp, wheelLerp);
     }

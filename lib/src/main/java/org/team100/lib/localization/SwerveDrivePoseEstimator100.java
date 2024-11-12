@@ -1,6 +1,5 @@
 package org.team100.lib.localization;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,7 +9,6 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -25,8 +23,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 
 public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     private static final double kBufferDuration = 1.5;
-    // look back a little to get a pose for velocity estimation
-    private static final double velocityDtS = 0.02;
 
     private final SwerveKinodynamics m_kinodynamics;
     private final TimeInterpolatableBuffer100<InterpolationRecord> m_poseBuffer;
@@ -154,13 +150,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         Pose2d newPose = sample.m_state.pose().exp(scaledTwist);
 
-        // Step 5: Adjust the gyro offset so that the adjusted pose is consistent with
-        // the unadjusted gyro angle
-        // this should have no effect if you disregard vision angle input
-
-        m_gyroOffset = newPose.getRotation().minus(sample.m_gyroAngle);
-        m_log_offset.log(() -> m_gyroOffset);
-
         // Step 6: Record the current pose to allow multiple measurements from the same
         // timestamp
         m_poseBuffer.put(
@@ -201,24 +190,18 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             double gyroRateRad_S,
             SwerveModulePositions wheelPositions) {
 
-        // the extra little bit here is to make sure we catch the most recent entry even
-        // though the clock jitters a little.
-        List<Entry<Double, InterpolationRecord>> consistentPair = m_poseBuffer.consistentPair(
-                currentTimeS, velocityDtS - 0.005);
+        // the entry right before this one, the basis for integration.
+        Entry<Double, InterpolationRecord> lowerEntry = m_poseBuffer.lowerEntry(
+                currentTimeS);
 
-        if (consistentPair.isEmpty()) {
-            Util.println("CONSISTENT PAIR IS EMPTY");
+        if (lowerEntry == null) {
+            Util.println("lower entry is null");
             // We're at the beginning. There's nothing to apply the wheel position delta to.
             // This should never happen.
             return;
         }
 
-        // the entry right before this one, the basis for integration.
-        Entry<Double, InterpolationRecord> lowerEntry = consistentPair.get(0);
-        // System.out.println("SwerveDrivePoseEstiamtor.put() lowerEntry " +
-        // lowerEntry);
-
-        double t1 = currentTimeS - lowerEntry.getKey();
+        double dt = currentTimeS - lowerEntry.getKey();
         InterpolationRecord value = lowerEntry.getValue();
         SwerveModel previousState = value.m_state;
 
@@ -235,46 +218,19 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         twist.dtheta = angle.minus(previousState.pose().getRotation()).getRadians();
 
         Pose2d newPose = previousState.pose().exp(twist);
-
         m_log_pose_x.log(newPose::getX);
 
-        FieldRelativeDelta deltaTransform = FieldRelativeDelta.delta(
-                previousState.pose(), newPose).div(t1);
+        // this is the backward finite difference velocity from odometry
+        FieldRelativeDelta odoVelo = FieldRelativeDelta.delta(
+                previousState.pose(), newPose)
+                .div(dt);
 
         // use the gyro rate instead of the odometry-derived rate
         FieldRelativeVelocity velocity = new FieldRelativeVelocity(
-                deltaTransform.getX(),
-                deltaTransform.getY(),
+                odoVelo.getX(),
+                odoVelo.getY(),
                 gyroRateRad_S);
-        // System.out.println("SwerveDrivePoseEstimator.put() current velocity " +
-        // velocity);
 
-        // calculate acceleration if possible
-        FieldRelativeAcceleration accel = new FieldRelativeAcceleration(0, 0, 0);
-        if (consistentPair.size() == 1) {
-            // System.out.println("SwerveDrivePoseEstimator.put() no previous");
-            // in this case we just look at the previous velocity
-            FieldRelativeVelocity v0 = previousState.velocity();
-            accel = velocity.accel(v0, t1);
-            // System.out.println("SwerveDrivePoseEstimator.put() final accel 1 " + accel);
-        }
-        if (consistentPair.size() > 1) {
-            // for acceleration we recalculate from position, since position might have been
-            // updated by the cameras.
-            Map.Entry<Double, InterpolationRecord> earlierEntry = consistentPair.get(1);
-            // System.out.println("SwerveDrivePoseEstiamtor.put() earlierEntry " +
-            // earlierEntry);
-
-            double t0 = lowerEntry.getKey() - earlierEntry.getKey();
-            // System.out.println("SwerveDrivePoseEstimator.put() accel " + accel);
-
-            SwerveModel earlierState = earlierEntry.getValue().m_state;
-            FieldRelativeVelocity v0 = FieldRelativeVelocity.velocity(earlierState.pose(), previousState.pose(), t0);
-            accel = velocity.accel(v0, t1);
-            // System.out.println("SwerveDrivePoseEstimator.put() final accel 2 " + accel);
-        }
-
-        // 11/11/24, no more accel here.
         SwerveModel swerveState = new SwerveModel(newPose, velocity);
 
         m_poseBuffer.put(
