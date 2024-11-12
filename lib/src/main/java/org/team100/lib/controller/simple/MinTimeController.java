@@ -8,7 +8,6 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.StringLogger;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
-import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -165,10 +164,6 @@ public class MinTimeController implements Glassy {
 
     private Control100 modulus(double x, double v, double a) {
         return new Control100(m_modulus.applyAsDouble(x), v, a);
-    }
-
-    private Control100 modulus(State100 s) {
-        return modulus(s.x(), s.v(), s.a());
     }
 
     private Control100 modulus(Model100 s) {

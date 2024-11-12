@@ -21,7 +21,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
-import org.team100.lib.state.State100;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.TrajectorySamplePoint;
 
@@ -684,33 +683,6 @@ public class LoggerFactory {
             m_xLogger.log(val::x);
             m_vLogger.log(val::v);
         }
-    }
-
-    public class State100Logger {
-        private final Level m_level;
-        private final DoubleLogger m_xLogger;
-        private final DoubleLogger m_vLogger;
-        private final DoubleLogger m_aLogger;
-
-        State100Logger(Level level, String leaf) {
-            m_level = level;
-            m_xLogger = doubleLogger(level, join(leaf, "x"));
-            m_vLogger = doubleLogger(level, join(leaf, "v"));
-            m_aLogger = doubleLogger(level, join(leaf, "a"));
-        }
-
-        public void log(Supplier<State100> vals) {
-            if (!allow(m_level))
-                return;
-            State100 val = vals.get();
-            m_xLogger.log(val::x);
-            m_vLogger.log(val::v);
-            m_aLogger.log(val::a);
-        }
-    }
-
-    public State100Logger state100Logger(Level level, String leaf) {
-        return new State100Logger(level, leaf);
     }
 
     public class Control100Logger {

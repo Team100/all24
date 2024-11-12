@@ -23,7 +23,6 @@ import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.MockGyro;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
-import org.team100.lib.state.State100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -147,7 +146,7 @@ class ManualWithFullStateHeadingTest {
         // say we've rotated a little.
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(new SwerveModel(currentPose, twistM_S), twist1_1);
         // setpoint is the goal
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
@@ -158,7 +157,7 @@ class ManualWithFullStateHeadingTest {
         // mostly rotated
         currentPose = new Pose2d(0, 0, new Rotation2d(1.55));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_thetaSetpoint = new State100(1.55, 0.2);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(1.55, 0.2);
         twistM_S = m_manualWithHeading.apply(new SwerveModel(currentPose, twistM_S), twist1_1);
         // setpoint is the goal
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
@@ -168,7 +167,7 @@ class ManualWithFullStateHeadingTest {
 
         // done
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
-        m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(Math.PI / 2, 0);
         twistM_S = m_manualWithHeading.apply(new SwerveModel(currentPose, twistM_S), twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
 
@@ -215,7 +214,7 @@ class ManualWithFullStateHeadingTest {
         currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
 
         // cheat the setpoint for the test
-        m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(0.5, 1);
         v = m_manualWithHeading.apply(new SwerveModel(currentPose, v), twist1_1);
         // the setpoint is the goal
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
@@ -225,7 +224,7 @@ class ManualWithFullStateHeadingTest {
         // mostly rotated, so the FB controller is calm
         currentPose = new Pose2d(0, 0, new Rotation2d(1.555));
         // cheat the setpoint for the test
-        m_manualWithHeading.m_thetaSetpoint = new State100(1.555, 0.2);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(1.555, 0.2);
         v = m_manualWithHeading.apply(new SwerveModel(currentPose, v), twist1_1);
         // the setpoint is the goal
         assertEquals(0.0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
@@ -236,7 +235,7 @@ class ManualWithFullStateHeadingTest {
 
         // at the setpoint
         currentPose = new Pose2d(0, 0, new Rotation2d(Math.PI / 2));
-        m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(Math.PI / 2, 0);
         v = m_manualWithHeading.apply(new SwerveModel(currentPose, v), twist1_1);
         assertNotNull(m_manualWithHeading.m_goal);
         // there should be no more profile to follow

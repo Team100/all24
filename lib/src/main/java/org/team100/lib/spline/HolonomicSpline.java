@@ -356,7 +356,7 @@ public class HolonomicSpline {
     private static void runOptimizationIteration(List<HolonomicSpline> splines) {
         // can't optimize anything with less than 2 splines
         if (splines.size() <= 1) {
-            Util.warn("runOptimizationIteration: nothing to optimize");
+            // Util.warn("runOptimizationIteration: nothing to optimize");
             return;
         }
 
