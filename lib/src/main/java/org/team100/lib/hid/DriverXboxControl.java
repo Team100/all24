@@ -4,7 +4,6 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
@@ -173,10 +172,6 @@ public class DriverXboxControl implements DriverControl {
     public boolean shooterLock() {
         return m_controller.getBButton();
     }
-
-    ////////////////////////////////////
-    //
-    // TODO: clean these up
 
     @Override
     public boolean actualCircle() {

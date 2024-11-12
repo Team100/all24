@@ -332,8 +332,6 @@ class ManualWithProfiledHeadingTest {
         // gyro rate is still full speed.
         gyro.rate = 2.828;
 
-        FieldRelativeVelocity clipped = m_manualWithHeading.clipAndScale(control);
-
         TrapezoidProfile100 profile = m_manualWithHeading.makeProfile(0);
         // profile speed is half max.
         assertEquals(1.414, profile.getMaxVelocity(), kDelta);

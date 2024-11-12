@@ -21,6 +21,7 @@ class GyroFilterTest {
         // run for 10 sec
         // final double bias = 0.5;
         final double bias = 0.01;
+        @SuppressWarnings("unused")
         double yaw = 0;
         final double total_time = 10;
         for (int i = 0; i < total_time / dt; ++i) {

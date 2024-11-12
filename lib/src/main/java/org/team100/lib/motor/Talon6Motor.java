@@ -74,6 +74,7 @@ public abstract class Talon6Motor implements BareMotor {
         m_supplyLimit = supplyLimit;
 
         TalonFXConfigurator talonFXConfigurator = m_motor.getConfigurator();
+        Phoenix100.logCrashStatus();
         Phoenix100.baseConfig(talonFXConfigurator);
         Phoenix100.motorConfig(talonFXConfigurator, motorPhase);
         Phoenix100.currentConfig(talonFXConfigurator, supplyLimit, statorLimit);

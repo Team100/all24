@@ -3,8 +3,6 @@ package org.team100.lib.motion.drivetrain.kinodynamics;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.team100.lib.util.Util;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.proto.SwerveModuleStateProto;
 import edu.wpi.first.math.kinematics.struct.SwerveModuleStateStruct;

@@ -262,6 +262,7 @@ class CoordinatedProfileTest {
 
         Control100 stateX = ix.control();
         Control100 stateY = iy.control();
+        @SuppressWarnings("unused")
         double total_time = 0;
         for (int i = 0; i < 1000; ++i) {
             total_time += DT;
