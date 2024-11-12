@@ -11,6 +11,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.timing.TimedPose;
@@ -105,7 +106,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
     public void execute() {
         if (m_trajectory == null)
             return;
-        SwerveState measurement = m_swerve.getState(); 
+        SwerveModel measurement = m_swerve.getState(); 
 
         if (m_steeringAligned) {
             Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(TimedRobot100.LOOP_PERIOD_S);
@@ -118,7 +119,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
 
             TimedPose desiredState = samplePoint.state();
             m_log.desired.log(() -> desiredState.state().getPose());
-            SwerveState reference = SwerveState.fromTimedPose(desiredState);
+            SwerveModel reference = SwerveModel.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
             // follow normally
@@ -135,7 +136,7 @@ public class DriveToWaypoint3 extends Command implements Glassy {
 
             TimedPose desiredState = samplePoint.state();
             m_log.desired.log(() -> desiredState.state().getPose());
-            SwerveState reference = SwerveState.fromTimedPose(desiredState);
+            SwerveModel reference = SwerveModel.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget);

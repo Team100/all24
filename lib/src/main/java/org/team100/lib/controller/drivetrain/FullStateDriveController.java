@@ -2,9 +2,9 @@ package org.team100.lib.controller.drivetrain;
 
 import java.util.function.DoubleUnaryOperator;
 
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -33,7 +33,7 @@ public class FullStateDriveController implements HolonomicFieldRelativeControlle
     }
 
     @Override
-    public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference) {
+    public FieldRelativeVelocity calculate(SwerveModel measurement, SwerveModel reference) {
         m_log.measurement.log(() -> measurement);
         m_log.reference.log(() -> reference);
         m_log.error.log(() -> reference.minus(measurement));
@@ -60,8 +60,8 @@ public class FullStateDriveController implements HolonomicFieldRelativeControlle
             double k2,
             double xTolerance,
             double xDotTolerance,
-            State100 measurement,
-            State100 setpoint,
+            Model100 measurement,
+            Model100 setpoint,
             DoubleUnaryOperator modulus) {
         double xError = modulus.applyAsDouble(setpoint.x() - measurement.x());
         double xDotError = setpoint.v() - measurement.v();

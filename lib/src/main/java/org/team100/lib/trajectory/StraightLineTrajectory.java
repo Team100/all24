@@ -2,7 +2,7 @@ package org.team100.lib.trajectory;
 
 import java.util.List;
 
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.util.Util;
 
@@ -28,14 +28,14 @@ public class StraightLineTrajectory {
      * Return a straight line trajectory from the start state to the end pose at
      * rest.
      */
-    public Trajectory100 apply(SwerveState startState, Pose2d end) {
+    public Trajectory100 apply(SwerveModel startState, Pose2d end) {
         if (m_useInitialVelocity)
             return movingToRest(startState, end);
         else
             return m_maker.restToRest(startState.pose(), end);
     }
 
-    private Trajectory100 movingToRest(SwerveState startState, Pose2d end) {
+    private Trajectory100 movingToRest(SwerveModel startState, Pose2d end) {
         if (Math.abs(startState.velocity().norm()) < VELOCITY_EPSILON) {
             // System.out.println("not actually moving, use rest-to-rest");
             return m_maker.restToRest(startState.pose(), end);

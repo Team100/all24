@@ -8,7 +8,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.motion.servo.AngularPositionServo;
 import org.team100.lib.motion.servo.LinearVelocityServo;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -79,7 +79,7 @@ public abstract class SwerveModule100 implements Glassy {
     }
 
     /** for testing only */
-    State100 getSetpoint() {
+    Control100 getSetpoint() {
         return m_turningServo.getSetpoint();
     }
 

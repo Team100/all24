@@ -67,7 +67,7 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy {
         Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
         if (!optionalAlliance.isPresent())
             return;
-        Pose2d startPose = m_swerve.getState().pose();
+        Pose2d startPose = m_swerve.getPose();
         Rotation2d rotationToGoal = m_goalTranslation.minus(startPose.getTranslation()).getAngle();
         Rotation2d startRotation = rotationToGoal.times(1.5);
         Pose2d startWaypoint = new Pose2d(startPose.getTranslation(), startRotation);
@@ -91,8 +91,8 @@ public class DriveToAdjacentWithShooterAngle extends Command implements Glassy {
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getState().pose();
-        ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
+        Pose2d currentPose = m_swerve.getPose();
+        ChassisSpeeds currentSpeed = m_swerve.getChassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
         m_log_chassis_speeds.log(() -> output);

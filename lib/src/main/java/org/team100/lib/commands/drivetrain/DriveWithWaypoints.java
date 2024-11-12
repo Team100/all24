@@ -52,7 +52,7 @@ public class DriveWithWaypoints extends Command implements Glassy {
 
     @Override
     public void initialize() {
-        final Pose2d start = m_swerve.getState().pose();
+        final Pose2d start = m_swerve.getPose();
         List<Pose2d> newWaypointM = new ArrayList<>(m_goal.get());
         newWaypointM.add(0, start);
 
@@ -73,8 +73,8 @@ public class DriveWithWaypoints extends Command implements Glassy {
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getState().pose();
-        ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
+        Pose2d currentPose = m_swerve.getPose();
+        ChassisSpeeds currentSpeed = m_swerve.getChassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);

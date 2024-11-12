@@ -15,7 +15,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -48,7 +48,7 @@ class SwerveDrivePoseEstimator100Test {
     private final SwerveModulePositions position01 = new SwerveModulePositions(p01, p01, p01, p01);
     private final Pose2d visionRobotPoseMeters = new Pose2d(1, 0, GeometryUtil.kRotationZero);
 
-    private static void verify(double x, SwerveState state) {
+    private static void verify(double x, SwerveModel state) {
         Pose2d estimate = state.pose();
         assertEquals(x, estimate.getX(), kDelta);
         assertEquals(0, estimate.getY(), kDelta);
@@ -534,7 +534,8 @@ class SwerveDrivePoseEstimator100Test {
 
     }
 
-    @Test
+    // this test doesn't apply to us because we ignore the vision theta.
+    // @Test
     void testBadInitialPose() {
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest();
 
@@ -628,7 +629,6 @@ class SwerveDrivePoseEstimator100Test {
 
         estimator.reset(
                 new Rotation2d(),
-                0,
                 positions,
                 startingPose,
                 0); // zero initial time
@@ -694,7 +694,7 @@ class SwerveDrivePoseEstimator100Test {
                             .minus(trajectory.getInitialPose().getRotation()),
                     0,
                     positions);
-            SwerveState xHat = estimator.get(t);
+            SwerveModel xHat = estimator.get(t);
 
             double error = groundTruthState.poseMeters.getTranslation().getDistance(xHat.pose().getTranslation());
             if (error > maxError) {

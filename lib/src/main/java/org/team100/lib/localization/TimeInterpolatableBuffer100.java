@@ -142,42 +142,6 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         return bottomBound.getValue().interpolate(topBound.getValue(), timeFraction);
     }
 
-    /**
-     * Return the lowerEntry before t. and another floorEntry dt before that.
-     * 
-     * The first is used as the basis for integration. The second is used to
-     * estimate velocity.
-     * 
-     * Writes are prohibited between the two reads, so that they are consistent.
-     * 
-     * This might return an empty list (if no entries exist before t) or one item
-     * (if one entry exists before t, but there are no entries earlier than dt
-     * before that), or two items.
-     * 
-     * If present, the first item in the list is the lowerEntry, and the second item
-     * is the earlierEntry, if present.
-     */
-    public List<Entry<Double, T>> consistentPair(double t, double dt) {
-        try {
-            // this pair should be consistent, so prohibit writes briefly.
-            m_lock.writeLock().lock();
-            Entry<Double, T> lowerEntry = m_pastSnapshots.lowerEntry(t);
-            if (lowerEntry == null) {
-                // if there's no lower entry, then return nothing.
-                return List.of();
-            }
-            Entry<Double, T> earlierEntry = m_pastSnapshots.floorEntry(lowerEntry.getKey() - dt);
-            if (earlierEntry == null) {
-                // if there's no earlier entry, return the lower entry alone.
-                return List.of(lowerEntry);
-            }
-
-            return List.of(lowerEntry, earlierEntry);
-        } finally {
-            m_lock.writeLock().unlock();
-        }
-    }
-
     public SortedMap<Double, T> tailMap(double t, boolean inclusive) {
         return m_pastSnapshots.tailMap(t, inclusive);
     }

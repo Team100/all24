@@ -9,11 +9,14 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
+import org.team100.lib.logging.LoggerFactory.Model100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
@@ -49,14 +52,14 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     // this was Sanjan experimenting in October 2024
     // private ProfileWPI profileTest = new ProfileWPI(40,120);
 
-    private State100 m_goal = new State100(0, 0);
-    private State100 m_setpointRad = new State100(0, 0);
+    private Model100 m_goal = new Model100(0, 0);
+    private Control100 m_setpointRad = new Control100(0, 0);
 
     // LOGGERS
-    private final State100Logger m_log_goal;
+    private final Model100Logger m_log_goal;
     private final DoubleLogger m_log_feedforward_torque;
-    private final State100Logger m_log_measurement;
-    private final State100Logger m_log_setpoint;
+    private final Model100Logger m_log_measurement;
+    private final Control100Logger m_log_setpoint;
     private final DoubleLogger m_log_u_FB;
     private final DoubleLogger m_log_u_FF;
     private final DoubleLogger m_log_u_TOTAL;
@@ -84,10 +87,10 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         m_controller.setIntegratorRange(0, 0.1);
         m_filter = LinearFilter.singlePoleIIR(0.02, TimedRobot100.LOOP_PERIOD_S);
 
-        m_log_goal = child.state100Logger(Level.TRACE, "goal (rad)");
+        m_log_goal = child.model100Logger(Level.TRACE, "goal (rad)");
         m_log_feedforward_torque = child.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
-        m_log_measurement = child.state100Logger(Level.TRACE, "measurement (rad)");
-        m_log_setpoint = child.state100Logger(Level.TRACE, "setpoint (rad)");
+        m_log_measurement = child.model100Logger(Level.TRACE, "measurement (rad)");
+        m_log_setpoint = child.control100Logger(Level.TRACE, "setpoint (rad)");
         m_log_u_FB = child.doubleLogger(Level.TRACE, "u_FB (rad_s)");
         m_log_u_FF = child.doubleLogger(Level.TRACE, "u_FF (rad_s)");
         m_log_u_TOTAL = child.doubleLogger(Level.TRACE, "u_TOTAL (rad_s)");
@@ -113,7 +116,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
             Util.warn("OnboardAngularPositionServo: Broken sensor!");
             return;
         }
-        m_setpointRad = new State100(position.getAsDouble(), velocity.getAsDouble());
+        m_setpointRad = new Control100(position.getAsDouble(), velocity.getAsDouble());
     }
 
     @Override
@@ -145,15 +148,15 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
         double mechanismVelocityRad_S = optVel.getAsDouble();
 
         // use the goal nearest to the measurement.
-        m_goal = new State100(MathUtil.angleModulus(goalRad - measurementPositionRad) + measurementPositionRad,
+        m_goal = new Model100(MathUtil.angleModulus(goalRad - measurementPositionRad) + measurementPositionRad,
                 goalVelocityRad_S);
 
         // use the setpoint nearest to the measurement.
-        m_setpointRad = new State100(
+        m_setpointRad = new Control100(
                 MathUtil.angleModulus(m_setpointRad.x() - measurementPositionRad) + measurementPositionRad,
                 m_setpointRad.v());
 
-        m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad, m_goal);
+        m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad.model(), m_goal);
         // this was Sanjan experimenting in October 2024
         // m_setpointRad = profileTest.calculate(0.02, m_setpointRad, m_goal);
 
@@ -181,7 +184,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
         m_log_goal.log(() -> m_goal);
         m_log_feedforward_torque.log(() -> feedForwardTorqueNm);
-        m_log_measurement.log(() -> new State100(measurementPositionRad, mechanismVelocityRad_S));
+        m_log_measurement.log(() -> new Model100(measurementPositionRad, mechanismVelocityRad_S));
         m_log_setpoint.log(() -> m_setpointRad);
         m_log_u_FB.log(() -> u_FB);
         m_log_u_FF.log(() -> u_FF);
@@ -257,7 +260,8 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     }
 
     /** for testing only */
-    public State100 getSetpoint() {
+    @Override
+    public Control100 getSetpoint() {
         return m_setpointRad;
     }
 

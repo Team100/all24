@@ -11,14 +11,16 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.logging.LoggerFactory.Model100Logger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.Gyro;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 
@@ -57,17 +59,17 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
     private final BooleanSupplier m_trigger;
 
     private final DoubleLogger m_log_apparent_motion;
-    private final State100Logger m_log_theta_setpoint;
+    private final Control100Logger m_log_theta_setpoint;
     private final DoubleLogger m_log_theta_measurement;
     private final DoubleLogger m_log_theta_error;
     private final DoubleLogger m_log_theta_FB;
-    private final State100Logger m_log_omega_reference;
+    private final Model100Logger m_log_omega_reference;
     private final DoubleLogger m_log_omega_measurement;
     private final DoubleLogger m_log_omega_error;
     private final DoubleLogger m_log_omega_FB;
     private final FieldLogger.Log m_field_log;
 
-    private State100 m_thetaSetpoint;
+    private Control100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
     private Pose2d m_prevPose;
@@ -94,18 +96,18 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 0.01);
         m_trigger = trigger;
         m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
-        m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
+        m_log_theta_setpoint = child.control100Logger(Level.TRACE, "theta/setpoint");
         m_log_theta_measurement = child.doubleLogger(Level.TRACE, "theta/measurement");
         m_log_theta_error = child.doubleLogger(Level.TRACE, "theta/error");
         m_log_theta_FB = child.doubleLogger(Level.TRACE, "theta/fb");
-        m_log_omega_reference = child.state100Logger(Level.TRACE, "omega/reference");
+        m_log_omega_reference = child.model100Logger(Level.TRACE, "omega/reference");
         m_log_omega_measurement = child.doubleLogger(Level.TRACE, "omega/measurement");
         m_log_omega_error = child.doubleLogger(Level.TRACE, "omega/error");
         m_log_omega_FB = child.doubleLogger(Level.TRACE, "omega/fb");
     }
 
     public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
+        m_thetaSetpoint = new Control100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
         m_ball = null;
         m_prevPose = currentPose;
         m_thetaController.reset();
@@ -120,8 +122,8 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
      * @param input control units [-1,1]
      * @return feasible robot-relative velocity in m/s and rad/s
      */
-
-    public ChassisSpeeds apply(SwerveState state, DriverControl.Velocity input) {
+    @Override
+    public ChassisSpeeds apply(SwerveModel state, DriverControl.Velocity input) {
         // clip the input to the unit circle
         Optional<Translation2d> target = m_target.get();
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
@@ -150,7 +152,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
                 Math100.getMinDistance(measurement, bearing.getRadians()));
 
         // make sure the setpoint uses the modulus close to the measurement.
-        m_thetaSetpoint = new State100(
+        m_thetaSetpoint = new Control100(
                 Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
 
@@ -158,9 +160,9 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         double targetMotion = TargetUtil.targetMotion(state, target.get());
         m_log_apparent_motion.log(() -> targetMotion);
 
-        State100 goal = new State100(bearing.getRadians(), targetMotion);
+        Model100 goal = new Model100(bearing.getRadians(), targetMotion);
 
-        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint.model(), goal);
         double thetaFF = m_thetaSetpoint.v();
 
         double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
@@ -169,7 +171,7 @@ public class ManualWithNoteRotation implements ChassisSpeedDriver {
         m_log_theta_error.log(m_thetaController::getPositionError);
         m_log_theta_FB.log(() -> thetaFB);
         double omegaFB = m_omegaController.calculate(yawRate, m_thetaSetpoint.v());
-        m_log_omega_reference.log(() -> m_thetaSetpoint);
+        m_log_omega_reference.log(() -> m_thetaSetpoint.model());
         m_log_omega_measurement.log(() -> yawRate);
         m_log_omega_error.log(m_omegaController::getPositionError);
         m_log_omega_FB.log(() -> omegaFB);

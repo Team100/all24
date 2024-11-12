@@ -10,9 +10,9 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
+import org.team100.lib.logging.LoggerFactory.SwerveModelLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.Trajectory100;
@@ -37,7 +37,7 @@ public class PermissiveTrajectoryListCommand extends Command implements Glassy {
     private final TrajectoryVisualization m_viz;
 
     // LOGGERS
-    private final SwerveStateLogger m_log_reference;
+    private final SwerveModelLogger m_log_reference;
 
     private Iterator<Function<Pose2d, Trajectory100>> m_trajectoryIter;
     private Trajectory100 m_currentTrajectory;
@@ -57,7 +57,7 @@ public class PermissiveTrajectoryListCommand extends Command implements Glassy {
         m_trajectories = trajectories;
         m_viz = viz;
         addRequirements(m_swerve);
-        m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");
+        m_log_reference = child.swerveModelLogger(Level.TRACE, "reference");
     }
 
     @Override
@@ -74,7 +74,7 @@ public class PermissiveTrajectoryListCommand extends Command implements Glassy {
         if (m_currentTrajectory == null || m_iter.isDone()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
-                m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getState().pose());
+                m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getPose());
                 m_iter = new TrajectoryTimeIterator(
                         new TrajectoryTimeSampler(m_currentTrajectory));
                 m_viz.setViz(m_currentTrajectory);
@@ -97,7 +97,7 @@ public class PermissiveTrajectoryListCommand extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
             TimedPose desiredState = samplePoint.state();
 
-            SwerveState reference = SwerveState.fromTimedPose(desiredState);
+            SwerveModel reference = SwerveModel.fromTimedPose(desiredState);
             m_log_reference.log(() -> reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget);
@@ -112,7 +112,7 @@ public class PermissiveTrajectoryListCommand extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
             TimedPose desiredState = samplePoint.state();
 
-            SwerveState reference = SwerveState.fromTimedPose(desiredState);
+            SwerveModel reference = SwerveModel.fromTimedPose(desiredState);
             m_log_reference.log(() -> reference);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget);

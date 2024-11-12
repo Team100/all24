@@ -1,8 +1,10 @@
 package org.team100.lib.profile;
 
+import org.team100.lib.motion.drivetrain.SwerveControl;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.profile.Profile100.ResultWithETA;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 
 /**
  * Coordinates three axes so that their profiles complete at about the same
@@ -38,7 +40,7 @@ public class HolonomicProfile {
     }
 
     /** Reset the scale factors. */
-    public void solve(SwerveState i, SwerveState g) {
+    public void solve(SwerveModel i, SwerveModel g) {
         // first find the max ETA
         ResultWithETA rx = px.calculateWithETA(m_dt, i.x(), g.x());
         ResultWithETA ry = py.calculateWithETA(m_dt, i.y(), g.y());
@@ -57,10 +59,10 @@ public class HolonomicProfile {
         pptheta = ptheta.scale(stheta);
     }
 
-    public SwerveState calculate(SwerveState i, SwerveState g) {
-        State100 stateX = ppx.calculate(m_dt, i.x(), g.x());
-        State100 stateY = ppy.calculate(m_dt, i.y(), g.y());
-        State100 stateTheta = pptheta.calculate(m_dt, i.theta(), g.theta());
-        return new SwerveState(stateX, stateY, stateTheta);
+    public SwerveControl calculate(SwerveModel i, SwerveModel g) {
+        Control100 stateX = ppx.calculate(m_dt, i.x(), g.x());
+        Control100 stateY = ppy.calculate(m_dt, i.y(), g.y());
+        Control100 stateTheta = pptheta.calculate(m_dt, i.theta(), g.theta());
+        return new SwerveControl(stateX, stateY, stateTheta);
     }
 }

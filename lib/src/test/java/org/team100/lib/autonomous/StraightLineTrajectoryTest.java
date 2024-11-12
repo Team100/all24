@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -29,7 +29,7 @@ class StraightLineTrajectoryTest {
     @Test
     void testRestToRest() {
         StraightLineTrajectory t = new StraightLineTrajectory(false, maker);
-        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 0, 0));
+        SwerveModel start = new SwerveModel(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         assertEquals(0.894, traj.getTotalTimeSeconds(), kDelta);
@@ -48,7 +48,7 @@ class StraightLineTrajectoryTest {
     @Test
     void testMovingToRest() {
         StraightLineTrajectory t = new StraightLineTrajectory(true, maker);
-        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(1, 0, 0));
+        SwerveModel start = new SwerveModel(GeometryUtil.kPoseZero, new FieldRelativeVelocity(1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         assertEquals(0.738, traj.getTotalTimeSeconds(), kDelta);
@@ -57,7 +57,7 @@ class StraightLineTrajectoryTest {
     @Test
     void testBackingUp() {
         StraightLineTrajectory t = new StraightLineTrajectory(true, maker);
-        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(-1, 0, 0));
+        SwerveModel start = new SwerveModel(GeometryUtil.kPoseZero, new FieldRelativeVelocity(-1, 0, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         // u-turn trajectories are not allowed.
@@ -67,7 +67,7 @@ class StraightLineTrajectoryTest {
     @Test
     void test2d() {
         StraightLineTrajectory t = new StraightLineTrajectory(true, maker);
-        SwerveState start = new SwerveState(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 1, 0));
+        SwerveModel start = new SwerveModel(GeometryUtil.kPoseZero, new FieldRelativeVelocity(0, 1, 0));
         Pose2d end = new Pose2d(1, 0, GeometryUtil.kRotationZero);
         Trajectory100 traj = t.apply(start, end);
         assertEquals(1.037, traj.getTotalTimeSeconds(), kDelta);

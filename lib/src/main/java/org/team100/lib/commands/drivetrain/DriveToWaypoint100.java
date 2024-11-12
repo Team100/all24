@@ -65,7 +65,7 @@ public class DriveToWaypoint100 extends Command implements Glassy {
 
     @Override
     public void initialize() {
-        final Pose2d start = m_swerve.getState().pose();
+        final Pose2d start = m_swerve.getPose();
         Pose2d end = m_goal;
         m_timer.reset();
         m_timer.start();
@@ -93,8 +93,8 @@ public class DriveToWaypoint100 extends Command implements Glassy {
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getState().pose();
-        ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
+        Pose2d currentPose = m_swerve.getPose();
+        ChassisSpeeds currentSpeed = m_swerve.getChassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         if (output == null)
             return;

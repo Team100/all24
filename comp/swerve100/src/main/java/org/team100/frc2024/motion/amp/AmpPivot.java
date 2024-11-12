@@ -13,6 +13,7 @@ import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.encoder.SimulatedBareEncoder;
 import org.team100.lib.encoder.SimulatedRotaryPositionSensor;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.AngularPositionServo;
@@ -24,8 +25,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.state.State100;
-import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.state.Control100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -120,7 +120,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         m_ampAngleServo.setPosition(value);
     }
 
-    public void setAmpState(State100 state) {
+    public void setAmpState(Control100 state) {
         m_ampAngleServo.setState(state);
     }
 

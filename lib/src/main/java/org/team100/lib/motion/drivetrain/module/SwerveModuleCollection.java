@@ -10,7 +10,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.motion.drivetrain.module.WCPSwerveModule100.DriveRatio;
 import org.team100.lib.motor.MotorPhase;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 import org.team100.lib.util.Util;
 
 /** Represents the modules in the drivetrain. */
@@ -198,8 +198,8 @@ public class SwerveModuleCollection {
                 m_rearRight.getDesiredState());
     }
 
-    public State100[] getSetpoint() {
-        return new State100[] {
+    public Control100[] getSetpoint() {
+        return new Control100[] {
                 m_frontLeft.getSetpoint(),
                 m_frontRight.getSetpoint(),
                 m_rearLeft.getSetpoint(),

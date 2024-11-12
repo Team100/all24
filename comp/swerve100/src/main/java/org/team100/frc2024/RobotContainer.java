@@ -191,7 +191,7 @@ public class RobotContainer implements Glassy {
                 visionDataProvider);
 
         final NotePosition24ArrayListener noteListener = new NotePosition24ArrayListener(
-                () -> m_drive.getState().pose());
+                () -> m_drive.getPose());
 
         //////////////////////////////
         //
@@ -555,7 +555,7 @@ public class RobotContainer implements Glassy {
 
     public void onInit() {
         // m_drive.resetPose()
-        m_drive.resetPose(new Pose2d(m_drive.getState().pose().getTranslation(), new Rotation2d(Math.PI)));
+        m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), new Rotation2d(Math.PI)));
 
     }
 

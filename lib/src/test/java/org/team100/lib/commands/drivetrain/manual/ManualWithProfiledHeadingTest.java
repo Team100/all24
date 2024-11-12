@@ -14,6 +14,7 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -21,7 +22,8 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.MockGyro;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -56,7 +58,7 @@ class ManualWithProfiledHeadingTest {
 
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
 
-        FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(new SwerveState(), twist1_1);
+        FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(new SwerveModel(), twist1_1);
         verify(0, 0, 0, twistM_S);
 
         // with a non-null desired rotation we're in snap mode
@@ -64,7 +66,7 @@ class ManualWithProfiledHeadingTest {
         desiredRotation = null;
 
         twist1_1 = new DriverControl.Velocity(0, 0, 1);
-        twistM_S = m_manualWithHeading.apply(new SwerveState(), twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveModel(), twist1_1);
         // with a nonzero desired twist, we're out of snap mode
         assertNull(m_manualWithHeading.m_goal);
 
@@ -98,7 +100,7 @@ class ManualWithProfiledHeadingTest {
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
 
         FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
-                new SwerveState(currentPose, new FieldRelativeVelocity(0, 0, 0)),
+                new SwerveModel(currentPose, new FieldRelativeVelocity(0, 0, 0)),
                 twist1_1);
 
         // not in snap mode
@@ -107,7 +109,7 @@ class ManualWithProfiledHeadingTest {
 
         twist1_1 = new DriverControl.Velocity(1, 0, 0);
 
-        twistM_S = m_manualWithHeading.apply(new SwerveState(currentPose, twistM_S), twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveModel(currentPose, twistM_S), twist1_1);
         assertNull(m_manualWithHeading.m_goal);
         verify(1, 0, 0, twistM_S);
     }
@@ -143,7 +145,7 @@ class ManualWithProfiledHeadingTest {
 
         // initial state is motionless
         FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
-                new SwerveState(
+                new SwerveModel(
                         GeometryUtil.kPoseZero,
                         new FieldRelativeVelocity(0, 0, 0)),
                 twist1_1);
@@ -163,9 +165,9 @@ class ManualWithProfiledHeadingTest {
         desiredRotation = null;
 
         // say we've rotated a little.
-        m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(
-                new SwerveState(
+                new SwerveModel(
                         new Pose2d(0, 0, new Rotation2d(0.5)),
                         new FieldRelativeVelocity(0, 0, 0.1)),
                 twist1_1);
@@ -174,9 +176,9 @@ class ManualWithProfiledHeadingTest {
         verify(0, 0, 2.828, twistM_S);
 
         // mostly rotated
-        m_manualWithHeading.m_thetaSetpoint = new State100(1.55, 0.2);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(1.55, 0.2);
         twistM_S = m_manualWithHeading.apply(
-                new SwerveState(
+                new SwerveModel(
                         new Pose2d(0, 0, new Rotation2d(1.55)),
                         new FieldRelativeVelocity(0, 0, 0.2)),
                 twist1_1);
@@ -186,9 +188,9 @@ class ManualWithProfiledHeadingTest {
         verify(0, 0, 0.183, twistM_S);
 
         // done
-        m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(Math.PI / 2, 0);
         twistM_S = m_manualWithHeading.apply(
-                new SwerveState(
+                new SwerveModel(
                         new Pose2d(0, 0, new Rotation2d(Math.PI / 2)),
                         new FieldRelativeVelocity(0, 0, 0)),
                 twist1_1);
@@ -228,7 +230,7 @@ class ManualWithProfiledHeadingTest {
         // no stick input
         final DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
         FieldRelativeVelocity v = m_manualWithHeading.apply(
-                new SwerveState(
+                new SwerveModel(
                         GeometryUtil.kPoseZero,
                         new FieldRelativeVelocity(0, 0, 0)),
                 twist1_1);
@@ -240,9 +242,9 @@ class ManualWithProfiledHeadingTest {
         verify(0, 0, 0.017, v);
 
         // say we've rotated a little.
-        m_manualWithHeading.m_thetaSetpoint = new State100(0.5, 1);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(0.5, 1);
         v = m_manualWithHeading.apply(
-                new SwerveState(
+                new SwerveModel(
                         new Pose2d(0, 0, new Rotation2d(0.5)),
                         new FieldRelativeVelocity(0, 0, 1)),
                 twist1_1);
@@ -251,9 +253,9 @@ class ManualWithProfiledHeadingTest {
         verify(0, 0, 1.017, v);
 
         // mostly rotated, so the FB controller is calm
-        m_manualWithHeading.m_thetaSetpoint = new State100(1.555, 0.2);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(1.555, 0.2);
         v = m_manualWithHeading.apply(
-                new SwerveState(
+                new SwerveModel(
                         new Pose2d(0, 0, new Rotation2d(1.555)),
                         new FieldRelativeVelocity(0, 0, 0.2)),
                 twist1_1);
@@ -264,9 +266,9 @@ class ManualWithProfiledHeadingTest {
         verify(0, 0, 0.183, v);
 
         // at the setpoint
-        m_manualWithHeading.m_thetaSetpoint = new State100(Math.PI / 2, 0);
+        m_manualWithHeading.m_thetaSetpoint = new Control100(Math.PI / 2, 0);
         v = m_manualWithHeading.apply(
-                new SwerveState(
+                new SwerveModel(
                         new Pose2d(0, 0, new Rotation2d(Math.PI / 2)),
                         new FieldRelativeVelocity(0, 0, 0)),
                 twist1_1);
@@ -300,7 +302,7 @@ class ManualWithProfiledHeadingTest {
         // driver rotates a bit
         DriverControl.Velocity control = new DriverControl.Velocity(0, 0, 1);
 
-        SwerveState currentState = new SwerveState(
+        SwerveModel currentState = new SwerveModel(
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 0));
         // no POV
@@ -313,7 +315,7 @@ class ManualWithProfiledHeadingTest {
         verify(0, 0, 2.828, v);
 
         // already going full speed:
-        currentState = new SwerveState(
+        currentState = new SwerveModel(
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro indicates the correct speed
@@ -325,7 +327,7 @@ class ManualWithProfiledHeadingTest {
 
         // let go of the stick
         control = new DriverControl.Velocity(0, 0, 0);
-        currentState = new SwerveState(
+        currentState = new SwerveModel(
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro rate is still full speed.
@@ -379,7 +381,7 @@ class ManualWithProfiledHeadingTest {
         // driver rotates a bit
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
 
-        SwerveState currentState = new SwerveState(
+        SwerveModel currentState = new SwerveModel(
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 0));
         // no POV
@@ -392,7 +394,7 @@ class ManualWithProfiledHeadingTest {
         verify(0, 0, 2.828, v);
 
         // already going full speed:
-        currentState = new SwerveState(
+        currentState = new SwerveModel(
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro indicates the correct speed
@@ -404,7 +406,7 @@ class ManualWithProfiledHeadingTest {
 
         // let go of the stick
         twist1_1 = new DriverControl.Velocity(0, 0, 0);
-        currentState = new SwerveState(
+        currentState = new SwerveModel(
                 GeometryUtil.kPoseZero,
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro rate is still full speed.
@@ -435,10 +437,10 @@ class ManualWithProfiledHeadingTest {
                 4.2,
                 0.01);
         // at max heading rate
-        State100 initialRaw = new State100(0, 2.828, 0);
+        Model100 initialRaw = new Model100(0, 2.828);
         // goal is the same but stopped, which is an overshoot profile
-        State100 goalRaw = new State100(0, 0, 0);
-        State100 u = initialRaw;
+        Model100 goalRaw = new Model100(0, 0);
+        Control100 u = initialRaw.control();
 
         // this produces nonsensical results. using a faster profile works fine
         // but the very slow profile is wrong somehow
@@ -446,7 +448,7 @@ class ManualWithProfiledHeadingTest {
         // which never happens in reality but it should do something less dumb.
 
         for (int i = 0; i < 100; ++i) {
-            u = m_profile.calculate(0.02, u, goalRaw);
+            u = m_profile.calculate(0.02, u.model(), goalRaw);
             // System.out.printf("%6.3f, %6.3f, %6.3f\n", u.x(), u.v(), u.a());
         }
     }

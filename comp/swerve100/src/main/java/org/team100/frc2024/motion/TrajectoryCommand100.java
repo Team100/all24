@@ -77,15 +77,15 @@ public class TrajectoryCommand100 extends Command implements Glassy  {
     @Override
     public void execute() {
         final double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_robotDrive.getState().pose();
-        ChassisSpeeds currentRobotRelativeSpeed = m_robotDrive.getState().chassisSpeeds();
+        Pose2d currentPose = m_robotDrive.getPose();
+        ChassisSpeeds currentRobotRelativeSpeed = m_robotDrive.getChassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentRobotRelativeSpeed);
 
         m_robotDrive.setChassisSpeedsNormally(output);
 
         m_log.m_log_chassis_speeds.log(() -> output);
         double thetaErrorRad = m_goal.getRotation().getRadians()
-                - m_robotDrive.getState().pose().getRotation().getRadians();
+                - m_robotDrive.getPose().getRotation().getRadians();
         m_log.m_log_THETA_ERROR.log(() -> thetaErrorRad);
         m_log.m_log_FINSIHED.log(() -> false);
     }

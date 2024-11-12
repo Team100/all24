@@ -11,6 +11,7 @@ import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.EnumLogger;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
+import org.team100.lib.logging.LoggerFactory.SwerveModelLogger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
@@ -36,10 +37,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
     private final VisionData m_cameras;
 
     // CACHES
-    private final Memo.CotemporalCache<SwerveState> m_stateSupplier;
+    private final Memo.CotemporalCache<SwerveModel> m_stateSupplier;
 
     // LOGGERS
-    private final SwerveStateLogger m_log_state;
+    private final SwerveModelLogger m_log_state;
     private final DoubleLogger m_log_turning;
     private final DoubleArrayLogger m_log_pose_array;
     private final DoubleArrayLogger m_log_field_robot;
@@ -61,7 +62,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_cameras = cameras;
         m_stateSupplier = Memo.of(this::update);
         stop();
-        m_log_state = child.swerveStateLogger(Level.COMP, "state");
+        m_log_state = child.swerveModelLogger(Level.COMP, "state");
         m_log_turning = child.doubleLogger(Level.TRACE, "Tur Deg");
         m_log_pose_array = child.doubleArrayLogger(Level.COMP, "pose array");
         m_log_field_robot = fieldLogger.doubleArrayLogger(Level.COMP, "robot");
@@ -95,7 +96,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
                 v.x(),
                 v.y(),
                 v.theta(),
-                getState().pose().getRotation());
+                getPose().getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
@@ -105,7 +106,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
                 vIn.x(),
                 vIn.y(),
                 vIn.theta(),
-                getState().pose().getRotation());
+                getPose().getRotation());
         m_swerveLocal.setChassisSpeedsNormally(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
@@ -122,7 +123,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
                 twist.x(),
                 twist.y(),
                 twist.theta(),
-                getState().pose().getRotation());
+                getPose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
@@ -178,7 +179,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.reset();
         m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
-                m_gyro.getYawRateNWU(),
                 m_swerveLocal.positions(),
                 new Pose2d(translation, m_gyro.getYawNWU()),
                 Timer.getFPGATimestamp());
@@ -190,7 +190,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.reset();
         m_poseEstimator.reset(
                 m_gyro.getYawNWU(),
-                m_gyro.getYawRateNWU(),
                 m_swerveLocal.positions(),
                 robotPose,
                 Timer.getFPGATimestamp());
@@ -212,7 +211,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
      * SwerveState representing the drivetrain's field-relative pose, velocity, and
      * acceleration.
      */
-    public SwerveState getState() {
+    public SwerveModel getState() {
         return m_stateSupplier.get();
     }
 
@@ -230,21 +229,21 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         // m_poseEstimator.periodic();
         m_stateSupplier.reset();
         m_log_state.log(this::getState);
-        m_log_turning.log(() -> getState().pose().getRotation().getDegrees());
+        m_log_turning.log(() -> getPose().getRotation().getDegrees());
         m_log_pose_array.log(
                 () -> new double[] {
-                        getState().pose().getX(),
-                        getState().pose().getY(),
-                        getState().pose().getRotation().getRadians()
+                        getPose().getX(),
+                        getPose().getY(),
+                        getPose().getRotation().getRadians()
                 });
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
         m_log_field_robot.log(() -> new double[] {
-                getState().pose().getX(),
-                getState().pose().getY(),
-                getState().pose().getRotation().getDegrees()
+                getPose().getX(),
+                getPose().getY(),
+                getPose().getRotation().getDegrees()
         });
         m_log_yaw_rate.log(m_gyro::getYawRateNWU);
         m_swerveLocal.periodic();
@@ -257,7 +256,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
     /////////////////////////////////////////////////////////////////
 
     /** used by the supplier */
-    private SwerveState update() {
+    private SwerveModel update() {
         double now = Timer.getFPGATimestamp();
         // System.out.println("SwerveDriveSubsystem.update() " + now);
         m_poseEstimator.put(
@@ -276,11 +275,15 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
 
     @Override
     public Pose2d getPose() {
-        return getState().pose();
+        return m_stateSupplier.get().pose();
     }
 
     @Override
     public FieldRelativeVelocity getVelocity() {
-        return getState().velocity();
+        return m_stateSupplier.get().velocity();
+    }
+
+    public ChassisSpeeds getChassisSpeeds() {
+        return m_stateSupplier.get().chassisSpeeds();
     }
 }
