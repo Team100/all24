@@ -11,6 +11,7 @@ import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.EnumLogger;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
+import org.team100.lib.logging.LoggerFactory.SwerveModelLogger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
@@ -36,10 +37,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
     private final VisionData m_cameras;
 
     // CACHES
-    private final Memo.CotemporalCache<SwerveState> m_stateSupplier;
+    private final Memo.CotemporalCache<SwerveModel> m_stateSupplier;
 
     // LOGGERS
-    private final SwerveStateLogger m_log_state;
+    private final SwerveModelLogger m_log_state;
     private final DoubleLogger m_log_turning;
     private final DoubleArrayLogger m_log_pose_array;
     private final DoubleArrayLogger m_log_field_robot;
@@ -61,7 +62,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_cameras = cameras;
         m_stateSupplier = Memo.of(this::update);
         stop();
-        m_log_state = child.swerveStateLogger(Level.COMP, "state");
+        m_log_state = child.swerveModelLogger(Level.COMP, "state");
         m_log_turning = child.doubleLogger(Level.TRACE, "Tur Deg");
         m_log_pose_array = child.doubleArrayLogger(Level.COMP, "pose array");
         m_log_field_robot = fieldLogger.doubleArrayLogger(Level.COMP, "robot");
@@ -212,7 +213,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
      * SwerveState representing the drivetrain's field-relative pose, velocity, and
      * acceleration.
      */
-    public SwerveState getState() {
+    public SwerveModel getState() {
         return m_stateSupplier.get();
     }
 
@@ -257,7 +258,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
     /////////////////////////////////////////////////////////////////
 
     /** used by the supplier */
-    private SwerveState update() {
+    private SwerveModel update() {
         double now = Timer.getFPGATimestamp();
         // System.out.println("SwerveDriveSubsystem.update() " + now);
         m_poseEstimator.put(

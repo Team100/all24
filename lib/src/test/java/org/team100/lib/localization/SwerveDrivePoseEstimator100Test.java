@@ -15,6 +15,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
@@ -48,7 +49,7 @@ class SwerveDrivePoseEstimator100Test {
     private final SwerveModulePositions position01 = new SwerveModulePositions(p01, p01, p01, p01);
     private final Pose2d visionRobotPoseMeters = new Pose2d(1, 0, GeometryUtil.kRotationZero);
 
-    private static void verify(double x, SwerveState state) {
+    private static void verify(double x, SwerveModel state) {
         Pose2d estimate = state.pose();
         assertEquals(x, estimate.getX(), kDelta);
         assertEquals(0, estimate.getY(), kDelta);

@@ -1,6 +1,8 @@
 package org.team100.lib.profile;
 
 import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.Math100;
 import org.team100.lib.util.Util;
 
@@ -98,8 +100,8 @@ public class TrapezoidProfile100 implements Profile100 {
             double maxA,
             double tol,
             double dt,
-            State100 initial,
-            State100 goal,
+            Model100 initial,
+            Model100 goal,
             double eta,
             double sTolerance) {
         final double minS = 0.01;
@@ -118,8 +120,8 @@ public class TrapezoidProfile100 implements Profile100 {
             double maxA,
             double tol,
             double dt,
-            State100 initial,
-            State100 goal,
+            Model100 initial,
+            Model100 goal,
             double eta, double s) {
         TrapezoidProfile100 p = new TrapezoidProfile100(
                 maxV,
@@ -131,7 +133,7 @@ public class TrapezoidProfile100 implements Profile100 {
     }
 
     @Override
-    public State100 calculate(double dt, State100 initial, State100 goal) {
+    public Control100 calculate(double dt, Model100 initial, Model100 goal) {
         return calculateWithETA(dt, initial, goal).state();
     }
 
@@ -155,12 +157,12 @@ public class TrapezoidProfile100 implements Profile100 {
      * Returns the goal if the intial is within tolerance of it.
      */
     @Override
-    public ResultWithETA calculateWithETA(double dt, final State100 initialRaw, final State100 goalRaw) {
+    public ResultWithETA calculateWithETA(double dt, final Model100 initialRaw, final Model100 goalRaw) {
         // Too-high initial speed is handled with braking
         if (initialRaw.v() > m_maxVelocity) {
             if (DEBUG)
                 Util.printf("positive entry speed too fast, braking %s\n", initialRaw.toString());
-            State100 result = full(dt, initialRaw, -1);
+            Control100 result = full(dt, initialRaw, -1);
             double extraSpeed = initialRaw.v() - m_maxVelocity;
             double extraTime = extraSpeed / m_maxAcceleration;
             double brakingDistance = 0.5 * extraSpeed * extraTime + m_maxVelocity * extraTime;
@@ -171,7 +173,7 @@ public class TrapezoidProfile100 implements Profile100 {
         if (initialRaw.v() < -m_maxVelocity) {
             if (DEBUG)
                 Util.printf("negative entry speed too fast, braking %s\n", initialRaw.toString());
-            State100 result = full(dt, initialRaw, 1);
+            Control100 result = full(dt, initialRaw, 1);
             // this is a positive number
             double extraSpeed = -1.0 * initialRaw.v() - m_maxVelocity;
             double extraTime = extraSpeed / m_maxAcceleration;
@@ -290,7 +292,7 @@ public class TrapezoidProfile100 implements Profile100 {
             return new ResultWithETA(r.state(), timeToCruise + r.etaS());
         }
         // We will not encounter any boundary during dt
-        State100 result = full(dt, initial, 1);
+        Control100 result = full(dt, initial, 1);
 
         // but we still need to know the full duration.
         //
@@ -300,17 +302,16 @@ public class TrapezoidProfile100 implements Profile100 {
             // so if we proceed for t1, what velocity will we be at?
             if (DEBUG)
                 Util.printf("no cruise\n");
-            State100 switchPoint = full(timeToSwitch, initial, 1);
+            Control100 switchPoint = full(timeToSwitch, initial, 1);
             double durationG = durationAtMaxA(switchPoint.v(), goal.v());
             return new ResultWithETA(result, timeToSwitch + durationG);
         }
         // we hit cruise first
         if (DEBUG)
             Util.printf("go cruise\n");
-        State100 cruisePoint = full(timeToCruise, initial, 1);
+        Control100 cruisePoint = full(timeToCruise, initial, 1);
         ResultWithETA remainingCruise = keepCruising(dt, cruisePoint, goal);
         return new ResultWithETA(result, timeToCruise + remainingCruise.etaS());
-
     }
 
     /**
@@ -343,7 +344,7 @@ public class TrapezoidProfile100 implements Profile100 {
         }
         // We will not encounter any boundary during dt, so the resulting state is just
         // "full throttle for dt"
-        State100 result = full(dt, initial, -1);
+        Control100 result = full(dt, initial, -1);
 
         // but we still need to know the full duration.
         //
@@ -351,12 +352,12 @@ public class TrapezoidProfile100 implements Profile100 {
         if (timeToSwitch < timeToCruise) {
             // we hit the switching point first
             // so if we proceed for t1, what velocity will we be at?
-            State100 switchPoint = full(timeToSwitch, initial, -1);
+            Control100 switchPoint = full(timeToSwitch, initial, -1);
             double durationG = durationAtMaxA(switchPoint.v(), goal.v());
             return new ResultWithETA(result, timeToSwitch + durationG);
         }
         // we hit cruise first
-        State100 cruisePoint = full(timeToCruise, initial, -1);
+        Control100 cruisePoint = full(timeToCruise, initial, -1);
         ResultWithETA remainingCruise = keepCruisingMinus(dt, cruisePoint, goal);
         return new ResultWithETA(result, timeToCruise + remainingCruise.etaS());
     }
@@ -380,7 +381,7 @@ public class TrapezoidProfile100 implements Profile100 {
         double durationToGMinus = dc / m_maxVelocity;
         if (MathUtil.isNear(0, durationToGMinus, 1e-12)) {
             // we are at the intersection of vmax and G-, so head down G-
-            State100 result = full(truncateDt(dt, initial, goal), initial, -1);
+            Control100 result = full(truncateDt(dt, initial, goal), initial, -1);
             // on the goal path so the remaining duration is maxA.
             double duration = durationAtMaxA(initial.v(), goal.v());
             return new ResultWithETA(result, duration);
@@ -416,7 +417,7 @@ public class TrapezoidProfile100 implements Profile100 {
         double durationToGPlus = dc / -m_maxVelocity;
         if (MathUtil.isNear(0, durationToGPlus, 1e-12)) {
             // We're at the intersection of -vmax and G+, so head up G+
-            State100 result = full(truncateDt(dt, initial, goal), initial, 1);
+            Control100 result = full(truncateDt(dt, initial, goal), initial, 1);
             // on the goal path so the remaining duration is maxA.
             double duration = durationAtMaxA(initial.v(), goal.v());
             return new ResultWithETA(result, duration);
@@ -480,14 +481,14 @@ public class TrapezoidProfile100 implements Profile100 {
      * direction to go and when you're sure you can proceed for the whole dt time
      * period.
      */
-    private State100 full(double dt, State100 in_initial, double direction) {
+    private Control100 full(double dt, State100 in_initial, double direction) {
         if (DEBUG)
             Util.printf("full x_i %s\n", in_initial);
         double x = in_initial.x() + in_initial.v() * dt
                 + 0.5 * direction * m_maxAcceleration * Math.pow(dt, 2);
         double v = in_initial.v() + direction * m_maxAcceleration * dt;
         double a = direction * m_maxAcceleration;
-        return new State100(x, v, a);
+        return new Control100(x, v, a);
     }
 
     /**
@@ -495,7 +496,7 @@ public class TrapezoidProfile100 implements Profile100 {
      * 
      * Note this ignores the velocity constraint.
      */
-    double t1IplusGminus(State100 initial, State100 goal) {
+    double t1IplusGminus(Model100 initial, Model100 goal) {
         double q_dot_switch = qDotSwitchIplusGminus(initial, goal);
         // this fixes rounding errors
         if (MathUtil.isNear(initial.v(), q_dot_switch, 1e-6))
@@ -512,7 +513,7 @@ public class TrapezoidProfile100 implements Profile100 {
      * 
      * Note this ignores the velocity constraint.
      */
-    double t1IminusGplus(State100 initial, State100 goal) {
+    double t1IminusGplus(Model100 initial, Model100 goal) {
         double q_dot_switch = qDotSwitchIminusGplus(initial, goal);
         // this fixes rounding errors
         if (MathUtil.isNear(initial.v(), q_dot_switch, 1e-6))
@@ -531,7 +532,7 @@ public class TrapezoidProfile100 implements Profile100 {
      * "switch" path using I+G- means the goal has to be to the right of the "s"
      * shaped curve including I.
      */
-    double qDotSwitchIplusGminus(State100 initial, State100 goal) {
+    double qDotSwitchIplusGminus(Model100 initial, Model100 goal) {
         if (initial.equals(goal))
             return initial.v();
 
@@ -563,7 +564,7 @@ public class TrapezoidProfile100 implements Profile100 {
      * "switch" path using I-G+ means the goal has to be to the left of the I- curve
      * for goal.v less than i.v, and to the left of the I+ curve for goal.v > i.v
      */
-    double qDotSwitchIminusGplus(State100 initial, State100 goal) {
+    double qDotSwitchIminusGplus(Model100 initial, Model100 goal) {
         if (initial.equals(goal))
             return goal.v();
 
@@ -596,29 +597,29 @@ public class TrapezoidProfile100 implements Profile100 {
      * path through the initial state and the negative-acceleration path through the
      * goal state, i.e. the I+G- path.
      */
-    double qSwitchIplusGminus(State100 initial, State100 goal) {
+    double qSwitchIplusGminus(Model100 initial, Model100 goal) {
         return (c_plus(initial) + c_minus(goal)) / 2;
     }
 
     /**
      * Midpoint position for the I-G+ path.
      */
-    double qSwitchIminusGplus(State100 initial, State100 goal) {
+    double qSwitchIminusGplus(Model100 initial, Model100 goal) {
         return (c_minus(initial) + c_plus(goal)) / 2;
     }
 
     /** Intercept of negative-acceleration path intersecting s */
-    double c_minus(State100 s) {
+    double c_minus(Model100 s) {
         return s.x() - Math.pow(s.v(), 2) / (-2.0 * m_maxAcceleration);
     }
 
     /** Intercept of positive-acceleration path intersecting s */
-    double c_plus(State100 s) {
+    double c_plus(Model100 s) {
         return s.x() - Math.pow(s.v(), 2) / (2.0 * m_maxAcceleration);
     }
 
     // for testing
-    double t1(State100 initial, State100 goal) {
+    double t1(Model100 initial, Model100 goal) {
         double t1IplusGminus = t1IplusGminus(initial, goal);
         double t1IminusGplus = t1IminusGplus(initial, goal);
         if (Double.isNaN(t1IplusGminus)) {

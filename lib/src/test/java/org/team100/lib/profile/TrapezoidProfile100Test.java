@@ -8,6 +8,8 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.profile.Profile100.ResultWithETA;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
@@ -30,9 +32,9 @@ class TrapezoidProfile100Test {
     void testTooHighEntryVelocity() {
         TrapezoidProfile100 p = new TrapezoidProfile100(1, 1, 0.01);
         // initial state velocity is higher than profile cruise
-        State100 initial = new State100(0, 2);
+        Model100 initial = new Model100(0, 2);
         // goal is achievable with constant max decel
-        State100 goal = new State100(2, 0);
+        Model100 goal = new Model100(2, 0);
         ResultWithETA r = p.calculateWithETA(0.02, initial, goal);
         assertEquals(2, r.etaS(), kDelta);
         // 2m/s * 0.02s = ~0.04
@@ -54,9 +56,9 @@ class TrapezoidProfile100Test {
     void testTooHighEntryVelocityInReverse() {
         TrapezoidProfile100 p = new TrapezoidProfile100(1, 1, 0.01);
         // initial state velocity is higher than profile cruise
-        State100 initial = new State100(0, -2);
+        Model100 initial = new Model100(0, -2);
         // goal is achievable with constant max decel
-        State100 goal = new State100(-2, 0);
+        Model100 goal = new Model100(-2, 0);
         ResultWithETA r = p.calculateWithETA(0.02, initial, goal);
         assertEquals(2, r.etaS(), kDelta);
         // 2m/s * 0.02s = ~0.04
@@ -78,9 +80,9 @@ class TrapezoidProfile100Test {
     void testTooHighEntryVelocityCruising() {
         TrapezoidProfile100 p = new TrapezoidProfile100(1, 1, 0.01);
         // initial state velocity is higher than profile cruise
-        State100 initial = new State100(0, 2);
+        Model100 initial = new Model100(0, 2);
         // goal is achievable with max decel 1s, cruise 1s, max decel 1s
-        State100 goal = new State100(3, 0);
+        Model100 goal = new Model100(3, 0);
         ResultWithETA r = p.calculateWithETA(0.02, initial, goal);
         assertEquals(3, r.etaS(), kDelta);
         // 2m/s * 0.02s = ~0.04
@@ -107,8 +109,8 @@ class TrapezoidProfile100Test {
     @Test
     void testETAAtGoal() {
         TrapezoidProfile100 p2 = new TrapezoidProfile100(1, 1, 0.01);
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(0, 0); // same
+        Model100 initial = new Model100(0, 0);
+        Model100 goal = new Model100(0, 0); // same
         ResultWithETA r = p2.calculateWithETA(0.02, initial, goal);
         // the next state is just the goal
         assertEquals(0, r.state().x(), kDelta);
@@ -120,8 +122,8 @@ class TrapezoidProfile100Test {
     @Test
     void testETARestToRest() {
         TrapezoidProfile100 p2 = new TrapezoidProfile100(1, 1, 0.01);
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(1, 0);
+        Model100 initial = new Model100(0, 0);
+        Model100 goal = new Model100(1, 0);
         ResultWithETA s = p2.calculateWithETA(0.02, initial, goal);
         assertEquals(0.0002, s.state().x(), kDelta);
         assertEquals(0.02, s.state().v(), kDelta);
@@ -138,8 +140,8 @@ class TrapezoidProfile100Test {
      */
     @Test
     void testETASolve() {
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(1, 0);
+        Model100 initial = new Model100(0, 0);
+        Model100 goal = new StaModel100te100(1, 0);
         // this this is the default eta above, so s = 1.0.
         double s = TrapezoidProfile100.solveForSlowerETA(1, 1, 0.01, 0.02, initial, goal, 2, kDelta);
         assertEquals(1.0, s, kDelta);
@@ -153,8 +155,8 @@ class TrapezoidProfile100Test {
 
     @Test
     void testETASolveStationary() {
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(0, 0);
+        Model100 initial = new Model100(0, 0);
+        Model100 goal = new Model100(0, 0);
         // this this is the default eta above, so s = 1.0.
         double s = TrapezoidProfile100.solveForSlowerETA(1, 1, 0.01, 0.02, initial, goal, 2, kDelta);
         assertEquals(1.0, s, kDelta);
@@ -164,8 +166,8 @@ class TrapezoidProfile100Test {
     @Test
     void testETARestToRestScaled1() {
         TrapezoidProfile100 p2 = new TrapezoidProfile100(0.5, 1, 0.01);
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(1, 0);
+        Model100 initial = new Model100(0, 0);
+        Model100 goal = new Model100(1, 0);
         ResultWithETA s = p2.calculateWithETA(0.02, initial, goal);
         assertEquals(0.0, s.state().x(), kDelta);
         assertEquals(0.02, s.state().v(), kDelta);
@@ -177,8 +179,8 @@ class TrapezoidProfile100Test {
     @Test
     void testETARestToRestScaled2() {
         TrapezoidProfile100 p2 = new TrapezoidProfile100(0.5, 0.5, 0.01);
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(1, 0);
+        Model100 initial = new Model100(0, 0);
+        Model100 goal = new Model100(1, 0);
         ResultWithETA s = p2.calculateWithETA(0.02, initial, goal);
         assertEquals(0.0, s.state().x(), kDelta);
         assertEquals(0.01, s.state().v(), kDelta);
@@ -191,8 +193,8 @@ class TrapezoidProfile100Test {
     @Test
     void testETARestToRestScaled3() {
         TrapezoidProfile100 p2 = new TrapezoidProfile100(0.25, 0.25, 0.01);
-        State100 initial = new State100(0, 0);
-        State100 goal = new State100(1, 0);
+        Model100 initial = new Model100(0, 0);
+        Model100 goal = new Model100(1, 0);
         ResultWithETA s = p2.calculateWithETA(0.02, initial, goal);
         assertEquals(0.0, s.state().x(), kDelta);
         assertEquals(0.005, s.state().v(), kDelta);
@@ -358,39 +360,39 @@ class TrapezoidProfile100Test {
 
         TrapezoidProfile100 p2 = new TrapezoidProfile100(5, 2, 0.01);
 
-        assertEquals(0, p.c_minus(new State100(0, 0)), 0.001);
-        assertEquals(0, p.c_plus(new State100(0, 0)), 0.001);
+        assertEquals(0, p.c_minus(new Model100(0, 0)), 0.001);
+        assertEquals(0, p.c_plus(new Model100(0, 0)), 0.001);
 
-        assertEquals(0.5, p.c_minus(new State100(0, 1)), 0.001);
-        assertEquals(-0.5, p.c_plus(new State100(0, 1)), 0.001);
+        assertEquals(0.5, p.c_minus(new Model100(0, 1)), 0.001);
+        assertEquals(-0.5, p.c_plus(new Model100(0, 1)), 0.001);
 
-        assertEquals(1.5, p.c_minus(new State100(1, 1)), 0.001);
-        assertEquals(0.5, p.c_plus(new State100(1, 1)), 0.001);
+        assertEquals(1.5, p.c_minus(new Model100(1, 1)), 0.001);
+        assertEquals(0.5, p.c_plus(new Model100(1, 1)), 0.001);
 
-        assertEquals(-0.5, p.c_minus(new State100(-1, 1)), 0.001);
-        assertEquals(-1.5, p.c_plus(new State100(-1, 1)), 0.001);
+        assertEquals(-0.5, p.c_minus(new Model100(-1, 1)), 0.001);
+        assertEquals(-1.5, p.c_plus(new Model100(-1, 1)), 0.001);
 
-        assertEquals(0.5, p.c_minus(new State100(0, -1)), 0.001);
-        assertEquals(-0.5, p.c_plus(new State100(0, -1)), 0.001);
+        assertEquals(0.5, p.c_minus(new Model100(0, -1)), 0.001);
+        assertEquals(-0.5, p.c_plus(new Model100(0, -1)), 0.001);
 
-        assertEquals(2, p.c_minus(new State100(0, 2)), 0.001);
-        assertEquals(-2, p.c_plus(new State100(0, 2)), 0.001);
+        assertEquals(2, p.c_minus(new Model100(0, 2)), 0.001);
+        assertEquals(-2, p.c_plus(new Model100(0, 2)), 0.001);
 
-        assertEquals(0.25, p2.c_minus(new State100(0, 1)), 0.001);
-        assertEquals(-0.25, p2.c_plus(new State100(0, 1)), 0.001);
+        assertEquals(0.25, p2.c_minus(new Model100(0, 1)), 0.001);
+        assertEquals(-0.25, p2.c_plus(new Model100(0, 1)), 0.001);
 
         // these are cases for the switching point test below
         // these curves don't intersect at all
-        assertEquals(-1, p.c_minus(new State100(-3, 2)), 0.001);
-        assertEquals(0, p.c_plus(new State100(2, 2)), 0.001);
+        assertEquals(-1, p.c_minus(new Model100(-3, 2)), 0.001);
+        assertEquals(0, p.c_plus(new Model100(2, 2)), 0.001);
 
         // these curves intersect exactly once at the origin
-        assertEquals(0, p.c_minus(new State100(-2, 2)), 0.001);
-        assertEquals(0, p.c_plus(new State100(2, 2)), 0.001);
+        assertEquals(0, p.c_minus(new Model100(-2, 2)), 0.001);
+        assertEquals(0, p.c_plus(new Model100(2, 2)), 0.001);
 
         // these two curves intersect twice, once at (0.5,1) and once at (0.5,-1)
-        assertEquals(1, p.c_minus(new State100(-1, 2)), 0.001);
-        assertEquals(0, p.c_plus(new State100(2, 2)), 0.001);
+        assertEquals(1, p.c_minus(new Model100(-1, 2)), 0.001);
+        assertEquals(0, p.c_plus(new Model100(2, 2)), 0.001);
     }
 
     @Test
@@ -399,22 +401,22 @@ class TrapezoidProfile100Test {
 
         TrapezoidProfile100 p2 = new TrapezoidProfile100(5, 2, 0.01);
 
-        assertEquals(0.375, p2.qSwitchIplusGminus(new State100(0, 0), new State100(0.5, 1.0)), 0.001);
-        assertEquals(0.125, p2.qSwitchIminusGplus(new State100(0, 0), new State100(0.5, 1.0)), 0.001);
+        assertEquals(0.375, p2.qSwitchIplusGminus(new Model100(0, 0), new Model100(0.5, 1.0)), 0.001);
+        assertEquals(0.125, p2.qSwitchIminusGplus(new Model100(0, 0), new Model100(0.5, 1.0)), 0.001);
 
-        assertEquals(-0.5, p.qSwitchIplusGminus(new State100(-3, 2), new State100(2, 2)), 0.001);
-        assertEquals(0, p.qSwitchIplusGminus(new State100(-2, 2), new State100(2, 2)), 0.001);
-        assertEquals(0.5, p.qSwitchIplusGminus(new State100(-1, 2), new State100(2, 2)), 0.001);
+        assertEquals(-0.5, p.qSwitchIplusGminus(new Model100(-3, 2), new Model100(2, 2)), 0.001);
+        assertEquals(0, p.qSwitchIplusGminus(new Model100(-2, 2), new Model100(2, 2)), 0.001);
+        assertEquals(0.5, p.qSwitchIplusGminus(new Model100(-1, 2), new Model100(2, 2)), 0.001);
 
-        assertEquals(-0.5, p.qSwitchIminusGplus(new State100(2, -2), new State100(-3, -2)), 0.001);
-        assertEquals(0.0, p.qSwitchIminusGplus(new State100(2, -2), new State100(-2, -2)), 0.001);
-        assertEquals(0.5, p.qSwitchIminusGplus(new State100(2, -2), new State100(-1, -2)), 0.001);
+        assertEquals(-0.5, p.qSwitchIminusGplus(new Model100(2, -2), new Model100(-3, -2)), 0.001);
+        assertEquals(0.0, p.qSwitchIminusGplus(new Model100(2, -2), new Model100(-2, -2)), 0.001);
+        assertEquals(0.5, p.qSwitchIminusGplus(new Model100(2, -2), new Model100(-1, -2)), 0.001);
 
         // these are all a little different just to avoid zero as the answer
-        assertEquals(0.5, p.qSwitchIplusGminus(new State100(2, 2), new State100(-1, 2)), 0.001);
-        assertEquals(0.5, p.qSwitchIplusGminus(new State100(-1, 2), new State100(2, -2)), 0.001);
-        assertEquals(0.5, p.qSwitchIminusGplus(new State100(2, 2), new State100(-1, 2)), 0.001);
-        assertEquals(0.5, p.qSwitchIminusGplus(new State100(-1, 2), new State100(2, -2)), 0.001);
+        assertEquals(0.5, p.qSwitchIplusGminus(new Model100(2, 2), new Model100(-1, 2)), 0.001);
+        assertEquals(0.5, p.qSwitchIplusGminus(new Model100(-1, 2), new Model100(2, -2)), 0.001);
+        assertEquals(0.5, p.qSwitchIminusGplus(new Model100(2, 2), new Model100(-1, 2)), 0.001);
+        assertEquals(0.5, p.qSwitchIminusGplus(new Model100(-1, 2), new Model100(2, -2)), 0.001);
     }
 
     /** Verify some switching velocity cases */
@@ -422,34 +424,34 @@ class TrapezoidProfile100Test {
     void testQDotSwitch2() {
         TrapezoidProfile100 p2 = new TrapezoidProfile100(5, 2, 0.01);
         // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12)
-        assertEquals(3.464, p2.qDotSwitchIplusGminus(new State100(-2, 2), new State100(2, 2)), 0.001);
+        assertEquals(3.464, p2.qDotSwitchIplusGminus(new Model100(-2, 2), new Model100(2, 2)), 0.001);
         // c(I)=-2, x=v^2/4, x=2, v=sqrt(8)
-        assertEquals(2.828, p2.qDotSwitchIplusGminus(new State100(-1, 2), new State100(1, 2)), 0.001);
+        assertEquals(2.828, p2.qDotSwitchIplusGminus(new Model100(-1, 2), new Model100(1, 2)), 0.001);
         // c(I)=-1.5, x=v^2/4, x=1.5, v=sqrt(6)
-        assertEquals(2.449, p2.qDotSwitchIplusGminus(new State100(-0.5, 2), new State100(0.5, 2)), 0.001);
+        assertEquals(2.449, p2.qDotSwitchIplusGminus(new Model100(-0.5, 2), new Model100(0.5, 2)), 0.001);
         // the same point
-        assertEquals(2.000, p2.qDotSwitchIplusGminus(new State100(0, 2), new State100(0, 2)), 0.001);
+        assertEquals(2.000, p2.qDotSwitchIplusGminus(new Model100(0, 2), new Model100(0, 2)), 0.001);
         // I+G- is negative-time here.
-        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State100(0.5, 2), new State100(-0.5, 2)), 0.001);
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new Model100(0.5, 2), new Model100(-0.5, 2)), 0.001);
         // I+G- is negative-time here.
-        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State100(1, 2), new State100(-1, 2)), 0.001);
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new Model100(1, 2), new Model100(-1, 2)), 0.001);
         // no intersection
-        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new State100(2, 2), new State100(-2, 2)), 0.001);
+        assertEquals(Double.NaN, p2.qDotSwitchIplusGminus(new Model100(2, 2), new Model100(-2, 2)), 0.001);
 
         // no intersection
-        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State100(-2, 2), new State100(2, 2)), 0.001);
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new Model100(-2, 2), new Model100(2, 2)), 0.001);
         // I-G+ is negative-time here
-        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State100(-1, 2), new State100(1, 2)), 0.001);
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new Model100(-1, 2), new Model100(1, 2)), 0.001);
         // I-G+ is negative-time here
-        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new State100(-0.5, 2), new State100(0.5, 2)), 0.001);
+        assertEquals(Double.NaN, p2.qDotSwitchIminusGplus(new Model100(-0.5, 2), new Model100(0.5, 2)), 0.001);
         // the same point
-        assertEquals(2.0, p2.qDotSwitchIminusGplus(new State100(0, 2), new State100(0, 2)), 0.001);
+        assertEquals(2.0, p2.qDotSwitchIminusGplus(new Model100(0, 2), new Model100(0, 2)), 0.001);
         // c(I)=-1.5, x=v^2/4, x=1.5, v=sqrt(6), negative arm
-        assertEquals(-2.449, p2.qDotSwitchIminusGplus(new State100(0.5, 2), new State100(-0.5, 2)), 0.001);
+        assertEquals(-2.449, p2.qDotSwitchIminusGplus(new Model100(0.5, 2), new Model100(-0.5, 2)), 0.001);
         // c(I)=-2, x=v^2/4, x=2, v=sqrt(8), negative arm
-        assertEquals(-2.828, p2.qDotSwitchIminusGplus(new State100(1, 2), new State100(-1, 2)), 0.001);
+        assertEquals(-2.828, p2.qDotSwitchIminusGplus(new Model100(1, 2), new Model100(-1, 2)), 0.001);
         // good path, c(I)=-3, x=v^2/4, x=3, v=sqrt(12) but the negative arm
-        assertEquals(-3.464, p2.qDotSwitchIminusGplus(new State100(2, 2), new State100(-2, 2)), 0.001);
+        assertEquals(-3.464, p2.qDotSwitchIminusGplus(new Model100(2, 2), new Model100(-2, 2)), 0.001);
 
     }
 
@@ -525,9 +527,9 @@ class TrapezoidProfile100Test {
     void testOneLongT() {
         // if we supply a very long dt, we should end up at the goal
         TrapezoidProfile100 p2 = new TrapezoidProfile100(3, 2, 0.01);
-        State100 initial = new State100(0, 0);
+        Model100 initial = new Model100(0, 0);
         // goal is far, requires (brief) cruising
-        State100 goal = new State100(5, 0);
+        Model100 goal = new Model100(5, 0);
         State100 s = p2.calculate(10, initial, goal);
         // it always gets exactly to the goal
         assertEquals(goal.x(), s.x(), 0.00001);
@@ -538,10 +540,10 @@ class TrapezoidProfile100Test {
     void testOneLongTReverse() {
         // if we supply a very long dt, we should end up at the goal
         TrapezoidProfile100 p2 = new TrapezoidProfile100(3, 2, 0.01);
-        State100 initial = new State100(0, 0);
+        Model100 initial = new Model100(0, 0);
         // goal is far, requires (brief) cruising
-        State100 goal = new State100(-5, 0);
-        State100 s = p2.calculate(10, initial, goal);
+        Model100 goal = new Model100(-5, 0);
+        Control100 s = p2.calculate(10, initial, goal);
         // it always gets exactly to the goal
         assertEquals(goal.x(), s.x(), 0.00001);
         assertEquals(goal.v(), s.v(), 0.000001);
@@ -554,9 +556,9 @@ class TrapezoidProfile100Test {
         Random random = new Random();
         for (int i = 0; i < 10000; ++i) {
             // random states in the square between (-2,-2) and (2,2)
-            State100 initial = new State100(4.0 * random.nextDouble() - 2.0, 4.0 * random.nextDouble() - 2.0);
-            State100 goal = new State100(4.0 * random.nextDouble() - 2.0, 4.0 * random.nextDouble() - 2.0);
-            State100 s = p2.calculate(10, initial, goal);
+            Model100 initial = new Model100(4.0 * random.nextDouble() - 2.0, 4.0 * random.nextDouble() - 2.0);
+            Model100 goal = new Model100(4.0 * random.nextDouble() - 2.0, 4.0 * random.nextDouble() - 2.0);
+            Control100 s = p2.calculate(10, initial, goal);
             // it always gets exactly to the goal
             assertEquals(goal.x(), s.x(), 0.00001);
             assertEquals(goal.v(), s.v(), 0.000001);
@@ -566,9 +568,9 @@ class TrapezoidProfile100Test {
     @Test
     void reciprocal() {
         TrapezoidProfile100 p2 = new TrapezoidProfile100(3, 2, 0.01);
-        State100 initial = new State100(-1, 1);
-        State100 goal = new State100(-1, -1);
-        State100 s = p2.calculate(10, initial, goal);
+        Model100 initial = new Model100(-1, 1);
+        Model100 goal = new Model100(-1, -1);
+        Control100 s = p2.calculate(10, initial, goal);
         assertEquals(goal.x(), s.x(), 0.000001);
         assertEquals(goal.v(), s.v(), 0.000001);
     }
@@ -578,8 +580,8 @@ class TrapezoidProfile100Test {
         TrapezoidProfile100 p2 = new TrapezoidProfile100(3, 2, 0.01);
         // in this case, t1 for I+G- is 0, and i think I-G+ is doing the wrong thing.
         // the delta v is 1, accel is 2, so this is a 0.5s solution.
-        State100 initial = new State100(-1, 2);
-        State100 goal = new State100(-0.25, 1);
+        Model100 initial = new Model100(-1, 2);
+        Model100 goal = new Model100(-0.25, 1);
 
         // in this case the I-G+ path switching point is the reciprocal, which isn't
         // what we want,

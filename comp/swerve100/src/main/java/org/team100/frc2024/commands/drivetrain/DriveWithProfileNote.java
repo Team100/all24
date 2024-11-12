@@ -14,10 +14,12 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.state.State100;
 import org.team100.lib.util.Math100;
 
@@ -160,7 +162,7 @@ public class DriveWithProfileNote extends Command implements Glassy  {
                 m_thetaSetpoint.v());
         m_thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, m_thetaGoalRaw);
 
-        SwerveState measurement = m_swerve.getState();
+        SwerveModel measurement = m_swerve.getState();
         SwerveState setpoint = new SwerveState(m_xSetpoint, m_ySetpoint, m_thetaSetpoint);
         FieldRelativeVelocity output = m_controller.calculate(measurement, setpoint);
 
@@ -189,7 +191,7 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
     @Override
     public boolean isFinished() {
-        State100 x = m_swerve.getState().x();
+        Model100 x = m_swerve.getState().x();
         double xError = m_xGoalRaw.x() - x.x();
         State100 y = m_swerve.getState().y();
         double yError = m_yGoalRaw.x() - y.x();

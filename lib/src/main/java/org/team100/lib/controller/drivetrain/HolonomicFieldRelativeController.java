@@ -5,6 +5,7 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
@@ -30,7 +31,7 @@ public interface HolonomicFieldRelativeController extends Glassy {
      * @param reference   reference state i.e. setpoint
      * @return field-relative , meters and radians per second
      */
-    FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference);
+    FieldRelativeVelocity calculate(SwerveModel measurement, SwerveState reference);
 
     /**
      * This uses the tolerances in the controllers.

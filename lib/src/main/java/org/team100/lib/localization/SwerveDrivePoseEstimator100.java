@@ -9,6 +9,7 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
@@ -79,7 +80,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      * Sample the state estimate buffer.
      */
     @Override
-    public SwerveState get(double timestampSeconds) {
+    public SwerveModel get(double timestampSeconds) {
         // System.out.println("SwerveDrivePoseEstimator.get() " + timestampSeconds);
         return m_poseBuffer.get(timestampSeconds).m_state;
     }

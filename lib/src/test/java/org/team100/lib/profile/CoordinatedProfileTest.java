@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.profile.Profile100.ResultWithETA;
+import org.team100.lib.state.Model100;
 import org.team100.lib.state.State100;
 
 /**
@@ -166,18 +167,18 @@ class CoordinatedProfileTest {
         TrapezoidProfile100 p1 = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         TrapezoidProfile100 p2 = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         // initial state at the origin at rest
-        State100 i1 = new State100(0, 0);
-        State100 i2 = new State100(0, 0);
+        Model100 i1 = new Model100(0, 0);
+        Model100 i2 = new Model100(0, 0);
         // final state at 1, at rest
-        State100 g1 = new State100(1, 0);
-        State100 g2 = new State100(2, 0);
+        Model100 g1 = new Model100(1, 0);
+        Model100 g2 = new Model100(2, 0);
 
-        State100 s1 = i1;
+        Model100 s1 = i1;
         ResultWithETA r = p1.calculateWithETA(DT, s1, g1);
         double total_time = r.etaS();
         assertEquals(2.0, total_time, kDelta);
 
-        State100 s2 = i2;
+        Model100 s2 = i2;
         r = p2.calculateWithETA(DT, s2, g2);
         total_time = r.etaS();
         assertEquals(3.0, total_time, kDelta);
@@ -192,18 +193,18 @@ class CoordinatedProfileTest {
         ProfileWPI p1 = new ProfileWPI(maxVel, maxAccel);
         ProfileWPI p2 = new ProfileWPI(maxVel, maxAccel);
         // initial state at the origin at rest
-        State100 i1 = new State100(0, 0);
-        State100 i2 = new State100(0, 0);
+        Model100 i1 = new Model100(0, 0);
+        Model100 i2 = new Model100(0, 0);
         // final state at 1, at rest
-        State100 g1 = new State100(1, 0);
-        State100 g2 = new State100(2, 0);
+        Model100 g1 = new Model100(1, 0);
+        Model100 g2 = new Model100(2, 0);
 
-        State100 s1 = i1;
+        Model100 s1 = i1;
         ResultWithETA r = p1.calculateWithETA(DT, s1, g1);
         double total_time = r.etaS();
         assertEquals(2.0, total_time, kDelta);
 
-        State100 s2 = i2;
+        Model100 s2 = i2;
         r = p2.calculateWithETA(DT, s2, g2);
         total_time = r.etaS();
         assertEquals(3.0, total_time, kDelta);
@@ -218,13 +219,13 @@ class CoordinatedProfileTest {
         TrapezoidProfile100 px = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         TrapezoidProfile100 py = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         // initial x state is moving fast
-        State100 ix = new State100(0, 1);
+        Model100 ix = new Model100(0, 1);
         // initial y state is stationary
-        State100 iy = new State100(0, 0);
+        Model100 iy = new Model100(0, 0);
         // goal x state is still at the origin (i.e. a "slow and back up" profile)
-        State100 gx = new State100(0, 0);
+        Model100 gx = new Model100(0, 0);
         // goal y state is not far
-        State100 gy = new State100(0.5, 0);
+        Model100 gy = new Model100(0.5, 0);
 
         // the "default profiles" produce different ETA's
         ResultWithETA rx = px.calculateWithETA(DT, ix, gx);
