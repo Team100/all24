@@ -1,6 +1,7 @@
 package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
+import java.util.function.Supplier;
 
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.experiments.Experiment;
@@ -13,11 +14,9 @@ import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Model100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
-import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
-import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -34,7 +33,6 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
 
     private final RotaryMechanism m_mechanism;
     private final RotaryPositionSensor m_positionSensor;
-    private final double m_maxVel;
     /**
      * This is positional feedback only, since velocity feedback is handled
      * outboard.
@@ -47,8 +45,14 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
      */
     private final LinearFilter m_filter;
 
-    /** Profile may be updated at runtime. */
-    private Profile100 m_profile = new NullProfile();
+    /**
+     * This is a supplier so we can update it at runtime.
+     * This is used at the moment for the "amp arm" motion, which uses fast and slow
+     * profiles depending on position, explicitly selected by commands.
+     * TODO: instead of that, make a profile that does the correct "easing"
+     * shape.
+     */
+    private final Supplier<Profile100> m_profile;
     // this was Sanjan experimenting in October 2024
     // private ProfileWPI profileTest = new ProfileWPI(40,120);
 
@@ -69,20 +73,16 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     private final DoubleLogger m_log_velocity_tolerance;
     private final BooleanLogger m_log_at_setpoint;
 
-    /**
-     * Don't forget to set a profile.
-     * TODO: remove maxVel.
-     */
     public OnboardAngularPositionServo(
             LoggerFactory parent,
             RotaryMechanism mech,
             RotaryPositionSensor positionSensor,
-            double maxVel,
+            Supplier<Profile100> profile,
             PIDController controller) {
         LoggerFactory child = parent.child(this);
         m_mechanism = mech;
         m_positionSensor = positionSensor;
-        m_maxVel = maxVel;
+        m_profile = profile;
         m_controller = controller;
         m_controller.setIntegratorRange(0, 0.1);
         m_filter = LinearFilter.singlePoleIIR(0.02, TimedRobot100.LOOP_PERIOD_S);
@@ -120,11 +120,6 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
     }
 
     @Override
-    public void setProfile(Profile100 profile) {
-        m_profile = profile;
-    }
-
-    @Override
     public void setTorqueLimit(double torqueNm) {
         m_mechanism.setTorqueLimit(torqueNm);
     }
@@ -156,7 +151,7 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
                 MathUtil.angleModulus(m_setpointRad.x() - measurementPositionRad) + measurementPositionRad,
                 m_setpointRad.v());
 
-        m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad.model(), m_goal);
+        m_setpointRad = m_profile.get().calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad.model(), m_goal);
         // this was Sanjan experimenting in October 2024
         // m_setpointRad = profileTest.calculate(0.02, m_setpointRad, m_goal);
 
@@ -166,17 +161,16 @@ public class OnboardAngularPositionServo implements AngularPositionServo {
                     m_filter.calculate(m_controller.calculate(measurementPositionRad,
                             m_setpointRad.x())),
                     kFeedbackDeadbandRad_S,
-                    m_maxVel);
+                    Double.POSITIVE_INFINITY);
         } else {
             u_FB = m_controller.calculate(measurementPositionRad,
                     m_setpointRad.x());
         }
 
-
         final double u_FF = m_setpointRad.v();
         // note u_FF is rad/s, so a big number, u_FB should also be a big number.
 
-        final double u_TOTAL = MathUtil.clamp(u_FB + u_FF, -m_maxVel, m_maxVel);
+        final double u_TOTAL = u_FB + u_FF;
 
         // stop using the trailing accel, use the setpoint accel instead.
         // m_mechanism.setVelocity(u_TOTAL, accel(u_TOTAL), feedForwardTorqueNm);

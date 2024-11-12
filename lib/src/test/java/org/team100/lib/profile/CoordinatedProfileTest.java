@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.profile.Profile100.ResultWithETA;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
-import org.team100.lib.state.State100;
 
 /**
  * Illustrates how to coordinate multiple profiles to take the same amount of
@@ -263,6 +262,7 @@ class CoordinatedProfileTest {
 
         Control100 stateX = ix.control();
         Control100 stateY = iy.control();
+        @SuppressWarnings("unused")
         double total_time = 0;
         for (int i = 0; i < 1000; ++i) {
             total_time += DT;

@@ -52,14 +52,13 @@ class AngularPositionProfileTest implements Timeless {
      */
     @Test
     void testTrapezoid() {
-        Profile100 profile = new ProfileWPI(1, 1);
+        final Profile100 profile = new ProfileWPI(1, 1);
         servo = new OnboardAngularPositionServo(
                 logger,
                 mech,
                 encoder,
-                1,
+                () -> profile,
                 controller2);
-        servo.setProfile(profile);
         servo.reset();
 
         verifyTrapezoid();
@@ -67,14 +66,13 @@ class AngularPositionProfileTest implements Timeless {
 
     @Test
     void testProfile() {
-        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        final Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new OnboardAngularPositionServo(
                 logger,
                 mech,
                 encoder,
-                1,
+                () -> profile,
                 controller2);
-        servo.setProfile(profile);
         servo.reset();
         verifyTrapezoid();
     }

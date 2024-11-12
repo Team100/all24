@@ -250,8 +250,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         AngularPositionServo servo = new OutboardAngularPositionServo(
                 parent,
                 mech,
-                combinedEncoder);
-        servo.setProfile(profile);
+                combinedEncoder,
+                profile);
         return servo;
     }
 

@@ -1,6 +1,5 @@
 package org.team100.lib.profile;
 
-import org.team100.lib.state.State100;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
 import org.team100.lib.util.Math100;

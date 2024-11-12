@@ -1,6 +1,5 @@
 package org.team100.lib.localization;
 
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.SortedMap;

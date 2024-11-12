@@ -17,7 +17,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
@@ -49,7 +48,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     private static final double kRotationSpeed = 0.5;
 
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
@@ -77,7 +75,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
             FieldLogger.Log fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             Supplier<Translation2d> target,
             PIDController thetaController,
             PIDController omegaController,
@@ -85,7 +82,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         m_field_log = fieldLogger;
         LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
@@ -106,10 +102,10 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     }
 
     @Override
-    public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new Control100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
+    public void reset(SwerveModel state) {
+        m_thetaSetpoint = state.theta().control();
         m_ball = null;
-        m_prevPose = currentPose;
+        m_prevPose = state.pose();
         m_thetaController.reset();
         m_omegaController.reset();
     }
@@ -127,7 +123,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
-        double headingRate = m_gyro.getYawRateNWU();
+        double headingRate = state.theta().v();
 
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = m_target.get();

@@ -3,7 +3,6 @@ package org.team100.lib.motion.servo;
 import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.Control100;
 
 // this is for refactoring the gravity servo
@@ -31,8 +30,6 @@ public interface GravityServoInterface extends Glassy {
     void setState(Control100 goal);
 
     void stop();
-
-    void setProfile(Profile100 profile);
 
     void setTorqueLimit(double torqueNm);
 

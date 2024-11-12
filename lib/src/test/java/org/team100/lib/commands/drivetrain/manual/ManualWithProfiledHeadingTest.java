@@ -15,12 +15,10 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.MockGyro;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
@@ -39,7 +37,6 @@ class ManualWithProfiledHeadingTest {
     @Test
     void testModeSwitching() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
@@ -49,12 +46,10 @@ class ManualWithProfiledHeadingTest {
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier,
                 thetaController,
                 omegaController);
-        Pose2d currentPose = GeometryUtil.kPoseZero;
-        m_manualWithHeading.reset(currentPose);
+        m_manualWithHeading.reset(new SwerveModel());
 
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
 
@@ -75,7 +70,6 @@ class ManualWithProfiledHeadingTest {
     @Test
     void testNotSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
@@ -85,14 +79,11 @@ class ManualWithProfiledHeadingTest {
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier,
                 thetaController,
                 omegaController);
 
-        Pose2d currentPose = GeometryUtil.kPoseZero;
-
-        m_manualWithHeading.reset(currentPose);
+        m_manualWithHeading.reset(new SwerveModel());
 
         // no desired rotation
         desiredRotation = null;
@@ -100,7 +91,7 @@ class ManualWithProfiledHeadingTest {
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
 
         FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
-                new SwerveModel(currentPose, new FieldRelativeVelocity(0, 0, 0)),
+                new SwerveModel(),
                 twist1_1);
 
         // not in snap mode
@@ -109,7 +100,7 @@ class ManualWithProfiledHeadingTest {
 
         twist1_1 = new DriverControl.Velocity(1, 0, 0);
 
-        twistM_S = m_manualWithHeading.apply(new SwerveModel(currentPose, twistM_S), twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveModel(GeometryUtil.kPoseZero, twistM_S), twist1_1);
         assertNull(m_manualWithHeading.m_goal);
         verify(1, 0, 0, twistM_S);
     }
@@ -117,7 +108,6 @@ class ManualWithProfiledHeadingTest {
     @Test
     void testSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
@@ -128,12 +118,11 @@ class ManualWithProfiledHeadingTest {
         ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier,
                 thetaController,
                 omegaController);
 
-        m_manualWithHeading.reset(GeometryUtil.kPoseZero);
+        m_manualWithHeading.reset(new SwerveModel());
         // reset means setpoint is currentpose.
         assertEquals(0, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         assertEquals(0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
@@ -145,9 +134,7 @@ class ManualWithProfiledHeadingTest {
 
         // initial state is motionless
         FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
-                new SwerveModel(
-                        GeometryUtil.kPoseZero,
-                        new FieldRelativeVelocity(0, 0, 0)),
+                new SwerveModel(),
                 twist1_1);
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
@@ -205,7 +192,6 @@ class ManualWithProfiledHeadingTest {
     @Test
     void testSnapHeld() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
 
@@ -215,13 +201,12 @@ class ManualWithProfiledHeadingTest {
         final ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier,
                 thetaController,
                 omegaController);
 
         // currently facing +x
-        m_manualWithHeading.reset(GeometryUtil.kPoseZero);
+        m_manualWithHeading.reset(new SwerveModel());
 
         // want to face towards +y
         desiredRotation = GeometryUtil.kRotation90;
@@ -230,9 +215,7 @@ class ManualWithProfiledHeadingTest {
         // no stick input
         final DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
         FieldRelativeVelocity v = m_manualWithHeading.apply(
-                new SwerveModel(
-                        GeometryUtil.kPoseZero,
-                        new FieldRelativeVelocity(0, 0, 0)),
+                new SwerveModel(),
                 twist1_1);
 
         // in snap mode
@@ -294,7 +277,6 @@ class ManualWithProfiledHeadingTest {
         final ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier,
                 thetaController,
                 omegaController);
@@ -332,8 +314,6 @@ class ManualWithProfiledHeadingTest {
                 new FieldRelativeVelocity(0, 0, 2.828));
         // gyro rate is still full speed.
         gyro.rate = 2.828;
-
-        FieldRelativeVelocity clipped = m_manualWithHeading.clipAndScale(control);
 
         TrapezoidProfile100 profile = m_manualWithHeading.makeProfile(0);
         // profile speed is half max.
@@ -373,7 +353,6 @@ class ManualWithProfiledHeadingTest {
         final ManualWithProfiledHeading m_manualWithHeading = new ManualWithProfiledHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier,
                 thetaController,
                 omegaController);

@@ -16,7 +16,6 @@ import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
@@ -25,7 +24,6 @@ import org.team100.lib.util.Math100;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -34,12 +32,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
  * 
- * The profile here is constant with robot speed, which is wrong: the available
- * rotational velocity and acceleration decline with speed.  As a result, the 
- * robot can't keep up with the profile, the controller errors grow, and the
- * robot overshoots at speed.
- * 
- * TODO: make the profile speed-dependent.
+ * The profile depends on robot speed, making rotation the lowest priority.
  */
 public class ManualWithProfiledHeading implements FieldRelativeDriver {
     // don't try to go full speed
@@ -49,8 +42,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private static final double OMEGA_FB_DEADBAND = 0.1;
     private static final double THETA_FB_DEADBAND = 0.1;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    // TODO: get rid of this, use the state estimator instead
-    private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
@@ -81,7 +72,6 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * 
      * @param parent
      * @param swerveKinodynamics
-     * @param gyro
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
      * @param thetaController
@@ -90,13 +80,11 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     public ManualWithProfiledHeading(
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController,
             PIDController omegaController) {
         LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
@@ -117,21 +105,13 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_log_output_omega = child.doubleLogger(Level.TRACE, "output/omega");
     }
 
-    public void reset(Pose2d currentPose) {
+    @Override
+    public void reset(SwerveModel state) {
+        m_thetaSetpoint = state.theta().control();
         m_goal = null;
         m_latch.unlatch();
         m_thetaController.reset();
         m_omegaController.reset();
-        updateSetpoint(currentPose.getRotation().getRadians(), getYawRateNWURad_S());
-    }
-
-    private double getYawRateNWURad_S() {
-        return m_gyro.getYawRateNWU();
-    }
-
-    /** Call this to keep the setpoint in sync with the manual rotation. */
-    private void updateSetpoint(double x, double v) {
-        m_thetaSetpoint = new Control100(x, v);
     }
 
     /**
@@ -181,7 +161,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
         if (m_thetaSetpoint == null) {
-            updateSetpoint(yawMeasurement, yawRateMeasurement);
+            m_thetaSetpoint = new Control100(yawMeasurement, yawRateMeasurement);
         }
 
         // use the modulus closest to the measurement

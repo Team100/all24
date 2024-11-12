@@ -2,7 +2,6 @@ package org.team100.lib.motion.servo;
 
 import java.util.OptionalDouble;
 
-import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.Control100;
 import org.team100.lib.util.Util;
 
@@ -56,11 +55,6 @@ public class OutboardGravityServo implements GravityServoInterface {
     @Override
     public void setEncoderPosition(double positionRad) {
         m_servo.setEncoderPosition(positionRad);
-    }
-
-    @Override
-    public void setProfile(Profile100 profile) {
-        m_servo.setProfile(profile);
     }
 
     @Override

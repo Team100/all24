@@ -12,7 +12,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.swerve.SwerveSetpoint;
 import org.team100.lib.util.NamedChooser;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -70,7 +69,7 @@ public class DriveManually extends Command implements Glassy {
         SwerveModuleStates currentStates = m_drive.getSwerveLocal().states();
         SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
         m_drive.resetSetpoint(setpoint);
-        Pose2d p = m_drive.getPose();
+        SwerveModel p = m_drive.getState();
         for (Driver d : m_drivers.values()) {
             d.reset(p);
         }
@@ -88,7 +87,7 @@ public class DriveManually extends Command implements Glassy {
             // System.out.println("reset mode");
             currentManualMode = manualMode;
             // there's state in there we'd like to forget
-            Pose2d p = m_drive.getPose();
+            SwerveModel p = m_drive.getState();
             for (Driver d : m_drivers.values()) {
                 d.reset(p);
             }
@@ -129,7 +128,7 @@ public class DriveManually extends Command implements Glassy {
                         m_drive.setRawModuleStates(d.apply(t));
                     }
 
-                    public void reset(Pose2d p) {
+                    public void reset(SwerveModel p) {
                         //
                     }
                 });
@@ -145,7 +144,7 @@ public class DriveManually extends Command implements Glassy {
                         m_drive.setChassisSpeeds(d.apply(s, t));
                     }
 
-                    public void reset(Pose2d p) {
+                    public void reset(SwerveModel p) {
                         d.reset(p);
                     }
                 });
@@ -161,7 +160,7 @@ public class DriveManually extends Command implements Glassy {
                         m_drive.driveInFieldCoords(d.apply(s, t));
                     }
 
-                    public void reset(Pose2d p) {
+                    public void reset(SwerveModel p) {
                         d.reset(p);
                     }
                 });
@@ -175,7 +174,7 @@ public class DriveManually extends Command implements Glassy {
                 m_drive.stop();
             }
 
-            public void reset(Pose2d p) {
+            public void reset(SwerveModel p) {
                 //
             }
         };

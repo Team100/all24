@@ -15,16 +15,13 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.MockGyro;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
-import org.team100.lib.state.State100;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -39,16 +36,13 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testModeSwitching() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier);
-        Pose2d currentPose = GeometryUtil.kPoseZero;
-        m_manualWithHeading.reset(currentPose);
+        m_manualWithHeading.reset(new SwerveModel());
 
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
 
@@ -69,18 +63,14 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testNotSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier);
 
-        Pose2d currentPose = GeometryUtil.kPoseZero;
-
-        m_manualWithHeading.reset(currentPose);
+        m_manualWithHeading.reset(new SwerveModel());
 
         // no desired rotation
         desiredRotation = null;
@@ -88,7 +78,7 @@ class ManualWithMinTimeHeadingTest {
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 1);
 
         FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
-                new SwerveModel(currentPose, new FieldRelativeVelocity(0, 0, 0)),
+                new SwerveModel(),
                 twist1_1);
 
         // not in snap mode
@@ -97,7 +87,7 @@ class ManualWithMinTimeHeadingTest {
 
         twist1_1 = new DriverControl.Velocity(1, 0, 0);
 
-        twistM_S = m_manualWithHeading.apply(new SwerveModel(currentPose, twistM_S), twist1_1);
+        twistM_S = m_manualWithHeading.apply(new SwerveModel(new Pose2d(), twistM_S), twist1_1);
         assertNull(m_manualWithHeading.m_goal);
         verify(1, 0, 0, twistM_S);
     }
@@ -105,18 +95,15 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testSnapMode() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier);
 
         // facing +x
-        Pose2d currentPose = GeometryUtil.kPoseZero;
-        m_manualWithHeading.reset(currentPose);
+        m_manualWithHeading.reset(new SwerveModel());
         // reset means setpoint is currentpose.
         assertEquals(0, m_manualWithHeading.m_thetaSetpoint.x(), kDelta);
         assertEquals(0, m_manualWithHeading.m_thetaSetpoint.v(), kDelta);
@@ -127,7 +114,7 @@ class ManualWithMinTimeHeadingTest {
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
 
         FieldRelativeVelocity twistM_S = m_manualWithHeading.apply(
-                new SwerveModel(currentPose, new FieldRelativeVelocity(0, 0, 0)),
+                new SwerveModel(),
                 twist1_1);
         // in snap mode
         assertNotNull(m_manualWithHeading.m_goal);
@@ -143,7 +130,7 @@ class ManualWithMinTimeHeadingTest {
         desiredRotation = null;
 
         // say we've rotated a little.
-        currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
+        Pose2d currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new Control100(0.5, 1);
         twistM_S = m_manualWithHeading.apply(new SwerveModel(currentPose, twistM_S), twist1_1);
@@ -175,18 +162,15 @@ class ManualWithMinTimeHeadingTest {
     @Test
     void testSnapHeld() {
         Experiments.instance.testOverride(Experiment.StickyHeading, false);
-        Gyro gyro = new MockGyro();
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         Supplier<Rotation2d> rotationSupplier = () -> desiredRotation;
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier);
 
         // currently facing +x
-        Pose2d currentPose = GeometryUtil.kPoseZero;
-        m_manualWithHeading.reset(currentPose);
+        m_manualWithHeading.reset(new SwerveModel());
 
         // want to face towards +y
         desiredRotation = GeometryUtil.kRotation90;
@@ -195,7 +179,7 @@ class ManualWithMinTimeHeadingTest {
         // no stick input
         DriverControl.Velocity twist1_1 = new DriverControl.Velocity(0, 0, 0);
         FieldRelativeVelocity v = m_manualWithHeading.apply(
-                new SwerveModel(currentPose, new FieldRelativeVelocity(0, 0, 0)),
+                new SwerveModel(),
                 twist1_1);
 
         // in snap mode
@@ -205,7 +189,7 @@ class ManualWithMinTimeHeadingTest {
         verify(0, 0, 0.2, v);
 
         // say we've rotated a little.
-        currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
+        Pose2d currentPose = new Pose2d(0, 0, new Rotation2d(0.5));
 
         // cheat the setpoint for the test
         m_manualWithHeading.m_thetaSetpoint = new Control100(0.5, 1);
@@ -244,7 +228,6 @@ class ManualWithMinTimeHeadingTest {
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier);
 
         // driver rotates a bit
@@ -300,7 +283,6 @@ class ManualWithMinTimeHeadingTest {
         ManualWithMinTimeHeading m_manualWithHeading = new ManualWithMinTimeHeading(
                 logger,
                 swerveKinodynamics,
-                gyro,
                 rotationSupplier);
 
         // driver rotates a bit

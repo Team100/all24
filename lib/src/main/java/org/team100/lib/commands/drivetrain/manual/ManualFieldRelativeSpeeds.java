@@ -9,8 +9,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.DriveUtil;
 
-import edu.wpi.first.math.geometry.Pose2d;
-
 /**
  * Transform manual input into a field-relative velocity.
  * 
@@ -49,7 +47,7 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
     }
 
     @Override
-    public void reset(Pose2d p) {
+    public void reset(SwerveModel p) {
         //
     }
 }

@@ -16,7 +16,6 @@ import org.team100.lib.logging.LoggerFactory.StringLogger;
 import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.sensors.Gyro;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
@@ -24,7 +23,6 @@ import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -50,7 +48,6 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      */
     private static final double GENTLE_OMEGA = Math.PI / 2;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
@@ -78,20 +75,15 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      * 
      * @param parent
      * @param swerveKinodynamics
-     * @param gyro
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
-     * @param thetaController
-     * @param omegaController
      */
     public ManualWithMinTimeHeading(
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             Supplier<Rotation2d> desiredRotation) {
         LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, TimedRobot100.LOOP_PERIOD_S);
@@ -122,19 +114,11 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
 
     }
 
-    public void reset(Pose2d currentPose) {
+    @Override
+    public void reset(SwerveModel currentPose) {
+        m_thetaSetpoint = currentPose.theta().control();
         m_goal = null;
         m_latch.unlatch();
-        updateSetpoint(currentPose.getRotation().getRadians(), getYawRateNWURad_S());
-    }
-
-    private double getYawRateNWURad_S() {
-        return m_gyro.getYawRateNWU();
-    }
-
-    /** Call this to keep the setpoint in sync with the manual rotation. */
-    private void updateSetpoint(double x, double v) {
-        m_thetaSetpoint = new Control100(x, v);
     }
 
     /**
@@ -235,13 +219,13 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
             final FieldRelativeVelocity twistWithSnapM_S = m_swerveKinodynamics
                     .preferRotation(
                             new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega));
-            m_log_desat_omega.log(() -> twistWithSnapM_S.theta());
+            m_log_desat_omega.log(twistWithSnapM_S::theta);
             return twistWithSnapM_S;
         } else {
             final FieldRelativeVelocity twistWithSnapM_S = m_swerveKinodynamics
                     .analyticDesaturation(
                             new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega));
-            m_log_desat_omega.log(() -> twistWithSnapM_S.theta());
+            m_log_desat_omega.log(twistWithSnapM_S::theta);
             return twistWithSnapM_S;
         }
     }
