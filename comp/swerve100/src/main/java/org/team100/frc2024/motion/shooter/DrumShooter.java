@@ -172,12 +172,11 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         pivotLogger,
                         pivotMech,
                         encoder,
-                        10, // TODO: remove this
+                        () -> profile,
                         pivotController);
                 pivotServo = new OutboardGravityServo(pivotAngleServo,
                         5.0, // TODO: tune this
                         0.0);
-                pivotServo.setProfile(profile);
                 break;
             default:
                 // For testing and simulation
@@ -209,12 +208,11 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         pivotLogger,
                         simMech,
                         simEncoder,
-                        10, // TODO: remove this
+                        () -> profile,
                         pivotController);
                 pivotServo = new OutboardGravityServo(simPivotAngleServo,
                         5.0, // TODO: tune this
                         0.0);
-                pivotServo.setProfile(profile);
         }
     }
 

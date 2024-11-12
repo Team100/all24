@@ -24,6 +24,7 @@ import org.team100.lib.motor.CANSparkMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
+import org.team100.lib.profile.NullProfile;
 import org.team100.lib.profile.Profile100;
 import org.team100.lib.state.Control100;
 
@@ -55,6 +56,8 @@ public class AmpPivot extends SubsystemBase implements Glassy {
     private static final double kGearRatio = 70;
 
     private final GravityServoInterface m_ampAngleServo;
+
+    private Profile100 m_activeProfile = new NullProfile();
 
     public AmpPivot(LoggerFactory parent) {
         LoggerFactory child = parent.child(this);
@@ -88,7 +91,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                         child,
                         mech,
                         encoder,
-                        10, // TODO: remove this
+                        () -> m_activeProfile,
                         controller);
                 servo.reset();
                 m_ampAngleServo = new OutboardGravityServo(servo, 5.0, 0.0);
@@ -109,15 +112,11 @@ public class AmpPivot extends SubsystemBase implements Glassy {
                         child,
                         simMech,
                         simEncoder,
-                        10, // TODO: remove this
+                        () -> m_activeProfile,
                         controller);
                 simServo.reset();
                 m_ampAngleServo = new OutboardGravityServo(simServo, 5.0, 0.0);
         }
-    }
-
-    public void setAmpPosition(double value) {
-        m_ampAngleServo.setPosition(value);
     }
 
     public void setAmpState(Control100 state) {
@@ -142,7 +141,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
     }
 
     public void setProfile(Profile100 profile) {
-        m_ampAngleServo.setProfile(profile);
+        m_activeProfile = profile;
     }
 
     @Override

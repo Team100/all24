@@ -109,8 +109,6 @@ public class RobotContainer implements Glassy {
     private final Command m_auton;
     private final DrumShooter m_shooter;
     final SwerveDriveSubsystem m_drive;
-    final AmpFeeder m_ampFeeder;
-    final AmpPivot m_ampPivot;
 
     public RobotContainer(TimedRobot100 robot) throws IOException {
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
@@ -199,6 +197,11 @@ public class RobotContainer implements Glassy {
         final Intake intake = new Intake(sysLog, m_sensors);
 
         m_shooter = new DrumShooter(sysLog, 3, 13, 27, 58, 100);
+        
+        // final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
+
+        final AmpFeeder m_ampFeeder = new AmpFeeder(sysLog);
+        final AmpPivot m_ampPivot = new AmpPivot(sysLog);
 
         ///////////////////////////
         //
@@ -212,11 +215,6 @@ public class RobotContainer implements Glassy {
                 m_sensors,
                 m_shooter,
                 visionDataProvider);
-
-        m_ampFeeder = new AmpFeeder(sysLog);
-        m_ampPivot = new AmpPivot(sysLog);
-
-        // final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
 
         ////////////////////////////
         //
@@ -289,7 +287,8 @@ public class RobotContainer implements Glassy {
         //
         // for testing odometry
         //
-        // TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(1.0, 1.0)));
+        // TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new
+        /////////////////////// ConstantConstraint(1.0, 1.0)));
         // StraightLineTrajectory maker = new StraightLineTrajectory(false, tmaker);
         // slow, will not work for high-speed entry
         // HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1,
@@ -328,10 +327,6 @@ public class RobotContainer implements Glassy {
         whileTrue(operatorControl::ramp, new Ramp(m_shooter, m_drive));
 
         whileTrue(operatorControl::feed, new Feed(intake, feeder));
-
-        // hold the amp up while holding the button
-        // whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(ampLogger,
-        // m_ampPivot, 1.8));
 
         // fast, then slow.
         whileTrue(operatorControl::pivotToAmpPosition,
@@ -500,7 +495,6 @@ public class RobotContainer implements Glassy {
         // operatorControl::leftClimb,
         // operatorControl::rightClimb));
         m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
-        // m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
         // if far from the goal, go fast. if near, go slow.
         m_ampPivot.setDefaultCommand(new AmpFastThenSlow(m_ampPivot, 0.1, 0));
 

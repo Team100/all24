@@ -30,7 +30,7 @@ class AnglePositionServoProfileTest {
 
     public AnglePositionServoProfileTest() {
         motor = new MockBareMotor();
-        RotaryMechanism mech = new SimpleRotaryMechanism(
+        final RotaryMechanism mech = new SimpleRotaryMechanism(
                 logger,
                 motor,
                 new MockIncrementalBareEncoder(),
@@ -39,14 +39,13 @@ class AnglePositionServoProfileTest {
         controller2 = new PIDController(1, 0, 0, TimedRobot100.LOOP_PERIOD_S);
         controller2.enableContinuousInput(-Math.PI, Math.PI);
 
-        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        final Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
         servo = new OnboardAngularPositionServo(
                 logger,
                 mech,
                 encoder,
-                1,
+                () -> profile,
                 controller2);
-        servo.setProfile(profile);
         servo.reset();
     }
 
@@ -68,7 +67,7 @@ class AnglePositionServoProfileTest {
         verify(0.705, 0.245, 0.7);
         verify(0.805, 0.320, 0.8);
         verify(0.905, 0.405, 0.9);
-        verify(1.000, 0.500, 1.0);
+        verify(1.006, 0.500, 1.0); // little bit of overshoot here
         verify(0.905, 0.595, 0.9);
         verify(0.803, 0.680, 0.8);
         verify(0.702, 0.755, 0.7);

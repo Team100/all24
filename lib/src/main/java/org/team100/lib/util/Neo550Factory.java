@@ -18,6 +18,7 @@ import org.team100.lib.motion.servo.OutboardLinearVelocityServo;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.Neo550CANSparkMotor;
 import org.team100.lib.motor.SimulatedBareMotor;
+import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.logging.LoggerFactory;
 
 public class Neo550Factory {
@@ -83,7 +84,7 @@ public class Neo550Factory {
         Neo550CANSparkMotor driveMotor = new Neo550CANSparkMotor(moduleLogger, canID, motorPhase, currentLimit,
                 Feedforward100.makeNeo550(), new PIDConstants(p));
         RotaryMechanism rotaryMechanism = new LimitedRotaryMechanism(new SimpleRotaryMechanism(moduleLogger, driveMotor,
-                new CANSparkEncoder(moduleLogger, driveMotor), gearRatio),lowerLimit, upperLimit);
+                new CANSparkEncoder(moduleLogger, driveMotor), gearRatio), lowerLimit, upperLimit);
         return new OutboardGravityServo(
                 new OutboardAngularPositionServo(
                         moduleLogger,
@@ -91,7 +92,8 @@ public class Neo550Factory {
                         new CombinedEncoder(
                                 moduleLogger,
                                 new SimulatedRotaryPositionSensor(moduleLogger, rotaryMechanism),
-                                rotaryMechanism)),
+                                rotaryMechanism),
+                        new TrapezoidProfile100(1, 1, 0.01)),
                 gravityNm,
                 offsetRad);
     }
@@ -131,7 +133,8 @@ public class Neo550Factory {
                         new CombinedEncoder(
                                 parent,
                                 new SimulatedRotaryPositionSensor(parent, rotaryMechanism),
-                                rotaryMechanism)),
+                                rotaryMechanism),
+                        new TrapezoidProfile100(1, 1, 0.01)),
                 1,
                 1);
     }

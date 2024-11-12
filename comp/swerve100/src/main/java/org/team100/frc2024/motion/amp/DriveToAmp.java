@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class DriveToAmp extends SequentialCommandGroup {
-    private static final double kAmpSwitchingPt = 1.6;
-    private static final double kAmpUp = 1.8;
     private static final double kCloseToAmpYM = 6.799454;
     private static final double kNearAmpYM = 6.474794;
     private static final double kAmpXM = 1.834296;
@@ -56,8 +54,7 @@ public class DriveToAmp extends SequentialCommandGroup {
                                 limits),
                         new FeedToAmp(intake, shooter, ampFeeder, feeder)),
                 new ParallelCommandGroup(
-                        // new AmpSet(parent, amp, kAmpUp),
-                        new AmpFastThenSlow(amp, kAmpSwitchingPt, kAmpUp),
+                        new AmpFastThenSlow(amp, 1.7, 1.8),
                         new SequentialCommandGroup(
                                 new DriveWithProfile2(
                                         () -> DriverStation.getAlliance().map(

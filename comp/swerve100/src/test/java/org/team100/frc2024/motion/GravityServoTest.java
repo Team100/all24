@@ -46,14 +46,12 @@ class GravityServoTest implements Timeless2024 {
                 logger,
                 simMech,
                 simEncoder,
-                8,
+                () -> profile,
                 pivotController);
-        servo.setProfile(profile);
         servo.reset();
 
         GravityServoInterface g = new OutboardGravityServo(
                 servo, 5.0, 0.0);
-        g.setProfile(profile);
         // start at zero
         assertEquals(0, g.getPositionRad().getAsDouble(), kDelta);
         // one second

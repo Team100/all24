@@ -41,8 +41,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private final Control100Logger m_log_setpoint;
     private final OptionalDoubleLogger m_log_position;
 
-    /** Profile may be updated at runtime. */
-    private Profile100 m_profile;
+    private final Profile100 m_profile;
     /** Remember that the outboard goal "winds up" i.e. it's not in [-pi,pi] */
     private Model100 m_goal = new Model100(0, 0);
     /** Remember that the outboard setpoint "winds up" i.e. it's not in [-pi,pi] */
@@ -54,10 +53,12 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     public OutboardAngularPositionServo(
             LoggerFactory parent,
             RotaryMechanism mech,
-            CombinedEncoder encoder) {
+            CombinedEncoder encoder,
+            Profile100 profile) {
         LoggerFactory child = parent.child(this);
         m_mechanism = mech;
         m_encoder = encoder;
+        m_profile = profile;
         m_log_goal = child.model100Logger(Level.TRACE, "goal (rad)");
         m_log_ff_torque = child.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
         m_log_measurement = child.doubleLogger(Level.TRACE, "measurement (rad)");
@@ -72,11 +73,6 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         if (position.isEmpty() || velocity.isEmpty())
             return;
         m_setpoint = new Control100(position.getAsDouble(), velocity.getAsDouble());
-    }
-
-    @Override
-    public void setProfile(Profile100 profile) {
-        m_profile = profile;
     }
 
     @Override
