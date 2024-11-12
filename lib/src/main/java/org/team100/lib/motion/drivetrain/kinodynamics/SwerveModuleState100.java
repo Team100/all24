@@ -26,7 +26,6 @@ public class SwerveModuleState100
     /**
      * Angle of the module. It can be empty, in cases where the angle is
      * indeterminate (e.g. calculating the angle required for zero speed).
-     * TODO: make this private
      */
     public Optional<Rotation2d> angle = Optional.empty();
 

@@ -14,6 +14,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDeltas;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
+import org.team100.lib.sensors.Gyro;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Util;
 
@@ -46,8 +47,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     public SwerveDrivePoseEstimator100(
             LoggerFactory parent,
             SwerveKinodynamics kinodynamics,
-            Rotation2d gyroAngle,
-            double gyroRateRad_S,
+            Gyro gyro,
             SwerveModulePositions modulePositions,
             Pose2d initialPoseMeters,
             double timestampSeconds) {
@@ -63,6 +63,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                                 initialPoseMeters,
                                 new FieldRelativeVelocity(0, 0, 0)),
                         modulePositions));
+        Rotation2d gyroAngle = gyro.getYawNWU();
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
         m_log_offset = child.rotation2dLogger(Level.TRACE, "GYRO OFFSET");
         m_log_pose_x = child.doubleLogger(Level.TRACE, "posex");
@@ -79,11 +80,11 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
     /** Empty the buffer and add the given measurements. */
     public void reset(
-            Rotation2d gyroAngle,
+            Gyro gyro,
             SwerveModulePositions modulePositions,
             Pose2d pose,
             double timestampSeconds) {
-
+        Rotation2d gyroAngle = gyro.getYawNWU();
         m_gyroOffset = pose.getRotation().minus(gyroAngle);
 
         // empty the buffer and add the current pose
@@ -178,7 +179,13 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
      * the gyro rate overrides the rate derived from the difference to the previous
      * state.
      */
-    public void put(
+    public void put(double currentTimeS,
+            Gyro gyro,
+            SwerveModulePositions wheelPositions) {
+        put(currentTimeS, gyro.getYawNWU(), gyro.getYawRateNWU(), wheelPositions);
+    }
+
+    void put(
             double currentTimeS,
             Rotation2d gyroAngle,
             double gyroRateRad_S,

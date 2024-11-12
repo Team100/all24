@@ -15,14 +15,13 @@ import org.team100.lib.logging.LoggerFactory.StringLogger;
 import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.sensors.Gyro;
 import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -38,7 +37,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      */
     private static final double GENTLE_OMEGA = Math.PI / 2;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
@@ -65,7 +63,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      * 
      * @param parent
      * @param swerveKinodynamics
-     * @param gyro
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
      * @param k                  full state gains
@@ -73,12 +70,10 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
     public ManualWithFullStateHeading(
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             double[] k) {
         LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_K = k;
         m_latch = new HeadingLatch();
@@ -95,19 +90,11 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         m_log_output_omega = child.doubleLogger(Level.TRACE, "output/omega");
     }
 
-    public void reset(Pose2d currentPose) {
+    @Override
+    public void reset(SwerveModel state) {
+        m_thetaSetpoint = state.theta().control();
         m_goal = null;
         m_latch.unlatch();
-        updateSetpoint(currentPose.getRotation().getRadians(), getYawRateNWURad_S());
-    }
-
-    private double getYawRateNWURad_S() {
-        return m_gyro.getYawRateNWU();
-    }
-
-    /** Call this to keep the setpoint in sync with the manual rotation. */
-    private void updateSetpoint(double x, double v) {
-        m_thetaSetpoint = new Control100(x, v);
     }
 
     /**
@@ -126,7 +113,9 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      */
     @Override
     public FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity twist1_1) {
-        Pose2d currentPose = state.pose();
+        Model100 thetaState = state.theta();
+        double yawMeasurement = thetaState.x();
+        double yawRate = thetaState.v();
 
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
@@ -135,10 +124,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
                 clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-
-        Rotation2d currentRotation = currentPose.getRotation();
-        double yawMeasurement = currentRotation.getRadians();
-        double yawRate = getYawRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
         m_goal = m_latch.latchedRotation(
@@ -158,14 +143,6 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
         // take the short path
         m_goal = new Rotation2d(
                 Math100.getMinDistance(yawMeasurement, m_goal.getRadians()));
-
-        // if this is the first run since the latch, then the setpoint should be
-        // whatever the measurement is
-        if (m_thetaSetpoint == null) {
-            // TODO: to avoid overshoot, maybe pick a setpoint that is feasible without
-            // overshoot?
-            updateSetpoint(yawMeasurement, yawRate);
-        }
 
         // in snap mode we take dx and dy from the user, and control dtheta.
         // the omega goal in snap mode is always zero.

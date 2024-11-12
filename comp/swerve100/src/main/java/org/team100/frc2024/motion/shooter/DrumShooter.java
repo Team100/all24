@@ -165,7 +165,8 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         pivotMotor,
                         new CANSparkEncoder(pivotLogger, pivotMotor),
                         kPivotReduction);
-                AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(pivotLogger, 0, 0.508753,
+                AS5048RotaryPositionSensor encoder = new AS5048RotaryPositionSensor(
+                        pivotLogger, 0, 0.508753,
                         EncoderDrive.DIRECT);
 
                 AngularPositionServo pivotAngleServo = new OnboardAngularPositionServo(
@@ -174,8 +175,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         encoder,
                         () -> profile,
                         pivotController);
-                pivotServo = new OutboardGravityServo(pivotAngleServo,
-                        5.0, // TODO: tune this
+                pivotServo = new OutboardGravityServo(
+                        pivotAngleServo,
+                        5.0,
                         0.0);
                 break;
             default:
@@ -210,8 +212,9 @@ public class DrumShooter extends SubsystemBase implements Glassy {
                         simEncoder,
                         () -> profile,
                         pivotController);
-                pivotServo = new OutboardGravityServo(simPivotAngleServo,
-                        5.0, // TODO: tune this
+                pivotServo = new OutboardGravityServo(
+                        simPivotAngleServo,
+                        5.0,
                         0.0);
         }
     }

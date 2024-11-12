@@ -5,8 +5,6 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
-import edu.wpi.first.math.geometry.Pose2d;
-
 public interface FieldRelativeDriver extends Glassy {
     /**
      * @param state from the drivetrain
@@ -15,6 +13,6 @@ public interface FieldRelativeDriver extends Glassy {
      */
     FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity input);
 
-    void reset(Pose2d p);
+    void reset(SwerveModel state);
 
 }

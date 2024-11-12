@@ -20,7 +20,6 @@ import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -172,23 +171,11 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         m_swerveLocal.stop();
     }
 
-    /** The effect won't be seen until the next cycle. */
-    public void resetTranslation(Translation2d translation) {
-        Util.warn("Make sure resetting the swerve module collection doesn't break anything");
-        m_swerveLocal.reset();
-        m_poseEstimator.reset(
-                m_gyro.getYawNWU(),
-                m_swerveLocal.positions(),
-                new Pose2d(translation, m_gyro.getYawNWU()),
-                Timer.getFPGATimestamp());
-        m_stateSupplier.reset();
-    }
-
     public void resetPose(Pose2d robotPose) {
         Util.warn("Make sure resetting the swerve module collection doesn't break anything");
         m_swerveLocal.reset();
         m_poseEstimator.reset(
-                m_gyro.getYawNWU(),
+                m_gyro,
                 m_swerveLocal.positions(),
                 robotPose,
                 Timer.getFPGATimestamp());
@@ -260,8 +247,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         // System.out.println("SwerveDriveSubsystem.update() " + now);
         m_poseEstimator.put(
                 now,
-                m_gyro.getYawNWU(),
-                m_gyro.getYawRateNWU(),
+                m_gyro,
                 m_swerveLocal.positions());
         m_cameras.update();
         return m_poseEstimator.get(now);

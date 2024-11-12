@@ -8,7 +8,6 @@ import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.DriveUtil;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -49,7 +48,7 @@ public class ManualChassisSpeeds implements ChassisSpeedDriver {
         return speeds;
     }
 
-    public void reset(Pose2d p) {
+    public void reset(SwerveModel p) {
         //
     }
 }

@@ -56,7 +56,7 @@ public class ShootSmartWithRotation extends Command implements Glassy  {
 
     @Override
     public void initialize() {
-        m_driver.reset(m_drive.getPose());
+        m_driver.reset(m_drive.getState());
     }
 
     @Override

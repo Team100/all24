@@ -23,7 +23,6 @@ import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
@@ -51,8 +50,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * 
  * TODO: replace the two PID controllers with simpler multiplication; see
  * ManualWithFullStateHeading for an example.
- * 
- * TODO: do more investigation into jitter,
  */
 public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
@@ -63,7 +60,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kRotationSpeed = 0.5;
 
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
@@ -96,7 +92,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
             FieldLogger.Log fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             PIDController thetaController,
             PIDController omegaController) {
         m_field_log = fieldLogger;
@@ -116,7 +111,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_log_omega_fb = child.doubleLogger(Level.TRACE, "omega/fb");
 
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_profile = new TrapezoidProfile100(
@@ -130,10 +124,10 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     }
 
     @Override
-    public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new Control100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
+    public void reset(SwerveModel state) {
+        m_thetaSetpoint = state.theta().control();
         m_ball = null;
-        m_prevPose = currentPose;
+        m_prevPose = state.pose();
         m_thetaController.reset();
         m_omegaController.reset();
         m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -154,7 +148,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
-        double yawRate = m_gyro.getYawRateNWU();
+        double yawRate = state.theta().v();
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get());
 

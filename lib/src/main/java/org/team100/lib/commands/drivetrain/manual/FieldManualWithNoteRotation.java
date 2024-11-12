@@ -19,7 +19,6 @@ import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
 import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
@@ -51,7 +50,6 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     private static final double kRotationSpeed = 0.5;
 
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     private final Supplier<Optional<Translation2d>> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
@@ -79,7 +77,6 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
             FieldLogger.Log fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             Supplier<Optional<Translation2d>> target,
             PIDController thetaController,
             PIDController omegaController,
@@ -97,7 +94,6 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         m_log_omega_fb = child.doubleLogger(Level.TRACE, "omega/fb");
 
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
@@ -109,10 +105,10 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
     }
 
     @Override
-    public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new Control100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
+    public void reset(SwerveModel state) {
+        m_thetaSetpoint = state.theta().control();
         m_ball = null;
-        m_prevPose = currentPose;
+        m_prevPose = state.pose();
         m_thetaController.reset();
         m_omegaController.reset();
     }
@@ -144,19 +140,18 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
             m_prevPose = state.pose();
             return twistWithLockM_S;
         }
-        Rotation2d currentRotation = state.pose().getRotation();
-        double yawRate = m_gyro.getYawRateNWU();
+        final double yaw = state.theta().x();
+        final double yawRate = state.theta().v();
         Translation2d currentTranslation = state.pose().getTranslation();
         Rotation2d bearing = TargetUtil.bearing(currentTranslation, target.get()).plus(GeometryUtil.kRotation180);
 
         // take the short path
-        double measurement = currentRotation.getRadians();
         bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, bearing.getRadians()));
+                Math100.getMinDistance(yaw, bearing.getRadians()));
 
         // make sure the setpoint uses the modulus close to the measurement.
         m_thetaSetpoint = new Control100(
-                Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
+                Math100.getMinDistance(yaw, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
 
         // the goal omega should match the target's apparent motion
@@ -171,9 +166,9 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
 
         double thetaFF = m_thetaSetpoint.v();
 
-        double thetaFB = m_thetaController.calculate(measurement, m_thetaSetpoint.x());
+        double thetaFB = m_thetaController.calculate(yaw, m_thetaSetpoint.x());
         m_log_theta_setpoint.log(() -> m_thetaSetpoint);
-        m_log_theta_measurement.log(() -> measurement);
+        m_log_theta_measurement.log(() -> yaw);
         m_log_theta_error.log(m_thetaController::getPositionError);
         m_log_theta_fb.log(() -> thetaFB);
 
@@ -194,7 +189,7 @@ public class FieldManualWithNoteRotation implements FieldRelativeDriver {
         if (m_trigger.getAsBoolean()) {
             m_ball = currentTranslation;
             // correct for newtonian relativity
-            m_ballV = new Translation2d(kBallVelocityM_S * TimedRobot100.LOOP_PERIOD_S, currentRotation)
+            m_ballV = new Translation2d(kBallVelocityM_S * TimedRobot100.LOOP_PERIOD_S, new Rotation2d(yaw))
                     .plus(FieldRelativeDelta.delta(m_prevPose, state.pose()).getTranslation());
         }
         if (m_ball != null) {
