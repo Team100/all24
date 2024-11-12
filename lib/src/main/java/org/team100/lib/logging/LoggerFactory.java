@@ -14,11 +14,13 @@ import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.localization.Blip24;
 import org.team100.lib.logging.primitive.PrimitiveLogger;
 import org.team100.lib.motion.arm.ArmAngles;
+import org.team100.lib.motion.drivetrain.SwerveControl;
 import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
+import org.team100.lib.state.Control100;
 import org.team100.lib.state.Model100;
 import org.team100.lib.state.State100;
 import org.team100.lib.timing.TimedPose;
@@ -710,6 +712,60 @@ public class LoggerFactory {
 
     public State100Logger state100Logger(Level level, String leaf) {
         return new State100Logger(level, leaf);
+    }
+
+    public class Control100Logger {
+        private final Level m_level;
+        private final DoubleLogger m_xLogger;
+        private final DoubleLogger m_vLogger;
+        private final DoubleLogger m_aLogger;
+
+        Control100Logger(Level level, String leaf) {
+            m_level = level;
+            m_xLogger = doubleLogger(level, join(leaf, "x"));
+            m_vLogger = doubleLogger(level, join(leaf, "v"));
+            m_aLogger = doubleLogger(level, join(leaf, "a"));
+        }
+
+        public void log(Supplier<Control100> vals) {
+            if (!allow(m_level))
+                return;
+            Control100 val = vals.get();
+            m_xLogger.log(val::x);
+            m_vLogger.log(val::v);
+            m_aLogger.log(val::a);
+        }
+    }
+
+    public Control100Logger control100Logger(Level level, String leaf) {
+        return new Control100Logger(level, leaf);
+    }
+
+    public class SwerveControlLogger {
+        private final Level m_level;
+        private final Control100Logger m_xLogger;
+        private final Control100Logger m_yLogger;
+        private final Control100Logger m_thetaLogger;
+
+        SwerveControlLogger(Level level, String leaf) {
+            m_level = level;
+            m_xLogger = control100Logger(level, join(leaf, "x"));
+            m_yLogger = control100Logger(level, join(leaf, "y"));
+            m_thetaLogger = control100Logger(level, join(leaf, "theta"));
+        }
+
+        public void log(Supplier<SwerveControl> vals) {
+            if (!allow(m_level))
+                return;
+            SwerveControl val = vals.get();
+            m_xLogger.log(val::x);
+            m_yLogger.log(val::y);
+            m_thetaLogger.log(val::theta);
+        }
+    }
+
+    public SwerveControlLogger swerveControlLogger(Level level, String leaf) {
+        return new SwerveControlLogger(level, leaf);
     }
 
     public class SwerveStateLogger {

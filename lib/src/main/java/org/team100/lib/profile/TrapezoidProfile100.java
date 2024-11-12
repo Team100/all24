@@ -74,7 +74,7 @@ public class TrapezoidProfile100 implements Profile100 {
         return new TrapezoidProfile100(m_maxVelocity, s * m_maxAcceleration, m_tolerance);
     }
 
-    public double solve(double dt, State100 i, State100 g, double eta, double etaTolerance) {
+    public double solve(double dt, Model100 i, Model100 g, double eta, double etaTolerance) {
         return solveForSlowerETA(
                 m_maxVelocity,
                 m_maxAcceleration,
@@ -166,7 +166,7 @@ public class TrapezoidProfile100 implements Profile100 {
             double extraSpeed = initialRaw.v() - m_maxVelocity;
             double extraTime = extraSpeed / m_maxAcceleration;
             double brakingDistance = 0.5 * extraSpeed * extraTime + m_maxVelocity * extraTime;
-            State100 afterBraking = new State100(initialRaw.x() + brakingDistance, m_maxVelocity, -m_maxAcceleration);
+            Model100 afterBraking = new Model100(initialRaw.x() + brakingDistance, m_maxVelocity);
             ResultWithETA remainder = calculateWithETA(dt, afterBraking, goalRaw);
             return new ResultWithETA(result, extraTime + remainder.etaS());
         }
@@ -178,21 +178,21 @@ public class TrapezoidProfile100 implements Profile100 {
             double extraSpeed = -1.0 * initialRaw.v() - m_maxVelocity;
             double extraTime = extraSpeed / m_maxAcceleration;
             double brakingDistance = 0.5 * extraSpeed * extraTime + m_maxVelocity * extraTime;
-            State100 afterBraking = new State100(initialRaw.x() - brakingDistance, -m_maxVelocity, m_maxAcceleration);
+            Model100 afterBraking = new Model100(initialRaw.x() - brakingDistance, -m_maxVelocity);
             ResultWithETA remainder = calculateWithETA(dt, afterBraking, goalRaw);
             return new ResultWithETA(result, extraTime + remainder.etaS());
         }
-        State100 initial = initialRaw;
+        Model100 initial = initialRaw;
         // Too-high goal speed is not allowed
         if (goalRaw.v() > m_maxVelocity || goalRaw.v() < -m_maxVelocity) {
             Util.warn("Goal velocity is higher than profile velocity");
         }
-        State100 goal = limitVelocity(goalRaw);
+        Model100 goal = limitVelocity(goalRaw);
 
         if (goal.near(initial, m_tolerance)) {
             if (DEBUG)
                 Util.printf("at goal\n");
-            return new ResultWithETA(goal, 0);
+            return new ResultWithETA(goal.control(), 0);
         }
 
         // Calculate the ETA to each switch point, or NaN if there's no valid path.
@@ -201,7 +201,7 @@ public class TrapezoidProfile100 implements Profile100 {
 
         if (Double.isNaN(t1IminusGplus) && Double.isNaN(t1IplusGminus)) {
             Util.warn("Both I-G+ and I+G- are NaN, this should never happen");
-            return new ResultWithETA(initial, 0);
+            return new ResultWithETA(initial.control(), 0);
         }
 
         if (Double.isNaN(t1IplusGminus)) {
@@ -255,14 +255,13 @@ public class TrapezoidProfile100 implements Profile100 {
     }
 
     /** Clamp state velocity to the profile limit. */
-    private State100 limitVelocity(final State100 s) {
-        return new State100(
+    private Model100 limitVelocity(final Model100 s) {
+        return new Model100(
                 s.x(),
-                MathUtil.clamp(s.v(), -m_maxVelocity, m_maxVelocity),
-                s.a());
+                MathUtil.clamp(s.v(), -m_maxVelocity, m_maxVelocity));
     }
 
-    private ResultWithETA handleIplus(double dt, State100 initial, State100 goal, double timeToSwitch) {
+    private ResultWithETA handleIplus(double dt, Model100 initial, Model100 goal, double timeToSwitch) {
         if (MathUtil.isNear(timeToSwitch, 0, 1e-12)) {
             // switch eta is zero: go to the goal via G-
             if (DEBUG)
@@ -286,7 +285,7 @@ public class TrapezoidProfile100 implements Profile100 {
             double x = initial.x()
                     + initial.v() * timeToCruise
                     + 0.5 * m_maxAcceleration * Math.pow(timeToCruise, 2);
-            State100 nextState = new State100(x, m_maxVelocity, m_maxAcceleration);
+            Model100 nextState = new Model100(x, m_maxVelocity);
             ResultWithETA r = keepCruising(dt - timeToCruise, nextState, goal);
             // return the next state with the total ETA.
             return new ResultWithETA(r.state(), timeToCruise + r.etaS());
@@ -310,7 +309,7 @@ public class TrapezoidProfile100 implements Profile100 {
         if (DEBUG)
             Util.printf("go cruise\n");
         Control100 cruisePoint = full(timeToCruise, initial, 1);
-        ResultWithETA remainingCruise = keepCruising(dt, cruisePoint, goal);
+        ResultWithETA remainingCruise = keepCruising(dt, cruisePoint.model(), goal);
         return new ResultWithETA(result, timeToCruise + remainingCruise.etaS());
     }
 
@@ -318,7 +317,7 @@ public class TrapezoidProfile100 implements Profile100 {
      * t1 is the time to the I-G+ switch point, which might be beyond the velocity
      * constraint.
      */
-    private ResultWithETA handleIminus(double dt, State100 initial, State100 goal, double timeToSwitch) {
+    private ResultWithETA handleIminus(double dt, Model100 initial, Model100 goal, double timeToSwitch) {
 
         if (MathUtil.isNear(timeToSwitch, 0, 1e-12)) {
             // Switch ETA is zero: go to the goal via G+
@@ -338,7 +337,7 @@ public class TrapezoidProfile100 implements Profile100 {
             double x = initial.x()
                     + initial.v() * timeToCruise
                     - 0.5 * m_maxAcceleration * Math.pow(timeToCruise, 2);
-            State100 nextState = new State100(x, -m_maxVelocity, -m_maxAcceleration);
+            Model100 nextState = new Model100(x, -m_maxVelocity);
             ResultWithETA r = keepCruisingMinus(dt - timeToCruise, nextState, goal);
             return new ResultWithETA(r.state(), timeToCruise + r.etaS());
         }
@@ -358,12 +357,12 @@ public class TrapezoidProfile100 implements Profile100 {
         }
         // we hit cruise first
         Control100 cruisePoint = full(timeToCruise, initial, -1);
-        ResultWithETA remainingCruise = keepCruisingMinus(dt, cruisePoint, goal);
+        ResultWithETA remainingCruise = keepCruisingMinus(dt, cruisePoint.model(), goal);
         return new ResultWithETA(result, timeToCruise + remainingCruise.etaS());
     }
 
     /** At positive cruising speed, keep going. */
-    ResultWithETA keepCruising(double dt, State100 initial, State100 goal) {
+    ResultWithETA keepCruising(double dt, Model100 initial, Model100 goal) {
         if (DEBUG)
             Util.printf("keep cruising %s\n", initial);
 
@@ -394,19 +393,19 @@ public class TrapezoidProfile100 implements Profile100 {
             double tremaining = dt - durationToGMinus;
             if (DEBUG)
                 Util.printf("tremaining %6.3f\n", tremaining);
-            ResultWithETA r = calculateWithETA(tremaining, new State100(gminus, m_maxVelocity), goal);
+            ResultWithETA r = calculateWithETA(tremaining, new Model100(gminus, m_maxVelocity), goal);
             // the total ETA is the time to G-, plus the time *on* G-
             return new ResultWithETA(r.state(), durationToGMinus + r.etaS());
         }
         // we won't reach G-, so cruise for all of dt.
-        return new ResultWithETA(new State100(
+        return new ResultWithETA(new Control100(
                 initial.x() + m_maxVelocity * dt,
                 m_maxVelocity,
                 0),
                 durationToGMinus + durationFromGMinusToGoal);
     }
 
-    ResultWithETA keepCruisingMinus(double dt, State100 initial, State100 goal) {
+    ResultWithETA keepCruisingMinus(double dt, Model100 initial, Model100 goal) {
         // We're already at negative cruising speed, which means G+ is next.
         // will we reach it during dt?
         double c_plus = c_plus(goal);
@@ -425,11 +424,11 @@ public class TrapezoidProfile100 implements Profile100 {
         double durationFromGPlusToGoal = durationAtMaxA(m_maxVelocity, goal.v());
         if (durationToGPlus < dt) {
             double tremaining = dt - durationToGPlus;
-            ResultWithETA r = calculateWithETA(tremaining, new State100(gplus, -m_maxVelocity), goal);
+            ResultWithETA r = calculateWithETA(tremaining, new Model100(gplus, -m_maxVelocity), goal);
             return new ResultWithETA(r.state(), durationToGPlus + r.etaS());
         }
         // we won't reach G+, so cruise for all of dt
-        return new ResultWithETA(new State100(
+        return new ResultWithETA(new Control100(
                 initial.x() - m_maxVelocity * dt,
                 -m_maxVelocity,
                 0),
@@ -440,7 +439,7 @@ public class TrapezoidProfile100 implements Profile100 {
      * Travel to the switching point, and then the remainder of time on the goal
      * path.
      */
-    private ResultWithETA traverseSwitch(double dt, State100 in_initial, final State100 goal, double t1,
+    private ResultWithETA traverseSwitch(double dt, Model100 in_initial, final Model100 goal, double t1,
             double direction) {
         if (DEBUG)
             Util.printf("traverse switch\n");
@@ -452,7 +451,7 @@ public class TrapezoidProfile100 implements Profile100 {
         double t2 = dt - t1;
         // just use the same method for the second part
         // note this is slower than the code below so maybe put it back
-        State100 s = new State100(x, v);
+        Model100 s = new Model100(x, v);
         if (DEBUG)
             Util.printf("switch state %s\n", s);
 
@@ -461,7 +460,7 @@ public class TrapezoidProfile100 implements Profile100 {
     }
 
     /** Returns a shorter dt to avoid overshooting the goal state. */
-    private double truncateDt(double dt, State100 in_initial, State100 in_goal) {
+    private double truncateDt(double dt, Model100 in_initial, Model100 in_goal) {
         double dtg = durationAtMaxA(in_initial.v(), in_goal.v());
         return Math.min(dt, dtg);
     }
@@ -481,7 +480,7 @@ public class TrapezoidProfile100 implements Profile100 {
      * direction to go and when you're sure you can proceed for the whole dt time
      * period.
      */
-    private Control100 full(double dt, State100 in_initial, double direction) {
+    private Control100 full(double dt, Model100 in_initial, double direction) {
         if (DEBUG)
             Util.printf("full x_i %s\n", in_initial);
         double x = in_initial.x() + in_initial.v() * dt

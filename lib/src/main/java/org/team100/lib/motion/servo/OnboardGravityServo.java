@@ -4,14 +4,15 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.encoder.RotaryPositionSensor;
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.profile.NullProfile;
-import org.team100.lib.profile.Profile100;
-import org.team100.lib.state.State100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
+import org.team100.lib.logging.LoggerFactory.Model100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.profile.NullProfile;
+import org.team100.lib.profile.Profile100;
+import org.team100.lib.state.Control100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -49,8 +50,8 @@ public class OnboardGravityServo implements GravityServoInterface {
     private final DoubleLogger m_log_u_TOTAL;
     private final DoubleLogger m_log_Measurement_position;
     private final DoubleLogger m_log_Measurement_velocity;
-    private final State100Logger m_log_Goal;
-    private final State100Logger m_log_Setpoint;
+    private final Control100Logger m_log_Goal;
+    private final Control100Logger m_log_Setpoint;
     private final DoubleLogger m_log_Controller_Position_Error;
     private final DoubleLogger m_log_Controller_Velocity_Error;
     private final DoubleLogger m_log_periodic_Measurement_position;
@@ -58,7 +59,7 @@ public class OnboardGravityServo implements GravityServoInterface {
 
     /** Profile may be updated at runtime. */
     private Profile100 m_profile = new NullProfile();
-    private State100 m_setpointRad = new State100(0, 0);
+    private Control100 m_setpointRad = new Control100(0, 0);
 
     /** Remember to set a profile! */
     public OnboardGravityServo(
@@ -73,8 +74,8 @@ public class OnboardGravityServo implements GravityServoInterface {
         m_log_u_TOTAL = child.doubleLogger(Level.TRACE, "u_TOTAL");
         m_log_Measurement_position = child.doubleLogger(Level.TRACE, "Measurement position (rad)");
         m_log_Measurement_velocity = child.doubleLogger(Level.TRACE, "Measurement velocity (rad_s)");
-        m_log_Goal = child.state100Logger(Level.TRACE, "Goal (rad)");
-        m_log_Setpoint = child.state100Logger(Level.TRACE, "Setpoint (rad)");
+        m_log_Goal = child.control100Logger(Level.TRACE, "Goal (rad)");
+        m_log_Setpoint = child.control100Logger(Level.TRACE, "Setpoint (rad)");
         m_log_Controller_Position_Error = child.doubleLogger(Level.TRACE, "Controller Position Error (rad)");
         m_log_Controller_Velocity_Error = child.doubleLogger(Level.TRACE, "Controller Velocity Error (rad_s)");
         m_log_periodic_Measurement_position = child.doubleLogger(Level.TRACE, "periodic Measurement position (rad)");
@@ -96,7 +97,7 @@ public class OnboardGravityServo implements GravityServoInterface {
             Util.warn("GravityServo: Broken sensor!");
             return;
         }
-        m_setpointRad = new State100(optPos.getAsDouble(), optVel.getAsDouble());
+        m_setpointRad = new Control100(optPos.getAsDouble(), optVel.getAsDouble());
     }
 
     @Override
@@ -110,7 +111,7 @@ public class OnboardGravityServo implements GravityServoInterface {
 
     /** allow moving end-state */
     @Override
-    public void setState(State100 goal) {
+    public void setState(Control100 goal) {
         OptionalDouble optPos = getPositionRad();
         OptionalDouble optVel = getVelocityRad_S();
         if (optPos.isEmpty() || optVel.isEmpty()) {
@@ -120,7 +121,7 @@ public class OnboardGravityServo implements GravityServoInterface {
         double mechanismPositionRad = optPos.getAsDouble();
         double mechanismVelocityRad_S = optVel.getAsDouble();
 
-        m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad, goal);
+        m_setpointRad = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpointRad.model(), goal.model());
 
         final double u_FB = MathUtil.applyDeadband(
                 m_filter.calculate(m_controller.calculate(mechanismPositionRad, m_setpointRad.x())),

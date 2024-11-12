@@ -27,7 +27,7 @@ public class OscillateForceField extends Command implements Glassy {
     private final HolonomicFieldRelativeController m_controller;
     private final double m_offsetM;
 
-    private SwerveState m_goal;
+    private SwerveModel m_goal;
 
     public OscillateForceField(
             SwerveDriveSubsystem swerve,
@@ -47,7 +47,7 @@ public class OscillateForceField extends Command implements Glassy {
 
         Pose2d endPose = startPose.plus(new Transform2d(m_offsetM, 0, new Rotation2d()));
 
-        m_goal = new SwerveState(endPose);
+        m_goal = new SwerveModel(endPose);
     }
 
     @Override

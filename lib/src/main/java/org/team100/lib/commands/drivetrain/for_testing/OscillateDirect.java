@@ -9,7 +9,6 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.util.ParabolicWave;
@@ -50,7 +49,7 @@ public class OscillateDirect extends Command implements Glassy {
     private final DoubleLogger m_log_measurement_speed;
     private final DoubleLogger m_log_measurement_position;
 
-    SwerveState m_initial;
+    SwerveModel m_initial;
 
     public OscillateDirect(LoggerFactory parent, SwerveDriveSubsystem swerve) {
         LoggerFactory child = parent.child(this);

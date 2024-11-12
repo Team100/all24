@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class AmpState extends Command implements Glassy  {
     private final AmpPivot m_pivot;
-    private final State100 m_goal;
+    private final Model100 m_goal;
     private final Profile100 m_profile;
     private final double m_torqueLimit;
     private final double m_toleranceRad;
@@ -26,7 +26,7 @@ public class AmpState extends Command implements Glassy  {
 
     public AmpState(
             AmpPivot pivot,
-            State100 goal,
+            Model100 goal,
             Profile100 profile,
             double torqueLimit,
             double toleranceRad,
@@ -56,7 +56,7 @@ public class AmpState extends Command implements Glassy  {
             // don't pulse the output if we're going to be "finished"
             return;
         }
-        m_pivot.setAmpState(m_goal);
+        m_pivot.setAmpState(m_goal.control());
     }
 
     // depend on the SelectCommand to decide when to switch, and

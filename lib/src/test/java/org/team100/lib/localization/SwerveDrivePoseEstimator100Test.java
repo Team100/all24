@@ -695,7 +695,7 @@ class SwerveDrivePoseEstimator100Test {
                             .minus(trajectory.getInitialPose().getRotation()),
                     0,
                     positions);
-            SwerveState xHat = estimator.get(t);
+            SwerveModel xHat = estimator.get(t);
 
             double error = groundTruthState.poseMeters.getTranslation().getDistance(xHat.pose().getTranslation());
             if (error > maxError) {

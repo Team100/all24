@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain.for_testing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveControl;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -53,7 +53,7 @@ class DriveInACircleTest {
         double initialRotation = 0;
         double turnRatio = 0;
 
-        SwerveState reference = DriveInACircle.getReference(
+        SwerveControl reference = DriveInACircle.getReference(
                 m_center,
                 radiusM,
                 m_angle,
@@ -94,7 +94,7 @@ class DriveInACircleTest {
         double initialRotation = 0;
         double turnRatio = 0;
 
-        SwerveState reference = DriveInACircle.getReference(
+        SwerveControl reference = DriveInACircle.getReference(
                 m_center,
                 radiusM,
                 m_angle,
@@ -135,7 +135,7 @@ class DriveInACircleTest {
         double initialRotation = 0;
         double turnRatio = 0;
 
-        SwerveState reference = DriveInACircle.getReference(
+        SwerveControl reference = DriveInACircle.getReference(
                 m_center,
                 radiusM,
                 m_angle,
@@ -176,7 +176,7 @@ class DriveInACircleTest {
         double initialRotation = 0;
         double turnRatio = 0;
 
-        SwerveState reference = DriveInACircle.getReference(
+        SwerveControl reference = DriveInACircle.getReference(
                 m_center,
                 radiusM,
                 m_angle,
@@ -217,7 +217,7 @@ class DriveInACircleTest {
         double initialRotation = 0;
         double turnRatio = 0;
 
-        SwerveState reference = DriveInACircle.getReference(
+        SwerveControl reference = DriveInACircle.getReference(
                 m_center,
                 radiusM,
                 m_angle,
@@ -258,7 +258,7 @@ class DriveInACircleTest {
         double initialRotation = 0;
         double turnRatio = 0;
 
-        SwerveState reference = DriveInACircle.getReference(
+        SwerveControl reference = DriveInACircle.getReference(
                 m_center,
                 radiusM,
                 m_angle,
@@ -299,7 +299,7 @@ class DriveInACircleTest {
         double initialRotation = 0;
         double turnRatio = 0;
 
-        SwerveState reference = DriveInACircle.getReference(
+        SwerveControl reference = DriveInACircle.getReference(
                 m_center,
                 radiusM,
                 m_angle,

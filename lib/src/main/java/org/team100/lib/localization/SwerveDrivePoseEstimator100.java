@@ -10,7 +10,6 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -64,10 +63,9 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 timestampSeconds,
                 new InterpolationRecord(
                         m_kinodynamics.getKinematics(),
-                        new SwerveState(
+                        new SwerveModel(
                                 initialPoseMeters,
-                                new FieldRelativeVelocity(0, 0, 0),
-                                new FieldRelativeAcceleration(0, 0, 0)),
+                                new FieldRelativeVelocity(0, 0, 0)),
                         gyroAngle,
                         gyroRateRad_S,
                         modulePositions));
@@ -100,10 +98,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 timestampSeconds,
                 new InterpolationRecord(
                         m_kinodynamics.getKinematics(),
-                        new SwerveState(
-                                pose,
-                                new FieldRelativeVelocity(0, 0, 0),
-                                new FieldRelativeAcceleration(0, 0, 0)),
+                        new SwerveModel(pose, new FieldRelativeVelocity(0, 0, 0)),
                         gyroAngle,
                         gyroRate,
                         modulePositions));
@@ -172,7 +167,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 timestampS,
                 new InterpolationRecord(
                         m_kinodynamics.getKinematics(),
-                        new SwerveState(newPose, sample.m_state.velocity(), sample.m_state.acceleration()),
+                        new SwerveModel(newPose, sample.m_state.velocity()),
                         sample.m_gyroAngle,
                         sample.m_gyroRateRad_S,
                         sample.m_wheelPositions));
@@ -225,7 +220,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
 
         double t1 = currentTimeS - lowerEntry.getKey();
         InterpolationRecord value = lowerEntry.getValue();
-        SwerveState previousState = value.m_state;
+        SwerveModel previousState = value.m_state;
 
         SwerveModuleDeltas modulePositionDelta = DriveUtil.modulePositionDelta(
                 value.m_wheelPositions,
@@ -273,18 +268,19 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             double t0 = lowerEntry.getKey() - earlierEntry.getKey();
             // System.out.println("SwerveDrivePoseEstimator.put() accel " + accel);
 
-            SwerveState earlierState = earlierEntry.getValue().m_state;
+            SwerveModel earlierState = earlierEntry.getValue().m_state;
             FieldRelativeVelocity v0 = FieldRelativeVelocity.velocity(earlierState.pose(), previousState.pose(), t0);
             accel = velocity.accel(v0, t1);
             // System.out.println("SwerveDrivePoseEstimator.put() final accel 2 " + accel);
         }
 
-        SwerveState swerveState = new SwerveState(newPose, velocity, accel);
+        // 11/11/24, no more accel here.
+        SwerveModel swerveState = new SwerveModel(newPose, velocity);
 
         m_poseBuffer.put(
                 currentTimeS,
                 new InterpolationRecord(
-                    m_kinodynamics.getKinematics(), swerveState, gyroAngle, gyroRateRad_S, wheelPositions));
+                        m_kinodynamics.getKinematics(), swerveState, gyroAngle, gyroRateRad_S, wheelPositions));
     }
 
     ///////////////////////////////////////

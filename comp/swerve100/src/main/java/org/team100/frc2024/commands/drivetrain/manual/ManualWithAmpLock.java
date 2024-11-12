@@ -7,17 +7,19 @@ import org.team100.lib.commands.drivetrain.manual.FieldRelativeDriver;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.logging.FieldLogger;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.Model100Logger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.Gyro;
-import org.team100.lib.state.State100;
-import org.team100.lib.logging.FieldLogger;
-import org.team100.lib.logging.Level;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 
@@ -56,18 +58,18 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
 
     // LOGGERS
     private final DoubleLogger m_log_apparent_motion;
-    private final State100Logger m_log_theta_setpoint;
+    private final Control100Logger m_log_theta_setpoint;
     private final DoubleLogger m_log_theta_measurement;
     private final DoubleLogger m_log_theta_error;
     private final DoubleLogger m_log_theta_fb;
-    private final State100Logger m_log_omega_reference;
+    private final Model100Logger m_log_omega_reference;
     private final DoubleLogger m_log_omega_measurement;
     private final DoubleLogger m_log_omega_error;
     private final DoubleLogger m_log_omega_fb;
     private final FieldLogger.Log m_field_log;
 
 
-    private State100 m_thetaSetpoint;
+    private Control100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
 
@@ -81,11 +83,11 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         m_field_log = fieldLogger;
         LoggerFactory child = parent.child(this);
         m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
-        m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
+        m_log_theta_setpoint = child.control100Logger(Level.TRACE, "theta/setpoint");
         m_log_theta_measurement = child.doubleLogger(Level.TRACE, "theta/measurement");
         m_log_theta_error = child.doubleLogger(Level.TRACE, "theta/error");
         m_log_theta_fb = child.doubleLogger(Level.TRACE, "theta/fb");
-        m_log_omega_reference = child.state100Logger(Level.TRACE, "omega/reference");
+        m_log_omega_reference = child.model100Logger(Level.TRACE, "omega/reference");
         m_log_omega_measurement = child.doubleLogger(Level.TRACE, "omega/measurement");
         m_log_omega_error = child.doubleLogger(Level.TRACE, "omega/error");
         m_log_omega_fb = child.doubleLogger(Level.TRACE, "omega/fb");
@@ -102,7 +104,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
 
     @Override
     public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
+        m_thetaSetpoint = new Control100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
         m_ball = null;
         m_thetaController.reset();
         m_omegaController.reset();
@@ -117,7 +119,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
      * @return feasible field-relative velocity in m/s and rad/s
      */
     @Override
-    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity input) {
+    public FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity input) {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
@@ -137,7 +139,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
                 Math100.getMinDistance(measurement, bearing.getRadians()));
 
         // make sure the setpoint uses the modulus close to the measurement.
-        m_thetaSetpoint = new State100(
+        m_thetaSetpoint = new Control100(
                 Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
 
@@ -145,9 +147,9 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         double targetMotion = TargetUtil.targetMotion(state, target);
         m_log_apparent_motion.log(() -> targetMotion);
 
-        State100 goal = new State100(bearing.getRadians(), targetMotion);
+        Model100 goal = new Model100(bearing.getRadians(), targetMotion);
 
-        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint.model(), goal);
 
         // this is user input scaled to m/s and rad/s
         FieldRelativeVelocity scaledInput = DriveUtil.scale(
@@ -164,7 +166,7 @@ public class ManualWithAmpLock implements FieldRelativeDriver {
         m_log_theta_fb.log(() -> thetaFB);
 
         double omegaFB = m_omegaController.calculate(yawRate, m_thetaSetpoint.v());
-        m_log_omega_reference.log(() -> m_thetaSetpoint);
+        m_log_omega_reference.log(() -> m_thetaSetpoint.model());
         m_log_omega_measurement.log(() -> yawRate);
         m_log_omega_error.log(m_omegaController::getPositionError);
         m_log_omega_fb.log(() -> omegaFB);

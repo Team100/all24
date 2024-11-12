@@ -18,7 +18,7 @@ import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -96,7 +96,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
             command.execute();
             double measurement = fixture.drive.getSwerveLocal().states().frontLeft().angle.get().getRadians();
             SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates().frontLeft();
-            State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
+            Control100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
                 Util.printf("goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",

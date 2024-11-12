@@ -11,6 +11,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.testing.Timeless;
 
@@ -42,8 +43,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(GeometryUtil.kRotationZero);
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(GeometryUtil.kRotationZero);
             }
         };
 
@@ -95,8 +96,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(-Math.PI / 4));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(-Math.PI / 4));
             }
         };
 
@@ -174,8 +175,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(3 * Math.PI / 4));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(3 * Math.PI / 4));
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
@@ -218,8 +219,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(Math.PI));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(Math.PI));
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
@@ -259,8 +260,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(Math.PI));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(Math.PI));
             }
         };
 
@@ -302,8 +303,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(Math.PI));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(Math.PI));
             }
         };
 
@@ -348,8 +349,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(Math.PI));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(Math.PI));
             }
         };
 
@@ -391,8 +392,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(Math.PI));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(Math.PI));
             }
         };
 
@@ -434,8 +435,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(-3 * Math.PI / 4));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(-3 * Math.PI / 4));
             }
         };
 
@@ -477,8 +478,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(3 * Math.PI / 4));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(3 * Math.PI / 4));
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
@@ -520,8 +521,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(3 * Math.PI / 4));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(3 * Math.PI / 4));
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(
@@ -563,8 +564,8 @@ class VisionDataProviderTest implements Timeless {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(3 * Math.PI / 4));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(3 * Math.PI / 4));
             }
         };
         VisionDataProvider24 vdp = new VisionDataProvider24(

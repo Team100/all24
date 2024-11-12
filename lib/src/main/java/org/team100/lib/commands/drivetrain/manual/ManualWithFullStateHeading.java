@@ -12,7 +12,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.logging.LoggerFactory.StringLogger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.sensors.Gyro;
@@ -124,7 +124,8 @@ public class ManualWithFullStateHeading implements FieldRelativeDriver {
      * @param twist1_1 control units, [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
-    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity twist1_1) {
+    @Override
+    public FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity twist1_1) {
         Pose2d currentPose = state.pose();
 
         // clip the input to the unit circle

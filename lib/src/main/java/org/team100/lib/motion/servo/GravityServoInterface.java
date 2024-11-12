@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 
 // this is for refactoring the gravity servo
 public interface GravityServoInterface extends Glassy {
@@ -16,7 +16,7 @@ public interface GravityServoInterface extends Glassy {
 
     /** set position with zero velocity */
     default void setPosition(double goalRad) {
-        setState(new State100(goalRad, 0));
+        setState(new Control100(goalRad, 0));
     }
 
     /**
@@ -28,7 +28,7 @@ public interface GravityServoInterface extends Glassy {
     void setEncoderPosition(double positionRad);
 
     /** allow moving end-state */
-    void setState(State100 goal);
+    void setState(Control100 goal);
 
     void stop();
 

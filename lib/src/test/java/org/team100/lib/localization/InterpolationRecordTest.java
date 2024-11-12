@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -22,7 +22,7 @@ class InterpolationRecordTest {
     void testInterp0() {
         // initially at rest, finally in motion.
         // what does the interpolator do?
-        SwerveState s0 = new SwerveState();
+        SwerveModel s0 = new SwerveModel();
         SwerveModulePositions p0 = new SwerveModulePositions(
                 new SwerveModulePosition100(0, Optional.empty()),
                 new SwerveModulePosition100(0, Optional.empty()),
@@ -42,7 +42,7 @@ class InterpolationRecordTest {
         // so
         // 1 = 1/2 * 1 * t; t = 2, a = 0.5.
 
-        SwerveState s1 = new SwerveState(new State100(), new State100(), new State100(1, 1, 0));
+        SwerveModel s1 = new SwerveModel(new Model100(), new Model100(), new Model100(1, 1));
         SwerveModulePositions p1 = new SwerveModulePositions(
                 new SwerveModulePosition100(Math.sqrt(2) / 2, Optional.of(new Rotation2d())),
                 new SwerveModulePosition100(Math.sqrt(2) / 2, Optional.of(new Rotation2d())),
@@ -56,7 +56,7 @@ class InterpolationRecordTest {
         assertEquals(1, r1.m_state.theta().v(), 0.001);
 
         {
-            // t=0 should return r0.  note "t" is not time
+            // t=0 should return r0. note "t" is not time
             InterpolationRecord lerp = r0.interpolate(r1, 0.0);
             assertEquals(0, lerp.m_gyroAngle.getRadians(), 0.001);
             assertEquals(0, lerp.m_gyroRateRad_S, 0.001);
@@ -70,9 +70,9 @@ class InterpolationRecordTest {
             assertEquals(1, lerp.m_state.theta().v(), 0.001);
         }
         {
-            // what about t=0.5?  a is constant, so the angle goes
+            // what about t=0.5? a is constant, so the angle goes
             // as t^2 ...
-            // which is not what we do.  this is just linear in all
+            // which is not what we do. this is just linear in all
             // dimensions which is not consistent but better than 0 or 1.
             InterpolationRecord lerp = r0.interpolate(r1, 0.5);
             assertEquals(0.5, lerp.m_gyroAngle.getRadians(), 0.001);

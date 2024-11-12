@@ -49,6 +49,10 @@ public class SwerveModel {
         this(new Model100(), new Model100(), new Model100());
     }
 
+    public SwerveControl control() {
+        return new SwerveControl(m_x.control(), m_y.control(), m_theta.control());
+    }
+
     public SwerveModel withTheta(double theta) {
         return new SwerveModel(m_x, m_y, new Model100(theta, m_theta.v()));
     }

@@ -6,10 +6,11 @@ import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.state.State100;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -41,25 +42,25 @@ class MinTimeControllerTest {
                 0.1, // finish
                 new double[] { 10.0, 10.0 } // k
         );
-        State100 goal = new State100();
-        State100 initial = new State100(1, 0);
+        Model100 goal = new Model100();
+        Model100 initial = new Model100(1, 0);
 
         // measurements are substantially delayed.
-        Queue<State100> queue = new LinkedList<>();
+        Queue<Model100> queue = new LinkedList<>();
         double delay = 0.1;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initial);
         }
 
-        State100 actualCurrentState = initial;
+        Model100 actualCurrentState = initial;
 
         for (int i = 0; i < 500; ++i) {
-            State100 delayedMeasurement = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurement, goal);
+            Model100 delayedMeasurement = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurement, goal);
             double tSec = i * kDt;
-            State100 newState = applyAccelOnly(tSec, actualCurrentState, u);
-            queue.add(newState);
-            actualCurrentState = newState;
+            Control100 newState = applyAccelOnly(tSec, actualCurrentState, u);
+            queue.add(newState.model());
+            actualCurrentState = newState.model();
             // System.out.println(u);
         }
     }
@@ -83,25 +84,25 @@ class MinTimeControllerTest {
                 0.1, // finish
                 new double[] { 10.0, 10.0 } // k
         );
-        State100 goal = new State100();
-        State100 initial = new State100(1, 0);
+        Model100 goal = new Model100();
+        Model100 initial = new Model100(1, 0);
 
         // measurements are substantially delayed.
-        Queue<State100> queue = new LinkedList<>();
+        Queue<Model100> queue = new LinkedList<>();
         double delay = 0.1;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initial);
         }
 
-        State100 actualCurrentState = initial;
+        Model100 actualCurrentState = initial;
 
         for (int i = 0; i < 500; ++i) {
-            State100 delayedMeasurement = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurement, goal);
+            Model100 delayedMeasurement = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurement, goal);
             double tSec = i * kDt;
-            State100 newState = applyVelocityOnly(tSec, actualCurrentState, u);
-            queue.add(newState);
-            actualCurrentState = newState;
+            Control100 newState = applyVelocityOnly(tSec, actualCurrentState, u);
+            queue.add(newState.model());
+            actualCurrentState = newState.model();
         }
     }
 
@@ -118,28 +119,28 @@ class MinTimeControllerTest {
                 1.0, // strongI
                 0, 0.1, new double[] { 10.0, 10.0 });
         // almost -pi
-        State100 initialRad = new State100(-3, 0);
+        Model100 initialRad = new Model100(-3, 0);
         // almost pi
-        State100 goalRad = new State100(3, 0);
+        Model100 goalRad = new Model100(3, 0);
 
         // measurements are substantially delayed.
-        Queue<State100> queue = new LinkedList<>();
+        Queue<Model100> queue = new LinkedList<>();
         // double delay = 0.1;
         double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
 
-        State100 actualCurrentStateRad = initialRad;
+        Model100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
         final int iterations = 400;
         final double noise = 0.0;
 
         for (int i = 0; i < iterations; ++i) {
-            State100 delayedMeasurementRad = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
+            Model100 delayedMeasurementRad = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(MathUtil::angleModulus, tSec, noise, 1.0, actualCurrentStateRad, u);
+            Model100 newStateRad = closedLoop(MathUtil::angleModulus, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -175,27 +176,27 @@ class MinTimeControllerTest {
                 new double[] { 10.0, 10.0 });
         // the short distance is across pi
         // but we're moving fast the other way.
-        State100 initialRad = new State100(1.7, -1);
-        State100 goalRad = new State100(-1.7, -1);
+        Model100 initialRad = new Model100(1.7, -1);
+        Model100 goalRad = new Model100(-1.7, -1);
 
         // measurements are substantially delayed.
-        Queue<State100> queue = new LinkedList<>();
+        Queue<Model100> queue = new LinkedList<>();
         // double delay = 0.1;
         double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
 
-        State100 actualCurrentStateRad = initialRad;
+        Model100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
         final int iterations = 400;
         final double noise = 0.0;
 
         for (int i = 0; i < iterations; ++i) {
-            State100 delayedMeasurementRad = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
+            Model100 delayedMeasurementRad = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(MathUtil::angleModulus, tSec, noise, 1.0, actualCurrentStateRad, u);
+            Model100 newStateRad = closedLoop(MathUtil::angleModulus, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -219,13 +220,13 @@ class MinTimeControllerTest {
                 0.8, // weakG
                 1.0, // strongI
                 0, 0.1, new double[] { 10.0, 10.0 });
-        State100 goalRad = new State100();
+        Model100 goalRad = new Model100();
         // just use rotation for now
-        State100 initialRad = new State100(1, 0);
+        Model100 initialRad = new Model100(1, 0);
 
         // measurements are substantially delayed.
-        Queue<State100> queue = new LinkedList<>();
-        // NOTE SHORT DELAY HERE, works fine.  :-)
+        Queue<Model100> queue = new LinkedList<>();
+        // NOTE SHORT DELAY HERE, works fine. :-)
         // long delay (e.g. 0.1) does not work fine
         double delay = 0.02;
         // double delay = 0.0;
@@ -233,16 +234,16 @@ class MinTimeControllerTest {
             queue.add(initialRad);
         }
 
-        State100 actualCurrentStateRad = initialRad;
+        Model100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
         final int iterations = 400;
         final double noise = 0.0;
 
         for (int i = 0; i < iterations; ++i) {
-            State100 delayedMeasurementRad = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
+            Model100 delayedMeasurementRad = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
+            Model100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
             // System.out.println(u);
@@ -265,28 +266,28 @@ class MinTimeControllerTest {
                 0.8, // weakG
                 1.0, // strongI
                 0, 0.1, new double[] { 10.0, 10.0 });
-        State100 goalRad = new State100();
+        Model100 goalRad = new Model100();
         // just use rotation for now
-        State100 initialRad = new State100(1, 0);
+        Model100 initialRad = new Model100(1, 0);
 
         // measurements are substantially delayed.
-        Queue<State100> queue = new LinkedList<>();
+        Queue<Model100> queue = new LinkedList<>();
         // double delay = 0.1;
         double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
 
-        State100 actualCurrentStateRad = initialRad;
+        Model100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
         final int iterations = 400;
         final double noise = 0.0;
 
         for (int i = 0; i < iterations; ++i) {
-            State100 delayedMeasurementRad = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
+            Model100 delayedMeasurementRad = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
+            Model100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -310,28 +311,28 @@ class MinTimeControllerTest {
                 0.8, // weakG
                 1.0, // strongI
                 0, 0.1, new double[] { 10.0, 10.0 });
-        State100 goalRad = new State100(1, 1);
+        Model100 goalRad = new Model100(1, 1);
         // just use rotation for now
-        State100 initialRad = new State100(0, 0);
+        Model100 initialRad = new Model100(0, 0);
 
         // measurements are substantially delayed.
-        Queue<State100> queue = new LinkedList<>();
+        Queue<Model100> queue = new LinkedList<>();
         double delay = 0.1;
         // double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
 
-        State100 actualCurrentStateRad = initialRad;
+        Model100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
         final int iterations = 200;
         final double noise = 0.0;
 
         for (int i = 0; i < iterations; ++i) {
-            State100 delayedMeasurementRad = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
+            Model100 delayedMeasurementRad = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
+            Model100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -353,24 +354,24 @@ class MinTimeControllerTest {
                 0.8, // weakG
                 1.0, // strongI
                 0, 0.1, new double[] { 10.0, 10.0 });
-        State100 goalRad = new State100();
-        State100 initialRad = new State100(1, 0);
-        Queue<State100> queue = new LinkedList<>();
+        Model100 goalRad = new Model100();
+        Model100 initialRad = new Model100(1, 0);
+        Queue<Model100> queue = new LinkedList<>();
         double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
 
-        State100 actualCurrentStateRad = initialRad;
+        Model100 actualCurrentStateRad = initialRad;
         final int iterations = 400;
         final double noise = 0.0;
         final double drive = 0.5;
         for (int i = 0; i < iterations; ++i) {
-            State100 delayedMeasurementRad = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
+            Model100 delayedMeasurementRad = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
 
-            State100 newStateRad = closedLoop(x -> x, tSec, noise, drive, actualCurrentStateRad, u);
+            Model100 newStateRad = closedLoop(x -> x, tSec, noise, drive, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
@@ -397,31 +398,31 @@ class MinTimeControllerTest {
                 0.8, // weakG
                 1.0, // strongI
                 0, 0.1, new double[] { 10.0, 10.0 });
-        State100 goalRad = new State100();
-        State100 initialRad = new State100(1, 0);
-        Queue<State100> queue = new LinkedList<>();
+        Model100 goalRad = new Model100();
+        Model100 initialRad = new Model100(1, 0);
+        Queue<Model100> queue = new LinkedList<>();
         double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
 
-        State100 actualCurrentStateRad = initialRad;
+        Model100 actualCurrentStateRad = initialRad;
         final int iterations = 400;
         final double noise = 0.0;
         final double drive = 1.5;
         for (int i = 0; i < iterations; ++i) {
-            State100 delayedMeasurementRad = queue.remove();
-            State100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
+            Model100 delayedMeasurementRad = queue.remove();
+            Control100 u = c.calculate(kDt, delayedMeasurementRad, goalRad);
             double tSec = i * kDt;
 
-            State100 newStateRad = closedLoop(x -> x, tSec, noise, drive, actualCurrentStateRad, u);
+            Model100 newStateRad = closedLoop(x -> x, tSec, noise, drive, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
     }
 
-    State100 addNoise(double noise, State100 p) {
-        return new State100(addNoise(noise, p.x()), addNoise(noise, p.v()), p.a());
+    Model100 addNoise(double noise, Model100 p) {
+        return new Model100(addNoise(noise, p.x()), addNoise(noise, p.v()));
     }
 
     double addNoise(double noise, Double p) {
@@ -457,19 +458,19 @@ class MinTimeControllerTest {
                 0.8, // weakG
                 1.0, // strongI
                 0, 0.1, new double[] { 10.0, 10.0 });
-        final State100 goalRad = new State100();
+        final Model100 goalRad = new Model100();
         // just use rotation for now
-        State100 initialRad = new State100(1, 0);
+        Model100 initialRad = new Model100(1, 0);
 
         // queue contains actual state, not noise.
-        Queue<State100> queue = new LinkedList<>();
+        Queue<Model100> queue = new LinkedList<>();
         // double delay = 0.1;
         double delay = 0.0;
         for (int i1 = 0; i1 < 1 + (int) (delay / kDt); ++i1) {
             queue.add(initialRad);
         }
 
-        State100 actualCurrentStateRad = initialRad;
+        Model100 actualCurrentStateRad = initialRad;
         // final int iterations = 500;
         final int iterations = 400;
         // the controller proportional zone needs to be bigger than the noise, to
@@ -477,28 +478,28 @@ class MinTimeControllerTest {
         final double noise = 0.025;
 
         for (int i = 0; i < iterations; ++i) {
-            State100 delayedMeasurementRad = queue.remove();
-            State100 u = c.calculate(kDt, addNoise(noise, delayedMeasurementRad), goalRad);
+            Model100 delayedMeasurementRad = queue.remove();
+            Control100 u = c.calculate(kDt, addNoise(noise, delayedMeasurementRad), goalRad);
             double tSec = i * kDt;
-            State100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
+            Model100 newStateRad = closedLoop(x -> x, tSec, noise, 1.0, actualCurrentStateRad, u);
             queue.add(newStateRad);
             actualCurrentStateRad = newStateRad;
         }
 
     }
 
-    private static State100 applyAccelOnly(double tSec, State100 currentMeasurement, State100 u) {
+    private static Control100 applyAccelOnly(double tSec, Model100 currentMeasurement, Control100 u) {
         double x = currentMeasurement.x() + currentMeasurement.v() * kDt + 0.5 * u.a() * Math.pow(kDt, 2);
         double v = currentMeasurement.v() + u.a() * kDt;
         // System.out.printf("%5.3f, %5.3f, %5.3f, %5.3f\n", tSec, x, v, u.a());
-        return new State100(x, v, u.a());
+        return new Control100(x, v, u.a());
     }
 
-    private static State100 applyVelocityOnly(double tSec, State100 currentMeasurement, State100 u) {
+    private static Control100 applyVelocityOnly(double tSec, Model100 currentMeasurement, Control100 u) {
         double x = currentMeasurement.x() + u.v() * kDt;
         double v = u.v();
         // System.out.printf("%5.3f, %5.3f, %5.3f, %5.3f\n", tSec, x, v, 0.0);
-        return new State100(x, v, 0);
+        return new Control100(x, v, 0);
     }
 
     /**
@@ -507,13 +508,13 @@ class MinTimeControllerTest {
      * 
      * @param drive 1.0 is normal, more is overdrive, less is underdrive.
      */
-    private State100 closedLoop(
+    private Model100 closedLoop(
             DoubleUnaryOperator modulus,
             double t,
             double noise,
             double drive,
-            State100 currentMeasurementRad,
-            final State100 u) {
+            Model100 currentMeasurementRad,
+            final Control100 u) {
         // volts per rev/s. about 10 volts per 100 rev/s = 0.1;
         final double kV = 0.1;
         // volts per rev/s^2.
@@ -542,7 +543,7 @@ class MinTimeControllerTest {
 
         // main loop is 50 hz, outboard loop is 1000 hz, so this runs 20 times.
         double dt = 0.001;
-        State100 resultRad = currentMeasurementRad;
+        Model100 resultRad = currentMeasurementRad;
         for (int i = 0; i < 20; ++i) {
             // double tSec = t + i * dt;
             // these are actual states
@@ -584,7 +585,7 @@ class MinTimeControllerTest {
             // u_FFVolts, u_FBVolts, u_TOTALVolts, netVolts, currentAmps,
             // u.v(), u.a());
 
-            resultRad = new State100(x, v, a);
+            resultRad = new Model100(x, v);
         }
 
         // return actual state, not noisy measurement.

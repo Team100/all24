@@ -6,6 +6,8 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.StringLogger;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.state.State100;
 import org.team100.lib.util.Util;
 
@@ -161,12 +163,16 @@ public class MinTimeController implements Glassy {
         m_log_mode = child.stringLogger(Level.TRACE, "mode");
     }
 
-    private State100 modulus(double x, double v, double a) {
-        return new State100(m_modulus.applyAsDouble(x), v, a);
+    private Control100 modulus(double x, double v, double a) {
+        return new Control100(m_modulus.applyAsDouble(x), v, a);
     }
 
-    private State100 modulus(State100 s) {
+    private Control100 modulus(State100 s) {
         return modulus(s.x(), s.v(), s.a());
+    }
+
+    private Control100 modulus(Model100 s) {
+        return modulus(s.x(), s.v(), 0);
     }
 
     /**
@@ -186,15 +192,15 @@ public class MinTimeController implements Glassy {
      * a real system, it will tend to get ahead of the profile, but only by one time
      * period.
      */
-    public State100 calculate(double dt, final State100 initialRaw, final State100 goalRaw) {
+    public Control100 calculate(double dt, final Model100 initialRaw, final Model100 goalRaw) {
         m_log_mode.log(() -> "calculating");
 
-        State100 initial = new State100(initialRaw.x(),
+        Model100 initial = new Model100(initialRaw.x(),
                 MathUtil.clamp(initialRaw.v(), -m_maxVelocity, m_maxVelocity));
 
         // for periodic state spaces, choose an equivalent goal close to the initial
         // state (may be outside the valid range, we'll fix it later).
-        State100 goal = new State100(
+        Model100 goal = new Model100(
                 m_modulus.applyAsDouble(goalRaw.x() - initialRaw.x()) + initialRaw.x(),
                 MathUtil.clamp(goalRaw.v(), -m_maxVelocity, m_maxVelocity));
 
@@ -290,7 +296,7 @@ public class MinTimeController implements Glassy {
      * 
      * @param t1 time to switching, always positive
      */
-    private State100 handleIplus(double dt, State100 initial, State100 goal, double t1) {
+    private Control100 handleIplus(double dt, Model100 initial, Model100 goal, double t1) {
         if (MathUtil.isNear(t1, 0, kBoundaryTolerance)) {
             // switch eta is zero! Switch to G, i.e. go to the goal via G-
             return fullG(truncateDt(dt, initial, goal), initial, -1);
@@ -312,7 +318,7 @@ public class MinTimeController implements Glassy {
      * 
      * @param t1 time to switching, sec, always positive
      */
-    private State100 handleIminus(double dt, State100 initial, State100 goal, double t1) {
+    private Control100 handleIminus(double dt, Model100 initial, Model100 goal, double t1) {
         if (MathUtil.isNear(t1, 0, kBoundaryTolerance)) {
             // Switch ETA is zero! Switch to G, i.e. go to the goal via G+
             return fullG(truncateDt(dt, initial, goal), initial, 1);
@@ -329,7 +335,7 @@ public class MinTimeController implements Glassy {
         return fullI(dt, initial, -1);
     }
 
-    private State100 keepCruising(double dt, State100 initial, State100 goal) {
+    private Control100 keepCruising(double dt, Model100 initial, Model100 goal) {
         // We're already at positive cruising speed, which means G- is next.
         // will we reach it during dt?
         double c_minus = c_minus(goal);
@@ -346,7 +352,7 @@ public class MinTimeController implements Glassy {
         if (dct < dt) {
             // there are two segments
             double tremaining = dt - dct;
-            return calculate(tremaining, new State100(gminus, m_maxVelocity), goal);
+            return calculate(tremaining, new Model100(gminus, m_maxVelocity), goal);
         }
         // we won't reach G-, so cruise for all of dt.
         return modulus(
@@ -355,7 +361,7 @@ public class MinTimeController implements Glassy {
                 0);
     }
 
-    private State100 keepCruisingMinus(double dt, State100 initial, State100 goal) {
+    private Control100 keepCruisingMinus(double dt, Model100 initial, Model100 goal) {
         // We're already at negative cruising speed, which means G+ is next.
         // will we reach it during dt?
         double c_plus = c_plus(goal);
@@ -369,7 +375,7 @@ public class MinTimeController implements Glassy {
         }
         if (dct < dt) {
             double tremaining = dt - dct;
-            return calculate(tremaining, new State100(gplus, -m_maxVelocity), goal);
+            return calculate(tremaining, new Model100(gplus, -m_maxVelocity), goal);
         }
         // we won't reach G+, so cruise for all of dt
         return modulus(
@@ -382,7 +388,8 @@ public class MinTimeController implements Glassy {
      * Travel to the switching point, and then the remainder of time on the goal
      * path.
      */
-    private State100 traverseSwitch(double dt, State100 in_initial, final State100 goal, double t1, double direction) {
+    private Control100 traverseSwitch(double dt, Model100 in_initial, final Model100 goal, double t1,
+            double direction) {
         // first get to the switching point
         double x = in_initial.x() + in_initial.v() * t1
                 + 0.5 * direction * m_switchingAcceleration * Math.pow(t1, 2);
@@ -391,11 +398,11 @@ public class MinTimeController implements Glassy {
         double t2 = dt - t1;
         // just use the same method for the second part
         // note this is slower than the code below so maybe put it back
-        return calculate(t2, new State100(x, v), goal);
+        return calculate(t2, new Model100(x, v), goal);
     }
 
     /** Returns a shorter dt to avoid overshooting the goal state. */
-    private double truncateDt(double dt, State100 in_initial, State100 in_goal) {
+    private double truncateDt(double dt, Model100 in_initial, Model100 in_goal) {
         double dtg = Math.abs((in_initial.v() - in_goal.v()) / m_switchingAcceleration);
         return Math.min(dt, dtg);
     }
@@ -403,7 +410,7 @@ public class MinTimeController implements Glassy {
     /**
      * For I paths, use slightly-stronger effort.
      */
-    private State100 fullI(double dt, State100 in_initial, double direction) {
+    private Control100 fullI(double dt, Model100 in_initial, double direction) {
         m_log_mode.log(() -> "full I");
         // final double scale = 0.1;
         direction = MathUtil.clamp(direction, -1, 1);
@@ -418,7 +425,7 @@ public class MinTimeController implements Glassy {
     /**
      * For G paths, use slightly-weaker effort.
      */
-    private State100 fullG(double dt, State100 in_initial, double direction) {
+    private Control100 fullG(double dt, Model100 in_initial, double direction) {
         m_log_mode.log(() -> "full I");
         // final double scale = 0.1;
         direction = MathUtil.clamp(direction, -1, 1);
@@ -434,7 +441,7 @@ public class MinTimeController implements Glassy {
      * The path contains an I-cruise boundary, so proceed in I to the boundary and
      * then at the cruise speed for the remaining time.
      */
-    private State100 cruise(double dt, State100 in_initial, double direction) {
+    private Control100 cruise(double dt, Model100 in_initial, double direction) {
         // need to clip (this is negative)
         double dv = direction * m_maxVelocity - in_initial.v();
         // time to get to limit (positive)
@@ -452,7 +459,7 @@ public class MinTimeController implements Glassy {
     }
 
     /** Time to switch point for I+G- path, or NaN if there is no path. */
-    double t1IplusGminus(State100 initial, State100 goal) {
+    double t1IplusGminus(Model100 initial, Model100 goal) {
         double q_dot_switch = qDotSwitchIplusGminus(initial, goal);
         // this fixes rounding errors
         if (MathUtil.isNear(initial.v(), q_dot_switch, 1e-6))
@@ -465,7 +472,7 @@ public class MinTimeController implements Glassy {
     }
 
     /** Time to switch point for I-G+ path, or NaN if there is no path. */
-    double t1IminusGplus(State100 initial, State100 goal) {
+    double t1IminusGplus(Model100 initial, Model100 goal) {
         double q_dot_switch = qDotSwitchIminusGplus(initial, goal);
         // this fixes rounding errors
         if (MathUtil.isNear(initial.v(), q_dot_switch, 1e-6))
@@ -484,7 +491,7 @@ public class MinTimeController implements Glassy {
      * "switch" path using I+G- means the goal has to be to the right of the "s"
      * shaped curve including I.
      */
-    double qDotSwitchIplusGminus(State100 initial, State100 goal) {
+    double qDotSwitchIplusGminus(Model100 initial, Model100 goal) {
         if (initial.equals(goal))
             return initial.v();
 
@@ -516,7 +523,7 @@ public class MinTimeController implements Glassy {
      * "switch" path using I-G+ means the goal has to be to the left of the I- curve
      * for goal.v less than i.v, and to the left of the I+ curve for goal.v > i.v
      */
-    double qDotSwitchIminusGplus(State100 initial, State100 goal) {
+    double qDotSwitchIminusGplus(Model100 initial, Model100 goal) {
         if (initial.equals(goal))
             return goal.v();
 
@@ -549,29 +556,29 @@ public class MinTimeController implements Glassy {
      * path through the initial state and the negative-acceleration path through the
      * goal state, i.e. the I+G- path.
      */
-    double qSwitchIplusGminus(State100 initial, State100 goal) {
+    double qSwitchIplusGminus(Model100 initial, Model100 goal) {
         return (c_plus(initial) + c_minus(goal)) / 2;
     }
 
     /**
      * Midpoint position for the I-G+ path.
      */
-    double qSwitchIminusGplus(State100 initial, State100 goal) {
+    double qSwitchIminusGplus(Model100 initial, Model100 goal) {
         return (c_minus(initial) + c_plus(goal)) / 2;
     }
 
     /** Intercept of negative-acceleration path intersecting s */
-    double c_minus(State100 s) {
+    double c_minus(Model100 s) {
         return s.x() - Math.pow(s.v(), 2) / (-2.0 * m_switchingAcceleration);
     }
 
     /** Intercept of negative-acceleration path intersecting s */
-    double c_plus(State100 s) {
+    double c_plus(Model100 s) {
         return s.x() - Math.pow(s.v(), 2) / (2.0 * m_switchingAcceleration);
     }
 
     // for testing
-    double t1(State100 initial, State100 goal) {
+    double t1(Model100 initial, Model100 goal) {
         double t1IplusGminus = t1IplusGminus(initial, goal);
         double t1IminusGplus = t1IminusGplus(initial, goal);
         if (Double.isNaN(t1IplusGminus)) {

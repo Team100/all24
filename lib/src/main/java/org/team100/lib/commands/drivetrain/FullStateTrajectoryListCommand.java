@@ -10,9 +10,9 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
+import org.team100.lib.logging.LoggerFactory.SwerveModelLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.Trajectory100;
@@ -35,7 +35,7 @@ public class FullStateTrajectoryListCommand extends Command implements Glassy {
     private final TrajectoryVisualization m_viz;
 
     // LOGGERS
-    private final SwerveStateLogger m_log_reference;
+    private final SwerveModelLogger m_log_reference;
 
     private Iterator<Trajectory100> m_trajectoryIter;
     private TrajectoryTimeIterator m_iter;
@@ -54,7 +54,7 @@ public class FullStateTrajectoryListCommand extends Command implements Glassy {
         m_trajectories = trajectories;
         m_viz = viz;
         addRequirements(m_swerve);
-        m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");
+        m_log_reference = child.swerveModelLogger(Level.TRACE, "reference");
     }
 
     @Override
@@ -93,8 +93,8 @@ public class FullStateTrajectoryListCommand extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
             TimedPose desiredState = samplePoint.state();
 
-            SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            SwerveState measurement = m_swerve.getState();
+            SwerveModel reference = SwerveModel.fromTimedPose(desiredState);
+            SwerveModel measurement = m_swerve.getState();
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_swerve.driveInFieldCoords(fieldRelativeTarget);
             m_log_reference.log(() -> reference);
@@ -109,8 +109,8 @@ public class FullStateTrajectoryListCommand extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
             TimedPose desiredState = samplePoint.state();
 
-            SwerveState reference = SwerveState.fromTimedPose(desiredState);
-            SwerveState measurement = m_swerve.getState();
+            SwerveModel reference = SwerveModel.fromTimedPose(desiredState);
+            SwerveModel measurement = m_swerve.getState();
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_aligned = m_swerve.steerAtRest(fieldRelativeTarget);
             m_log_reference.log(() -> reference);

@@ -4,9 +4,9 @@ import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -60,14 +60,13 @@ public class Spin extends Command implements Glassy {
         }
         m_angleRad += m_speedRad_S * TimedRobot100.LOOP_PERIOD_S;
 
-        State100 xState = new State100(m_center.getX(), 0, 0);
-        State100 yState = new State100(m_center.getY(), 0, 0);
-        State100 rotation = new State100(
+        Model100 xState = new Model100(m_center.getX(), 0);
+        Model100 yState = new Model100(m_center.getY(), 0);
+        Model100 rotation = new Model100(
                 m_initialRotation + m_angleRad,
-                m_speedRad_S,
-                accelRad_S_S);
+                m_speedRad_S);
 
-        SwerveState reference = new SwerveState(xState, yState, rotation);
+        SwerveModel reference = new SwerveModel(xState, yState, rotation);
 
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference);
         // force dx and dy to zero, clamp dtheta

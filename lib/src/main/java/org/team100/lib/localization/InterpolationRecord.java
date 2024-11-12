@@ -2,6 +2,7 @@ package org.team100.lib.localization;
 
 import java.util.Objects;
 
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -26,7 +27,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     private final SwerveDriveKinematics100 m_kinematics;
 
     // The pose observed given the current sensor inputs and the previous pose.
-    final SwerveState m_state;
+    final SwerveModel m_state;
 
     // The current gyro angle.
     final Rotation2d m_gyroAngle;
@@ -48,7 +49,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
      */
     InterpolationRecord(
             SwerveDriveKinematics100 kinematics,
-            SwerveState state,
+            SwerveModel state,
             Rotation2d gyro,
             double gyroRateRad_S,
             SwerveModulePositions wheelPositions) {
@@ -105,13 +106,11 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
         FieldRelativeVelocity endVelocity = endValue.m_state.velocity();
         FieldRelativeVelocity velocity = startVelocity.plus(endVelocity.minus(startVelocity).times(t));
 
-        FieldRelativeAcceleration startAccel = m_state.acceleration();
-        FieldRelativeAcceleration endAccel = endValue.m_state.acceleration();
-        FieldRelativeAcceleration acceleration = startAccel.plus(endAccel.minus(startAccel).times(t));
-        SwerveState newState = new SwerveState(
-                pose,
-                velocity,
-                acceleration);
+        // FieldRelativeAcceleration startAccel = m_state.acceleration();
+        // FieldRelativeAcceleration endAccel = endValue.m_state.acceleration();
+        // FieldRelativeAcceleration acceleration = startAccel.plus(endAccel.minus(startAccel).times(t));
+        // 11/11/24, no more accel here.
+        SwerveModel newState = new SwerveModel(pose, velocity);
         return new InterpolationRecord(m_kinematics, newState, gyroLerp, gyroRateLerp, wheelLerp);
     }
 

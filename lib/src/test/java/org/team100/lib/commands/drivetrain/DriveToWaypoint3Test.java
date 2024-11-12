@@ -19,7 +19,7 @@ import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.timing.TimedPose;
@@ -50,7 +50,8 @@ class DriveToWaypoint3Test extends Fixtured {
         SwerveDriveSubsystem drivetrain = fixture.drive;
 
         StraightLineTrajectory trajectories = new StraightLineTrajectory(true, null) {
-            public Trajectory100 apply(SwerveState startState, Pose2d end) {
+            @Override
+            public Trajectory100 apply(SwerveModel startState, Pose2d end) {
                 return new Trajectory100(List.of(new TimedPose(Pose2dWithMotion.kIdentity, 0, 0, 0)));
             }
         };

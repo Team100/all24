@@ -9,7 +9,8 @@ import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.MathUtil;
@@ -39,15 +40,15 @@ public class DriveInALittleSquare extends Command implements Glassy  {
     private static final double kMaxVel = 1;
     private static final double kMaxAccel = 1;
     private static final double kXToleranceRad = 0.02;
-    private static final State100 kStart = new State100(0, 0);
-    private static final State100 kGoal = new State100(kDriveLengthM, 0);
+    private static final Control100 kStart = new Control100(0, 0);
+    private static final Model100 kGoal = new Model100(kDriveLengthM, 0);
     private static final double kVToleranceRad_S = 0.02;
 
     private final SwerveDriveSubsystem m_swerve;
     private final TrapezoidProfile100 m_driveProfile;
 
     /** Current speed setpoint. */
-    State100 m_setpoint;
+    Control100 m_setpoint;
     /** Current swerve steering axis goal. */
     Rotation2d m_goal;
     DriveState m_state;
@@ -64,7 +65,7 @@ public class DriveInALittleSquare extends Command implements Glassy  {
         m_state = DriveState.STEERING;
         m_goal = GeometryUtil.kRotationZero;
         m_setpoint = kStart;
-        m_setpoint = m_driveProfile.calculate(0, m_setpoint, kGoal);
+        m_setpoint = m_driveProfile.calculate(0, m_setpoint.model(), kGoal);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class DriveInALittleSquare extends Command implements Glassy  {
                     m_setpoint = kStart;
                 } else {
                     // keep going
-                    m_setpoint = m_driveProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, kGoal);
+                    m_setpoint = m_driveProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint.model(), kGoal);
                 }
                 break;
             case STEERING:
@@ -88,7 +89,7 @@ public class DriveInALittleSquare extends Command implements Glassy  {
                     // driving
                     m_state = DriveState.DRIVING;
                     m_setpoint = kStart;
-                    m_setpoint = m_driveProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, kGoal);
+                    m_setpoint = m_driveProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint.model(), kGoal);
                 } else {
                     // wait to reach the setpoint
                 }

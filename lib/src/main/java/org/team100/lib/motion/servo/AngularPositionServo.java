@@ -4,7 +4,7 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 
 /**
  * Angular position control, e.g. for swerve steering axes or arm axes.
@@ -70,7 +70,7 @@ public interface AngularPositionServo extends Glassy {
 
     void close();
 
-    State100 getSetpoint();
+    Control100 getSetpoint();
 
     /** for logging */
     void periodic();

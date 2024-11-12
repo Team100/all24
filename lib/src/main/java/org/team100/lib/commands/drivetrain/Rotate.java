@@ -5,14 +5,17 @@ import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
 import org.team100.lib.sensors.Gyro;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.state.State100;
 
 import edu.wpi.first.math.MathUtil;
@@ -34,21 +37,21 @@ public class Rotate extends Command implements Glassy {
     private final SwerveDriveSubsystem m_robotDrive;
     private final Gyro m_gyro;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final State100 m_goalState;
+    private final Model100 m_goalState;
 
     // LOGGERS
     private final DoubleLogger m_log_error_x;
     private final DoubleLogger m_log_error_v;
     private final DoubleLogger m_log_measurement_x;
     private final DoubleLogger m_log_measurement_v;
-    private final State100Logger m_log_reference;
+    private final Control100Logger m_log_reference;
 
     final HolonomicFieldRelativeController m_controller;
 
     private boolean m_finished = false;
 
     TrapezoidProfile100 m_profile;
-    State100 refTheta;
+    Control100 refTheta;
 
     private boolean m_steeringAligned;
 
@@ -64,15 +67,15 @@ public class Rotate extends Command implements Glassy {
         m_controller = controller;
         m_gyro = gyro;
         m_swerveKinodynamics = swerveKinodynamics;
-        m_goalState = new State100(targetAngleRadians, 0);
-        refTheta = new State100(0, 0);
+        m_goalState = new Model100(targetAngleRadians, 0);
+        refTheta = new Control100(0, 0);
 
         addRequirements(drivetrain);
         m_log_error_x = child.doubleLogger(Level.TRACE, "errorX");
         m_log_error_v = child.doubleLogger(Level.TRACE, "errorV");
         m_log_measurement_x = child.doubleLogger(Level.TRACE, "measurementX");
         m_log_measurement_v = child.doubleLogger(Level.TRACE, "measurementV");
-        m_log_reference = child.state100Logger(Level.TRACE, "reference");
+        m_log_reference = child.control100Logger(Level.TRACE, "reference");
     }
 
     @Override
@@ -89,7 +92,7 @@ public class Rotate extends Command implements Glassy {
 
     private void resetRefTheta() {
         ChassisSpeeds initialSpeeds = m_robotDrive.getChassisSpeeds();
-        refTheta = new State100(
+        refTheta = new Control100(
                 m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
     }
@@ -97,17 +100,17 @@ public class Rotate extends Command implements Glassy {
     @Override
     public void execute() {
         // reference
-        refTheta = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, refTheta, m_goalState);
+        refTheta = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, refTheta.model(), m_goalState);
         m_finished = MathUtil.isNear(refTheta.x(), m_goalState.x(), kXToleranceRad)
                 && MathUtil.isNear(refTheta.v(), m_goalState.v(), kVToleranceRad_S);
 
-        SwerveState measurement = m_robotDrive.getState();
+        SwerveModel measurement = m_robotDrive.getState();
         Pose2d currentPose = measurement.pose();
 
-        SwerveState reference = new SwerveState(
-                new State100(currentPose.getX(), 0, 0), // stationary at current pose
-                new State100(currentPose.getY(), 0, 0),
-                new State100(refTheta.x(), refTheta.v(), refTheta.a()));
+        SwerveModel reference = new SwerveModel(
+                new Model100(currentPose.getX(), 0), // stationary at current pose
+                new Model100(currentPose.getY(), 0),
+                new Model100(refTheta.x(), refTheta.v()));
 
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
