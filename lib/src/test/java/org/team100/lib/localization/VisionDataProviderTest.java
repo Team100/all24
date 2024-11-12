@@ -12,7 +12,6 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Pose2d;

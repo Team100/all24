@@ -12,7 +12,6 @@ import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.EnumLogger;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
 import org.team100.lib.logging.LoggerFactory.SwerveModelLogger;
-import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.sensors.Gyro;

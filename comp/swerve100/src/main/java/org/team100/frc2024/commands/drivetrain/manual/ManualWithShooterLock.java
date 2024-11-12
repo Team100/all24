@@ -20,7 +20,6 @@ import org.team100.lib.logging.LoggerFactory.Model100Logger;
 import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
 import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
@@ -283,7 +282,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         return isAligned;
     }
 
-    static Rotation2d aimWhileMoving(Rotation2d bearing, double shooterVelocity, SwerveState state) {
+    static Rotation2d aimWhileMoving(Rotation2d bearing, double shooterVelocity, SwerveModel state) {
 
         // its the shooter util code but robot moving vec is y velocity and angle in
         // rads is bearing

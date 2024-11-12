@@ -6,7 +6,6 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.util.ParabolicWave;
 import org.team100.lib.util.SquareWave;
 import org.team100.lib.util.TriangleWave;

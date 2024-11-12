@@ -1,7 +1,6 @@
 package org.team100.lib.controller.drivetrain;
 
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.controller.PIDController;

@@ -2,7 +2,6 @@ package org.team100.lib.profile;
 
 import org.team100.lib.motion.drivetrain.SwerveControl;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.profile.Profile100.ResultWithETA;
 import org.team100.lib.state.Control100;
 

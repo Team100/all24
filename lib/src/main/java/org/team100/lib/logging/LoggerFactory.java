@@ -16,7 +16,6 @@ import org.team100.lib.logging.primitive.PrimitiveLogger;
 import org.team100.lib.motion.arm.ArmAngles;
 import org.team100.lib.motion.drivetrain.SwerveControl;
 import org.team100.lib.motion.drivetrain.SwerveModel;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeAcceleration;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
@@ -766,33 +765,6 @@ public class LoggerFactory {
 
     public SwerveControlLogger swerveControlLogger(Level level, String leaf) {
         return new SwerveControlLogger(level, leaf);
-    }
-
-    public class SwerveStateLogger {
-        private final Level m_level;
-        private final State100Logger m_xLogger;
-        private final State100Logger m_yLogger;
-        private final State100Logger m_thetaLogger;
-
-        SwerveStateLogger(Level level, String leaf) {
-            m_level = level;
-            m_xLogger = state100Logger(level, join(leaf, "x"));
-            m_yLogger = state100Logger(level, join(leaf, "y"));
-            m_thetaLogger = state100Logger(level, join(leaf, "theta"));
-        }
-
-        public void log(Supplier<SwerveState> vals) {
-            if (!allow(m_level))
-                return;
-            SwerveState val = vals.get();
-            m_xLogger.log(val::x);
-            m_yLogger.log(val::y);
-            m_thetaLogger.log(val::theta);
-        }
-    }
-
-    public SwerveStateLogger swerveStateLogger(Level level, String leaf) {
-        return new SwerveStateLogger(level, leaf);
     }
 
     public Model100Logger model100Logger(Level level, String leaf) {
