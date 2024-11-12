@@ -8,9 +8,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 import org.team100.lib.util.DriveUtil;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
 
@@ -26,11 +24,6 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
 
     // The pose observed given the current sensor inputs and the previous pose.
     final SwerveModel m_state;
-
-    // The current gyro angle.
-    final Rotation2d m_gyroAngle;
-
-    final double m_gyroRateRad_S;
 
     // The current encoder readings.
     final SwerveModulePositions m_wheelPositions;
@@ -48,13 +41,9 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     InterpolationRecord(
             SwerveDriveKinematics100 kinematics,
             SwerveModel state,
-            Rotation2d gyro,
-            double gyroRateRad_S,
             SwerveModulePositions wheelPositions) {
         m_kinematics = kinematics;
         m_state = state;
-        m_gyroAngle = gyro;
-        m_gyroRateRad_S = gyroRateRad_S;
         m_wheelPositions = new SwerveModulePositions(wheelPositions);
     }
 
@@ -63,9 +52,8 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
      * position, or lower bound.
      * 
      * Interpolates the wheel positions.
-     * Interpolates the gyro angle.
-     * ***INTEGRATES*** to find the pose; ignores the supplied end pose unless t >=
-     * 1 :-(.
+     * Integrates wheel positions to find the interpolated pose.
+     * Interpolates the velocity.
      *
      * @param endValue The upper bound, or end.
      * @param t        How far between the lower and upper bound we are. This should
@@ -87,16 +75,10 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
                 m_wheelPositions.rearLeft().interpolate(endValue.m_wheelPositions.rearLeft(), t),
                 m_wheelPositions.rearRight().interpolate(endValue.m_wheelPositions.rearRight(), t));
 
-        // Find the new gyro angle.
-        Rotation2d gyroLerp = m_gyroAngle.interpolate(endValue.m_gyroAngle, t);
-        double gyroRateLerp = MathUtil.interpolate(m_gyroRateRad_S, endValue.m_gyroRateRad_S, t);
-
         // Create a twist to represent the change based on the interpolated sensor
         // inputs.
         Twist2d twist = m_kinematics.toTwist2d(
                 DriveUtil.modulePositionDelta(m_wheelPositions, wheelLerp));
-        twist.dtheta = gyroLerp.minus(m_gyroAngle).getRadians();
-
         Pose2d pose = m_state.pose().exp(twist);
 
         // these lerps are wrong but maybe close enough
@@ -105,7 +87,7 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
         FieldRelativeVelocity velocity = startVelocity.plus(endVelocity.minus(startVelocity).times(t));
 
         SwerveModel newState = new SwerveModel(pose, velocity);
-        return new InterpolationRecord(m_kinematics, newState, gyroLerp, gyroRateLerp, wheelLerp);
+        return new InterpolationRecord(m_kinematics, newState, wheelLerp);
     }
 
     @Override
@@ -117,19 +99,18 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
             return false;
         }
         InterpolationRecord rec = (InterpolationRecord) obj;
-        return Objects.equals(m_gyroAngle, rec.m_gyroAngle)
-                && Objects.equals(m_wheelPositions, rec.m_wheelPositions)
+        return Objects.equals(m_wheelPositions, rec.m_wheelPositions)
                 && Objects.equals(m_state, rec.m_state);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(m_gyroAngle, m_wheelPositions, m_state);
+        return Objects.hash(m_wheelPositions, m_state);
     }
 
     @Override
     public String toString() {
-        return "InterpolationRecord [m_poseMeters=" + m_state + ", m_gyroAngle=" + m_gyroAngle
+        return "InterpolationRecord [m_poseMeters=" + m_state
                 + ", m_wheelPositions=" + m_wheelPositions + "]";
     }
 

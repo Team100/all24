@@ -62,8 +62,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                         new SwerveModel(
                                 initialPoseMeters,
                                 new FieldRelativeVelocity(0, 0, 0)),
-                        gyroAngle,
-                        gyroRateRad_S,
                         modulePositions));
         m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
         m_log_offset = child.rotation2dLogger(Level.TRACE, "GYRO OFFSET");
@@ -82,7 +80,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
     /** Empty the buffer and add the given measurements. */
     public void reset(
             Rotation2d gyroAngle,
-            double gyroRate,
             SwerveModulePositions modulePositions,
             Pose2d pose,
             double timestampSeconds) {
@@ -95,8 +92,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 new InterpolationRecord(
                         m_kinodynamics.getKinematics(),
                         new SwerveModel(pose, new FieldRelativeVelocity(0, 0, 0)),
-                        gyroAngle,
-                        gyroRate,
                         modulePositions));
 
         m_log_offset.log(() -> m_gyroOffset);
@@ -157,8 +152,6 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
                 new InterpolationRecord(
                         m_kinodynamics.getKinematics(),
                         new SwerveModel(newPose, sample.m_state.velocity()),
-                        sample.m_gyroAngle,
-                        sample.m_gyroRateRad_S,
                         sample.m_wheelPositions));
         // Step 7: Replay odometry inputs between sample time and latest recorded sample
         // to update the pose buffer and correct odometry.
@@ -167,8 +160,9 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
             double entryTimestampS = entry.getKey();
             InterpolationRecord value = entry.getValue();
 
-            Rotation2d entryGyroAngle = value.m_gyroAngle;
-            double entryGyroRate = value.m_gyroRateRad_S;
+            // this is what the gyro must have been given the pose and offset
+            Rotation2d entryGyroAngle = value.m_state.pose().getRotation().minus(m_gyroOffset);
+            double entryGyroRate = value.m_state.theta().v();
             SwerveModulePositions wheelPositions = value.m_wheelPositions;
 
             put(entryTimestampS, entryGyroAngle, entryGyroRate, wheelPositions);
@@ -236,7 +230,7 @@ public class SwerveDrivePoseEstimator100 implements PoseEstimator100, Glassy {
         m_poseBuffer.put(
                 currentTimeS,
                 new InterpolationRecord(
-                        m_kinodynamics.getKinematics(), swerveState, gyroAngle, gyroRateRad_S, wheelPositions));
+                        m_kinodynamics.getKinematics(), swerveState, wheelPositions));
     }
 
     ///////////////////////////////////////
