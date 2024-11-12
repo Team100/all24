@@ -26,7 +26,7 @@ public class CommandMaker {
         return new WrapperCommand(
                 Choreo.choreoSwerveCommand(
                         trajectory,
-                        () -> drivetrain.getState().pose(),
+                        () -> drivetrain.getPose(),
                         new PIDController(0.25, 0.0, 0.0),
                         new PIDController(0.25, 0.0, 0.0),
                         new PIDController(0.25, 0.0, 0.0),

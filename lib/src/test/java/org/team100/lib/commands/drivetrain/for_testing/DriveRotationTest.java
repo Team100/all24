@@ -16,7 +16,7 @@ class DriveRotationTest extends Fixtured {
         Supplier<Double> rot = () -> desiredRotation;
         DriveRotation command = new DriveRotation(fixture.drive, rot);
         command.initialize();
-        assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
+        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         command.execute();
         command.end(false);
     }

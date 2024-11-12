@@ -30,10 +30,10 @@ public class RotateToShooter extends Command {
         if (!alliance.isPresent())
             return;
 
-        double measurement = m_drive.getState().pose().getRotation().getRadians();
+        double measurement = m_drive.getPose().getRotation().getRadians();
         double setpoint = ShooterUtil.getRobotRotationToSpeaker(
                 alliance.get(),
-                m_drive.getState().pose().getTranslation(), 0).getRadians();
+                m_drive.getPose().getTranslation(), 0).getRadians();
 
         setpoint = Math100.getMinDistance(measurement, setpoint);
 
@@ -51,8 +51,8 @@ public class RotateToShooter extends Command {
         }
         double bearingRad = ShooterUtil.getRobotRotationToSpeaker(
                 alliance.get(),
-                m_drive.getState().pose().getTranslation(), 0).getRadians()
-                - m_drive.getState().pose().getRotation().getRadians();
+                m_drive.getPose().getTranslation(), 0).getRadians()
+                - m_drive.getPose().getRotation().getRadians();
         return Math.abs(bearingRad) < kToleranceRad;
     }
 }

@@ -59,7 +59,7 @@ public class FullStateTrajectoryListCommand extends Command implements Glassy {
 
     @Override
     public void initialize() {
-        Pose2d currentPose = m_swerve.getState().pose();
+        Pose2d currentPose = m_swerve.getPose();
         m_trajectoryIter = m_trajectories.apply(currentPose).iterator();
         m_iter = null;
         m_aligned = false;

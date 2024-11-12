@@ -55,7 +55,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
                 x -> List.of(maker.line(x)),
                 viz);
         c.initialize();
-        assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
+        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         c.execute();
         assertFalse(c.isFinished());
         // the trajectory takes a little over 3s
@@ -66,7 +66,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
         }
         // at goal; wide tolerance due to test timing
         assertTrue(c.isFinished());
-        assertEquals(1.031, fixture.drive.getState().pose().getX(), 0.05);
+        assertEquals(1.031, fixture.drive.getPose().getX(), 0.05);
     }
 
     /**

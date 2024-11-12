@@ -66,11 +66,11 @@ public class DriveManually extends Command implements Glassy  {
         // the real previous setpoint is.
         // Note this is not necessarily "at rest," because we might start driving
         // manually while the robot is moving.
-        ChassisSpeeds currentSpeeds = m_drive.getState().chassisSpeeds();
+        ChassisSpeeds currentSpeeds = m_drive.getChassisSpeeds();
         SwerveModuleStates currentStates = m_drive.getSwerveLocal().states();
         SwerveSetpoint setpoint = new SwerveSetpoint(currentSpeeds, currentStates);
         m_drive.resetSetpoint(setpoint);
-        Pose2d p = m_drive.getState().pose();
+        Pose2d p = m_drive.getPose();
         for (Driver d : m_drivers.values()) {
             d.reset(p);
         }
@@ -88,7 +88,7 @@ public class DriveManually extends Command implements Glassy  {
             // System.out.println("reset mode");
             currentManualMode = manualMode;
             // there's state in there we'd like to forget
-            Pose2d p = m_drive.getState().pose();
+            Pose2d p = m_drive.getPose();
             for (Driver d : m_drivers.values()) {
                 d.reset(p);
             }

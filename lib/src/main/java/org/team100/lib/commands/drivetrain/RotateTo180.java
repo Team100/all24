@@ -15,7 +15,7 @@ public class RotateTo180 extends Command {
 
     @Override
     public void execute() {
-        if (m_drive.getState().pose().getRotation().getDegrees() < 150 || m_drive.getState().pose().getRotation().getDegrees() > 210) {
+        if (m_drive.getPose().getRotation().getDegrees() < 150 || m_drive.getPose().getRotation().getDegrees() > 210) {
             FieldRelativeVelocity twist = new FieldRelativeVelocity(0, 0, 1);
             m_drive.driveInFieldCoords(twist);
         } else {

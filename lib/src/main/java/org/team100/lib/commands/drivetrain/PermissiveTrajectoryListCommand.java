@@ -74,7 +74,7 @@ public class PermissiveTrajectoryListCommand extends Command implements Glassy {
         if (m_currentTrajectory == null || m_iter.isDone()) {
             // get the next trajectory
             if (m_trajectoryIter.hasNext()) {
-                m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getState().pose());
+                m_currentTrajectory = m_trajectoryIter.next().apply(m_swerve.getPose());
                 m_iter = new TrajectoryTimeIterator(
                         new TrajectoryTimeSampler(m_currentTrajectory));
                 m_viz.setViz(m_currentTrajectory);

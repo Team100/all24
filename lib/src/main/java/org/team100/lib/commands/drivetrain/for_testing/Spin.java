@@ -43,7 +43,7 @@ public class Spin extends Command implements Glassy {
     @Override
     public void initialize() {
         m_controller.reset();
-        Pose2d currentPose = m_swerve.getState().pose();
+        Pose2d currentPose = m_swerve.getPose();
         m_center = currentPose.getTranslation();
         m_initialRotation = currentPose.getRotation().getRadians();
         m_speedRad_S = 0;

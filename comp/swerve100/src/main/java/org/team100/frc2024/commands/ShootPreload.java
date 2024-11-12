@@ -73,7 +73,7 @@ public class ShootPreload extends Command implements Glassy {
         if (!alliance.isPresent())
             return;
 
-        Translation2d robotLocation = m_drive.getState().pose().getTranslation();
+        Translation2d robotLocation = m_drive.getPose().getTranslation();
         Translation2d speakerLocation = ShooterUtil.getSpeakerTranslation(alliance.get());
 
         double rangeM = robotLocation.getDistance(speakerLocation);

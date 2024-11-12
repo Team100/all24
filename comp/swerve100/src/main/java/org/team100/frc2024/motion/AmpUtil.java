@@ -25,8 +25,8 @@ public class AmpUtil {
 
     public static List<Pose2d> getShortestTrajecNew(SwerveDriveSubsystem drive) {
         Map<String, List<Pose2d>> poseMap = new ConcurrentHashMap<>();
-        Translation2d currentTranslation = drive.getState().pose().getTranslation();
-        Pose2d currentPose = drive.getState().pose();
+        Translation2d currentTranslation = drive.getPose().getTranslation();
+        Pose2d currentPose = drive.getPose();
 
         List<Pose2d> rightSideFarStage = new ArrayList<>();
 

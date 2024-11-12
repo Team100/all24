@@ -87,7 +87,7 @@ public class DriveInACircle extends Command implements Glassy {
     @Override
     public void initialize() {
         m_controller.reset();
-        Pose2d currentPose = m_swerve.getState().pose();
+        Pose2d currentPose = m_swerve.getPose();
         m_initialRotation = currentPose.getRotation().getRadians();
         m_center = getCenter(currentPose, kRadiusM);
         m_speedRad_S = 0;

@@ -88,9 +88,9 @@ public class Rotate extends Command implements Glassy {
     }
 
     private void resetRefTheta() {
-        ChassisSpeeds initialSpeeds = m_robotDrive.getState().chassisSpeeds();
+        ChassisSpeeds initialSpeeds = m_robotDrive.getChassisSpeeds();
         refTheta = new State100(
-                m_robotDrive.getState().pose().getRotation().getRadians(),
+                m_robotDrive.getPose().getRotation().getRadians(),
                 initialSpeeds.omegaRadiansPerSecond);
     }
 

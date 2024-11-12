@@ -147,14 +147,14 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
         Translation2d goal = optGoal.get();
 
-        m_thetaGoalRaw = getThetaGoalState(m_swerve.getState().pose(), goal);
+        m_thetaGoalRaw = getThetaGoalState(m_swerve.getPose(), goal);
         m_xGoalRaw = new State100(goal.getX(), 0, 0);
         m_yGoalRaw = new State100(goal.getY(), 0, 0);
 
         m_xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_xSetpoint, m_xGoalRaw);
         m_ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_ySetpoint, m_yGoalRaw);
         // make sure the setpoint uses the modulus close to the measurement.
-        final double thetaMeasurement = m_swerve.getState().pose().getRotation().getRadians();
+        final double thetaMeasurement = m_swerve.getPose().getRotation().getRadians();
         m_thetaSetpoint = new State100(
                 Math100.getMinDistance(thetaMeasurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());

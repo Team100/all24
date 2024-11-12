@@ -109,7 +109,7 @@ public class DriveWithProfile2 extends Command implements Glassy {
     @Override
     public void execute() {
         
-        Rotation2d currentRotation = m_swerve.getState().pose().getRotation();
+        Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
         Optional<Pose2d> opt = m_fieldRelativeGoal.get();

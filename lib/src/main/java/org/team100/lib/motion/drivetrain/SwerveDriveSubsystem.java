@@ -95,7 +95,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
                 v.x(),
                 v.y(),
                 v.theta(),
-                getState().pose().getRotation());
+                getPose().getRotation());
         m_swerveLocal.setChassisSpeeds(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
@@ -105,7 +105,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
                 vIn.x(),
                 vIn.y(),
                 vIn.theta(),
-                getState().pose().getRotation());
+                getPose().getRotation());
         m_swerveLocal.setChassisSpeedsNormally(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
@@ -122,7 +122,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
                 twist.x(),
                 twist.y(),
                 twist.theta(),
-                getState().pose().getRotation());
+                getPose().getRotation());
         return m_swerveLocal.steerAtRest(targetChassisSpeeds, m_gyro.getYawRateNWU());
     }
 
@@ -230,21 +230,21 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
         // m_poseEstimator.periodic();
         m_stateSupplier.reset();
         m_log_state.log(this::getState);
-        m_log_turning.log(() -> getState().pose().getRotation().getDegrees());
+        m_log_turning.log(() -> getPose().getRotation().getDegrees());
         m_log_pose_array.log(
                 () -> new double[] {
-                        getState().pose().getX(),
-                        getState().pose().getY(),
-                        getState().pose().getRotation().getRadians()
+                        getPose().getX(),
+                        getPose().getY(),
+                        getPose().getRotation().getRadians()
                 });
 
         // Update the Field2d widget
         // the name "field" is used by Field2d.
         // the name "robot" can be anything.
         m_log_field_robot.log(() -> new double[] {
-                getState().pose().getX(),
-                getState().pose().getY(),
-                getState().pose().getRotation().getDegrees()
+                getPose().getX(),
+                getPose().getY(),
+                getPose().getRotation().getDegrees()
         });
         m_log_yaw_rate.log(m_gyro::getYawRateNWU);
         m_swerveLocal.periodic();
@@ -276,11 +276,15 @@ public class SwerveDriveSubsystem extends SubsystemBase implements Glassy, Drive
 
     @Override
     public Pose2d getPose() {
-        return getState().pose();
+        return m_stateSupplier.get().pose();
     }
 
     @Override
     public FieldRelativeVelocity getVelocity() {
-        return getState().velocity();
+        return m_stateSupplier.get().velocity();
+    }
+
+    public ChassisSpeeds getChassisSpeeds() {
+        return m_stateSupplier.get().chassisSpeeds();
     }
 }

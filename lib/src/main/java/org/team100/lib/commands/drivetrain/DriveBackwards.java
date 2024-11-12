@@ -22,12 +22,12 @@ public class DriveBackwards extends Command {
     @Override
     public void initialize() {
         m_isFinished = false;
-        m_startingPose = m_drive.getState().pose();
+        m_startingPose = m_drive.getPose();
     }
 
     @Override
     public void execute() {
-        if (Math.abs(m_drive.getState().pose().getX() - m_startingPose.getX()) < m_length) {
+        if (Math.abs(m_drive.getPose().getX() - m_startingPose.getX()) < m_length) {
             ChassisSpeeds chassisSpeeds = new ChassisSpeeds(-0.1, 0, 0);
             m_drive.setChassisSpeeds(chassisSpeeds);
         } else {
