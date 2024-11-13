@@ -219,6 +219,11 @@ public class RobotContainer implements Glassy {
                 m_shooter,
                 visionDataProvider);
 
+        // m_ampFeeder = new AmpFeeder(sysLog);
+        // m_ampPivot = new AmpPivot(sysLog);
+
+        // final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
+
         ////////////////////////////
         //
         // DRIVETRAIN COMMANDS
@@ -484,10 +489,10 @@ public class RobotContainer implements Glassy {
         feeder.setDefaultCommand(feeder.run(feeder::stop));
         intake.setDefaultCommand(intake.run(intake::stop));
         // climber.setDefaultCommand(new ClimberDefault(
-        // // comLog,
-        // climber,
-        // operatorControl::leftClimb,
-        // operatorControl::rightClimb));
+        //         comLog,
+        //         climber,
+        //         operatorControl::leftClimb,
+        //         operatorControl::rightClimb));
         m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
         // if far from the goal, go fast. if near, go slow.
         m_ampPivot.setDefaultCommand(new AmpFastThenSlow(m_ampPivot, 0.1, 0));

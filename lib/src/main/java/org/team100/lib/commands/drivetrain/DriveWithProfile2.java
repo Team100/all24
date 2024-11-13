@@ -71,7 +71,7 @@ public class DriveWithProfile2 extends Command implements Glassy {
                 kTranslationalToleranceM);
         thetaProfile = new TrapezoidProfile100(
                 m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2()/16,
+                m_limits.getMaxAngleAccelRad_S2()/50,
                 kRotationToleranceRad);
         addRequirements(m_swerve);
     }
@@ -88,8 +88,8 @@ public class DriveWithProfile2 extends Command implements Glassy {
         }
         m_fieldRelativeGoal = opt.get();
         
-        m_xGoalRaw = new Model100(fieldRelativeGoal.getX(), 0);
-        m_yGoalRaw = new Model100(fieldRelativeGoal.getY(), 0);
+        m_xGoalRaw = new Model100(m_fieldRelativeGoal.getX(), 0);
+        m_yGoalRaw = new Model100(m_fieldRelativeGoal.getY(), 0);
 
         double tx = xProfile.calculateWithETA(dt, xSetpoint.model(), m_xGoalRaw).etaS();
         double ty = yProfile.calculateWithETA(dt, ySetpoint.model(), m_yGoalRaw).etaS();
@@ -114,23 +114,24 @@ public class DriveWithProfile2 extends Command implements Glassy {
         double measurement = currentRotation.getRadians();
         Optional<Pose2d> opt = m_fieldRelativeGoalSupplier.get();
         if (opt.isEmpty()) {
-            if (m_fieldRelativeGoal == null) 
-            return;
+            if (m_fieldRelativeGoal == null) {
+                return;
+            }
         } else {
             m_fieldRelativeGoal = opt.get();
         }
-        Rotation2d bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, fieldRelativeGoal.getRotation().getRadians()));
+        Rotation2d rotation = new Rotation2d(
+                Math100.getMinDistance(measurement, m_fieldRelativeGoal.getRotation().getRadians()));
         // make sure the setpoint uses the modulus close to the measurement.
         thetaSetpoint = new Control100(
                 Math100.getMinDistance(measurement, thetaSetpoint.x()),
                 thetaSetpoint.v());
 
-        m_thetaGoalRaw = new Model100(bearing.getRadians(), 0);
-        m_xGoalRaw = new Model100(fieldRelativeGoal.getX(), 0);
+        m_thetaGoalRaw = new Model100(rotation.getRadians(), 0);
+        m_xGoalRaw = new Model100(m_fieldRelativeGoal.getX(), 0);
         xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, xSetpoint.model(), m_xGoalRaw);
 
-        m_yGoalRaw = new Model100(fieldRelativeGoal.getY(), 0);
+        m_yGoalRaw = new Model100(m_fieldRelativeGoal.getY(), 0);
         ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, ySetpoint.model(), m_yGoalRaw);
 
         thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, thetaSetpoint.model(), m_thetaGoalRaw);
