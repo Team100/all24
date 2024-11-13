@@ -63,7 +63,7 @@ public class RobotContainer {
 
         m_indexer = IndexerCollection.get(sysLog);
 
-        whileTrue(driverControl::ampLock, new Shoot(m_shooter, m_indexer));
+        whileTrue(driverControl::shoot, new Shoot(m_shooter, m_indexer));
         // whileTrue(driverControl::fullCycle, new ShootOne(m_shooter, m_indexer));
         whileTrue(driverControl::driveToNote, m_shooter.run(m_shooter::spinUp));
 
