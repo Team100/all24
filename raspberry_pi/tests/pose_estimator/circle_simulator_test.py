@@ -1,4 +1,4 @@
-# pylint: disable=C0301,E0611,R0903
+# pylint: disable=C0301,E0611,R0903,W0212
 
 import math
 import unittest
@@ -18,7 +18,7 @@ from app.pose_estimator.swerve_module_position import (
 from tests.pose_estimator.circle_simulator import CircleSimulator
 
 
-class SimulatorTest(unittest.TestCase):
+class CircleSimulatorTest(unittest.TestCase):
     def test_simple(self) -> None:
         sim = CircleSimulator(FieldMap())
         self.assertAlmostEqual(2, sim.gt_x)
@@ -60,7 +60,7 @@ class SimulatorTest(unittest.TestCase):
         robot_pose = Pose2(2, 0, 0)
         camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
         calib = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
-        px: Point2 = sim.px(landmark, robot_pose, camera_offset, calib)
+        px: Point2 = sim._px(landmark, robot_pose, camera_offset, calib)
         # pixel should be in the lower right quadrant
         # remember x+right, y+down
         self.assertAlmostEqual(208, px[0], 0)

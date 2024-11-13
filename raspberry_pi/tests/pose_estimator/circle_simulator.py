@@ -130,28 +130,28 @@ class CircleSimulator:
         robot_pose = Pose2(self.gt_x, self.gt_y, self.gt_theta)
 
         # lower left
-        p0 = self.px(
+        p0 = self._px(
             self.l0,
             robot_pose,
             self.camera_offset,
             self.calib,
         )
         # lower right
-        p1 = self.px(
+        p1 = self._px(
             self.l1,
             robot_pose,
             self.camera_offset,
             self.calib,
         )
         # upper right
-        p2 = self.px(
+        p2 = self._px(
             self.l2,
             robot_pose,
             self.camera_offset,
             self.calib,
         )
         # upper left
-        p3 = self.px(
+        p3 = self._px(
             self.l3,
             robot_pose,
             self.camera_offset,
@@ -159,14 +159,15 @@ class CircleSimulator:
         )
         self.gt_pixels = [p0, p1, p2, p3]
 
-    def px(  # type: ignore
+    def _px(  # type: ignore
         self,
         landmark: np.ndarray,
         robot_pose: Pose2,
         camera_offset: Pose3,
         calib: Cal3DS2,
     ) -> Point2:
-        """robot_pose and camera_offset are x-forward, z-up"""
+        """Project the landmark point into the camera frame and return (x, y) in pixels.
+        Robot_pose and camera_offset are x-forward, z-up."""
         # ctor a pose3 with x,y,yaw, x-forward, z-up
         offset_pose = Pose3(robot_pose).compose(camera_offset)  # type: ignore
         # print("offset pose ", offset_pose)
