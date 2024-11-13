@@ -103,12 +103,23 @@ class Cal3DS2:
     p1: float
     p2: float
 
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
+class MyTwist3d:
+    """This works around the missing Twist3d on the RPi's at the moment"""
+    dx: float
+    dy: float
+    dz: float
+    rx: float
+    ry: float
+    rz: float
+
 
 @wpistruct.make_wpistruct
 @dataclasses.dataclass
 class CameraCalibration:
     camera_offset: Pose3d
-    offset_sigma: Twist3d
+    offset_sigma: MyTwist3d
     calib: Cal3DS2
     calib_sigma: Cal3DS2
 

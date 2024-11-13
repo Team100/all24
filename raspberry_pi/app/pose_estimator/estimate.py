@@ -10,11 +10,9 @@ import gtsam
 import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
-from gtsam.symbol_shorthand import C, K, X  # type:ignore
+from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
-import app.pose_estimator.factors.accelerometer as accelerometer
-import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
 import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
 import app.pose_estimator.factors.apriltag_smooth_batch as apriltag_smooth_batch
 import app.pose_estimator.factors.binary_gyro as binary_gyro
@@ -28,36 +26,21 @@ from app.pose_estimator.swerve_module_position import (
     SwerveModulePosition100,
     SwerveModulePositions,
 )
+from app.pose_estimator.util import make_smoother
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
+
 # prior uncertainty is *much* larger than field, i.e. "no idea"
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([160, 80, 60]))
 PRIOR_MEAN = gtsam.Pose2(8, 4, 0)
-ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
+
 # the gyro has really low noise.
 GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.0001]))
 
+# sensor noise, +/- one pixel.
+# TODO: if you want to model *blur* then you need more noise here, and maybe more in x than y.
 PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
-# used for calibration only
-CAL = gtsam.Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0)
-CAL_NOISE = noiseModel.Diagonal.Sigmas(
-    np.array(
-        [
-            1,
-            1,
-            1,
-            1,
-            1,
-            0.01,
-            0.01,
-            0.001,
-            0.001,
-        ]
-    )
-)
-OFFSET0 = gtsam.Pose3()
-OFFSET_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1]))
 
 
 class Estimate:
@@ -65,7 +48,7 @@ class Estimate:
         """Initialize the model
         initial module positions are at their origins.
         TODO: some other initial positions?"""
-        self.isam: gtsam.BatchFixedLagSmoother = self.make_smoother()
+        self.isam: gtsam.BatchFixedLagSmoother = make_smoother()
         self.result: gtsam.Values = gtsam.Values()
         # between updates we accumulate inputs here
         self.new_factors = gtsam.NonlinearFactorGraph()
@@ -105,14 +88,7 @@ class Estimate:
     def init(self) -> None:
         """Adds camera cal (K) and offset (C) at t0.
         No longer adds a pose at t0, if you want that, do it."""
-        # there is just one camera factor
-        self.new_values.insert(K(0), CAL)
-        self.new_timestamps[K(0)] = 0
-        self.new_factors.push_back(gtsam.PriorFactorCal3DS2(K(0), CAL, CAL_NOISE))
-        # and one camera offset for now
-        self.new_values.insert(C(0), OFFSET0)
-        self.new_timestamps[C(0)] = 0
-        self.new_factors.push_back(gtsam.PriorFactorPose3(C(0), OFFSET0, OFFSET_NOISE))
+        pass
 
     def add_state(self, time_us: int, initial_value: gtsam.Pose2) -> None:
         """Add a new robot state (pose) to the estimator, if it doesn't already exist."""
@@ -235,27 +211,7 @@ class Estimate:
         self.positions = positions
         self.odo_t = t1_us
 
-    def accelerometer(
-        self, t0_us: int, t1_us: int, t2_us: int, x: float, y: float
-    ) -> None:
-        """Add an accelerometer measurement.
-        t0_us, t1_us, t2_us: timestamps of the referenced states
-        TODO: handle time differently
-        """
-        dt1: float = (t1_us - t0_us) / 1000000
-        dt2: float = (t2_us - t1_us) / 1000000
-        self.new_factors.push_back(
-            accelerometer.factor(
-                x,
-                y,
-                dt1,
-                dt2,
-                ACCELEROMETER_NOISE,
-                X(t0_us),
-                X(t1_us),
-                X(t2_us),
-            )
-        )
+
 
     def gyro(self, t0_us: int, yaw: float) -> None:
         # if this is the only factor attached to this variable
@@ -272,15 +228,6 @@ class Estimate:
                 GYRO_NOISE,
                 X(t0_us),
                 X(t1_us),
-            )
-        )
-
-    def apriltag_for_calibration(
-        self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
-    ) -> None:
-        self.new_factors.push_back(
-            apriltag_calibrate.factor(
-                landmark, measured, PX_NOISE, X(t0_us), C(0), K(0)
             )
         )
 
@@ -394,16 +341,4 @@ class Estimate:
         p1 = p.exp(self.measurement)
         return gtsam.Pose2(p1.X(), p1.Y(), p1.rotation().radians())
 
-    def make_smoother(self) -> gtsam.BatchFixedLagSmoother:
-        # experimenting with the size of the lag buffer.
-        # the python odometry factor is intolerably slow
-        # but the native one is quite fast.
-        # i'm not sure what sort of window we really need; maybe
-        # just long enough to span periods of blindness, so,
-        # like a second or two?
-        # a long window is VERY SLOW, so try very short windows
-        # just long enough to catch a single vision update.
-        lag_s = 0.1
-        lag_us = lag_s * 1e6
-        lm_params = gtsam.LevenbergMarquardtParams()
-        return gtsam.BatchFixedLagSmoother(lag_us, lm_params)
+

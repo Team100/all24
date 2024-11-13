@@ -33,7 +33,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
         est.add_state(1, gtsam.Pose2())
         est.update()
-        self.assertEqual(4, est.result.size())
+        self.assertEqual(2, est.result.size())
 
         p0: gtsam.Pose2 = est.result.atPose2(X(0))
         p1: gtsam.Pose2 = est.result.atPose2(X(1))

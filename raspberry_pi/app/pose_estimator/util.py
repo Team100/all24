@@ -50,3 +50,18 @@ def pose2_to_pose2d(pose2: gtsam.Pose2) -> Pose2d:
 def to_cal(gc: gtsam.Cal3DS2) -> Cal3DS2:
     v = gc.vector()
     return Cal3DS2(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8])
+
+
+def make_smoother() -> gtsam.BatchFixedLagSmoother:
+    # experimenting with the size of the lag buffer.
+    # the python odometry factor is intolerably slow
+    # but the native one is quite fast.
+    # i'm not sure what sort of window we really need; maybe
+    # just long enough to span periods of blindness, so,
+    # like a second or two?
+    # a long window is VERY SLOW, so try very short windows
+    # just long enough to catch a single vision update.
+    lag_s = 0.1
+    lag_us = lag_s * 1e6
+    lm_params = gtsam.LevenbergMarquardtParams()
+    return gtsam.BatchFixedLagSmoother(lag_us, lm_params)

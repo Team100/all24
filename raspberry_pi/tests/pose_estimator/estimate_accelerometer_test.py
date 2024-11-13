@@ -12,13 +12,14 @@ from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
 from app.pose_estimator.estimate import Estimate
+from app.pose_estimator.parking_lot import ParkingLot
 
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
 
 class EstimateAccelerometerTest(unittest.TestCase):
     def test_accelerometer_0(self) -> None:
-        est = Estimate()
+        est = ParkingLot()
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -30,7 +31,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         est.accelerometer(0, 20000, 40000, 0, 0)
         est.update()
         print(est.result)
-        self.assertEqual(5, est.result.size())
+        self.assertEqual(3, est.result.size())
         p0: gtsam.Pose2 = est.result.atPose2(X(0))
         self.assertAlmostEqual(0, p0.x())
         self.assertAlmostEqual(0, p0.y())
@@ -45,7 +46,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         self.assertAlmostEqual(0, p2.theta())
 
     def test_accelerometer_1(self) -> None:
-        est = Estimate()
+        est = ParkingLot()
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -58,7 +59,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         est.accelerometer(0, 20000, 40000, 1, 0)
         est.update()
         print(est.result)
-        self.assertEqual(5, est.result.size())
+        self.assertEqual(3, est.result.size())
         p0: gtsam.Pose2 = est.result.atPose2(X(0))
         # this state has a prior so it is relatively immobile
         self.assertAlmostEqual(0, p0.x())
