@@ -31,10 +31,6 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * If the goal supplier runs empty, this remembers the previous goal for 1 sec,
  * and then gives up.
- * 
- * TODO: coordinate the axes; currently it's three independent profiles.
- * 
- * TODO: force the theta axis to finish first, so that the approach is correct.
  */
 public class DriveWithProfileNote extends Command implements Glassy {
 

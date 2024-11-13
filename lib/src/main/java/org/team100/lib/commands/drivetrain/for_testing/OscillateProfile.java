@@ -57,13 +57,6 @@ public class OscillateProfile extends Command implements Glassy {
     @Override
     public void execute() {
         SwerveModel measurement = m_swerve.getState();
-        // TODO: make this actually work
-        // adjust the rotation in the goal so that it points at the setpoint
-        // the idea is to arrive at the goal facing it.
-        // m_goal = m_goal.withTheta(m_goal.translation().minus(m_setpoint.translation()).getAngle().getRadians());
-        // this will change the profile, though, since rotation can be the slowest part.
-        // m_profile.solve(m_setpoint, m_goal);
-
         m_setpoint = m_profile.calculate(m_setpoint.model(), m_goal);
         // System.out.println("measurement " + measurement + " setpoint " + m_setpoint);
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, m_setpoint.model());

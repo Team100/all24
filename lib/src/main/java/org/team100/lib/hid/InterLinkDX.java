@@ -11,10 +11,6 @@ import edu.wpi.first.wpilibj.GenericHID;
  * The Spektrum InterLinkDX controller is an RC-style control with a USB
  * interface.
  * 
- * This is unfinished.
- * 
- * TODO: finish the mapping
- * 
  * HARDWARE
  * 
  * The control layout is as follows:

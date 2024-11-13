@@ -13,9 +13,7 @@ import edu.wpi.first.math.MathUtil;
  * setpoint velocity feedforward.
  */
 public class FullStateDriveController implements HolonomicFieldRelativeController {
-    // TODO: make these parameters not constants
     private static final double kXK1 = 4; // position
-    // NOTE: Sanjan set kXK2 to zero as an experiment; I put it back.
     private static final double kXK2 = 0.25; // velocity
     private static final double kThetaK1 = 4; // position
     private static final double kThetaK2 = 0.25; // velocity

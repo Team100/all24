@@ -47,9 +47,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * 
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
- * 
- * TODO: replace the two PID controllers with simpler multiplication; see
- * ManualWithFullStateHeading for an example.
  */
 public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
@@ -63,7 +60,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
-    // TODO: this filters the omega output since it can be noisy
+    // this filters the omega output since it can be noisy
     private final LinearFilter m_outputFilter;
 
     // LOGGERS

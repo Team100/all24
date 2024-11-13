@@ -350,7 +350,6 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        // TODO (jun 24) tune theta and omega control
         final PIDController thetaController = new PIDController(3.0, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         final PIDController omegaController = new PIDController(0.2, 0, 0);
