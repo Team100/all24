@@ -10,7 +10,7 @@ from gtsam import Pose2  # type:ignore
 from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
-from app.pose_estimator.parking_lot import ParkingLot
+from app.pose_estimator.parking_lot.parking_lot import ParkingLot
 from tests.pose_estimator.line_simulator import LineSimulator
 
 ACTUALLY_PRINT = False
@@ -62,7 +62,7 @@ class EstimateSimulateAccelTest(unittest.TestCase):
             t1 = time.time_ns()
             et = t1 - t0
             if ACTUALLY_PRINT:
-                print(f"{et/1e9} {est.result.size()}")
+                print(f"{et/1e9} {est._result.size()}")
             t = i * 0.02
             gt_x = sim.gt_x
             gt_y = sim.gt_y
@@ -70,7 +70,7 @@ class EstimateSimulateAccelTest(unittest.TestCase):
 
             # using just odometry without noise, the error
             # is exactly zero, all the time. :-)
-            p: Pose2 = est.result.atPose2(X(t2_us))
+            p: Pose2 = est._result.atPose2(X(t2_us))
             # use the previous estimate as the new estimate.
             state = p
             est_x = p.x()

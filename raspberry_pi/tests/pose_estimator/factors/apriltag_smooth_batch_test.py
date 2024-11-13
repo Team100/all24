@@ -130,9 +130,8 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
 
     def test_factor(self) -> None:
         # same case as above
-        measured = np.array([200, 200, 0, 0])
         landmarks = [np.array([1, 0, 0]), np.array([1, 1, 1])]
-        p0 = gtsam.Pose2()
+        measured = np.array([200, 200, 0, 0])
         offset = gtsam.Pose3()
         f: gtsam.NoiseModelFactor = apriltag_smooth_batch.factor(
             landmarks,
@@ -143,6 +142,7 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
             X(0),
         )
         v = gtsam.Values()
+        p0 = gtsam.Pose2()
         v.insert(X(0), p0)
         err_px = f.unwhitenedError(v)
         # same case as above
