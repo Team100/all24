@@ -84,9 +84,12 @@ public class DriveWithProfile2 extends Command implements Glassy {
 
         Optional<Pose2d> opt = m_fieldRelativeGoalSupplier.get();
         if (opt.isEmpty()) {
-            return;
+            if (m_fieldRelativeGoal == null) {
+                return;
+            }
+        } else {
+            m_fieldRelativeGoal = opt.get();
         }
-        m_fieldRelativeGoal = opt.get();
         
         m_xGoalRaw = new Model100(m_fieldRelativeGoal.getX(), 0);
         m_yGoalRaw = new Model100(m_fieldRelativeGoal.getY(), 0);
@@ -142,7 +145,9 @@ public class DriveWithProfile2 extends Command implements Glassy {
 
     @Override
     public boolean isFinished() {
-        if (!m_fieldRelativeGoalSupplier.get().isPresent() && m_fieldRelativeGoal == null) return true;
+        if (!m_fieldRelativeGoalSupplier.get().isPresent() && m_fieldRelativeGoal == null) {
+            return true;
+        }
         double xError = m_xGoalRaw.x() - m_swerve.getState().x().x();
         double yError = m_yGoalRaw.x() - m_swerve.getState().y().x();
         double thetaError = m_thetaGoalRaw.x() - m_swerve.getState().theta().x();
