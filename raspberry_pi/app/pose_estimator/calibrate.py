@@ -11,7 +11,7 @@ from gtsam import noiseModel  # type:ignore
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 from gtsam.symbol_shorthand import C, K, X  # type:ignore
 
-import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate
+import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate_batch
 from app.pose_estimator.util import make_smoother
 
 # initial value and prior for camera calibration
@@ -123,7 +123,7 @@ class Calibrate:
         self, landmark: np.ndarray, measured: np.ndarray, t0_us: int
     ) -> None:
         self.new_factors.push_back(
-            apriltag_calibrate.factor(
+            apriltag_calibrate_batch.factor(
                 landmark, measured, PX_NOISE, X(t0_us), C(0), K(0)
             )
         )

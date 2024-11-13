@@ -8,7 +8,7 @@ import numpy as np
 from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import C, K, X  # type:ignore
 
-import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate_batch
+import app.pose_estimator.factors.apriltag_calibrate_batch as apriltag_calibrate_batch
 
 # example calibration, focal length 200, pixel center 200, a little bit
 # of distortion.
@@ -16,17 +16,21 @@ KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
 NOISE2 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 
 
-class AprilTagCalibrateTest(unittest.TestCase):
+class AprilTagCalibrateBatchTest(unittest.TestCase):
     def test_h_center_1(self) -> None:
-        landmark = np.array([1, 0, 0])
+        landmarks = [np.array([1, 0, 0]), np.array([1, 0, 0])]
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
-        estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmark)(p0, offset, KCAL)
+        estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmarks)(
+            p0, offset, KCAL
+        )
         # landmark on the camera bore, so it's at (cx, cy)
         self.assertTrue(
             np.allclose(
                 np.array(
                     [
+                        200,
+                        200,
                         200,
                         200,
                     ]
@@ -36,16 +40,20 @@ class AprilTagCalibrateTest(unittest.TestCase):
         )
 
     def test_h_side_0(self) -> None:
-        # higher than the camera
-        landmark = np.array([1, 0, 1])
+        # second point is above the camera bore
+        landmarks = [np.array([1, 0, 0]), np.array([1, 0, 1])]
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
-        estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmark)(p0, offset, KCAL)
+        estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmarks)(
+            p0, offset, KCAL
+        )
         # landmark above the camera bore, so the 'y' value is less
         self.assertTrue(
             np.allclose(
                 np.array(
                     [
+                        200,
+                        200,
                         200,
                         20,
                     ]
@@ -55,11 +63,13 @@ class AprilTagCalibrateTest(unittest.TestCase):
         )
 
     def test_h_upper_left(self) -> None:
-        # higher than the camera
-        landmark = np.array([1, 1, 1])
+        # second point is above and to the left
+        landmarks = [np.array([1, 0, 0]), np.array([1, 1, 1])]
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
-        estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmark)(p0, offset, KCAL)
+        estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmarks)(
+            p0, offset, KCAL
+        )
         # above and to the left, so both x and y are less.
         # (coincidentally right on the edge)
         print("estimate: ", estimate_px)
@@ -67,6 +77,8 @@ class AprilTagCalibrateTest(unittest.TestCase):
             np.allclose(
                 np.array(
                     [
+                        200,
+                        200,
                         0,
                         0,
                     ]
@@ -77,19 +89,21 @@ class AprilTagCalibrateTest(unittest.TestCase):
 
     def test_H_upper_left(self) -> None:
         # as above but with jacobians
-        measured = np.array([0, 0])
-        landmark = np.array([1, 1, 1])
+        measured = np.array([200, 200, 0, 0])
+        landmarks = [np.array([1, 0, 0]), np.array([1, 1, 1])]
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
         H = [np.zeros((3, 2)), np.zeros((6, 2)), np.zeros((9, 2))]
         err_px: np.ndarray = apriltag_calibrate_batch.h_H(
-            landmark, measured, p0, offset, KCAL, H
+            landmarks, measured, p0, offset, KCAL, H
         )
         # same case as above
         self.assertTrue(
             np.allclose(
                 np.array(
                     [
+                        0,
+                        0,
                         0,
                         0,
                     ]
@@ -104,6 +118,8 @@ class AprilTagCalibrateTest(unittest.TestCase):
             np.allclose(
                 np.array(
                     [
+                        [0, 200, 200],
+                        [0, 0.0, 0],
                         [-360, 280, 640],
                         [-360, 80, 440],
                     ]
@@ -116,6 +132,8 @@ class AprilTagCalibrateTest(unittest.TestCase):
             np.allclose(
                 np.array(
                     [
+                        [0, 0, 200, 0, 200, 0],
+                        [0, -200, 0, 0, 0, 200],
                         [-200, -440, 640, -360, 280, 80],
                         [200, -640, 440, -360, 80, 280],
                     ]
@@ -128,6 +146,8 @@ class AprilTagCalibrateTest(unittest.TestCase):
             np.allclose(
                 np.array(
                     [
+                        [0, 0, 0, 1, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 1, 0, 0, 0, 0],
                         [-1, 0, -1, 1, 0, -400, -800, 400, 800],
                         [0, -1, 0, 0, 1, -400, -800, 800, 400],
                     ]
@@ -139,12 +159,12 @@ class AprilTagCalibrateTest(unittest.TestCase):
 
     def test_factor(self) -> None:
         # same as above
-        measured = np.array([0, 0])
-        landmark = np.array([1, 1, 1])
+        measured = np.array([200, 200, 0, 0])
+        landmarks = [np.array([1, 0, 0]), np.array([1, 1, 1])]
         p0 = gtsam.Pose2()
         offset = gtsam.Pose3()
         f: gtsam.NoiseModelFactor = apriltag_calibrate_batch.factor(
-            landmark,
+            landmarks,
             measured,
             NOISE2,
             X(0),
@@ -162,6 +182,8 @@ class AprilTagCalibrateTest(unittest.TestCase):
             np.allclose(
                 np.array(
                     [
+                        0,
+                        0,
                         0,
                         0,
                     ]
