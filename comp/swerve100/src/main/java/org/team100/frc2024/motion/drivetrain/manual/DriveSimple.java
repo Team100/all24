@@ -19,7 +19,7 @@ public class DriveSimple extends Command {
 
     @Override
     public void initialize() {
-        m_driver.reset(m_swerve.getState().pose());
+        m_driver.reset(m_swerve.getState());
     }
 
     @Override

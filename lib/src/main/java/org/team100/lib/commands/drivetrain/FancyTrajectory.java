@@ -70,8 +70,8 @@ public class FancyTrajectory extends Command implements Glassy {
     @Override
     public void execute() {
         final double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_robotDrive.getState().pose();
-        ChassisSpeeds currentSpeed = m_robotDrive.getState().chassisSpeeds();
+        Pose2d currentPose = m_robotDrive.getPose();
+        ChassisSpeeds currentSpeed = m_robotDrive.getChassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         m_log_chassis_speeds.log(() -> output);
         m_robotDrive.setChassisSpeeds(output);

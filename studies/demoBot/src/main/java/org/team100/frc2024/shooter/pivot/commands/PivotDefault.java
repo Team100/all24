@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.frc2024.shooter.pivot.PivotSubsystem;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class PivotDefault extends Command {
@@ -24,7 +25,7 @@ public class PivotDefault extends Command {
 
     @Override
     public void execute() {
-        m_pivot.dutyCycle(m_twistSupplier.get());
+        m_pivot.dutyCycle(MathUtil.applyDeadband(m_twistSupplier.get(), 0.05)/2);
     }
 
     @Override

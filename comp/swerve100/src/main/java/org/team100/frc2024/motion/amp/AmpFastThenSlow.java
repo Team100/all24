@@ -1,7 +1,7 @@
 package org.team100.frc2024.motion.amp;
 
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -26,7 +26,7 @@ public class AmpFastThenSlow extends SequentialCommandGroup {
                 // first go fast to the switch point at the slow velocity
                 new AmpState(
                         pivot,
-                        new State100(
+                        new Model100(
                                 switchRad,
                                 switchRad < goalRad ? kSlowVelocityRad_S : -kSlowVelocityRad_S),
                         kFastProfile,
@@ -36,7 +36,7 @@ public class AmpFastThenSlow extends SequentialCommandGroup {
                 // then go slow to the goal at rest
                 new AmpState(
                         pivot,
-                        new State100(goalRad, 0.0),
+                        new Model100(goalRad, 0.0),
                         kSlowProfile,
                         kSlowTorqueLimitNm,
                         kTolerance,

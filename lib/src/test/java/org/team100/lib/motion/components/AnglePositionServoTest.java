@@ -30,53 +30,54 @@ class AnglePositionServoTest {
     /** A minimal exercise. */
     @Test
     void testOnboard() {
-        MockBareMotor turningMotor = new MockBareMotor();
-        RotaryMechanism mech = new SimpleRotaryMechanism(
+        final MockBareMotor turningMotor = new MockBareMotor();
+        final RotaryMechanism mech = new SimpleRotaryMechanism(
                 logger,
                 turningMotor,
                 new MockIncrementalBareEncoder(),
                 1);
-        MockRotaryPositionSensor turningEncoder = new MockRotaryPositionSensor();
-
-        PIDController turningController2 = new PIDController(1, 0, 0, TimedRobot100.LOOP_PERIOD_S);
-
-        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
-        double maxVel = 1;
-        AngularPositionServo servo = new OnboardAngularPositionServo(
+        final MockRotaryPositionSensor turningEncoder = new MockRotaryPositionSensor();
+        final PIDController turningController2 = new PIDController(1, 0, 0, TimedRobot100.LOOP_PERIOD_S);
+        final Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        final AngularPositionServo servo = new OnboardAngularPositionServo(
                 logger,
                 mech,
                 turningEncoder,
-                maxVel,
+                () -> profile,
                 turningController2);
-        servo.setProfile(profile);
         servo.reset();
         // spin for 1 s
         for (int i = 0; i < 50; ++i) {
             servo.setPosition(1, 0);
+            // lets say we're on the profile.
+            turningEncoder.angle = servo.getSetpoint().x();
+            turningEncoder.rate = servo.getSetpoint().v();
         }
         assertEquals(0, turningMotor.output, 0.001);
         assertEquals(0.5, servo.getSetpoint().x(), kDelta);
         assertEquals(1.0, servo.getSetpoint().v(), kDelta);
-        assertEquals(1, turningMotor.velocity, kDelta);
+        assertEquals(0.5, turningEncoder.getPositionRad().getAsDouble(), kDelta);
+        // a little overshoot?
+        assertEquals(1.02, turningMotor.velocity, kDelta);
     }
 
     @Test
     void testOutboard() {
-        MockBareMotor motor = new MockBareMotor();
-        RotaryMechanism mech = new SimpleRotaryMechanism(
+        final MockBareMotor motor = new MockBareMotor();
+        final RotaryMechanism mech = new SimpleRotaryMechanism(
                 logger,
                 motor,
                 new MockIncrementalBareEncoder(),
                 1);
-        MockRotaryPositionSensor externalEncoder = new MockRotaryPositionSensor();
-        CombinedEncoder combinedEncoder = new CombinedEncoder(logger, externalEncoder, mech);
-        Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
+        final MockRotaryPositionSensor externalEncoder = new MockRotaryPositionSensor();
+        final CombinedEncoder combinedEncoder = new CombinedEncoder(logger, externalEncoder, mech);
+        final Profile100 profile = new TrapezoidProfile100(1, 1, 0.05);
 
-        OutboardAngularPositionServo servo = new OutboardAngularPositionServo(
+        final OutboardAngularPositionServo servo = new OutboardAngularPositionServo(
                 logger,
                 mech,
-                combinedEncoder);
-        servo.setProfile(profile);
+                combinedEncoder,
+                profile);
         servo.reset();
         // it moves slowly
         servo.setPosition(1, 0);

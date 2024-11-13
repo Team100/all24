@@ -43,8 +43,7 @@ public class Fixture {
         swerveLocal = new SwerveLocal(logger, swerveKinodynamics, setpointGenerator, collection);
         poseEstimator = swerveKinodynamics.newPoseEstimator(
                 logger,
-                gyro.getYawNWU(),
-                gyro.getYawRateNWU(),
+                gyro,
                 collection.positions(),
                 GeometryUtil.kPoseZero,
                 0); // initial time is zero here for testing

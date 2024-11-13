@@ -15,7 +15,7 @@ import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
@@ -23,6 +23,7 @@ import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
+import org.team100.lib.sensors.MockGyro;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -48,7 +49,7 @@ class SwerveDrivePoseEstimator100Test {
     private final SwerveModulePositions position01 = new SwerveModulePositions(p01, p01, p01, p01);
     private final Pose2d visionRobotPoseMeters = new Pose2d(1, 0, GeometryUtil.kRotationZero);
 
-    private static void verify(double x, SwerveState state) {
+    private static void verify(double x, SwerveModel state) {
         Pose2d estimate = state.pose();
         assertEquals(x, estimate.getX(), kDelta);
         assertEquals(0, estimate.getY(), kDelta);
@@ -68,8 +69,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 logger,
-                GeometryUtil.kRotationZero,
-                0,
+                new MockGyro(),
                 positionZero,
                 GeometryUtil.kPoseZero,
                 0); // zero initial time
@@ -176,8 +176,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 logger,
-                GeometryUtil.kRotationZero,
-                0,
+                new MockGyro(),
                 positionZero,
                 GeometryUtil.kPoseZero,
                 0); // zero initial time
@@ -286,8 +285,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 logger,
-                GeometryUtil.kRotationZero,
-                0,
+                new MockGyro(),
                 positionZero,
                 GeometryUtil.kPoseZero,
                 0); // zero initial time
@@ -336,8 +334,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] visionMeasurementStdDevs = new double[] { 1.0, 1.0, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 logger,
-                GeometryUtil.kRotationZero,
-                0,
+                new MockGyro(),
                 positionZero,
                 GeometryUtil.kPoseZero,
                 0); // zero initial time
@@ -386,8 +383,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] visionMeasurementStdDevs = new double[] { 0.5, 0.5, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 logger,
-                GeometryUtil.kRotationZero,
-                0,
+                new MockGyro(),
                 positionZero,
                 GeometryUtil.kPoseZero,
                 0); // zero initial time
@@ -438,8 +434,7 @@ class SwerveDrivePoseEstimator100Test {
         double[] visionMeasurementStdDevs = new double[] { 0.1, 0.1, Double.MAX_VALUE };
         SwerveDrivePoseEstimator100 poseEstimator = kinodynamics.newPoseEstimator(
                 logger,
-                GeometryUtil.kRotationZero,
-                0,
+                new MockGyro(),
                 positionZero,
                 GeometryUtil.kPoseZero,
                 0); // zero initial time
@@ -499,8 +494,7 @@ class SwerveDrivePoseEstimator100Test {
         var estimator = new SwerveDrivePoseEstimator100(
                 logger,
                 kinodynamics,
-                new Rotation2d(),
-                0,
+                new MockGyro(),
                 new SwerveModulePositions(fl, fr, bl, br),
                 new Pose2d(),
                 0); // zero initial time
@@ -534,7 +528,8 @@ class SwerveDrivePoseEstimator100Test {
 
     }
 
-    @Test
+    // this test doesn't apply to us because we ignore the vision theta.
+    // @Test
     void testBadInitialPose() {
         SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forWPITest();
 
@@ -553,8 +548,7 @@ class SwerveDrivePoseEstimator100Test {
         var estimator = new SwerveDrivePoseEstimator100(
                 logger,
                 kinodynamics,
-                new Rotation2d(),
-                0,
+                new MockGyro(),
                 new SwerveModulePositions(fl, fr, bl, br),
                 new Pose2d(-1, -1, Rotation2d.fromRadians(-1)),
                 0); // zero initial time
@@ -627,8 +621,7 @@ class SwerveDrivePoseEstimator100Test {
         // new starting pose here, so we don't actually use the earlier initial pose
 
         estimator.reset(
-                new Rotation2d(),
-                0,
+                new MockGyro(),
                 positions,
                 startingPose,
                 0); // zero initial time
@@ -694,7 +687,7 @@ class SwerveDrivePoseEstimator100Test {
                             .minus(trajectory.getInitialPose().getRotation()),
                     0,
                     positions);
-            SwerveState xHat = estimator.get(t);
+            SwerveModel xHat = estimator.get(t);
 
             double error = groundTruthState.poseMeters.getTranslation().getDistance(xHat.pose().getTranslation());
             if (error > maxError) {
@@ -755,8 +748,7 @@ class SwerveDrivePoseEstimator100Test {
         var estimator = new SwerveDrivePoseEstimator100(
                 logger,
                 kinodynamics,
-                new Rotation2d(),
-                0,
+                new MockGyro(),
                 new SwerveModulePositions(fl, fr, bl, br),
                 new Pose2d(1, 2, Rotation2d.fromDegrees(270)),
                 0); // zero initial time
@@ -798,8 +790,7 @@ class SwerveDrivePoseEstimator100Test {
         var estimator = new SwerveDrivePoseEstimator100(
                 logger,
                 kinodynamics,
-                new Rotation2d(),
-                0,
+                new MockGyro(),
                 new SwerveModulePositions(
                         new SwerveModulePosition100(),
                         new SwerveModulePosition100(),

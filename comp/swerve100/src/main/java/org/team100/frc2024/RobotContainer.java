@@ -1,7 +1,6 @@
 package org.team100.frc2024;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -9,7 +8,6 @@ import java.util.function.BooleanSupplier;
 import org.team100.frc2024.commands.AutonCommand;
 import org.team100.frc2024.commands.Feed;
 import org.team100.frc2024.commands.Lob;
-import org.team100.frc2024.commands.climber.HomeClimber;
 import org.team100.frc2024.commands.drivetrain.manual.ManualWithAmpLock;
 import org.team100.frc2024.commands.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.config.AutonChooser;
@@ -22,8 +20,6 @@ import org.team100.frc2024.motion.amp.AmpFastThenSlow;
 import org.team100.frc2024.motion.amp.AmpFeeder;
 import org.team100.frc2024.motion.amp.AmpPivot;
 import org.team100.frc2024.motion.amp.DriveToAmp;
-import org.team100.frc2024.motion.climber.ClimberDefault;
-import org.team100.frc2024.motion.climber.ClimberSubsystem;
 import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
 import org.team100.frc2024.motion.intake.Intake;
 import org.team100.frc2024.motion.intake.RunIntakeAndAmpFeeder;
@@ -45,7 +41,6 @@ import org.team100.lib.commands.drivetrain.manual.FieldManualWithNoteRotation;
 import org.team100.lib.commands.drivetrain.manual.ManualChassisSpeeds;
 import org.team100.lib.commands.drivetrain.manual.ManualFieldRelativeSpeeds;
 import org.team100.lib.commands.drivetrain.manual.ManualWithFullStateHeading;
-import org.team100.lib.commands.drivetrain.manual.ManualWithMinTimeHeading;
 import org.team100.lib.commands.drivetrain.manual.ManualWithNoteRotation;
 import org.team100.lib.commands.drivetrain.manual.ManualWithProfiledHeading;
 import org.team100.lib.commands.drivetrain.manual.ManualWithTargetLock;
@@ -85,9 +80,6 @@ import org.team100.lib.profile.HolonomicProfile;
 import org.team100.lib.sensors.Gyro;
 import org.team100.lib.sensors.GyroFactory;
 import org.team100.lib.swerve.AsymSwerveSetpointGenerator;
-import org.team100.lib.timing.ConstantConstraint;
-import org.team100.lib.trajectory.StraightLineTrajectory;
-import org.team100.lib.trajectory.TrajectoryMaker;
 import org.team100.lib.util.Util;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
@@ -121,8 +113,6 @@ public class RobotContainer implements Glassy {
     private final Command m_auton;
     private final DrumShooter m_shooter;
     final SwerveDriveSubsystem m_drive;
-    final AmpFeeder m_ampFeeder;
-    final AmpPivot m_ampPivot;
 
     public RobotContainer(TimedRobot100 robot) throws IOException {
         final AsyncFactory asyncFactory = new AsyncFactory(robot);
@@ -162,14 +152,12 @@ public class RobotContainer implements Glassy {
         final Gyro gyro = GyroFactory.get(
                 driveLog,
                 swerveKinodynamics,
-                m_modules,
-                asyncFactory);
+                m_modules);
 
         // ignores the rotation derived from vision.
         final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 driveLog,
-                gyro.getYawNWU(),
-                gyro.getYawRateNWU(),
+                gyro,
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());
@@ -184,7 +172,11 @@ public class RobotContainer implements Glassy {
                 driveLog,
                 swerveKinodynamics,
                 RobotController::getBatteryVoltage);
-        final SwerveLocal swerveLocal = new SwerveLocal(driveLog, swerveKinodynamics, setpointGenerator, m_modules);
+        final SwerveLocal swerveLocal = new SwerveLocal(
+                driveLog,
+                swerveKinodynamics,
+                setpointGenerator,
+                m_modules);
 
         m_drive = new SwerveDriveSubsystem(
                 fieldLogger,
@@ -195,7 +187,7 @@ public class RobotContainer implements Glassy {
                 visionDataProvider);
 
         final NotePosition24ArrayListener noteListener = new NotePosition24ArrayListener(
-                () -> m_drive.getState().pose());
+                m_drive::getPose);
 
         //////////////////////////////
         //
@@ -209,6 +201,11 @@ public class RobotContainer implements Glassy {
 
         m_shooter = new DrumShooter(sysLog, 3, 13, 27, 58, 100);
 
+        // final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
+
+        final AmpFeeder m_ampFeeder = new AmpFeeder(sysLog);
+        final AmpPivot m_ampPivot = new AmpPivot(sysLog);
+
         ///////////////////////////
         //
         // LEDS
@@ -221,11 +218,6 @@ public class RobotContainer implements Glassy {
                 m_sensors,
                 m_shooter,
                 visionDataProvider);
-
-        m_ampFeeder = new AmpFeeder(sysLog);
-        m_ampPivot = new AmpPivot(sysLog);
-
-        final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
 
         ////////////////////////////
         //
@@ -251,7 +243,7 @@ public class RobotContainer implements Glassy {
 
         // cartesian position, rotation full-state.
         HolonomicFieldRelativeController.Log hlog = new HolonomicFieldRelativeController.Log(comLog);
-        HolonomicFieldRelativeController halfFullStateController = HolonomicDriveControllerFactory.get(hlog);
+        final HolonomicFieldRelativeController holonomicController = HolonomicDriveControllerFactory.get(hlog);
 
         final DriveTrajectoryFollowerUtil util = new DriveTrajectoryFollowerUtil(comLog);
         final DriveTrajectoryFollowerFactory driveControllerFactory = new DriveTrajectoryFollowerFactory(util);
@@ -264,14 +256,13 @@ public class RobotContainer implements Glassy {
                         driveControllerFactory.fancyPIDF(PIDFlog),
                         swerveKinodynamics));
 
-        final HolonomicFieldRelativeController controller = HolonomicDriveControllerFactory.get(hlog);
         final DriveTrajectoryFollower drivePID = driveControllerFactory.goodPIDF(PIDFlog);
 
         whileTrue(driverControl::driveToNote,
                 new ParallelDeadlineGroup(new DriveWithProfileRotation(
                         noteListener::getClosestTranslation2d,
                         m_drive,
-                        halfFullStateController,
+                        holonomicController,
                         swerveKinodynamics), intake.run(intake::intakeSmart)));
         // try the new mintime controller
         final HolonomicFieldRelativeController minTimeController = new MinTimeDriveController(comLog, hlog);
@@ -284,18 +275,23 @@ public class RobotContainer implements Glassy {
         // whileTrue(driverControl::actualCircle,
         // new DriveInACircle(comLog, m_drive, controller, -1, viz));
         whileTrue(driverControl::driveToAmp,
-        new DriveWithProfileRotation(
-            () -> Optional.of(m_layout.getTagPose(DriverStation.getAlliance().get(), 4).get().getTranslation().toTranslation2d()),
-            m_drive,
-            halfFullStateController,
-            swerveKinodynamics));
+                new DriveToAmp(
+                        m_drive,
+                        holonomicController,
+                        swerveKinodynamics,
+                        m_ampPivot,
+                        m_ampFeeder,
+                        intake,
+                        m_shooter,
+                        feeder));
 
         ///////////////////////
         //
         // for testing odometry
         //
-        TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new ConstantConstraint(1.0, 1.0)));
-        StraightLineTrajectory maker = new StraightLineTrajectory(false, tmaker);
+        // TrajectoryMaker tmaker = new TrajectoryMaker(List.of(new
+        /////////////////////// ConstantConstraint(1.0, 1.0)));
+        // StraightLineTrajectory maker = new StraightLineTrajectory(false, tmaker);
         // slow, will not work for high-speed entry
         // HolonomicProfile hp = new HolonomicProfile(TimedRobot100.LOOP_PERIOD_S, 1, 1,
         // 0.01, 1, 1, 0.01);
@@ -334,10 +330,6 @@ public class RobotContainer implements Glassy {
 
         whileTrue(operatorControl::feed, new Feed(intake, feeder));
 
-        // hold the amp up while holding the button
-        // whileTrue(operatorControl::pivotToAmpPosition, new AmpSet(ampLogger,
-        // m_ampPivot, 1.8));
-
         // fast, then slow.
         whileTrue(operatorControl::pivotToAmpPosition,
                 new AmpFastThenSlow(m_ampPivot, 1.7, 1.8));
@@ -351,10 +343,10 @@ public class RobotContainer implements Glassy {
 
         whileTrue(operatorControl::never, new Lob(m_shooter, intake));
 
-        whileTrue(operatorControl::homeClimber, new HomeClimber(comLog, climber));
+        // whileTrue(operatorControl::homeClimber, new HomeClimber(comLog, climber));
 
-        whileTrue(operatorControl::climbUpPosition, climber.upPosition());
-        whileTrue(operatorControl::climbDownPosition, climber.downPosition());
+        // whileTrue(operatorControl::climbUpPosition, climber.upPosition());
+        // whileTrue(operatorControl::climbDownPosition, climber.downPosition());
 
         ///////////////////////////
         //
@@ -379,7 +371,6 @@ public class RobotContainer implements Glassy {
                         fieldLog,
                         manLog,
                         swerveKinodynamics,
-                        gyro,
                         noteListener::getClosestTranslation2d,
                         thetaController,
                         omegaController,
@@ -392,7 +383,6 @@ public class RobotContainer implements Glassy {
                 new ManualWithProfiledHeading(
                         manLog,
                         swerveKinodynamics,
-                        gyro,
                         driverControl::desiredRotation,
                         thetaController,
                         omegaController));
@@ -400,7 +390,7 @@ public class RobotContainer implements Glassy {
         // these gains are not terrible; trying to go faster seems to induce oscillation
         // theta feedback is rad/s, per rad of error.
         // so if you want to go 1.5rad at a time in a lot less than
-        // a second, you kinda want 3 or 5 or something.  if you make
+        // a second, you kinda want 3 or 5 or something. if you make
         // it too big, it will overshoot.
         // omega feedback is rad/s per rad/s of error.
         // this generally opposes the theta feedback, so you don't
@@ -411,7 +401,6 @@ public class RobotContainer implements Glassy {
                 new ManualWithFullStateHeading(
                         manLog,
                         swerveKinodynamics,
-                        gyro,
                         driverControl::desiredRotation,
                         new double[] {
                                 5,
@@ -423,7 +412,6 @@ public class RobotContainer implements Glassy {
                         fieldLog,
                         manLog,
                         swerveKinodynamics,
-                        gyro,
                         noteListener::getClosestTranslation2d,
                         thetaController,
                         omegaController,
@@ -434,7 +422,6 @@ public class RobotContainer implements Glassy {
                         fieldLog,
                         manLog,
                         swerveKinodynamics,
-                        gyro,
                         driverControl::target,
                         thetaController,
                         omegaController,
@@ -445,7 +432,6 @@ public class RobotContainer implements Glassy {
                         fieldLog,
                         manLog,
                         swerveKinodynamics,
-                        gyro,
                         thetaController,
                         omegaController));
 
@@ -455,7 +441,6 @@ public class RobotContainer implements Glassy {
                 fieldLog,
                 comLog.child("ShooterLock"),
                 swerveKinodynamics,
-                gyro,
                 thetaController,
                 omega2Controller);
 
@@ -463,7 +448,6 @@ public class RobotContainer implements Glassy {
                 fieldLog,
                 comLog,
                 swerveKinodynamics,
-                gyro,
                 thetaController,
                 omega2Controller);
 
@@ -499,15 +483,13 @@ public class RobotContainer implements Glassy {
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
         feeder.setDefaultCommand(feeder.run(feeder::stop));
         intake.setDefaultCommand(intake.run(intake::stop));
-        climber.setDefaultCommand(new ClimberDefault(
-                comLog,
-                climber,
-                operatorControl::leftClimb,
-                operatorControl::rightClimb));
+        // climber.setDefaultCommand(new ClimberDefault(
+        // // comLog,
+        // climber,
+        // operatorControl::leftClimb,
+        // operatorControl::rightClimb));
         m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
-        // m_ampPivot.setDefaultCommand(new AmpSet(ampLogger, m_ampPivot, 0));
         // if far from the goal, go fast. if near, go slow.
-        // TODO: tune these numbers
         m_ampPivot.setDefaultCommand(new AmpFastThenSlow(m_ampPivot, 0.1, 0));
 
         ////////////////////
@@ -554,7 +536,7 @@ public class RobotContainer implements Glassy {
 
     public void onInit() {
         // m_drive.resetPose()
-        m_drive.resetPose(new Pose2d(m_drive.getState().pose().getTranslation(), new Rotation2d(Math.PI)));
+        m_drive.resetPose(new Pose2d(m_drive.getPose().getTranslation(), new Rotation2d(Math.PI)));
 
     }
 

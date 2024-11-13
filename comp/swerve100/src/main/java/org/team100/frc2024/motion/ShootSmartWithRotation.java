@@ -56,7 +56,7 @@ public class ShootSmartWithRotation extends Command implements Glassy  {
 
     @Override
     public void initialize() {
-        m_driver.reset(m_drive.getState().pose());
+        m_driver.reset(m_drive.getState());
     }
 
     @Override
@@ -68,12 +68,12 @@ public class ShootSmartWithRotation extends Command implements Glassy  {
             return;
         }
         m_shooter.forward();
-        Translation2d robotLocation = m_drive.getState().pose().getTranslation();
+        Translation2d robotLocation = m_drive.getPose().getTranslation();
         Translation2d speakerLocation = ShooterUtil.getSpeakerTranslation(alliance.get());
         Translation2d difference = robotLocation.minus(speakerLocation);
         double angle = MathUtil.angleModulus(Math.atan2(difference.getY(), difference.getX()) - Math.PI);
         m_log_angle.log(() -> angle);
-        double angleModulus = MathUtil.angleModulus(m_drive.getState().pose().getRotation().getRadians());
+        double angleModulus = MathUtil.angleModulus(m_drive.getPose().getRotation().getRadians());
         m_log_realangle.log(() -> angleModulus);
         double angleError = angle - angleModulus;
         double distance = robotLocation.getDistance(speakerLocation);

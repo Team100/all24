@@ -103,12 +103,10 @@ public class RobotContainerParkingLot implements Glassy {
         m_gyro = GyroFactory.get(
                 driveLogger,
                 swerveKinodynamics,
-                m_modules,
-                asyncFactory);
+                m_modules);
         final SwerveDrivePoseEstimator100 poseEstimator = swerveKinodynamics.newPoseEstimator(
                 driveLogger,
-                m_gyro.getYawNWU(),
-                m_gyro.getYawRateNWU(),
+                m_gyro,
                 m_modules.positions(),
                 GeometryUtil.kPoseZero,
                 Timer.getFPGATimestamp());

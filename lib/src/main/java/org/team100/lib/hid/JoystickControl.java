@@ -4,8 +4,6 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import org.team100.lib.geometry.GeometryUtil;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;

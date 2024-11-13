@@ -26,7 +26,7 @@ public class ShooterLockCommand extends Command {
 
     @Override
     public void initialize() {
-        m_driver.reset(m_drive.getState().pose());
+        m_driver.reset(m_drive.getState());
     }
 
     @Override

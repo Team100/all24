@@ -148,10 +148,6 @@ class DriveMotionPlannerTest {
                 Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose),
                         controller.getSetpoint(time).get().state().getPose());
 
-                // System.out.println(pose);
-
-                // TODO: revisit these very loose error bounds.
-
                 assertEquals(0.0, error.getTranslation().getX(), 0.5);
                 assertEquals(0.0, error.getTranslation().getY(), 0.5);
                 assertEquals(0.0, error.getRotation().getDegrees(), 30.0);

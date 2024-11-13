@@ -6,7 +6,7 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class DriveToPoseSimple extends Command implements Glassy {
     private final FieldRelativeVelocityLogger m_log_output;
-    private final SwerveState m_goal;
+    private final SwerveModel m_goal;
     private final HolonomicFieldRelativeController m_controller;
     private final SwerveDriveSubsystem m_swerve;
 
@@ -33,7 +33,7 @@ public class DriveToPoseSimple extends Command implements Glassy {
         LoggerFactory child = parent.child(this);
         m_log_output = child.fieldRelativeVelocityLogger(Level.TRACE, "output");
         // goal is motionless at the specified pose.
-        m_goal = new SwerveState(goal);
+        m_goal = new SwerveModel(goal);
         m_controller = controller;
         m_swerve = swerve;
     }
@@ -45,7 +45,7 @@ public class DriveToPoseSimple extends Command implements Glassy {
 
     @Override
     public void execute() {
-        SwerveState measurement = m_swerve.getState();
+        SwerveModel measurement = m_swerve.getState();
         FieldRelativeVelocity output = m_controller.calculate(measurement, m_goal);
         m_log_output.log(() -> output);
         m_swerve.driveInFieldCoordsVerbatim(output);

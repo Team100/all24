@@ -12,6 +12,11 @@ import com.reduxrobotics.sensors.canandgyro.Canandgyro.Faults;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 
+/**
+ * The Redux gyro folk say that the measurements provided are within 1ms of the
+ * CAN packet being sent, and the CAN latency is quite low, so I think delay can
+ * be ignored for this device.
+ */
 public class ReduxGyro implements Gyro {
 
     private final Canandgyro m_gyro;

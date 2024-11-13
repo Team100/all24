@@ -3,9 +3,9 @@ package org.team100.lib.controller.drivetrain;
 import org.team100.lib.controller.simple.MinTimeController;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -73,22 +73,22 @@ public class MinTimeDriveController implements HolonomicFieldRelativeController 
      * Makes no attempt to coordinate the axes or provide feasible output.
      */
     @Override
-    public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference) {
+    public FieldRelativeVelocity calculate(SwerveModel measurement, SwerveModel reference) {
         m_log.measurement.log(() -> measurement);
         m_log.reference.log(() -> reference);
         m_log.error.log(() -> reference.minus(measurement));
 
         FieldRelativeVelocity u_FF = reference.velocity();
 
-        State100 xFB = m_xController.calculate(
+        Control100 xFB = m_xController.calculate(
                 TimedRobot100.LOOP_PERIOD_S,
                 measurement.x(),
                 reference.x());
-        State100 yFB = m_yController.calculate(
+        Control100 yFB = m_yController.calculate(
                 TimedRobot100.LOOP_PERIOD_S,
                 measurement.y(),
                 reference.y());
-        State100 thetaFB = m_thetaController.calculate(
+        Control100 thetaFB = m_thetaController.calculate(
                 TimedRobot100.LOOP_PERIOD_S,
                 measurement.theta(),
                 reference.theta());

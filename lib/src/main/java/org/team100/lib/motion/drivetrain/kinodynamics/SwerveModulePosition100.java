@@ -27,7 +27,6 @@ public class SwerveModulePosition100
     /**
      * Angle of the module. It can be empty, in cases where the angle is
      * indeterminate (e.g. calculating the angle required for zero speed).
-     * TODO: make this private.
      */
     public Optional<Rotation2d> angle = Optional.empty();
 
@@ -92,11 +91,23 @@ public class SwerveModulePosition100
     @Override
     public SwerveModulePosition100 interpolate(SwerveModulePosition100 endValue, double t) {
         double distLerp = MathUtil.interpolate(this.distanceMeters, endValue.distanceMeters, t);
-        if (this.angle.isEmpty() || endValue.angle.isEmpty()) {
-            return new SwerveModulePosition100(distLerp, Optional.empty());
-        } else {
-            Rotation2d angleLerp = this.angle.get().interpolate(endValue.angle.get(), t);
+        if (this.angle.isEmpty() && endValue.angle.isEmpty()) {
+            // no angle information at all == no idea where we are, just return zero.
+            return new SwerveModulePosition100(0.0, Optional.empty());
+        }
+        if (this.angle.isEmpty()) {
+            // start is unknown but end is known, so use end.
+            Rotation2d angleLerp = endValue.angle.get();
             return new SwerveModulePosition100(distLerp, Optional.of(angleLerp));
         }
+        if (endValue.angle.isEmpty()) {
+            // start is known but end is not, so use start.
+            Rotation2d angleLerp = this.angle.get();
+            return new SwerveModulePosition100(distLerp, Optional.of(angleLerp));
+        }
+        // both start and end are known, so interpolate.
+        Rotation2d angleLerp = this.angle.get().interpolate(endValue.angle.get(), t);
+        return new SwerveModulePosition100(distLerp, Optional.of(angleLerp));
+
     }
 }

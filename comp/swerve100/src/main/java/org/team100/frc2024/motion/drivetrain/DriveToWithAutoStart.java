@@ -61,7 +61,7 @@ public class DriveToWithAutoStart extends Command implements Glassy {
 
     @Override
     public void initialize() {
-        Pose2d startPose = m_swerve.getState().pose();
+        Pose2d startPose = m_swerve.getPose();
         Translation2d startTranslation = new Translation2d();
         Translation2d endTranslation = m_goalWaypoint.getTranslation();
         Rotation2d angleToGoal = endTranslation.minus(startTranslation).getAngle();
@@ -91,8 +91,8 @@ public class DriveToWithAutoStart extends Command implements Glassy {
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getState().pose();
-        ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
+        Pose2d currentPose = m_swerve.getPose();
+        ChassisSpeeds currentSpeed = m_swerve.getChassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
         m_log_chassis_speeds.log(() -> output);

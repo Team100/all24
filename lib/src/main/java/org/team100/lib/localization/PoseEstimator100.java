@@ -1,6 +1,6 @@
 package org.team100.lib.localization;
 
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
@@ -14,5 +14,5 @@ public interface PoseEstimator100 {
             double[] visionSigma);
 
 
-    SwerveState get(double timestampS);
+    SwerveModel get(double timestampS);
 }
