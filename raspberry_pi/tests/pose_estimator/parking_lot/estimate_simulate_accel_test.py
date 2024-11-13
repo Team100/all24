@@ -11,7 +11,7 @@ from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
 from app.pose_estimator.parking_lot.parking_lot import ParkingLot
-from tests.pose_estimator.line_simulator import LineSimulator
+from tests.pose_estimator.simulation.line_simulator import LineSimulator
 
 ACTUALLY_PRINT = False
 

@@ -10,7 +10,7 @@ from wpimath.geometry import (Pose3d, Rotation2d, Rotation3d, Transform3d,
                               Twist3d)
 from wpiutil import wpistruct
 
-from app.pose_estimator.swerve_module_position import SwerveModulePositions
+from app.kinodynamics.swerve_module_position import SwerveModulePositions
 
 
 @wpistruct.make_wpistruct  # type:ignore

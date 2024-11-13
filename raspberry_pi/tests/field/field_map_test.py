@@ -5,7 +5,7 @@
 
 import unittest
 
-from app.pose_estimator.field_map import FieldMap
+from app.field.field_map import FieldMap
 
 
 class FieldMapTest(unittest.TestCase):

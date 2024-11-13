@@ -17,7 +17,7 @@ from app.config.camera_config import CameraConfig
 from app.config.identity import Identity
 from app.network.network_protocol import Network, PoseEstimate25
 from app.pose_estimator.estimate import Estimate
-from app.pose_estimator.field_map import FieldMap
+from app.field.field_map import FieldMap
 
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 ODO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))

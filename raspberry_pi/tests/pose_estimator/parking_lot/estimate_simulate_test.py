@@ -11,9 +11,9 @@ from gtsam import Pose2  # type:ignore
 from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
-from app.pose_estimator.field_map import FieldMap
+from app.field.field_map import FieldMap
 from app.pose_estimator.parking_lot.parking_lot import ParkingLot
-from tests.pose_estimator.circle_simulator import CircleSimulator
+from tests.pose_estimator.simulation.circle_simulator import CircleSimulator
 
 ACTUALLY_PRINT = False
 

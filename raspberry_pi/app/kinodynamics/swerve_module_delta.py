@@ -3,7 +3,7 @@ import math
 
 from wpimath.geometry import Rotation2d
 
-from app.pose_estimator.swerve_module_position import OptionalRotation2d
+from app.kinodynamics.swerve_module_position import OptionalRotation2d
 
 # pylint: disable=C0200,R0903
 

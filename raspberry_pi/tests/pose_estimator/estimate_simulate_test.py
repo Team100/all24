@@ -10,8 +10,8 @@ from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
 from app.pose_estimator.estimate import Estimate
-from app.pose_estimator.field_map import FieldMap
-from tests.pose_estimator.circle_simulator import CircleSimulator
+from app.field.field_map import FieldMap
+from tests.pose_estimator.simulation.circle_simulator import CircleSimulator
 
 ACTUALLY_PRINT = False
 

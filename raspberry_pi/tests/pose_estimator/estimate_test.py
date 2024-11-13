@@ -12,7 +12,7 @@ from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d
 
 from app.pose_estimator.estimate import Estimate
-from app.pose_estimator.swerve_module_position import (
+from app.kinodynamics.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
     SwerveModulePositions,

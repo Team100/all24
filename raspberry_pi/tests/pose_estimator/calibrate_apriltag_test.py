@@ -28,16 +28,39 @@ class CalibrateAprilTagTest(unittest.TestCase):
         landmark = np.array([1, 1, 1])
         measured = np.array([0, 0])
         est.apriltag_for_calibration(landmark, measured, 0)
+
         est.update()
-        print(est.result)
-        # there are a lot of degrees of freedom here
-        # so nothing interesting is going to happen.
-        self.assertEqual(3, est.result.size())
-        p0: gtsam.Pose2 = est.result.atPose2(X(0))
-        self.assertAlmostEqual(-0.14, p0.x(), 1)
-        self.assertAlmostEqual(0, p0.y(), 1)
-        self.assertAlmostEqual(0, p0.theta(), 1)
-        c0: gtsam.Pose3 = est.result.atPose3(C(0))
-        self.assertAlmostEqual(0, c0.x(), 1)
-        k0: gtsam.Cal3DS2 = est.result.atCal3DS2(K(0))
+
+        # there's a fair amount of noise here
+        self.assertEqual(3, est.result_size())
+
+        p0: gtsam.Pose2 = est.mean_pose2(X(0))
+        self.assertAlmostEqual(-0.149, p0.x(), 3)
+        self.assertAlmostEqual(0.031, p0.y(), 1)
+        self.assertAlmostEqual(0.020, p0.theta(), 3)
+        s0 = est.sigma(X(0))
+        print(s0)
+        self.assertTrue(
+            np.allclose(
+                np.array([0.221,0.212,0.092]),
+                s0,
+                atol=0.001))
+        
+        c0: gtsam.Pose3 = est.mean_pose3(C(0))
+        self.assertAlmostEqual(-0.016, c0.x(), 3)
+        self.assertAlmostEqual(0.004, c0.y(), 3)
+        self.assertAlmostEqual(0.016, c0.z(), 3)
+        self.assertAlmostEqual(0.011, c0.rotation().roll(), 3)
+        self.assertAlmostEqual(-0.036, c0.rotation().pitch(), 3)
+        self.assertAlmostEqual(0.020, c0.rotation().yaw(), 3)
+        sc0 = est.sigma(C(0))
+        print(sc0)
+        self.assertTrue(
+            np.allclose(
+            np.array([0.089,0.082,0.092,0.097,0.097,0.094]),
+            sc0,
+            atol=0.001))
+
+        k0: gtsam.Cal3DS2 = est.mean_cal3DS2(K(0))
+        print(k0)
         self.assertAlmostEqual(59.993, k0.fx(), 3)

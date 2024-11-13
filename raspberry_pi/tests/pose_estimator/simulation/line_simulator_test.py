@@ -1,6 +1,6 @@
 import unittest
 
-from tests.pose_estimator.line_simulator import LineSimulator
+from tests.pose_estimator.simulation.line_simulator import LineSimulator
 
 
 class LineSimulatorTest(unittest.TestCase):

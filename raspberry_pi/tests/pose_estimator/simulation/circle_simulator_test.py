@@ -7,15 +7,15 @@ import numpy as np
 from gtsam import Cal3DS2, Point2, Point3, Pose2, Pose3, Rot3  # type:ignore
 from wpimath.geometry import Rotation2d, Translation2d
 
-from app.pose_estimator.drive_util import DriveUtil
-from app.pose_estimator.field_map import FieldMap
-from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
-from app.pose_estimator.swerve_module_position import (
+from app.util.drive_util import DriveUtil
+from app.field.field_map import FieldMap
+from app.kinodynamics.swerve_drive_kinematics import SwerveDriveKinematics100
+from app.kinodynamics.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
     SwerveModulePositions,
 )
-from tests.pose_estimator.circle_simulator import CircleSimulator
+from tests.pose_estimator.simulation.circle_simulator import CircleSimulator
 
 
 class CircleSimulatorTest(unittest.TestCase):
