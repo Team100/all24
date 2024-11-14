@@ -6,8 +6,8 @@ For now this uses the CircleSimulator only."""
 # pylint: disable=R0903
 
 from app.network.network_protocol import Blip25, Network
-from app.pose_estimator.field_map import FieldMap
-from tests.pose_estimator.circle_simulator import CircleSimulator
+from app.field.field_map import FieldMap
+from tests.pose_estimator.simulation.circle_simulator import CircleSimulator
 
 
 class NTSim:

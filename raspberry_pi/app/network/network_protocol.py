@@ -10,7 +10,7 @@ from wpimath.geometry import (Pose3d, Rotation2d, Rotation3d, Transform3d,
                               Twist3d)
 from wpiutil import wpistruct
 
-from app.pose_estimator.swerve_module_position import SwerveModulePositions
+from app.kinodynamics.swerve_module_position import SwerveModulePositions
 
 
 @wpistruct.make_wpistruct  # type:ignore
@@ -103,12 +103,23 @@ class Cal3DS2:
     p1: float
     p2: float
 
+@wpistruct.make_wpistruct
+@dataclasses.dataclass
+class MyTwist3d:
+    """This works around the missing Twist3d on the RPi's at the moment"""
+    dx: float
+    dy: float
+    dz: float
+    rx: float
+    ry: float
+    rz: float
+
 
 @wpistruct.make_wpistruct
 @dataclasses.dataclass
 class CameraCalibration:
     camera_offset: Pose3d
-    offset_sigma: Twist3d
+    offset_sigma: MyTwist3d
     calib: Cal3DS2
     calib_sigma: Cal3DS2
 

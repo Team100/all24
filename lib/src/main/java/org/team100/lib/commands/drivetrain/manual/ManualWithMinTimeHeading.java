@@ -39,7 +39,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * available at high speed, whereas the available torque is modeled here as a
  * constant.
  * 
- * TODO: don't use this class before implementing variable torque limits.
+ * Don't use this class before implementing variable torque limits.
  */
 public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     /**

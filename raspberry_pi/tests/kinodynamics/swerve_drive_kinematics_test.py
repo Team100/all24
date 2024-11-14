@@ -1,12 +1,13 @@
 import math
 import unittest
+import numpy as np
+
 
 from wpimath.geometry import Rotation2d, Translation2d
 
-from app.pose_estimator.swerve_drive_kinematics import SwerveDriveKinematics100
-from app.pose_estimator.swerve_module_delta import (SwerveModuleDelta,
-                                                    SwerveModuleDeltas)
-from app.pose_estimator.swerve_module_position import OptionalRotation2d
+from app.kinodynamics.swerve_drive_kinematics import SwerveDriveKinematics100
+from app.kinodynamics.swerve_module_delta import SwerveModuleDelta, SwerveModuleDeltas
+from app.kinodynamics.swerve_module_position import OptionalRotation2d
 
 
 class SwerveDriveKinematics100Test(unittest.TestCase):
@@ -20,21 +21,26 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
                 Translation2d(-0.5, -0.5),
             ]
         )
-        self.assertEqual(8, k.inverse_kinematics.shape[0])
-        self.assertEqual(3, k.inverse_kinematics.shape[1])
+        print(k.inverse_kinematics)
+        self.assertEqual((8, 3), k.inverse_kinematics.shape)
 
-        self.assertAlmostEqual(1, k.inverse_kinematics[0, 0])
-        self.assertAlmostEqual(0, k.inverse_kinematics[0, 1])
-        self.assertAlmostEqual(-0.5, k.inverse_kinematics[0, 2])
-        self.assertAlmostEqual(0, k.inverse_kinematics[1, 0])
-        self.assertAlmostEqual(1, k.inverse_kinematics[1, 1])
-        self.assertAlmostEqual(0.5, k.inverse_kinematics[1, 2])
-        self.assertAlmostEqual(1, k.inverse_kinematics[2, 0])
-        self.assertAlmostEqual(0, k.inverse_kinematics[2, 1])
-        self.assertAlmostEqual(0.5, k.inverse_kinematics[2, 2])
-        self.assertAlmostEqual(0, k.inverse_kinematics[3, 0])
-        self.assertAlmostEqual(1, k.inverse_kinematics[3, 1])
-        self.assertAlmostEqual(0.5, k.inverse_kinematics[3, 2])
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, -0.5],
+                        [0, 1, 0.5],
+                        [1, 0, 0.5],
+                        [0, 1, 0.5],
+                        [1, 0, -0.5],
+                        [0, 1, -0.5],
+                        [1, 0, 0.5],
+                        [0, 1, -0.5],
+                    ]
+                ),
+                k.inverse_kinematics,
+            )
+        )
 
     def test_forward(self) -> None:
         """Same as java"""
@@ -46,20 +52,22 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
                 Translation2d(-0.5, -0.5),
             ]
         )
-        self.assertEqual(3, k.forward_kinematics.shape[0])
-        self.assertEqual(8, k.forward_kinematics.shape[1])
-        self.assertAlmostEqual(0.25, k.forward_kinematics[0, 0])
-        self.assertAlmostEqual(0, k.forward_kinematics[1, 0])
-        self.assertAlmostEqual(-0.25, k.forward_kinematics[2, 0])
-        self.assertAlmostEqual(0, k.forward_kinematics[0, 1])
-        self.assertAlmostEqual(0.25, k.forward_kinematics[1, 1])
-        self.assertAlmostEqual(0.25, k.forward_kinematics[2, 1])
-        self.assertAlmostEqual(0.25, k.forward_kinematics[0, 2])
-        self.assertAlmostEqual(0, k.forward_kinematics[1, 2])
-        self.assertAlmostEqual(0.25, k.forward_kinematics[2, 2])
-        self.assertAlmostEqual(0, k.forward_kinematics[0, 3])
-        self.assertAlmostEqual(0.25, k.forward_kinematics[1, 3])
-        self.assertAlmostEqual(0.25, k.forward_kinematics[2, 3])
+        self.assertEqual((3, 8), k.forward_kinematics.shape)
+        print(k.forward_kinematics)
+
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [0.25, 0.00, 0.25, 0.00, 0.25, 0.00, 0.25, 0.00],
+                        [0.00, 0.25, 0.00, 0.25, 0.00, 0.25, 0.00, 0.25],
+                        [-0.25, 0.25, 0.25, 0.25, -0.25, -0.25, 0.25, -0.25],
+                    ]
+                ),
+                k.forward_kinematics,
+            )
+        )
+
 
     def test_twist_straight(self) -> None:
         kinematics = SwerveDriveKinematics100(
@@ -135,8 +143,7 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
         delta = SwerveModuleDelta(
             5.0, OptionalRotation2d(True, Rotation2d.fromDegrees(0.0))
         )
-        twist = m_kinematics.to_twist_2d(SwerveModuleDeltas(
-            delta, delta, delta, delta))
+        twist = m_kinematics.to_twist_2d(SwerveModuleDeltas(delta, delta, delta, delta))
 
         self.assertAlmostEqual(5.0, twist.dx, 9)
         self.assertAlmostEqual(0.0, twist.dy, 9)
@@ -153,8 +160,7 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
         delta = SwerveModuleDelta(
             5.0, OptionalRotation2d(True, Rotation2d.fromDegrees(90.0))
         )
-        twist = m_kinematics.to_twist_2d(
-            SwerveModuleDeltas(delta, delta, delta, delta))
+        twist = m_kinematics.to_twist_2d(SwerveModuleDeltas(delta, delta, delta, delta))
 
         self.assertAlmostEqual(0.0, twist.dx, 9)
         self.assertAlmostEqual(5.0, twist.dy, 9)
@@ -182,7 +188,8 @@ class SwerveDriveKinematics100Test(unittest.TestCase):
         )
 
         twist = m_kinematics.to_twist_2d(
-            SwerveModuleDeltas(fl_delta, fr_delta, bl_delta, br_delta))
+            SwerveModuleDeltas(fl_delta, fr_delta, bl_delta, br_delta)
+        )
 
         self.assertAlmostEqual(0.0, twist.dx, 9)
         self.assertAlmostEqual(0.0, twist.dy, 9)

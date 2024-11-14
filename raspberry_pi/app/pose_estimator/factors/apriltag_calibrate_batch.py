@@ -1,4 +1,4 @@
-"""AprilTag factor for smoothing in batch.
+"""AprilTag factor for calibration in batch.
 
 A batch means the set of AprilTag corners seen in a single frame.
 """
@@ -10,7 +10,11 @@ import gtsam
 import numpy as np
 from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 
-from app.pose_estimator.numerical_derivative import numericalDerivative11
+from app.pose_estimator.numerical_derivative import (
+    numericalDerivative31,
+    numericalDerivative32,
+    numericalDerivative33,
+)
 
 # camera "zero" is facing +z; this turns it to face +x
 CAM_COORD = gtsam.Pose3(
@@ -21,15 +25,13 @@ CAM_COORD = gtsam.Pose3(
 
 def h_fn(
     landmarks: list[np.ndarray],
-    offset: gtsam.Pose3,
-    calib: gtsam.Cal3DS2,
-) -> Callable[[gtsam.Pose2], np.ndarray]:
-    """Returns a pixel estimation function for an array of landmarks.
-    The estimate is a single flat array with all the points, concatenated,
-    i.e. (x0, y0, x1, y1, x2, y2, ...)"""
+) -> Callable[[gtsam.Pose2, gtsam.Pose3, gtsam.Cal3DS2], np.ndarray]:
+    """Returns a pixel estimation function for an array of constant landmarks,
+    with variable pose, offset, and calibration. 
+    The landmark is the field position of a tag corner."""
 
-    def h(p0: gtsam.Pose2) -> np.ndarray:
-        """estimated pixel location of the target"""
+    def h(p0: gtsam.Pose2, offset: gtsam.Pose3, calib: gtsam.Cal3DS2) -> np.ndarray:
+        """Estimated pixel location of the target."""
         # this is x-forward z-up
         offset_pose = gtsam.Pose3(p0).compose(offset)
         # this is z-forward y-down
@@ -48,36 +50,42 @@ def h_H(
     calib: gtsam.Cal3DS2,
     H: list[np.ndarray],
 ) -> np.ndarray:
-    """measured: concatenation of px"""
-    h = h_fn(landmarks, offset, calib)
-    result = h(p0) - measured
+    """Error function (in pixels) including Jacobian vector, H.
+    measured: concatenation of px"""
+    h = h_fn(landmarks)
+    result = h(p0, offset, calib) - measured
     if H is not None:
-        H[0] = numericalDerivative11(h, p0)
-
+        H[0] = numericalDerivative31(h, p0, offset, calib)
+        H[1] = numericalDerivative32(h, p0, offset, calib)
+        H[2] = numericalDerivative33(h, p0, offset, calib)
     return result
 
 
 def factor(
     landmarks: list[np.ndarray],
     measured: np.ndarray,
-    offset: gtsam.Pose3,
-    calib: gtsam.Cal3DS2,
     model: SharedNoiseModel,
     p0_key: int,
+    offset_key: int,
+    calib_key: int,
 ) -> gtsam.NoiseModelFactor:
-    """using constant offset and calibration, use this for smoothing.
-
-    landmark: list of field coordinates
-    measured: concatenation of pixel coordinates"""
+    """using variable offset and calibration, use this for camera calibration.
+    landmark: field coordinates
+    measured: pixel coordinate
+    model: pixel noise"""
 
     def error_func(
         this: gtsam.CustomFactor, v: gtsam.Values, H: list[np.ndarray]
     ) -> np.ndarray:
+        """Pull the variables from the model and apply the px error function."""
         p0: gtsam.Pose2 = v.atPose2(this.keys()[0])
+        offset: gtsam.Pose3 = v.atPose3(this.keys()[1])
+        calib: gtsam.Cal3DS2 = v.atCal3DS2(this.keys()[2])
+
         return h_H(landmarks, measured, p0, offset, calib, H)
 
     return gtsam.CustomFactor(
         model,
-        gtsam.KeyVector([p0_key]),  # type:ignore
+        gtsam.KeyVector([p0_key, offset_key, calib_key]),  # type:ignore
         error_func,
     )

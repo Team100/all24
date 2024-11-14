@@ -199,8 +199,8 @@ public class RobotContainer implements Glassy {
 
         // final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
 
-        final AmpFeeder m_ampFeeder = new AmpFeeder(sysLog);
-        final AmpPivot m_ampPivot = new AmpPivot(sysLog);
+        // final AmpFeeder m_ampFeeder = new AmpFeeder(sysLog);
+        // final AmpPivot m_ampPivot = new AmpPivot(sysLog);
 
         ///////////////////////////
         //
@@ -271,16 +271,16 @@ public class RobotContainer implements Glassy {
         // whileTrue(driverControl::actualCircle,
         // new DriveInACircle(comLog, m_drive, controller, -1, viz));
 
-        whileTrue(driverControl::driveToAmp,
-                new DriveToAmp(
-                        m_drive,
-                        holonomicController,
-                        swerveKinodynamics,
-                        m_ampPivot,
-                        m_ampFeeder,
-                        intake,
-                        m_shooter,
-                        feeder));
+        // whileTrue(driverControl::driveToAmp,
+        //         new DriveToAmp(
+        //                 m_drive,
+        //                 holonomicController,
+        //                 swerveKinodynamics,
+        //                 m_ampPivot,
+        //                 m_ampFeeder,
+        //                 intake,
+        //                 m_shooter,
+        //                 feeder));
 
         ///////////////////////
         //
@@ -317,26 +317,26 @@ public class RobotContainer implements Glassy {
         // new RepeatCommand(
         // new FullCycle(comLog, m_drive, controller, viz)));
 
-        whileTrue(operatorControl::intake,
-                new RunIntakeAndAmpFeeder(intake, feeder, m_ampFeeder));
+        // whileTrue(operatorControl::intake,
+        //         new RunIntakeAndAmpFeeder(intake, feeder, m_ampFeeder));
 
-        whileTrue(operatorControl::outtake,
-                new OuttakeCommand(intake, m_shooter, m_ampFeeder, feeder));
+        // whileTrue(operatorControl::outtake,
+        //         new OuttakeCommand(intake, m_shooter, m_ampFeeder, feeder));
 
         whileTrue(operatorControl::ramp, new Ramp(m_shooter, m_drive));
 
         whileTrue(operatorControl::feed, new Feed(intake, feeder));
 
         // fast, then slow.
-        whileTrue(operatorControl::pivotToAmpPosition,
-                new AmpFastThenSlow(m_ampPivot, 1.7, 1.8));
+        // whileTrue(operatorControl::pivotToAmpPosition,
+        //         new AmpFastThenSlow(m_ampPivot, 1.7, 1.8));
 
-        whileTrue(operatorControl::feedToAmp,
-                new FeedToAmp(intake, m_shooter, m_ampFeeder, feeder));
+        // whileTrue(operatorControl::feedToAmp,
+        //         new FeedToAmp(intake, m_shooter, m_ampFeeder, feeder));
 
         whileTrue(operatorControl::testShoot, new TestShoot(m_shooter));
 
-        whileTrue(operatorControl::outtakeFromAmp, m_ampFeeder.run(m_ampFeeder::outtake));
+        // whileTrue(operatorControl::outtakeFromAmp, m_ampFeeder.run(m_ampFeeder::outtake));
 
         whileTrue(operatorControl::never, new Lob(m_shooter, intake));
 
@@ -350,7 +350,6 @@ public class RobotContainer implements Glassy {
         // DRIVE
         //
 
-        // TODO (jun 24) tune theta and omega control
         final PIDController thetaController = new PIDController(3.0, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         final PIDController omegaController = new PIDController(0.2, 0, 0);
@@ -485,9 +484,9 @@ public class RobotContainer implements Glassy {
         // climber,
         // operatorControl::leftClimb,
         // operatorControl::rightClimb));
-        m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
+        // m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
         // if far from the goal, go fast. if near, go slow.
-        m_ampPivot.setDefaultCommand(new AmpFastThenSlow(m_ampPivot, 0.1, 0));
+        // m_ampPivot.setDefaultCommand(new AmpFastThenSlow(m_ampPivot, 0.1, 0));
 
         ////////////////////
         //

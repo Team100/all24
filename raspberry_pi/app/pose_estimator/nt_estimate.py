@@ -17,7 +17,7 @@ from app.config.camera_config import CameraConfig
 from app.config.identity import Identity
 from app.network.network_protocol import Network, PoseEstimate25
 from app.pose_estimator.estimate import Estimate
-from app.pose_estimator.field_map import FieldMap
+from app.field.field_map import FieldMap
 
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 ODO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -25,13 +25,14 @@ ODO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 # discrete time step is 20 ms
 TIME_STEP_US = 20000
 
+
 class NTEstimate:
     def __init__(self, field_map: FieldMap, net: Network) -> None:
         self.field_map = field_map
         self.net = net
         self.blip_receiver = net.get_blip25_receiver("foo")
         self.odo_receiver = net.get_odometry_receiver("bar")
-        self.gyro_receiver=  net.get_gyro_receiver("baz")
+        self.gyro_receiver = net.get_gyro_receiver("baz")
         self.pose_sender = net.get_pose_sender("pose")
         self.est = Estimate()
         # current estimate, used for initial value for next time
@@ -48,17 +49,16 @@ class NTEstimate:
         """Collect any pending measurements from
         the network and add them to the sim."""
 
-
         self._receive_blips()
         self._receive_odometry()
         self._receive_gyro()
 
         self.est.update()
 
-        print("NTEstimate.step() result ", self.est.result)
+        # print("NTEstimate.step() result ", self.est.result)
         results: tuple[int, gtsam.Pose2, np.ndarray] = cast(
-            tuple[int, gtsam.Pose2, np.ndarray], self.est.get_result())
-        
+            tuple[int, gtsam.Pose2, np.ndarray], self.est.get_result()
+        )
 
         timestamp = results[0]
         most_recent_estimate = results[1]
@@ -70,19 +70,19 @@ class NTEstimate:
         twist = self.est.measurement
         odo_dt_us = self.est.odo_dt
         # future_estimate = self.est.extrapolate(most_recent_estimate)
-        pose_estimate = PoseEstimate25(most_recent_estimate.x(),
-                                      most_recent_estimate.y(),
-                                      most_recent_estimate.theta(),
-                                      math.sqrt(covariance[0,0]),
-                                      math.sqrt(covariance[1,1]),
-                                      math.sqrt(covariance[2,2]),
-                                      twist.dx,
-                                      twist.dy,
-                                      twist.dtheta,
-                                      odo_dt_us
-                                      )
+        pose_estimate = PoseEstimate25(
+            most_recent_estimate.x(),
+            most_recent_estimate.y(),
+            most_recent_estimate.theta(),
+            math.sqrt(covariance[0, 0]),
+            math.sqrt(covariance[1, 1]),
+            math.sqrt(covariance[2, 2]),
+            twist.dx,
+            twist.dy,
+            twist.dtheta,
+            odo_dt_us,
+        )
         self.pose_sender.send(pose_estimate, ntcore._now() - timestamp)
-
 
     def _receive_blips(self) -> None:
         """Receive pending blips from the network"""
@@ -126,8 +126,7 @@ class NTEstimate:
             self.est.add_state(time_slice, self.state)
             self.est.gyro(time_slice, yaw.radians())
 
-
     @staticmethod
     def discrete(timestamp_us: int) -> int:
         """Discretize time at 50 Hz"""
-        return math.ceil(timestamp_us/TIME_STEP_US) * TIME_STEP_US
+        return math.ceil(timestamp_us / TIME_STEP_US) * TIME_STEP_US

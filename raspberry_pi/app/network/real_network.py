@@ -27,7 +27,7 @@ from app.network.network_protocol import (
     PoseEstimate25,
     PoseSender,
 )
-from app.pose_estimator.swerve_module_position import SwerveModulePositions
+from app.kinodynamics.swerve_module_position import SwerveModulePositions
 
 # global singleton
 start_time_us = ntcore._now()

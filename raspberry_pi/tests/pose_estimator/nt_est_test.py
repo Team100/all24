@@ -11,9 +11,9 @@ from app.config.identity import Identity
 from app.network.fake_network import FakeNetwork
 from app.network.network_protocol import Blip25, PoseEstimate25
 from app.network.real_network import RealNetwork
-from app.pose_estimator.field_map import FieldMap
+from app.field.field_map import FieldMap
 from app.pose_estimator.nt_estimate import NTEstimate
-from app.pose_estimator.swerve_module_position import (OptionalRotation2d,
+from app.kinodynamics.swerve_module_position import (OptionalRotation2d,
                                                        SwerveModulePosition100,
                                                        SwerveModulePositions)
 
