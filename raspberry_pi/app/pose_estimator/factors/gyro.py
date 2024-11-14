@@ -60,4 +60,5 @@ def factor(
     model: SharedNoiseModel,
     p0_key: int,
 ) -> gtsam.NoiseModelFactor:
-    return factorCustom(measured, model, p0_key)
+    return factorNative(measured, model, p0_key)
+    # return factorCustom(measured, model, p0_key)

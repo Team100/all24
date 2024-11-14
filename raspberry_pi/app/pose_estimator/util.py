@@ -52,7 +52,8 @@ def to_cal(gc: gtsam.Cal3DS2) -> Cal3DS2:
     return Cal3DS2(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8])
 
 
-def make_smoother() -> gtsam.BatchFixedLagSmoother:
+def make_smoother(lag_s: float) -> gtsam.BatchFixedLagSmoother:
+    """lag_s: length of the smoother lag window in seconds."""
     # experimenting with the size of the lag buffer.
     # the python odometry factor is intolerably slow
     # but the native one is quite fast.
@@ -61,7 +62,6 @@ def make_smoother() -> gtsam.BatchFixedLagSmoother:
     # like a second or two?
     # a long window is VERY SLOW, so try very short windows
     # just long enough to catch a single vision update.
-    lag_s = 0.1
     lag_us = lag_s * 1e6
     lm_params = gtsam.LevenbergMarquardtParams()
     return gtsam.BatchFixedLagSmoother(lag_us, lm_params)

@@ -46,7 +46,7 @@ class Estimate:
         """Initialize the model
         initial module positions are at their origins.
         TODO: some other initial positions?"""
-        self._isam: gtsam.BatchFixedLagSmoother = make_smoother()
+        self._isam: gtsam.BatchFixedLagSmoother = make_smoother(0.1)
         self._result: gtsam.Values = gtsam.Values()
         # between updates we accumulate inputs here
         self._new_factors = gtsam.NonlinearFactorGraph()

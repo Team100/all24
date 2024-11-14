@@ -35,7 +35,7 @@ ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 class ParkingLot:
 
     def __init__(self) -> None:
-        self._isam: gtsam.BatchFixedLagSmoother = make_smoother()
+        self._isam: gtsam.BatchFixedLagSmoother = make_smoother(0.1)
         self._result: gtsam.Values = gtsam.Values()
         self._new_factors = gtsam.NonlinearFactorGraph()
         self._new_values = gtsam.Values()

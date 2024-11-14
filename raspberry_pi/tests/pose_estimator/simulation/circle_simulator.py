@@ -2,10 +2,10 @@
 # mypy: disable-error-code="import-untyped"
 """Minimal simulated telemetry generator for both smoothing and calibration.
 
-The field is 4x4 meters
-The field has one tag on the far (+x) end, 1m off the floor
+The field is 3x3 meters
+The field has one tag on the far (+x) end, 0.5 m off the floor
 The robot has one camera with the same pose as the robot, except 1m high.
-The robot path is a circle of radius 1m, centered 3m away from the tag, followed at 1m/s.
+The robot path is a circle of radius 1m, centered (1, 0), followed at 1m/s.
 The robot rotates back and forth with an amplitude of 0.5 rad, at 3x the frequency of the circular path (so 4 rad/s)
 
 Because the gyro drift is a random walk, the whole thing needs to be sequential.
@@ -45,7 +45,8 @@ PATH_CENTER_Y_M = 0
 PATH_RADIUS_M = 1
 PATH_PERIOD_S = 2.0 * math.pi
 PAN_PERIOD_S = PATH_PERIOD_S / 3
-PAN_SCALE_RAD = 0.5
+# maximum pan angle, radians
+PAN_SCALE_RAD = 1.0
 # camera "zero" is facing +z; this turns it to face +x
 CAM_COORD = Pose3(
     Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
@@ -83,7 +84,7 @@ class CircleSimulator:
         # lower right
         # upper right
         # upper left
-        self.gt_pixels: list[Point2]
+        self.gt_pixels: list[np.ndarray]
 
         # set positions back to zero
         # TODO: more clever init
@@ -94,14 +95,18 @@ class CircleSimulator:
             SwerveModulePosition100(0, OptionalRotation2d(True, Rotation2d(0))),
         )
         # constant landmark points
+        # tag zero is at (3, 0, 1)
         tag = self.field_map.get(0)
         self.l0 = tag[0]
         self.l1 = tag[1]
         self.l2 = tag[2]
         self.l3 = tag[3]
         self.landmarks = [self.l0, self.l1, self.l2, self.l3]
-        self.camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
-        self.calib = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
+
+        # the camera is 0.5m from the floor
+        self.camera_offset = Pose3(Rot3(), np.array([0, 0, 0.5]))
+        # this camera is 800x600.
+        self.calib = Cal3DS2(200.0, 200.0, 0.0, 400.0, 300.0, -0.2, 0.1, 0.0, 0.0)
 
         # initialize
         self.step(0)
@@ -158,6 +163,19 @@ class CircleSimulator:
             self.calib,
         )
         self.gt_pixels = [p0, p1, p2, p3]
+        # TODO: concatenate these pixels here
+
+        # omit out-of-frame tags
+        all_pixels = np.concatenate(self.gt_pixels)
+
+        # TODO: proper frame boundaries
+        if (
+            np.any(all_pixels[::2] < 0)
+            or np.any(all_pixels[1::2] < 0)
+            or np.any(all_pixels[::2] > 800)
+            or np.any(all_pixels[1::2] > 600)
+        ):
+            self.gt_pixels = []
 
     def _px(  # type: ignore
         self,
@@ -165,7 +183,7 @@ class CircleSimulator:
         robot_pose: Pose2,
         camera_offset: Pose3,
         calib: Cal3DS2,
-    ) -> Point2:
+    ) -> np.ndarray:
         """Project the landmark point into the camera frame and return (x, y) in pixels.
         Robot_pose and camera_offset are x-forward, z-up."""
         # ctor a pose3 with x,y,yaw, x-forward, z-up

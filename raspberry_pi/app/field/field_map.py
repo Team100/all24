@@ -14,7 +14,8 @@ class FieldMap:
         # value = list of arrays, each array is (x, y)
         # TODO: make this a flat array with 8 numbers instead.
         self.tags: dict[int, list[np.ndarray]] = {}
-        self.tags[0] = FieldMap.make_tag(4, 0, 1, 0)
+        # tag zero is like something we could set up for practice, 1m high
+        self.tags[0] = FieldMap.make_tag(3, 0, 1, 0)
         self.tags[1] = FieldMap.make_tag(2, 2, 1, math.pi / 2)
 
     def get(self, tag_id: int) -> list[np.ndarray]:

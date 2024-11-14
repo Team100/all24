@@ -19,7 +19,7 @@ class CalibrateAprilTagTest(unittest.TestCase):
         """Test the calibration factor.
         There's not enough data here to really converge on anything, it's just
         to test the plumbing."""
-        est = Calibrate()
+        est = Calibrate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)

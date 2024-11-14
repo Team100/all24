@@ -20,34 +20,82 @@ import app.pose_estimator.factors.gyro as gyro
 import app.pose_estimator.factors.odometry as odometry
 from app.kinodynamics.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.kinodynamics.swerve_module_delta import SwerveModuleDeltas
-from app.kinodynamics.swerve_module_position import (OptionalRotation2d,
-                                                     SwerveModulePosition100,
-                                                     SwerveModulePositions)
+from app.kinodynamics.swerve_module_position import (
+    OptionalRotation2d,
+    SwerveModulePosition100,
+    SwerveModulePositions,
+)
 from app.pose_estimator.util import make_smoother
 from app.util.drive_util import DriveUtil
 
+# the initial guesses need to be kinda close
+# the prior noise needs to be kinda narrow
+
 # initial value and prior for camera calibration
-CAL = gtsam.Cal3DS2(60.0, 60.0, 0.0, 45.0, 45.0, 0.0, 0.0, 0.0, 0.0)
-# calibration prior sigma. TODO: make this much wider.
-CAL_NOISE = noiseModel.Diagonal.Sigmas(
+# in simulation the correct k1 and k2 values appear
+# after just 0.25 sec (!)
+CAL_PRIOR_MEAN = gtsam.Cal3DS2(
+    180.0,  # wrong, the real value is 200
+    180.0,  # wrong, the real value is 200
+    0.0,
+    400.0,  # known precisely
+    300.0,  # known precisely
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+)
+
+# calibration prior sigma.
+# some parameters are known very precisely, e.g. s, cx, cy, p1, p2.
+# also we can measure the focal length approximately
+# distortion coefficients are hard to measure but not very large.
+CAL_PRIOR_NOISE = noiseModel.Diagonal.Sigmas(
     np.array(
         [
-            1,
-            1,
-            1,
-            1,
-            1,
-            0.01,
-            0.01,
-            0.001,
-            0.001,
+            10,  # fx
+            10,  # fy
+            0.001,  # s
+            0.001,  # cx
+            0.001,  # cy
+            1,  # k1
+            1,  # k2
+            0.001,  # p1
+            0.001,  # p2
         ]
     )
 )
+
 # initial value and prior for camera offset.
-OFFSET0 = gtsam.Pose3()
-# offset prior sigma.  TODO: make this much wider.
-OFFSET_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1]))
+# in simulation, the "z" component is fixed within 0.25 sec (!)
+# but the "x" and "y" are *never* fixed, i think because a fixed offset
+# just doesn't matter much in the sim geometry.
+OFFSET_PRIOR_MEAN = gtsam.Pose3(
+    gtsam.Rot3(),
+    np.array(
+        [
+            0.0,
+            0.0,
+            0.6,
+        ]
+    ),
+)
+
+# offset prior sigma.
+# we can measure the offset within a few inches and tens of degrees
+# in gtsam, a pose3 logmap is [R_x,R_y,R_z,T_x,T_y,T_z]
+OFFSET_PRIOR_NOISE = noiseModel.Diagonal.Sigmas(
+    np.array(
+        [
+            0.1,  # roll
+            0.2,  # pitch
+            0.2,  # yaw
+            0.2,  # x
+            0.2,  # y
+            0.2,  # z
+        ]
+    )
+)
 
 # TODO: real noise estimates.
 ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -57,7 +105,12 @@ PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([160, 80, 60]))
 PRIOR_MEAN = gtsam.Pose2(8, 4, 0)
 
 # the gyro has really low noise.
-GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.0001]))
+# GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.0001]))
+# but if we actually give the model such a tiny error, then it
+# freaks out, changing all the other dimensions to try to get an
+# answer within those tiny bounds.  so use *slightly* wider
+# noise model and it seems to work fine, at least in simulation.
+GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.001]))
 
 # sensor noise, +/- one pixel.
 # TODO: if you want to model *blur* then you need more noise here, and maybe more in x than y.
@@ -65,8 +118,9 @@ PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
 
 
 class Calibrate:
-    def __init__(self) -> None:
-        self._isam: gtsam.BatchFixedLagSmoother = make_smoother()
+    def __init__(self, lag_s: float) -> None:
+        """lag_s: size of lag window in seconds"""
+        self._isam: gtsam.BatchFixedLagSmoother = make_smoother(lag_s)
         self._result: gtsam.Values = gtsam.Values()
 
         # between updates we accumulate inputs here
@@ -106,13 +160,17 @@ class Calibrate:
     def init(self) -> None:
         """Adds camera cal (K) and offset (C) at t0."""
         # there is just one camera factor
-        self._new_values.insert(K(0), CAL)
+        self._new_values.insert(K(0), CAL_PRIOR_MEAN)
         self._new_timestamps[K(0)] = 0
-        self._new_factors.push_back(gtsam.PriorFactorCal3DS2(K(0), CAL, CAL_NOISE))
+        self._new_factors.push_back(
+            gtsam.PriorFactorCal3DS2(K(0), CAL_PRIOR_MEAN, CAL_PRIOR_NOISE)
+        )
         # and one camera offset for now
-        self._new_values.insert(C(0), OFFSET0)
+        self._new_values.insert(C(0), OFFSET_PRIOR_MEAN)
         self._new_timestamps[C(0)] = 0
-        self._new_factors.push_back(gtsam.PriorFactorPose3(C(0), OFFSET0, OFFSET_NOISE))
+        self._new_factors.push_back(
+            gtsam.PriorFactorPose3(C(0), OFFSET_PRIOR_MEAN, OFFSET_PRIOR_NOISE)
+        )
 
     def update(self) -> None:
         """Run the solver"""
@@ -142,6 +200,7 @@ class Calibrate:
         return self._result.atPose2(key)
 
     def sigma(self, key) -> np.ndarray:
+        """For a Pose2 this returns [sigma x, sigma y, sigma Θ]"""
         m = self.marginal_covariance()
         s = m.marginalCovariance(key)
         return np.sqrt(np.diag(s))
@@ -204,6 +263,8 @@ class Calibrate:
                 landmarks, measured, noise, X(t0_us), C(0), K(0)
             )
         )
+
+    def keep_calib_hot(self, t0_us: int) -> None:
         # you need to tell the smoother to hang on to these factors.
         self._new_timestamps[C(0)] = t0_us
         self._new_timestamps[K(0)] = t0_us
