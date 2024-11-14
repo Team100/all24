@@ -19,6 +19,7 @@ import org.team100.lib.logging.LevelPoller;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
+import org.team100.lib.motion.mechanism.SimpleRotaryMechanism;
 import org.team100.lib.motion.servo.OutboardAngularPositionServo;
 import org.team100.lib.motor.Falcon6Motor;
 import org.team100.lib.motor.MotorPhase;
@@ -49,14 +50,14 @@ public class RobotContainer {
     final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
     final DriverControl driverControl = new DriverControlProxy(logger, async);
 
-    final Falcon6Motor falconMotor1 = new Falcon6Motor(fieldLogger, 10, MotorPhase.FORWARD, 5, 5, new PIDConstants(0.1),
+    final Falcon6Motor falconMotor1 = new Falcon6Motor(fieldLogger, 11, MotorPhase.FORWARD, 5, 5, new PIDConstants(0.1),
         Feedforward100.makeShooterFalcon6());
     final Falcon6Motor falconMotor2 = new Falcon6Motor(fieldLogger, 18, MotorPhase.FORWARD, 5, 5, new PIDConstants(0.1),
         Feedforward100.makeShooterFalcon6());
 
-    final RotaryMechanism rotaryMechanism1 = new RotaryMechanism(fieldLogger, falconMotor1,
+    final RotaryMechanism rotaryMechanism1 = new SimpleRotaryMechanism(fieldLogger, falconMotor1,
         new Talon6Encoder(fieldLogger, falconMotor1), 1);
-    final RotaryMechanism rotaryMechanism2 = new RotaryMechanism(fieldLogger, falconMotor2,
+    final RotaryMechanism rotaryMechanism2 = new SimpleRotaryMechanism(fieldLogger, falconMotor2,
         new Talon6Encoder(fieldLogger, falconMotor2), 1);
 
     final CombinedEncoder combinedEncoder1 = new CombinedEncoder(fieldLogger,
@@ -67,8 +68,8 @@ public class RobotContainer {
     m_motor1 = new OutboardAngularPositionServo(fieldLogger, rotaryMechanism1, combinedEncoder1);
     m_motor2 = new OutboardAngularPositionServo(fieldLogger, rotaryMechanism2, combinedEncoder2);
     Profile100 profile = new TrapezoidProfile100(
-        1,
-        1,
+        0.01,
+        0.01,
         0.02);
     m_motor1.setProfile(profile);
     m_motor2.setProfile(profile);
