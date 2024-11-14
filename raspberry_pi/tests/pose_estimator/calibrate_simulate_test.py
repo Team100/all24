@@ -9,7 +9,7 @@ from gtsam import Pose2  # type:ignore
 from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
-from app.pose_estimator.estimate import Estimate
+from app.pose_estimator.calibrate import Calibrate
 from app.field.field_map import FieldMap
 from tests.pose_estimator.simulation.circle_simulator import CircleSimulator
 
@@ -18,13 +18,13 @@ ACTUALLY_PRINT = False
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 
 
-class EstimateSimulateTest(unittest.TestCase):
+class CalibrateSimulateTest(unittest.TestCase):
     def test_odo_only(self) -> None:
         """Odometry only, using the native factor.
         This is very fast, 0.1s on my machine for a 1s window,
         0.03s for a 0.1s window"""
         sim = CircleSimulator(FieldMap())
-        est = Estimate()
+        est = Calibrate()
         est.init()
 
         # sim starts at (2,0)
@@ -81,7 +81,7 @@ class EstimateSimulateTest(unittest.TestCase):
         """Camera with batch factors.
         this is much faster than multiple factors, 0.4s for a 0.1s window"""
         sim = CircleSimulator(FieldMap())
-        est = Estimate()
+        est = Calibrate()
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -102,9 +102,7 @@ class EstimateSimulateTest(unittest.TestCase):
             est.add_state(t0_us, state)
 
             all_pixels = np.concatenate(sim.gt_pixels)
-            est.apriltag_for_smoothing_batch(
-                sim.landmarks, all_pixels, t0_us, sim.camera_offset, sim.calib
-            )
+            est.apriltag_for_calibration_batch(sim.landmarks, all_pixels, t0_us)
 
             est.update()
             t1 = time.time_ns()
@@ -139,7 +137,7 @@ class EstimateSimulateTest(unittest.TestCase):
         0.6s for 2s of data in a 0.1s window
         """
         sim = CircleSimulator(FieldMap())
-        est = Estimate()
+        est = Calibrate()
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -172,9 +170,7 @@ class EstimateSimulateTest(unittest.TestCase):
 
             all_pixels = np.concatenate(sim.gt_pixels)
 
-            est.apriltag_for_smoothing_batch(
-                sim.landmarks, all_pixels, t1_us, sim.camera_offset, sim.calib
-            )
+            est.apriltag_for_calibration_batch(sim.landmarks, all_pixels, t1_us)
 
             est.update()
             t1 = time.time_ns()

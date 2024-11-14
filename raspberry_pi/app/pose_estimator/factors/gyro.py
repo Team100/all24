@@ -38,7 +38,7 @@ def factorCustom(
         p0: gtsam.Pose2 = v.atPose2(this.keys()[0])
         return h_H(measured, p0, H)
 
-    print("key", gtsam.symbolIndex(p0_key))
+    # print("key", gtsam.symbolIndex(p0_key))
     return gtsam.CustomFactor(
         model,
         gtsam.KeyVector([p0_key]),  # type:ignore
