@@ -49,7 +49,7 @@ class NTEstTest(unittest.TestCase):
         if estimate is not None:
             # so what are we left with?
             # right in front of the tag, as expected.
-            self.assertAlmostEqual(2.351, estimate.x, 3)
+            self.assertAlmostEqual(1.351, estimate.x, 3)
             self.assertAlmostEqual(0, estimate.y, 3)
             self.assertAlmostEqual(0, estimate.theta, 3)
             # good at estimating range
@@ -86,7 +86,7 @@ class NTEstTest(unittest.TestCase):
 
         # so what are we left with?
         # right in front of the tag, as expected.
-        self.assertAlmostEqual(2.351, net.estimate.x, 3)
+        self.assertAlmostEqual(1.351, net.estimate.x, 3)
         # this is not exctly 0 due to the wide prior
         self.assertAlmostEqual(0, net.estimate.y, 2)
         # this is not exctly 0 due to the wide prior

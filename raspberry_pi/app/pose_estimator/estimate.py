@@ -198,6 +198,10 @@ class Estimate:
 
     def update(self) -> None:
         """Run the solver"""
+        # print("============UPDATE============")
+        # print(self._new_factors)
+        # print(self._new_values)
+        # print(self._new_timestamps)
         self._isam.update(self._new_factors, self._new_values, self._new_timestamps)
         self._result: gtsam.Values = self._isam.calculateEstimate()  # type: ignore
 

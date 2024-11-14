@@ -21,6 +21,9 @@ class NTSim:
         measurements to the network."""
         self.sim.step(dt_s)
         p = self.sim.gt_pixels
+        # sometimes the tag is out of frame, so there's nothing to send.
+        if len(p) == 0:
+            return
         b = Blip25(
             1,
             p[0][0],

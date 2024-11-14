@@ -9,8 +9,8 @@ from gtsam import Pose2  # type:ignore
 from gtsam import noiseModel  # type:ignore
 from gtsam.symbol_shorthand import X  # type:ignore
 
-from app.pose_estimator.estimate import Estimate
 from app.field.field_map import FieldMap
+from app.pose_estimator.estimate import Estimate
 from tests.pose_estimator.simulation.circle_simulator import CircleSimulator
 
 ACTUALLY_PRINT = False
@@ -156,6 +156,10 @@ class EstimateSimulateTest(unittest.TestCase):
             t0_us = 20000 * i
             # updates gt to t0
             sim.step(0.02)
+
+            if len(sim.gt_pixels) == 0:
+                continue
+
             est.add_state(t0_us, state)
 
             all_pixels = np.concatenate(sim.gt_pixels)
@@ -227,11 +231,11 @@ class EstimateSimulateTest(unittest.TestCase):
             est.gyro(t1_us, sim.gt_theta)
             # gt_theta_0 = sim.gt_theta
 
-            all_pixels = np.concatenate(sim.gt_pixels)
-
-            est.apriltag_for_smoothing_batch(
-                sim.landmarks, all_pixels, t1_us, sim.camera_offset, sim.calib
-            )
+            if len(sim.gt_pixels) > 0:
+                all_pixels = np.concatenate(sim.gt_pixels)
+                est.apriltag_for_smoothing_batch(
+                    sim.landmarks, all_pixels, t1_us, sim.camera_offset, sim.calib
+                )
 
             est.update()
             t1 = time.time_ns()
