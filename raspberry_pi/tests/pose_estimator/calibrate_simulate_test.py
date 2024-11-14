@@ -77,6 +77,62 @@ class CalibrateSimulateTest(unittest.TestCase):
                 f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}, {err_x:7.4f}, {err_y:7.4f}, {err_theta:7.4f}"
             )
 
+    def test_odo_and_gyro(self) -> None:
+        sim = CircleSimulator(FieldMap())
+        est = Calibrate()
+        est.init()
+
+        # sim starts at (2,0)
+        prior_mean = gtsam.Pose2(2, 0, 0)
+        est.add_state(0, prior_mean)
+        est.prior(0, prior_mean, PRIOR_NOISE)
+
+        state = gtsam.Pose2()
+        odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
+
+        # this should just record the positions and timestamp
+        est.odometry(0, sim.positions, odometry_noise)
+
+        print()
+        print(
+            "      t,    GT X,    GT Y,  GT ROT,   EST X,   EST Y, EST ROT,   ERR X,   ERR Y, ERR ROT"
+        )
+        for i in range(1, 100):
+            t0 = time.time_ns()
+            t0_us = 20000 * (i - 1)
+            t1_us = 20000 * i
+            # updates gt to t1
+            sim.step(0.02)
+            est.add_state(t1_us, state)
+            est.odometry(t1_us, sim.positions, odometry_noise)
+            est.gyro(t1_us, sim.gt_theta)
+            est.update()
+            t1 = time.time_ns()
+            et = t1 - t0
+            if ACTUALLY_PRINT:
+                print(f"{et/1e9} {est.result_size()}")
+            t = i * 0.02
+            gt_x = sim.gt_x
+            gt_y = sim.gt_y
+            gt_theta = sim.gt_theta
+
+            # using just odometry without noise, the error
+            # is exactly zero, all the time. :-)
+            p: Pose2 = est.mean_pose2(X(t1_us))
+            # use the previous estimate as the new estimate.
+            state = p
+            est_x = p.x()
+            est_y = p.y()
+            est_theta = p.theta()
+
+            err_x = est_x - gt_x
+            err_y = est_y - gt_y
+            err_theta = est_theta - gt_theta
+
+            print(
+                f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}, {err_x:7.4f}, {err_y:7.4f}, {err_theta:7.4f}"
+            )
+
     def test_camera_batched(self) -> None:
         """Camera with batch factors.
         this is much faster than multiple factors, 0.4s for a 0.1s window"""
