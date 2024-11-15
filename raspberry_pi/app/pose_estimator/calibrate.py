@@ -325,3 +325,24 @@ class Calibrate:
         # if you have only the gyro (which only constrains yaw)
         # you will fail, so add an extremely loose prior.
         self.prior(t0_us, PRIOR_MEAN, PRIOR_NOISE)
+
+    def get_result(self) -> tuple[int, gtsam.Pose2, np.ndarray] | None:
+        """the most recent timestamped pose and covariance
+        tuple(time_us, pose2, cov)
+        TODO: maybe make update() do this
+        TODO: make more of these, i.e. one for C, K, and X"""
+        timestamp_map = self._isam.timestamps()
+        m = self.marginal_covariance()
+        # timestamp map is std::map inside, which is ordered by key
+        for key, time_us in reversed(list(timestamp_map.items())):
+            # run through the list from newest to oldest, looking for X
+            idx = gtsam.symbolIndex(key)
+            char = chr(gtsam.symbolChr(key))
+            # print("KEY", key, "IDX", idx, "CHR", char)
+            if char == "x":
+                # the most-recent pose
+                x: gtsam.Pose2 = self._result.atPose2(key)
+                cov: np.ndarray = m.marginalCovariance(key)
+                return (int(time_us), x, cov)
+
+        return None

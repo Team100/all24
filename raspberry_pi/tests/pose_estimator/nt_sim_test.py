@@ -1,3 +1,4 @@
+"""Exercise the network tables simulator."""
 import unittest
 
 import ntcore

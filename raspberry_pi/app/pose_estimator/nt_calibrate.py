@@ -1,5 +1,9 @@
 """Read measurements from Network Tables, run the
-smoother, and publish the results on Network Tables."""
+calibrator, and publish the results on Network Tables.
+
+TODO: dedupe this with the estimator version.   """
+
+
 
 # pylint: disable=C0301,E0611,E1101,R0902,R0903,R0914,W0212
 
@@ -18,7 +22,7 @@ from app.config.identity import Identity
 from app.field.field_map import FieldMap
 from app.network.network_protocol import Network, PoseEstimate25
 from app.pose_estimator import util
-from app.pose_estimator.estimate import Estimate
+from app.pose_estimator.calibrate import Calibrate
 
 PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 ODO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -27,7 +31,7 @@ ODO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 TIME_STEP_US = 20000
 
 
-class NTEstimate:
+class NTCalibrate:
     def __init__(self, field_map: FieldMap, net: Network) -> None:
         self.field_map = field_map
         self.net = net
@@ -35,7 +39,7 @@ class NTEstimate:
         self.odo_receiver = net.get_odometry_receiver("bar")
         self.gyro_receiver = net.get_gyro_receiver("baz")
         self.pose_sender = net.get_pose_sender("pose")
-        self.est = Estimate()
+        self.est = Calibrate(0.1)
         # current estimate, used for initial value for next time
         # TODO: remove gtsam types
         self.state = gtsam.Pose2()
@@ -103,16 +107,17 @@ class NTEstimate:
                 pixels = blip.measurement()
                 corners = self.field_map.get(blip.tag_id)
                 self.est.add_state(time_slice, self.state)
-                self.est.apriltag_for_smoothing_batch(
-                    corners, pixels, time_slice, cam.camera_offset, cam.calib
+                self.est.apriltag_for_calibration_batch(
+                    corners, pixels, time_slice
                 )
+                self.est.keep_calib_hot(time_slice)
 
     def _receive_odometry(self) -> None:
         odo = self.odo_receiver.get()
         for pos in odo:
             time_slice = util.discrete(pos[0])
-            # print("TIME SLICE ", time_slice)
             positions = pos[1]
+            print("TIME SLICE", time_slice, "POS", positions)
             self.est.add_state(time_slice, self.state)
             self.est.odometry(time_slice, positions, ODO_NOISE)
 
@@ -127,3 +132,7 @@ class NTEstimate:
             self.est.add_state(time_slice, self.state)
             self.est.gyro(time_slice, yaw.radians())
 
+    @staticmethod
+    def discrete(timestamp_us: int) -> int:
+        """Discretize time at 50 Hz"""
+        return math.ceil(timestamp_us / TIME_STEP_US) * TIME_STEP_US

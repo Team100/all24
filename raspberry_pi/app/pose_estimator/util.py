@@ -1,5 +1,6 @@
 # pylint: disable=E1101
 import gtsam
+import math
 from wpimath.geometry import (
     Pose3d,
     Translation3d,
@@ -10,6 +11,13 @@ from wpimath.geometry import (
 )
 
 from app.network.network_protocol import Cal3DS2
+
+# discrete time step is 20 ms
+TIME_STEP_US = 20000
+
+def discrete(timestamp_us: int) -> int:
+    """Discretize time at 50 Hz"""
+    return math.ceil(timestamp_us / TIME_STEP_US) * TIME_STEP_US
 
 
 def pose3_to_pose3d(pose3: gtsam.Pose3) -> Pose3d:
