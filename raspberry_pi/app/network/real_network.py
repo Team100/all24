@@ -7,7 +7,7 @@ from typing import cast
 
 import ntcore
 from typing_extensions import override
-from wpimath.geometry import Rotation2d, Rotation3d
+from wpimath.geometry import Rotation2d, Rotation3d, Pose2d
 from wpiutil import wpistruct
 
 from app.config.identity import Identity
@@ -28,6 +28,7 @@ from app.network.network_protocol import (
     OdometrySender,
     PoseEstimate25,
     PoseSender,
+    PriorReceiver,
 )
 from app.kinodynamics.swerve_module_position import SwerveModulePositions
 
@@ -226,6 +227,35 @@ class RealCalibSender(CalibSender):
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
+class RealPriorReceiver(PriorReceiver):
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(
+            inst, [name], ntcore.PubSubOptions(keepDuplicates=True)
+        )
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
+
+    @override
+    def get(self) -> Pose2d | None:
+        queue: list = self.poller.readQueue()
+        # consecutive priors override each other so just take the last one
+        if len(queue) == 0:
+            return None
+        event = queue[-1]
+
+        value_event_data = cast(ntcore.ValueEventData, event.data)
+        nt_value: ntcore.Value = value_event_data.value
+        raw: bytes = cast(bytes, nt_value.getRaw())
+        pose: Pose2d = wpistruct.unpack(Pose2d, raw)
+        return pose
+
 class RealNetwork(Network):
     def __init__(self, identity: Identity) -> None:
         # TODO: use identity.name instead
@@ -247,6 +277,10 @@ class RealNetwork(Network):
             # this works
             self._inst.setServer("10.1.0.2")
 
+    @override
+    def now(self) -> int:
+        return ntcore._now() - start_time_us
+    
     @override
     def get_double_sender(self, name: str) -> RealDoubleSender:
         return RealDoubleSender(self._inst.getDoubleTopic(name).publish())
@@ -296,6 +330,10 @@ class RealNetwork(Network):
         return RealCalibSender(
             self._inst.getStructTopic(name, CameraCalibration).publish()
         )
+    
+    @override
+    def get_prior_receiver(self, name: str) -> PriorReceiver:
+        return RealPriorReceiver(name, self._inst)
 
     @override
     def flush(self) -> None:

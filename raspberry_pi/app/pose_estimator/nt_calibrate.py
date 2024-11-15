@@ -3,8 +3,6 @@ calibrator, and publish the results on Network Tables.
 
 TODO: dedupe this with the estimator version.   """
 
-
-
 # pylint: disable=C0301,E0611,E1101,R0902,R0903,R0914,W0212
 
 import math
@@ -15,49 +13,67 @@ import gtsam
 import ntcore
 import numpy as np
 from gtsam import noiseModel  # type:ignore
-from wpimath.geometry import Pose2d
+from gtsam.symbol_shorthand import C, K, X  # type:ignore
+
 
 from app.config.camera_config import CameraConfig
 from app.config.identity import Identity
 from app.field.field_map import FieldMap
-from app.network.network_protocol import Network, PoseEstimate25
+from app.network.network_protocol import (
+    Cal3DS2,
+    CameraCalibration,
+    MyTwist3d,
+    Network,
+    PoseEstimate25,
+)
 from app.pose_estimator import util
 from app.pose_estimator.calibrate import Calibrate
 
-PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
+# TODO: consolidate these
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([160, 80, 60]))
+PRIOR_MEAN = gtsam.Pose2(8, 4, 0)
+
 ODO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
 # discrete time step is 20 ms
 TIME_STEP_US = 20000
+LAG = 0.1
 
 
 class NTCalibrate:
     def __init__(self, field_map: FieldMap, net: Network) -> None:
         self.field_map = field_map
         self.net = net
-        self.blip_receiver = net.get_blip25_receiver("foo")
-        self.odo_receiver = net.get_odometry_receiver("bar")
-        self.gyro_receiver = net.get_gyro_receiver("baz")
+        # TODO: consolidate these names
+        self.prior_receiver = net.get_prior_receiver("prior")
+        self.blip_receiver = net.get_blip25_receiver("blip25")
+        self.odo_receiver = net.get_odometry_receiver("odometry")
+        self.gyro_receiver = net.get_gyro_receiver("gyro")
         self.pose_sender = net.get_pose_sender("pose")
-        self.est = Calibrate(0.1)
+        self.calib_sender = net.get_calib_sender("calib")
+
+        self.est = Calibrate(LAG)
         # current estimate, used for initial value for next time
         # TODO: remove gtsam types
-        self.state = gtsam.Pose2()
+        self.state = PRIOR_MEAN
         self.est.init()
         # this timestamp is probably not close to the ones we will
         # receive from the network.
-        prior_mean = gtsam.Pose2(0, 0, 0)
-        self.est.add_state(0, prior_mean)
-        self.est.prior(0, prior_mean, PRIOR_NOISE)
+
+        now = self.net.now()
+        self.est.add_state(now, PRIOR_MEAN)
+        self.est.prior(now, PRIOR_MEAN, PRIOR_NOISE)
+
 
     def step(self) -> None:
         """Collect any pending measurements from
         the network and add them to the sim."""
-
+        self._receive_prior()
         self._receive_blips()
         self._receive_odometry()
         self._receive_gyro()
 
+        self.est.keep_calib_hot(self.net.now())
         self.est.update()
 
         # print("NTEstimate.step() result ", self.est.result)
@@ -89,12 +105,59 @@ class NTCalibrate:
         )
         self.pose_sender.send(pose_estimate, ntcore._now() - timestamp)
 
+        c0: gtsam.Pose3 = self.est.mean_pose3(C(0))
+        cp0 = util.pose3_to_pose3d(c0)
+        cs0 = self.est.sigma(C(0))
+        ct0 = MyTwist3d(
+            cs0[3],
+            cs0[4],
+            cs0[5],
+            cs0[0],
+            cs0[1],
+            cs0[2],
+        )
+
+        k0: gtsam.Cal3DS2 = self.est.mean_cal3DS2(K(0))
+        kd0 = util.to_cal(k0)
+        ks0 = self.est.sigma(K(0))
+        kc0 = Cal3DS2(
+            ks0[0],
+            ks0[1],
+            ks0[2],
+            ks0[3],
+            ks0[4],
+            ks0[5],
+            ks0[6],
+            ks0[7],
+            ks0[8],
+        )
+
+        camera_calibration = CameraCalibration(cp0, ct0, kd0, kc0)
+        self.calib_sender.send(camera_calibration, ntcore._now() - timestamp)
+
+    def _receive_prior(self) -> None:
+        """If we ever receive a prior message, we restart the whole model."""
+        prior = self.prior_receiver.get()
+        if prior is None:
+            return
+        
+        # restart the whole thing
+        p = util.pose2d_to_pose2(prior)
+        # TODO: supply sigma on the wire?
+        s = noiseModel.Diagonal.Sigmas(np.array([0.05, 0.05, 0.05]))
+
+        self.est = Calibrate(LAG)
+        self.state = p
+        self.est.init()
+        now = self.net.now()
+        self.est.add_state(now, p)
+        self.est.prior(now, p, s)
+
     def _receive_blips(self) -> None:
         """Receive pending blips from the network"""
         # TODO: read the camera identity from the blip
         cam = CameraConfig(Identity.UNKNOWN)
         sights = self.blip_receiver.get()
-        # print("NTEstimate.step() sights ", sights)
         for sight in sights:
 
             time_slice = util.discrete(sight[0])
@@ -108,9 +171,7 @@ class NTCalibrate:
                 pixels = blip.measurement()
                 corners = self.field_map.get(blip.tag_id)
                 self.est.add_state(time_slice, self.state)
-                self.est.apriltag_for_calibration_batch(
-                    corners, pixels, time_slice
-                )
+                self.est.apriltag_for_calibration_batch(corners, pixels, time_slice)
                 self.est.keep_calib_hot(time_slice)
 
     def _receive_odometry(self) -> None:
@@ -132,8 +193,3 @@ class NTCalibrate:
             # then it will be underconstrained (i.e. no constraint on x or y)
             self.est.add_state(time_slice, self.state)
             self.est.gyro(time_slice, yaw.radians())
-
-    @staticmethod
-    def discrete(timestamp_us: int) -> int:
-        """Discretize time at 50 Hz"""
-        return math.ceil(timestamp_us / TIME_STEP_US) * TIME_STEP_US

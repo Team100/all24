@@ -30,9 +30,9 @@ class NTEstimate:
         self.field_map = field_map
         self.cam = cam
         self.net = net
-        self.blip_receiver = net.get_blip25_receiver("foo")
-        self.odo_receiver = net.get_odometry_receiver("bar")
-        self.gyro_receiver = net.get_gyro_receiver("baz")
+        self.blip_receiver = net.get_blip25_receiver("blip25")
+        self.odo_receiver = net.get_odometry_receiver("odometry")
+        self.gyro_receiver = net.get_gyro_receiver("gyro")
         self.pose_sender = net.get_pose_sender("pose")
         self.est = Estimate()
         # current estimate, used for initial value for next time

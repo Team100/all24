@@ -6,10 +6,13 @@ import dataclasses
 from typing import Protocol
 
 import numpy as np
-from wpimath.geometry import Pose3d, Rotation2d, Rotation3d, Transform3d, Twist3d
+from wpimath.geometry import (Pose2d, Pose3d, Rotation2d, Rotation3d,
+                              Transform3d)
 from wpiutil import wpistruct
 
 from app.kinodynamics.swerve_module_position import SwerveModulePositions
+
+F = ".3f"
 
 
 @wpistruct.make_wpistruct  # type:ignore
@@ -80,6 +83,14 @@ class PoseEstimate25:
     # time between next-most-recent and most-recent
     dt: float
 
+    def __str__(self) -> str:
+        return (
+            f"(x {self.x:{F}} y {self.y:{F}} Θ {self.theta:{F}} "
+            f"sx {self.x_sigma:{F}} sy {self.y_sigma:{F}} sΘ {self.theta_sigma:{F}} "
+            f"dx {self.dx:{F}} dy {self.dy:{F}} dΘ {self.dtheta:{F}} "
+            f"dt {self.dt:{F}})"
+        )
+
 
 @wpistruct.make_wpistruct
 @dataclasses.dataclass
@@ -123,6 +134,16 @@ class CameraCalibration:
     offset_sigma: MyTwist3d
     calib: Cal3DS2
     calib_sigma: Cal3DS2
+
+    def __str__(self) -> str:
+        return (
+            f"(x {self.camera_offset.x:{F}} y {self.camera_offset.y:{F}} z {self.camera_offset.z:{F}} "
+            f"rx {self.camera_offset.rotation().x:{F}} ry {self.camera_offset.rotation().y:{F}} rz {self.camera_offset.rotation().z:{F}} "
+            f"dx {self.offset_sigma.dx:{F}} dy {self.offset_sigma.dy:{F}} dz {self.offset_sigma.dz:{F}} "
+            f"drx {self.offset_sigma.rx:{F}} dry {self.offset_sigma.ry:{F}} drz {self.offset_sigma.rz:{F}} "
+            f"fx {self.calib.fx:{F}} fy {self.calib.fy:{F}} cx {self.calib.u0:{F}} cy {self.calib.v0:{F}} k1 {self.calib.k1:{F}} k2 {self.calib.k2:{F}} "
+            f"dfx {self.calib_sigma.fx:{F}} dfy {self.calib_sigma.fy:{F}} dcx {self.calib_sigma.u0:{F}} dcy {self.calib_sigma.v0:{F}} dk1 {self.calib_sigma.k1:{F}} dk2 {self.calib_sigma.k2:{F}})"
+        )
 
 
 class DoubleSender(Protocol):
@@ -174,10 +195,17 @@ class GyroReceiver(Protocol):
 
 
 class CalibSender(Protocol):
+    # TODO: we don't care about timestamp here so remove it
     def send(self, val: CameraCalibration, delay_us: int) -> None: ...
 
 
+class PriorReceiver(Protocol):
+    """Force a pose."""
+    def get(self) -> Pose2d | None: ...
+
+
 class Network(Protocol):
+    def now(self) -> int: ...
     def get_double_sender(self, name: str) -> DoubleSender: ...
     def get_blip_sender(self, name: str) -> BlipSender: ...
     def get_note_sender(self, name: str) -> NoteSender: ...
@@ -189,4 +217,5 @@ class Network(Protocol):
     def get_gyro_sender(self, name: str) -> GyroSender: ...
     def get_gyro_receiver(self, name: str) -> GyroReceiver: ...
     def get_calib_sender(self, name: str) -> CalibSender: ...
+    def get_prior_receiver(self, name: str) -> PriorReceiver: ...
     def flush(self) -> None: ...

@@ -200,7 +200,10 @@ class Calibrate:
         return self._result.atPose2(key)
 
     def sigma(self, key) -> np.ndarray:
-        """For a Pose2 this returns [sigma x, sigma y, sigma Θ]"""
+        """For a Pose2 this returns [sigma x, sigma y, sigma Θ].
+        For a Pose3, [R_x,R_y,R_z,T_x,T_y,T_z] (see Pose3.h)
+        For Cal3DS2, [fx, fy, s, cx, cy, k1, k2, p1, p2]
+        TODO: make a separate method for each type"""
         m = self.marginal_covariance()
         s = m.marginalCovariance(key)
         return np.sqrt(np.diag(s))
@@ -265,7 +268,8 @@ class Calibrate:
         )
 
     def keep_calib_hot(self, t0_us: int) -> None:
-        # you need to tell the smoother to hang on to these factors.
+        """Even if we don't see any targets, remember the
+        camera calibration and offset."""
         self._new_timestamps[C(0)] = t0_us
         self._new_timestamps[K(0)] = t0_us
 

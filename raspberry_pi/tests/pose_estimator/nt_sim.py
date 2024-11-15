@@ -19,9 +19,9 @@ class NTSim:
     def __init__(self, net: Network) -> None:
         self.net = net
         # TODO: real naming scheme
-        self.blip_sender = net.get_blip25_sender("foo")
-        self.odometry_sender = net.get_odometry_sender("bar")
-        self.gyro_sender = net.get_gyro_sender("baz")
+        self.blip_sender = net.get_blip25_sender("blip25")
+        self.odometry_sender = net.get_odometry_sender("odometry")
+        self.gyro_sender = net.get_gyro_sender("gyro")
         self.sim = CircleSimulator(FieldMap())
 
     def step(self, dt_s: float) -> None:

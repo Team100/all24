@@ -15,6 +15,7 @@ from app.network.network_protocol import Cal3DS2
 # discrete time step is 20 ms
 TIME_STEP_US = 20000
 
+
 def discrete(timestamp_us: int) -> int:
     # print("TIMESTAMP_US",timestamp_us)
     """Discretize time at 50 Hz"""
@@ -54,6 +55,10 @@ def pose2_to_pose2d(pose2: gtsam.Pose2) -> Pose2d:
         Translation2d(pose2.translation()),
         Rotation2d(pose2.rotation().c(), pose2.rotation().s()),
     )
+
+
+def pose2d_to_pose2(pose2d: Pose2d) -> gtsam.Pose2:
+    return gtsam.Pose2(pose2d.x, pose2d.y, pose2d.rotation().radians())
 
 
 def to_cal(gc: gtsam.Cal3DS2) -> Cal3DS2:

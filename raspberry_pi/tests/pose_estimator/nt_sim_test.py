@@ -16,7 +16,7 @@ class NTSimTest(unittest.TestCase):
         print()
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
-        sub = inst.getStructArrayTopic("foo", Blip25).subscribe([])
+        sub = inst.getStructArrayTopic("blip25", Blip25).subscribe([])
         net = RealNetwork(Identity.UNKNOWN)
         sim = NTSim(net)
         for _ in range(50):

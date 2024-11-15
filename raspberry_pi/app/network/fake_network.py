@@ -1,7 +1,8 @@
 # pylint: disable=R0902,R0903,W0212
 
+import time
 from typing_extensions import override
-from wpimath.geometry import Rotation2d, Rotation3d
+from wpimath.geometry import Rotation2d, Rotation3d, Pose2d
 
 from app.network.network_protocol import (
     Blip24,
@@ -20,8 +21,12 @@ from app.network.network_protocol import (
     OdometrySender,
     PoseEstimate25,
     PoseSender,
+    PriorReceiver,
 )
 from app.kinodynamics.swerve_module_position import SwerveModulePositions
+
+# global singleton
+start_time_us = time.time_ns() // 1000
 
 
 class FakeDoubleSender(DoubleSender):
@@ -57,6 +62,7 @@ class FakeBlip25Sender(Blip25Sender):
 
     @override
     def send(self, val: list[Blip25], delay_us: int) -> None:
+        print(val)
         self.blips.extend(val)
 
 
@@ -67,7 +73,9 @@ class FakeBlip25Receiver(Blip25Receiver):
 
     @override
     def get(self) -> list[tuple[int, list[Blip25]]]:
-        return self.net.received_blip25s[self.name]
+        blips = self.net.received_blip25s[self.name]
+        print(blips)
+        return blips
 
 
 class FakePoseSender(PoseSender):
@@ -130,20 +138,37 @@ class FakeGyroReceiver(GyroReceiver):
         return self.net.received_yaw
 
 
+class FakePriorReceiver(PriorReceiver):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    @override
+    def get(self) -> Pose2d | None:
+        return self.net.prior
+
+
 class FakeNetwork(Network):
     def __init__(self) -> None:
         self.doubles: dict[str, list[float]] = {}
         self.blips: dict[str, list[Blip24]] = {}
         self.blip25s: dict[str, list[Blip25]] = {}
-        # key: camera, list of updates, each update is tuple (timestamp, list of blips)
+        # {camera name, [(timestamp, [blip])]
         self.received_blip25s: dict[str, list[tuple[int, list[Blip25]]]] = {}
+        # {camera_name, [rotation]}
         self.notes: dict[str, list[Rotation3d]] = {}
         self.estimate: PoseEstimate25
         self.sent_positions: SwerveModulePositions
+        # [(timestamp, positions)]
         self.received_positions: list[tuple[int, SwerveModulePositions]] = []
         self.sent_yaw: Rotation2d
         self.received_yaw: list[tuple[int, Rotation2d]] = []
         self.calib: CameraCalibration
+        self.prior = None
+
+    @override
+    def now(self) -> int:
+        return time.time_ns() // 1000 - start_time_us
 
     @override
     def get_double_sender(self, name: str) -> DoubleSender:
@@ -198,6 +223,10 @@ class FakeNetwork(Network):
     @override
     def get_calib_sender(self, name: str) -> CalibSender:
         return FakeCalibSender(name, self)
+
+    @override
+    def get_prior_receiver(self, name: str) -> PriorReceiver:
+        return FakePriorReceiver(name, self)
 
     @override
     def flush(self) -> None:

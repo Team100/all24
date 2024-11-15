@@ -77,7 +77,7 @@ class NTEstimateTest(unittest.TestCase):
         for _ in range(10):
             time.sleep(0.02)
             time_us = ntcore._now() - start_time_us
-            net.received_blip25s["foo"] = [
+            net.received_blip25s["blip25"] = [
                 (
                     time_us,
                     [
@@ -112,7 +112,7 @@ class NTEstimateTest(unittest.TestCase):
         print()
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
-        pub = inst.getStructTopic("bar", SwerveModulePositions).publish(
+        pub = inst.getStructTopic("odometry", SwerveModulePositions).publish(
             ntcore.PubSubOptions(keepDuplicates=True)
         )
         sub = inst.getStructTopic("pose", PoseEstimate25).subscribe(None)
@@ -172,7 +172,7 @@ class NTEstimateTest(unittest.TestCase):
         print()
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
-        pub = inst.getStructTopic("baz", Rotation2d).publish(
+        pub = inst.getStructTopic("gyro", Rotation2d).publish(
             ntcore.PubSubOptions(keepDuplicates=True)
         )
         sub = inst.getStructTopic("pose", PoseEstimate25).subscribe(None)
@@ -202,5 +202,5 @@ class NTEstimateTest(unittest.TestCase):
             # prior was enormous
             self.assertAlmostEqual(160, estimate.x_sigma, 3)
             self.assertAlmostEqual(80, estimate.y_sigma, 3)
-            # prior was 0.1
-            self.assertAlmostEqual(0.0001, estimate.theta_sigma, 3)
+            # prior was 0.001
+            self.assertAlmostEqual(0.001, estimate.theta_sigma, 3)

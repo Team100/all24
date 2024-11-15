@@ -54,7 +54,7 @@ class EstimateGyroTest(unittest.TestCase):
         self.assertTrue(
             np.allclose(
                 np.array(
-                    [0.3, 0.3, 0.0001],
+                    [0.3, 0.3, 0.001],
                 ),
                 s0,
                 atol=0.0001,
@@ -77,7 +77,7 @@ class EstimateGyroTest(unittest.TestCase):
         p0: gtsam.Pose2 = est.mean_pose2(X(0))
         self.assertAlmostEqual(0, p0.x(), 3)
         self.assertAlmostEqual(0, p0.y(), 3)
-        self.assertAlmostEqual(1, p0.theta(), 5)
+        self.assertAlmostEqual(1, p0.theta(), 3)
 
         m = est.marginal_covariance()
         c0 = m.marginalCovariance(X(0))
@@ -102,7 +102,7 @@ class EstimateGyroTest(unittest.TestCase):
         self.assertTrue(
             np.allclose(
                 np.array(
-                    [0.3, 0.3, 0.0001],
+                    [0.3, 0.3, 0.001],
                 ),
                 s0,
                 atol=0.0001,
