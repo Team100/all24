@@ -104,6 +104,7 @@ class NTCalibrate:
             # so that the network schema and the estimate schema are more
             # similar
             for blip in blip_list:
+                # print("TIME", time_slice, "BLIP", blip)
                 pixels = blip.measurement()
                 corners = self.field_map.get(blip.tag_id)
                 self.est.add_state(time_slice, self.state)
@@ -117,7 +118,7 @@ class NTCalibrate:
         for pos in odo:
             time_slice = util.discrete(pos[0])
             positions = pos[1]
-            print("TIME SLICE", time_slice, "POS", positions)
+            # print("TIME", time_slice, "POS", positions)
             self.est.add_state(time_slice, self.state)
             self.est.odometry(time_slice, positions, ODO_NOISE)
 
@@ -126,7 +127,7 @@ class NTCalibrate:
         for g in gyro:
             time_slice = util.discrete(g[0])
             yaw = g[1]
-            print("TIME", time_slice, "YAW", yaw)
+            # print("TIME", time_slice, "YAW", yaw)
             # if this is the only factor attached to this variable
             # then it will be underconstrained (i.e. no constraint on x or y)
             self.est.add_state(time_slice, self.state)

@@ -21,9 +21,11 @@ from app.network.network_protocol import (
     CameraCalibration,
     DoubleSender,
     GyroReceiver,
+    GyroSender,
     Network,
     NoteSender,
     OdometryReceiver,
+    OdometrySender,
     PoseEstimate25,
     PoseSender,
 )
@@ -138,6 +140,15 @@ class RealPoseSender(PoseSender):
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
+class RealOdometrySender(OdometrySender):
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
+        self.pub = pub
+
+    @override
+    def send(self, val: SwerveModulePositions, delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
+
+
 class RealOdometryReceiver(OdometryReceiver):
     def __init__(
         self,
@@ -153,6 +164,7 @@ class RealOdometryReceiver(OdometryReceiver):
         self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
         # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
 
+    @override
     def get(self) -> list[tuple[int, SwerveModulePositions]]:
         result: list[tuple[int, SwerveModulePositions]] = []
         # see NotePosition24ArrayListener for example
@@ -165,6 +177,15 @@ class RealOdometryReceiver(OdometryReceiver):
             pos: SwerveModulePositions = wpistruct.unpack(SwerveModulePositions, raw)
             result.append((time_us, pos))
         return result
+
+
+class RealGyroSender(GyroSender):
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
+        self.pub = pub
+
+    @override
+    def send(self, val: Rotation2d, delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
 
 
 class RealGyroReceiver(GyroReceiver):
@@ -182,6 +203,7 @@ class RealGyroReceiver(GyroReceiver):
         self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
         # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
 
+    @override
     def get(self) -> list[tuple[int, Rotation2d]]:
         result: list[tuple[int, Rotation2d]] = []
         queue: list = self.poller.readQueue()
@@ -252,8 +274,18 @@ class RealNetwork(Network):
         return RealPoseSender(self._inst.getStructTopic(name, PoseEstimate25).publish())
 
     @override
+    def get_odometry_sender(self, name: str) -> OdometrySender:
+        return RealOdometrySender(
+            self._inst.getStructTopic(name, SwerveModulePositions).publish()
+        )
+
+    @override
     def get_odometry_receiver(self, name: str) -> OdometryReceiver:
         return RealOdometryReceiver(name, self._inst)
+
+    @override
+    def get_gyro_sender(self, name: str) -> GyroSender:
+        return RealGyroSender(self._inst.getStructTopic(name, Rotation2d).publish())
 
     @override
     def get_gyro_receiver(self, name: str) -> GyroReceiver:

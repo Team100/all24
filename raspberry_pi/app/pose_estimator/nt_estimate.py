@@ -11,25 +11,24 @@ import gtsam
 import ntcore
 import numpy as np
 from gtsam import noiseModel  # type:ignore
-from wpimath.geometry import Pose2d
 
 from app.config.camera_config import CameraConfig
-from app.config.identity import Identity
 from app.field.field_map import FieldMap
 from app.network.network_protocol import Network, PoseEstimate25
 from app.pose_estimator import util
 from app.pose_estimator.estimate import Estimate
 
-PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
-ODO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
+# TODO: consolidate with estimate.py.
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([160, 80, 60]))
+PRIOR_MEAN = gtsam.Pose2(8, 4, 0)
 
-# discrete time step is 20 ms
-TIME_STEP_US = 20000
+ODO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 
 
 class NTEstimate:
-    def __init__(self, field_map: FieldMap, net: Network) -> None:
+    def __init__(self, field_map: FieldMap, cam: CameraConfig, net: Network) -> None:
         self.field_map = field_map
+        self.cam = cam
         self.net = net
         self.blip_receiver = net.get_blip25_receiver("foo")
         self.odo_receiver = net.get_odometry_receiver("bar")
@@ -42,9 +41,8 @@ class NTEstimate:
         self.est.init()
         # this timestamp is probably not close to the ones we will
         # receive from the network.
-        prior_mean = gtsam.Pose2(0, 0, 0)
-        self.est.add_state(0, prior_mean)
-        self.est.prior(0, prior_mean, PRIOR_NOISE)
+        self.est.add_state(0, PRIOR_MEAN)
+        self.est.prior(0, PRIOR_MEAN, PRIOR_NOISE)
 
     def step(self) -> None:
         """Collect any pending measurements from
@@ -88,7 +86,7 @@ class NTEstimate:
     def _receive_blips(self) -> None:
         """Receive pending blips from the network"""
         # TODO: read the camera identity from the blip
-        cam = CameraConfig(Identity.UNKNOWN)
+        # cam = CameraConfig(Identity.UNKNOWN)
         sights = self.blip_receiver.get()
         # print("NTEstimate.step() sights ", sights)
         for sight in sights:
@@ -100,11 +98,12 @@ class NTEstimate:
             # so that the network schema and the estimate schema are more
             # similar
             for blip in blip_list:
+                # print("TIME", time_slice, "BLIP", blip)
                 pixels = blip.measurement()
                 corners = self.field_map.get(blip.tag_id)
                 self.est.add_state(time_slice, self.state)
                 self.est.apriltag_for_smoothing_batch(
-                    corners, pixels, time_slice, cam.camera_offset, cam.calib
+                    corners, pixels, time_slice, self.cam.camera_offset, self.cam.calib
                 )
 
     def _receive_odometry(self) -> None:
@@ -113,6 +112,7 @@ class NTEstimate:
             time_slice = util.discrete(pos[0])
             # print("TIME SLICE ", time_slice)
             positions = pos[1]
+            # print("TIME", time_slice, "ODO", positions)
             self.est.add_state(time_slice, self.state)
             self.est.odometry(time_slice, positions, ODO_NOISE)
 
@@ -121,9 +121,8 @@ class NTEstimate:
         for g in gyro:
             time_slice = util.discrete(g[0])
             yaw = g[1]
-            print("TIME", time_slice, "YAW", yaw)
+            # print("TIME", time_slice, "YAW", yaw)
             # if this is the only factor attached to this variable
             # then it will be underconstrained (i.e. no constraint on x or y)
             self.est.add_state(time_slice, self.state)
             self.est.gyro(time_slice, yaw.radians())
-

@@ -9,6 +9,7 @@ import unittest
 import ntcore
 from wpimath.geometry import Rotation2d
 
+from app.config.camera_config import CameraConfig
 from app.config.identity import Identity
 from app.network.fake_network import FakeNetwork
 from app.network.network_protocol import Blip25, PoseEstimate25
@@ -32,8 +33,9 @@ class NTEstimateTest(unittest.TestCase):
         )
         sub = inst.getStructTopic("pose", PoseEstimate25).subscribe(None)
         field_map = FieldMap()
+        cam = CameraConfig(Identity.UNKNOWN)
         net = RealNetwork(Identity.UNKNOWN)
-        est = NTEstimate(field_map, net)
+        est = NTEstimate(field_map, cam, net)
         estimate = None
         for i in range(10):
             time.sleep(0.02)
@@ -68,8 +70,9 @@ class NTEstimateTest(unittest.TestCase):
 
     def test_fake_nt_est_blips(self) -> None:
         field_map = FieldMap()
+        cam = CameraConfig(Identity.UNKNOWN)
         net = FakeNetwork()
-        est = NTEstimate(field_map, net)
+        est = NTEstimate(field_map, cam, net)
         start_time_us = ntcore._now()
         for _ in range(10):
             time.sleep(0.02)
@@ -114,8 +117,9 @@ class NTEstimateTest(unittest.TestCase):
         )
         sub = inst.getStructTopic("pose", PoseEstimate25).subscribe(None)
         field_map = FieldMap()
+        cam = CameraConfig(Identity.UNKNOWN)
         net = RealNetwork(Identity.UNKNOWN)
-        est = NTEstimate(field_map, net)
+        est = NTEstimate(field_map, cam, net)
         estimate = None
         for i in range(10):
             time.sleep(0.02)
@@ -173,14 +177,13 @@ class NTEstimateTest(unittest.TestCase):
         )
         sub = inst.getStructTopic("pose", PoseEstimate25).subscribe(None)
         field_map = FieldMap()
+        cam = CameraConfig(Identity.UNKNOWN)
         net = RealNetwork(Identity.UNKNOWN)
-        est = NTEstimate(field_map, net)
+        est = NTEstimate(field_map, cam, net)
         estimate = None
         for i in range(10):
             time.sleep(0.02)
-            # print("NTEstTest.test_real_nt_est() i ", i)
             time_us = ntcore._now()
-            # print("NTEstTest.test_real_nt_est() time_us ", time_us)
 
             pub.set(
                 Rotation2d(0.1 * i),

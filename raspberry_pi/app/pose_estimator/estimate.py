@@ -34,7 +34,8 @@ PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([160, 80, 60]))
 PRIOR_MEAN = gtsam.Pose2(8, 4, 0)
 
 # the gyro has really low noise.
-GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.0001]))
+# TODO: consolidate with calibrate.py
+GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.001]))
 
 # sensor noise, +/- one pixel.
 # TODO: if you want to model *blur* then you need more noise here, and maybe more in x than y.

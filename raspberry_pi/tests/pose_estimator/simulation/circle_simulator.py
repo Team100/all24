@@ -28,6 +28,8 @@ from gtsam import Pose2  # type:ignore
 from gtsam import PinholeCameraCal3DS2, Pose3, Rot3
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 
+from app.config.camera_config import CameraConfig
+from app.config.identity import Identity
 from app.field.field_map import FieldMap
 from app.kinodynamics.swerve_drive_kinematics import SwerveDriveKinematics100
 from app.kinodynamics.swerve_module_position import (
@@ -103,10 +105,12 @@ class CircleSimulator:
         self.l3 = tag[3]
         self.landmarks = [self.l0, self.l1, self.l2, self.l3]
 
+        cam = CameraConfig(Identity.UNKNOWN)
+
         # the camera is 0.5m from the floor
-        self.camera_offset = Pose3(Rot3(), np.array([0, 0, 0.5]))
+        self.camera_offset = cam.camera_offset
         # this camera is 800x600.
-        self.calib = Cal3DS2(200.0, 200.0, 0.0, 400.0, 300.0, -0.2, 0.1, 0.0, 0.0)
+        self.calib = cam.calib
 
         # initialize
         self.step(0)
@@ -133,6 +137,7 @@ class CircleSimulator:
         )
 
         robot_pose = Pose2(self.gt_x, self.gt_y, self.gt_theta)
+        print("GT POSE", new_wpi_pose)
 
         # lower left
         p0 = self._px(

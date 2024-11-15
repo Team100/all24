@@ -13,9 +13,11 @@ from app.network.network_protocol import (
     CameraCalibration,
     DoubleSender,
     GyroReceiver,
+    GyroSender,
     Network,
     NoteSender,
     OdometryReceiver,
+    OdometrySender,
     PoseEstimate25,
     PoseSender,
 )
@@ -88,13 +90,34 @@ class FakeCalibSender(CalibSender):
         self.net.calib = val
 
 
+class FakeOdometrySender(OdometrySender):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    @override
+    def send(self, val: SwerveModulePositions, delay_us: int) -> None:
+        self.net.sent_positions = val
+
+
 class FakeOdometryReceiver(OdometryReceiver):
     def __init__(self, name: str, net: "FakeNetwork") -> None:
         self.name = name
         self.net = net
 
+    @override
     def get(self) -> list[tuple[int, SwerveModulePositions]]:
         return self.net.received_positions
+
+
+class FakeGyroSender(GyroSender):
+    def __init__(self, name: str, net: "FakeNetwork") -> None:
+        self.name = name
+        self.net = net
+
+    @override
+    def send(self, val: Rotation2d, delay_us: int) -> None:
+        self.net.sent_yaw = val
 
 
 class FakeGyroReceiver(GyroReceiver):
@@ -102,6 +125,7 @@ class FakeGyroReceiver(GyroReceiver):
         self.name = name
         self.net = net
 
+    @override
     def get(self) -> list[tuple[int, Rotation2d]]:
         return self.net.received_yaw
 
@@ -115,7 +139,9 @@ class FakeNetwork(Network):
         self.received_blip25s: dict[str, list[tuple[int, list[Blip25]]]] = {}
         self.notes: dict[str, list[Rotation3d]] = {}
         self.estimate: PoseEstimate25
+        self.sent_positions: SwerveModulePositions
         self.received_positions: list[tuple[int, SwerveModulePositions]] = []
+        self.sent_yaw: Rotation2d
         self.received_yaw: list[tuple[int, Rotation2d]] = []
         self.calib: CameraCalibration
 
@@ -154,8 +180,16 @@ class FakeNetwork(Network):
         return FakePoseSender(name, self)
 
     @override
+    def get_odometry_sender(self, name: str) -> OdometrySender:
+        return FakeOdometrySender(name, self)
+
+    @override
     def get_odometry_receiver(self, name: str) -> OdometryReceiver:
         return FakeOdometryReceiver(name, self)
+
+    @override
+    def get_gyro_sender(self, name: str) -> GyroSender:
+        return FakeGyroSender(name, self)
 
     @override
     def get_gyro_receiver(self, name: str) -> GyroReceiver:

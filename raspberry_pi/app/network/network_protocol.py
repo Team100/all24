@@ -6,8 +6,7 @@ import dataclasses
 from typing import Protocol
 
 import numpy as np
-from wpimath.geometry import (Pose3d, Rotation2d, Rotation3d, Transform3d,
-                              Twist3d)
+from wpimath.geometry import Pose3d, Rotation2d, Rotation3d, Transform3d, Twist3d
 from wpiutil import wpistruct
 
 from app.kinodynamics.swerve_module_position import SwerveModulePositions
@@ -103,10 +102,12 @@ class Cal3DS2:
     p1: float
     p2: float
 
+
 @wpistruct.make_wpistruct
 @dataclasses.dataclass
 class MyTwist3d:
     """This works around the missing Twist3d on the RPi's at the moment"""
+
     dx: float
     dy: float
     dz: float
@@ -152,10 +153,18 @@ class PoseSender(Protocol):
     def send(self, val: PoseEstimate25, delay_us: int) -> None: ...
 
 
+class OdometrySender(Protocol):
+    def send(self, val: SwerveModulePositions, delay_us: int) -> None: ...
+
+
 class OdometryReceiver(Protocol):
     def get(self) -> list[tuple[int, SwerveModulePositions]]:
         """Receive a list of tuples (timestamp, positions)"""
         ...
+
+
+class GyroSender(Protocol):
+    def send(self, val: Rotation2d, delay_us: int) -> None: ...
 
 
 class GyroReceiver(Protocol):
@@ -175,7 +184,9 @@ class Network(Protocol):
     def get_blip25_sender(self, name: str) -> Blip25Sender: ...
     def get_blip25_receiver(self, name: str) -> Blip25Receiver: ...
     def get_pose_sender(self, name: str) -> PoseSender: ...
+    def get_odometry_sender(self, name: str) -> OdometrySender: ...
     def get_odometry_receiver(self, name: str) -> OdometryReceiver: ...
+    def get_gyro_sender(self, name: str) -> GyroSender: ...
     def get_gyro_receiver(self, name: str) -> GyroReceiver: ...
     def get_calib_sender(self, name: str) -> CalibSender: ...
     def flush(self) -> None: ...

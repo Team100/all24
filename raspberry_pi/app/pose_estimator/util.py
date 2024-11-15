@@ -16,6 +16,7 @@ from app.network.network_protocol import Cal3DS2
 TIME_STEP_US = 20000
 
 def discrete(timestamp_us: int) -> int:
+    # print("TIMESTAMP_US",timestamp_us)
     """Discretize time at 50 Hz"""
     return math.ceil(timestamp_us / TIME_STEP_US) * TIME_STEP_US
 
