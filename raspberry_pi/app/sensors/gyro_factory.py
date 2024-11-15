@@ -5,7 +5,7 @@
 from adafruit_platformdetect import Detector  # type:ignore
 
 from app.config.identity import Identity
-from app.network.real_network import Network
+from app.network.network import Network
 from app.sensors.fake_gyro import FakeGyro
 from app.sensors.gyro_protocol import Gyro
 from app.sensors.real_gyro import RealGyro

@@ -14,7 +14,8 @@ from gtsam import noiseModel  # type:ignore
 
 from app.config.camera_config import CameraConfig
 from app.field.field_map import FieldMap
-from app.network.network_protocol import Network, PoseEstimate25
+from app.network.structs import PoseEstimate25
+from app.network.network import Network
 from app.pose_estimator import util
 from app.pose_estimator.estimate import Estimate
 
@@ -30,10 +31,12 @@ class NTEstimate:
         self.field_map = field_map
         self.cam = cam
         self.net = net
+        self.prior_receiver = net.get_prior_receiver("prior")
         self.blip_receiver = net.get_blip25_receiver("blip25")
         self.odo_receiver = net.get_odometry_receiver("odometry")
         self.gyro_receiver = net.get_gyro_receiver("gyro")
         self.pose_sender = net.get_pose_sender("pose")
+
         self.est = Estimate()
         # current estimate, used for initial value for next time
         # TODO: remove gtsam types
@@ -48,6 +51,7 @@ class NTEstimate:
         """Collect any pending measurements from
         the network and add them to the sim."""
 
+        self._receive_prior()
         self._receive_blips()
         self._receive_odometry()
         self._receive_gyro()
@@ -83,6 +87,24 @@ class NTEstimate:
         )
         self.pose_sender.send(pose_estimate, ntcore._now() - timestamp)
 
+    def _receive_prior(self) -> None:
+        """If we ever receive a prior message, we restart the whole model."""
+        prior = self.prior_receiver.get()
+        if prior is None:
+            return
+
+        # restart the whole thing
+        p = util.pose2d_to_pose2(prior)
+        # TODO: supply sigma on the wire?
+        s = noiseModel.Diagonal.Sigmas(np.array([0.05, 0.05, 0.05]))
+
+        self.est = Estimate()
+        self.state = p
+        self.est.init()
+        now = self.net.now()
+        self.est.add_state(now, p)
+        self.est.prior(now, p, s)
+
     def _receive_blips(self) -> None:
         """Receive pending blips from the network"""
         # TODO: read the camera identity from the blip
@@ -98,7 +120,7 @@ class NTEstimate:
             # so that the network schema and the estimate schema are more
             # similar
             for blip in blip_list:
-                # print("TIME", time_slice, "BLIP", blip)
+                print("TIME", time_slice, "BLIP", blip)
                 pixels = blip.measurement()
                 corners = self.field_map.get(blip.tag_id)
                 self.est.add_state(time_slice, self.state)

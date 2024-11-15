@@ -8,7 +8,8 @@ For now this uses the CircleSimulator only."""
 from wpimath.geometry import Rotation2d
 
 from app.field.field_map import FieldMap
-from app.network.network_protocol import Blip25, Network
+from app.network.structs import Blip25
+from app.network.network import Network
 from tests.pose_estimator.simulation.circle_simulator import CircleSimulator
 
 # TODO: more than one tag

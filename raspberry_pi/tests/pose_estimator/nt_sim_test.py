@@ -1,12 +1,12 @@
 """Exercise the network tables simulator."""
+
 import unittest
 
 import ntcore
 
 from app.config.identity import Identity
-from app.network.fake_network import FakeNetwork
-from app.network.network_protocol import Blip25
-from app.network.real_network import RealNetwork
+from app.network.structs import Blip25
+from app.network.network import Network
 from tests.pose_estimator.nt_sim import NTSim
 
 
@@ -17,15 +17,8 @@ class NTSimTest(unittest.TestCase):
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
         sub = inst.getStructArrayTopic("blip25", Blip25).subscribe([])
-        net = RealNetwork(Identity.UNKNOWN)
+        net = Network(Identity.UNKNOWN)
         sim = NTSim(net)
         for _ in range(50):
             sim.step(0.02)
             print(sub.readQueue())
-
-    def test_fake_nt_sim(self) -> None:
-        net = FakeNetwork()
-        sim = NTSim(net)
-        for _ in range(50):
-            sim.step(0.02)
-            print(net.blip25s)

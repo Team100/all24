@@ -12,8 +12,8 @@ import ntcore
 from app.config.camera_config import CameraConfig
 from app.config.identity import Identity
 from app.field.field_map import FieldMap
-from app.network.network_protocol import PoseEstimate25
-from app.network.real_network import RealNetwork
+from app.network.structs import PoseEstimate25
+from app.network.network import Network
 from app.pose_estimator.nt_estimate import NTEstimate
 from tests.pose_estimator.nt_sim import NTSim
 
@@ -25,7 +25,7 @@ class NTSimNTEstimateTest(unittest.TestCase):
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
         sub = inst.getStructTopic("pose", PoseEstimate25).subscribe(None)
-        net = RealNetwork(Identity.UNKNOWN)
+        net = Network(Identity.UNKNOWN)
         sim = NTSim(net)
         field_map = FieldMap()
         cam = CameraConfig(Identity.UNKNOWN)

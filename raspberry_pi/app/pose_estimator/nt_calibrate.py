@@ -13,19 +13,19 @@ import gtsam
 import ntcore
 import numpy as np
 from gtsam import noiseModel  # type:ignore
-from gtsam.symbol_shorthand import C, K, X  # type:ignore
+from gtsam.symbol_shorthand import C, K  # type:ignore
 
 
 from app.config.camera_config import CameraConfig
 from app.config.identity import Identity
 from app.field.field_map import FieldMap
-from app.network.network_protocol import (
+from app.network.structs import (
     Cal3DS2,
     CameraCalibration,
     MyTwist3d,
-    Network,
     PoseEstimate25,
 )
+from app.network.network import Network
 from app.pose_estimator import util
 from app.pose_estimator.calibrate import Calibrate
 
@@ -64,7 +64,6 @@ class NTCalibrate:
         self.est.add_state(now, PRIOR_MEAN)
         self.est.prior(now, PRIOR_MEAN, PRIOR_NOISE)
 
-
     def step(self) -> None:
         """Collect any pending measurements from
         the network and add them to the sim."""
@@ -80,6 +79,10 @@ class NTCalibrate:
         results: tuple[int, gtsam.Pose2, np.ndarray] = cast(
             tuple[int, gtsam.Pose2, np.ndarray], self.est.get_result()
         )
+
+        if results is None:
+            print("no result!")
+            return
 
         timestamp = results[0]
         most_recent_estimate = results[1]
@@ -140,7 +143,8 @@ class NTCalibrate:
         prior = self.prior_receiver.get()
         if prior is None:
             return
-        
+
+        print("PRIOR", prior)
         # restart the whole thing
         p = util.pose2d_to_pose2(prior)
         # TODO: supply sigma on the wire?
@@ -167,7 +171,7 @@ class NTCalibrate:
             # so that the network schema and the estimate schema are more
             # similar
             for blip in blip_list:
-                # print("TIME", time_slice, "BLIP", blip)
+                print("TIME", time_slice, "BLIP", blip)
                 pixels = blip.measurement()
                 corners = self.field_map.get(blip.tag_id)
                 self.est.add_state(time_slice, self.state)
@@ -179,7 +183,7 @@ class NTCalibrate:
         for pos in odo:
             time_slice = util.discrete(pos[0])
             positions = pos[1]
-            # print("TIME", time_slice, "POS", positions)
+            print("TIME", time_slice, "POS", positions)
             self.est.add_state(time_slice, self.state)
             self.est.odometry(time_slice, positions, ODO_NOISE)
 
@@ -188,7 +192,7 @@ class NTCalibrate:
         for g in gyro:
             time_slice = util.discrete(g[0])
             yaw = g[1]
-            # print("TIME", time_slice, "YAW", yaw)
+            print("TIME", time_slice, "YAW", yaw)
             # if this is the only factor attached to this variable
             # then it will be underconstrained (i.e. no constraint on x or y)
             self.est.add_state(time_slice, self.state)

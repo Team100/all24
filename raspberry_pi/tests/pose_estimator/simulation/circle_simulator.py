@@ -22,7 +22,6 @@ import math
 
 import numpy as np
 from gtsam import Cal3DS2  # includes distortion
-from gtsam import Point2  # type:ignore
 from gtsam import Point3  # type:ignore
 from gtsam import Pose2  # type:ignore
 from gtsam import PinholeCameraCal3DS2, Pose3, Rot3
@@ -57,6 +56,8 @@ CAM_COORD = Pose3(
 
 
 class CircleSimulator:
+    """Starts at (2,0,0)"""
+
     def __init__(self, field_map: FieldMap) -> None:
         self.field_map = field_map
         # TODO: actual wheelbase etc

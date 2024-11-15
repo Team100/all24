@@ -16,7 +16,7 @@ from app.camera.interpreter_factory import InterpreterFactory
 from app.camera.camera_loop import CameraLoop
 from app.config.identity import Identity
 from app.framework.looper import Looper
-from app.network.real_network import RealNetwork
+from app.network.network import Network
 from app.sensors.gyro_factory import GyroFactory
 from app.sensors.gyro_loop import GyroLoop
 
@@ -24,7 +24,7 @@ from app.sensors.gyro_loop import GyroLoop
 def main() -> None:
     print("main")
     identity: Identity = Identity.get()
-    network = RealNetwork(identity)
+    network = Network(identity)
 
     done = Event()
     try:

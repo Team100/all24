@@ -10,7 +10,7 @@ from wpimath.geometry import (
     Rotation2d,
 )
 
-from app.network.network_protocol import Cal3DS2
+from app.network.structs import Cal3DS2
 
 # discrete time step is 20 ms
 TIME_STEP_US = 20000

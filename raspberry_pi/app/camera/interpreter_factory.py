@@ -6,7 +6,7 @@ from app.config.identity import Identity
 from app.camera.camera_protocol import Camera
 from app.dashboard.fake_display import FakeDisplay
 from app.dashboard.real_display import RealDisplay
-from app.network.real_network import Network
+from app.network.network import Network
 from app.localization.note_detector import NoteDetector
 from app.localization.tag_detector import TagDetector
 
