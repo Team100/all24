@@ -132,8 +132,11 @@ Deploy this to your robot. Your motor should slowly increase until it is running
 
 TODO(dmontauk): it actually seems to reset the speed for some reason. Debug this?
 
+## Attaching a Controller
+Running a motor at a constant or increasing speed also isn't very interesting. We want to control it - using an XBox controller!!
 
-## Starting/Stopping??
+### Adding the Controller Code
 
-## Attaching to a Button??
+### Attaching a Controller to the RoboRIO
+
 
