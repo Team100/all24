@@ -133,10 +133,43 @@ Deploy this to your robot. Your motor should slowly increase until it is running
 TODO(dmontauk): it actually seems to reset the speed for some reason. Debug this?
 
 ## Attaching a Controller
-Running a motor at a constant or increasing speed also isn't very interesting. We want to control it - using an XBox controller!!
+Running a motor at a constant or increasing speed also isn't very interesting. We want to control it - using an XBox controller!! This is really easy :)
 
 ### Adding the Controller Code
+We can use the `XBoxController` class. Add another member variable to your class:
+
+```java
+private XBoxController m_controller;
+```
+
+Then initialize it in your `robotInit` method:
+```java
+m_controller = new XBoxController(0);
+```
+
+The `0` signifies it's the "first" XBoxController found (I think?). 
+
+Now we want to have the XBoxController drive the `setDutyCycle` values. Because this now counts as `teleop` we should move the code to the `teleopPeriodic` function. Let's also print the stick value for debugging, which gives us this code:
+
+```java
+  @Override
+  public void teleopPeriodic() {
+    // We divide by 10 because otherwise the motor will go crazy at 100%. On real robots, we obviously want 100%...
+    double stick_value = m_controller.getLeftY() / 10;
+    Util.printf("Stick value: %.2f\n", stick_value); m_single_motor.setDutyCycle(stick_value);
+  }
+```
+
+Build and deploy this to your robot.
 
 ### Attaching a Controller to the RoboRIO
+Just plug the XBoxController to your computer via USB :) Easy!
+
+### Putting it all together
+With the controller plugged in, your code deployed, you should have all green lights in your Driver Station:
+
+![](readme_img/all_green_driver_station)
+
+Makes sure you have `TeleOperated` enabled, and Enable the robot. Then you should be able to control it with your Left Stick up/down on the XBox Controller. Exciting!!
 
 

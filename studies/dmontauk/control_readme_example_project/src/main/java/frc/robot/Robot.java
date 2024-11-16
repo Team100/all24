@@ -14,6 +14,7 @@ import org.team100.lib.util.Memo;
 import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -31,9 +32,7 @@ public class Robot extends TimedRobot {
 
   private BareMotor m_single_motor;
   private double m_duty_cycle = 0.1;
-  private double m_velocity = 2 * Math.PI;
-  private double m_accel = 10;
-  private double m_torque = 0;
+  private XboxController m_controller;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -41,9 +40,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    // m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    // m_chooser.addOption("My Auto", kCustomAuto);
-    // SmartDashboard.putData("Auto choices", m_chooser);
     Util.printf("Initializing single motor");
     m_single_motor = new NeoCANSparkMotor(
       Logging.instance().rootLogger.child("test logger"),
@@ -53,6 +49,8 @@ public class Robot extends TimedRobot {
       Feedforward100.makeNeo(), 
       new PIDConstants(0, 0, 0));
     Util.printf("Motor intialized.");
+    m_single_motor.setDutyCycle(0.0);
+    m_controller = new XboxController(0);
   }
 
   /**
@@ -65,14 +63,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     Memo.resetAll();
-    m_single_motor.setDutyCycle(0.1);
     double current_velocity = m_single_motor.getVelocityRad_S();
     Util.printf("Current Velocity: %.2f\n", current_velocity);
-    m_duty_cycle = m_duty_cycle * 0.001;
-    // m_single_motor.setVelocity(m_velocity, m_accel, m_torque);
-    // m_velocity = m_velocity * 1.0001;
-    // Util.printf("robotPeriodic called. Increasing motor velocity to: %.2f\n", m_velocity);
-
+    // m_duty_cycle = m_duty_cycle * 0.001;
   }
 
   /**
@@ -112,7 +105,11 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    double stick_value = m_controller.getLeftY() / 10;
+    Util.printf("Stick value: %.2f\n", stick_value);
+    m_single_motor.setDutyCycle(stick_value);
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
