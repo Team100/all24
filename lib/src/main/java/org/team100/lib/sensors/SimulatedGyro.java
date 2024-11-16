@@ -2,8 +2,8 @@ package org.team100.lib.sensors;
 
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.motion.drivetrain.module.SwerveModuleCollection;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -27,7 +27,7 @@ public class SimulatedGyro implements Gyro {
 
     @Override
     public Rotation2d getYawNWU() {
-        SwerveModuleState100[] states = m_moduleCollection.states();
+        SwerveModuleStates states = m_moduleCollection.states();
         // discretization is not necessary here because we only use the rotation, which
         // is invariant
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);
@@ -40,7 +40,7 @@ public class SimulatedGyro implements Gyro {
 
     @Override
     public double getYawRateNWU() {
-        SwerveModuleState100[] states = m_moduleCollection.states();
+        SwerveModuleStates states = m_moduleCollection.states();
         // discretization is not necessary here because we only use the rotation, which
         // is invariant
         ChassisSpeeds speeds = m_kinodynamics.toChassisSpeeds(states);

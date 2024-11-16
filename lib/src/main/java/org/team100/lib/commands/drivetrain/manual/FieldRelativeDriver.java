@@ -2,10 +2,8 @@ package org.team100.lib.commands.drivetrain.manual;
 
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-
-import edu.wpi.first.math.geometry.Pose2d;
 
 public interface FieldRelativeDriver extends Glassy {
     /**
@@ -13,8 +11,8 @@ public interface FieldRelativeDriver extends Glassy {
      * @param input control units [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
-    FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity input);
+    FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity input);
 
-    void reset(Pose2d p);
+    void reset(SwerveModel state);
 
 }

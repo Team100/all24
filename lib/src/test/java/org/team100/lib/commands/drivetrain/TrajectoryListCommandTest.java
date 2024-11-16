@@ -18,7 +18,7 @@ import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.Fixtured;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.timing.TimingConstraint;
 import org.team100.lib.timing.TimingConstraintFactory;
@@ -55,7 +55,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
                 x -> List.of(maker.line(x)),
                 viz);
         c.initialize();
-        assertEquals(0, fixture.drive.getState().pose().getX(), kDelta);
+        assertEquals(0, fixture.drive.getPose().getX(), kDelta);
         c.execute();
         assertFalse(c.isFinished());
         // the trajectory takes a little over 3s
@@ -66,7 +66,7 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
         }
         // at goal; wide tolerance due to test timing
         assertTrue(c.isFinished());
-        assertEquals(1.031, fixture.drive.getState().pose().getX(), 0.05);
+        assertEquals(1.031, fixture.drive.getPose().getX(), 0.05);
     }
 
     /**
@@ -94,9 +94,9 @@ class TrajectoryListCommandTest extends Fixtured implements Timeless {
             stepTime(kDtS);
             fixture.drive.periodic();
             command.execute();
-            double measurement = fixture.drive.getSwerveLocal().states()[0].angle.get().getRadians();
-            SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates()[0];
-            State100 setpoint = fixture.swerveLocal.getSetpoints()[0];
+            double measurement = fixture.drive.getSwerveLocal().states().frontLeft().angle.get().getRadians();
+            SwerveModuleState100 goal = fixture.swerveLocal.getDesiredStates().frontLeft();
+            Control100 setpoint = fixture.swerveLocal.getSetpoints()[0];
             // this output is useful to see what's happening.
             if (dump)
                 Util.printf("goal %5.3f setpoint x %5.3f setpoint v %5.3f measurement %5.3f\n",

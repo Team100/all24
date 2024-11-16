@@ -3,9 +3,6 @@ package org.team100.lib.config;
 /**
  * The motor feedforward model includes four constants.
  * 
- * TODO: this class overlaps with TorqueModel, so dedupe it somehow.
- * 
- * 
  * @param kV  Velocity: ratio between unloaded speed (rev/s) and voltage, so the
  *            units are VOLT-SEC/REV. This reflects the "Back EMF" aspect of a
  *            motor: it produces a voltage proportional to speed. The value is
@@ -47,9 +44,12 @@ public class Feedforward100 {
         return new Feedforward100(0.122, 0.000, 0.100, 0.065, 0.5);
     }
 
-    // TODO get the acurate numbers here
+    public static Feedforward100 makeNeoArm() {
+        return new Feedforward100(0.22, 1, 0, 0, 0);
+    }
+
     public static Feedforward100 makeNeo550() {
-        return new Feedforward100(0.32, 0, 0, .07, 0);
+        return new Feedforward100(0.12, 0, 0, .07, 0);
     }
 
     public static Feedforward100 makeArmPivot() {

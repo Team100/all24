@@ -1,7 +1,6 @@
 package org.team100.lib.localization;
 
 import java.util.Map.Entry;
-import java.util.List;
 import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -11,6 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.StringLogger;
 
 import edu.wpi.first.math.interpolation.Interpolatable;
@@ -34,6 +34,7 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
     private final ReadWriteLock m_lock = new ReentrantReadWriteLock();
     private final StringLogger m_log_bottom;
     private final StringLogger m_log_top;
+    private final DoubleLogger m_log_lerpTime;
 
     public TimeInterpolatableBuffer100(LoggerFactory parent, double historyS, double timeS, T initialValue) {
         LoggerFactory child = parent.child(this);
@@ -42,13 +43,15 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         m_pastSnapshots.put(timeS, initialValue);
         m_log_bottom = child.stringLogger(Level.TRACE, "bottom");
         m_log_top = child.stringLogger(Level.TRACE, "top");
+        m_log_lerpTime = child.doubleLogger(Level.TRACE, "lerptime");
     }
 
     /**
      * Remove stale entries and add the new one.
      */
     public void put(double timeS, T value) {
-        // System.out.println("TimeInterpolatableBuffer.put() " + timeS + " value " + value);
+        // System.out.println("TimeInterpolatableBuffer.put() " + timeS + " value " +
+        // value);
         try {
             // wait for in-progress double-reads
             m_lock.readLock().lock();
@@ -71,7 +74,8 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * Remove all entries and add the new one.
      */
     public void reset(double timeS, T value) {
-        // System.out.println("TimeInterpolatableBuffer100.reset() " + timeS + " value " + value);
+        // System.out.println("TimeInterpolatableBuffer100.reset() " + timeS + " value "
+        // + value);
         try {
             // wait for in-progress double-reads
             m_lock.readLock().lock();
@@ -86,11 +90,13 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
      * Sample the buffer at the given time.
      */
     public T get(double timeSeconds) {
-        // System.out.println("TimeInterpolatableBuffer100.timeSeconds() " + timeSeconds);
+        // System.out.println("TimeInterpolatableBuffer100.timeSeconds() " +
+        // timeSeconds);
         // Special case for when the requested time is the same as a sample
         T nowEntry = m_pastSnapshots.get(timeSeconds);
         if (nowEntry != null) {
             // System.out.println("now " + nowEntry);
+            m_log_lerpTime.log(() -> 0.0);
             return nowEntry;
         }
         Entry<Double, T> topBound = null;
@@ -108,12 +114,14 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
             String bottomValue = bottomBound.getValue().toString();
             m_log_bottom.log(() -> bottomValue);
             // System.out.println("bottom " + bottomValue);
+            m_log_lerpTime.log(() -> 0.0);
             return bottomBound.getValue();
         }
         if (bottomBound == null) {
             String topValue = topBound.getValue().toString();
             m_log_top.log(() -> topValue);
             // System.out.println("top " + topValue);
+            m_log_lerpTime.log(() -> 1.0);
             return topBound.getValue();
         }
 
@@ -129,43 +137,8 @@ public final class TimeInterpolatableBuffer100<T extends Interpolatable<T>> impl
         double timeSinceBottom = timeSeconds - bottomBound.getKey();
         double timeSpan = topBound.getKey() - bottomBound.getKey();
         double timeFraction = timeSinceBottom / timeSpan;
+        m_log_lerpTime.log(() -> timeFraction);
         return bottomBound.getValue().interpolate(topBound.getValue(), timeFraction);
-    }
-
-    /**
-     * Return the lowerEntry before t. and another floorEntry dt before that.
-     * 
-     * The first is used as the basis for integration. The second is used to
-     * estimate velocity.
-     * 
-     * Writes are prohibited between the two reads, so that they are consistent.
-     * 
-     * This might return an empty list (if no entries exist before t) or one item
-     * (if one entry exists before t, but there are no entries earlier than dt
-     * before that), or two items.
-     * 
-     * If present, the first item in the list is the lowerEntry, and the second item
-     * is the earlierEntry, if present.
-     */
-    public List<Entry<Double, T>> consistentPair(double t, double dt) {
-        try {
-            // this pair should be consistent, so prohibit writes briefly.
-            m_lock.writeLock().lock();
-            Entry<Double, T> lowerEntry = m_pastSnapshots.lowerEntry(t);
-            if (lowerEntry == null) {
-                // if there's no lower entry, then return nothing.
-                return List.of();
-            }
-            Entry<Double, T> earlierEntry = m_pastSnapshots.floorEntry(lowerEntry.getKey() - dt);
-            if (earlierEntry == null) {
-                // if there's no earlier entry, return the lower entry alone.
-                return List.of(lowerEntry);
-            }
-
-            return List.of(lowerEntry, earlierEntry);
-        } finally {
-            m_lock.writeLock().unlock();
-        }
     }
 
     public SortedMap<Double, T> tailMap(double t, boolean inclusive) {

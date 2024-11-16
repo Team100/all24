@@ -5,11 +5,13 @@ import java.util.OptionalDouble;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
+import org.team100.lib.logging.LoggerFactory.Model100Logger;
 import org.team100.lib.motion.mechanism.LinearMechanism;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -23,16 +25,16 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
     private final PIDController m_controller;
     private final Profile100 m_profile;
     // LOGGERS
-    private final State100Logger m_log_goal;
+    private final Model100Logger m_log_goal;
     private final DoubleLogger m_log_measurement;
-    private final State100Logger m_log_setpoint;
+    private final Control100Logger m_log_setpoint;
     private final DoubleLogger m_log_u_FB;
     private final DoubleLogger m_log_u_FF;
     private final DoubleLogger m_log_u_TOTAL;
     private final DoubleLogger m_log_error;
     private final DoubleLogger m_log_velocity_error;
 
-    private State100 m_setpoint = new State100(0, 0);
+    private Control100 m_setpoint = new Control100(0, 0);
 
     public OnboardLinearDutyCyclePositionServo(
             LoggerFactory parent,
@@ -43,9 +45,9 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
         m_mechanism = mechanism;
         m_controller = controller;
         m_profile = profile;
-        m_log_goal = child.state100Logger(Level.TRACE, "goal (m)");
+        m_log_goal = child.model100Logger(Level.TRACE, "goal (m)");
         m_log_measurement = child.doubleLogger(Level.TRACE, "measurement (m)");
-        m_log_setpoint = child.state100Logger(Level.TRACE, "setpoint (m)");
+        m_log_setpoint = child.control100Logger(Level.TRACE, "setpoint (m)");
         m_log_u_FB = child.doubleLogger(Level.TRACE, "u_FB (duty cycle)");
         m_log_u_FF = child.doubleLogger(Level.TRACE, "u_FF (duty cycle)");
         m_log_u_TOTAL = child.doubleLogger(Level.TRACE, "u_TOTAL (duty cycle)");
@@ -60,7 +62,7 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
         OptionalDouble velocity = getVelocity();
         if (position.isEmpty() || velocity.isEmpty())
             return;
-        m_setpoint = new State100(position.getAsDouble(), velocity.getAsDouble());
+        m_setpoint = new Control100(position.getAsDouble(), velocity.getAsDouble());
     }
 
     @Override
@@ -69,8 +71,8 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
         if (positionM.isEmpty())
             return;
         double measurementM = positionM.getAsDouble();
-        State100 goal = new State100(goalM, goalVelocityM_S);
-        m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, goal);
+        Model100 goal = new Model100(goalM, goalVelocityM_S);
+        m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint.model(), goal);
         double u_FF = kV * m_setpoint.v();
         double u_FB = m_controller.calculate(measurementM, m_setpoint.x());
         double u_TOTAL = MathUtil.clamp(u_FF + u_FB, -1.0, 1.0);

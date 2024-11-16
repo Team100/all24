@@ -62,7 +62,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
     /**
      * this value is intended to make the response to vision input more gradual, to
      * avoid "jitter." it's a guess.
-     * TODO: try adjusting this
      */
     private static final double[] tightStateStdDevs = new double[] {
             0.001,
@@ -123,13 +122,14 @@ public class VisionDataProvider24 implements VisionData, Glassy {
             NetworkTableValue v = ve.value;
             String name = ve.getTopic().getName();
             String[] fields = name.split("/");
-            if (fields.length != 3)
+            if (fields.length != 4) {
                 return;
+            }
             if (fields[2].equals("fps")) {
                 // FPS is not used by the robot
             } else if (fields[2].equals("latency")) {
                 // latency is not used by the robot
-            } else if (fields[2].equals("blips")) {
+            } else if (fields[3].equals("blips")) {
                 // decode the way StructArrayEntryImpl does
                 byte[] b = v.getRaw();
                 if (b.length == 0)

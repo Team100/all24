@@ -16,7 +16,7 @@ import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleState100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleStates;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathDistanceSampler;
 import org.team100.lib.swerve.SwerveSetpoint;
@@ -129,7 +129,7 @@ class DriveMotionPlannerTest {
                 // System.out.println(speeds);
                 if (true) {// setpoint == null) {
                     // Initialize from first chassis speeds.
-                    SwerveModuleState100[] states = kSmoothKinematicLimits.toSwerveModuleStates(
+                    SwerveModuleStates states = kSmoothKinematicLimits.toSwerveModuleStates(
                             speeds,
                             velocity.omegaRadiansPerSecond);
                     setpoint = new SwerveSetpoint(speeds, states);
@@ -147,10 +147,6 @@ class DriveMotionPlannerTest {
                 // Inches and degrees
                 Pose2d error = GeometryUtil.transformBy(GeometryUtil.inverse(pose),
                         controller.getSetpoint(time).get().state().getPose());
-
-                // System.out.println(pose);
-
-                // TODO: revisit these very loose error bounds.
 
                 assertEquals(0.0, error.getTranslation().getX(), 0.5);
                 assertEquals(0.0, error.getTranslation().getY(), 0.5);

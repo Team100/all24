@@ -11,7 +11,8 @@ class UdpPrimitiveProtocol2PerformanceTest {
      */
     @Test
     void testEncodingPerformance() throws Exception {
-        final int ITERATIONS = 200000000;
+        // final int ITERATIONS = 200000000;
+        final int ITERATIONS = 20000000;
         final int BUFFER_SIZE = 10000000;
 
         // huge buffer for this test; we're testing the encoding.

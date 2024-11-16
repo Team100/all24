@@ -9,22 +9,21 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.logging.LoggerFactory.StringLogger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -32,12 +31,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * rotational control.
  * 
  * Rotation uses a profile, velocity feedforward, and positional feedback.
+ * 
+ * The profile depends on robot speed, making rotation the lowest priority.
  */
 public class ManualWithProfiledHeading implements FieldRelativeDriver {
+    // don't try to go full speed
+    private static final double PROFILE_SPEED = 0.5;
+    // accelerate gently to avoid upset
+    private static final double PROFILE_ACCEL = 0.1;
     private static final double OMEGA_FB_DEADBAND = 0.1;
     private static final double THETA_FB_DEADBAND = 0.1;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
@@ -50,7 +54,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     private final DoubleLogger m_log_max_speed;
     private final DoubleLogger m_log_max_accel;
     private final DoubleLogger m_log_goal_theta;
-    private final State100Logger m_log_setpoint_theta;
+    private final Control100Logger m_log_setpoint_theta;
     private final DoubleLogger m_log_measurement_theta;
     private final DoubleLogger m_log_measurement_omega;
     private final DoubleLogger m_log_error_theta;
@@ -62,13 +66,12 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
 
     // package private for testing
     Rotation2d m_goal = null;
-    State100 m_thetaSetpoint = null;
+    Control100 m_thetaSetpoint = null;
 
     /**
      * 
      * @param parent
      * @param swerveKinodynamics
-     * @param gyro
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
      * @param thetaController
@@ -77,13 +80,11 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
     public ManualWithProfiledHeading(
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             Supplier<Rotation2d> desiredRotation,
             PIDController thetaController,
             PIDController omegaController) {
         LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
@@ -93,7 +94,7 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_log_max_speed = child.doubleLogger(Level.TRACE, "maxSpeedRad_S");
         m_log_max_accel = child.doubleLogger(Level.TRACE, "maxAccelRad_S2");
         m_log_goal_theta = child.doubleLogger(Level.TRACE, "goal/theta");
-        m_log_setpoint_theta = child.state100Logger(Level.TRACE, "setpoint/theta");
+        m_log_setpoint_theta = child.control100Logger(Level.TRACE, "setpoint/theta");
         m_log_measurement_theta = child.doubleLogger(Level.TRACE, "measurement/theta");
         m_log_measurement_omega = child.doubleLogger(Level.TRACE, "measurement/omega");
         m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
@@ -104,21 +105,13 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         m_log_output_omega = child.doubleLogger(Level.TRACE, "output/omega");
     }
 
-    public void reset(Pose2d currentPose) {
+    @Override
+    public void reset(SwerveModel state) {
+        m_thetaSetpoint = state.theta().control();
         m_goal = null;
         m_latch.unlatch();
         m_thetaController.reset();
         m_omegaController.reset();
-        updateSetpoint(currentPose.getRotation().getRadians(), getYawRateNWURad_S());
-    }
-
-    private double getYawRateNWURad_S() {
-        return m_gyro.getYawRateNWU();
-    }
-
-    /** Call this to keep the setpoint in sync with the manual rotation. */
-    private void updateSetpoint(double x, double v) {
-        m_thetaSetpoint = new State100(x, v);
     }
 
     /**
@@ -135,28 +128,30 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
      * @param twist1_1 control units, [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
-    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity twist1_1) {
-        // clip the input to the unit circle
-        DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
-        // scale to max in both translation and rotation
-        FieldRelativeVelocity twistM_S = DriveUtil.scale(
-                clipped,
-                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+    @Override
+    public FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity twist1_1) {
+        final FieldRelativeVelocity control = clipAndScale(twist1_1);
 
-        double yawMeasurement = state.theta().x();
-        // TODO: use the state instead
-        double yawRate = getYawRateNWURad_S();
+        final double yawMeasurement = state.theta().x();
+        final double yawRateMeasurement = state.theta().v();
+
+        final double currentVelocity = state.velocity().norm();
+
+        final TrapezoidProfile100 m_profile = makeProfile(currentVelocity);
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(state.theta(), pov, twistM_S.theta());
+        m_goal = m_latch.latchedRotation(
+                m_profile.getMaxAcceleration(),
+                state.theta(),
+                pov,
+                control.theta());
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
             m_thetaSetpoint = null;
             m_log_mode.log(() -> "free");
             // desaturate to feasibility
-            return m_swerveKinodynamics.analyticDesaturation(twistM_S);
+            return m_swerveKinodynamics.analyticDesaturation(control);
         }
 
         // take the short path
@@ -166,72 +161,40 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         // if this is the first run since the latch, then the setpoint should be
         // whatever the measurement is
         if (m_thetaSetpoint == null) {
-            updateSetpoint(yawMeasurement, yawRate);
+            m_thetaSetpoint = new Control100(yawMeasurement, yawRateMeasurement);
         }
 
         // use the modulus closest to the measurement
-        m_thetaSetpoint = new State100(
+        m_thetaSetpoint = new Control100(
                 Math100.getMinDistance(yawMeasurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
         // the omega goal in snap mode is always zero.
-        State100 goalState = new State100(m_goal.getRadians(), 0);
+        Model100 goalState = new Model100(m_goal.getRadians(), 0);
 
-        // the profile has no state and is ~free to instantiate so make a new one every
-        // time. the max speed adapts to the observed speed (plus a little).
-        // the max speed should be half of the absolute max, to compromise translation
-        // and rotation, unless the actual translation speed is less, in which case we
-        // can rotate faster.
-
-        // how fast do we want to go?
-        double xySpeed = twistM_S.norm();
-        // fraction of the maximum speed
-        double xyRatio = Math.min(1, xySpeed / m_swerveKinodynamics.getMaxDriveVelocityM_S());
-        // fraction left for rotation
-        double oRatio = 1 - xyRatio;
-        // actual speed is at least half
-        double kRotationSpeed = Math.max(0.5, oRatio);
-
-        // finally reduce the speed to make it easier
-        final double lessV = 0.5;
-        // kinodynamic max A seems too high?
-        final double lessA = 0.1;
-
-        double maxSpeedRad_S = Math.max(Math.abs(yawRate) + 0.001,
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed) * lessV;
-        double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * lessA;
-
-        m_log_max_speed.log(() -> maxSpeedRad_S);
-        m_log_max_accel.log(() -> maxAccelRad_S2);
-
-        final TrapezoidProfile100 m_profile = new TrapezoidProfile100(
-                maxSpeedRad_S,
-                maxAccelRad_S2,
-                0.01);
-
-        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goalState);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint.model(), goalState);
 
         // the snap overrides the user input for omega.
         double thetaFF = m_thetaSetpoint.v();
 
         final double thetaFB = getThetaFB(yawMeasurement);
 
-        final double omegaFB = getOmegaFB(yawRate);
+        final double omegaFB = getOmegaFB(yawRateMeasurement);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB + omegaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
+        FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(control.x(), control.y(), omega);
 
         m_log_mode.log(() -> "snap");
         m_log_goal_theta.log(m_goal::getRadians);
         m_log_setpoint_theta.log(() -> m_thetaSetpoint);
         m_log_measurement_theta.log(() -> yawMeasurement);
-        m_log_measurement_omega.log(() -> yawRate);
+        m_log_measurement_omega.log(() -> yawRateMeasurement);
         m_log_error_theta.log(() -> m_thetaSetpoint.x() - yawMeasurement);
-        m_log_error_omega.log(() -> m_thetaSetpoint.v() - yawRate);
+        m_log_error_omega.log(() -> m_thetaSetpoint.v() - yawRateMeasurement);
         m_log_theta_FF.log(() -> thetaFF);
         m_log_theta_FB.log(() -> thetaFB);
         m_log_omega_FB.log(() -> omegaFB);
@@ -243,10 +206,44 @@ public class ManualWithProfiledHeading implements FieldRelativeDriver {
         return twistWithSnapM_S;
     }
 
+    public FieldRelativeVelocity clipAndScale(DriverControl.Velocity twist1_1) {
+        // clip the input to the unit circle
+        DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
+        // scale to max in both translation and rotation
+        return DriveUtil.scale(
+                clipped,
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+    }
+
+    /**
+     * Note that the max speed and accel are inversely proportional to the current velocity.
+     */
+    public TrapezoidProfile100 makeProfile(double currentVelocity) {
+        // fraction of the maximum speed
+        double xyRatio = Math.min(1, currentVelocity / m_swerveKinodynamics.getMaxDriveVelocityM_S());
+        // fraction left for rotation
+        double oRatio = 1 - xyRatio;
+        // add a little bit of default speed
+        double kRotationSpeed = Math.max(0.1, oRatio);
+
+        double maxSpeedRad_S = m_swerveKinodynamics.getMaxAngleSpeedRad_S() * kRotationSpeed * PROFILE_SPEED;
+
+        double maxAccelRad_S2 = m_swerveKinodynamics.getMaxAngleAccelRad_S2() * kRotationSpeed * PROFILE_ACCEL;
+
+        m_log_max_speed.log(() -> maxSpeedRad_S);
+        m_log_max_accel.log(() -> maxAccelRad_S2);
+
+        return new TrapezoidProfile100(
+                maxSpeedRad_S,
+                maxAccelRad_S2,
+                0.01);
+    }
+
     private double getOmegaFB(double headingRate) {
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
 
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+        if (Experiments.instance.enabled(Experiment.SnapThetaFilter)) {
             // output filtering to prevent oscillation due to delay
             omegaFB = m_outputFilter.calculate(omegaFB);
         }

@@ -36,17 +36,9 @@ public enum Experiment {
      */
     AvoidVisionJitter,
     /**
-     * 
+     * Filter snap rotational output to remove oscillation
      */
-    UseSecondDerivativeSwerve,
-    /**
-     * Filter rotational output to remove oscillation
-     */
-    UseThetaFilter,
-    /**
-     * Use outboard closed-loop position control for steering instead of onboard PID
-     */
-    OutboardSteering,
+    SnapThetaFilter,
     /**
      * Use low-pass filter and deadbanding on controller feedback, to prevent
      * overresponse to noise and jitter around zero.
@@ -55,5 +47,13 @@ public enum Experiment {
     /**
      * Use the network-tables gyro. 
      */
-    NetworkGyro
+    NetworkGyro,
+    /**
+     * Snaps can prefer rotation or translation
+     */
+    SnapPreferRotation,
+    /**
+     * Clip the snap omega
+     */
+    SnapGentle
 }

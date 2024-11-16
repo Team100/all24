@@ -10,31 +10,44 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.logging.LoggerFactory.StringLogger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.sensors.Gyro;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * Function that supports manual cartesian control, and both manual and locked
  * rotational control.
  * 
- * Rotation uses a profile, velocity feedforward, and positional feedback.
+ * Rotation uses a "min time" controller.
+ * 
+ * This driver does not play well with the setpoint generator: the acceleration
+ * limiter makes it fall behind, which means it oscillates with high
+ * amplitude and low frequency.
+ * 
+ * The issue is that the setpoint generator accurately models the low torque
+ * available at high speed, whereas the available torque is modeled here as a
+ * constant.
+ * 
+ * Don't use this class before implementing variable torque limits.
  */
 public class ManualWithMinTimeHeading implements FieldRelativeDriver {
+    /**
+     * in "gentle snaps" mode this is the max omega allowed. The
+     * idea is to get to the setpoint over a few seconds, so plan ahead!
+     */
+    private static final double GENTLE_OMEGA = Math.PI / 2;
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     /** Absolute input supplier, null if free */
     private final Supplier<Rotation2d> m_desiredRotation;
     private final HeadingLatch m_latch;
@@ -43,7 +56,7 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
 
     private final StringLogger m_log_mode;
     private final DoubleLogger m_log_goal_theta;
-    private final State100Logger m_log_setpoint_theta;
+    private final Control100Logger m_log_setpoint_theta;
     private final DoubleLogger m_log_measurement_theta;
     private final DoubleLogger m_log_measurement_omega;
     private final DoubleLogger m_log_error_theta;
@@ -52,29 +65,25 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
     private final DoubleLogger m_log_goal_error_omega;
     private final DoubleLogger m_log_theta_FF;
     private final DoubleLogger m_log_output_omega;
+    private final DoubleLogger m_log_desat_omega;
 
     // package private for testing
     Rotation2d m_goal = null;
-    State100 m_thetaSetpoint = null;
+    Control100 m_thetaSetpoint = null;
 
     /**
      * 
      * @param parent
      * @param swerveKinodynamics
-     * @param gyro
      * @param desiredRotation    absolute input supplier, null if free. usually
      *                           POV-derived.
-     * @param thetaController
-     * @param omegaController
      */
     public ManualWithMinTimeHeading(
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             Supplier<Rotation2d> desiredRotation) {
         LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_desiredRotation = desiredRotation;
         m_latch = new HeadingLatch();
         m_outputFilter = LinearFilter.singlePoleIIR(0.01, TimedRobot100.LOOP_PERIOD_S);
@@ -83,16 +92,16 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_controller = new MinTimeController(
                 child,
                 MathUtil::angleModulus,
-                15, // maxV
-                12, // switchingA
-                9, // weakG
-                20, // strongI
+                8, // maxV
+                6, // switchingA
+                4, // weakG
+                10, // strongI
                 0.01, // tolerance
                 0.1, // finish
-                new double[] { 5.0, 0.5 });
+                new double[] { 5.0, 0.35 });
         m_log_mode = child.stringLogger(Level.TRACE, "mode");
         m_log_goal_theta = child.doubleLogger(Level.TRACE, "goal/theta");
-        m_log_setpoint_theta = child.state100Logger(Level.TRACE, "setpoint/theta");
+        m_log_setpoint_theta = child.control100Logger(Level.TRACE, "setpoint/theta");
         m_log_measurement_theta = child.doubleLogger(Level.TRACE, "measurement/theta");
         m_log_measurement_omega = child.doubleLogger(Level.TRACE, "measurement/omega");
         m_log_error_theta = child.doubleLogger(Level.TRACE, "error/theta");
@@ -101,21 +110,15 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_log_goal_error_omega = child.doubleLogger(Level.TRACE, "goal_error/omega");
         m_log_theta_FF = child.doubleLogger(Level.TRACE, "thetaFF");
         m_log_output_omega = child.doubleLogger(Level.TRACE, "output/omega");
+        m_log_desat_omega = child.doubleLogger(Level.TRACE, "desat/omega");
+
     }
 
-    public void reset(Pose2d currentPose) {
+    @Override
+    public void reset(SwerveModel currentPose) {
+        m_thetaSetpoint = currentPose.theta().control();
         m_goal = null;
         m_latch.unlatch();
-        updateSetpoint(currentPose.getRotation().getRadians(), getYawRateNWURad_S());
-    }
-
-    private double getYawRateNWURad_S() {
-        return m_gyro.getYawRateNWU();
-    }
-
-    /** Call this to keep the setpoint in sync with the manual rotation. */
-    private void updateSetpoint(double x, double v) {
-        m_thetaSetpoint = new State100(x, v);
     }
 
     /**
@@ -132,7 +135,8 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
      * @param twist1_1 control units, [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
-    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity twist1_1) {
+    @Override
+    public FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity twist1_1) {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(twist1_1, 1.0);
         // scale to max in both translation and rotation
@@ -142,12 +146,15 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         double yawMeasurement = state.theta().x();
-        // TODO: i think the state omega isn't right. find out.
         double yawRate = state.theta().v();
         // double yawRate = getYawRateNWURad_S();
 
         Rotation2d pov = m_desiredRotation.get();
-        m_goal = m_latch.latchedRotation(state.theta(), pov, twistM_S.theta());
+        m_goal = m_latch.latchedRotation(
+                m_swerveKinodynamics.getMaxAngleAccelRad_S2(),
+                state.theta(),
+                pov,
+                twistM_S.theta());
         if (m_goal == null) {
             // we're not in snap mode, so it's pure manual
             // in this case there is no setpoint
@@ -177,20 +184,22 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
 
         // in snap mode we take dx and dy from the user, and use the profile for dtheta.
         // the omega goal in snap mode is always zero.
-        State100 goalState = new State100(
+        Model100 goalState = new Model100(
                 Math100.getMinDistance(yawMeasurement, m_goal.getRadians()), 0);
 
         m_thetaSetpoint = m_controller.calculate(TimedRobot100.LOOP_PERIOD_S, state.theta(), goalState);
 
         // the snap overrides the user input for omega.
-        final double thetaFF = getThetaFF();
+        double thetaFF2 = getThetaFF();
+        if (Experiments.instance.enabled(Experiment.SnapGentle))
+            thetaFF2 = MathUtil.clamp(thetaFF2, -1.0 * GENTLE_OMEGA, GENTLE_OMEGA);
 
-        
+        final double thetaFF = thetaFF2;
+
         final double omega = MathUtil.clamp(
                 thetaFF,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        FieldRelativeVelocity twistWithSnapM_S = new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega);
 
         m_log_mode.log(() -> "snap");
         m_log_goal_theta.log(() -> m_goal.getRadians());
@@ -204,16 +213,27 @@ public class ManualWithMinTimeHeading implements FieldRelativeDriver {
         m_log_theta_FF.log(() -> thetaFF);
         m_log_output_omega.log(() -> omega);
 
-        // desaturate the end result to feasibility by preferring the rotation over
-        // translation
-        twistWithSnapM_S = m_swerveKinodynamics.preferRotation(twistWithSnapM_S);
-        return twistWithSnapM_S;
+        // desaturate the end result to feasibility, optionally preferring the rotation
+        // over translation
+        if (Experiments.instance.enabled(Experiment.SnapPreferRotation)) {
+            final FieldRelativeVelocity twistWithSnapM_S = m_swerveKinodynamics
+                    .preferRotation(
+                            new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega));
+            m_log_desat_omega.log(twistWithSnapM_S::theta);
+            return twistWithSnapM_S;
+        } else {
+            final FieldRelativeVelocity twistWithSnapM_S = m_swerveKinodynamics
+                    .analyticDesaturation(
+                            new FieldRelativeVelocity(twistM_S.x(), twistM_S.y(), omega));
+            m_log_desat_omega.log(twistWithSnapM_S::theta);
+            return twistWithSnapM_S;
+        }
     }
 
     private double getThetaFF() {
         double thetaFF = m_thetaSetpoint.v();
 
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+        if (Experiments.instance.enabled(Experiment.SnapThetaFilter)) {
             // output filtering to prevent oscillation due to delay
             thetaFF = m_outputFilter.calculate(thetaFF);
         }

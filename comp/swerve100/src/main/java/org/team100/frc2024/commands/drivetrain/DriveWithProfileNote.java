@@ -14,11 +14,12 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,18 +31,14 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * If the goal supplier runs empty, this remembers the previous goal for 1 sec,
  * and then gives up.
- * 
- * TODO: coordinate the axes; currently it's three independent profiles.
- * 
- * TODO: force the theta axis to finish first, so that the approach is correct.
  */
-public class DriveWithProfileNote extends Command implements Glassy  {
-    
-    private static final double kRotationToleranceRad = Math.PI/32;
+public class DriveWithProfileNote extends Command implements Glassy {
+
+    private static final double kRotationToleranceRad = Math.PI / 32;
     private static final double kTranslationalToleranceM = 0.01;
-    private static final double kRotationToleranceRad_S = Math.PI/64;
+    private static final double kRotationToleranceRad_S = Math.PI / 64;
     private static final double kTranslationalToleranceM_S = 0.01;
-    
+
     private final FieldLogger.Log m_field_log;
     private final Intake m_intake;
     private final Supplier<Optional<Translation2d>> m_fieldRelativeGoal;
@@ -56,14 +53,14 @@ public class DriveWithProfileNote extends Command implements Glassy  {
     private final BooleanLogger m_log_note_detected;
 
     private Translation2d m_previousGoal;
-    private State100 m_xSetpoint;
-    private State100 m_ySetpoint;
-    private State100 m_thetaSetpoint;
+    private Control100 m_xSetpoint;
+    private Control100 m_ySetpoint;
+    private Control100 m_thetaSetpoint;
     private int m_count;
-    
-    private State100 m_xGoalRaw;
-    private State100 m_yGoalRaw;
-    private State100 m_thetaGoalRaw;
+
+    private Model100 m_xGoalRaw;
+    private Model100 m_yGoalRaw;
+    private Model100 m_thetaGoalRaw;
 
     public DriveWithProfileNote(
             FieldLogger.Log fieldLogger,
@@ -104,9 +101,9 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
     @Override
     public void initialize() {
-        m_xSetpoint = m_swerve.getState().x();
-        m_ySetpoint = m_swerve.getState().y();
-        m_thetaSetpoint = m_swerve.getState().theta();
+        m_xSetpoint = m_swerve.getState().x().control();
+        m_ySetpoint = m_swerve.getState().y().control();
+        m_thetaSetpoint = m_swerve.getState().theta().control();
     }
 
     /**
@@ -147,21 +144,21 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
         Translation2d goal = optGoal.get();
 
-        m_thetaGoalRaw = getThetaGoalState(m_swerve.getState().pose(), goal);
-        m_xGoalRaw = new State100(goal.getX(), 0, 0);
-        m_yGoalRaw = new State100(goal.getY(), 0, 0);
+        m_thetaGoalRaw = getThetaGoalState(m_swerve.getPose(), goal);
+        m_xGoalRaw = new Model100(goal.getX(), 0);
+        m_yGoalRaw = new Model100(goal.getY(), 0);
 
-        m_xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_xSetpoint, m_xGoalRaw);
-        m_ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_ySetpoint, m_yGoalRaw);
+        m_xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_xSetpoint.model(), m_xGoalRaw);
+        m_ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_ySetpoint.model(), m_yGoalRaw);
         // make sure the setpoint uses the modulus close to the measurement.
-        final double thetaMeasurement = m_swerve.getState().pose().getRotation().getRadians();
-        m_thetaSetpoint = new State100(
+        final double thetaMeasurement = m_swerve.getPose().getRotation().getRadians();
+        m_thetaSetpoint = new Control100(
                 Math100.getMinDistance(thetaMeasurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
-        m_thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, m_thetaGoalRaw);
+        m_thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint.model(), m_thetaGoalRaw);
 
-        SwerveState measurement = m_swerve.getState();
-        SwerveState setpoint = new SwerveState(m_xSetpoint, m_ySetpoint, m_thetaSetpoint);
+        SwerveModel measurement = m_swerve.getState();
+        SwerveModel setpoint = new SwerveModel(m_xSetpoint.model(), m_ySetpoint.model(), m_thetaSetpoint.model());
         FieldRelativeVelocity output = m_controller.calculate(measurement, setpoint);
 
         m_swerve.driveInFieldCoords(output);
@@ -169,11 +166,11 @@ public class DriveWithProfileNote extends Command implements Glassy  {
         m_field_log.m_log_target.log(() -> new double[] { goal.getX(), goal.getY(), 0 });
     }
 
-    private static State100 getThetaGoalState(Pose2d pose, Translation2d goal) {
+    private static Model100 getThetaGoalState(Pose2d pose, Translation2d goal) {
         // take the short path
         final double measurementRad = pose.getRotation().getRadians();
         final double goalRad = getThetaGoalRad(goal, pose);
-        return new State100(Math100.getMinDistance(measurementRad, goalRad), 0);
+        return new Model100(Math100.getMinDistance(measurementRad, goalRad), 0);
     }
 
     private static double getThetaGoalRad(Translation2d goal, Pose2d pose) {
@@ -189,11 +186,11 @@ public class DriveWithProfileNote extends Command implements Glassy  {
 
     @Override
     public boolean isFinished() {
-        State100 x = m_swerve.getState().x();
+        Model100 x = m_swerve.getState().x();
         double xError = m_xGoalRaw.x() - x.x();
-        State100 y = m_swerve.getState().y();
+        Model100 y = m_swerve.getState().y();
         double yError = m_yGoalRaw.x() - y.x();
-        State100 theta = m_swerve.getState().theta();
+        Model100 theta = m_swerve.getState().theta();
         double thetaError = m_thetaGoalRaw.x() - theta.x();
         return Math.abs(xError) < kTranslationalToleranceM
                 && Math.abs(yError) < kTranslationalToleranceM

@@ -49,7 +49,7 @@ class DriveManuallyTest extends Fixtured implements Timeless {
 
         stepTime(0.02);
         robotDrive.periodic();
-        assertEquals(1, robotDrive.getState().chassisSpeeds().vxMetersPerSecond, 0.001);
+        assertEquals(1, robotDrive.getChassisSpeeds().vxMetersPerSecond, 0.001);
 
         desiredMode = "ROBOT_RELATIVE_CHASSIS_SPEED";
         command.execute();

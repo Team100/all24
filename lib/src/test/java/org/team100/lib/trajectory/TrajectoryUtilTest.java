@@ -8,12 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.follower.DriveTrajectoryFollowerUtil;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Pose2dWithMotion;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.path.Path100;
 import org.team100.lib.path.PathPoint;
 import org.team100.lib.path.PathSamplePoint;

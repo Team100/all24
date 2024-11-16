@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -41,8 +41,8 @@ class VisionDataProviderPerformanceTest {
             }
 
             @Override
-            public SwerveState get(double timestampSeconds) {
-                return new SwerveState(new Rotation2d(-Math.PI / 4));
+            public SwerveModel get(double timestampSeconds) {
+                return new SwerveModel(new Rotation2d(-Math.PI / 4));
             }
         };
 

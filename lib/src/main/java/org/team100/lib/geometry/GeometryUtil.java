@@ -55,8 +55,8 @@ public class GeometryUtil {
         return new Twist2d(twist.dx * scale, twist.dy * scale, twist.dtheta * scale);
     }
 
-    public static FieldRelativeVelocity scale(FieldRelativeVelocity twist, double scale) {
-        return new FieldRelativeVelocity(twist.x() * scale, twist.y() * scale, twist.theta() * scale);
+    public static FieldRelativeVelocity scale(FieldRelativeVelocity v, double scale) {
+        return new FieldRelativeVelocity(v.x() * scale, v.y() * scale, v.theta() * scale);
     }
 
     public static Pose2d transformBy(Pose2d a, Pose2d b) {

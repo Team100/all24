@@ -111,14 +111,12 @@ public class ServoFactory {
                 new CANSparkEncoder(parent, motor),
                 gearRatio);
         RotaryPositionSensor sensor = new ProxyRotaryPositionSensor(mech);
-        AngularPositionServo servo = new OnboardAngularPositionServo(
+        return new OnboardAngularPositionServo(
                 parent,
                 mech,
                 sensor,
-                maxVelocity,
+                () -> new TrapezoidProfile100(maxVelocity, maxAccel, 0.05),
                 controller);
-        servo.setProfile(new TrapezoidProfile100(maxVelocity, maxAccel, 0.05));
-        return servo;
     }
 
     public static AngularPositionServo simulatedAngleServo(
@@ -139,14 +137,12 @@ public class ServoFactory {
         // the new sim doesn't have hard stops; should it?
         // 0, // minimum hard stop
         // 2); // maximum hard stop
-        AngularPositionServo servo = new OnboardAngularPositionServo(
+        return new OnboardAngularPositionServo(
                 parent,
                 mech,
                 sensor,
-                maxVelocity,
+                () -> new TrapezoidProfile100(maxVelocity, maxAccel, 0.05),
                 controller);
-        servo.setProfile(new TrapezoidProfile100(maxVelocity, maxAccel, 0.05));
-        return servo;
     }
 
     private ServoFactory() {

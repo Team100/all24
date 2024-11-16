@@ -4,7 +4,10 @@ import java.util.Optional;
 
 import org.team100.lib.hid.DriverControl;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDelta;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModuleDeltas;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePosition100;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveModulePositions;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -108,39 +111,53 @@ public class DriveUtil {
     }
 
     /**
-     * Path between start and end is assumed to be a circular arc so the
-     * angle of the delta is the angle of the chord between the endpoints,
-     * i.e. the average angle. This might not be a good assumption if the positional
-     * control is at a lower level, so that the motion is not uniform during the
-     * control period.
-     * 
-     * Note the arc is assumed to be the same length as the chord, though, i.e. the
-     * angles are assumed to be close to each other.
+     * The inverse kinematics wants this to represent a geodesic, which
+     * means that the steering doesn't change between start and end.
      */
-    public static SwerveModulePosition100[] modulePositionDelta(
-            SwerveModulePosition100[] start,
-            SwerveModulePosition100[] end) {
-        if (start.length != end.length) {
-            throw new IllegalArgumentException("Inconsistent number of modules!");
+    public static SwerveModuleDeltas modulePositionDelta(
+            SwerveModulePositions start,
+            SwerveModulePositions end) {
+        return new SwerveModuleDeltas(
+                delta(start.frontLeft(), end.frontLeft()),
+                delta(start.frontRight(), end.frontRight()),
+                delta(start.rearLeft(), end.rearLeft()),
+                delta(start.rearRight(), end.rearRight()));
+    }
+
+    public static SwerveModulePositions modulePositionFromDelta(
+            SwerveModulePositions initial,
+            SwerveModuleDeltas delta) {
+        return new SwerveModulePositions(
+                plus(initial.frontLeft(), delta.frontLeft()),
+                plus(initial.frontRight(), delta.frontRight()),
+                plus(initial.rearLeft(), delta.rearLeft()),
+                plus(initial.rearRight(), delta.rearRight()));
+    }
+
+    /**
+     * Delta for one module, straight line path using the end angle.
+     */
+    public static SwerveModuleDelta delta(
+            SwerveModulePosition100 start,
+            SwerveModulePosition100 end) {
+        double deltaM = end.distanceMeters - start.distanceMeters;
+        if (end.angle.isPresent()) {
+            return new SwerveModuleDelta(deltaM, end.angle);
         }
-        SwerveModulePosition100[] newPositions = new SwerveModulePosition100[start.length];
-        for (int i = 0; i < start.length; i++) {
-            SwerveModulePosition100 startModule = start[i];
-            SwerveModulePosition100 endModule = end[i];
-            // these positions might be null, if the encoder has failed (which can seem to
-            // happen if the robot is *severely* overrunning).
-            double deltaM = endModule.distanceMeters - startModule.distanceMeters;
-            if (startModule.angle.isPresent() && endModule.angle.isPresent()) {
-                newPositions[i] = new SwerveModulePosition100(
-                        deltaM,
-                        // this change breaks the odometry test on line 66, the 90 degree turn case.
-                        // endModule.angle);
-                        Optional.of(endModule.angle.get().interpolate(startModule.angle.get(), 0.5)));
-            } else {
-                newPositions[i] = new SwerveModulePosition100(deltaM, Optional.empty());
-            }
+        // the angle might be empty, if the encoder has failed
+        // (which can seem to happen if the robot is *severely* overrunning).
+        return new SwerveModuleDelta(0, Optional.empty());
+    }
+
+    public static SwerveModulePosition100 plus(
+            SwerveModulePosition100 start,
+            SwerveModuleDelta delta) {
+        double posM = start.distanceMeters + delta.distanceMeters;
+        if (delta.angle.isPresent()) {
+            return new SwerveModulePosition100(posM, delta.angle);
         }
-        return newPositions;
+        // if there's no delta angle, we're not going anywhere.
+        return start;
     }
 
     private DriveUtil() {

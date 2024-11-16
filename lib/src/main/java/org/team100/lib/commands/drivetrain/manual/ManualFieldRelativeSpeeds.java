@@ -4,12 +4,10 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.util.DriveUtil;
-
-import edu.wpi.first.math.geometry.Pose2d;
 
 /**
  * Transform manual input into a field-relative velocity.
@@ -32,7 +30,7 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
      * feasible) speeds, and then desaturates to a feasible holonomic velocity.
      */
     @Override
-    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity input) {
+    public FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity input) {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
 
@@ -49,7 +47,7 @@ public class ManualFieldRelativeSpeeds implements FieldRelativeDriver {
     }
 
     @Override
-    public void reset(Pose2d p) {
+    public void reset(SwerveModel p) {
         //
     }
 }

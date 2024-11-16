@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.frc2024.shooter.pivot.PivotSubsystem;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class PivotDefault extends Command {
@@ -11,11 +12,12 @@ public class PivotDefault extends Command {
     private final Supplier<Double> m_twistSupplier;
     private final PivotSubsystem m_pivot;
 
-    private final double rate = 0.01;
+    private final double rate = -0.5;
 
     public PivotDefault(Supplier<Double> twistSupplier, PivotSubsystem pivot) {
         m_twistSupplier = twistSupplier;
         m_pivot = pivot;
+        addRequirements(m_pivot);
     }
 
     @Override
@@ -23,7 +25,7 @@ public class PivotDefault extends Command {
 
     @Override
     public void execute() {
-        m_pivot.setAngleRad(m_pivot.getAngleRad().getAsDouble() + m_twistSupplier.get() * rate);
+        m_pivot.dutyCycle(MathUtil.applyDeadband(m_twistSupplier.get(), 0.05)/2);
     }
 
     @Override

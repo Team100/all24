@@ -9,15 +9,16 @@ import org.team100.lib.hid.DriverControl;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.logging.LoggerFactory.Model100Logger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeDelta;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 
@@ -47,7 +48,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
     private static final double kRotationSpeed = 0.5;
 
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     private final Supplier<Translation2d> m_target;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
@@ -56,17 +56,17 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
 
     // LOGGERS
     private final DoubleLogger m_log_apparent_motion;
-    private final State100Logger m_log_theta_setpoint;
+    private final Control100Logger m_log_theta_setpoint;
     private final DoubleLogger m_log_theta_measurement;
     private final DoubleLogger m_log_theta_error;
     private final DoubleLogger m_log_theta_FB;
-    private final State100Logger m_log_omega_reference;
+    private final Model100Logger m_log_omega_reference;
     private final DoubleLogger m_log_omega_measurement;
     private final DoubleLogger m_log_omega_error;
     private final DoubleLogger m_log_omega_FB;
     private final FieldLogger.Log m_field_log;
 
-    private State100 m_thetaSetpoint;
+    private Control100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
     private Pose2d m_prevPose;
@@ -75,7 +75,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
             FieldLogger.Log fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             Supplier<Translation2d> target,
             PIDController thetaController,
             PIDController omegaController,
@@ -83,7 +82,6 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         m_field_log = fieldLogger;
         LoggerFactory child = parent.child(this);
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_target = target;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
@@ -93,21 +91,21 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
                 0.01);
         m_trigger = trigger;
         m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
-        m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
+        m_log_theta_setpoint = child.control100Logger(Level.TRACE, "theta/setpoint");
         m_log_theta_measurement = child.doubleLogger(Level.TRACE, "theta/measurement");
         m_log_theta_error = child.doubleLogger(Level.TRACE, "theta/error");
         m_log_theta_FB = child.doubleLogger(Level.TRACE, "theta/fb");
-        m_log_omega_reference = child.state100Logger(Level.TRACE, "omega/reference");
+        m_log_omega_reference = child.model100Logger(Level.TRACE, "omega/reference");
         m_log_omega_measurement = child.doubleLogger(Level.TRACE, "omega/measurement");
         m_log_omega_error = child.doubleLogger(Level.TRACE, "omega/error");
         m_log_omega_FB = child.doubleLogger(Level.TRACE, "omega/fb");
     }
 
     @Override
-    public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
+    public void reset(SwerveModel state) {
+        m_thetaSetpoint = state.theta().control();
         m_ball = null;
-        m_prevPose = currentPose;
+        m_prevPose = state.pose();
         m_thetaController.reset();
         m_omegaController.reset();
     }
@@ -121,11 +119,11 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
      * @return feasible field-relative velocity in m/s and rad/s
      */
     @Override
-    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity input) {
+    public FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity input) {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
-        double headingRate = m_gyro.getYawRateNWU();
+        double headingRate = state.theta().v();
 
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = m_target.get();
@@ -137,7 +135,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
                 Math100.getMinDistance(measurement, bearing.getRadians()));
 
         // make sure the setpoint uses the modulus close to the measurement.
-        m_thetaSetpoint = new State100(
+        m_thetaSetpoint = new Control100(
                 Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
 
@@ -145,9 +143,9 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         double targetMotion = TargetUtil.targetMotion(state, target);
         m_log_apparent_motion.log(() -> targetMotion);
 
-        State100 goal = new State100(bearing.getRadians(), targetMotion);
+        Model100 goal = new Model100(bearing.getRadians(), targetMotion);
 
-        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint.model(), goal);
 
         // this is user input scaled to m/s and rad/s
         FieldRelativeVelocity scaledInput = DriveUtil.scale(
@@ -164,7 +162,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         m_log_theta_FB.log(() -> thetaFB);
 
         double omegaFB = m_omegaController.calculate(headingRate, m_thetaSetpoint.v());
-        m_log_omega_reference.log(() -> m_thetaSetpoint);
+        m_log_omega_reference.log(() -> m_thetaSetpoint.model());
         m_log_omega_measurement.log(() -> headingRate);
         m_log_omega_error.log(m_omegaController::getPositionError);
         m_log_omega_FB.log(() -> omegaFB);

@@ -11,12 +11,12 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.FieldRelativeVelocityLogger;
-import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
+import org.team100.lib.logging.LoggerFactory.SwerveControlLogger;
 import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
+import org.team100.lib.motion.drivetrain.SwerveControl;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -47,11 +47,11 @@ public class DriveInACircle extends Command implements Glassy {
     // LOGGERS
     private final Translation2dLogger m_log_center;
     private final DoubleLogger m_log_angle;
-    private final SwerveStateLogger m_log_reference;
+    private final SwerveControlLogger m_log_reference;
     private final FieldRelativeVelocityLogger m_log_target;
 
     private Translation2d m_center;
-    private double m_initialRotation;
+    private double m_initialRotation; 
     private double m_speedRad_S;
     private double m_angleRad;
 
@@ -75,7 +75,7 @@ public class DriveInACircle extends Command implements Glassy {
         LoggerFactory child = parent.child(this);
         m_log_center = child.translation2dLogger(Level.TRACE, "center");
         m_log_angle = child.doubleLogger(Level.TRACE, "angle");
-        m_log_reference = child.swerveStateLogger(Level.TRACE, "reference");
+        m_log_reference = child.swerveControlLogger(Level.TRACE, "reference");
         m_log_target = child.fieldRelativeVelocityLogger(Level.TRACE, "target");
         m_swerve = drivetrain;
         m_turnRatio = turnRatio;
@@ -87,7 +87,7 @@ public class DriveInACircle extends Command implements Glassy {
     @Override
     public void initialize() {
         m_controller.reset();
-        Pose2d currentPose = m_swerve.getState().pose();
+        Pose2d currentPose = m_swerve.getPose();
         m_initialRotation = currentPose.getRotation().getRadians();
         m_center = getCenter(currentPose, kRadiusM);
         m_speedRad_S = 0;
@@ -105,7 +105,7 @@ public class DriveInACircle extends Command implements Glassy {
         }
         m_angleRad += m_speedRad_S * TimedRobot100.LOOP_PERIOD_S;
 
-        SwerveState reference = getReference(
+        SwerveControl reference = getReference(
                 m_center,
                 kRadiusM,
                 m_angleRad,
@@ -114,7 +114,7 @@ public class DriveInACircle extends Command implements Glassy {
                 m_initialRotation,
                 m_turnRatio);
 
-        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference);
+        FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(m_swerve.getState(), reference.model());
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
 
         m_log_center.log(() -> m_center);
@@ -127,7 +127,7 @@ public class DriveInACircle extends Command implements Glassy {
         return currentPose.transformBy(new Transform2d(0, radiusM, GeometryUtil.kRotationZero)).getTranslation();
     }
 
-    static SwerveState getReference(
+    static SwerveControl getReference(
             final Translation2d center,
             final double radiusM,
             final double angleRad,
@@ -136,7 +136,7 @@ public class DriveInACircle extends Command implements Glassy {
             final double initialRotation,
             final double turnRatio) {
 
-        State100 rotation = new State100(
+        Control100 rotation = new Control100(
                 initialRotation + turnRatio * angleRad,
                 turnRatio * speedRad_S,
                 turnRatio * accelRad_S_S);
@@ -145,22 +145,22 @@ public class DriveInACircle extends Command implements Glassy {
         double cos = Math.cos(initialRotation + angleRad);
         // centripetal acceleration is omega^2*r
         // pathwise acceleration is whatever the accel parameter says
-        State100 xState = new State100(
+        Control100 xState = new Control100(
                 center.getX() + sin * radiusM,
                 speedRad_S * cos * radiusM,
                 -1.0 * speedRad_S * speedRad_S * sin * radiusM + accelRad_S_S * cos);
-        State100 yState = new State100(
+        Control100 yState = new Control100(
                 center.getY() - cos * radiusM,
                 speedRad_S * sin * radiusM,
                 speedRad_S * speedRad_S * cos * radiusM + accelRad_S_S * sin);
-        return new SwerveState(xState, yState, rotation);
+        return new SwerveControl(xState, yState, rotation);
     }
 
     private void visualize() {
         // these poses are only used for visualization
         List<Pose2d> poses = new ArrayList<>();
         for (double angleRad = 0; angleRad < 2 * Math.PI; angleRad += 0.1) {
-            SwerveState s = getReference(
+            SwerveControl s = getReference(
                     m_center,
                     kRadiusM,
                     angleRad,

@@ -7,7 +7,6 @@ import org.team100.frc2024.drivetrain.TankDriveSubsystem;
 import org.team100.frc2024.drivetrain.TankModuleCollection;
 import org.team100.frc2024.drivetrain.commands.DriveManually;
 import org.team100.frc2024.shooter.commands.Shoot;
-import org.team100.frc2024.shooter.commands.ShootOne;
 import org.team100.frc2024.shooter.drumShooter.DrumShooter;
 import org.team100.frc2024.shooter.drumShooter.ShooterCollection;
 import org.team100.frc2024.shooter.indexer.Indexer;
@@ -15,7 +14,6 @@ import org.team100.frc2024.shooter.indexer.IndexerCollection;
 import org.team100.frc2024.shooter.pivot.PivotCollection;
 import org.team100.frc2024.shooter.pivot.PivotSubsystem;
 import org.team100.frc2024.shooter.pivot.commands.PivotDefault;
-import org.team100.frc2024.shooter.pivot.commands.ZeroPivot;
 import org.team100.lib.async.Async;
 import org.team100.lib.async.AsyncFactory;
 import org.team100.lib.framework.TimedRobot100;
@@ -54,19 +52,19 @@ public class RobotContainer {
 
         final LoggerFactory sysLog = logger.child("Subsystems");
 
-        m_drive = new TankDriveSubsystem(fieldLogger, TankModuleCollection.get(fieldLogger, 40));
+        m_drive = new TankDriveSubsystem(fieldLogger, TankModuleCollection.get(fieldLogger, 20));
         m_drive.setDefaultCommand(new DriveManually(driverControl::velocity, m_drive));
 
         m_shooter = new DrumShooter(sysLog, ShooterCollection.get(sysLog, 20));
         m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
-
-        m_pivot = new PivotSubsystem(sysLog, PivotCollection.get(sysLog, 20));
+        
+        m_pivot = new PivotSubsystem(sysLog, PivotCollection.get(sysLog, 15));
         m_pivot.setDefaultCommand(new PivotDefault(driverControl::shooterPivot, m_pivot));
 
         m_indexer = IndexerCollection.get(sysLog);
 
-        whileTrue(driverControl::ampLock, new Shoot(m_shooter, m_indexer));
-        whileTrue(driverControl::fullCycle, new ShootOne(m_shooter, m_indexer));
+        whileTrue(driverControl::shoot, new Shoot(m_shooter, m_indexer));
+        // whileTrue(driverControl::fullCycle, new ShootOne(m_shooter, m_indexer));
         whileTrue(driverControl::driveToNote, m_shooter.run(m_shooter::spinUp));
 
         m_auton = null;
@@ -76,7 +74,8 @@ public class RobotContainer {
     }
 
     public void onTeleopInit() {
-        new ZeroPivot(m_pivot).schedule();
+        m_pivot.setEncoderPosition(Math.PI/2);
+        // new ZeroPivot(m_pivot).schedule();
     }
 
     public void periodic() {

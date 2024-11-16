@@ -11,19 +11,20 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.TargetUtil;
 import org.team100.lib.geometry.Vector2d;
 import org.team100.lib.hid.DriverControl;
-import org.team100.lib.motion.drivetrain.SwerveState;
-import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
-import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.profile.TrapezoidProfile100;
-import org.team100.lib.sensors.Gyro;
-import org.team100.lib.state.State100;
 import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.Model100Logger;
 import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
+import org.team100.lib.motion.drivetrain.SwerveModel;
+import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
+import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.profile.TrapezoidProfile100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 import org.team100.lib.util.DriveUtil;
 import org.team100.lib.util.Math100;
 
@@ -46,11 +47,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * 
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
- * 
- * TODO: replace the two PID controllers with simpler multiplication; see
- * ManualWithFullStateHeading for an example.
- * 
- * TODO: do more investigation into jitter,
  */
 public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kBallVelocityM_S = 5;
@@ -61,17 +57,16 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private static final double kRotationSpeed = 0.5;
 
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Gyro m_gyro;
     private final PIDController m_thetaController;
     private final PIDController m_omegaController;
     private final TrapezoidProfile100 m_profile;
-    // TODO: this filters the omega output since it can be noisy
+    // this filters the omega output since it can be noisy
     private final LinearFilter m_outputFilter;
 
     // LOGGERS
     private final DoubleLogger m_log_apparent_motion;
-    private final State100Logger m_log_theta_setpoint;
-    private final State100Logger m_log_goal;
+    private final Control100Logger m_log_theta_setpoint;
+    private final Model100Logger m_log_goal;
     private final Rotation2dLogger m_log_bearing;
     private final DoubleLogger m_log_bearing_check;
     private final Translation2dLogger m_log_target;
@@ -83,7 +78,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private final DoubleLogger m_log_omega_fb;
     private final FieldLogger.Log m_field_log;
 
-    private State100 m_thetaSetpoint;
+    private Control100 m_thetaSetpoint;
     private Translation2d m_ball;
     private Translation2d m_ballV;
     private BooleanSupplier m_trigger;
@@ -94,15 +89,14 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
             FieldLogger.Log fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Gyro gyro,
             PIDController thetaController,
             PIDController omegaController) {
         m_field_log = fieldLogger;
         LoggerFactory child = parent.child(this);
 
         m_log_apparent_motion = child.doubleLogger(Level.TRACE, "apparent motion");
-        m_log_theta_setpoint = child.state100Logger(Level.TRACE, "theta/setpoint");
-        m_log_goal = child.state100Logger(Level.TRACE, "goal");
+        m_log_theta_setpoint = child.control100Logger(Level.TRACE, "theta/setpoint");
+        m_log_goal = child.model100Logger(Level.TRACE, "goal");
         m_log_bearing = child.rotation2dLogger(Level.TRACE, "bearing");
         m_log_bearing_check = child.doubleLogger(Level.TRACE, "Bearing Check");
         m_log_target = child.translation2dLogger(Level.TRACE, "target");
@@ -114,7 +108,6 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_log_omega_fb = child.doubleLogger(Level.TRACE, "omega/fb");
 
         m_swerveKinodynamics = swerveKinodynamics;
-        m_gyro = gyro;
         m_thetaController = thetaController;
         m_omegaController = omegaController;
         m_profile = new TrapezoidProfile100(
@@ -128,10 +121,10 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     }
 
     @Override
-    public void reset(Pose2d currentPose) {
-        m_thetaSetpoint = new State100(currentPose.getRotation().getRadians(), m_gyro.getYawRateNWU());
+    public void reset(SwerveModel state) {
+        m_thetaSetpoint = state.theta().control();
         m_ball = null;
-        m_prevPose = currentPose;
+        m_prevPose = state.pose();
         m_thetaController.reset();
         m_omegaController.reset();
         m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -144,7 +137,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
      * feasible) speeds, and then desaturates to a feasible holonomic velocity.
      */
     @Override
-    public FieldRelativeVelocity apply(SwerveState state, DriverControl.Velocity input) {
+    public FieldRelativeVelocity apply(SwerveModel state, DriverControl.Velocity input) {
         Optional<Alliance> optionalAlliance = DriverStation.getAlliance();
         if (!optionalAlliance.isPresent())
             return new FieldRelativeVelocity(0, 0, 0);
@@ -152,7 +145,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         // clip the input to the unit circle
         DriverControl.Velocity clipped = DriveUtil.clampTwist(input, 1.0);
         Rotation2d currentRotation = state.pose().getRotation();
-        double yawRate = m_gyro.getYawRateNWU();
+        double yawRate = state.theta().v();
         Translation2d currentTranslation = state.pose().getTranslation();
         Translation2d target = ShooterUtil.getOffsetTranslation(optionalAlliance.get());
 
@@ -171,7 +164,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         m_log_bearing_check.log(() -> bearing.minus(currentRotation).getDegrees());
 
         // make sure the setpoint uses the modulus close to the measurement.
-        m_thetaSetpoint = new State100(
+        m_thetaSetpoint = new Control100(
                 Math100.getMinDistance(measurement, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
 
@@ -179,8 +172,8 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         double targetMotion = TargetUtil.targetMotion(state, target);
         m_log_apparent_motion.log(() -> targetMotion);
 
-        State100 goal = new State100(bearing.getRadians(), targetMotion);
-        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
+        Model100 goal = new Model100(bearing.getRadians(), targetMotion);
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint.model(), goal);
 
         // this is user input scaled to m/s and rad/s
         FieldRelativeVelocity scaledInput = DriveUtil.scale(
@@ -235,7 +228,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
     private double getOmegaFB(double yawRate) {
         double omegaFB = m_omegaController.calculate(yawRate, m_thetaSetpoint.v());
 
-        if (Experiments.instance.enabled(Experiment.UseThetaFilter)) {
+        if (Experiments.instance.enabled(Experiment.SnapThetaFilter)) {
             // output filtering to prevent oscillation due to delay
             omegaFB = m_outputFilter.calculate(omegaFB);
         }
@@ -280,7 +273,7 @@ public class ManualWithShooterLock implements FieldRelativeDriver {
         return isAligned;
     }
 
-    static Rotation2d aimWhileMoving(Rotation2d bearing, double shooterVelocity, SwerveState state) {
+    static Rotation2d aimWhileMoving(Rotation2d bearing, double shooterVelocity, SwerveModel state) {
 
         // its the shooter util code but robot moving vec is y velocity and angle in
         // rads is bearing

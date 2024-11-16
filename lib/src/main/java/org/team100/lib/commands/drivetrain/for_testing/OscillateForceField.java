@@ -3,7 +3,7 @@ package org.team100.lib.commands.drivetrain.for_testing;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,7 +26,7 @@ public class OscillateForceField extends Command implements Glassy {
     private final HolonomicFieldRelativeController m_controller;
     private final double m_offsetM;
 
-    private SwerveState m_goal;
+    private SwerveModel m_goal;
 
     public OscillateForceField(
             SwerveDriveSubsystem swerve,
@@ -41,26 +41,24 @@ public class OscillateForceField extends Command implements Glassy {
     @Override
     public void initialize() {
         // choose a goal 1m away
-        SwerveState start = m_swerve.getState();
+        SwerveModel start = m_swerve.getState();
         Pose2d startPose = start.pose();
-        // don't rotate
+
         Pose2d endPose = startPose.plus(new Transform2d(m_offsetM, 0, new Rotation2d()));
-        // spin 180 between the endpoints
-        // Pose2d endPose = startPose.plus(new Transform2d(m_offsetM, 0,
-        // GeometryUtil.kRotation180));
-        m_goal = new SwerveState(endPose);
+
+        m_goal = new SwerveModel(endPose);
     }
 
     @Override
     public void execute() {
-        SwerveState measurement = m_swerve.getState();
+        SwerveModel measurement = m_swerve.getState();
         FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, m_goal);
         m_swerve.driveInFieldCoords(fieldRelativeTarget);
     }
 
     @Override
     public boolean isFinished() {
-        SwerveState measurement = m_swerve.getState();
+        SwerveModel measurement = m_swerve.getState();
         return measurement.near(m_goal, TOLERANCE);
     }
 

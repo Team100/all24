@@ -28,8 +28,8 @@ public class ShooterCollection {
             switch (Identity.instance) {
                 case DEMO_BOT:
                 //TODO get the real diameter, gearRatios, and canIDs, and Indexer accel
-                LinearVelocityServo leftDrum = Neo550Factory.getNEO550VelocityServo(kLeft, collectionLogger,currentLimit,4,m_gearRatio,MotorPhase.FORWARD, shooterWheelDiameterM);
-                LinearVelocityServo rightDrum = Neo550Factory.getNEO550VelocityServo(kRight, collectionLogger,currentLimit,5,m_gearRatio,MotorPhase.REVERSE, shooterWheelDiameterM);
+                LinearVelocityServo leftDrum = Neo550Factory.getNEO550VelocityServo(kLeft, collectionLogger,currentLimit,39,m_gearRatio,MotorPhase.FORWARD, shooterWheelDiameterM);
+                LinearVelocityServo rightDrum = Neo550Factory.getNEO550VelocityServo(kRight, collectionLogger,currentLimit,19,m_gearRatio,MotorPhase.REVERSE, shooterWheelDiameterM);
                 return new ShooterCollection(leftDrum, rightDrum);
                 case BLANK:
                 default:

@@ -9,7 +9,7 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 import org.team100.lib.timing.TimedPose;
 import org.team100.lib.trajectory.StraightLineTrajectory;
@@ -69,7 +69,7 @@ public class OscillatePosition extends Command implements Glassy {
     public void initialize() {
         m_controller.reset();
         // choose a goal 1m away
-        SwerveState start = m_swerve.getState();
+        SwerveModel start = m_swerve.getState();
         Pose2d startPose = start.pose();
         Pose2d endPose = startPose.plus(new Transform2d(m_offsetM, 0, new Rotation2d()));
         m_trajectory = m_trajectories.apply(start, endPose);
@@ -82,7 +82,7 @@ public class OscillatePosition extends Command implements Glassy {
     public void execute() {
         if (m_trajectory == null)
             return;
-        SwerveState measurement = m_swerve.getState();
+        SwerveModel measurement = m_swerve.getState();
 
         if (m_steeringAligned) {
             Optional<TrajectorySamplePoint> optSamplePoint = m_iter.advance(TimedRobot100.LOOP_PERIOD_S);
@@ -94,7 +94,7 @@ public class OscillatePosition extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            SwerveState reference = SwerveState.fromTimedPose(desiredState);
+            SwerveModel reference = SwerveModel.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
             m_log_trajecX.log(() -> desiredState.state().getPose().getX());
             m_log_trajecY.log(() -> desiredState.state().getPose().getY());
@@ -112,7 +112,7 @@ public class OscillatePosition extends Command implements Glassy {
             TrajectorySamplePoint samplePoint = optSamplePoint.get();
 
             TimedPose desiredState = samplePoint.state();
-            SwerveState reference = SwerveState.fromTimedPose(desiredState);
+            SwerveModel reference = SwerveModel.fromTimedPose(desiredState);
             FieldRelativeVelocity fieldRelativeTarget = m_controller.calculate(measurement, reference);
 
             m_steeringAligned = m_swerve.steerAtRest(fieldRelativeTarget);

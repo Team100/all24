@@ -3,8 +3,7 @@ package org.team100.lib.motion.servo;
 import java.util.OptionalDouble;
 
 import org.team100.lib.dashboard.Glassy;
-import org.team100.lib.profile.Profile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
 
 /**
  * Angular position control, e.g. for swerve steering axes or arm axes.
@@ -17,8 +16,6 @@ public interface AngularPositionServo extends Glassy {
      * but there needs to be an initial setpoint.
      */
     void reset();
-
-    void setProfile(Profile100 profile);
 
     /**
      * Resets the encoder position, is very slow, so 
@@ -70,7 +67,7 @@ public interface AngularPositionServo extends Glassy {
 
     void close();
 
-    State100 getSetpoint();
+    Control100 getSetpoint();
 
     /** for logging */
     void periodic();

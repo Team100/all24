@@ -6,6 +6,8 @@ import edu.wpi.first.math.filter.LinearFilter;
 
 /** Verify that high-pass filtering is a bad approach to bias correction. */
 class GyroFilterTest {
+    private static final boolean PRINT = false;
+
     @Test
     void testSimple() {
         // if there's a bias in the gyro output, what does the filter do with it?
@@ -19,13 +21,15 @@ class GyroFilterTest {
         // run for 10 sec
         // final double bias = 0.5;
         final double bias = 0.01;
+        @SuppressWarnings("unused")
         double yaw = 0;
         final double total_time = 10;
         for (int i = 0; i < total_time / dt; ++i) {
             double t = dt * i;
             double x = f.calculate(bias);
             yaw += x * dt;
-            System.out.printf("%5.3f %5.3f %5.3f\n", t, x, yaw);
+            if (PRINT)
+                System.out.printf("%5.3f %5.3f %5.3f\n", t, x, yaw);
         }
     }
 

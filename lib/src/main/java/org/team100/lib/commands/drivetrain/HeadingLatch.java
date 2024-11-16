@@ -2,7 +2,7 @@ package org.team100.lib.commands.drivetrain;
 
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -12,11 +12,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class HeadingLatch {
     private static final double unlatch = 0.01;
-    private static final double maxARad_S2 = 10;
+
     private Rotation2d m_desiredRotation = null;
 
+    /**
+     * @param maxARad_S2 supply an acceleration that matches whatever profile or
+     *                   expectations you have for angular acceleration.
+     */
     public Rotation2d latchedRotation(
-            State100 state,
+            double maxARad_S2,
+            Model100 state,
             Rotation2d pov,
             double inputOmega) {
         if (Math.abs(inputOmega) > unlatch) {

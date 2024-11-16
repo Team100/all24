@@ -7,8 +7,7 @@ from typing import cast
 import numpy as np
 from cv2 import undistortImagePoints
 from numpy.typing import NDArray
-from robotpy_apriltag import (AprilTagDetection, AprilTagDetector,
-                              AprilTagPoseEstimator)
+from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
 from typing_extensions import override
 
 from app.camera.camera_protocol import Camera, Request, Size
@@ -97,6 +96,11 @@ class TagDetector(Interpreter):
 
                 # UNDISTORT EACH ITEM
                 # undistortPoints is at least 10X faster than undistort on the whole image.
+                # the order here is:
+                # lower left
+                # lower right
+                # upper right
+                # upper left
                 corners: tuple[
                     float, float, float, float, float, float, float, float
                 ] = result_item.getCorners((0, 0, 0, 0, 0, 0, 0, 0))

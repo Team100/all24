@@ -6,12 +6,14 @@ import org.team100.lib.encoder.CombinedEncoder;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Control100Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.Model100Logger;
 import org.team100.lib.logging.LoggerFactory.OptionalDoubleLogger;
-import org.team100.lib.logging.LoggerFactory.State100Logger;
 import org.team100.lib.motion.mechanism.RotaryMechanism;
 import org.team100.lib.profile.Profile100;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -33,31 +35,34 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     private final CombinedEncoder m_encoder;
 
     // LOGGERS
-    private final State100Logger m_log_goal;
+    private final Model100Logger m_log_goal;
     private final DoubleLogger m_log_ff_torque;
     private final DoubleLogger m_log_measurement;
-    private final State100Logger m_log_setpoint;
+    private final Control100Logger m_log_setpoint;
     private final OptionalDoubleLogger m_log_position;
 
-    /** Profile may be updated at runtime. */
-    private Profile100 m_profile;
+    private final Profile100 m_profile;
     /** Remember that the outboard goal "winds up" i.e. it's not in [-pi,pi] */
-    private State100 m_goal = new State100(0, 0);
+    private Model100 m_goal = new Model100(0, 0);
     /** Remember that the outboard setpoint "winds up" i.e. it's not in [-pi,pi] */
-    private State100 m_setpoint = new State100(0, 0);
-
+    private Control100 m_setpoint = new Control100(0, 0);
+    // this was Sanjan experimenting in October 2024
+    // private ProfileWPI profileTest = new ProfileWPI(40,120);
+    
     /** Don't forget to set a profile. */
     public OutboardAngularPositionServo(
             LoggerFactory parent,
             RotaryMechanism mech,
-            CombinedEncoder encoder) {
+            CombinedEncoder encoder,
+            Profile100 profile) {
         LoggerFactory child = parent.child(this);
         m_mechanism = mech;
         m_encoder = encoder;
-        m_log_goal = child.state100Logger(Level.TRACE, "goal (rad)");
+        m_profile = profile;
+        m_log_goal = child.model100Logger(Level.TRACE, "goal (rad)");
         m_log_ff_torque = child.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
         m_log_measurement = child.doubleLogger(Level.TRACE, "measurement (rad)");
-        m_log_setpoint = child.state100Logger(Level.TRACE, "setpoint (rad)");
+        m_log_setpoint = child.control100Logger(Level.TRACE, "setpoint (rad)");
         m_log_position = child.optionalDoubleLogger(Level.TRACE, "Position");
     }
 
@@ -67,12 +72,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         OptionalDouble velocity = getVelocity();
         if (position.isEmpty() || velocity.isEmpty())
             return;
-        m_setpoint = new State100(position.getAsDouble(), velocity.getAsDouble());
-    }
-
-    @Override
-    public void setProfile(Profile100 profile) {
-        m_profile = profile;
+        m_setpoint = new Control100(position.getAsDouble(), velocity.getAsDouble());
     }
 
     @Override
@@ -107,7 +107,7 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
 
         // choose a goal which is near the measurement
         // apply error to unwrapped measurement, so goal is [-inf, inf]
-        m_goal = new State100(goalErr + unwrappedMeasurementRad, goalVelocity);
+        m_goal = new Model100(goalErr + unwrappedMeasurementRad, goalVelocity);
 
         // @sanjan's version from sep 2024 used measurement as setpoint which i think is
         // an error.
@@ -118,10 +118,12 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         // setpoint err is [-pi,pi]
         double setpointErr = MathUtil.angleModulus(wrappedSetpoint - wrappedMeasurementRad);
         // we're choosing a setpoint that is near the measurement
-        m_setpoint = new State100(setpointErr + unwrappedMeasurementRad, m_setpoint.v());
+        m_setpoint = new Control100(setpointErr + unwrappedMeasurementRad, m_setpoint.v());
 
         // finally compute a new setpoint
-        m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, m_goal);
+        m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint.model(), m_goal);
+        // this was Sanjan experimenting in October 2024
+        // m_setpoint = profileTest.calculate(0.02, m_setpoint, m_goal);
 
         m_mechanism.setPosition(m_setpoint.x(), m_setpoint.v(), feedForwardTorqueNm);
 
@@ -192,8 +194,9 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
     }
 
     @Override
-    public State100 getSetpoint() {
-        return m_goal;
+    public Control100 getSetpoint() {
+        // 11/11/24 note this used to return m_goal ?
+        return m_setpoint;
     }
 
     @Override

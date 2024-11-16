@@ -61,24 +61,28 @@ public class SwerveKinodynamicsFactory {
                         20, // max decel m/s/s
                         40, // steering rate rad/s
                         40 * Math.PI, // steering accel rad/s/s
-                        0.449, // track m
-                        0.464, // wheelbase m
+                        0.49, // front track m
+                        0.44, // back track m
+                        0.462, // wheelbase m
                         .232, // front offset m
                         0.3); // vcg m
             case BLANK:
-                // this is used for tests and simulation; if you change it you should fix all
-                // the broken tests.
+                // this is used for tests and simulation; the limits should be kept in sync
+                // with the comp config, so that the simulator provides realistic
+                // feedback.  it's not *identical* to the comp config because it affects
+                // a whole lots of tests, which you'll have to touch every time you
+                // change it.  :-(
                 return new SwerveKinodynamics(
-                        4, // vel m/s
+                        5, // vel m/s
                         10, // stall m/s/s
-                        4, // accel m/s/s
-                        4, // decel m/s/s
-                        13, // steering rate rad/s
-                        20 * Math.PI, // steering accel rad/s/s
+                        10, // accel m/s/s
+                        20, // decel m/s/s
+                        40, // steering rate rad/s
+                        120, // steering accel rad/s/s
                         0.5, // track m
                         0.5, // wheelbase m
                         .25, // front offset m
-                        0.3); // vcg m
+                        0.1); // vcg m
             case BETA_BOT:
                 // these numbers were extracted from module mode acceleration
                 // runs as shown in this spreadsheet
@@ -104,7 +108,9 @@ public class SwerveKinodynamicsFactory {
                         0.29, // front offset m
                         0.1); // vcg m
             default:
-                Util.warn("Using default kinodynamics");
+            Util.warn("***");
+            Util.warn("*** Using default kinodynamics, this should never happen.");
+            Util.warn("***");
                 return new SwerveKinodynamics(
                         5, // vel m/s
                         20, // stall m/s/s

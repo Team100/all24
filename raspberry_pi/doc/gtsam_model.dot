@@ -1,0 +1,50 @@
+/**
+ * To render this file, install the tintinweb Graphviz preview extension and click
+ * the little "DOT" that appears in the upper right.  Choose the "FDP" engine,
+ * which notices the "pos" parameter.
+ */
+graph {
+    Xp [color = "blue";shape = "point";width = "0.2";xlabel = "prior";];
+    X0 [label = "X0";shape = "circle";pos = "10,12!";margin = -0.1;];
+    O0 [color = "green";shape = "point";width = "0.2";xlabel = "odometry";];
+    O1 [color = "green";shape = "point";width = "0.2";xlabel = "odometry";];
+    X1 [label = "X1";shape = "circle";pos = "12,12!";margin = -0.1;];
+    X2 [label = "X2";shape = "circle";pos = "14,12!";margin = -0.1;];
+    Xe [label = "";shape = "none";pos = "16,12!";];
+    t0 [label = "Tag";shape = "box";pos = "12,16!";];
+    c0 [label = "Off";shape = "circle";margin = -0.1;pos = "9,15!";];
+    cp [color = "blue";shape = "point";width = "0.2";xlabel = "prior";];
+    k0 [label = "Cal";shape = "circle";margin = -0.1;pos = "9,13!";];
+    kp [color = "blue";shape = "point";width = "0.2";xlabel = "prior";];
+    v0 [color = "green";shape = "point";width = "0.2";pos="11,14!";xlabel = "vision";];
+    v1 [color = "green";shape = "point";width = "0.2";pos="12,14!";xlabel = "vision ";];
+    v2 [color = "green";shape = "point";width = "0.2";pos="13,14!"; xlabel = "vision ";];
+    g0 [color = "green";shape = "point";width = "0.2";xlabel = "gyro";];
+    g1 [color = "green";shape = "point";width = "0.2";xlabel = "gyro ";];
+    g2 [color = "green";shape = "point";width = "0.2";xlabel = "gyro ";];
+    bd [label = "";shape = "none";pos = "16,10!";];
+    
+    Xp -- X0;
+    X0 -- O0;
+    O0 -- X1;
+    X1 -- O1;
+    O1 -- X2;
+    X2 -- Xe [style = "dotted";];
+    X0 -- v0;
+    X1 -- v1;
+    X2 -- v2;
+    v0 -- t0;
+    v1 -- t0;
+    v2 -- t0;
+    cp -- c0;
+    v0 -- c0;
+    v1 -- c0;
+    v2 -- c0;
+    kp -- k0;
+    v0 -- k0;
+    v1 -- k0;
+    v2 -- k0;
+    g0 -- X0;
+    g1 -- X1;
+    g2 -- X2;
+}

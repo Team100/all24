@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.profile.Profile100.ResultWithETA;
-import org.team100.lib.state.State100;
+import org.team100.lib.state.Control100;
+import org.team100.lib.state.Model100;
 
 /**
  * Illustrates how to coordinate multiple profiles to take the same amount of
@@ -21,6 +22,8 @@ import org.team100.lib.state.State100;
  * we can look there; our own profile does not, so we need to modify it.
  */
 class CoordinatedProfileTest {
+    private static final boolean PRINT = false;
+
     private static final double PROFILE_TOLERANCE = 0.01;
     private static final double kDelta = 0.001;
     private static final double DT = 0.02;
@@ -40,47 +43,53 @@ class CoordinatedProfileTest {
         TrapezoidProfile100 p1 = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         TrapezoidProfile100 p2 = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         // initial state at the origin at rest
-        State100 i1 = new State100(0, 0);
-        State100 i2 = new State100(0, 0);
+        Model100 i1 = new Model100(0, 0);
+        Model100 i2 = new Model100(0, 0);
         // final state at 1, at rest
-        State100 g1 = new State100(1, 0);
-        State100 g2 = new State100(2, 0);
+        Model100 g1 = new Model100(1, 0);
+        Model100 g2 = new Model100(2, 0);
 
         // how long does it take to get to the first goal?
-        State100 s1 = i1;
+        Control100 s1 = i1.control();
         double total_time = 0;
         double max_v = 0;
         for (int i = 0; i < 1000; ++i) {
             // next state
-            s1 = p1.calculate(DT, s1, g1);
+            s1 = p1.calculate(DT, s1.model(), g1);
             total_time += DT;
             max_v = Math.max(max_v, s1.v());
-            if (s1.near(g1, 0.01)) {
-                System.out.println("at goal at t " + total_time);
+            if (s1.model().near(g1, 0.01)) {
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s\n", total_time, s1);
+            if (PRINT)
+                System.out.printf("%f %s\n", total_time, s1);
         }
-        System.out.println("max v " + max_v);
+        if (PRINT)
+            System.out.println("max v " + max_v);
         // this is a triangle profile
         assertEquals(2.0, total_time, kDelta);
 
         // the second goal is farther away.
-        State100 s2 = i2;
+        Control100 s2 = i2.control();
         total_time = 0;
         max_v = 0;
         for (int i = 0; i < 1000; ++i) {
             // next state
-            s2 = p2.calculate(DT, s2, g2);
+            s2 = p2.calculate(DT, s2.model(), g2);
             total_time += DT;
             max_v = Math.max(max_v, s2.v());
-            if (s2.near(g2, 0.01)) {
-                System.out.println("at goal at t " + total_time);
+            if (s2.model().near(g2, 0.01)) {
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s\n", total_time, s2);
+            if (PRINT)
+                System.out.printf("%f %s\n", total_time, s2);
         }
-        System.out.println("max v " + max_v);
+        if (PRINT)
+            System.out.println("max v " + max_v);
         // this is a trapezoid profile
         assertEquals(3.0, total_time, kDelta);
     }
@@ -96,48 +105,54 @@ class CoordinatedProfileTest {
         ProfileWPI p1 = new ProfileWPI(maxVel, maxAccel);
         ProfileWPI p2 = new ProfileWPI(maxVel, maxAccel);
         // initial state at the origin at rest
-        State100 i1 = new State100(0, 0);
-        State100 i2 = new State100(0, 0);
+        Model100 i1 = new Model100(0, 0);
+        Model100 i2 = new Model100(0, 0);
         // final state at 1, at rest
-        State100 g1 = new State100(1, 0);
-        State100 g2 = new State100(2, 0);
+        Model100 g1 = new Model100(1, 0);
+        Model100 g2 = new Model100(2, 0);
 
         // how long does it take to get to the first goal?
-        State100 s1 = i1;
+        Control100 s1 = i1.control();
         double total_time = 0;
         double max_v = 0;
         for (int i = 0; i < 1000; ++i) {
             // next state
             // note WPI doesn't produce accel in the profile. :-)
-            s1 = p1.calculate(DT, s1, g1);
+            s1 = p1.calculate(DT, s1.model(), g1);
             total_time += DT;
             max_v = Math.max(max_v, s1.v());
-            if (s1.near(g1, 0.01)) {
-                System.out.println("at goal at t " + total_time);
+            if (s1.model().near(g1, 0.01)) {
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s\n", total_time, s1);
+            if (PRINT)
+                System.out.printf("%f %s\n", total_time, s1);
         }
-        System.out.println("max v " + max_v);
+        if (PRINT)
+            System.out.println("max v " + max_v);
         // this is a triangle profile
         assertEquals(2.0, total_time, kDelta);
 
         // the second goal is farther away.
-        State100 s2 = i2;
+        Control100 s2 = i2.control();
         total_time = 0;
         max_v = 0;
         for (int i = 0; i < 1000; ++i) {
             // next state
-            s2 = p2.calculate(DT, s2, g2);
+            s2 = p2.calculate(DT, s2.model(), g2);
             total_time += DT;
             max_v = Math.max(max_v, s2.v());
-            if (s2.near(g2, 0.01)) {
-                System.out.println("at goal at t " + total_time);
+            if (s2.model().near(g2, 0.01)) {
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s\n", total_time, s2);
+            if (PRINT)
+                System.out.printf("%f %s\n", total_time, s2);
         }
-        System.out.println("max v " + max_v);
+        if (PRINT)
+            System.out.println("max v " + max_v);
         // this is a trapezoid profile
         assertEquals(3.0, total_time, kDelta);
     }
@@ -152,18 +167,18 @@ class CoordinatedProfileTest {
         TrapezoidProfile100 p1 = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         TrapezoidProfile100 p2 = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         // initial state at the origin at rest
-        State100 i1 = new State100(0, 0);
-        State100 i2 = new State100(0, 0);
+        Model100 i1 = new Model100(0, 0);
+        Model100 i2 = new Model100(0, 0);
         // final state at 1, at rest
-        State100 g1 = new State100(1, 0);
-        State100 g2 = new State100(2, 0);
+        Model100 g1 = new Model100(1, 0);
+        Model100 g2 = new Model100(2, 0);
 
-        State100 s1 = i1;
+        Model100 s1 = i1;
         ResultWithETA r = p1.calculateWithETA(DT, s1, g1);
         double total_time = r.etaS();
         assertEquals(2.0, total_time, kDelta);
 
-        State100 s2 = i2;
+        Model100 s2 = i2;
         r = p2.calculateWithETA(DT, s2, g2);
         total_time = r.etaS();
         assertEquals(3.0, total_time, kDelta);
@@ -178,23 +193,22 @@ class CoordinatedProfileTest {
         ProfileWPI p1 = new ProfileWPI(maxVel, maxAccel);
         ProfileWPI p2 = new ProfileWPI(maxVel, maxAccel);
         // initial state at the origin at rest
-        State100 i1 = new State100(0, 0);
-        State100 i2 = new State100(0, 0);
+        Model100 i1 = new Model100(0, 0);
+        Model100 i2 = new Model100(0, 0);
         // final state at 1, at rest
-        State100 g1 = new State100(1, 0);
-        State100 g2 = new State100(2, 0);
+        Model100 g1 = new Model100(1, 0);
+        Model100 g2 = new Model100(2, 0);
 
-        State100 s1 = i1;
+        Model100 s1 = i1;
         ResultWithETA r = p1.calculateWithETA(DT, s1, g1);
         double total_time = r.etaS();
         assertEquals(2.0, total_time, kDelta);
 
-        State100 s2 = i2;
+        Model100 s2 = i2;
         r = p2.calculateWithETA(DT, s2, g2);
         total_time = r.etaS();
         assertEquals(3.0, total_time, kDelta);
     }
-
 
     @Test
     void testCoordinatedProfiles() {
@@ -205,13 +219,13 @@ class CoordinatedProfileTest {
         TrapezoidProfile100 px = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         TrapezoidProfile100 py = new TrapezoidProfile100(maxVel, maxAccel, tolerance);
         // initial x state is moving fast
-        State100 ix = new State100(0, 1);
+        Model100 ix = new Model100(0, 1);
         // initial y state is stationary
-        State100 iy = new State100(0, 0);
+        Model100 iy = new Model100(0, 0);
         // goal x state is still at the origin (i.e. a "slow and back up" profile)
-        State100 gx = new State100(0, 0);
+        Model100 gx = new Model100(0, 0);
         // goal y state is not far
-        State100 gy = new State100(0.5, 0);
+        Model100 gy = new Model100(0.5, 0);
 
         // the "default profiles" produce different ETA's
         ResultWithETA rx = px.calculateWithETA(DT, ix, gx);
@@ -246,18 +260,21 @@ class CoordinatedProfileTest {
 
         // then run the profiles to see where they end up
 
-        State100 stateX = ix;
-        State100 stateY = iy;
+        Control100 stateX = ix.control();
+        Control100 stateY = iy.control();
+        @SuppressWarnings("unused")
         double total_time = 0;
         for (int i = 0; i < 1000; ++i) {
             total_time += DT;
-            stateX = px.calculate(DT, stateX, gx);
-            stateY = py.calculate(DT, stateY, gy);
-            if (stateX.near(gx, PROFILE_TOLERANCE) && stateY.near(gy, PROFILE_TOLERANCE)) {
-                System.out.println("at goal at t " + total_time);
+            stateX = px.calculate(DT, stateX.model(), gx);
+            stateY = py.calculate(DT, stateY.model(), gy);
+            if (stateX.model().near(gx, PROFILE_TOLERANCE) && stateY.model().near(gy, PROFILE_TOLERANCE)) {
+                if (PRINT)
+                    System.out.println("at goal at t " + total_time);
                 break;
             }
-            System.out.printf("%f %s %s\n", total_time, stateX, stateY);
+            if (PRINT)
+                System.out.printf("%f %s %s\n", total_time, stateX, stateY);
         }
     }
 

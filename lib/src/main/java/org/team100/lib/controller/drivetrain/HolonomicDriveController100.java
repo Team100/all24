@@ -1,6 +1,6 @@
 package org.team100.lib.controller.drivetrain;
 
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -47,7 +47,7 @@ public class HolonomicDriveController100 implements HolonomicFieldRelativeContro
      * Makes no attempt to coordinate the axes or provide feasible output.
      */
     @Override
-    public FieldRelativeVelocity calculate(SwerveState measurement, SwerveState reference) {
+    public FieldRelativeVelocity calculate(SwerveModel measurement, SwerveModel reference) {
         m_log.measurement.log(() -> measurement);
         m_log.reference.log(() -> reference);
         m_log.error.log(() -> reference.minus(measurement));

@@ -107,6 +107,10 @@ public interface DriverControl extends Glassy {
     default boolean defense() {
         return false;
     }
+    
+    default boolean shoot() {
+        return false;
+    }
 
     default boolean driveWithFancyTrajec() {
         return false;

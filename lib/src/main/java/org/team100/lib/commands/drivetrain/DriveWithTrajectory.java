@@ -70,8 +70,8 @@ public class DriveWithTrajectory extends Command implements Glassy {
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getState().pose();
-        ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
+        Pose2d currentPose = m_swerve.getPose();
+        ChassisSpeeds currentSpeed = m_swerve.getChassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
 
         m_log_chassis_speeds.log(() -> output);

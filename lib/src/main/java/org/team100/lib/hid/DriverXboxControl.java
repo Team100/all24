@@ -4,7 +4,6 @@ import static org.team100.lib.hid.ControlUtil.clamp;
 import static org.team100.lib.hid.ControlUtil.deadband;
 import static org.team100.lib.hid.ControlUtil.expo;
 
-import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
@@ -51,8 +50,6 @@ public class DriverXboxControl implements DriverControl {
     private final DoubleLogger m_log_right_x;
     private final DoubleLogger m_log_left_x;
     private final EnumLogger m_log_speed;
-
-    Rotation2d previousRotation = GeometryUtil.kRotationZero;
 
     public DriverXboxControl(LoggerFactory parent) {
         m_controller = new XboxController(0);
@@ -116,6 +113,10 @@ public class DriverXboxControl implements DriverControl {
         }
     }
 
+    public boolean shoot() {
+        return m_controller.getRightBumper();
+    }
+
     /**
      * This used to be public and affect everything; now it just affects the
      * velocity() output above.
@@ -175,10 +176,6 @@ public class DriverXboxControl implements DriverControl {
     public boolean shooterLock() {
         return m_controller.getBButton();
     }
-
-    ////////////////////////////////////
-    //
-    // TODO: clean these up
 
     @Override
     public boolean actualCircle() {

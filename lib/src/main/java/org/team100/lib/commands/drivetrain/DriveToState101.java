@@ -63,17 +63,17 @@ public class DriveToState101 extends Command implements Glassy {
 
     @Override
     public void initialize() {
-        Translation2d toGoal = m_goal.getTranslation().minus(m_swerve.getState().pose().getTranslation());
+        Translation2d toGoal = m_goal.getTranslation().minus(m_swerve.getPose().getTranslation());
         Transform2d transform = new Transform2d(toGoal, toGoal.getAngle()).inverse();
-        Pose2d startPose = new Pose2d(m_swerve.getState().pose().getTranslation(), transform.getRotation());
-        FieldRelativeVelocity startVelocity = m_swerve.getState().velocity();
+        Pose2d startPose = new Pose2d(m_swerve.getPose().getTranslation(), transform.getRotation());
+        FieldRelativeVelocity startVelocity = m_swerve.getVelocity();
         Pose2d startWaypoint = getStartWaypoint(startPose, startVelocity);
         Pose2d endWaypoint = new Pose2d(m_goal.getTranslation(), new Rotation2d(1, -1));
         List<Pose2d> waypointsM = List.of(
                 startWaypoint,
                 endWaypoint);
         List<Rotation2d> headings = List.of(
-                m_swerve.getState().pose().getRotation(),
+                m_swerve.getPose().getRotation(),
                 m_goal.getRotation());
         Trajectory100 trajectory = TrajectoryPlanner.generateTrajectory(
                 waypointsM,
@@ -96,8 +96,8 @@ public class DriveToState101 extends Command implements Glassy {
     @Override
     public void execute() {
         double now = Timer.getFPGATimestamp();
-        Pose2d currentPose = m_swerve.getState().pose();
-        ChassisSpeeds currentSpeed = m_swerve.getState().chassisSpeeds();
+        Pose2d currentPose = m_swerve.getPose();
+        ChassisSpeeds currentSpeed = m_swerve.getChassisSpeeds();
         ChassisSpeeds output = m_controller.update(now, currentPose, currentSpeed);
         m_log_chassis_speeds.log(() -> output);
         DriveUtil.checkSpeeds(output);

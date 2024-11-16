@@ -31,6 +31,7 @@ public class OperatorControlProxy implements OperatorControl {
     public void refresh() {
         // name is blank if not connected
         String name = DriverStation.getJoystickName(kPort);
+        name = name.trim();
         if (name.equals(m_name))
             return;
         m_name = name;

@@ -4,7 +4,7 @@ import org.team100.frc2024.FieldConstants;
 import org.team100.frc2024.FieldConstantsFactory;
 import org.team100.frc2024.motion.shooter.ShooterTable;
 import org.team100.lib.geometry.Vector2d;
-import org.team100.lib.motion.drivetrain.SwerveState;
+import org.team100.lib.motion.drivetrain.SwerveModel;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -64,7 +64,7 @@ public class ShooterUtil {
     public static double getShooterAngleWhileMovingTest(
             double distanceM,
             double velocityM_s,
-            SwerveState state) {
+            SwerveModel state) {
         double angleWithoutMoving = getAngleRad(distanceM);
         double angleInRads = angleWithoutMoving * Math.PI / 180;
         double xComponent = velocityM_s * Math.sin(angleInRads);
@@ -76,7 +76,7 @@ public class ShooterUtil {
     public static double getShooterAngleWhileMoving(
             double distanceM,
             double velocityM_s,
-            SwerveState state) {
+            SwerveModel state) {
         double angleWithoutMoving = getAngleRad(distanceM);
         Rotation2d angleInRads = Rotation2d.fromDegrees(angleWithoutMoving);
         Vector2d stationaryRobotVector = new Vector2d(velocityM_s, angleInRads);

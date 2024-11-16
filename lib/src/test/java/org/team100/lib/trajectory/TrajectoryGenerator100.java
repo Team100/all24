@@ -15,9 +15,6 @@ import edu.wpi.first.math.geometry.Translation2d;
  * This is from 254 2023.
  */
 public class TrajectoryGenerator100 {
-    private static final double kMaxAccel = 2.54;
-    public static final double kMaxVelocityMetersPerSecond = 5.05; // Calibrated 3/12 on Comp Bot
-
     private final TrajectorySet mTrajectorySet;
 
     public TrajectoryGenerator100() {
@@ -38,7 +35,6 @@ public class TrajectoryGenerator100 {
         public final Trajectory100 redNCPCubeScoringPositionToFarSideDockWithPickup;
         public final Trajectory100 redNCPCubeScoringPositionToThirdCube;
         public final Trajectory100 redCPLeftScoringPositionToCPFirstPickup;
-        // public final Trajectory100 CPFirstPickupToFarSideDock;
         public final Trajectory100 ncpScoringToCubePickup;
         public final Trajectory100 ncpThirdScoreToBackoff;
 
@@ -95,9 +91,6 @@ public class TrajectoryGenerator100 {
             allTrajectories.put("redNCPCubeScoringPositionToThirdCube", redNCPCubeScoringPositionToThirdCube);
             redCPLeftScoringPositionToCPFirstPickup = getRedCPLeftScoringPositionToCPFirstPickup();
             allTrajectories.put("redCPLeftScoringPositionToCPFirstPickup", redCPLeftScoringPositionToCPFirstPickup);
-            // CPFirstPickupToFarSideDock = getCPFirstPickupToFarSideDock();
-            // allTrajectories.put("CPFirstPickupToFarSideDock",
-            // CPFirstPickupToFarSideDock);
             ncpScoringToCubePickup = getNCPScoringtoCubePickup();
             allTrajectories.put("ncpScoringToCubePickup", ncpScoringToCubePickup);
             cpFirstScoreToOutsidePickup = getCPFirstScoreToOutsidePickup();
@@ -498,15 +491,5 @@ public class TrajectoryGenerator100 {
             headings.add(Rotation2d.fromDegrees(0.0));
             return generate(waypoints, headings, List.of());
         }
-
-        // private Trajectory100 getCPFirstPickupToFarSideDock() {
-        // List<Pose2d> waypoints = new ArrayList<>();
-        // List<Rotation2d> headings = new ArrayList<>();
-        // waypoints.add(new Pose2d(5.334, -0.254, Rotation2d.fromDegrees(180.0)));
-        // headings.add(Rotation2d.fromDegrees(0.0));
-        // waypoints.add(new Pose2d(4.191, -2.032, Rotation2d.fromDegrees(0.0)));
-        // headings.add(Rotation2d.fromDegrees(0.0));
-        // return generate(waypoints, headings, List.of(), 0.5, 1.0);
-        // }
     }
 }

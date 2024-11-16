@@ -18,18 +18,18 @@ public class ZeroPivot extends Command {
     @Override
     public void initialize() {
         ready = false;
-        m_pivot.setTorqueLimit(0.01);
+        m_pivot.setTorqueLimit(0.00001);
     }
 
     @Override
     public void execute() {
-        double asDouble = m_pivot.getAngleRad().getAsDouble();
-        m_pivot.setAngleRad(asDouble - 0.05);
-        if (Math.abs(prevAngle - asDouble) < 0.025) {
-            m_pivot.setEncoderPosition(Math.PI/2);
-            ready = true;
-        } 
-        prevAngle = asDouble; 
+        // double asDouble = m_pivot.getAngleRad().getAsDouble();
+        // m_pivot.setAngleRad(asDouble - 0.05);
+        // if (Math.abs(prevAngle - asDouble) < 0.025) {
+        //     m_pivot.setEncoderPosition(Math.PI/2);
+        //     ready = true;
+        // } 
+        // prevAngle = asDouble; 
     }
 
     @Override
