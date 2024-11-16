@@ -20,7 +20,7 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .raspberry_pi
+          context: ./raspberry_pi
           platforms: linux/arm64,linux/arm/v7
           push: false
           tags: team100-pi:${{ github.sha }}
