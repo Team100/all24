@@ -48,7 +48,7 @@ public class RobotContainer {
     final LoggerFactory logger = logging.rootLogger;
 
     final TrajectoryVisualization viz = new TrajectoryVisualization(fieldLogger);
-    final DriverControl driverControl = new DriverControlProxy(logger, async);
+    new DriverControlProxy(logger, async);
 
     final Falcon6Motor falconMotor1 = new Falcon6Motor(fieldLogger, 11, MotorPhase.FORWARD, 5, 5, new PIDConstants(0.1),
         Feedforward100.makeShooterFalcon6());
@@ -96,3 +96,4 @@ public class RobotContainer {
 
   }
 }
+// hi
