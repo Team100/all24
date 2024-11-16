@@ -49,28 +49,28 @@ public class DriverControlProxy implements DriverControl {
     }
 
     private static DriverControl getDriverControl(LoggerFactory parent, String name) {
-        if (name.contains("F310")) {
-            return new DriverXboxControl(parent);
-        }
-        if (name.contains("Xbox")) {
-            return new DriverXboxControl(parent);
-        }
-        if (name.startsWith("VKBsim")) {
-            return new VKBJoystick();
-        }
-        if (name.startsWith("Logitech Extreme")) {
-            return new LogitechExtremeJoystick();
-        }
-        if (name.startsWith("GP Controller")) {
-            return new RealFlight(parent);
-        }
-        if (name.equals("Team 100 Pilot")) {
-            return new Pilot();
-        }
-        if (name.contains("Keyboard")) {
-            return new SimulatedJoystick();
-        }
-        return new NoDriverControl();
+        // if (name.contains("F310")) {
+        //     return new DriverXboxControl(parent);
+        // }
+        // if (name.contains("Xbox")) {
+        //     return new DriverXboxControl(parent);
+        // }
+        // if (name.startsWith("VKBsim")) {
+        //     return new VKBJoystick(parent);
+        // }
+        // if (name.startsWith("Logitech Extreme")) {
+        //     return new LogitechExtremeJoystick();
+        // }
+        // if (name.startsWith("GP Controller")) {
+        //     return new RealFlight(parent);
+        // }
+        // if (name.equals("Team 100 Pilot")) {
+        //     return new Pilot();
+        // }
+        // if (name.contains("Keyboard")) {
+        //     return new SimulatedJoystick();
+        // }
+         return new VKBJoystick(parent);
     }
 
     @Override

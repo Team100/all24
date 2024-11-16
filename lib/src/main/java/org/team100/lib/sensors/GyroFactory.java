@@ -31,7 +31,7 @@ public class GyroFactory {
                     // System.loadLibrary("vmxHaljni");
                     return new SelectGyro(
                             new NTGyro(),
-                            new SingleNavXGyro(parent, asyncFactory.get()),
+                            new ReduxGyro(parent, 7),
                             () -> Experiments.instance.enabled(Experiment.NetworkGyro));
                 } catch (UnsatisfiedLinkError e) {
                     // fall back to simulated heading for testing.
