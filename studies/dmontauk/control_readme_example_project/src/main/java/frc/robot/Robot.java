@@ -10,6 +10,8 @@ import org.team100.lib.logging.Logging;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeoCANSparkMotor;
+import org.team100.lib.util.Memo;
+import org.team100.lib.util.Util;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -28,6 +30,10 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   private BareMotor m_single_motor;
+  private double m_duty_cycle = 0.1;
+  private double m_velocity = 2 * Math.PI;
+  private double m_accel = 10;
+  private double m_torque = 0;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -35,17 +41,18 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+    // m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
+    // m_chooser.addOption("My Auto", kCustomAuto);
+    // SmartDashboard.putData("Auto choices", m_chooser);
+    Util.printf("Initializing single motor");
     m_single_motor = new NeoCANSparkMotor(
       Logging.instance().rootLogger.child("test logger"),
       7, 
       MotorPhase.FORWARD, 
-      1, 
+      30, 
       Feedforward100.makeNeo(), 
       new PIDConstants(0, 0, 0));
-    m_single_motor.setVelocity(0.1, 0.1, 0.1);
+    Util.printf("Motor intialized.");
   }
 
   /**
@@ -56,7 +63,17 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    Memo.resetAll();
+    m_single_motor.setDutyCycle(0.1);
+    double current_velocity = m_single_motor.getVelocityRad_S();
+    Util.printf("Current Velocity: %.2f\n", current_velocity);
+    m_duty_cycle = m_duty_cycle * 0.001;
+    // m_single_motor.setVelocity(m_velocity, m_accel, m_torque);
+    // m_velocity = m_velocity * 1.0001;
+    // Util.printf("robotPeriodic called. Increasing motor velocity to: %.2f\n", m_velocity);
+
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
