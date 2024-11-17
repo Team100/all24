@@ -33,10 +33,10 @@ RUN pip3 install adafruit-circuitpython-lsm6ds
 RUN pip3 install debugpy
 RUN pip3 install numpy
 RUN pip3 install aiohttp
-RUN pip3 install opencv-python
-# RUN pip3 install robotpy --prefer-binary
-# RUN pip3 install robotpy-cscore --prefer-binary
-# RUN pip3 install robotpy-apriltag --prefer-binary
+# RUN pip3 install opencv-python
+RUN pip3 install robotpy --prefer-binary
+RUN pip3 install robotpy-cscore --prefer-binary
+RUN pip3 install robotpy-apriltag --prefer-binary
 
 # Create app directory
 WORKDIR /team100

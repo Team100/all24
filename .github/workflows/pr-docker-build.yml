@@ -20,15 +20,6 @@ jobs:
           # Enable docker layer caching
           buildkitd-flags: --debug
 
-      # Add cache steps before build
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
       - name: Build Docker image
         uses: docker/build-push-action@v5
         timeout-minutes: 30
