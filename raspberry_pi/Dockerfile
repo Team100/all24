@@ -12,6 +12,8 @@ RUN apt-get install -y libcamera-dev
 RUN apt-get install -y python3-aiohttp
 RUN apt-get install -y python3-opencv
 RUN apt-get install -y python3-venv
+RUN apt-get install -y build-essential 
+RUN apt-get install -y python3-dev 
 
 RUN apt-get clean  && rm -rf /var/lib/apt/lists/*
 
