@@ -34,9 +34,16 @@ RUN pip3 install debugpy
 RUN pip3 install numpy
 RUN pip3 install aiohttp
 # RUN pip3 install opencv-python
-RUN pip3 install robotpy --prefer-binary
-RUN pip3 install robotpy-cscore --prefer-binary
-RUN pip3 install robotpy-apriltag --prefer-binary
+RUN pip3 install --prefer-binary robotpy-wpiutil
+RUN pip3 install --prefer-binary robotpy-wpimath
+RUN pip3 install --prefer-binary robotpy-wpinet
+RUN pip3 install --prefer-binary robotpy-hal
+RUN pip3 install --prefer-binary robotpy-halsim
+RUN pip3 install --prefer-binary robotpy-commands-v2
+RUN pip3 install --prefer-binary robotpy
+# Then install the additional robotpy packages
+RUN pip3 install robotpy-cscore 
+RUN pip3 install robotpy-apriltag 
 
 # Create app directory
 WORKDIR /team100
