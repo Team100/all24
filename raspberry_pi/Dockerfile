@@ -2,6 +2,7 @@
 FROM dtcooper/raspberrypi-os:bookworm
 
 # Install system dependencies
+RUN echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries
 RUN apt-get update
 RUN apt-get install -y python3-pip
 RUN apt-get install -y python3-setuptools

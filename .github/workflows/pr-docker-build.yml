@@ -16,16 +16,29 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          # Enable docker layer caching
+          buildkitd-flags: --debug
+
+      # Add cache steps before build
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
+        timeout-minutes: 30
         with:
           context: ./raspberry_pi
+          cache-from: type=gha
+          cache-to: type=gha,mode=max`
           platforms: linux/arm64,linux/arm/v7
-          push: false
+          push: true 
           tags: team100-pi:${{ github.sha }}
-          # Change the output format to OCI
-          outputs: type=oci,dest=/tmp/image.tar
 
           # - name: Add PR Comment on Failure
       #   if: failure()
