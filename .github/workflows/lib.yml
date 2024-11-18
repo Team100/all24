@@ -12,7 +12,6 @@ on:
 
 permissions:
   checks: write
-  pull-requests: write
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -31,7 +30,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     # Declares the repository safe and not under dubious ownership.
     - name: Add repository to git safe directories
@@ -53,7 +52,8 @@ jobs:
 
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
+      if: ${{ always() }}
       with:
-        files: |
-          **/TEST*.xml
+        # comments don't work with fork PRs anyway
+        comment_mode: off
+        files: **/TEST*.xml
