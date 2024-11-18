@@ -56,4 +56,6 @@ jobs:
       with:
         # comments don't work with fork PRs anyway
         comment_mode: off
-        files: **/TEST*.xml
+        files: |
+          **/TEST*.xml
+
