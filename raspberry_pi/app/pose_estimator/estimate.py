@@ -34,7 +34,8 @@ PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([160, 80, 60]))
 PRIOR_MEAN = gtsam.Pose2(8, 4, 0)
 
 # the gyro has really low noise.
-GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.0001]))
+# TODO: consolidate with calibrate.py
+GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.001]))
 
 # sensor noise, +/- one pixel.
 # TODO: if you want to model *blur* then you need more noise here, and maybe more in x than y.
@@ -46,7 +47,7 @@ class Estimate:
         """Initialize the model
         initial module positions are at their origins.
         TODO: some other initial positions?"""
-        self._isam: gtsam.BatchFixedLagSmoother = make_smoother()
+        self._isam: gtsam.BatchFixedLagSmoother = make_smoother(0.1)
         self._result: gtsam.Values = gtsam.Values()
         # between updates we accumulate inputs here
         self._new_factors = gtsam.NonlinearFactorGraph()
@@ -198,6 +199,10 @@ class Estimate:
 
     def update(self) -> None:
         """Run the solver"""
+        # print("============UPDATE============")
+        # print(self._new_factors)
+        # print(self._new_values)
+        # print(self._new_timestamps)
         self._isam.update(self._new_factors, self._new_values, self._new_timestamps)
         self._result: gtsam.Values = self._isam.calculateEstimate()  # type: ignore
 

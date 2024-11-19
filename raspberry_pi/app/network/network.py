@@ -6,71 +6,58 @@
 from typing import cast
 
 import ntcore
-from typing_extensions import override
-from wpimath.geometry import Rotation2d, Rotation3d
+from wpimath.geometry import Pose2d, Rotation2d, Rotation3d
 from wpiutil import wpistruct
 
 from app.config.identity import Identity
-from app.network.network_protocol import (
+from app.kinodynamics.swerve_module_position import SwerveModulePositions
+from app.network.structs import (
     Blip24,
     Blip25,
-    Blip25Receiver,
-    Blip25Sender,
-    BlipSender,
-    CalibSender,
     CameraCalibration,
-    DoubleSender,
-    GyroReceiver,
-    Network,
-    NoteSender,
-    OdometryReceiver,
     PoseEstimate25,
-    PoseSender,
 )
-from app.kinodynamics.swerve_module_position import SwerveModulePositions
 
 # global singleton
 start_time_us = ntcore._now()
 
 
-class RealDoubleSender(DoubleSender):
+class DoubleSender:
     def __init__(self, pub: ntcore.DoublePublisher) -> None:
         self.pub = pub
 
-    @override
     def send(self, val: float, delay_us: int) -> None:
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
-class RealBlipSender(BlipSender):
+class BlipSender:
     def __init__(self, pub: ntcore.StructArrayPublisher) -> None:
         self.pub = pub
 
-    @override
     def send(self, val: list[Blip24], delay_us: int) -> None:
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
-class RealNoteSender(NoteSender):
+class NoteSender:
     def __init__(self, pub: ntcore.StructArrayPublisher) -> None:
         self.pub = pub
 
-    @override
     def send(self, val: list[Rotation3d], delay_us: int) -> None:
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
-class RealBlip25Sender(Blip25Sender):
+class Blip25Sender:
     def __init__(self, pub: ntcore.StructArrayPublisher) -> None:
         self.pub = pub
 
-    @override
     def send(self, val: list[Blip25], delay_us: int) -> None:
         timestamp = int(ntcore._now() - delay_us)
         self.pub.set(val, timestamp)
 
 
-class RealBlip25Receiver(Blip25Receiver):
+class Blip25Receiver:
+    """Receive the list of tuples (timetamp, list[blip]) seen in a single frame"""
+
     def __init__(
         self,
         name: str,
@@ -88,7 +75,6 @@ class RealBlip25Receiver(Blip25Receiver):
 
         # print("RealBlip25Receiver.__init__() start_time_us ", self.start_time_us)
 
-    @override
     def get(self) -> list[tuple[int, list[Blip25]]]:
         """(timestamp_us, tag id, blip)
         The timestamp is referenced to the "now" value at
@@ -129,16 +115,25 @@ class RealBlip25Receiver(Blip25Receiver):
         return result
 
 
-class RealPoseSender(PoseSender):
+class PoseSender:
     def __init__(self, pub: ntcore.StructPublisher) -> None:
         self.pub = pub
 
-    @override
     def send(self, val: PoseEstimate25, delay_us: int) -> None:
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
-class RealOdometryReceiver(OdometryReceiver):
+class OdometrySender:
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
+        self.pub = pub
+
+    def send(self, val: SwerveModulePositions, delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
+
+
+class OdometryReceiver:
+    """Receive a list of tuples (timestamp, positions)"""
+
     def __init__(
         self,
         name: str,
@@ -167,7 +162,17 @@ class RealOdometryReceiver(OdometryReceiver):
         return result
 
 
-class RealGyroReceiver(GyroReceiver):
+class GyroSender:
+    def __init__(self, pub: ntcore.StructPublisher) -> None:
+        self.pub = pub
+
+    def send(self, val: Rotation2d, delay_us: int) -> None:
+        self.pub.set(val, int(ntcore._now() - delay_us))
+
+
+class GyroReceiver:
+    """Receive a list of tuples (timestamp, yaw)"""
+
     def __init__(
         self,
         name: str,
@@ -195,16 +200,47 @@ class RealGyroReceiver(GyroReceiver):
         return result
 
 
-class RealCalibSender(CalibSender):
+class CalibSender:
     def __init__(self, pub: ntcore.StructPublisher) -> None:
         self.pub = pub
 
-    @override
+    # TODO: we don't care about timestamp here so remove it
     def send(self, val: CameraCalibration, delay_us: int) -> None:
         self.pub.set(val, int(ntcore._now() - delay_us))
 
 
-class RealNetwork(Network):
+class PriorReceiver:
+    """Force a pose."""
+
+    def __init__(
+        self,
+        name: str,
+        inst: ntcore.NetworkTableInstance,
+    ) -> None:
+        self.name = name
+        self.poller = ntcore.NetworkTableListenerPoller(inst)
+        # need to hang on to this reference :-(
+        self.msub = ntcore.MultiSubscriber(
+            inst, [name], ntcore.PubSubOptions(keepDuplicates=True)
+        )
+        self.poller.addListener(self.msub, ntcore.EventFlags.kValueAll)
+        # self.poller.addListener([name], ntcore.EventFlags.kValueAll)
+
+    def get(self) -> Pose2d | None:
+        queue: list = self.poller.readQueue()
+        # consecutive priors override each other so just take the last one
+        if len(queue) == 0:
+            return None
+        event = queue[-1]
+
+        value_event_data = cast(ntcore.ValueEventData, event.data)
+        nt_value: ntcore.Value = value_event_data.value
+        raw: bytes = cast(bytes, nt_value.getRaw())
+        pose: Pose2d = wpistruct.unpack(Pose2d, raw)
+        return pose
+
+
+class Network:
     def __init__(self, identity: Identity) -> None:
         # TODO: use identity.name instead
         # TODO: make Network work for gyro, not just vision
@@ -225,46 +261,50 @@ class RealNetwork(Network):
             # this works
             self._inst.setServer("10.1.0.2")
 
-    @override
-    def get_double_sender(self, name: str) -> RealDoubleSender:
-        return RealDoubleSender(self._inst.getDoubleTopic(name).publish())
+    def now(self) -> int:
+        return ntcore._now() - start_time_us
 
-    @override
-    def get_blip_sender(self, name: str) -> RealBlipSender:
-        return RealBlipSender(self._inst.getStructArrayTopic(name, Blip24).publish())
+    def get_double_sender(self, name: str) -> DoubleSender:
+        return DoubleSender(self._inst.getDoubleTopic(name).publish())
 
-    @override
-    def get_note_sender(self, name: str) -> RealNoteSender:
-        return RealNoteSender(
+    def get_blip_sender(self, name: str) -> BlipSender:
+        return BlipSender(self._inst.getStructArrayTopic(name, Blip24).publish())
+
+    def get_note_sender(self, name: str) -> NoteSender:
+        return NoteSender(
             self._inst.getStructArrayTopic(name, Rotation3d).publish()
         )
 
-    @override
-    def get_blip25_sender(self, name: str) -> RealBlip25Sender:
-        return RealBlip25Sender(self._inst.getStructArrayTopic(name, Blip25).publish())
+    def get_blip25_sender(self, name: str) -> Blip25Sender:
+        return Blip25Sender(self._inst.getStructArrayTopic(name, Blip25).publish())
 
-    @override
     def get_blip25_receiver(self, name: str) -> Blip25Receiver:
-        return RealBlip25Receiver(name, self._inst)
+        return Blip25Receiver(name, self._inst)
 
-    @override
     def get_pose_sender(self, name: str) -> PoseSender:
-        return RealPoseSender(self._inst.getStructTopic(name, PoseEstimate25).publish())
+        return PoseSender(self._inst.getStructTopic(name, PoseEstimate25).publish())
 
-    @override
+    def get_odometry_sender(self, name: str) -> OdometrySender:
+        return OdometrySender(
+            self._inst.getStructTopic(name, SwerveModulePositions).publish()
+        )
+
     def get_odometry_receiver(self, name: str) -> OdometryReceiver:
-        return RealOdometryReceiver(name, self._inst)
+        return OdometryReceiver(name, self._inst)
 
-    @override
+    def get_gyro_sender(self, name: str) -> GyroSender:
+        return GyroSender(self._inst.getStructTopic(name, Rotation2d).publish())
+
     def get_gyro_receiver(self, name: str) -> GyroReceiver:
-        return RealGyroReceiver(name, self._inst)
+        return GyroReceiver(name, self._inst)
 
-    @override
     def get_calib_sender(self, name: str) -> CalibSender:
-        return RealCalibSender(
+        return CalibSender(
             self._inst.getStructTopic(name, CameraCalibration).publish()
         )
 
-    @override
+    def get_prior_receiver(self, name: str) -> PriorReceiver:
+        return PriorReceiver(name, self._inst)
+
     def flush(self) -> None:
         self._inst.flush()

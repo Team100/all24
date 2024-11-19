@@ -26,6 +26,10 @@ public class Util {
         System.out.println("WARNING: " + s);
     }
 
+    public static void warnf(String s, Object... args) {
+        System.out.printf("WARNING: " + String.format(s, args));
+    }
+
     /** Throw if x is out of range. This is a more strict version of "clamp" :-) */
     public static double inRange(double x, double minX, double maxX) {
         if (x < minX)

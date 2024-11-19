@@ -23,7 +23,7 @@ from app.pose_estimator.util import make_smoother
 # no idea what this should be.  it's probably higher.  :-)
 ACCELEROMETER_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 # the gyro has really low noise.
-GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.0001]))
+GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.001]))
 # sensor noise, +/- one pixel.
 PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
 # prior uncertainty is *much* larger than field, i.e. "no idea"
@@ -35,7 +35,7 @@ ODOMETRY_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
 class ParkingLot:
 
     def __init__(self) -> None:
-        self._isam: gtsam.BatchFixedLagSmoother = make_smoother()
+        self._isam: gtsam.BatchFixedLagSmoother = make_smoother(0.1)
         self._result: gtsam.Values = gtsam.Values()
         self._new_factors = gtsam.NonlinearFactorGraph()
         self._new_values = gtsam.Values()

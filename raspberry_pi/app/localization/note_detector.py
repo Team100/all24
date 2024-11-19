@@ -13,7 +13,7 @@ from app.camera.camera_protocol import Camera, Request, Size
 from app.camera.interpreter_protocol import Interpreter
 from app.config.identity import Identity
 from app.dashboard.display import Display
-from app.network.real_network import Network
+from app.network.network import Network
 
 Mat = NDArray[np.uint8]
 

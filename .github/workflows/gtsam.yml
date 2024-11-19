@@ -1,5 +1,5 @@
 # see https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-name: Raspberry Pi Tests
+name: GTSAM tests
 
 on: [push]
 
@@ -38,16 +38,9 @@ jobs:
       - run: pip install robotpy-wpiutil
       - run: pip install robotpy-apriltag
       - run: pip install opencv-python
+      - run: pip install gtsam
 
 #      - run: python3 runtests.py
         
-      - run: pytest --forked -vv -rA --full-trace tests/config
-        if: ${{ always() }}
-      - run: pytest --forked -vv -rA --full-trace tests/dashboard
-        if: ${{ always() }}
-      - run: pytest --forked -vv -rA --full-trace tests/localization
-        if: ${{ always() }}
-      - run: pytest --forked -vv -rA --full-trace tests/network
-        if: ${{ always() }}
-      - run: pytest --forked -vv -rA --full-trace tests/util
-        if: ${{ always() }}
+      - run: pytest --forked -vv -rA --full-trace tests/pose_estimator
+        if: always()

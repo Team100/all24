@@ -20,7 +20,7 @@ class OdometryTest(unittest.TestCase):
         # The CustomFactor wrapper makes this hard to test more thoroughly.
         t = Twist2d(0, 0, 0)
         f: gtsam.NoiseModelFactor = odometry.factor(t, NOISE3, X(0), X(1))
-        print("keys", f.keys())
+        # print("keys", f.keys())
         v = gtsam.Values()
         p0 = gtsam.Pose2()
         p1 = gtsam.Pose2()

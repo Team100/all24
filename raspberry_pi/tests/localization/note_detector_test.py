@@ -1,18 +1,26 @@
 import unittest
 
+import ntcore
+from wpimath.geometry import Rotation3d
+
 from app.camera.fake_camera import FakeCamera
 from app.config.identity import Identity
 from app.dashboard.fake_display import FakeDisplay
 from app.localization.note_detector import NoteDetector
-from app.network.fake_network import FakeNetwork
+from app.network.network import Network
 
 
 class NoteDetectorTest(unittest.TestCase):
     KEY = "noteVision/unknown/0/Rotation3d"
 
     def test_one_note_found(self) -> None:
+
+        inst = ntcore.NetworkTableInstance.getDefault()
+        inst.startServer()
+        sub = inst.getStructArrayTopic(self.KEY, Rotation3d).subscribe([])
+
         identity = Identity.UNKNOWN
-        network = FakeNetwork()
+        network = Network(identity)
         # this has an orange blob that matches the
         # HSV range in the note detector
         # the blob is in the lower right quadrant, so the result
@@ -32,8 +40,7 @@ class NoteDetectorTest(unittest.TestCase):
         self.assertEqual(482, display.circles[0][0])
         self.assertEqual(468, display.circles[0][1])
 
-        self.assertIn(self.KEY, network.notes)
-        rots = network.notes[self.KEY]
+        rots = sub.get()
         self.assertEqual(1, len(rots))
         rot = rots[0]
         # ~zero
@@ -52,8 +59,13 @@ class NoteDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(0.983, q.W(), 3)
 
     def test_zero_notes_found(self) -> None:
+        inst = ntcore.NetworkTableInstance.getDefault()
+        inst.startServer()
+        sub = inst.getStructArrayTopic(self.KEY, Rotation3d).subscribe([])
+
         identity = Identity.UNKNOWN
-        network = FakeNetwork()
+        network = Network(identity)
+
         # nothing in this image
         camera = FakeCamera("white_square.jpg")
         display = FakeDisplay()
@@ -68,7 +80,7 @@ class NoteDetectorTest(unittest.TestCase):
         self.assertEqual(1, display.frame_count)
 
         ## always publish even if empty
-        self.assertEqual(1, len(network.notes))
-        self.assertIn(self.KEY, network.notes)
-        rots = network.notes[self.KEY]
+
+        rots = sub.get()
+
         self.assertEqual(0, len(rots))
