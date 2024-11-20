@@ -35,7 +35,7 @@ class EstimateAprilTagTest(unittest.TestCase):
             measured,
             0,
             gtsam.Pose3(),
-            gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0),
+            gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1),
         )
         est.update()
         self.assertEqual(1, est.result_size())

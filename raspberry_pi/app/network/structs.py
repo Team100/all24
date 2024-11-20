@@ -106,9 +106,9 @@ class Cal3DS2:
     # radial 2nd-order and 4th-order
     k1: float
     k2: float
-    #  tangential distortion
-    p1: float
-    p2: float
+    #  tangential distortion is not wrapped by gtsam
+    # p1: float
+    # p2: float
 
 
 @wpistruct.make_wpistruct

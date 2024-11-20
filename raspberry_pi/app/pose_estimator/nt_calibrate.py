@@ -131,8 +131,8 @@ class NTCalibrate:
             ks0[4],
             ks0[5],
             ks0[6],
-            ks0[7],
-            ks0[8],
+            # ks0[7],
+            # ks0[8],
         )
 
         camera_calibration = CameraCalibration(cp0, ct0, kd0, kc0)

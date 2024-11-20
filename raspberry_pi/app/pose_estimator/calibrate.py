@@ -42,8 +42,6 @@ CAL_PRIOR_MEAN = gtsam.Cal3DS2(
     300.0,  # known precisely
     0.0,
     0.0,
-    0.0,
-    0.0,
 )
 
 # calibration prior sigma.
