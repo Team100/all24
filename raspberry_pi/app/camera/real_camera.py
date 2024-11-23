@@ -259,6 +259,8 @@ class RealCamera(Camera):
             controls={
                 "ExposureTime": RealCamera.__get_exposure_time(identity),
                 "AnalogueGain": 8,
+                "AeEnable": False,
+                "AwbEnable": False,
                 # limit auto: go as fast as possible but no slower than 30fps
                 # without a duration limit, we slow down in the dark, which is fine
                 # "FrameDurationLimits": (5000, 33333),  # 41 fps

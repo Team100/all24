@@ -111,7 +111,7 @@ class Cal3DS2:
     p2: float
 
 
-@wpistruct.make_wpistruct
+@wpistruct.make_wpistruct 
 @dataclasses.dataclass
 class MyTwist3d:
     """This works around the missing Twist3d on the RPi's at the moment"""

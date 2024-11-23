@@ -3,6 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -47,23 +48,24 @@ public class DriveWithProfileRotation extends DriveWithProfile2 {
      * empty.
      */
     private Optional<Translation2d> getGoal() {
-        Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
-        if (optGoal.isPresent()) {
-            // Supplier is ok, use this goal and reset the history mechanism.
-            m_previousGoal = optGoal.get();
-            m_count = 0;
-            return optGoal;
-        }
-        if (m_count > 50) {
-            // Supplier is empty and timer has expired.
-            return Optional.empty();
-        }
-        if (m_previousGoal == null) {
-            // Nothing to fall back to.
-            return Optional.empty();
-        }
-        m_count++;
-        return Optional.of(m_previousGoal);
+        return m_fieldRelativeGoal.get();
+        // Optional<Translation2d> optGoal = m_fieldRelativeGoal.get();
+        // if (optGoal.isPresent()) {
+        //     // Supplier is ok, use this goal and reset the history mechanism.
+        //     m_previousGoal = optGoal.get();
+        //     m_count = 0;
+        //     return optGoal;
+        // }
+        // if (m_count > 50) {
+        //     // Supplier is empty and timer has expired.
+        //     return Optional.empty();
+        // }
+        // if (m_previousGoal == null) {
+        //     // Nothing to fall back to.
+        //     return Optional.empty();
+        // }
+        // m_count++;
+        // return Optional.of(m_previousGoal);
     }
 
 /**
@@ -94,7 +96,12 @@ public class DriveWithProfileRotation extends DriveWithProfile2 {
         if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
             // face the rear of the robot towards the goal.
             Translation2d toGoal = goal.minus(pose.getTranslation());
-            return toGoal.getAngle().getRadians() + Math.PI;
+            switch(Identity.instance) {
+                case COMP_BOT:
+                return toGoal.getAngle().getRadians() + Math.PI;
+                default:
+                return toGoal.getAngle().getRadians();
+            }
         } else {
             // leave the rotation alone
             return pose.getRotation().getRadians();

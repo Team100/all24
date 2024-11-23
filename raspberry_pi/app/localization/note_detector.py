@@ -39,10 +39,10 @@ class NoteDetector(Interpreter):
         self.height: int = size.height
 
         # opencv hue values are 0-180, half the usual number
-        self.object_lower = np.array((0, 150, 50))
-        self.object_lower2 = np.array((178, 150, 50))
-        self.object_higher = np.array((8, 255, 255))
-        self.object_higher2 = np.array((180, 255, 255))
+        lowerSat = 50
+        lowerValue = 100
+        self.object_lower = np.array((30, lowerSat, lowerValue))
+        self.object_higher = np.array((50, 255, 255))
 
         # TODO: move the identity part of this path to the Network object
         path = "noteVision/" + identity.value + "/" + str(camera_num)
@@ -62,6 +62,8 @@ class NoteDetector(Interpreter):
             img_hsv = np.ascontiguousarray(img_hsv)
 
             img_range = cv2.inRange(img_hsv, self.object_lower, self.object_higher)
+            # img_range2 = cv2.inRange(img_hsv, self.object_lower2, self.object_higher2)
+            # img_range = cv2.bitwise_or(img_range1, img_range2)
 
             floodfill = img_range.copy()
             mask = np.zeros((self.height + 2, self.width + 2), np.uint8)
@@ -69,7 +71,7 @@ class NoteDetector(Interpreter):
 
             floodfill_inv = cv2.bitwise_not(floodfill)
             img_floodfill = cv2.bitwise_or(img_range, floodfill_inv)
-            median = cv2.medianBlur(img_floodfill, 5)
+            median = cv2.medianBlur(img_range, 5)
             contours, _ = cv2.findContours(
                 median, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
             )
@@ -91,7 +93,7 @@ class NoteDetector(Interpreter):
                 # reject too small (m00 is in pixels)
                 # TODO: make this adjustable at runtime
                 # to pick out distant targets
-                if mmnts["m00"] < 100:
+                if mmnts["m00"] < 500:
                     continue
 
                 cX = int(mmnts["m10"] / mmnts["m00"])
@@ -116,5 +118,5 @@ class NoteDetector(Interpreter):
             fps = req.fps()
             self.display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
             self.display.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
-            # self.display.put(img_range)
+            #self.display.put(img_range)
             self.display.put(img_bgr)
