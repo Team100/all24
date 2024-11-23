@@ -1,7 +1,6 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.logging.LoggerFactory;
@@ -104,8 +103,8 @@ public class SwerveModuleCollection {
                                 32,
                                 DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 12,
-                                7,
-                                0.151,
+                                2,
+                                0.34,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(frontRightLogger,
@@ -114,8 +113,8 @@ public class SwerveModuleCollection {
                                 30,
                                 DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 11,
-                                8,
-                                0.88,
+                                1,
+                                0.62,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(rearLeftLogger,
@@ -124,8 +123,8 @@ public class SwerveModuleCollection {
                                 31,
                                 DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 21,
-                                6,
-                                0.91,
+                                3,
+                                0.59,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(rearRightLogger,
@@ -134,8 +133,8 @@ public class SwerveModuleCollection {
                                 22,
                                 DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 33,
-                                9,
-                                0.888,
+                                0,
+                                0.59,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE));
             case BETA_BOT:

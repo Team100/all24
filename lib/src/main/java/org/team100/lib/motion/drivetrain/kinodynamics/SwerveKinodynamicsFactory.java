@@ -55,7 +55,7 @@ public class SwerveKinodynamicsFactory {
                         0.3); // vcg m
             case SWERVE_ONE:
                 return new SwerveKinodynamics(
-                        4, // vel m/s
+                        5, // vel m/s
                         10, // stall m/s/s
                         10, // max accel m/s/s
                         20, // max decel m/s/s
