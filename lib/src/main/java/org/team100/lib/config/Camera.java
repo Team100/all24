@@ -51,15 +51,15 @@ public enum Camera {
      */
     GLOBAL_GAME_PIECE("364f07fb090a3bf7",
             new Transform3d(
-                    new Translation3d(-0.0565, 0, 0.381),
-                    new Rotation3d(0, Math.toRadians(30), Math.PI))),
+                    new Translation3d(0.2, -0.05, 0.381),
+                    new Rotation3d(0, Math.toRadians(20), 0))),
                    
      /**
      * Camera bot right april tag detector
      */
     GLOBAL_RIGHT("d44649628c20d4d4",
             new Transform3d(
-                    new Translation3d(0.1905, -0.095, 0.381),
+                    new Translation3d(0.15, -0.095, 0.381),
                     new Rotation3d(0, Math.toRadians(-20), Math.toRadians(-30)))),
                    
      /**
@@ -67,7 +67,7 @@ public enum Camera {
      */
     GLOBAL_LEFT("06ece53b019a5c2e",
             new Transform3d(
-                    new Translation3d(0.1905, 0.095, 0.381),
+                    new Translation3d(0.15, 0.095, 0.381),
                     new Rotation3d(0, Math.toRadians(-25), Math.toRadians(20)))),
                    
     

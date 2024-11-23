@@ -64,8 +64,8 @@ public class SwerveKinodynamicsFactory {
                         0.49, // front track m
                         0.44, // back track m
                         0.462, // wheelbase m
-                        .232, // front offset m
-                        0.3); // vcg m
+                        .31, // front offset m
+                        0.07); // vcg m
             case BLANK:
                 // this is used for tests and simulation; the limits should be kept in sync
                 // with the comp config, so that the simulator provides realistic
