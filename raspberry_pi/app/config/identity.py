@@ -37,8 +37,8 @@ class Identity(Enum):
     GAME_PIECE = "1000000013c9c96c"
 
     # camera-bot cameras
-    GLOBAL_GAME_PIECE = "364f07fb090a3bf7"
-    GLOBAL_RIGHT = "d44649628c20d4d4"
+    GLOBAL_GAME_PIECE = "d44649628c20d4d4"
+    GLOBAL_RIGHT = "364f07fb090a3bf7"
     GLOBAL_LEFT = "06ece53b019a5c2e"
 
     # for testing

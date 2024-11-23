@@ -41,8 +41,8 @@ class NoteDetector(Interpreter):
         # opencv hue values are 0-180, half the usual number
         lowerSat = 50
         lowerValue = 100
-        self.object_lower = np.array((45, lowerSat, lowerValue))
-        self.object_higher = np.array((90, 255, 255))
+        self.object_lower = np.array((30, lowerSat, lowerValue))
+        self.object_higher = np.array((50, 255, 255))
 
         # TODO: move the identity part of this path to the Network object
         path = "noteVision/" + identity.value + "/" + str(camera_num)
@@ -119,4 +119,4 @@ class NoteDetector(Interpreter):
             self.display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
             self.display.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
             #self.display.put(img_range)
-            self.display.put(img_range)
+            self.display.put(img_bgr)

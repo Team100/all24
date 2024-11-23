@@ -51,8 +51,8 @@ public enum Camera {
      */
     GLOBAL_GAME_PIECE("364f07fb090a3bf7",
             new Transform3d(
-                    new Translation3d(-0.11, 0, 0.381),
-                    new Rotation3d(0, Math.toRadians(20), Math.PI))),
+                    new Translation3d(0.2, -0.05, 0.381),
+                    new Rotation3d(0, Math.toRadians(20), 0))),
                    
      /**
      * Camera bot right april tag detector

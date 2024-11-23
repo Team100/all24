@@ -3,6 +3,7 @@ package org.team100.lib.commands.drivetrain;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.team100.lib.config.Identity;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
@@ -95,7 +96,12 @@ public class DriveWithProfileRotation extends DriveWithProfile2 {
         if (Experiments.instance.enabled(Experiment.DriveToNoteWithRotation)) {
             // face the rear of the robot towards the goal.
             Translation2d toGoal = goal.minus(pose.getTranslation());
-            return toGoal.getAngle().getRadians() + Math.PI;
+            switch(Identity.instance) {
+                case COMP_BOT:
+                return toGoal.getAngle().getRadians() + Math.PI;
+                default:
+                return toGoal.getAngle().getRadians();
+            }
         } else {
             // leave the rotation alone
             return pose.getRotation().getRadians();
