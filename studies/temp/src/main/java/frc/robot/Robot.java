@@ -1,14 +1,18 @@
 package frc.robot;
 
-import java.io.IOException;
 
+
+import org.team100.lib.config.Feedforward100;
 import org.team100.lib.config.Identity;
+import org.team100.lib.config.PIDConstants;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.JvmLogger;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.Logging;
+import org.team100.lib.motor.Falcon6Motor;
+import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
@@ -20,6 +24,8 @@ import org.team100.lib.util.Util;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -37,7 +43,11 @@ public class Robot extends TimedRobot100 {
     private final DoubleLogger m_log_voltage;
     private final JvmLogger m_jvmLogger;
 
-    private RobotContainer m_robotContainer;
+    private final Logging logging = Logging.instance();
+    private final Falcon6Motor falconMotor1;
+    private final Falcon6Motor falconMotor2;
+    private final Timer timer;
+    XboxController controller = new XboxController(0);
 
     public Robot() {
         LoggerFactory dsLog = m_robotLogger.child("DriverStation");
@@ -49,6 +59,13 @@ public class Robot extends TimedRobot100 {
         m_log_key_list_size = m_robotLogger.intLogger(Level.TRACE, "key list size");
         m_log_voltage = m_robotLogger.doubleLogger(Level.TRACE, "voltage");
         m_jvmLogger = new JvmLogger(m_robotLogger);
+
+        LoggerFactory parent = logging.rootLogger;
+        falconMotor1 = new Falcon6Motor(parent, 11, MotorPhase.FORWARD, 40, 40, new PIDConstants(0.1),
+                Feedforward100.makeShooterFalcon6());
+        falconMotor2 = new Falcon6Motor(parent, 18, MotorPhase.FORWARD, 40, 40, new PIDConstants(0.1),
+                Feedforward100.makeShooterFalcon6());
+        timer = new Timer();
     }
 
     @Override
@@ -65,13 +82,6 @@ public class Robot extends TimedRobot100 {
 
         // log what the scheduler is doing
         SmartDashboard.putData(CommandScheduler.getInstance());
-
-        try {
-            m_robotContainer = new RobotContainer(this);
-        } catch (IOException e) {
-            throw new IllegalStateException("Robot Container Instantiation Failed", e);
-        }
-
 
         NetworkTableInstance.getDefault().startServer();
 
@@ -123,6 +133,8 @@ public class Robot extends TimedRobot100 {
 
     @Override
     public void autonomousInit() {
+        timer.start();
+
     }
 
     @Override
@@ -155,6 +167,27 @@ public class Robot extends TimedRobot100 {
 
     @Override
     public void autonomousPeriodic() {
+        if (timer.get() < 1) {
+            falconMotor1.setDutyCycle(0.1); // forward
+            falconMotor2.setDutyCycle(-0.1); // forward
+
+        } else {
+            falconMotor1.setDutyCycle(0);
+            falconMotor2.setDutyCycle(0);
+        }
+        if (timer.get() < 2 && timer.get() > 1) { // backward
+            falconMotor1.setDutyCycle(-0.1);
+            falconMotor2.setDutyCycle(0.1);
+        } else if (timer.get() < 3 && timer.get() > 2) { // right
+            falconMotor1.setDutyCycle(0.1);
+            falconMotor2.setDutyCycle(0.1);
+
+        } else if (timer.get() < 4 && timer.get() > 3) {
+            falconMotor1.setDutyCycle(-0.1);
+            falconMotor2.setDutyCycle(-0.1);
+        } else
+            falconMotor1.setDutyCycle(0);
+        falconMotor2.setDutyCycle(0);
         m_log_mode.log(() -> "autonomous");
     }
 
@@ -165,7 +198,25 @@ public class Robot extends TimedRobot100 {
 
     @Override
     public void teleopPeriodic() {
-        m_robotContainer.teleopPeriodic();
+        double input2 = controller.getLeftY();
+        falconMotor1.setDutyCycle(input2);
+        double input3 = controller.getRightY();
+        falconMotor2.setDutyCycle(-1 * input3);
+
+        if (controller.getLeftBumper()) {
+            falconMotor1.setDutyCycle(0.5);
+        }
+        if (controller.getRightBumper()) {
+            falconMotor2.setDutyCycle(-0.5);
+        }
+
+        if (controller.getLeftTriggerAxis() != 0) {
+            falconMotor1.setDutyCycle(-0.5);
+        }
+        if (controller.getRightTriggerAxis() != 0) {
+            falconMotor2.setDutyCycle(0.5);
+        }
+
         m_log_mode.log(() -> "teleop");
         m_log_voltage.log(RobotController::getBatteryVoltage);
     }
