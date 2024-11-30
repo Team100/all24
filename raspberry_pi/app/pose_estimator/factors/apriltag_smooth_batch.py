@@ -50,7 +50,10 @@ def h_H(
 ) -> np.ndarray:
     """measured: concatenation of px"""
     h = h_fn(landmarks, offset, calib)
-    result = h(p0) - measured
+    try:
+        result = h(p0) - measured
+    except RuntimeError: # CheiralityException
+        return np.ones_like(measured) * 100000 # a big number
     if H is not None:
         H[0] = numericalDerivative11(h, p0)
 

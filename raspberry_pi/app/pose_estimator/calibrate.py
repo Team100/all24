@@ -172,15 +172,19 @@ class Calibrate:
 
     def update(self) -> None:
         """Run the solver"""
+        print("FACTORS", self._new_factors)
+        print("VALUES", self._new_values)
+        print("TIMESTAMPS", self._new_timestamps)
+        
         self._isam.update(self._new_factors, self._new_values, self._new_timestamps)
         self._result: gtsam.Values = self._isam.calculateEstimate()  # type: ignore
 
-        # print("TIMESTAMPS")
-        # print(self.isam.timestamps())
+        print("TIMESTAMPS")
+        print(self._isam.timestamps())
         k = max(self._isam.timestamps().keys())
         ts = max(self._isam.timestamps().values())
-        # print(self._result.atPose2(k))
-        # print(ts)
+        print(self._result.atPose2(k))
+        print(ts)
 
         # reset the accumulators
         self._new_factors.resize(0)

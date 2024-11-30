@@ -73,6 +73,7 @@ class NTCalibrate:
         self._receive_gyro()
 
         self.est.keep_calib_hot(self.net.now())
+        print("UPDATE!")
         self.est.update()
 
         # print("NTEstimate.step() result ", self.est.result)

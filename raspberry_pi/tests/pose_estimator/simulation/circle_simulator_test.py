@@ -28,22 +28,22 @@ class CircleSimulatorTest(unittest.TestCase):
         self.assertAlmostEqual(0, sim.positions.front_left.angle.value.radians())
 
         # lower left
-        self.assertAlmostEqual(192, sim.gt_pixels[0][0], 0)
-        self.assertAlmostEqual(208, sim.gt_pixels[0][1], 0)
+        self.assertAlmostEqual(384, sim.gt_pixels[0][0], 0)
+        self.assertAlmostEqual(219, sim.gt_pixels[0][1], 0)
         # lower right
-        self.assertAlmostEqual(208, sim.gt_pixels[1][0], 0)
-        self.assertAlmostEqual(208, sim.gt_pixels[1][1], 0)
+        self.assertAlmostEqual(416, sim.gt_pixels[1][0], 0)
+        self.assertAlmostEqual(219, sim.gt_pixels[1][1], 0)
         # upper right
-        self.assertAlmostEqual(208, sim.gt_pixels[2][0], 0)
-        self.assertAlmostEqual(192, sim.gt_pixels[2][1], 0)
+        self.assertAlmostEqual(416, sim.gt_pixels[2][0], 0)
+        self.assertAlmostEqual(190, sim.gt_pixels[2][1], 0)
         # upper left
-        self.assertAlmostEqual(192, sim.gt_pixels[3][0], 0)
-        self.assertAlmostEqual(192, sim.gt_pixels[3][1], 0)
+        self.assertAlmostEqual(384, sim.gt_pixels[3][0], 0)
+        self.assertAlmostEqual(190, sim.gt_pixels[3][1], 0)
 
         sim.step(math.pi / 2)
         self.assertAlmostEqual(1, sim.gt_x)
         self.assertAlmostEqual(1, sim.gt_y)
-        self.assertAlmostEqual(-0.5, sim.gt_theta)
+        self.assertAlmostEqual(-1, sim.gt_theta)
         sim.step(math.pi / 2)
         self.assertAlmostEqual(0, sim.gt_x)
         self.assertAlmostEqual(0, sim.gt_y)
@@ -51,7 +51,7 @@ class CircleSimulatorTest(unittest.TestCase):
         sim.step(math.pi / 2)
         self.assertAlmostEqual(1, sim.gt_x)
         self.assertAlmostEqual(-1, sim.gt_y)
-        self.assertAlmostEqual(0.5, sim.gt_theta)
+        self.assertAlmostEqual(1, sim.gt_theta)
 
     def test_camera(self) -> None:
         sim = CircleSimulator(FieldMap())

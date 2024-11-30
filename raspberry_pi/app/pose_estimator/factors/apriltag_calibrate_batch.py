@@ -53,7 +53,10 @@ def h_H(
     """Error function (in pixels) including Jacobian vector, H.
     measured: concatenation of px"""
     h = h_fn(landmarks)
-    result = h(p0, offset, calib) - measured
+    try:
+        result = h(p0, offset, calib) - measured
+    except RuntimeError: # CheiralityException
+        return np.ones_like(measured) * 100000 # a big number
     if H is not None:
         H[0] = numericalDerivative31(h, p0, offset, calib)
         H[1] = numericalDerivative32(h, p0, offset, calib)
