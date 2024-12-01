@@ -10,7 +10,7 @@ from gtsam.symbol_shorthand import X  # type:ignore
 
 import app.pose_estimator.factors.apriltag_smooth_batch as apriltag_smooth_batch
 
-KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
+KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
 NOISE2 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 
 

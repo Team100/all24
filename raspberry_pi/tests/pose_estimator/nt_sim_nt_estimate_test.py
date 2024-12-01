@@ -33,10 +33,10 @@ class NTSimNTEstimateTest(unittest.TestCase):
         for i in range(100):
             # TODO: i think for this test to work reliably i need to fully fake time.
             time.sleep(0.02)
-            print("\nSTEP", i)
+            # print("\nSTEP", i)
             # publish some stuff
             sim.step(0.02)
             # collect it
             est.step()
             estimate = sub.get()
-            print("ESTIMATE", estimate)
+            # print("ESTIMATE", estimate)

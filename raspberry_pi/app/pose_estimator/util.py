@@ -62,8 +62,9 @@ def pose2d_to_pose2(pose2d: Pose2d) -> gtsam.Pose2:
 
 
 def to_cal(gc: gtsam.Cal3DS2) -> Cal3DS2:
-    v = gc.vector()
-    return Cal3DS2(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8])
+    return Cal3DS2(gc.fx(), gc.fy(), gc.skew(), gc.px(), gc.py(), gc.k1(), gc.k2())
+    # v = gc.vector()
+    # return Cal3DS2(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8])
 
 
 def make_smoother(lag_s: float) -> gtsam.BatchFixedLagSmoother:

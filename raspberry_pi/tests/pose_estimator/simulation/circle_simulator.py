@@ -138,7 +138,7 @@ class CircleSimulator:
         )
 
         robot_pose = Pose2(self.gt_x, self.gt_y, self.gt_theta)
-        print("GT POSE", new_wpi_pose)
+        # print("GT POSE", new_wpi_pose)
 
         # lower left
         p0 = self._px(
