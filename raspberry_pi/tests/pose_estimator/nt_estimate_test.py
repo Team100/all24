@@ -66,7 +66,7 @@ class NTEstimateTest(unittest.TestCase):
             )
             est.step()
             estimate = sub.get()
-            print("ESTIMATE", estimate)
+            # print("ESTIMATE", estimate)
 
         self.assertIsNotNone(estimate)
         estimate = cast(PoseEstimate25, estimate)

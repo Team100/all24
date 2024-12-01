@@ -120,7 +120,7 @@ class NTEstimate:
             # so that the network schema and the estimate schema are more
             # similar
             for blip in blip_list:
-                print("TIME", time_slice, "BLIP", blip)
+                # print("TIME", time_slice, "BLIP", blip)
                 pixels = blip.measurement()
                 corners = self.field_map.get(blip.tag_id)
                 self.est.add_state(time_slice, self.state)

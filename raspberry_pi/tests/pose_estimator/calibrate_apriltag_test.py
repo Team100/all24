@@ -65,10 +65,11 @@ class CalibrateAprilTagTest(unittest.TestCase):
         self.assertAlmostEqual(180, k0.fy(), 3)
         self.assertAlmostEqual(400, k0.px(), 3)
         self.assertAlmostEqual(300, k0.py(), 3)
-        self.assertAlmostEqual(0, k0.k()[0], 3)
-        self.assertAlmostEqual(0, k0.k()[1], 3)
-        self.assertAlmostEqual(0, k0.k()[2], 3)
-        self.assertAlmostEqual(0, k0.k()[3], 3)
+        self.assertAlmostEqual(0, k0.k1(), 3)
+        self.assertAlmostEqual(0, k0.k2(), 3)
+        # these are not wrapped
+        # self.assertAlmostEqual(0, k0.p1(), 3)
+        # self.assertAlmostEqual(0, k0.p2(), 3)
 
         # not meaningful i think
         sk0 = est.sigma(K(0))

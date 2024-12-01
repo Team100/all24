@@ -17,7 +17,7 @@ from tests.pose_estimator.simulation.circle_simulator import CircleSimulator
 
 ACTUALLY_PRINT = False
 
-PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
+PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([3, 3, 1]))
 
 
 class EstimateSimulateTest(unittest.TestCase):
@@ -102,7 +102,10 @@ class EstimateSimulateTest(unittest.TestCase):
             t0 = time.time_ns()
             t0_us = 20000 * i
             # updates gt to t0
-            sim.step(0.02)
+            sim.step(0.02) 
+            if len(sim.gt_pixels) == 0:
+                # skip out-of-frame iterations
+                continue
             est.add_state(t0_us, state)
             est.apriltag_for_smoothing(
                 sim.l0, sim.gt_pixels[0], t0_us, sim.camera_offset, sim.calib
@@ -179,18 +182,19 @@ class EstimateSimulateTest(unittest.TestCase):
             est.add_state(t1_us, state)
             est.odometry(t1_us, sim.positions, odometry_noise)
 
-            est.apriltag_for_smoothing(
-                sim.l0, sim.gt_pixels[0], t1_us, sim.camera_offset, sim.calib
-            )
-            est.apriltag_for_smoothing(
-                sim.l1, sim.gt_pixels[1], t1_us, sim.camera_offset, sim.calib
-            )
-            est.apriltag_for_smoothing(
-                sim.l2, sim.gt_pixels[2], t1_us, sim.camera_offset, sim.calib
-            )
-            est.apriltag_for_smoothing(
-                sim.l3, sim.gt_pixels[3], t1_us, sim.camera_offset, sim.calib
-            )
+            if len(sim.gt_pixels) > 0:
+                est.apriltag_for_smoothing(
+                    sim.l0, sim.gt_pixels[0], t1_us, sim.camera_offset, sim.calib
+                )
+                est.apriltag_for_smoothing(
+                    sim.l1, sim.gt_pixels[1], t1_us, sim.camera_offset, sim.calib
+                )
+                est.apriltag_for_smoothing(
+                    sim.l2, sim.gt_pixels[2], t1_us, sim.camera_offset, sim.calib
+                )
+                est.apriltag_for_smoothing(
+                    sim.l3, sim.gt_pixels[3], t1_us, sim.camera_offset, sim.calib
+                )
             est.update()
             t1 = time.time_ns()
             et = t1 - t0
@@ -263,18 +267,19 @@ class EstimateSimulateTest(unittest.TestCase):
             est.gyro(t1_us, sim.gt_theta)
             # gt_theta_0 = sim.gt_theta
 
-            est.apriltag_for_smoothing(
-                sim.l0, sim.gt_pixels[0], t1_us, sim.camera_offset, sim.calib
-            )
-            est.apriltag_for_smoothing(
-                sim.l1, sim.gt_pixels[1], t1_us, sim.camera_offset, sim.calib
-            )
-            est.apriltag_for_smoothing(
-                sim.l2, sim.gt_pixels[2], t1_us, sim.camera_offset, sim.calib
-            )
-            est.apriltag_for_smoothing(
-                sim.l3, sim.gt_pixels[3], t1_us, sim.camera_offset, sim.calib
-            )
+            if len(sim.gt_pixels) > 0:
+                est.apriltag_for_smoothing(
+                    sim.l0, sim.gt_pixels[0], t1_us, sim.camera_offset, sim.calib
+                )
+                est.apriltag_for_smoothing(
+                    sim.l1, sim.gt_pixels[1], t1_us, sim.camera_offset, sim.calib
+                )
+                est.apriltag_for_smoothing(
+                    sim.l2, sim.gt_pixels[2], t1_us, sim.camera_offset, sim.calib
+                )
+                est.apriltag_for_smoothing(
+                    sim.l3, sim.gt_pixels[3], t1_us, sim.camera_offset, sim.calib
+                )
             est.update()
             t1 = time.time_ns()
             et = t1 - t0

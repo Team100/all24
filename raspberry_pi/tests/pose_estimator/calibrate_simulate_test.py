@@ -235,7 +235,7 @@ class CalibrateSimulateTest(unittest.TestCase):
                 f"{s0[0]:{f}}, {s0[1]:{f}}, {s0[2]:{f}}, "
                 f"{err_x:{f}}, {err_y:{f}}, {err_theta:{f}}, "
                 f"{k0.fx():{f}}, {k0.fy():{f}}, {k0.px():{f}}, "
-                f"{k0.py():{f}}, {k0.k()[0]:{f}}, {k0.k()[1]:{f}}, "
+                f"{k0.py():{f}}, {k0.k1():{f}}, {k0.k2():{f}}, "
                 f"{c0.x():{f}}, {c0.y():{f}}, {c0.z():{f}}, "
                 f"{c0.rotation().roll():{f}}, {c0.rotation().pitch():{f}}, {c0.rotation().yaw():{f}}"
             )
@@ -329,7 +329,7 @@ class CalibrateSimulateTest(unittest.TestCase):
                 f"{s0[0]:{f}}, {s0[1]:{f}}, {s0[2]:{f}}, "
                 f"{err_x:{f}}, {err_y:{f}}, {err_theta:{f}}, "
                 f"{k0.fx():{f}}, {k0.fy():{f}}, {k0.px():{f}}, "
-                f"{k0.py():{f}}, {k0.k()[0]:{f}}, {k0.k()[1]:{f}}, "
+                f"{k0.py():{f}}, {k0.k1():{f}}, {k0.k2():{f}}, "
                 f"{c0.x():{f}}, {c0.y():{f}}, {c0.z():{f}}, "
                 f"{c0.rotation().roll():{f}}, {c0.rotation().pitch():{f}}, {c0.rotation().yaw():{f}}"
             )

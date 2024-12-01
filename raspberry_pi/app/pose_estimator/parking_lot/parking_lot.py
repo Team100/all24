@@ -89,7 +89,7 @@ class ParkingLot:
         # print(self.isam.timestamps())
         k = max(self._isam.timestamps().keys())
         ts = max(self._isam.timestamps().values())
-        print(self._result.atPose2(k))
+        # print(self._result.atPose2(k))
         # print(ts)
 
         # reset the accumulators

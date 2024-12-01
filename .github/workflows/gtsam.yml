@@ -1,7 +1,7 @@
 # see https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 name: GTSAM tests
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
   build:
@@ -38,7 +38,9 @@ jobs:
       - run: pip install robotpy-wpiutil
       - run: pip install robotpy-apriltag
       - run: pip install opencv-python
-      - run: pip install gtsam
+      #- run: pip install gtsam
+      # actually use the nightly, since the release version does not work.
+      - run: pip install --index-url https://test.pypi.org/simple --extra-index-url https://pypi.org/simple/ truher-gtsam-nightly 
 
 #      - run: python3 runtests.py
         
