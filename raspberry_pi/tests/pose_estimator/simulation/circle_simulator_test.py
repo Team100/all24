@@ -60,7 +60,7 @@ class CircleSimulatorTest(unittest.TestCase):
         robot_pose = Pose2(2, 0, 0)
         camera_offset = Pose3(Rot3(), np.array([0, 0, 1]))
         calib = Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
-        px: Point2 = sim._px(landmark, robot_pose, camera_offset, calib)
+        px: np.ndarray = sim._px(landmark, robot_pose, camera_offset, calib)
         # pixel should be in the lower right quadrant
         # remember x+right, y+down
         self.assertAlmostEqual(208, px[0], 0)
