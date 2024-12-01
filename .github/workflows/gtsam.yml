@@ -1,7 +1,7 @@
 # see https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 name: GTSAM tests
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
   build:
