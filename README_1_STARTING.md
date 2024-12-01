@@ -9,6 +9,9 @@ TODO
 ## Get VSCode + WPILib Set Up
 TODO
 
+1. You might need to install [Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack) manually to get autocomplete etc?
+
+
 ## Getting VSCode Workspace Working
 In VSCode, go to `File > Open Folder` and select the `swerve100` folder. 
 
