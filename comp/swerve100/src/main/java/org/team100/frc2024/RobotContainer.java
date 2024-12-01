@@ -11,17 +11,10 @@ import org.team100.frc2024.commands.drivetrain.manual.ManualWithAmpLock;
 import org.team100.frc2024.commands.drivetrain.manual.ManualWithShooterLock;
 import org.team100.frc2024.config.AutonChooser;
 import org.team100.frc2024.motion.AutoMaker;
-import org.team100.frc2024.motion.FeedToAmp;
 import org.team100.frc2024.motion.FeederSubsystem;
-import org.team100.frc2024.motion.OuttakeCommand;
 import org.team100.frc2024.motion.ShootSmartWithRotation;
-import org.team100.frc2024.motion.amp.AmpFastThenSlow;
-import org.team100.frc2024.motion.amp.AmpFeeder;
-import org.team100.frc2024.motion.amp.AmpPivot;
-import org.team100.frc2024.motion.amp.DriveToAmp;
 import org.team100.frc2024.motion.drivetrain.manual.AmpLockCommand;
 import org.team100.frc2024.motion.intake.Intake;
-import org.team100.frc2024.motion.intake.RunIntakeAndAmpFeeder;
 import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.frc2024.motion.shooter.Ramp;
 import org.team100.frc2024.motion.shooter.TestShoot;
@@ -183,7 +176,7 @@ public class RobotContainer implements Glassy {
                 visionDataProvider);
 
         final NotePosition24ArrayListener noteListener = new NotePosition24ArrayListener(
-                m_drive::getPose);
+                poseEstimator);
 
         //////////////////////////////
         //
@@ -214,6 +207,11 @@ public class RobotContainer implements Glassy {
                 m_sensors,
                 m_shooter,
                 visionDataProvider);
+
+        // m_ampFeeder = new AmpFeeder(sysLog);
+        // m_ampPivot = new AmpPivot(sysLog);
+
+        // final ClimberSubsystem climber = new ClimberSubsystem(sysLog, 60, 61);
 
         ////////////////////////////
         //
@@ -281,6 +279,7 @@ public class RobotContainer implements Glassy {
         //                 intake,
         //                 m_shooter,
         //                 feeder));
+
 
         ///////////////////////
         //
@@ -480,11 +479,6 @@ public class RobotContainer implements Glassy {
         feeder.setDefaultCommand(feeder.run(feeder::stop));
         intake.setDefaultCommand(intake.run(intake::stop));
         // climber.setDefaultCommand(new ClimberDefault(
-        // // comLog,
-        // climber,
-        // operatorControl::leftClimb,
-        // operatorControl::rightClimb));
-        // m_ampFeeder.setDefaultCommand(m_ampFeeder.run(m_ampFeeder::stop));
         // if far from the goal, go fast. if near, go slow.
         // m_ampPivot.setDefaultCommand(new AmpFastThenSlow(m_ampPivot, 0.1, 0));
 

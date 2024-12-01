@@ -41,13 +41,13 @@ public class NotePosition24ArrayListener {
     private static final double kMaxSightAgeS = 0.1;
     private StructBuffer<Rotation3d> m_buf = StructBuffer.create(Rotation3d.struct);
     private List<Translation2d> notes = new ArrayList<>();
-    private final Supplier<Pose2d> m_poseSupplier;
+    private final PoseEstimator100 m_poseSupplier;
     private final NetworkTableListenerPoller m_poller;
 
     private double latestTime = 0;
 
-    public NotePosition24ArrayListener(Supplier<Pose2d> poseSupplier) {
-        m_poseSupplier = poseSupplier;
+    public NotePosition24ArrayListener(PoseEstimator100 poseEstimator) {
+        m_poseSupplier = poseEstimator;
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
         m_poller = new NetworkTableListenerPoller(inst);
         m_poller.addListener(
@@ -64,14 +64,14 @@ public class NotePosition24ArrayListener {
             NetworkTableValue v = ve.value;
             String name = ve.getTopic().getName();
             String[] fields = name.split("/");
-            if (fields.length != 3) {
+            if (fields.length != 4) {
                 return;
             }
             if (fields[2].equals("fps")) {
                 // FPS is not used by the robot
             } else if (fields[2].equals("latency")) {
                 // latency is not used by the robot
-            } else if (fields[2].equals("Rotation3d")) {
+            } else if (fields[3].equals("Rotation3d")) {
                 // decode the way StructArrayEntryImpl does
                 byte[] b = v.getRaw();
                 if (b.length == 0) {
@@ -88,8 +88,7 @@ public class NotePosition24ArrayListener {
                     return;
                 }
                 Transform3d cameraInRobotCoordinates = Camera.get(fields[1]).getOffset();
-                // TODO: this should use the timestamp of the camera data, not the current time.
-                Pose2d robotPose = m_poseSupplier.get();
+                Pose2d robotPose = m_poseSupplier.get(v.getServerTime() / 1000000.0).pose();
                 // TODO: this should accumulate sights, not replace the list every time.
                 notes = TargetLocalizer.cameraRotsToFieldRelativeArray(
                         robotPose,
@@ -106,9 +105,9 @@ public class NotePosition24ArrayListener {
      */
     public List<Translation2d> getTranslation2dArray() {
         update();
-        Pose2d robotPose = m_poseSupplier.get();
         switch (Identity.instance) {
             case BLANK:
+                Pose2d robotPose = m_poseSupplier.get(Timer.getFPGATimestamp()).pose();
                 SimulatedCamera simCamera = SimulatedCamera.getGamePieceCamera();
                 Optional<Alliance> alliance = DriverStation.getAlliance();
                 if (alliance.isEmpty())
@@ -131,7 +130,7 @@ public class NotePosition24ArrayListener {
      */
     public Optional<Translation2d> getClosestTranslation2d() {
         update();
-        Pose2d robotPose = m_poseSupplier.get();
+        Pose2d robotPose = m_poseSupplier.get(Timer.getFPGATimestamp()).pose();
         return NotePicker.closestNote(
                 getTranslation2dArray(),
                 robotPose);

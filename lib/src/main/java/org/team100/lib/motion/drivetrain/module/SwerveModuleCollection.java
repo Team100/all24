@@ -1,7 +1,6 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.logging.LoggerFactory;
@@ -102,40 +101,40 @@ public class SwerveModuleCollection {
                                 currentLimit,
                                 statorLimit,
                                 32,
-                                DriveRatio.FAST, AnalogTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 12,
                                 2,
-                                0.336,
+                                0.34,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(frontRightLogger,
                                 currentLimit,
                                 statorLimit,
                                 30,
-                                DriveRatio.FAST, AnalogTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 11,
                                 1,
-                                0.619,
+                                0.62,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(rearLeftLogger,
                                 currentLimit,
                                 statorLimit,
                                 31,
-                                DriveRatio.FAST, AnalogTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 21,
                                 3,
-                                0.591,
+                                0.59,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(rearRightLogger,
                                 currentLimit,
                                 statorLimit,
                                 22,
-                                DriveRatio.FAST, AnalogTurningEncoder.class,
+                                DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 33,
                                 0,
-                                0.512,
+                                0.59,
                                 kinodynamics,
                                 EncoderDrive.DIRECT, MotorPhase.REVERSE));
             case BETA_BOT:
