@@ -12,7 +12,7 @@ import app.pose_estimator.factors.apriltag_calibrate as apriltag_calibrate_batch
 
 # example calibration, focal length 200, pixel center 200, a little bit
 # of distortion.
-KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0)
+KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
 NOISE2 = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
 
 

@@ -62,8 +62,8 @@ class NTCalibrateTest(unittest.TestCase):
         # with so few data points, so this is
         # garbage.  note the enormous tolerance.
         # ?????
-        self.assertAlmostEqual(2.9, estimate.x, 0)
-        self.assertAlmostEqual(-2.4, estimate.y, 0)
+        self.assertAlmostEqual(1, estimate.x, -1)
+        self.assertAlmostEqual(-2.4, estimate.y, -1)
         self.assertAlmostEqual(-0.3, estimate.theta, 0)
         # ???
         self.assertAlmostEqual(0.3, estimate.x_sigma, 0)

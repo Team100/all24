@@ -17,7 +17,7 @@ class CameraConfig:
                     np.array([0, 0, 0.5]),
                 )
                 self.calib = gtsam.Cal3DS2(
-                    200.0, 200.0, 0.0, 400.0, 300.0, -0.2, 0.1, 0.0, 0.0
+                    200.0, 200.0, 0.0, 400.0, 300.0, -0.2, 0.1
                 )
             case _:
                 self.camera_offset = gtsam.Pose3(
@@ -25,5 +25,5 @@ class CameraConfig:
                     np.array([0, 0, 1]),
                 )
                 self.calib = gtsam.Cal3DS2(
-                    200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1, 0.0, 0.0
+                    200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1
                 )

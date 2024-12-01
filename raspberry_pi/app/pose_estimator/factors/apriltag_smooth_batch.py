@@ -35,6 +35,9 @@ def h_fn(
         # this is z-forward y-down
         camera_pose = offset_pose.compose(CAM_COORD)
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
+        # Camera.project() will throw CheiralityException sometimes
+        # so be sure to use GTSAM_THROW_CHEIRALITY_EXCEPTION=OFF
+        # (as nightly.yml does).
         return np.concatenate([camera.project(x) for x in landmarks])
 
     return h
