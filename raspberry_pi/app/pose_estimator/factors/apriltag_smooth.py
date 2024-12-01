@@ -42,6 +42,9 @@ def h_fn(
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
         # print("CAMERA", camera)
         # print("LANDMARK", landmark)
+        # Camera.project() will throw CheiralityException sometimes
+        # so be sure to use GTSAM_THROW_CHEIRALITY_EXCEPTION=OFF
+        # (as nightly.yml does).
         return camera.project(landmark)
 
     return h
@@ -57,11 +60,7 @@ def h_H(
 ) -> np.ndarray:
     """Error function (in pixels), including Jacobians, H."""
     h = h_fn(landmark, offset, calib)
-    try:
-        estimate = h(p0)
-    except RuntimeError: # CheiralityException
-        return np.ones_like(measured) * 100000 # a big number
-
+    estimate = h(p0)
     # print("ESTIMATE", estimate)
     # print("MEASURED", measured)
     result = estimate - measured

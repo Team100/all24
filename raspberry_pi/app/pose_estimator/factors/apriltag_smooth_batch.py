@@ -35,6 +35,9 @@ def h_fn(
         # this is z-forward y-down
         camera_pose = offset_pose.compose(CAM_COORD)
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
+        # Camera.project() will throw CheiralityException sometimes
+        # so be sure to use GTSAM_THROW_CHEIRALITY_EXCEPTION=OFF
+        # (as nightly.yml does).
         return np.concatenate([camera.project(x) for x in landmarks])
 
     return h
@@ -50,10 +53,7 @@ def h_H(
 ) -> np.ndarray:
     """measured: concatenation of px"""
     h = h_fn(landmarks, offset, calib)
-    try:
-        result = h(p0) - measured
-    except RuntimeError: # CheiralityException
-        return np.ones_like(measured) * 100000 # a big number
+    result = h(p0) - measured
     if H is not None:
         H[0] = numericalDerivative11(h, p0)
 
