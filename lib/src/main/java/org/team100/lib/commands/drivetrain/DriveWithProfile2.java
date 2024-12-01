@@ -31,7 +31,7 @@ public class DriveWithProfile2 extends Command implements Glassy {
     public static double kRotationToleranceRad_S = Math.PI / 64;
     public static double kTranslationalToleranceM_S = 0.01;
 
-    private final Supplier<Optional<Pose2d>> m_fieldRelativeGoal;
+    private final Supplier<Optional<Pose2d>> m_fieldRelativeGoalSupplier;
     private final SwerveDriveSubsystem m_swerve;
     private final HolonomicFieldRelativeController m_controller;
     private final SwerveKinodynamics m_limits;
@@ -41,8 +41,9 @@ public class DriveWithProfile2 extends Command implements Glassy {
     private final double dt = 0.02;
     private double sx = 1;
     private double sy = 1;
-    private boolean wheelsAtCorrectPos;
 
+    private Pose2d m_fieldRelativeGoal = null;
+    
     private Control100 xSetpoint;
     private Control100 ySetpoint;
     private Control100 thetaSetpoint;
@@ -56,13 +57,13 @@ public class DriveWithProfile2 extends Command implements Glassy {
             SwerveDriveSubsystem drivetrain,
             HolonomicFieldRelativeController controller,
             SwerveKinodynamics limits) {
-        m_fieldRelativeGoal = fieldRelativeGoal;
+        m_fieldRelativeGoalSupplier = fieldRelativeGoal;
         m_swerve = drivetrain;
         m_controller = controller;
         m_limits = limits;
         xProfile = new TrapezoidProfile100(
                 m_limits.getMaxDriveVelocityM_S(),
-                m_limits.getMaxDriveAccelerationM_S2() /2,
+                m_limits.getMaxDriveAccelerationM_S2()/2,
                 kTranslationalToleranceM);
         yProfile = new TrapezoidProfile100(
                 m_limits.getMaxDriveVelocityM_S(),
@@ -70,27 +71,28 @@ public class DriveWithProfile2 extends Command implements Glassy {
                 kTranslationalToleranceM);
         thetaProfile = new TrapezoidProfile100(
                 m_limits.getMaxAngleSpeedRad_S(),
-                m_limits.getMaxAngleAccelRad_S2()/2,
+                m_limits.getMaxAngleAccelRad_S2()/50,
                 kRotationToleranceRad);
         addRequirements(m_swerve);
     }
 
     @Override
     public void initialize() {
-        wheelsAtCorrectPos = false;
-
         xSetpoint = m_swerve.getState().x().control();
         ySetpoint = m_swerve.getState().y().control();
         thetaSetpoint = m_swerve.getState().theta().control();
 
-        Optional<Pose2d> opt = m_fieldRelativeGoal.get();
+        Optional<Pose2d> opt = m_fieldRelativeGoalSupplier.get();
         if (opt.isEmpty()) {
-            return;
+            if (m_fieldRelativeGoal == null) {
+                return;
+            }
+        } else {
+            m_fieldRelativeGoal = opt.get();
         }
-        Pose2d fieldRelativeGoal = opt.get();
         
-        m_xGoalRaw = new Model100(fieldRelativeGoal.getX(), 0);
-        m_yGoalRaw = new Model100(fieldRelativeGoal.getY(), 0);
+        m_xGoalRaw = new Model100(m_fieldRelativeGoal.getX(), 0);
+        m_yGoalRaw = new Model100(m_fieldRelativeGoal.getY(), 0);
 
         double tx = xProfile.calculateWithETA(dt, xSetpoint.model(), m_xGoalRaw).etaS();
         double ty = yProfile.calculateWithETA(dt, ySetpoint.model(), m_yGoalRaw).etaS();
@@ -113,43 +115,26 @@ public class DriveWithProfile2 extends Command implements Glassy {
         Rotation2d currentRotation = m_swerve.getPose().getRotation();
         // take the short path
         double measurement = currentRotation.getRadians();
-        Optional<Pose2d> opt = m_fieldRelativeGoal.get();
+        Optional<Pose2d> opt = m_fieldRelativeGoalSupplier.get();
         if (opt.isEmpty()) {
-            return;
-        }
-        Pose2d fieldRelativeGoal = opt.get();
-
-        Rotation2d bearing = new Rotation2d(
-                Math100.getMinDistance(measurement, fieldRelativeGoal.getRotation().getRadians()));
-
-        if (!wheelsAtCorrectPos) {
-            if (atRest()) {
-                m_thetaGoalRaw = new Model100(bearing.getRadians(), 0);
-                m_xGoalRaw = new Model100(fieldRelativeGoal.getX(), 0);
-                Control100 xs = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, xSetpoint.model(), m_xGoalRaw);
-
-                m_yGoalRaw = new Model100(fieldRelativeGoal.getY(), 0);
-                Control100 ys = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, ySetpoint.model(), m_yGoalRaw);
-
-                Control100 thetas = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, thetaSetpoint.model(), m_thetaGoalRaw);
-                SwerveModel goalState = new SwerveModel(xs.model(), ys.model(), thetas.model());
-                FieldRelativeVelocity goal = m_controller.calculate(m_swerve.getState(), goalState);
-                wheelsAtCorrectPos = m_swerve.steerAtRest(goal);
+            if (m_fieldRelativeGoal == null) {
                 return;
-            } else {
-                wheelsAtCorrectPos = true;
             }
+        } else {
+            m_fieldRelativeGoal = opt.get();
         }
+        Rotation2d rotation = new Rotation2d(
+                Math100.getMinDistance(measurement, m_fieldRelativeGoal.getRotation().getRadians()));
         // make sure the setpoint uses the modulus close to the measurement.
         thetaSetpoint = new Control100(
                 Math100.getMinDistance(measurement, thetaSetpoint.x()),
                 thetaSetpoint.v());
 
-        m_thetaGoalRaw = new Model100(bearing.getRadians(), 0);
-        m_xGoalRaw = new Model100(fieldRelativeGoal.getX(), 0);
+        m_thetaGoalRaw = new Model100(rotation.getRadians(), 0);
+        m_xGoalRaw = new Model100(m_fieldRelativeGoal.getX(), 0);
         xSetpoint = xProfile.calculate(TimedRobot100.LOOP_PERIOD_S, xSetpoint.model(), m_xGoalRaw);
 
-        m_yGoalRaw = new Model100(fieldRelativeGoal.getY(), 0);
+        m_yGoalRaw = new Model100(m_fieldRelativeGoal.getY(), 0);
         ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, ySetpoint.model(), m_yGoalRaw);
 
         thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, thetaSetpoint.model(), m_thetaGoalRaw);
@@ -160,7 +145,9 @@ public class DriveWithProfile2 extends Command implements Glassy {
 
     @Override
     public boolean isFinished() {
-        if (!m_fieldRelativeGoal.get().isPresent()) return true;
+        if (!m_fieldRelativeGoalSupplier.get().isPresent() && m_fieldRelativeGoal == null) {
+            return true;
+        }
         double xError = m_xGoalRaw.x() - m_swerve.getState().x().x();
         double yError = m_yGoalRaw.x() - m_swerve.getState().y().x();
         double thetaError = m_thetaGoalRaw.x() - m_swerve.getState().theta().x();
