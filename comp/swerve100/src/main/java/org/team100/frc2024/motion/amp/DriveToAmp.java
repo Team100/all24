@@ -7,6 +7,7 @@ import org.team100.frc2024.motion.shooter.DrumShooter;
 import org.team100.lib.commands.drivetrain.DriveWithProfile2;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
@@ -33,6 +34,7 @@ public class DriveToAmp extends SequentialCommandGroup {
             kAmpXM, kFieldWidthM - kCloseToAmpYM, GeometryUtil.kRotation90);
 
     public DriveToAmp(
+            FieldLogger.Log fieldLogger,
             SwerveDriveSubsystem drive,
             HolonomicFieldRelativeController controller,
             SwerveKinodynamics limits,
@@ -44,6 +46,7 @@ public class DriveToAmp extends SequentialCommandGroup {
         addCommands(
                 new ParallelDeadlineGroup(
                         new DriveWithProfile2(
+                                fieldLogger,
                                 () -> DriverStation.getAlliance().map(
                                         x -> switch (x) {
                                             case Red -> kRedNearAmp;
@@ -57,6 +60,7 @@ public class DriveToAmp extends SequentialCommandGroup {
                         new AmpFastThenSlow(amp, 1.7, 1.8),
                         new SequentialCommandGroup(
                                 new DriveWithProfile2(
+                                        fieldLogger,
                                         () -> DriverStation.getAlliance().map(
                                                 x -> switch (x) {
                                                     case Red -> kRedCloseToAmp;

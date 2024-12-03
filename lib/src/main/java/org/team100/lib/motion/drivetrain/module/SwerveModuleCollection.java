@@ -105,9 +105,9 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 12,
                                 7,
-                                0.151,
+                                0.651,
                                 kinodynamics,
-                                EncoderDrive.DIRECT, MotorPhase.REVERSE),
+                                EncoderDrive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(frontRightLogger,
                                 currentLimit,
                                 statorLimit,
@@ -115,9 +115,9 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 11,
                                 8,
-                                0.88,
+                                0.38,
                                 kinodynamics,
-                                EncoderDrive.DIRECT, MotorPhase.REVERSE),
+                                EncoderDrive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(rearLeftLogger,
                                 currentLimit,
                                 statorLimit,
@@ -125,9 +125,9 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 21,
                                 6,
-                                0.91,
+                                0.41,
                                 kinodynamics,
-                                EncoderDrive.DIRECT, MotorPhase.REVERSE),
+                                EncoderDrive.INVERSE, MotorPhase.REVERSE),
                         WCPSwerveModule100.getFalconDrive(rearRightLogger,
                                 currentLimit,
                                 statorLimit,
@@ -135,9 +135,9 @@ public class SwerveModuleCollection {
                                 DriveRatio.FAST, DutyCycleRotaryPositionSensor.class,
                                 33,
                                 9,
-                                0.888,
+                                0.388,
                                 kinodynamics,
-                                EncoderDrive.DIRECT, MotorPhase.REVERSE));
+                                EncoderDrive.INVERSE, MotorPhase.REVERSE));
             case BETA_BOT:
             case SWERVE_TWO:
             case BLANK:
