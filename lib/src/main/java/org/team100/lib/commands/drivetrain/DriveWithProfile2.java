@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.dashboard.Glassy;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.SwerveModel;
 import org.team100.lib.motion.drivetrain.kinodynamics.FieldRelativeVelocity;
@@ -44,6 +45,8 @@ public class DriveWithProfile2 extends Command implements Glassy {
 
     private Pose2d m_fieldRelativeGoal = null;
     
+    private final FieldLogger.Log m_field_log;
+
     private Control100 xSetpoint;
     private Control100 ySetpoint;
     private Control100 thetaSetpoint;
@@ -53,10 +56,12 @@ public class DriveWithProfile2 extends Command implements Glassy {
     private Model100 m_thetaGoalRaw;
 
     public DriveWithProfile2(
+            FieldLogger.Log fieldLogger,
             Supplier<Optional<Pose2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicFieldRelativeController controller,
             SwerveKinodynamics limits) {
+        m_field_log = fieldLogger;
         m_fieldRelativeGoalSupplier = fieldRelativeGoal;
         m_swerve = drivetrain;
         m_controller = controller;
@@ -136,6 +141,10 @@ public class DriveWithProfile2 extends Command implements Glassy {
 
         m_yGoalRaw = new Model100(m_fieldRelativeGoal.getY(), 0);
         ySetpoint = yProfile.calculate(TimedRobot100.LOOP_PERIOD_S, ySetpoint.model(), m_yGoalRaw);
+        m_field_log.m_log_target.log(() -> new double[] {
+            m_fieldRelativeGoal.getX(),
+            m_fieldRelativeGoal.getY(),
+            m_fieldRelativeGoal.getRotation().getRadians() });
 
         thetaSetpoint = thetaProfile.calculate(TimedRobot100.LOOP_PERIOD_S, thetaSetpoint.model(), m_thetaGoalRaw);
         SwerveModel goalState = new SwerveModel(xSetpoint.model(), ySetpoint.model(), thetaSetpoint.model());

@@ -7,6 +7,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.controller.drivetrain.HolonomicFieldRelativeController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.logging.FieldLogger;
 import org.team100.lib.motion.drivetrain.SwerveDriveSubsystem;
 import org.team100.lib.motion.drivetrain.kinodynamics.SwerveKinodynamics;
 
@@ -30,11 +31,12 @@ public class DriveWithProfileRotation extends DriveWithProfile2 {
     private Translation2d m_previousGoal;
 
     public DriveWithProfileRotation(
+            FieldLogger.Log fieldLogger,
             Supplier<Optional<Translation2d>> fieldRelativeGoal,
             SwerveDriveSubsystem drivetrain,
             HolonomicFieldRelativeController controller,
             SwerveKinodynamics limits) {
-        super(() -> m_goal, drivetrain, controller, limits);
+        super(fieldLogger, () -> m_goal, drivetrain, controller, limits);
         kRotationToleranceRad = 2 * Math.PI;
         kRotationToleranceRad_S = 6 * Math.PI;
         kTranslationalToleranceM = 0.05;
@@ -68,7 +70,7 @@ public class DriveWithProfileRotation extends DriveWithProfile2 {
         // return Optional.of(m_previousGoal);
     }
 
-/**
+    /**
      * Returns the current goal, or the previous one if the current one is newly
      * empty.
      */
@@ -98,6 +100,7 @@ public class DriveWithProfileRotation extends DriveWithProfile2 {
             Translation2d toGoal = goal.minus(pose.getTranslation());
             switch(Identity.instance) {
                 case COMP_BOT:
+                case BLANK:
                 return toGoal.getAngle().getRadians() + Math.PI;
                 default:
                 return toGoal.getAngle().getRadians();
