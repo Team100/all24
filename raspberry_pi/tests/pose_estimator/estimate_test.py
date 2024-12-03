@@ -12,7 +12,7 @@ from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d
 
 from app.pose_estimator.estimate import Estimate
-from app.pose_estimator.swerve_module_position import (
+from app.kinodynamics.swerve_module_position import (
     OptionalRotation2d,
     SwerveModulePosition100,
     SwerveModulePositions,
@@ -33,15 +33,43 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
         est.add_state(1, gtsam.Pose2())
         est.update()
-        self.assertEqual(4, est.result.size())
+        self.assertEqual(2, est.result_size())
 
-        p0: gtsam.Pose2 = est.result.atPose2(X(0))
-        p1: gtsam.Pose2 = est.result.atPose2(X(1))
+        p0: gtsam.Pose2 = est.mean_pose2(X(0))
 
         self.assertAlmostEqual(0, p0.x())
         self.assertAlmostEqual(0, p0.y())
         self.assertAlmostEqual(0, p0.theta())
 
+        m = est.marginal_covariance()
+        c0 = m.marginalCovariance(X(0))
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [0.09, 0.00, 0.00],
+                        [0.00, 0.09, 0.00],
+                        [0.00, 0.00, 0.01],
+                    ]
+                ),
+                c0,
+                atol=0.001,
+            )
+        )
+        s0 = est.sigma_pose2(X(0))
+        print(s0)
+        # the prior sigma
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [0.3, 0.3, 0.1],
+                ),
+                s0,
+                atol=0.001,
+            )
+        )
+
+        p1: gtsam.Pose2 = est.mean_pose2(X(1))
         self.assertAlmostEqual(0, p1.x())
         self.assertAlmostEqual(0, p1.y())
         self.assertAlmostEqual(0, p1.theta())

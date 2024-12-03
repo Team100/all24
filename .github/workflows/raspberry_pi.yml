@@ -42,12 +42,12 @@ jobs:
 #      - run: python3 runtests.py
         
       - run: pytest --forked -vv -rA --full-trace tests/config
-        if: always()
+        if: ${{ always() }}
       - run: pytest --forked -vv -rA --full-trace tests/dashboard
-        if: always()
+        if: ${{ always() }}
       - run: pytest --forked -vv -rA --full-trace tests/localization
-        if: always()
+        if: ${{ always() }}
       - run: pytest --forked -vv -rA --full-trace tests/network
-        if: always()
+        if: ${{ always() }}
       - run: pytest --forked -vv -rA --full-trace tests/util
-        if: always()
+        if: ${{ always() }}

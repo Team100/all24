@@ -27,7 +27,7 @@ from adafruit_lsm6ds import Rate  # type:ignore
 from adafruit_lsm6ds.lsm6dsox import LSM6DSOX  # type:ignore
 
 from app.config.identity import Identity
-from app.network.real_network import Network
+from app.network.network import Network
 from app.sensors.gyro_protocol import Gyro
 from app.util.timer import Timer
 

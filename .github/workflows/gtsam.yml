@@ -1,0 +1,48 @@
+# see https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+name: GTSAM tests
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-22.04
+    
+    defaults:
+      run:
+        working-directory: ./raspberry_pi
+
+    #container: wpilib/roborio-cross-ubuntu:2024-22.04
+
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10' 
+
+      # the broken thing seems to relate numpy and eigen
+      - run: sudo apt install -y libeigen3-dev
+      - run: python -m pip install --upgrade pip
+      # supports Buffer
+      - run: python3 -m pip install typing_extensions==4.12.2
+      - run: pip install pytest
+      - run: pip install typeguard
+      - run: pip install anyio
+      - run: pip install pytest-forked
+      # i think the default numpy version is 2.1.2, which is really new
+      - run: pip install numpy==1.26.2
+      - run: pip install robotpy==2024.3.2.1
+      - run: pip install robotpy-cscore
+      - run: pip install robotpy-wpimath
+      - run: pip install robotpy-wpiutil
+      - run: pip install robotpy-apriltag
+      - run: pip install opencv-python
+      #- run: pip install gtsam
+      # actually use the nightly, since the release version does not work.
+      - run: pip install --index-url https://test.pypi.org/simple --extra-index-url https://pypi.org/simple/ truher-gtsam-nightly 
+
+#      - run: python3 runtests.py
+        
+      - run: pytest --forked -vv -rA --full-trace tests/pose_estimator
+        if: always()

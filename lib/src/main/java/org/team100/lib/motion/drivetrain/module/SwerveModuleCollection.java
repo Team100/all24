@@ -1,7 +1,6 @@
 package org.team100.lib.motion.drivetrain.module;
 
 import org.team100.lib.config.Identity;
-import org.team100.lib.encoder.AnalogTurningEncoder;
 import org.team100.lib.encoder.DutyCycleRotaryPositionSensor;
 import org.team100.lib.encoder.EncoderDrive;
 import org.team100.lib.logging.LoggerFactory;

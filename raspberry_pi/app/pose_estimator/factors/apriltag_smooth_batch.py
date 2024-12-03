@@ -24,7 +24,9 @@ def h_fn(
     offset: gtsam.Pose3,
     calib: gtsam.Cal3DS2,
 ) -> Callable[[gtsam.Pose2], np.ndarray]:
-    """returns a single array with all the points, concatenated."""
+    """Returns a pixel estimation function for an array of landmarks.
+    The estimate is a single flat array with all the points, concatenated,
+    i.e. (x0, y0, x1, y1, x2, y2, ...)"""
 
     def h(p0: gtsam.Pose2) -> np.ndarray:
         """estimated pixel location of the target"""
@@ -33,6 +35,9 @@ def h_fn(
         # this is z-forward y-down
         camera_pose = offset_pose.compose(CAM_COORD)
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
+        # Camera.project() will throw CheiralityException sometimes
+        # so be sure to use GTSAM_THROW_CHEIRALITY_EXCEPTION=OFF
+        # (as nightly.yml does).
         return np.concatenate([camera.project(x) for x in landmarks])
 
     return h

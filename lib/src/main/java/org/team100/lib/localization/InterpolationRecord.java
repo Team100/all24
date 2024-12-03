@@ -12,20 +12,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
 
-/**
- * Represents an odometry record. The record contains the inputs provided as
- * well as the pose that was observed based on these inputs, as well as the
- * previous record and its inputs.
- * 
- * TODO: add velocity and acceleration.
- */
 class InterpolationRecord implements Interpolatable<InterpolationRecord> {
     private final SwerveDriveKinematics100 m_kinematics;
 
-    // The pose observed given the current sensor inputs and the previous pose.
     final SwerveModel m_state;
 
-    // The current encoder readings.
     final SwerveModulePositions m_wheelPositions;
 
     /**
@@ -34,8 +25,6 @@ class InterpolationRecord implements Interpolatable<InterpolationRecord> {
      * @param kinematics
      * @param state          The pose observed given the current sensor inputs and
      *                       the previous pose.
-     * @param gyro           The current gyro angle.
-     * @param gyroRateRad_S  current omega
      * @param wheelPositions The current encoder readings. Makes a copy.
      */
     InterpolationRecord(

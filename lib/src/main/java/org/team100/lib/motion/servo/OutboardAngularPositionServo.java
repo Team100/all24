@@ -204,4 +204,14 @@ public class OutboardAngularPositionServo implements AngularPositionServo {
         m_mechanism.periodic();
         m_encoder.periodic();
     }
+
+    public void setProfile(Profile100 profile) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setProfile'");
+    }
+
+    public void setSpeed(double input2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setSpeed'");
+    }
 }

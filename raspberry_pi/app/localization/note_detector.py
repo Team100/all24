@@ -13,7 +13,7 @@ from app.camera.camera_protocol import Camera, Request, Size
 from app.camera.interpreter_protocol import Interpreter
 from app.config.identity import Identity
 from app.dashboard.display import Display
-from app.network.real_network import Network
+from app.network.network import Network
 
 Mat = NDArray[np.uint8]
 
@@ -26,7 +26,13 @@ class NoteDetector(Interpreter):
         camera_num: int,
         display: Display,
         network: Network,
+        object_lower: np.ndarray,
+        object_higher: np.ndarray
     ) -> None:
+        """
+        object_lower and object_higher are ([H, S, V]) bounds.
+        NOTE: hue values are 0-180, half the usual range.
+        """
         self.cam = cam
         self.display = display
         self.network = network
@@ -38,11 +44,8 @@ class NoteDetector(Interpreter):
         self.width: int = size.width
         self.height: int = size.height
 
-        # opencv hue values are 0-180, half the usual number
-        lowerSat = 50
-        lowerValue = 100
-        self.object_lower = np.array((30, lowerSat, lowerValue))
-        self.object_higher = np.array((50, 255, 255))
+        self.object_lower = object_lower
+        self.object_higher = object_higher
 
         # TODO: move the identity part of this path to the Network object
         path = "noteVision/" + identity.value + "/" + str(camera_num)

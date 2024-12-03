@@ -89,8 +89,6 @@ import edu.wpi.first.math.MathUtil;
  * 
  * It might be slower around the switching points, since it can call itself once
  * or twice, once per segment.
- * 
- * TODO: allow different acceleration and deceleration.
  */
 public class MinTimeController implements Glassy {
 

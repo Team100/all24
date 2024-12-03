@@ -16,6 +16,9 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.RobotController;
+
 /**
  * Superclass for TalonFX motors.
  */
@@ -31,6 +34,7 @@ public abstract class Talon6Motor implements BareMotor {
     protected final DoubleSupplier m_dutyCycle;
     protected final DoubleSupplier m_error;
     protected final DoubleSupplier m_supply;
+    protected final DoubleSupplier m_supplyVoltage;
     protected final DoubleSupplier m_stator;
     protected final DoubleSupplier m_temp;
     protected final DoubleSupplier m_torque;
@@ -56,6 +60,7 @@ public abstract class Talon6Motor implements BareMotor {
     private final DoubleLogger m_log_output;
     private final DoubleLogger m_log_error;
     private final DoubleLogger m_log_supply;
+    private final DoubleLogger m_log_supplyVoltage;
     private final DoubleLogger m_log_stator;
     private final DoubleLogger m_log_torque;
     private final DoubleLogger m_log_temp;
@@ -90,6 +95,7 @@ public abstract class Talon6Motor implements BareMotor {
         m_dutyCycle = Memo.ofDouble(() -> m_motor.getDutyCycle().refresh().getValueAsDouble());
         m_error = Memo.ofDouble(() -> m_motor.getClosedLoopError().refresh().getValueAsDouble());
         m_supply = Memo.ofDouble(() -> m_motor.getSupplyCurrent().refresh().getValueAsDouble());
+        m_supplyVoltage = Memo.ofDouble(() -> m_motor.getSupplyVoltage().refresh().getValueAsDouble());
         m_stator = Memo.ofDouble(() -> m_motor.getStatorCurrent().refresh().getValueAsDouble());
         m_temp = Memo.ofDouble(() -> m_motor.getDeviceTemp().refresh().getValueAsDouble());
         m_torque = Memo.ofDouble(() -> m_motor.getTorqueCurrent().refresh().getValueAsDouble());
@@ -108,6 +114,7 @@ public abstract class Talon6Motor implements BareMotor {
         m_log_output = child.doubleLogger(Level.DEBUG, "output [-1,1]");
         m_log_error = child.doubleLogger(Level.TRACE, "error (rev_s)");
         m_log_supply = child.doubleLogger(Level.DEBUG, "supply current (A)");
+        m_log_supplyVoltage = child.doubleLogger(Level.DEBUG, "supply voltage (V)");
         m_log_stator = child.doubleLogger(Level.TRACE, "stator current (A)");
         m_log_torque = child.doubleLogger(Level.TRACE, "torque (Nm)");
         m_log_temp = child.doubleLogger(Level.TRACE, "temperature (C)");
@@ -153,11 +160,11 @@ public abstract class Talon6Motor implements BareMotor {
                 m_velocityVoltage
                         .withVelocity(motorRev_S)
                         .withFeedForward(kFFVolts)));
-                        
+
         // without feedforward
         // Phoenix100.warn(() -> m_motor.setControl(
-        //         m_velocityVoltage
-        //                 .withVelocity(motorRev_S)));
+        // m_velocityVoltage
+        // .withVelocity(motorRev_S)));
 
         m_log_desired_speed.log(() -> motorRev_S);
         m_log_desired_accel.log(() -> motorRev_S2);
@@ -272,9 +279,15 @@ public abstract class Talon6Motor implements BareMotor {
         m_log_output.log(m_dutyCycle);
         m_log_error.log(m_error);
         m_log_supply.log(m_supply);
+        m_log_supplyVoltage.log(m_supplyVoltage);
         m_log_stator.log(m_stator);
         m_log_torque.log(this::getMotorTorque);
         m_log_temp.log(m_temp);
+        if (RobotController.getBatteryVoltage() - m_supplyVoltage.getAsDouble() > 1)
+            Util.warnf("Motor voltage %d low, bad connection? motor: %f, battery: %f\n",
+                    m_motor.getDeviceID(),
+                    m_supplyVoltage.getAsDouble(),
+                    RobotController.getBatteryVoltage());
     }
 
     private double getMotorTorque() {

@@ -39,8 +39,10 @@ public class RobotContainer {
         TurretCollection turretCollection = TurretCollection.get(sysLog);
         m_turret = new Turret(sysLog,turretCollection);
         m_turret.setDefaultCommand(new TurretDefault(driverControl::velocity, m_turret));
-        whileTrue(driverControl::ampLock, m_turret.run(() -> m_turret.setAngle(Math.PI/2)));
+        whileTrue(driverControl::fullCycle, m_turret.run(() -> m_turret.setAngle(Math.PI/2)));
         whileTrue(driverControl::driveToNote, m_turret.run(() -> m_turret.setAngle(0)));
+        whileTrue(driverControl::ampLock, m_turret.run(() -> m_turret.setAngle(Math.PI)));
+        whileTrue(driverControl::shooterLock, m_turret.run(() -> m_turret.setAngle(Math.PI*1.5)));
     }
 
 

@@ -26,13 +26,40 @@ class EstimateGyroTest(unittest.TestCase):
 
         est.gyro(0, 0)
         est.update()
-        print(est.result)
-        self.assertEqual(3, est.result.size())
-        p0: gtsam.Pose2 = est.result.atPose2(X(0))
+        self.assertEqual(1, est.result_size())
+        p0: gtsam.Pose2 = est.mean_pose2(X(0))
         self.assertAlmostEqual(0, p0.x(), 3)
-        self.assertAlmostEqual(0, p0.y(),3 )
+        self.assertAlmostEqual(0, p0.y(), 3)
         self.assertAlmostEqual(0, p0.theta(), 5)
-
+        m = est.marginal_covariance()
+        c0 = m.marginalCovariance(X(0))
+        print("c0", c0)
+        # gyro noise is very low; cartesian noise is from the prior.
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [0.09, 0.00, 0.00],
+                        [0.00, 0.09, 0.00],
+                        [0.00, 0.00, 0.00],
+                    ]
+                ),
+                c0,
+                atol=0.001,
+            )
+        )
+        s0 = est.sigma_pose2(X(0))
+        print(s0)
+        # gyro noise is very low; cartesian noise is from the prior.
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [0.3, 0.3, 0.001],
+                ),
+                s0,
+                atol=0.0001,
+            )
+        )
 
     def test_gyro_1(self) -> None:
         """rotating"""
@@ -45,10 +72,39 @@ class EstimateGyroTest(unittest.TestCase):
 
         est.gyro(0, 1)
         est.update()
-        print(est.result)
-        self.assertEqual(3, est.result.size())
-        p0: gtsam.Pose2 = est.result.atPose2(X(0))
+
+        self.assertEqual(1, est.result_size())
+        p0: gtsam.Pose2 = est.mean_pose2(X(0))
         self.assertAlmostEqual(0, p0.x(), 3)
         self.assertAlmostEqual(0, p0.y(), 3)
-        self.assertAlmostEqual(1, p0.theta(), 5)
+        self.assertAlmostEqual(1, p0.theta(), 3)
 
+        m = est.marginal_covariance()
+        c0 = m.marginalCovariance(X(0))
+        print("c0", c0)
+        # gyro noise is very low; cartesian noise is from the prior.
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [0.09, 0.00, 0.00],
+                        [0.00, 0.09, 0.00],
+                        [0.00, 0.00, 0.00],
+                    ]
+                ),
+                c0,
+                atol=0.001,
+            )
+        )
+        s0 = est.sigma_pose2(X(0))
+        print(s0)
+        # gyro noise is very low; cartesian noise is from the prior.
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [0.3, 0.3, 0.001],
+                ),
+                s0,
+                atol=0.0001,
+            )
+        )

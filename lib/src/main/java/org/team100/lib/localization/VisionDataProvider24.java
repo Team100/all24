@@ -62,7 +62,6 @@ public class VisionDataProvider24 implements VisionData, Glassy {
     /**
      * this value is intended to make the response to vision input more gradual, to
      * avoid "jitter." it's a guess.
-     * TODO: try adjusting this
      */
     private static final double[] tightStateStdDevs = new double[] {
             0.001,

@@ -1,5 +1,6 @@
 # pylint: disable=E1101
 import gtsam
+import math
 from wpimath.geometry import (
     Pose3d,
     Translation3d,
@@ -9,7 +10,16 @@ from wpimath.geometry import (
     Rotation2d,
 )
 
-from app.network.network_protocol import Cal3DS2
+from app.network.structs import Cal3DS2
+
+# discrete time step is 20 ms
+TIME_STEP_US = 20000
+
+
+def discrete(timestamp_us: int) -> int:
+    # print("TIMESTAMP_US",timestamp_us)
+    """Discretize time at 50 Hz"""
+    return math.ceil(timestamp_us / TIME_STEP_US) * TIME_STEP_US
 
 
 def pose3_to_pose3d(pose3: gtsam.Pose3) -> Pose3d:
@@ -47,6 +57,26 @@ def pose2_to_pose2d(pose2: gtsam.Pose2) -> Pose2d:
     )
 
 
+def pose2d_to_pose2(pose2d: Pose2d) -> gtsam.Pose2:
+    return gtsam.Pose2(pose2d.x, pose2d.y, pose2d.rotation().radians())
+
+
 def to_cal(gc: gtsam.Cal3DS2) -> Cal3DS2:
-    v = gc.vector()
-    return Cal3DS2(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8])
+    return Cal3DS2(gc.fx(), gc.fy(), gc.skew(), gc.px(), gc.py(), gc.k1(), gc.k2())
+    # v = gc.vector()
+    # return Cal3DS2(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8])
+
+
+def make_smoother(lag_s: float) -> gtsam.BatchFixedLagSmoother:
+    """lag_s: length of the smoother lag window in seconds."""
+    # experimenting with the size of the lag buffer.
+    # the python odometry factor is intolerably slow
+    # but the native one is quite fast.
+    # i'm not sure what sort of window we really need; maybe
+    # just long enough to span periods of blindness, so,
+    # like a second or two?
+    # a long window is VERY SLOW, so try very short windows
+    # just long enough to catch a single vision update.
+    lag_us = lag_s * 1e6
+    lm_params = gtsam.LevenbergMarquardtParams()
+    return gtsam.BatchFixedLagSmoother(lag_us, lm_params)
