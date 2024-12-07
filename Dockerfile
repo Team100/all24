@@ -17,7 +17,12 @@ COPY comp/swerve100/*.gradle comp/swerve100/gradle.properties ./
 # Download dependencies using wrapper
 RUN ./gradlew
 
+# Lib doesn't change often; copy before the other code
+WORKDIR /team100
+COPY lib ./
+
 # Now copy the rest of your code
+WORKDIR /team100/comp/swerve100
 COPY comp/swerve100/src ./src
 
 # Build and test (same command as in GitHub Action)
