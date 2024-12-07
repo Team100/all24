@@ -28,7 +28,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max`
           platforms: linux/arm64,linux/arm/v7
-          push: true 
+          push: false
           tags: team100-pi:${{ github.sha }}
 
           # - name: Add PR Comment on Failure
