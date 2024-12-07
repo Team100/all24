@@ -26,4 +26,4 @@ WORKDIR /team100/comp/swerve100
 COPY comp/swerve100/src ./src
 
 # Build and test (same command as in GitHub Action)
-# RUN ./gradlew build
+RUN ./gradlew build

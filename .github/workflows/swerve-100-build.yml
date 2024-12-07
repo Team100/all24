@@ -1,4 +1,4 @@
-name: PR Docker Build Check
+name: Swerve100 Docker Build
 
 on: [push]
 
