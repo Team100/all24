@@ -207,4 +207,18 @@ class SwerveUtilTest {
         double accelLimit = SwerveUtil.minAccel(limits, 0.92);
         assertEquals(0.8, accelLimit, kDelta);
     }
+
+    @Test
+    void simMinAccel() {
+        // simulate full-throttle to see the exponential curve. 
+        // https://docs.google.com/spreadsheets/d/1k-g8_blQP3X1RNtjFQgk1CJXyzzvNLNuUbWhaNLduvw
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forRealisticTest();
+        double v = 0;
+        final double dt = 0.02;
+        for (double t = 0; t < 3; t += dt) {
+            System.out.printf("%5.3f %5.3f\n", t, v);
+            double a = SwerveUtil.minAccel(limits, v);
+            v += dt * a;
+        }
+    }
 }
