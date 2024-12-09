@@ -43,6 +43,8 @@ def h_fn(
         offset_pose = gtsam.Pose3(p0).compose(offset)
         # this is z-forward y-down
         camera_pose = offset_pose.compose(CAM_COORD)
+        print("camera_pose", camera_pose)
+        print("landmark", landmark)
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
         return camera.project(landmark)
 
