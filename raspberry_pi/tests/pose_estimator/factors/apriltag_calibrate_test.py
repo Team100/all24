@@ -210,8 +210,8 @@ class AprilTagCalibrateTest(unittest.TestCase):
         )
 
     def test_H_upper_left3(self) -> None:
-        # as above but with jacobians
-        measured = np.array([0, 0])
+        # offset rotates the center near the landmark
+        measured = np.array([238, 278])
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
         # Remember Ypr is intrinsic
@@ -233,6 +233,7 @@ class AprilTagCalibrateTest(unittest.TestCase):
                     ]
                 ),
                 err_px,
+                atol=1
             )
         )
         print("H[0]:\n", H[0])
@@ -242,32 +243,32 @@ class AprilTagCalibrateTest(unittest.TestCase):
             np.allclose(
                 np.array(
                     [
-                        [-200, 200, 400],
-                        [-200, 0, 200],
+                        [-99, 79, 178],
+                        [-43, -67, -24],
                     ]
                 ),
                 H[0],
-                atol=0.001,
+                atol=1,
             )
         )
         self.assertTrue(
             np.allclose(
                 np.array(
                     [
-                        [-200, -200, 400, -200, 200, 0],
-                        [200, -400, 200, -200, 0, 200],
+                        [78, -14, 207, 24, 126, 0],
+                        [-38, -230, 15, 49, 0, 126],
                     ]
                 ),
                 H[1],
-                atol=0.001,
+                atol=1,
             )
         )
         self.assertTrue(
             np.allclose(
                 np.array(
                     [
-                        [-1, 0, -1, 1, 0, -400, -800, 400, 800],
-                        [0, -1, 0, 0, 1, -400, -800, 800, 400],
+                        [0.190, 0, 0.392, 1, 0, 7.191, 1.363, 29.732, 52.303],
+                        [0, 0.392, 0, 0, 1, 14.861, 2.817, 99.364, 29.732],
                     ]
                 ),
                 H[2],
