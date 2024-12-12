@@ -254,6 +254,7 @@ public class RobotContainer implements Glassy {
 
         whileTrue(driverControl::driveToNote,
                 new ParallelDeadlineGroup(new DriveWithProfileRotation(
+                        fieldLog,
                         noteListener::getClosestTranslation2d,
                         m_drive,
                         holonomicController,
@@ -268,18 +269,6 @@ public class RobotContainer implements Glassy {
                         m_drive));
         // whileTrue(driverControl::actualCircle,
         // new DriveInACircle(comLog, m_drive, controller, -1, viz));
-
-        // whileTrue(driverControl::driveToAmp,
-        //         new DriveToAmp(
-        //                 m_drive,
-        //                 holonomicController,
-        //                 swerveKinodynamics,
-        //                 m_ampPivot,
-        //                 m_ampFeeder,
-        //                 intake,
-        //                 m_shooter,
-        //                 feeder));
-
 
         ///////////////////////
         //

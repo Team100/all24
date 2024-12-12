@@ -58,6 +58,8 @@ public class SimpleLinearMechanism implements LinearMechanism {
     @Override
     public OptionalDouble getVelocityM_S() {
         OptionalDouble velocityRad_S = m_encoder.getVelocityRad_S();
+
+        //TODO for some reason this number is always zero
         if (velocityRad_S.isEmpty())
             return OptionalDouble.empty();
         return OptionalDouble.of(velocityRad_S.getAsDouble() * m_wheelRadiusM / m_gearRatio);
