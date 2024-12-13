@@ -24,7 +24,7 @@ PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 class EstimateAccelerometerTest(unittest.TestCase):
     def test_no_factors(self) -> None:
         """Nothing bad happens if you don't have any factors."""
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -76,7 +76,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
     def test_result(self) -> None:
         """Just one state and one prior factor."""
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         est.add_state(0, gtsam.Pose2(0, 0, 0))
@@ -118,7 +118,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
     def test_multiple_priors(self) -> None:
         """One state but two different priors: the tighter prior "wins"."""
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         est.add_state(0, gtsam.Pose2(0, 0, 0))
@@ -169,7 +169,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
         )
 
     def test_marginals(self) -> None:
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -198,7 +198,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
     def test_joint_marginals(self) -> None:
         """OK we're not actually going to use this."""
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))
@@ -240,7 +240,7 @@ class EstimateAccelerometerTest(unittest.TestCase):
 
     def test_extrapolate(self) -> None:
         """extrapolate the most-recent odometry."""
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1, 0.1]))

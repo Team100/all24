@@ -24,7 +24,7 @@ class EstimateSimulateTest(unittest.TestCase):
         This is very fast, 0.1s on my machine for a 1s window,
         0.03s for a 0.1s window"""
         sim = CircleSimulator(FieldMap())
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         # sim starts at (2,0)
@@ -80,7 +80,7 @@ class EstimateSimulateTest(unittest.TestCase):
     def test_odo_and_gyro(self) -> None:
 
         sim = CircleSimulator(FieldMap())
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         # sim starts at (2,0)
@@ -136,9 +136,13 @@ class EstimateSimulateTest(unittest.TestCase):
 
     def test_camera_batched(self) -> None:
         """Camera with batch factors.
-        this is much faster than multiple factors, 0.4s for a 0.1s window"""
+        using 0.1s window
+        using 2s of data
+        Python: 0.3s (15% of realtime)
+        C++: 0.04s (2% of realtime)
+        """
         sim = CircleSimulator(FieldMap())
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -147,10 +151,11 @@ class EstimateSimulateTest(unittest.TestCase):
 
         state = gtsam.Pose2()
 
-        print()
-        print(
-            "      t,    GT X,    GT Y,  GT ROT,   EST X,   EST Y, EST ROT,   ERR X,   ERR Y, ERR ROT"
-        )
+        if ACTUALLY_PRINT:
+            print()
+            print(
+                "      t,    GT X,    GT Y,  GT ROT,   EST X,   EST Y, EST ROT,   ERR X,   ERR Y, ERR ROT"
+            )
         for i in range(1, 100):
             t0 = time.time_ns()
             t0_us = 20000 * i
@@ -189,18 +194,21 @@ class EstimateSimulateTest(unittest.TestCase):
             err_x = est_x - gt_x
             err_y = est_y - gt_y
             err_theta = est_theta - gt_theta
+            if ACTUALLY_PRINT:
 
-            print(
-                f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}, {err_x:7.4f}, {err_y:7.4f}, {err_theta:7.4f}"
-            )
+                print(
+                    f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}, {err_x:7.4f}, {err_y:7.4f}, {err_theta:7.4f}"
+                )
 
     def test_batched_camera_and_odometry_and_gyro(self) -> None:
         """Camera and odometry and gyro.
-        Batching vision speeds things up significantly,
-        0.6s for 2s of data in a 0.1s window
+        using 0.1s window
+        using 2s of data
+        Batching python: 0.33s (i.e. 16% of realtime)
+        Non-batching c++: 0.07s (i.e. 4% of realtime)
         """
         sim = CircleSimulator(FieldMap())
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -213,10 +221,11 @@ class EstimateSimulateTest(unittest.TestCase):
 
         state = gtsam.Pose2()
 
-        print()
-        print(
-            "      t,    GT X,    GT Y,  GT ROT,   EST X,   EST Y, EST ROT,   ERR X,   ERR Y, ERR ROT"
-        )
+        if ACTUALLY_PRINT:
+            print()
+            print(
+                "      t,    GT X,    GT Y,  GT ROT,   EST X,   EST Y, EST ROT,   ERR X,   ERR Y, ERR ROT"
+            )
         # gt_theta_0 = sim.gt_theta
         for i in range(1, 100):
             t0 = time.time_ns()
@@ -260,6 +269,7 @@ class EstimateSimulateTest(unittest.TestCase):
             err_y = est_y - gt_y
             err_theta = est_theta - gt_theta
 
-            print(
-                f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}, {err_x:7.4f}, {err_y:7.4f}, {err_theta:7.4f}"
-            )
+            if ACTUALLY_PRINT:
+                print(
+                    f"{t:7.4f}, {gt_x:7.4f}, {gt_y:7.4f}, {gt_theta:7.4f}, {est_x:7.4f}, {est_y:7.4f}, {est_theta:7.4f}, {err_x:7.4f}, {err_y:7.4f}, {err_theta:7.4f}"
+                )

@@ -14,6 +14,7 @@ from gtsam.symbol_shorthand import X  # type:ignore
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d, Twist2d
 
 import app.pose_estimator.factors.apriltag_smooth_batch as apriltag_smooth_batch
+import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
 import app.pose_estimator.factors.gyro as gyro
 import app.pose_estimator.factors.odometry as odometry
 from app.util.drive_util import DriveUtil
@@ -41,13 +42,20 @@ GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.001]))
 # TODO: if you want to model *blur* then you need more noise here, and maybe more in x than y.
 PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
 
+# the "batch" mode uses a python CustomFactor that takes multiple landmarks
+# and corresponding pixels; the python stuff is very slow.
+# the "not batch" mode uses a C++ factor, PlanarProjectionFactor,
+# which takes a single landmark at a time (because there's no particular
+# performance advantage to batching in C++)
+USE_BATCH = False
+
 
 class Estimate:
-    def __init__(self) -> None:
+    def __init__(self, lag: float) -> None:
         """Initialize the model
         initial module positions are at their origins.
         TODO: some other initial positions?"""
-        self._isam: gtsam.BatchFixedLagSmoother = make_smoother(0.1)
+        self._isam: gtsam.BatchFixedLagSmoother = make_smoother(lag)
         self._result: gtsam.Values = gtsam.Values()
         # between updates we accumulate inputs here
         self._new_factors = gtsam.NonlinearFactorGraph()
@@ -186,16 +194,29 @@ class Estimate:
         camera_offset: gtsam.Pose3,
         calib: gtsam.Cal3DS2,
     ) -> None:
-        """With constant offset and calibration, solves a batch of landmarks at once.
+        """With constant offset and calibration, either uses a python CustomFactor
+         to solve a batch at once, or, uses multiple C++ factors.
         landmarks: list of 3d points
         measured: concatenated px measurements
         TODO: flatten landmarks"""
-        noise = noiseModel.Diagonal.Sigmas(np.concatenate([[1, 1] for _ in landmarks]))
-        self._new_factors.push_back(
-            apriltag_smooth_batch.factor(
-                landmarks, measured, camera_offset, calib, noise, X(t0_us)
+        if USE_BATCH:
+            noise = noiseModel.Diagonal.Sigmas(
+                np.concatenate([[1, 1] for _ in landmarks])
             )
-        )
+            self._new_factors.push_back(
+                apriltag_smooth_batch.factor(
+                    landmarks, measured, camera_offset, calib, noise, X(t0_us)
+                )
+            )
+        else:
+            for i, landmark in enumerate(landmarks):
+                px = measured[i * 2 : (i + 1) * 2]
+                noise = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
+                self._new_factors.push_back(
+                    apriltag_smooth.factor(
+                        landmark, px, camera_offset, calib, noise, X(t0_us)
+                    )
+                )
 
     def update(self) -> None:
         """Run the solver"""

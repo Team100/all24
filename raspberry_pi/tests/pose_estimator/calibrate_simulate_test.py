@@ -147,6 +147,10 @@ class CalibrateSimulateTest(unittest.TestCase):
         apart, and/or multiple cameras, or, as below, with odometry.
         It takes a long time to learn the fx and fy values, like >20s.
         but k1 and k2 seem pretty close within 10s.
+        For the 1000-iteration (20s) case with the python batched factor,
+        runtime is about 20s (i.e. 100% realtime, totally not ok).
+        For the c++ not-batched factor the runtime is about 5s (still
+        not great).
         """
         np.set_printoptions(suppress=True, precision=2)
 
@@ -163,18 +167,19 @@ class CalibrateSimulateTest(unittest.TestCase):
 
         state = gtsam.Pose2()
 
-        print()
-        print(
-            "     t, "
-            "  GT X,   GT Y,   GT Θ, "
-            " Est X,  Est Y,  Est Θ, "
-            " sig X,  sig Y,  sig Θ, "
-            " Err X,  Err Y,  Err Θ, "
-            "   F_X,    F_Y,    P_X, "
-            "   P_Y,    K_0,    K_1, "
-            "   C_X,    C_Y,    C_Z, "
-            "   C_R,    C_P,    C_Y"
-        )
+        if ACTUALLY_PRINT:
+            print()
+            print(
+                "     t, "
+                "  GT X,   GT Y,   GT Θ, "
+                " Est X,  Est Y,  Est Θ, "
+                " sig X,  sig Y,  sig Θ, "
+                " Err X,  Err Y,  Err Θ, "
+                "   F_X,    F_Y,    P_X, "
+                "   P_Y,    K_0,    K_1, "
+                "   C_X,    C_Y,    C_Z, "
+                "   C_R,    C_P,    C_Y"
+            )
         for i in range(1, 1000):
             t0 = time.time_ns()
             t0_us = 20000 * i
@@ -228,17 +233,18 @@ class CalibrateSimulateTest(unittest.TestCase):
 
             f = '6.2f'
 
-            print(
-                f"{t:{f}}, "
-                f"{gt_x:{f}}, {gt_y:{f}}, {gt_theta:{f}}, "
-                f"{est_x:{f}}, {est_y:{f}}, {est_theta:{f}}, "
-                f"{s0[0]:{f}}, {s0[1]:{f}}, {s0[2]:{f}}, "
-                f"{err_x:{f}}, {err_y:{f}}, {err_theta:{f}}, "
-                f"{k0.fx():{f}}, {k0.fy():{f}}, {k0.px():{f}}, "
-                f"{k0.py():{f}}, {k0.k1():{f}}, {k0.k2():{f}}, "
-                f"{c0.x():{f}}, {c0.y():{f}}, {c0.z():{f}}, "
-                f"{c0.rotation().roll():{f}}, {c0.rotation().pitch():{f}}, {c0.rotation().yaw():{f}}"
-            )
+            if ACTUALLY_PRINT:
+                print(
+                    f"{t:{f}}, "
+                    f"{gt_x:{f}}, {gt_y:{f}}, {gt_theta:{f}}, "
+                    f"{est_x:{f}}, {est_y:{f}}, {est_theta:{f}}, "
+                    f"{s0[0]:{f}}, {s0[1]:{f}}, {s0[2]:{f}}, "
+                    f"{err_x:{f}}, {err_y:{f}}, {err_theta:{f}}, "
+                    f"{k0.fx():{f}}, {k0.fy():{f}}, {k0.px():{f}}, "
+                    f"{k0.py():{f}}, {k0.k1():{f}}, {k0.k2():{f}}, "
+                    f"{c0.x():{f}}, {c0.y():{f}}, {c0.z():{f}}, "
+                    f"{c0.rotation().roll():{f}}, {c0.rotation().pitch():{f}}, {c0.rotation().yaw():{f}}"
+                )
 
     def test_batched_camera_and_odometry_and_gyro(self) -> None:
         """Camera and odometry and gyro.
@@ -248,6 +254,9 @@ class CalibrateSimulateTest(unittest.TestCase):
         It takes a long time to learn fx and fy, as the model above also does.
         k1 and k2 are pretty close within 2 sec (!)
         The prediction errors are below 1cm and 0.5 deg all the time.
+        for the python batched factor for 20s, the runtime is about 15s
+        for the c++ not-batched factor for 20s, the runtime is about 1.3s
+        (much better)
         """
         sim = CircleSimulator(FieldMap())
         est = Calibrate(0.1)
@@ -262,18 +271,19 @@ class CalibrateSimulateTest(unittest.TestCase):
 
         state = gtsam.Pose2()
 
-        print()
-        print(
-            "     t, "
-            "  GT X,   GT Y,   GT Θ, "
-            " Est X,  Est Y,  Est Θ, "
-            " sig X,  sig Y,  sig Θ, "
-            " Err X,  Err Y,  Err Θ, "
-            "   F_X,    F_Y,    P_X, "
-            "   P_Y,    K_0,    K_1, "
-            "   C_X,    C_Y,    C_Z, "
-            "   C_R,    C_P,    C_Y"
-        )
+        if ACTUALLY_PRINT:
+            print()
+            print(
+                "     t, "
+                "  GT X,   GT Y,   GT Θ, "
+                " Est X,  Est Y,  Est Θ, "
+                " sig X,  sig Y,  sig Θ, "
+                " Err X,  Err Y,  Err Θ, "
+                "   F_X,    F_Y,    P_X, "
+                "   P_Y,    K_0,    K_1, "
+                "   C_X,    C_Y,    C_Z, "
+                "   C_R,    C_P,    C_Y"
+            )
         for i in range(1, 1000):
             t0 = time.time_ns()
             t0_us = 20000 * i
@@ -322,14 +332,15 @@ class CalibrateSimulateTest(unittest.TestCase):
 
             f = '6.2f'
 
-            print(
-                f"{t:{f}}, "
-                f"{gt_x:{f}}, {gt_y:{f}}, {gt_theta:{f}}, "
-                f"{est_x:{f}}, {est_y:{f}}, {est_theta:{f}}, "
-                f"{s0[0]:{f}}, {s0[1]:{f}}, {s0[2]:{f}}, "
-                f"{err_x:{f}}, {err_y:{f}}, {err_theta:{f}}, "
-                f"{k0.fx():{f}}, {k0.fy():{f}}, {k0.px():{f}}, "
-                f"{k0.py():{f}}, {k0.k1():{f}}, {k0.k2():{f}}, "
-                f"{c0.x():{f}}, {c0.y():{f}}, {c0.z():{f}}, "
-                f"{c0.rotation().roll():{f}}, {c0.rotation().pitch():{f}}, {c0.rotation().yaw():{f}}"
-            )
+            if ACTUALLY_PRINT:
+                print(
+                    f"{t:{f}}, "
+                    f"{gt_x:{f}}, {gt_y:{f}}, {gt_theta:{f}}, "
+                    f"{est_x:{f}}, {est_y:{f}}, {est_theta:{f}}, "
+                    f"{s0[0]:{f}}, {s0[1]:{f}}, {s0[2]:{f}}, "
+                    f"{err_x:{f}}, {err_y:{f}}, {err_theta:{f}}, "
+                    f"{k0.fx():{f}}, {k0.fy():{f}}, {k0.px():{f}}, "
+                    f"{k0.py():{f}}, {k0.k1():{f}}, {k0.k2():{f}}, "
+                    f"{c0.x():{f}}, {c0.y():{f}}, {c0.z():{f}}, "
+                    f"{c0.rotation().roll():{f}}, {c0.rotation().pitch():{f}}, {c0.rotation().yaw():{f}}"
+                )

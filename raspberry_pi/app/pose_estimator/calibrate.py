@@ -114,6 +114,12 @@ GYRO_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.001]))
 # TODO: if you want to model *blur* then you need more noise here, and maybe more in x than y.
 PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
 
+# the "batch" mode uses a python CustomFactor that takes multiple landmarks
+# and corresponding pixels; the python stuff is very slow.
+# the "not batch" mode uses a C++ factor, PlanarProjectionFactor,
+# which takes a single landmark at a time (because there's no particular
+# performance advantage to batching in C++)
+USE_BATCH = False
 
 class Calibrate:
     def __init__(self, lag_s: float) -> None:
@@ -262,12 +268,27 @@ class Calibrate:
     def apriltag_for_calibration_batch(
         self, landmarks: list[np.ndarray], measured: np.ndarray, t0_us: int
     ) -> None:
-        noise = noiseModel.Diagonal.Sigmas(np.concatenate([[1, 1] for _ in landmarks]))
-        self._new_factors.push_back(
-            apriltag_calibrate_batch.factor(
-                landmarks, measured, noise, X(t0_us), C(0), K(0)
+        """With constant offset and calibration, either uses a python CustomFactor
+        to solve a batch at once, or, uses multiple C++ factors.
+        landmarks: list of 3d points
+        measured: concatenated px measurements
+        TODO: flatten landmarks"""
+        if USE_BATCH:
+            noise = noiseModel.Diagonal.Sigmas(np.concatenate([[1, 1] for _ in landmarks]))
+            self._new_factors.push_back(
+                apriltag_calibrate_batch.factor(
+                    landmarks, measured, noise, X(t0_us), C(0), K(0)
+                )
             )
-        )
+        else:
+            for i, landmark in enumerate(landmarks):
+                px = measured[i * 2 : (i + 1) * 2]
+                noise = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
+                self._new_factors.push_back(
+                    apriltag_calibrate.factor(
+                        landmark, px, noise, X(t0_us), C(0), K(0)
+                    )
+                )   
 
     def keep_calib_hot(self, t0_us: int) -> None:
         """Even if we don't see any targets, remember the

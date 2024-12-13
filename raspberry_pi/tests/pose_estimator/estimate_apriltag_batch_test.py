@@ -19,7 +19,7 @@ class EstimateAprilTagTest(unittest.TestCase):
 
     def test_apriltag_1(self) -> None:
         """Test the smoothing factor."""
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
