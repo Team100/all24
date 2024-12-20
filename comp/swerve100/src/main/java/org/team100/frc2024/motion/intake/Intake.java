@@ -48,7 +48,7 @@ public class Intake extends SubsystemBase implements Glassy {
         m_sensors = sensors;
 
         switch (Identity.instance) {
-            case COMP_BOT:
+            case DISABLED:
                 m_intake = new PWMSparkMax(1);
                 m_centering = new PWMSparkMax(2);
                 superRollers = ServoFactory.limitedNeoVelocityServo(
