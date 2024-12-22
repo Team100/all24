@@ -37,7 +37,7 @@ class NTEstimate:
         self.gyro_receiver = net.get_gyro_receiver("gyro")
         self.pose_sender = net.get_pose_sender("pose")
 
-        self.est = Estimate()
+        self.est = Estimate(0.1)
         # current estimate, used for initial value for next time
         # TODO: remove gtsam types
         self.state = gtsam.Pose2()
@@ -98,7 +98,7 @@ class NTEstimate:
         # TODO: supply sigma on the wire?
         s = noiseModel.Diagonal.Sigmas(np.array([0.05, 0.05, 0.05]))
 
-        self.est = Estimate()
+        self.est = Estimate(0.1)
         self.state = p
         self.est.init()
         now = self.net.now()

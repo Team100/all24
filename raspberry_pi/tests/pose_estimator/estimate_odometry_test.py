@@ -26,7 +26,7 @@ PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 class EstimateOdometryTest(unittest.TestCase):
     def test_odometry_0(self) -> None:
         # initial position at origin
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         # std dev of 1 cm and 0.5 deg
@@ -131,7 +131,7 @@ class EstimateOdometryTest(unittest.TestCase):
     def test_odometry_1(self) -> None:
         """combined rotation and translation, no wheel slip, should yield exact solution."""
         # initial position at origin, 1m wheelbase
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         odometry_noise = noiseModel.Diagonal.Sigmas(np.array([0.01, 0.01, 0.01]))
@@ -246,7 +246,7 @@ class EstimateOdometryTest(unittest.TestCase):
     def test_odometry_2(self) -> None:
         """add some wheel slip to the above case."""
         # initial position at origin, 1m wheelbase
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)

@@ -120,7 +120,7 @@ public class DrumShooter extends SubsystemBase implements Glassy {
         Feedforward100 rollerFF = Feedforward100.makeShooterFalcon6();
 
         switch (Identity.instance) {
-            case COMP_BOT:
+            case DISABLED:
                 Falcon6Motor leftMotor = new Falcon6Motor(
                         leftLogger,
                         leftID,

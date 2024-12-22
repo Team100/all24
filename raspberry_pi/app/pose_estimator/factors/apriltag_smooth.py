@@ -69,7 +69,7 @@ def h_H(
     return result
 
 
-def factor(
+def factorCustom(
     landmark: np.ndarray,
     measured: np.ndarray,
     offset: gtsam.Pose3,
@@ -93,3 +93,28 @@ def factor(
         gtsam.KeyVector([p0_key]),  # type:ignore
         error_func,
     )
+
+
+def factorNative(
+    landmark: np.ndarray,
+    measured: np.ndarray,
+    offset: gtsam.Pose3,
+    calib: gtsam.Cal3DS2,
+    model: SharedNoiseModel,
+    p0_key: int,
+) -> gtsam.NoiseModelFactor:
+    return gtsam.PlanarProjectionFactor(
+        landmark, measured, offset, calib, model, p0_key
+    )
+
+
+def factor(
+    landmark: np.ndarray,
+    measured: np.ndarray,
+    offset: gtsam.Pose3,
+    calib: gtsam.Cal3DS2,
+    model: SharedNoiseModel,
+    p0_key: int,
+) -> gtsam.NoiseModelFactor:
+    return factorNative(landmark, measured, offset, calib, model, p0_key)
+    # return factorCustom(landmark, measured, offset, calib, model, p0_key)

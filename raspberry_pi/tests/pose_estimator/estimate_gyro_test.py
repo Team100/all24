@@ -17,7 +17,7 @@ PRIOR_NOISE = noiseModel.Diagonal.Sigmas(np.array([0.3, 0.3, 0.1]))
 class EstimateGyroTest(unittest.TestCase):
     def test_gyro_0(self) -> None:
         """motionless"""
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)
@@ -63,7 +63,7 @@ class EstimateGyroTest(unittest.TestCase):
 
     def test_gyro_1(self) -> None:
         """rotating"""
-        est = Estimate()
+        est = Estimate(0.1)
         est.init()
 
         prior_mean = gtsam.Pose2(0, 0, 0)

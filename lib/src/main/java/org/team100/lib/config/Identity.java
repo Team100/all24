@@ -28,6 +28,7 @@ public enum Identity {
     SWERVE_TWO("0317f285"),
     COMP_BOT("03238232"), 
     SWERVE_ONE("032363AC"), 
+    DISABLED("disabled"), // for mechanisms which don't exist
     BLANK(""), // e.g. test default or simulation
     UNKNOWN(null);
 

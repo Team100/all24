@@ -34,7 +34,7 @@ def h_fn(
     landmark: np.ndarray,
 ) -> Callable[[gtsam.Pose2, gtsam.Pose3, gtsam.Cal3DS2], np.ndarray]:
     """Returns a pixel estimation function for a constant landmark,
-    with variable pose, offset, and calibration. 
+    with variable pose, offset, and calibration.
     The landmark is the field position of a tag corner."""
 
     def h(p0: gtsam.Pose2, offset: gtsam.Pose3, calib: gtsam.Cal3DS2) -> np.ndarray:
@@ -43,6 +43,8 @@ def h_fn(
         offset_pose = gtsam.Pose3(p0).compose(offset)
         # this is z-forward y-down
         camera_pose = offset_pose.compose(CAM_COORD)
+        print("camera_pose", camera_pose)
+        print("landmark", landmark)
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
         return camera.project(landmark)
 
@@ -67,7 +69,7 @@ def h_H(
     return result
 
 
-def factor(
+def factorCustom(
     landmark: np.ndarray,
     measured: np.ndarray,
     model: SharedNoiseModel,
@@ -95,3 +97,28 @@ def factor(
         gtsam.KeyVector([p0_key, offset_key, calib_key]),  # type:ignore
         error_func,
     )
+
+
+def factorNative(
+    landmark: np.ndarray,
+    measured: np.ndarray,
+    model: SharedNoiseModel,
+    p0_key: int,
+    offset_key: int,
+    calib_key: int,
+) -> gtsam.NoiseModelFactor:
+    return gtsam.PlanarSFMFactor(
+        landmark, measured, model, p0_key, offset_key, calib_key
+    )
+
+
+def factor(
+    landmark: np.ndarray,
+    measured: np.ndarray,
+    model: SharedNoiseModel,
+    p0_key: int,
+    offset_key: int,
+    calib_key: int,
+) -> gtsam.NoiseModelFactor:
+    return factorNative(landmark, measured, model, p0_key, offset_key, calib_key)
+    # return factorCustom(landmark, measured, model, p0_key, offset_key, calib_key)

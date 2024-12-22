@@ -1,4 +1,4 @@
-# pylint: disable=E1101
+# pylint: disable=C0103,E1101
 
 
 import math
@@ -96,3 +96,340 @@ class UtilTest(unittest.TestCase):
         self.assertAlmostEqual(2, wc.k2)
         # self.assertAlmostEqual(3, wc.p1)
         # self.assertAlmostEqual(4, wc.p2)
+
+    def test_compose_h(self) -> None:
+        """Figure out what the composition Jacobians do"""
+        # compose two identities
+        p0 = gtsam.Pose3()
+        p1 = gtsam.Pose3()
+        H1 = np.zeros((6, 6), order="F")
+        H2 = np.zeros((6, 6), order="F")
+        p0.compose(p1, H1, H2)
+
+        # adjoint of the inverse
+        print("H1", H1)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 0, 0],
+                        [0, 0, 0, 0, 1, 0],
+                        [0, 0, 0, 0, 0, 1],
+                    ]
+                ),
+                H1,
+            )
+        )
+        # always identity
+        print("H2", H2)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 0, 0],
+                        [0, 0, 0, 0, 1, 0],
+                        [0, 0, 0, 0, 0, 1],
+                    ]
+                ),
+                H2,
+            )
+        )
+
+    def test_compose_h2(self) -> None:
+        """Figure out what the composition Jacobians do"""
+        # compose identity with pure translation
+        p0 = gtsam.Pose3()
+        p1 = gtsam.Pose3(gtsam.Rot3(), np.array([1, 0, 0]))
+        H1 = np.zeros((6, 6), order="F")
+        H2 = np.zeros((6, 6), order="F")
+        p0.compose(p1, H1, H2)
+
+        # adjoint of the inverse
+        print("H1", H1)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 0, 0],
+                        [0, 0, 1, 0, 1, 0],
+                        [0, -1, 0, 0, 0, 1],
+                    ]
+                ),
+                H1,
+            )
+        )
+        # always identity
+        print("H2", H2)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 0, 0],
+                        [0, 0, 0, 0, 1, 0],
+                        [0, 0, 0, 0, 0, 1],
+                    ]
+                ),
+                H2,
+            )
+        )
+
+    def test_compose_h3(self) -> None:
+        """Figure out what the composition Jacobians do"""
+        # compose identity with pure rotation
+        p0 = gtsam.Pose3()
+        p1 = gtsam.Pose3(gtsam.Rot3().Yaw(1), np.array([0, 0, 0]))
+        H1 = np.zeros((6, 6), order="F")
+        H2 = np.zeros((6, 6), order="F")
+        p0.compose(p1, H1, H2)
+
+        # adjoint of the inverse
+        print("H1", H1)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [0.540, 0.841, 0.000, 0.000, 0.000, 0.000],
+                        [-0.841, 0.540, 0.000, 0.000, 0.000, 0.000],
+                        [0.000, 0.000, 1.000, 0.000, 0.000, 0.000],
+                        [0.000, 0.000, 0.000, 0.540, 0.841, 0.000],
+                        [0.000, 0.000, 0.000, -0.841, 0.540, 0.000],
+                        [0.000, 0.000, 0.000, 0.000, 0.000, 1.000],
+                    ]
+                ),
+                H1,
+                atol=0.001,
+            )
+        )
+        # always identity
+        print("H2", H2)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 0, 0],
+                        [0, 0, 0, 0, 1, 0],
+                        [0, 0, 0, 0, 0, 1],
+                    ]
+                ),
+                H2,
+            )
+        )
+
+    def test_compose_h4(self) -> None:
+        """Figure out what the composition Jacobians do"""
+        # compose identity with translation + rotation
+        p0 = gtsam.Pose3()
+        p1 = gtsam.Pose3(gtsam.Rot3().Yaw(1), np.array([1, 0, 0]))
+        H1 = np.zeros((6, 6), order="F")
+        H2 = np.zeros((6, 6), order="F")
+        p0.compose(p1, H1, H2)
+
+        # adjoint of the inverse
+        print("H1", H1)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [0.540, 0.841, 0, 0, 0, 0],
+                        [-0.841, 0.540, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0],
+                        [0, 0, 0.841, 0.540, 0.841, 0],
+                        [0, 0, 0.540, -0.841, 0.540, 0],
+                        [0, -1, 0, 0, 0, 1],
+                    ]
+                ),
+                H1,
+                atol=0.001
+            )
+        )
+        # always identity
+        print("H2", H2)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 0, 0],
+                        [0, 0, 0, 0, 1, 0],
+                        [0, 0, 0, 0, 0, 1],
+                    ]
+                ),
+                H2,
+            )
+        )
+
+
+    def test_compose_2h(self) -> None:
+        """Figure out what the composition Jacobians do"""
+        # compose two identities
+        p0 = gtsam.Pose2()
+        p1 = gtsam.Pose2()
+        H1 = np.zeros((3, 3), order="F")
+        H2 = np.zeros((3, 3), order="F")
+        p0.compose(p1, H1, H2)
+
+        # adjoint of the inverse
+        print("H1", H1)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1],
+
+                    ]
+                ),
+                H1,
+            )
+        )
+        # always identity
+        print("H2", H2)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1],
+                    ]
+                ),
+                H2,
+            )
+        )
+
+    def test_compose_2h2(self) -> None:
+        """Figure out what the composition Jacobians do"""
+        # compose identity with pure translation
+        p0 = gtsam.Pose2()
+        p1 = gtsam.Pose2(1, 0, 0)
+        H1 = np.zeros((3, 3), order="F")
+        H2 = np.zeros((3, 3), order="F")
+        p0.compose(p1, H1, H2)
+
+        # adjoint of the inverse
+        # since we moved +x, dtheta produces dy.
+        print("H1", H1)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0],
+                        [0, 1, 1],
+                        [0, 0, 1],
+                    ]
+                ),
+                H1,
+            )
+        )
+        # always identity
+        print("H2", H2)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1],
+                    ]
+                ),
+                H2,
+            )
+        )
+
+    def test_compose_2h3(self) -> None:
+        """Figure out what the composition Jacobians do"""
+        # compose identity with pure rotation
+        p0 = gtsam.Pose2()
+        p1 = gtsam.Pose2(0, 0, 1)
+        H1 = np.zeros((3, 3), order="F")
+        H2 = np.zeros((3, 3), order="F")
+        p0.compose(p1, H1, H2)
+
+        # adjoint of the inverse
+        # pure rotation
+        print("H1", H1)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [0.540, 0.841, 0],
+                        [-0.841, 0.540, 0],
+                        [0, 0, 1],
+                    ]
+                ),
+                H1,
+                atol=0.001,
+            )
+        )
+        # always identity
+        print("H2", H2)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1],
+                    ]
+                ),
+                H2,
+            )
+        )
+
+    def test_compose_2h4(self) -> None:
+        """Figure out what the composition Jacobians do"""
+        # compose identity with translation + rotation
+        p0 = gtsam.Pose2()
+        p1 = gtsam.Pose2(1, 0, 1)
+        H1 = np.zeros((3, 3), order="F")
+        H2 = np.zeros((3, 3), order="F")
+        p0.compose(p1, H1, H2)
+
+        # adjoint of the inverse
+        # same theta-y coupling but since we rotated a bit, it's not just y.
+        print("H1", H1)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [0.540, 0.841, 0.841],
+                        [-0.841, 0.540, 0.540],
+                        [0, 0, 1],
+                    ]
+                ),
+                H1,
+                atol=0.001
+            )
+        )
+        # always identity
+        print("H2", H2)
+        self.assertTrue(
+            np.allclose(
+                np.array(
+                    [
+                        [1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1],
+                    ]
+                ),
+                H2,
+            )
+        )

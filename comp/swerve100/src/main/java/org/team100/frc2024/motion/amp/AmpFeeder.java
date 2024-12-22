@@ -21,7 +21,7 @@ public class AmpFeeder extends SubsystemBase implements Glassy {
     public AmpFeeder(LoggerFactory parent) {
         LoggerFactory child = parent.child(this);
         switch (Identity.instance) {
-            case COMP_BOT:
+            case DISABLED:
                 Feedforward100 ff = Feedforward100.makeNeo();
                 PIDConstants pid = new PIDConstants(0, 0, 0);
                 ampDrive = new NeoCANSparkMotor(child, 33, MotorPhase.FORWARD, 40, ff, pid);

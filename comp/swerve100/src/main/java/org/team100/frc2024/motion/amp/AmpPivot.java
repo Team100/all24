@@ -67,7 +67,7 @@ public class AmpPivot extends SubsystemBase implements Glassy {
         controller.setIntegratorRange(0, 0.1);
 
         switch (Identity.instance) {
-            case COMP_BOT:
+            case DISABLED:
                 Feedforward100 ff = Feedforward100.makeArmPivot();
                 PIDConstants pid = new PIDConstants(kOutboardP, kOutboardI, kOutboardD);
                 CANSparkMotor motor = new NeoCANSparkMotor(
