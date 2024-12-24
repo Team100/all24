@@ -16,26 +16,17 @@ from app.pose_estimator.numerical_derivative import (
     numericalDerivative33,
 )
 
-# camera "zero" is facing +z; this turns it to face +x
-CAM_COORD = gtsam.Pose3(
-    gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
-    gtsam.Point3(0, 0, 0),  # type:ignore
-)
-
 
 def h_fn(
     landmarks: list[np.ndarray],
 ) -> Callable[[gtsam.Pose2, gtsam.Pose3, gtsam.Cal3DS2], np.ndarray]:
     """Returns a pixel estimation function for an array of constant landmarks,
-    with variable pose, offset, and calibration. 
+    with variable pose, offset, and calibration.
     The landmark is the field position of a tag corner."""
 
     def h(p0: gtsam.Pose2, offset: gtsam.Pose3, calib: gtsam.Cal3DS2) -> np.ndarray:
         """Estimated pixel location of the target."""
-        # this is x-forward z-up
-        offset_pose = gtsam.Pose3(p0).compose(offset)
-        # this is z-forward y-down
-        camera_pose = offset_pose.compose(CAM_COORD)
+        camera_pose = gtsam.Pose3(p0).compose(offset)
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
         # Camera.project() will throw CheiralityException sometimes
         # so be sure to use GTSAM_THROW_CHEIRALITY_EXCEPTION=OFF

@@ -23,11 +23,6 @@ from app.pose_estimator.numerical_derivative import (
     numericalDerivative33,
 )
 
-# camera "zero" is facing +z; this turns it to face +x
-CAM_COORD = gtsam.Pose3(
-    gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
-    gtsam.Point3(0, 0, 0),  # type:ignore
-)
 
 
 def h_fn(
@@ -39,12 +34,7 @@ def h_fn(
 
     def h(p0: gtsam.Pose2, offset: gtsam.Pose3, calib: gtsam.Cal3DS2) -> np.ndarray:
         """Estimated pixel location of the target."""
-        # this is x-forward z-up
-        offset_pose = gtsam.Pose3(p0).compose(offset)
-        # this is z-forward y-down
-        camera_pose = offset_pose.compose(CAM_COORD)
-        print("camera_pose", camera_pose)
-        print("landmark", landmark)
+        camera_pose = gtsam.Pose3(p0).compose(offset) 
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
         return camera.project(landmark)
 
@@ -107,8 +97,8 @@ def factorNative(
     offset_key: int,
     calib_key: int,
 ) -> gtsam.NoiseModelFactor:
-    return gtsam.PlanarSFMFactor(
-        landmark, measured, model, p0_key, offset_key, calib_key
+    return gtsam.PlanarProjectionFactor3(
+        p0_key, offset_key, calib_key, landmark, measured, model
     )
 
 

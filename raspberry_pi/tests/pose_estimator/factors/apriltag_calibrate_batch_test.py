@@ -20,7 +20,10 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
     def test_h_center_1(self) -> None:
         landmarks = [np.array([1, 0, 0]), np.array([1, 0, 0])]
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmarks)(
             p0, offset, KCAL
         )
@@ -43,7 +46,10 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
         # second point is above the camera bore
         landmarks = [np.array([1, 0, 0]), np.array([1, 0, 1])]
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmarks)(
             p0, offset, KCAL
         )
@@ -66,7 +72,10 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
         # second point is above and to the left
         landmarks = [np.array([1, 0, 0]), np.array([1, 1, 1])]
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         estimate_px: np.ndarray = apriltag_calibrate_batch.h_fn(landmarks)(
             p0, offset, KCAL
         )
@@ -92,7 +101,10 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
         measured = np.array([200, 200, 0, 0])
         landmarks = [np.array([1, 0, 0]), np.array([1, 1, 1])]
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         H = [np.zeros((3, 2)), np.zeros((6, 2)), np.zeros((9, 2))]
         err_px: np.ndarray = apriltag_calibrate_batch.h_H(
             landmarks, measured, p0, offset, KCAL, H
@@ -128,14 +140,15 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
                 atol=0.001,
             )
         )
+        # remember the camera is now z-fwd y-down
         self.assertTrue(
             np.allclose(
                 np.array(
                     [
-                        [0, 0, 200, 0, 200, 0],
-                        [0, -200, 0, 0, 0, 200],
-                        [-200, -440, 640, -360, 280, 80],
-                        [200, -640, 440, -360, 80, 280],
+                        [0, -200, 0, -200, 0, 0],
+                        [200, 0, 0, 0, -200, 0],
+                        [440, -640, -200, -280, -80, -360],
+                        [640, -440, 200, -80, -280, -360],
                     ]
                 ),
                 H[1],
@@ -171,7 +184,10 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
             ]
         )
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         f: gtsam.NoiseModelFactor = apriltag_calibrate_batch.factor(
             landmarks,
             measured,
@@ -213,7 +229,10 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
             ]
         )
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3(gtsam.Rot3(), np.array([0, 0, 1]))
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 1),  # type: ignore
+        )
         f: gtsam.NoiseModelFactor = apriltag_calibrate_batch.factor(
             landmarks,
             measured,
@@ -255,7 +274,12 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
             ]
         )
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3(gtsam.Rot3.Pitch(-0.1), np.array([0, 0, 0]))
+        offset = gtsam.Pose3(gtsam.Rot3.Pitch(-0.1), np.array([0, 0, 0])).compose(
+            gtsam.Pose3(
+                gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+                gtsam.Point3(0, 0, 0),
+            )
+        )  # type: ignore
         f: gtsam.NoiseModelFactor = apriltag_calibrate_batch.factor(
             landmarks,
             measured,
@@ -297,7 +321,11 @@ class AprilTagCalibrateBatchTest(unittest.TestCase):
             ]
         )
         p0 = gtsam.Pose2(0.05, 0, 0)
-        offset = gtsam.Pose3(gtsam.Rot3(), np.array([0, 0, 1]))
+
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 1),
+        )
         f: gtsam.NoiseModelFactor = apriltag_calibrate_batch.factor(
             landmarks,
             measured,

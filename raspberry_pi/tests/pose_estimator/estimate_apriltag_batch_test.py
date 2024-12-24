@@ -34,7 +34,10 @@ class EstimateAprilTagTest(unittest.TestCase):
             landmarks,
             measured,
             0,
-            gtsam.Pose3(),
+            gtsam.Pose3(
+                gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+                gtsam.Point3(0, 0, 0),
+            ),
             gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1),
         )
         est.update()

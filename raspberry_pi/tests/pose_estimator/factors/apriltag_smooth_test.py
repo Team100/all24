@@ -10,11 +10,15 @@ from gtsam.symbol_shorthand import X  # type:ignore
 
 import app.pose_estimator.factors.apriltag_smooth as apriltag_smooth
 
+
 class AprilTagSmoothTest(unittest.TestCase):
     def test_h_center_1(self) -> None:
         landmark = np.array([1, 0, 0])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
         estimate_px: np.ndarray = apriltag_smooth.h_fn(landmark, offset, KCAL)(p0)
         # landmark on the camera bore, so it's at (cx, cy)
@@ -34,7 +38,10 @@ class AprilTagSmoothTest(unittest.TestCase):
         # higher than the camera
         landmark = np.array([1, 0, 1])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
         estimate_px: np.ndarray = apriltag_smooth.h_fn(landmark, offset, KCAL)(p0)
         # landmark above the camera bore, so the 'y' value is less
@@ -54,7 +61,10 @@ class AprilTagSmoothTest(unittest.TestCase):
         # higher than the camera
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
         estimate_px: np.ndarray = apriltag_smooth.h_fn(landmark, offset, KCAL)(p0)
         # above and to the left, so both x and y are less.
@@ -77,7 +87,10 @@ class AprilTagSmoothTest(unittest.TestCase):
         # as above but with jacobians
         landmark = np.array([1, 0, 0])
         measured = np.array([200, 200])
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         p0 = gtsam.Pose2()
         # target on bore, distortion has no impact.
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
@@ -121,7 +134,10 @@ class AprilTagSmoothTest(unittest.TestCase):
         # as above but with jacobians
         landmark = np.array([1, 1, 1])
         measured = np.array([0, 0])
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         p0 = gtsam.Pose2()
         # distortion
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
@@ -167,7 +183,10 @@ class AprilTagSmoothTest(unittest.TestCase):
         # as above but with jacobians
         landmark = np.array([1, 1, 1])
         measured = np.array([0, 0])
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         p0 = gtsam.Pose2()
         # no distortion
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, 0, 0)
@@ -194,7 +213,7 @@ class AprilTagSmoothTest(unittest.TestCase):
         # du/dtheta = + (as above)
         # dv/dx = - (dolly fwd => px goes up)
         # dv/dy = 0 (just truck)
-        # dv/dtheta = + 
+        # dv/dtheta = +
         self.assertTrue(
             np.allclose(
                 np.array(
@@ -213,7 +232,10 @@ class AprilTagSmoothTest(unittest.TestCase):
         measured = np.array([0, 0])
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        # camera is now z-forward y-down
+        offset = gtsam.Pose3(
+            gtsam.Rot3(0, 0, 1, -1, 0, 0, 0, -1, 0), np.array([0, 0, 0])
+        )
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
         noise = noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
         f: gtsam.NoiseModelFactor = apriltag_smooth.factor(

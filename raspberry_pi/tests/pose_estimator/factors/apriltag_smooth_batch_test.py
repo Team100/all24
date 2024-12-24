@@ -19,7 +19,10 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
     def test_h_center_1(self) -> None:
         landmarks = [np.array([1, 0, 0]), np.array([1, 0, 0])]
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         estimate_px: np.ndarray = apriltag_smooth_batch.h_fn(landmarks, offset, KCAL)(
             p0
         )
@@ -43,7 +46,10 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
         # second point is above the camera bore
         landmarks = [np.array([1, 0, 0]), np.array([1, 0, 1])]
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         estimate_px: np.ndarray = apriltag_smooth_batch.h_fn(landmarks, offset, KCAL)(
             p0
         )
@@ -66,7 +72,10 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
         # second point is above and to the left
         landmarks = [np.array([1, 0, 0]), np.array([1, 1, 1])]
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         estimate_px: np.ndarray = apriltag_smooth_batch.h_fn(landmarks, offset, KCAL)(
             p0
         )
@@ -92,7 +101,10 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
         measured = np.array([200, 200, 0, 0])
         landmarks = [np.array([1, 0, 0]), np.array([1, 1, 1])]
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         H = [np.zeros((3, 2))]
         err_px: np.ndarray = apriltag_smooth_batch.h_H(
             landmarks, measured, p0, offset, KCAL, H
@@ -134,7 +146,10 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
             np.array([1, 1, 1]),  # upper left corner
         ]
         measured = np.array([200, 200, 0, 0])
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         f: gtsam.NoiseModelFactor = apriltag_smooth_batch.factor(
             landmarks,
             measured,
@@ -177,7 +192,10 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
                 200,  # center
             ]
         )
-        offset = gtsam.Pose3(gtsam.Rot3(), np.array([0, 0, 1]))
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 1),  # type: ignore
+        )
         f: gtsam.NoiseModelFactor = apriltag_smooth_batch.factor(
             landmarks,
             measured,
@@ -220,7 +238,10 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
                 49,
             ]
         )
-        offset = gtsam.Pose3(gtsam.Rot3.Pitch(-0.1), np.array([0, 0, 0]))
+        offset = gtsam.Pose3(gtsam.Rot3.Pitch(-0.1), np.array([0, 0, 0])).compose(gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0)))  # type: ignore
+        
         f: gtsam.NoiseModelFactor = apriltag_smooth_batch.factor(
             landmarks,
             measured,
@@ -263,7 +284,9 @@ class AprilTagSmoothBatchTest(unittest.TestCase):
                 200,  # center
             ]
         )
-        offset = gtsam.Pose3(gtsam.Rot3(), np.array([0, 0, 1]))
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 1))  # type: ignore
         f: gtsam.NoiseModelFactor = apriltag_smooth_batch.factor(
             landmarks,
             measured,
