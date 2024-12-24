@@ -37,6 +37,7 @@ class CalibrateAprilTagTest(unittest.TestCase):
         self.assertEqual(3, est.result_size())
 
         p0: gtsam.Pose2 = est.mean_pose2(X(0))
+        print(p0)
         self.assertAlmostEqual(0, p0.x(), 3)
         self.assertAlmostEqual(0, p0.y(), 3)
         self.assertAlmostEqual(0, p0.theta(), 3)
@@ -48,14 +49,16 @@ class CalibrateAprilTagTest(unittest.TestCase):
         self.assertAlmostEqual(0, c0.x(), 3)
         self.assertAlmostEqual(0, c0.y(), 3)
         self.assertAlmostEqual(0.6, c0.z(), 3)
-        self.assertAlmostEqual(0, c0.rotation().roll(), 3)
-        self.assertAlmostEqual(0, c0.rotation().pitch(), 3)
-        self.assertAlmostEqual(0, c0.rotation().yaw(), 3)
+        # these rotations match the offset
+        # which is z-fwd remember
+        rotVec = c0.rotation().xyz()
+        print("rotVec", rotVec)
+        self.assertTrue(np.allclose(np.array([-1.571, 0, -1.571]), rotVec, atol=0.001))
         sc0 = est.sigma(C(0))
-        print(sc0)
+        print("sc0", sc0)
         self.assertTrue(
             np.allclose(
-                np.array([0.094, 0.163, 0.191, 0.199, 0.194, 0.164]), sc0, atol=0.001
+                np.array([0.163, 0.191, 0.094, 0.194, 0.164, 0.199]), sc0, atol=0.001
             )
         )
 

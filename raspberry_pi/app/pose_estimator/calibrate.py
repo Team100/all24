@@ -68,8 +68,9 @@ CAL_PRIOR_NOISE = noiseModel.Diagonal.Sigmas(
 # in simulation, the "z" component is fixed within 0.25 sec (!)
 # but the "x" and "y" are *never* fixed, i think because a fixed offset
 # just doesn't matter much in the sim geometry.
+# remember the camera is now z-fwd
 OFFSET_PRIOR_MEAN = gtsam.Pose3(
-    gtsam.Rot3(),
+    gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
     np.array(
         [
             0.0,
@@ -82,17 +83,9 @@ OFFSET_PRIOR_MEAN = gtsam.Pose3(
 # offset prior sigma.
 # we can measure the offset within a few inches and tens of degrees
 # in gtsam, a pose3 logmap is [R_x,R_y,R_z,T_x,T_y,T_z]
+# remember camera is z-fwd
 OFFSET_PRIOR_NOISE = noiseModel.Diagonal.Sigmas(
-    np.array(
-        [
-            0.1,  # roll
-            0.2,  # pitch
-            0.2,  # yaw
-            0.2,  # x
-            0.2,  # y
-            0.2,  # z
-        ]
-    )
+    np.array([0.2, 0.2, 0.1, 0.2, 0.2, 0.2])
 )
 
 # TODO: real noise estimates.
@@ -120,6 +113,7 @@ PX_NOISE = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
 # which takes a single landmark at a time (because there's no particular
 # performance advantage to batching in C++)
 USE_BATCH = False
+
 
 class Calibrate:
     def __init__(self, lag_s: float) -> None:
@@ -181,7 +175,6 @@ class Calibrate:
         # print("FACTORS", self._new_factors)
         # print("VALUES", self._new_values)
         # print("TIMESTAMPS", self._new_timestamps)
-        
         self._isam.update(self._new_factors, self._new_values, self._new_timestamps)
         self._result: gtsam.Values = self._isam.calculateEstimate()  # type: ignore
 
@@ -274,7 +267,9 @@ class Calibrate:
         measured: concatenated px measurements
         TODO: flatten landmarks"""
         if USE_BATCH:
-            noise = noiseModel.Diagonal.Sigmas(np.concatenate([[1, 1] for _ in landmarks]))
+            noise = noiseModel.Diagonal.Sigmas(
+                np.concatenate([[1, 1] for _ in landmarks])
+            )
             self._new_factors.push_back(
                 apriltag_calibrate_batch.factor(
                     landmarks, measured, noise, X(t0_us), C(0), K(0)
@@ -285,10 +280,8 @@ class Calibrate:
                 px = measured[i * 2 : (i + 1) * 2]
                 noise = noiseModel.Diagonal.Sigmas(np.array([1, 1]))
                 self._new_factors.push_back(
-                    apriltag_calibrate.factor(
-                        landmark, px, noise, X(t0_us), C(0), K(0)
-                    )
-                )   
+                    apriltag_calibrate.factor(landmark, px, noise, X(t0_us), C(0), K(0))
+                )
 
     def keep_calib_hot(self, t0_us: int) -> None:
         """Even if we don't see any targets, remember the

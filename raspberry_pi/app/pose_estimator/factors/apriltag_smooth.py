@@ -17,12 +17,6 @@ from gtsam.noiseModel import Base as SharedNoiseModel  # type:ignore
 
 from app.pose_estimator.numerical_derivative import numericalDerivative11
 
-# camera "zero" is facing +z; this turns it to face +x
-CAM_COORD = gtsam.Pose3(
-    gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
-    gtsam.Point3(0, 0, 0),  # type:ignore
-)
-
 
 def h_fn(
     landmark: np.ndarray,
@@ -35,13 +29,8 @@ def h_fn(
 
     def h(p0: gtsam.Pose2) -> np.ndarray:
         """Estimated pixel location of the target."""
-        # this is x-forward z-up
-        offset_pose = gtsam.Pose3(p0).compose(offset)
-        # this is z-forward y-down
-        camera_pose = offset_pose.compose(CAM_COORD)
+        camera_pose = gtsam.Pose3(p0).compose(offset)
         camera = gtsam.PinholeCameraCal3DS2(camera_pose, calib)
-        # print("CAMERA", camera)
-        # print("LANDMARK", landmark)
         # Camera.project() will throw CheiralityException sometimes
         # so be sure to use GTSAM_THROW_CHEIRALITY_EXCEPTION=OFF
         # (as nightly.yml does).
@@ -103,8 +92,8 @@ def factorNative(
     model: SharedNoiseModel,
     p0_key: int,
 ) -> gtsam.NoiseModelFactor:
-    return gtsam.PlanarProjectionFactor(
-        landmark, measured, offset, calib, model, p0_key
+    return gtsam.PlanarProjectionFactor1(
+        p0_key, landmark, measured, offset, calib, model
     )
 
 

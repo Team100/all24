@@ -19,11 +19,12 @@ class AprilTagCalibrateTest(unittest.TestCase):
     def test_h_center_1(self) -> None:
         landmark = np.array([1, 0, 0])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
-        KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
-        estimate_px: np.ndarray = apriltag_calibrate.h_fn(landmark)(
-            p0, offset, KCAL
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
         )
+        KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
+        estimate_px: np.ndarray = apriltag_calibrate.h_fn(landmark)(p0, offset, KCAL)
         # landmark on the camera bore, so it's at (cx, cy)
         self.assertTrue(
             np.allclose(
@@ -41,11 +42,12 @@ class AprilTagCalibrateTest(unittest.TestCase):
         # higher than the camera
         landmark = np.array([1, 0, 1])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
-        KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
-        estimate_px: np.ndarray = apriltag_calibrate.h_fn(landmark)(
-            p0, offset, KCAL
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
         )
+        KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
+        estimate_px: np.ndarray = apriltag_calibrate.h_fn(landmark)(p0, offset, KCAL)
         # landmark above the camera bore, so the 'y' value is less
         self.assertTrue(
             np.allclose(
@@ -63,11 +65,12 @@ class AprilTagCalibrateTest(unittest.TestCase):
         # higher than the camera
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
-        KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
-        estimate_px: np.ndarray = apriltag_calibrate.h_fn(landmark)(
-            p0, offset, KCAL
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
         )
+        KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
+        estimate_px: np.ndarray = apriltag_calibrate.h_fn(landmark)(p0, offset, KCAL)
         # above and to the left, so both x and y are less.
         # (coincidentally right on the edge)
         print("estimate: ", estimate_px)
@@ -88,7 +91,10 @@ class AprilTagCalibrateTest(unittest.TestCase):
         measured = np.array([0, 0])
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
         H = [np.zeros((3, 2)), np.zeros((6, 2)), np.zeros((9, 2))]
         err_px: np.ndarray = apriltag_calibrate.h_H(
@@ -121,12 +127,13 @@ class AprilTagCalibrateTest(unittest.TestCase):
                 atol=0.001,
             )
         )
+        # remember camera is z-fwd now
         self.assertTrue(
             np.allclose(
                 np.array(
                     [
-                        [-200, -440, 640, -360, 280, 80],
-                        [200, -640, 440, -360, 80, 280],
+                        [440, -640, -200, -280, -80, -360],
+                        [640, -440, 200, -80, -280, -360],
                     ]
                 ),
                 H[1],
@@ -151,7 +158,10 @@ class AprilTagCalibrateTest(unittest.TestCase):
         measured = np.array([0, 0])
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        offset = gtsam.Pose3(
+            gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+            gtsam.Point3(0, 0, 0),  # type: ignore
+        )
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, 0, 0)
         H = [np.zeros((3, 2)), np.zeros((6, 2)), np.zeros((9, 2))]
         err_px: np.ndarray = apriltag_calibrate.h_H(
@@ -188,8 +198,8 @@ class AprilTagCalibrateTest(unittest.TestCase):
             np.allclose(
                 np.array(
                     [
-                        [-200, -200, 400, -200, 200, 0],
-                        [200, -400, 200, -200, 0, 200],
+                        [200, -400, -200, -200, 0, -200],
+                        [400, -200, 200, 0, -200, -200],
                     ]
                 ),
                 H[1],
@@ -215,7 +225,12 @@ class AprilTagCalibrateTest(unittest.TestCase):
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
         # Remember Ypr is intrinsic
-        offset = gtsam.Pose3(gtsam.Rot3().Ypr(1, -1, 0), np.array([0, 0, 0]))
+        offset = gtsam.Pose3(gtsam.Rot3().Ypr(1, -1, 0), np.array([0, 0, 0])).compose(
+            gtsam.Pose3(
+                gtsam.Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
+                gtsam.Point3(0, 0, 0),
+            )
+        )  # type: ignore
         print("OFFSET", offset)
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, 0, 0)
         H = [np.zeros((3, 2)), np.zeros((6, 2)), np.zeros((9, 2))]
@@ -233,7 +248,7 @@ class AprilTagCalibrateTest(unittest.TestCase):
                     ]
                 ),
                 err_px,
-                atol=1
+                atol=1,
             )
         )
         print("H[0]:\n", H[0])
@@ -251,12 +266,13 @@ class AprilTagCalibrateTest(unittest.TestCase):
                 atol=1,
             )
         )
+        # camera is z-fwd
         self.assertTrue(
             np.allclose(
                 np.array(
                     [
-                        [78, -14, 207, 24, 126, 0],
-                        [-38, -230, 15, 49, 0, 126],
+                        [14, -207, 78, -126, 0, 24],
+                        [231, -14, -38, 0, -126, 49],
                     ]
                 ),
                 H[1],
@@ -281,7 +297,10 @@ class AprilTagCalibrateTest(unittest.TestCase):
         measured = np.array([0, 0])
         landmark = np.array([1, 1, 1])
         p0 = gtsam.Pose2()
-        offset = gtsam.Pose3()
+        # camera is now z-forward y-down
+        offset = gtsam.Pose3(
+            gtsam.Rot3(0, 0, 1, -1, 0, 0, 0, -1, 0), np.array([0, 0, 0])
+        )
         KCAL = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
         f: gtsam.NoiseModelFactor = apriltag_calibrate.factor(
             landmark,

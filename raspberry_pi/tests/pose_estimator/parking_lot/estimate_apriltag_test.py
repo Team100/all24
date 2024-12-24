@@ -29,13 +29,12 @@ class EstimateAprilTagTest(unittest.TestCase):
         # upper left, this is from apriltag_calibrate_test.
         landmark = np.array([1, 1, 1])
         measured = np.array([0, 0])
-        est.apriltag_for_smoothing(
-            landmark,
-            measured,
-            0,
-            gtsam.Pose3(),
-            gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1),
+        calib = gtsam.Cal3DS2(200.0, 200.0, 0.0, 200.0, 200.0, -0.2, 0.1)
+        # camera is now z-forward y-down
+        offset = gtsam.Pose3(
+            gtsam.Rot3(0, 0, 1, -1, 0, 0, 0, -1, 0), np.array([0, 0, 0])
         )
+        est.apriltag_for_smoothing(landmark, measured, 0, offset, calib)
         est.update()
         self.assertEqual(1, est.result_size())
         p0: gtsam.Pose2 = est.mean_pose2(X(0))
@@ -67,6 +66,6 @@ class EstimateAprilTagTest(unittest.TestCase):
                     [0.09, 0.09, 0.09],
                 ),
                 s0,
-                atol=0.01
+                atol=0.01,
             )
         )

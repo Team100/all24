@@ -48,11 +48,6 @@ PATH_PERIOD_S = 2.0 * math.pi
 PAN_PERIOD_S = PATH_PERIOD_S / 3
 # maximum pan angle, radians
 PAN_SCALE_RAD = 1.0
-# camera "zero" is facing +z; this turns it to face +x
-CAM_COORD = Pose3(
-    Rot3(np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])),
-    Point3(0, 0, 0),  # type: ignore
-)
 
 
 class CircleSimulator:
@@ -192,12 +187,6 @@ class CircleSimulator:
     ) -> np.ndarray:
         """Project the landmark point into the camera frame and return (x, y) in pixels.
         Robot_pose and camera_offset are x-forward, z-up."""
-        # ctor a pose3 with x,y,yaw, x-forward, z-up
-        offset_pose = Pose3(robot_pose).compose(camera_offset)  # type: ignore
-        # print("offset pose ", offset_pose)
-        camera_pose = offset_pose.compose(CAM_COORD)  # type: ignore
-        # camera constructor expects z-forward y-down
-        # print("camera pose ", camera_pose)
-        # print("landmark ", landmark)
+        camera_pose = Pose3(robot_pose).compose(camera_offset)  # type: ignore
         camera = PinholeCameraCal3DS2(camera_pose, calib)
         return camera.project(landmark)  # type: ignore
