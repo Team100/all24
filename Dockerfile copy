@@ -1,0 +1,31 @@
+FROM wpilib/roborio-cross-ubuntu:2024-22.04
+
+WORKDIR /app
+
+# Copy only wrapper files first
+COPY gradle ./gradle
+COPY gradlew gradlew.bat ./
+
+# Make gradlew executable
+RUN chmod +x gradlew
+
+# Copy build configuration
+COPY *.gradle gradle.properties ./
+
+
+# Download dependencies using wrapper
+RUN --mount=type=cache,target=/root/.gradle ./gradlew --build-cache dependencies
+RUN ./gradlew
+
+# Create a custom gradle.properties to override desktop/simulation settings
+RUN echo "includeDesktopSupport=false" > gradle.properties
+
+# Now copy the rest of your code
+COPY src ./src
+
+# Build with specific options, focusing only on robot code
+RUN ./gradlew build --no-daemon \
+    -PskipTests \
+    -x simulateJava \
+    -x test
+

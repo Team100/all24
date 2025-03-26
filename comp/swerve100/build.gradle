@@ -42,7 +42,10 @@ deploy {
             // or from command line. If not found an exception will be thrown.
             // You can use getTeamOrDefault(team) instead of getTeamNumber if you
             // want to store a team number in this file.
-            team = project.frc.getTeamNumber()
+            // team = project.frc.getTeamNumber()
+            // TODO(dmontauk): a better approach would be to have build dependencies pulled separately
+            // from the actual build.
+            team = project.frc.getTeamOrDefault(100)
             debug = project.frc.getDebugOrDefault(false)
 
             artifacts {          
@@ -217,4 +220,15 @@ wpi.java.configureTestTasks(test)
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
+}
+
+// Add this at the end of your build.gradle file
+task downloadDependencies() {
+    doLast {
+        configurations.all { c ->
+            if (c.canBeResolved) {
+                c.resolve()
+            }
+        }
+    }
 }
